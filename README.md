@@ -1,4 +1,4 @@
-## EVA ($Please fill in what EVA stands for, I forgot!)
+## EVA (Exploratory Video Analytics)
 
 ### Table of Contents
 * Dataset
