@@ -43,11 +43,11 @@ __UA-DETRAC test set__
 
 __Annotations regarding attribute information (e.g. vehicle category, weather, scale) used for detection training__
 
-`wget https://drive.google.com/drive/folders/1FJfBiR7SPbMrOoPXfGDJjmV5qepXFsJy?usp=sharing/DETRAC-Train-Annotations-XML.zip -o DETRAC-Train_Annotations-XML.zip`
+`wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=12xJc8S0Z7lYaAadsi2CoSK3WqH2OkUBu' -O DETRAC-Train_Annotations-XML.zip`
 
 __Position information of target trajectories out of the general background, which is used for tracking and detection evaluation__
 
-`wget https://drive.google.com/drive/folders/1FJfBiR7SPbMrOoPXfGDJjmV5qepXFsJy?usp=sharing/DETRAC-Train-Annotations-MAT.zip -o DETRAC-Train_Annotations-MAT.zip`
+`wget --no-check-certificate 'https://drive.google.com/uc?export=download&id=1gTMu9ksZr2UUPleDe1yOMqGAJUGx9ByC' -O DETRAC-Train_Annotations-MAT.zip`
 
 
 __Unzipping the dataset__
