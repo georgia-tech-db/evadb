@@ -1,30 +1,29 @@
-## Dataset
+# Dataset
 
-### Table of Content
-* aic480
-* aic540
-* aic1080
+### Table of Contents
 * UA-DETRAC
-* Dataset usage by UIUC team for NVIDIA AI City Challenge
-
-## Make a table that shows how many images for each set, the resolution, how many categories for each set
+* NOSCOPE dataset
 
 
-### aic480, aic1080, aic540
-An explanation about what kind of images (pictures taken from cctv footage, what is the geographical location, what time of day)
-Same applies for aic540, aic1080, UA-DETRAC
-for aic540, mention it is only downsampled from aic1080
+### UA-DETRAC FACTS
+* [UA-DETRAC Website](http://detrac-db.rit.albany.edu/home) contains description, video sample with annotations, benchmark, and annotation categories
+* Multi-object tracking and detection dataset
+* 10 hours of video at 24 locations in Beijing an Tianjin in China
+* Recorded at __25 frames per second__
+* Resolution is __960 x 540 pixels__
+* More than __140 thousand frames__
+* __8250 vehicles__ that are manually annotated
+* Vehicle categories are __Car, Bus, Van,__ and __Other__
+* Weather categories are __Night, Sunny, Rainy,__ and __Cloudy__
+* Other annotations include __Scale of Vehicle, Occulsion Ratio,__ and __Truncation Ratio__. 
 
-Car, SUV, SmallTruck, MediumTruck, LargeTruck, Pedestrian, Bus, Van, GroupOfPeople, Bicycle, 
-Motorcycle, TrafficSignal-Green, TrafficSignal-Yellow, TrafficSignal-Red, and Crossing
-
-### UA-DETRAC
+### UA-DETRAC, How to Download and Unzip?
+* Refer to __[UA-DETRAC](ua_detrac/README.md)__
 
 
-### How did these people use the datasets
-Mention they only used aic480, aic1080. They did use some augementation techniques-> hard negative example mining (outline which ones)
-They did not use UA-DETRAC because it only had 4 types of labels.
+### NOSCOPE dataset (TODO)
 
-Possible challenges that are different from other datasets is that lighting conditions differ heavily,
-angle of view is a bit peculiar.
+
+
+
 
