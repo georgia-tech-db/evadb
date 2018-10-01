@@ -10,6 +10,29 @@ from scipy import ndimage
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
 
+class Load:
+
+    def __init__(self, name="ua_detrac"):
+        sys.path.append("../data")
+
+        if name == "ua_detrac":
+            label_path = '/small-annotation/'
+            input_path = '/small-data/'
+            vehtype_filters = ['car', 'van', 'bus']
+
+
+
+class LoadTest:
+
+    def __init__(self):
+        load = Load()
+
+
+
+if __name__ == "__main__":
+    load = Load()
+
+
 def load_dataset(input_path):
 	list_of_files = []
 	num_frames_list = []
@@ -37,6 +60,8 @@ def load_dataset(input_path):
 		if (i%10000 == 0):
 			print ("Loaded %d images" %i)
 	return X, num_frames_list
+
+
 
 def get_vehtype_labels(filter, label_path, num_frames_list):
 	y = []
@@ -68,17 +93,8 @@ def get_vehtype_labels(filter, label_path, num_frames_list):
 			i+=1
 	return y
 
-def PP(clf,X_train, X_test, y_train, y_test):
-	train_start_time = time.time()
-	clf.fit(X_train,y_train)
-	print("train time: %.3f sec" % (time.time() - train_start_time))
-	test_start_time = time.time()
-	y_pred = clf.predict(X_test)
-	print("test time: %.3f sec" % (time.time() - test_start_time))
-	print ("Accuracy: %.3f"%clf.score(X_test,y_test))
-	unique,counts = np.unique(y_pred,return_counts=True)
-	print "Absolute reduction: ",counts[0],"/",len(y_test)
-	print ("reduction rate: %.3f"%(counts[0]*1.0/len(y_test)))
+
+
 
 def main():
 	label_path = '../dataset/DETRAC-Train-Annotations-XML/'
@@ -107,7 +123,7 @@ def main():
 		clf = RandomForestClassifier(max_depth=2, random_state=0)
 		print ("--- RandomForest ---")
 		PP(clf,X_train, X_test, y_train, y_test)
-	# X = 
+	# X =
 
 if __name__ == '__main__':
 	start_time = time.time()
