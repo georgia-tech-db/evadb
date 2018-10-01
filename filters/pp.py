@@ -1,14 +1,17 @@
 import time
 import os, sys
 import numpy as np
+#import matplotlib.pyplot as plt
+
+
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
-#import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import xml.etree.ElementTree as ET
 from scipy import ndimage
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
-
+from sklearn.feature_extraction import FeatureHasher
+from sklearn.decomposition import PCA
 
 
 # Meant to be a black box for trying all models available and returning statistics and model for
@@ -24,6 +27,43 @@ class PP_gen:
     self.category_stats = {} #save the statistics related to the model, although most stats are embedded in the model,
                              #made this just in case there could be stats that are not saved
     #TODO: append the models to model_library (feature hashing, PCA, KDE, SVM, NN)
+
+
+  #TODO: need to perform feature hashing after all the categories are inputted??
+  def feature_hashing(self):
+    category_count = len(self.category_libary.keys())
+    if category_count < 2:
+      return
+
+    h = FeatureHasher(n_features=category_count)
+    D = []
+    for i in range(category_count):
+      D.append()
+    D = [{'dog': 1, 'cat': 2, 'elephant': 4}, {'dog': 2, 'run': 5}]
+    f = h.transform(D)
+    f.toarray()
+
+  def pca(self):
+    X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+    pca = PCA(n_components=2)
+    pca.fit(X)
+    PCA(copy=True, iterated_power='auto', n_components=2, random_state=None,
+        svd_solver='auto', tol=0.0, whiten=False)
+    print(pca.explained_variance_ratio_)
+    print(pca.singular_values_)
+
+  def PP(clf, X_train, X_test, y_train, y_test):
+    train_start_time = time.time()
+    clf.fit(X_train, y_train)
+    print("train time: %.3f sec" % (time.time() - train_start_time))
+    test_start_time = time.time()
+    y_pred = clf.predict(X_test)
+    print("test time: %.3f sec" % (time.time() - test_start_time))
+    print ("Accuracy: %.3f" % clf.score(X_test, y_test))
+    unique, counts = np.unique(y_pred, return_counts=True)
+    print "Absolute reduction: ", counts[0], "/", len(y_test)
+    print ("reduction rate: %.3f" % (counts[0] * 1.0 / len(y_test)))
+
 
 
   # Give category_name and its parsed X, Y, also provide arguments if you want to specify model arguments
