@@ -9,8 +9,6 @@ from sklearn.neural_network import MLPClassifier
 # the query optimizer to choose for a given query
 
 class PP_gen:
-
-
   def __init__(self):
 
     self.model_library = {"kde": self.kde,
@@ -25,27 +23,25 @@ class PP_gen:
                               } #feature hashing, PCA, None - Separated to do mix and match
 
     self.pre_results = {} #save the preprocessed results {"pre_model_name": reformed_data
-
-
     self.category_libary = {} #save the trained model
     self.category_stats = {} #save the statistics related to the model, although most stats are embedded in the model,
                              #made this just in case there could be stats that are not saved
 
   def train_all(self, X, label_dict):
-    # label_dict = {"category_name": y}
-    self.preprocess(X, label_dict)
-    self.process(X, label_dict)
+    X_preprocessed = self.preprocess(X, label_dict)
+    self.process(X_preprocessed, label_dict)
 
-  #TODO: Need to find a way to allow processing models to incorporate preprocessing
   def process(self, X, label_dict):
-    for model in self.model_library:
-      self.model_library[model]([X, label_dict])
+    for process_method in X:
+      for model in self.model_library:
+        self.model_library[model]([X[process_method], label_dict, process_method])
 
 
   def preprocess(self, X, label_dict):
+    X_preprocessed = {}
     for model in self.pre_model_library:
-      self.pre_model_library[model]([X,label_dict])
-
+      X_preprocessed[model], _ = self.pre_model_library[model]([X,label_dict])
+    return X_preprocessed
 
   def evaluate(self, X_test, label_dict):
     """
@@ -54,11 +50,13 @@ class PP_gen:
                                                        "time_to_train":}
     """
     #TODO: need to include various categories in self.category_stats, but will only include the accuracy for now
-    #TODO: need an evaluation method that allows mix and match of processing and preprocessing
     for category_name in self.category_library:
       for model_name in self.category_library[category_name]:
+        #We need to parse by "/" token and apply the proper preprocessing method
+        pre, pro = model_name.split("/")
+        X_pre, _ = self.pre_model_library[pre]([X_test, label_dict])
         model = self.category_library[category_name][model_name]
-        score = model.score()
+        score = model.score(X_pre, label_dict[category_name])
         if category_name not in self.category_stats:
           self.category_stats[category_name] = {}
         self.category_stats[category_name][model_name] = {"score": score}
@@ -67,45 +65,45 @@ class PP_gen:
 
   #random forest
   def rf(self, args):
-    X, label_dict = args
+    X, label_dict, pre = args
     for label in label_dict:
       rf = RandomForestClassifier(max_depth=2, random_state=0)
       rf.fit(X, label_dict[label])
       if label not in self.category_library:
         self.category_library[label] = {}
-      self.category_library[label]['rf'] = rf
+      self.category_library[label][pre + '/rf'] = rf
 
 
   def dnn(self, args):
-    X, label_dict = args
+    X, label_dict, pre = args
     for label in label_dict:
       dnn = MLPClassifier(solver='lbfgs', alpha=1e-5,
                           hidden_layer_sizes = (5, 2), random_state = 1)
       dnn.fit(X, label_dict[label])
       if label not in self.category_library:
         self.category_library[label] = {}
-      self.category_library[label]['dnn'] = dnn
+      self.category_library[label][pre +'/dnn'] = dnn
     return
 
   def svm(self, args):
-    X, label_dict = args
+    X, label_dict, pre = args
     for label in label_dict:
       svm = LinearSVC(random_state=0)
       svm.fit(X, label_dict[label])
       if label not in self.category_library:
         self.category_library[label] = {}
-      self.category_library[label]['svm'] = svm
+      self.category_library[label][pre + '/svm'] = svm
     return
 
   def kde(self, args):
-    X, label_dict = args
+    X, label_dict, pre = args
     for label in label_dict:
       kde = KernelDensityWrapper(kernel='gaussian', bandwidth=0.2)
       # We will assume each label is one-shot encoding
       kde.fit(X, label_dict[label])
       if label not in self.category_library:
         self.category_library[label] = {}
-      self.category_library[label]['kde'] = kde
+      self.category_library[label][pre + '/kde'] = kde
 
     return
 
