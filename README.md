@@ -1,4 +1,4 @@
-## EVA 
+## EVA (Exploratory Video Analytics)
 
 ### Table of Contents
 * Dataset
