@@ -3,11 +3,9 @@ import os, sys
 import numpy as np
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
-#import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import xml.etree.ElementTree as ET
-from scipy import ndimage
-from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
+from keras.preprocessing.image import img_to_array, load_img
 
 
 def load_dataset(input_path):
