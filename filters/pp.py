@@ -8,7 +8,7 @@ from sklearn.neural_network import MLPClassifier
 # Meant to be a black box for trying all models available and returning statistics and model for
 # the query optimizer to choose for a given query
 
-class PP_gen:
+class PP:
   def __init__(self):
 
     self.model_library = {"kde": self.kde,
@@ -16,16 +16,17 @@ class PP_gen:
                           "dnn": self.dnn,
                           "rf": self.rf} #KDE, SVM, NN - this should be a mapping of model name to model CONSTRUCTOR
 
-    self.pre_model_library = {"pca": self.pca,
-                              "none": self.none
+    self.pre_model_library = {"none": self.none,
+                              "pca": self.pca,
                               #"fh": self.feature_hashing,
                               # "sampling": self.sampling,
                               } #feature hashing, PCA, None - Separated to do mix and match
 
-    self.pre_results = {} #save the preprocessed results {"pre_model_name": reformed_data
-    self.category_libary = {} #save the trained model
+    #self.pre_results = {} #save the preprocessed results {"pre_model_name": reformed_data
+    self.category_library = {} #save the trained model
     self.category_stats = {} #save the statistics related to the model, although most stats are embedded in the model,
                              #made this just in case there could be stats that are not saved
+    self.pre_category_library = {}
 
   def train_all(self, X, label_dict):
     X_preprocessed = self.preprocess(X, label_dict)
@@ -61,7 +62,7 @@ class PP_gen:
           self.category_stats[category_name] = {}
         self.category_stats[category_name][model_name] = {"score": score}
 
-    return
+    return self.category_stats
 
   #random forest
   def rf(self, args):
@@ -109,11 +110,13 @@ class PP_gen:
 
   def pca(self, args):
     X, label_dict = args
-    nsamples, nx, ny, nc = X.shape
-    X = X.reshape((nsamples, nx * ny * nc))
-    pca = PCA()
-    X_new = pca.fit_tranform(X)
-    self.pre_results["pca"] = pca
+    if "pca" not in self.pre_category_library:
+      pca = PCA()
+      X_new = pca.fit_transform(X)
+      self.pre_category_library["pca"] = pca
+    else:
+      pca = self.pre_category_library["pca"]
+      X_new = pca.transform(X)
 
     return [X_new, label_dict] #we will return the models for the caller to save them
 

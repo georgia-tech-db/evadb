@@ -1,5 +1,5 @@
 import time
-import os, sys
+import os
 import numpy as np
 import xml.etree.ElementTree as ET
 from keras.preprocessing.image import img_to_array, load_img
@@ -9,8 +9,9 @@ from keras.preprocessing.image import img_to_array, load_img
 class Load:
   def __init__(self, name="ua_detrac"):
     self.data_dict = {}
+    self.label_dict = {}
 		#TODO: Make this inheritance
-    prefix = "../data/"
+    prefix = "data/"
     if name == "ua_detrac":
       self.label_path = prefix + name + '/small-annotation/'
       self.input_path = prefix + name + '/small-data/'
@@ -58,7 +59,7 @@ class Load:
     for item in self.vehtype_filters:
       y = self.get_vehtype_labels(item, num_frames_list)
       y = np.array(y)
-      self.label_dict[item] = {y} #label will be in the format of 0,1s
+      self.label_dict[item] = y #label will be in the format of 0,1s
 
     return X, self.label_dict
 
