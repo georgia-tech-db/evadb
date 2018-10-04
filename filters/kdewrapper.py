@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from sklearn.neighbors.kde import KernelDensity
 
@@ -14,20 +12,23 @@ class KernelDensityWrapper:
   #need .fit function
   #need .predict function
 
-  def __init__(self):
+  def __init__(self, kernel='guassian', bandwidth=0.2):
     self.kernels = [] #assume everything is one shot
+    self.kernel = kernel
+    self.bandwidth = bandwidth
 
   def fit(self, X, y):
     unique_vals = np.unique(y)
     unique_vals = np.sort(unique_vals)
-    assert(unique_vals == np.array([0,1]))
+    assert(unique_vals[0] == 0)
+    assert(unique_vals[1] == 1)
 
 
-    kde = KernelDensity(kernel='gaussian', bandwidth=0.2)
+    kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
     kde.fit(X[y == 0])
     self.kernels.append(kde)
 
-    kde = KernelDensity(kernel='gaussian', bandwidth=0.2)
+    kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
     kde.fit(X[y == 1])
     self.kernels.append(kde)
 
