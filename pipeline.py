@@ -4,13 +4,8 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-
-import filters.load.Load as Load
-import filters.pp.PP as PP
-
-
-
-
+import filters.load as load
+import filters.pp as pp
 
 
 #TODO: Fill this file in with the components loaded from other files
@@ -25,8 +20,8 @@ class Pipeline:
 
 
   def __init__(self):
-    self.load = Load()
-    self.pp = PP()
+    self.load = load.Load()
+    self.pp = pp.PP()
 
 
   # We have access to train and test dataset -> Used for finding the score and evaluation
@@ -34,6 +29,9 @@ class Pipeline:
     start_time = time.time()
 
     data, label_dict = self.load.load_dataset()
+    nsamples, nx, ny, nc = data.shape
+    data = data.reshape((nsamples, nx * ny * nc))
+
     #TODO: Split the dataset into train, val, test (val should be used for evaluating the pps
     #TODO: (continued) -> Need to look at paper to make sure it is the correct way
     X = pd.DataFrame(data)
@@ -56,8 +54,12 @@ class Pipeline:
     start_time = time.time()
     self.pp.train_all(X_train, label_dict_train)
     print("--- Total Execution Time for training the dataset : %.3f seconds ---" % (time.time() - start_time))
+    if __debug__:
+      print X_train.shape
+      print X_test.shape
 
-    self.pp.evaluate(X_test, label_dict_test)
+    category_stats = self.pp.evaluate(X_test, label_dict_test)
+    print category_stats
 
 
     return
