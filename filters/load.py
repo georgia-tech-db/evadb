@@ -11,7 +11,7 @@ class Load:
     self.data_dict = {}
     self.label_dict = {}
 		#TODO: Make this inheritance
-    prefix = "data/"
+    prefix = "/nethome/jbang36/eva/data/"
     if name == "ua_detrac":
       self.label_path = prefix + name + '/small-annotation/'
       self.input_path = prefix + name + '/small-data/'
