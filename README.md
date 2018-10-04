@@ -22,7 +22,7 @@ The filters below are running:
 
 To see the pipeline in action, execute the following commands:
 
-```
-   $cd $YOUR_EVA_DIRECTORY
-   $python pipeline.py
+```bash
+   cd $YOUR_EVA_DIRECTORY
+   python pipeline.py
 ```
