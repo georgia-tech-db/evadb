@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split
 
 import filters.load as load
 import filters.pp as pp
+import query_optimizer.query_optimizer as qo
 
 
 #TODO: Fill this file in with the components loaded from other files
@@ -17,15 +18,13 @@ class Pipeline:
      5. Listen to Queries
      6. Give back result"""
 
-
-
   def __init__(self):
     self.load = load.Load()
     self.pp = pp.PP()
-
+    self.qo = qo.QueryOptimizer()
 
   # We have access to train and test dataset -> Used for finding the score and evaluation
-  def test(self):
+  def filter_performance_test(self):
     start_time = time.time()
 
     data, label_dict = self.load.load_dataset()
@@ -60,8 +59,6 @@ class Pipeline:
 
     category_stats = self.pp.evaluate(X_test, label_dict_test)
     print category_stats
-
-
     return
 
   # Actual run of the pipeline
