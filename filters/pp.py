@@ -64,6 +64,28 @@ class PP:
 
     return self.category_stats
 
+  #We will assume that model_name includes preprocessing method
+  #The format of the name would be pre/pro
+  def predict(self, X_test, category_name, model_name, bool = True):
+    """
+    :param X_test: Set of data the user wants to predict
+    :param category_name: "ex: car, van, others, white, gray, ...."
+    :param model_name: "ex: none/kde, pca/dnn, ..."
+    :param bool: "Whether you want the corresponding ones or not;
+                  ex: if category_name was car and bool was False,
+                  the function will return all frames that that don't contain car
+    :return: relevant samples from X
+    """
+    pre, pro = model_name.split("/")
+    X_pre, _ = self.pre_model_library[pre]([X_test, {} ])
+    model = self.category_library[category_name][model_name]
+    y_hat = model.predict(X_pre)
+    if bool:
+      return X_test[y_hat == 1]
+    else:
+      return X_test[y_hat == 0]
+
+
   #random forest
   def rf(self, args):
     X, label_dict, pre = args
