@@ -11,7 +11,21 @@ class QueryOptimizer:
 
   def __init__(self, ip_str="127.0.0.1"):
     self.ip_str = ip_str
-    self.startSocket()
+    #self.startSocket()
+
+
+  def wrangler(self):
+    """
+    Different types of checks are performed
+    1. not equals check (f(C) != v)
+    2. comparison check (f(C) > v -> f(C) > t, for all t <= v
+    3. Range check (v1 <= f(C) <= v2) - special type of comparison check
+    4. No-predicates = when column in finite and discrete, it can still benefit
+      ex) 1 <=> type = car U type = truck U type = SUV
+    :return:
+    """
+
+
 
 
   def startSocket(self):
