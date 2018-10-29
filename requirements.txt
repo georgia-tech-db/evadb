@@ -3,3 +3,4 @@ tensorflow
 keras
 numpy
 scikit-learn
+opencv-python
