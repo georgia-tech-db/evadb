@@ -171,6 +171,9 @@ if __name__ == '__main__':
                        'motorbike', 'person', 'pottedplant',
                        'sheep', 'sofa', 'train', 'tvmonitor'])
 
+  pascal_classes = np.asarray(['__background__',  # always index 0
+                        'car','bus','van','others'])
+
   # initilize the network here.
   if args.net == 'vgg16':
     fasterRCNN = vgg16(pascal_classes, pretrained=False, class_agnostic=args.class_agnostic)
@@ -329,6 +332,7 @@ if __name__ == '__main__':
       det_toc = time.time()
       detect_time = det_toc - det_tic
       misc_tic = time.time()
+      #results=open("results.txt",'wb')
       if vis:
           im2show = np.copy(im)
       for j in xrange(1, len(pascal_classes)):
@@ -341,14 +345,14 @@ if __name__ == '__main__':
               cls_boxes = pred_boxes[inds, :]
             else:
               cls_boxes = pred_boxes[inds][:, j * 4:(j + 1) * 4]
-            
+
             cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
             # cls_dets = torch.cat((cls_boxes, cls_scores), 1)
             cls_dets = cls_dets[order]
             keep = nms(cls_dets, cfg.TEST.NMS, force_cpu=not cfg.USE_GPU_NMS)
             cls_dets = cls_dets[keep.view(-1).long()]
             if vis:
-              im2show = vis_detections(im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
+              im2show = vis_detections(args.image_dir+"/"+imglist[num_images],im2show, pascal_classes[j], cls_dets.cpu().numpy(), 0.5)
 
       misc_toc = time.time()
       nms_time = misc_toc - misc_tic
