@@ -233,19 +233,22 @@ if __name__ == "__main__":
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
   query_list_short = ["t=van && s>60 && s<65 && o=pt211"]
+
   synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
                        "c=red", "c=white", "c=black", "c=silver",
                        "s>50", "s>60", "s>65", "s>70",
                        "i=pt335", "i=pt211", "i=pt342", "i=pt208",
                        "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
-  synthetic_pp_stats = {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
-                        "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
-                        "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}
-                        }
+
+  synthetic_pp_stats = { "none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
+                         "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
+                         "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95} }
+
   label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
                 "s": [constants.CONTINUOUS, [50, 60, 65, 70]],
                 "i": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
                 "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]]}
+
   qo = QueryOptimizer()
   for query in query_list_short:
     qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)
