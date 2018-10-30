@@ -68,7 +68,7 @@ def parse_args():
                       action='store_true')
   parser.add_argument('--ls', dest='large_scale',
                       help='whether use large imag scale',
-                      action='store_true')                      
+                      action='store_true')
   parser.add_argument('--mGPUs', dest='mGPUs',
                       help='whether use multiple GPUs',
                       action='store_true')
@@ -296,6 +296,26 @@ if __name__ == '__main__':
     logger = SummaryWriter("logs")
 
   for epoch in range(args.start_epoch, args.max_epochs + 1):
+
+    imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
+    train_size = len(roidb)
+
+    print('{:d} roidb entries'.format(len(roidb)))
+
+    output_dir = args.save_dir + "/" + args.net + "/" + args.dataset
+    if not os.path.exists(output_dir):
+      os.makedirs(output_dir)
+
+    #sampler_batch = sampler(train_size, args.batch_size)
+
+    #dataset = roibatchLoader(roidb, ratio_list, ratio_index, args.batch_size, \
+    #                       imdb.num_classes, training=True)
+
+    #dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size,
+    #                                          sampler=sampler_batch, num_workers=args.num_workers)
+
+
+
     # setting to train mode
     fasterRCNN.train()
     loss_temp = 0
@@ -304,7 +324,7 @@ if __name__ == '__main__':
     if epoch % (args.lr_decay_step + 1) == 0:
         adjust_learning_rate(optimizer, args.lr_decay_gamma)
         lr *= args.lr_decay_gamma
-
+    print("Loading data ")
     data_iter = iter(dataloader)
     for step in range(iters_per_epoch):
       data = next(data_iter)
@@ -312,7 +332,6 @@ if __name__ == '__main__':
       im_info.data.resize_(data[1].size()).copy_(data[1])
       gt_boxes.data.resize_(data[2].size()).copy_(data[2])
       num_boxes.data.resize_(data[3].size()).copy_(data[3])
-
       fasterRCNN.zero_grad()
       rois, cls_prob, bbox_pred, \
       rpn_loss_cls, rpn_loss_box, \
@@ -368,17 +387,17 @@ if __name__ == '__main__':
         loss_temp = 0
         start = time.time()
 
-    
-    save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
-    save_checkpoint({
-      'session': args.session,
-      'epoch': epoch + 1,
-      'model': fasterRCNN.module.state_dict() if args.mGPUs else fasterRCNN.state_dict(),
-      'optimizer': optimizer.state_dict(),
-      'pooling_mode': cfg.POOLING_MODE,
-      'class_agnostic': args.class_agnostic,
-    }, save_name)
-    print('save model: {}'.format(save_name))
+
+  save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
+  save_checkpoint({
+    'session': args.session,
+    'epoch': epoch + 1,
+    'model': fasterRCNN.module.state_dict() if args.mGPUs else fasterRCNN.state_dict(),
+    'optimizer': optimizer.state_dict(),
+    'pooling_mode': cfg.POOLING_MODE,
+    'class_agnostic': args.class_agnostic,
+  }, save_name)
+  print('save model: {}'.format(save_name))
 
   if args.use_tfboard:
     logger.close()
