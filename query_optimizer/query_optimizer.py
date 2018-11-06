@@ -1,14 +1,20 @@
 
 # The query optimizer decide how to label the data points
 # Load the series of queries from a txt file?
-
+import sys
 import socket
-from time import sleep
 import threading
-import constants
 import numpy as np
 from itertools import product
+from time import sleep
 
+
+try:
+  import constants
+except:
+  sys.path.append("/nethome/jbang36/eva")
+  print sys.path
+  import constants
 
 class QueryOptimizer:
 
@@ -16,7 +22,7 @@ class QueryOptimizer:
   def __init__(self, ip_str="127.0.0.1"):
     self.ip_str = ip_str
     #self.startSocket()
-    self.operators = ["=", "!=", "<", "<=", ">", ">="]
+    self.operators = ["!=", ">=", "<=", "=", "<", ">"]
     self.separators = ["||", "&&"]
 
 
@@ -70,18 +76,18 @@ class QueryOptimizer:
     :return:
     """
     query_parsed = []
-    query_subs = [query.split(" ")]
+    query_subs = query.split(" ")
     query_operators = []
     for query_sub in query_subs:
       if query_sub == "||" or query_sub == "&&":
-        query_parsed.append(query_sub)
+        query_operators.append(query_sub)
       else:
         assert(any(operator in self.operators for operator in query_sub))
         for operator in self.operators:
           query_sub_list = query_sub.split(operator)
           if type(query_sub_list) is list and \
             len(query_sub_list) > 1:
-            query_parsed.append(query_sub_list)
+            query_parsed.append([query_sub_list[0], operator, query_sub_list[1]])
             break
     #query_parsed ex: [ ["t", "=", "van"], ["s", ">", "60"]]
     #query_operators ex: ["||", "||", "&&"]
@@ -102,6 +108,17 @@ class QueryOptimizer:
     elif str == "<=":
       return ">"
 
+  def convertL2S(self, parsed_query, query_ops):
+    final_str = ""
+    index = 0
+    for sub_parsed_query in parsed_query:
+      if len(parsed_query) >= 2 and index < len(query_ops):
+        final_str += ''.join(sub_parsed_query) + " " + query_ops[index] + " "
+        index += 1
+      else:
+        final_str += ''.join(sub_parsed_query)
+    return final_str
+
 
   def _wrangler(self, query, label_desc):
     """
@@ -119,10 +136,13 @@ class QueryOptimizer:
     :return: transformed query
     """
     #TODO: Need to implement range check
-    query_sorted = sorted(query)
-    query_parsed, query_operators = self._parseQuery(query_sorted)
+
+    query_parsed, query_operators = self._parseQuery(query)
+    #query_sorted = sorted(query_parsed)
+
     query_transformed = []
     equivalences = []
+    equivalences_op = []
 
     for query_sub_list in query_parsed:
       subject = query_sub_list[0]
@@ -132,20 +152,20 @@ class QueryOptimizer:
       assert(subject in label_desc) # Label should be in label description dictionary
       l_desc = label_desc[subject]
       if l_desc[0] == constants.DISCRETE:
-        equivalence = [query_sub_list]
+        equivalence = [self.convertL2S([query_sub_list], [])]
         assert(operator == "=" or operator == "!=")
         alternate_string = ""
-        for category in l_desc:
+        for category in l_desc[1]:
           if category != object:
             alternate_string += subject + self._logic_reverse(operator) + category + " && "
         alternate_string = alternate_string[:-len(" && ")] #must strip the last ' || '
-        query_tmp, _ = self._parseQuery(alternate_string)
-        equivalence.append(query_tmp)
+        #query_tmp, _ = self._parseQuery(alternate_string)
+        equivalence.append(alternate_string)
 
       elif l_desc[0] == constants.CONTINUOUS:
         #TODO: Need to compute the equivalence classes for continuous instances
 
-        equivalence = [query_sub_list]
+        equivalence = [self.convertL2S([query_sub_list], [])]
         assert(operator == "=" or operator == "!=" or operator == "<"
                or operator == "<=" or operator == ">" or operator == ">=")
         alternate_string = ""
@@ -157,18 +177,18 @@ class QueryOptimizer:
           object_num = eval(object)
           for number in l_desc[1]:
             if number > object_num:
-              alternate_string += subject + operator + str(number)
-              query_tmp, _ = self._parseQuery(alternate_string)
-              equivalence.append(query_tmp)
+              alternate_string = subject + operator + str(number)
+              #query_tmp, _ = self._parseQuery(alternate_string)
+              equivalence.append(alternate_string)
         if operator == ">" or operator == ">=":
           object_num = eval(object)
           for number in l_desc[1]:
             if number < object_num:
-              alternate_string += subject + operator + str(number)
-              query_tmp, _ = self._parseQuery(alternate_string)
-              equivalence.append(query_tmp)
+              alternate_string = subject + operator + str(number)
+              #query_tmp, _ = self._parseQuery(alternate_string)
+              equivalence.append(alternate_string)
 
-
+      #TODO: Need to make sure the ones that are just single need to be double listed
       equivalences.append(equivalence)
 
     possible_queries = product(*equivalences)
@@ -210,40 +230,57 @@ class QueryOptimizer:
     #query_transformed = [[["t", "!=", "car"], ["t", "=", "van"]], ... ]
     for possible_query in query_transformed:
       evaluation = []
-      evaluation_stats = 0
+      evaluation_stats = []
       k_count = 0
-      for query_sub in possible_query:
-        if k_count > k: #TODO: Look into the logic of choosing k PPs, currently if you exceed a certain number, you just ignore
+      op_index = 0
+      for query_sub in possible_query: #Even inside query_sub it can be divided into query_sub_sub
+        if k_count > k: #TODO: If you exceed a certain number, you just ignore the expression
           continue
-        if query_sub in pp_list:
-          #Find the best model for the pp
-          model, reduction_rate = self._find_model(query_sub, pp_stats, accuracy_budget)
-          if model == None:
-            continue
-          else:
+        query_sub_list, query_sub_operators = self._parseQuery(query_sub)
+        evaluation_tmp = []
+        evaluation_stats_tmp = []
+        for i in xrange(len(query_sub_list)):
+          query_sub_str = ''.join(query_sub_list[i])
+          if query_sub_str in pp_list:
+            #Find the best model for the pp
+            model, reduction_rate = self._find_model(query_sub_str, pp_stats, accuracy_budget)
+            if model == None:
+              continue
+            else:
+              evaluation_tmp.append(query_sub_str)
+              evaluation_stats_tmp.append(reduction_rate)
+              k_count += 1
 
-            evaluation.append(pp_list)
-            evaluation_stats = self._update_stats(evaluation_stats, reduction_rate)
-            k_count += 1
 
-      evaluations.append(evaluation)
-      evaluations_stats.append(evaluation_stats)
+        reduc_rate = 0
+        if len(evaluation_stats_tmp) != 0:
+          reduc_rate = self._update_stats(evaluation_stats_tmp, query_sub_operators)
+
+        evaluation.append(query_sub)
+        evaluation_stats.append(reduc_rate)
+      op_index += 1
+
+
+      evaluations.append( self.convertL2S(evaluation, query_operators) )
+      evaluations_stats.append( self._update_stats(evaluation_stats, query_operators) )
 
     max_index = np.argmax(np.array(evaluations_stats), axis = 0)
-    return evaluations[max_index]
+    return (evaluations[max_index], evaluations_stats[max_index])
 
 
+  #Make this function take in the list of reduction rates and the operator lists
+  def _update_stats(self, evaluation_stats, query_operators):
+    final_red = evaluation_stats[0]
+    assert(len(evaluation_stats) == len(query_operators) + 1)
 
-  def _update_stats(self, evaluation_stats, reduction_rate, operator):
-    if evaluation_stats == 0:
-      evaluation_stats = reduction_rate
-    else:
-      if operator == "||":
-        evaluation_stats = 1 - evaluation_stats * reduction_rate
-      elif operator == "&&":
-        evaluation_stats = evaluation_stats * reduction_rate
+    for i in xrange(1, len(evaluation_stats)):
+      if query_operators[i - 1] == "&&":
+        final_red = final_red + evaluation_stats[i] - final_red * evaluation_stats[i]
+      elif query_operators[i - 1] == "||":
+        final_red = final_red * evaluation_stats[i]
 
-    return evaluation_stats
+    return final_red
+
 
 
 
@@ -258,17 +295,17 @@ class QueryOptimizer:
     possible_models = pp_stats[pp_name]
     best = [] #[best_model_name, best_model_cost / best_model_reduction_rate]
     for possible_model in possible_models:
-      if pp_stats[possible_model]["A"] < accuracy_budget:
+      if possible_models[possible_model]["A"] < accuracy_budget:
         continue
       if best == []:
-        best = [possible_model, self._compute_cost_red_rate(pp_stats[possible_model]["C"],
-                                                            pp_stats[possible_model]["R"]),
-                pp_stats[possible_model]["R"]]
+        best = [possible_model, self._compute_cost_red_rate(possible_models[possible_model]["C"],
+                                                            possible_models[possible_model]["R"]),
+                possible_models[possible_model]["R"]]
       else:
-        alternative_best_cost = self._compute_cost_red_rate(pp_stats[possible_model]["C"],
-                                                            pp_stats[possible_model]["R"])
+        alternative_best_cost = self._compute_cost_red_rate(possible_models[possible_model]["C"],
+                                                            possible_models[possible_model]["R"])
         if alternative_best_cost < best[1]:
-          best = [possible_model, alternative_best_cost, pp_stats[possible_model]["R"]]
+          best = [possible_model, alternative_best_cost, possible_models[possible_model]["R"]]
 
 
     if best == []:
@@ -300,10 +337,12 @@ class QueryOptimizer:
     """
     query_transformed, query_operators = self._wrangler(query, label_desc)
     #query_transformed is a comprehensive list of transformed queries
-    return self._compute_expressions([query_transformed, query_operators], pp_list, pp_stats, k, accuracy_budget)
+    return self._compute_expression([query_transformed, query_operators], pp_list, pp_stats, k, accuracy_budget)
 
 
 if __name__ == "__main__":
+
+
   query_list = ["t=suv", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=suv",
                 "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
@@ -319,11 +358,16 @@ if __name__ == "__main__":
 
   synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
                        "c=red", "c=white", "c=black", "c=silver",
-                       "s>50", "s>60", "s>65", "s>70",
+                       "s>40", "s>50", "s>60", "s<65", "s<70"
                        "i=pt335", "i=pt211", "i=pt342", "i=pt208",
                        "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
 
-  synthetic_pp_stats = {"t=van" :{ "none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
+  synthetic_pp_list_short = ["t=van", "s>60", "o=pt211"]
+
+
+  #TODO: Might need to change this to a R vs A curve instead of static numbers
+  #TODO: When selecting appropriate PPs, we only select based on reduction rate
+  synthetic_pp_stats_short = {"t=van" :{ "none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
                                    "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
                                   "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}},
 
@@ -334,13 +378,13 @@ if __name__ == "__main__":
                                      "none/kde": {"R": 0.14, "C": 0.12, "A": 0.93}} }
 
   label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
-                "s": [constants.CONTINUOUS, [50, 60, 65, 70]],
+                "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
                 "i": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
                 "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]]}
 
   qo = QueryOptimizer()
   for query in query_list_short:
-    qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)
+    print qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc)
 
 
 
