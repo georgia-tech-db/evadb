@@ -243,10 +243,12 @@ class QueryOptimizer:
           query_sub_str = ''.join(query_sub_list[i])
           if query_sub_str in pp_list:
             #Find the best model for the pp
-            model, reduction_rate = self._find_model(query_sub_str, pp_stats, accuracy_budget)
-            if model == None:
+
+            data = self._find_model(query_sub_str, pp_stats, accuracy_budget)
+            if data == None:
               continue
             else:
+              model, reduction_rate = data
               evaluation_tmp.append(query_sub_str)
               evaluation_stats_tmp.append(reduction_rate)
               k_count += 1
@@ -271,6 +273,8 @@ class QueryOptimizer:
   #Make this function take in the list of reduction rates and the operator lists
   def _update_stats(self, evaluation_stats, query_operators):
     final_red = evaluation_stats[0]
+    print(evaluation_stats)
+    print(query_operators)
     assert(len(evaluation_stats) == len(query_operators) + 1)
 
     for i in xrange(1, len(evaluation_stats)):
@@ -313,18 +317,6 @@ class QueryOptimizer:
     else:
       return best[0], best[2]
 
-
-
-
-
-
-
-
-
-
-
-
-
   def run(self, query, pp_list, pp_stats, label_desc, k = 3, accuracy_budget = 0.9):
     """
 
@@ -354,13 +346,70 @@ if __name__ == "__main__":
                 "(i=pt335 || i=pt342) && o!=pt211 && o!=pt208",
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
-  query_list_short = ["t=van && s>60 && o=pt211"]
+  query_list_mod = ["t=suv", "s>60",
+                "c=white", "c!=white", "o=pt211", "c=white && t=suv",
+                "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
+                "t=suv && c!=white", "c=white && t!=suv && t!=van",
+                "t=van && s>60 && s<65",
+                "i=pt335 && o!=pt211 && o!=pt208", "t=van && i=pt335 && o=pt211",
+                "t!=sedan && c!=black && c!=silver && t!=truck",
+                "t=van && s>60 && s<65 && o=pt211", "t!=suv && t!=van && c!=red && t!=white",
+                "i=pt335 && o=pt211 && t=van && c=red"]
 
   synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
                        "c=red", "c=white", "c=black", "c=silver",
-                       "s>40", "s>50", "s>60", "s<65", "s<70"
+                       "s>40", "s>50", "s>60", "s<65", "s<70",
                        "i=pt335", "i=pt211", "i=pt342", "i=pt208",
                        "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
+
+  synthetic_pp_stats = {"t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
+                                  "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
+                                  "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}},
+                        "t=suv": {"none/svm": {"R": 0.13, "C": 0.01, "A": 0.95}},
+                        "t=sedan": {"none/svm": {"R": 0.21, "C": 0.01, "A": 0.94}},
+                        "t=truck": {"none/svm": {"R": 0.05, "C": 0.01, "A": 0.99}},
+
+                        "c=red": {"none/svm": {"R": 0.131, "C": 0.011, "A": 0.951}},
+                        "c=white": {"none/svm": {"R": 0.212, "C": 0.012, "A": 0.942}},
+                        "c=black": {"none/svm": {"R": 0.133, "C": 0.013, "A": 0.953}},
+                        "c=silver": {"none/svm": {"R": 0.214, "C": 0.014, "A": 0.944}},
+
+                        "s>40": {"none/svm": {"R": 0.08, "C": 0.20, "A": 0.8}},
+                        "s>50": {"none/svm": {"R": 0.10, "C": 0.20, "A": 0.82}},
+
+
+                        "s>60": {"none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
+                                 "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
+
+                        "s<65": {"none/svm": {"R": 0.05, "C": 0.20, "A": 0.8}},
+                        "s<70": {"none/svm": {"R": 0.02, "C": 0.20, "A": 0.9}},
+
+                        "o=pt211": {"none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
+                                    "none/kde": {"R": 0.143, "C": 0.123, "A": 0.932}},
+
+                        "o=pt335": {"none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
+                                    "none/kde": {"R": 0.144, "C": 0.124, "A": 0.934}},
+
+                        "o=pt342": {"none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
+                                    "none/kde": {"R": 0.145, "C": 0.125, "A": 0.935}},
+
+                        "o=pt208": {"none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
+                                    "none/kde": {"R": 0.146, "C": 0.126, "A": 0.936}},
+
+                        "i=pt211": {"none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
+                                    "none/kde": {"R": 0.143, "C": 0.123, "A": 0.932}},
+
+                        "i=pt335": {"none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
+                                    "none/kde": {"R": 0.144, "C": 0.124, "A": 0.934}},
+
+                        "i=pt342": {"none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
+                                    "none/kde": {"R": 0.145, "C": 0.125, "A": 0.935}},
+
+                        "i=pt208": {"none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
+                                    "none/kde": {"R": 0.146, "C": 0.126, "A": 0.936}}}
+
+  query_list_short = ["t=van && s>60 && o=pt211"]
+
 
   synthetic_pp_list_short = ["t=van", "s>60", "o=pt211"]
 
@@ -379,12 +428,14 @@ if __name__ == "__main__":
 
   label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
                 "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
+                "c": [constants.DISCRETE, ["white", "red", "black", "silver"]],
                 "i": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
                 "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]]}
 
   qo = QueryOptimizer()
-  for query in query_list_short:
-    print qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc)
+  for query in query_list_mod:
+    #print qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc)
+    print qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)
 
 
 
