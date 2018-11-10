@@ -13,8 +13,8 @@ class Load:
 		#TODO: Make this inheritance
     prefix = "/nethome/jbang36/eva/data/"
     if name == "ua_detrac":
-      self.label_path = prefix + name + '/small-annotation/'
-      self.input_path = prefix + name + '/small-data/'
+      self.label_path = os.path.join(prefix, name, 'small-annotation')
+      self.input_path = os.path.join(prefix, name, 'small-data')
       self.vehtype_filters = ['car', 'van', 'bus', 'others']
       self.weather_filters = ['cloudy', 'night', 'sunny', 'rainy']
       self.vehcolor_filters = ['white', 'black', 'silver', 'red']
