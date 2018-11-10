@@ -46,9 +46,10 @@ class PP:
 
   def evaluate(self, X_test, label_dict):
     """
-    self.category_stats[category_name] = {model_name: {"reduction_rate": model.score(),
-                                                       "false_negative_rate": model.......,
-                                                       "time_to_train":}
+    self.category_stats[category_name] = {model_name: {"R": reduction_rate,
+                                                       "C": time_to_train,
+                                                       "A": accuracy}
+
     """
     #TODO: need to include various categories in self.category_stats, but will only include the accuracy for now
     for category_name in self.category_library:
@@ -60,7 +61,7 @@ class PP:
         score = model.score(X_pre, label_dict[category_name])
         if category_name not in self.category_stats:
           self.category_stats[category_name] = {}
-        self.category_stats[category_name][model_name] = {"score": score}
+        self.category_stats[category_name][model_name] = {"A": score}
 
     return self.category_stats
 
