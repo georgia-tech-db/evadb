@@ -1,4 +1,10 @@
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 from PIL import Image
+import numpy as np
+
+from PIL import Image
+import cv2
 
 class Colors(object):
 	class Color(object):
@@ -83,3 +89,17 @@ def process_image(image):
 
     #image.show()
     return st_color
+
+
+im = np.array(Image.open('./MVI_20011/img00001.jpg'), dtype=np.uint8)
+
+x,y = 592,378
+h,w = 160,162
+
+roi = im[y:y+h, x:x+w]
+cv2.imwrite("roi.jpg", roi)
+image = Image.open('roi.jpg')
+color = process_image(image)
+print(color)
+
+
