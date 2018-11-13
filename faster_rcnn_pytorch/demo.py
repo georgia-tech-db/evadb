@@ -23,7 +23,7 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 import torch.optim as optim
-
+from filters.TaskManager import TaskManager
 import torchvision.transforms as transforms
 import torchvision.datasets as dset
 from scipy.misc import imread
@@ -46,9 +46,8 @@ except NameError:
     xrange = range  # Python 3
 
 def accept_input_from_pp(X):
-    print(X.shape)
-    print("received")
-    evaluate_inp_from_pp(X)
+    detected_class_image, detected_bbox, detected_classes=evaluate_inp_from_pp(X)
+    t=TaskManager(detected_class_image,detected_bbox,detected_classes,'color')
 
 def parse_args():
   """
@@ -90,7 +89,7 @@ def parse_args():
                       default=1, type=int)
   parser.add_argument('--checkepoch', dest='checkepoch',
                       help='checkepoch to load network',
-                      default=50, type=int)
+                      default=20, type=int)
   parser.add_argument('--checkpoint', dest='checkpoint',
                       help='checkpoint to load network',
                       default=233, type=int)
@@ -586,7 +585,6 @@ def evaluate_inp_from_pp(X,save_to_path=False,path_to_save=None):
                     #im2show = vis_detections(args.image_dir + "/" + imglist[num_images], im2show, pascal_classes[j],
                     #                         cls_dets.cpu().numpy(), 0.5)
 
-                    detected_class_image.append(im2show)
                     if ind not in detected_bbox:
                         detected_bbox[ind]=box_above_thresh
                     else:
@@ -603,9 +601,6 @@ def evaluate_inp_from_pp(X,save_to_path=False,path_to_save=None):
             # cv2.imshow('test', im2show)
             # cv2.waitKey(0)
         result_path = os.path.join(args.image_dir, str(ind) + "_det.jpg")
-        print(im2show.shape)
-        print(im2show[detected_bbox[0][0][1]:detected_bbox[0][0][3],detected_bbox[0][0][0]:detected_bbox[0][0][2]])
-        cv2.imwrite("output.jpg", im2show[detected_bbox[0][0][0]:detected_bbox[0][0][2],detected_bbox[0][0][1]:detected_bbox[0][0][3]])
-        print(detected_classes)
-        print(detected_bbox)
+        detected_class_image.append(im2show)
+        cv2.imwrite("output.jpg",im2show[detected_bbox[3][0][1]:detected_bbox[3][0][3],detected_bbox[3][0][0]:detected_bbox[3][0][2]])
     return detected_class_image,detected_bbox,detected_classes

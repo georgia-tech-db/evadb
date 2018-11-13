@@ -1,0 +1,45 @@
+Using TensorFlow backend.
+Loaded 1600 inputs
+--------------------Working on car filter--------------------
+No.of test frames with cars : 29 / 528
+--- LinearSVC ---
+train time: 2.269 sec
+test time: 0.074 sec
+Accuracy: 1.000
+Absolute reduction:  29 / 528
+reduction rate: 0.055
+--- RandomForest ---
+train time: 0.085 sec
+test time: 0.003 sec
+Accuracy: 0.975
+Absolute reduction:  16 / 528
+reduction rate: 0.030
+--------------------Working on van filter--------------------
+No.of test frames with cars : 261 / 528
+--- LinearSVC ---
+train time: 2.387 sec
+test time: 0.025 sec
+Accuracy: 0.996
+Absolute reduction:  261 / 528
+reduction rate: 0.494
+--- RandomForest ---
+train time: 0.084 sec
+test time: 0.003 sec
+Accuracy: 0.928
+Absolute reduction:  233 / 528
+reduction rate: 0.441
+--------------------Working on bus filter--------------------
+No.of test frames with cars : 198 / 528
+--- LinearSVC ---
+train time: 1.444 sec
+test time: 0.025 sec
+Accuracy: 1.000
+Absolute reduction:  198 / 528
+reduction rate: 0.375
+--- RandomForest ---
+train time: 0.101 sec
+test time: 0.003 sec
+Accuracy: 0.979
+Absolute reduction:  197 / 528
+reduction rate: 0.373
+--- Total Execution Time : 29.294 seconds ---
