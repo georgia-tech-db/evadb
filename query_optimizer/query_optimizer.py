@@ -13,11 +13,14 @@ try:
   import constants
 except:
   sys.path.append("/nethome/jbang36/eva")
-  print sys.path
+  sys.path.append("/home/jaeho-linux/fall2018/DDL/Eva")
   import constants
 
 class QueryOptimizer:
-
+  """
+  TODO: If you have a classifier for =, you can make a classifier for !=
+  TODO: Deal with parenthesis
+  """
 
   def __init__(self, ip_str="127.0.0.1"):
     self.ip_str = ip_str
@@ -235,6 +238,8 @@ class QueryOptimizer:
       op_index = 0
       for query_sub in possible_query: #Even inside query_sub it can be divided into query_sub_sub
         if k_count > k: #TODO: If you exceed a certain number, you just ignore the expression
+          evaluation = []
+          evaluation_stats = []
           continue
         query_sub_list, query_sub_operators = self._parseQuery(query_sub)
         evaluation_tmp = []
@@ -256,6 +261,7 @@ class QueryOptimizer:
 
         reduc_rate = 0
         if len(evaluation_stats_tmp) != 0:
+          if __debug__: print("Within sub: " + str(query_sub_list))
           reduc_rate = self._update_stats(evaluation_stats_tmp, query_sub_operators)
 
         evaluation.append(query_sub)
@@ -264,6 +270,7 @@ class QueryOptimizer:
 
 
       evaluations.append( self.convertL2S(evaluation, query_operators) )
+      if __debug__: print("Outside sub: " + str(possible_query))
       evaluations_stats.append( self._update_stats(evaluation_stats, query_operators) )
 
     max_index = np.argmax(np.array(evaluations_stats), axis = 0)
@@ -272,9 +279,11 @@ class QueryOptimizer:
 
   #Make this function take in the list of reduction rates and the operator lists
   def _update_stats(self, evaluation_stats, query_operators):
+    if len(evaluation_stats) == 0:
+        return 0
     final_red = evaluation_stats[0]
-    print(evaluation_stats)
-    print(query_operators)
+    if __debug__: print("evaluation_stats:   " + str(evaluation_stats))
+    if __debug__: print("  query_operators:  " + str(query_operators))
     assert(len(evaluation_stats) == len(query_operators) + 1)
 
     for i in xrange(1, len(evaluation_stats)):
@@ -346,6 +355,9 @@ if __name__ == "__main__":
                 "(i=pt335 || i=pt342) && o!=pt211 && o!=pt208",
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
+  #TODO: Support for parenthesis queries
+
+
   query_list_mod = ["t=suv", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=suv",
                 "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
@@ -355,6 +367,10 @@ if __name__ == "__main__":
                 "t!=sedan && c!=black && c!=silver && t!=truck",
                 "t=van && s>60 && s<65 && o=pt211", "t!=suv && t!=van && c!=red && t!=white",
                 "i=pt335 && o=pt211 && t=van && c=red"]
+
+  query_list_test = ["c=white && t!=suv && t!=van"]
+
+
 
   synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
                        "c=red", "c=white", "c=black", "c=silver",
