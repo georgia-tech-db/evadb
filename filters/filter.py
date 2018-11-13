@@ -9,7 +9,6 @@ import cv2
 import sys
 sys.path.append("/home/pballapuram3/Eva")
 from faster_rcnn_pytorch.demo import accept_input_from_pp
-
 def load_dataset(input_path):
 	list_of_files = []
 	num_frames_list = []
@@ -91,7 +90,6 @@ def pass_to_udf(test_pred,test_X):
 		test_X=test_X.reshape(1,test_X.shape[0],test_X.shape[1],test_X.shape[2])
 	pos_frames=np.where(test_pred==1)
 	accept_input_from_pp(test_X[pos_frames])
-
 
 def main():
 	label_path = '../dataset/DETRAC-Train-Annotations-XML/'
