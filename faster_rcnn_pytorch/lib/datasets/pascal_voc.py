@@ -46,7 +46,7 @@ class UADETRAC(imdb):
         self._devkit_path = self._get_default_path() if devkit_path is None \
             else devkit_path
         print(devkit_path)
-        self.data_path = "/home/pballapuram3/Eva/faster-rcnn.pytorch/data/VOCdevkit2007/VOC2007"
+        self.data_path = "/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007"
 
         self._classes = ('__background__',  # always index 0
                         'car','bus','van','others')
@@ -85,7 +85,7 @@ class UADETRAC(imdb):
         :return: full path of this image
         """
         #print(index)
-        image_path = os.path.join(self.data_path, 'Insight-MVT_Annotation_Test',
+        image_path = os.path.join(self.data_path, 'Insight-MVT_Annotation_Train',
                                   index[:-4])
         assert os.path.exists(image_path), \
             'Path does not exist: {}'.format(image_path)
