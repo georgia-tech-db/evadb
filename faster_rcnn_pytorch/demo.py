@@ -47,8 +47,8 @@ except NameError:
 
 def accept_input_from_pp(X):
     detected_class_image, detected_bbox, detected_classes=evaluate_inp_from_pp(X)
-    t=TaskManager(detected_class_image,detected_bbox,detected_classes,'color')
-
+    #t=TaskManager(detected_class_image,detected_bbox,detected_classes,'color')
+    t=TaskManager(detected_class_image,detected_bbox,detected_classes,'intersection')
 def parse_args():
   """
   Parse input arguments
@@ -71,7 +71,7 @@ def parse_args():
                       default=root_dir+"/models")
   parser.add_argument('--image_dir', dest='image_dir',
                       help='directory to load images for demo',
-                      default="images")
+                      default="/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/Red_Data")
   parser.add_argument('--cuda', dest='cuda',
                       help='whether use CUDA',
                       action='store_true')
@@ -179,6 +179,9 @@ if __name__ == '__main__':
 
   pascal_classes = np.asarray(['__background__',  # always index 0
                         'car','bus','van','others'])
+
+  pascal_classes = np.asarray(['__background__',  # always index 0
+                               'sign'])
 
   # initilize the network here.
   if args.net == 'vgg16':
@@ -602,5 +605,5 @@ def evaluate_inp_from_pp(X,save_to_path=False,path_to_save=None):
             # cv2.waitKey(0)
         result_path = os.path.join(args.image_dir, str(ind) + "_det.jpg")
         detected_class_image.append(im2show)
-        cv2.imwrite("output.jpg",im2show[detected_bbox[3][0][1]:detected_bbox[3][0][3],detected_bbox[3][0][0]:detected_bbox[3][0][2]])
+        cv2.imwrite("output.jpg",im2show[detected_bbox[0][0][1]:detected_bbox[0][0][3],detected_bbox[0][0][0]:detected_bbox[0][0][2]])
     return detected_class_image,detected_bbox,detected_classes

@@ -38,20 +38,22 @@ class UADETRAC(imdb):
         # year = image_set.split('_')[0]
         # image_set = image_set[len(year) + 1 : len(image_set)]
         super(UADETRAC, self).__init__('UADETRAC')  # set self.name
-        self._img_ext='.jpg'
+        #self._img_ext='.jpg'
 
         # self.year = year
         self.root_path = root_path
         #self.devkit_path = devkit_path
         self._devkit_path = self._get_default_path() if devkit_path is None \
             else devkit_path
-        print(devkit_path)
-        self.data_path = "/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007"
+        #print(devkit_path)
+
+        self.data_path = "/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/"
 
         self._classes = ('__background__',  # always index 0
                         'car','bus','van','others')
         self._num_classes = len(self.classes)
-        self.image_set_index = os.listdir(self.data_path+'/Annotations')
+        self.image_set_index = os.listdir(self.data_path + '/Annotations')
+        #self.image_set_index = os.listdir(self.data_path)
         #self._num_images = len(self.image_set_index)
         #print('num_images', self._num_images)
         self.mask_size = mask_size
@@ -76,7 +78,7 @@ class UADETRAC(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return os.path.join("/home/pballapuram3/Eva/faster-rcnn.pytorch/data/", 'VOCdevkit2007')
+        return os.path.join("/home/pballapuram3/Eva/faster_rcnn_pytorch/data/", 'VOCdevkit2007')
 
     def image_path_from_index(self, index):
         """
@@ -85,8 +87,9 @@ class UADETRAC(imdb):
         :return: full path of this image
         """
         #print(index)
-        image_path = os.path.join(self.data_path, 'Insight-MVT_Annotation_Train',
-                                  index[:-4])
+        image_path = os.path.join(self.data_path,index)
+        #image_path = os.path.join(self.data_path, 'Insight-MVT_Annotation_Train',
+        #                          index[:-4])
         assert os.path.exists(image_path), \
             'Path does not exist: {}'.format(image_path)
         return image_path
@@ -114,21 +117,14 @@ class UADETRAC(imdb):
         """
         cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
         if os.path.exists(cache_file):
-            print(cache_file)
             with open(cache_file, 'rb') as fid:
                 roidb = pickle.load(fid)
             print('{} gt roidb loaded from {}'.format(self.name, cache_file))
             return roidb
 
-        # gt_roidb = [self.load_UADETRAC_annotation(index) for index in self.image_set_index]
-        gt_roidb = []
-        ind=np.random.randint(0,len(self.image_set_index),1)[0]
-        index=self.image_set_index[ind]
-        print("Chosen " +str(index))
+        gt_roidb = [self.load_UADETRAC_annotation(index) for index in self.image_set_index]
         #for index in self.image_set_index:
-        #    gt_roidb.extend(self.load_UADETRAC_annotation(index))
-        gt_roidb.extend(self.load_UADETRAC_annotation(index))
-
+        #   gt_roidb.extend(self.load_UADETRAC_annotation(index))
         #with open(cache_file, 'wb') as fid:
         #    pickle.dump(gt_roidb, fid, pickle.HIGHEST_PROTOCOL)
         #print('wrote gt roidb to {}'.format(cache_file))
@@ -252,7 +248,6 @@ class UADETRAC(imdb):
                                     'max_overlaps': overlaps.max(axis=1),
                                     'flipped': False})
             roi_recs.append(roi_rec)
-        print(len(roi_recs))
         return roi_recs
 
     def load_UADETRAC_annotation_Shuo(self, index):
@@ -326,6 +321,53 @@ class UADETRAC(imdb):
                             'max_classes': overlaps.argmax(axis=1),
                             'max_overlaps': overlaps.max(axis=1),
                             'flipped': False})
+            roi_recs.append(roi_rec)
+        return roi_recs
+
+    def load_red_annotation(self, ind):
+        """
+        for a given sequence, load images and bounding boxes info from XML file
+        :param index: index of a specific sequence
+        :return: record['boxes', 'gt_classes', 'gt_overlaps', 'flipped']
+        """
+
+        roi_recs = []
+        #for index in range(0,500):
+        b = []
+        index=ind
+        roi_rec = dict()
+        roi_rec['image'] = self.image_path_from_index(index)
+        im_size = cv2.imread(roi_rec['image'], cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION).shape
+        roi_rec['height'] = float(im_size[0])
+        roi_rec['width'] = float(im_size[1])
+
+        with open("/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/Red_Annotations/gt.txt",'r') as f:
+            ann=f.readlines()
+        cnt=-1
+        for line in ann:
+            f_name=line.split(';')[0]
+            if index == f_name:
+                b.append([])
+                cnt+=1
+                for j in range(1,5):
+                    b[cnt].append(int(line.split(';')[j]))
+
+        #if not self.config['use_diff']:
+         #    non_diff_objs = [obj for obj in objs if int(obj.find('difficult').text) == 0]
+         #    objs = non_diff_objs
+        if len(b)>0:
+            num_targets = cnt+1
+            boxes = np.asarray(b,dtype=np.uint16)
+            gt_classes = np.ones(num_targets, dtype=np.int32)
+            overlaps = np.zeros((num_targets, self.num_classes), dtype=np.float32)
+            overlaps[:,1]=1.0
+            # Load object bounding boxes into a data frame.
+            roi_rec.update({'boxes': boxes,
+                         'gt_classes': gt_classes,
+                         'gt_overlaps': overlaps,
+                         'max_classes': overlaps.argmax(axis=1),
+                         'max_overlaps': overlaps.max(axis=1),
+                         'flipped': False})
             roi_recs.append(roi_rec)
         return roi_recs
 
