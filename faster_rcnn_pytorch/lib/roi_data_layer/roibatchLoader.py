@@ -71,8 +71,8 @@ class roibatchLoader(data.Dataset):
     data_height, data_width = data.size(1), data.size(2)
     if self.training:
         np.random.shuffle(blobs['gt_boxes'])
-        gt_boxes = torch.from_numpy(blobs['gt_boxes'])
 
+        gt_boxes = torch.from_numpy(blobs['gt_boxes'])
         ########################################################
         # padding the input image to fixed size for each group #
         ########################################################
