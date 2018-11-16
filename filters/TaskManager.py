@@ -1,4 +1,6 @@
 from filters.color_detection import process_image
+from filters.intersection_detection import intersection_detector
+
 import numpy as np
 class TaskManager():
 
@@ -10,8 +12,8 @@ class TaskManager():
             self.call_color()
         elif task=='speed':
             self.call_speed()
-        elif task=='in_out':
-            self.call_bi()
+        elif task=='intersection':
+            self.call_intersection()
 
     def call_color(self):
         color = []
@@ -27,5 +29,9 @@ class TaskManager():
     def call_speed(self):
         pass
 
-    def call_bi(self):
-        pass
+    def call_intersection(self):
+        intersection=[]
+        for cnt,img in enumerate(self.images):
+            intersection.append(intersection_detector(img,'MVI_20011',self.img_bbox))
+        return color
+        

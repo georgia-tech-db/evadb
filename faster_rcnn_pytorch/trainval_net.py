@@ -296,12 +296,12 @@ if __name__ == '__main__':
     logger = SummaryWriter("logs")
 
   for epoch in range(args.start_epoch, args.max_epochs + 1):
-
+    '''
     imdb, roidb, ratio_list, ratio_index = combined_roidb(args.imdb_name)
     train_size = len(roidb)
 
     print('{:d} roidb entries'.format(len(roidb)))
-
+    '''
     output_dir = args.save_dir + "/" + args.net + "/" + args.dataset
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
@@ -388,10 +388,10 @@ if __name__ == '__main__':
         start = time.time()
 
 
-  save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
+  save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, args.max_epochs, iters_per_epoch))
   save_checkpoint({
     'session': args.session,
-    'epoch': epoch + 1,
+    'epoch': args.max_epochs + 1,
     'model': fasterRCNN.module.state_dict() if args.mGPUs else fasterRCNN.state_dict(),
     'optimizer': optimizer.state_dict(),
     'pooling_mode': cfg.POOLING_MODE,
