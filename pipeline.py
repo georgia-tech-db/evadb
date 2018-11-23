@@ -29,7 +29,7 @@ class Pipeline:
     #self.qo = qo.QueryOptimizer()
 
   # We have access to train and test dataset -> Used for finding the score and evaluation
-  def filter_performance_test(self):
+  def test(self):
     start_time = time.time()
 
     data, label_dict = self.load.load_dataset()
@@ -119,7 +119,7 @@ class Pipeline:
 
 
 
+
 if __name__ == "__main__":
     pipeline = Pipeline()
-    pipeline.filter_performance_test()
-    #pipeline.filter_output_test()
+    pipeline.test()
