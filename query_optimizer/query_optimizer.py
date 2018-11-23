@@ -36,6 +36,7 @@ class QueryOptimizer:
     thread.start()
     while True:
       input = raw_input('Type in your query in the form of __label__ > __number__\n')
+
       self.parseInput(input)
 
 
@@ -85,11 +86,12 @@ class QueryOptimizer:
       if query_sub == "||" or query_sub == "&&":
         query_operators.append(query_sub)
       else:
-        assert(any(operator in self.operators for operator in query_sub))
+
+        if True not in [operator in self.operators for operator in query_sub]:
+          return [],[]
         for operator in self.operators:
           query_sub_list = query_sub.split(operator)
-          if type(query_sub_list) is list and \
-            len(query_sub_list) > 1:
+          if type(query_sub_list) is list and len(query_sub_list) > 1:
             query_parsed.append([query_sub_list[0], operator, query_sub_list[1]])
             break
     #query_parsed ex: [ ["t", "=", "van"], ["s", ">", "60"]]
@@ -261,7 +263,6 @@ class QueryOptimizer:
 
         reduc_rate = 0
         if len(evaluation_stats_tmp) != 0:
-          if __debug__: print("Within sub: " + str(query_sub_list))
           reduc_rate = self._update_stats(evaluation_stats_tmp, query_sub_operators)
 
         evaluation.append(query_sub)
@@ -270,7 +271,6 @@ class QueryOptimizer:
 
 
       evaluations.append( self.convertL2S(evaluation, query_operators) )
-      if __debug__: print("Outside sub: " + str(possible_query))
       evaluations_stats.append( self._update_stats(evaluation_stats, query_operators) )
 
     max_index = np.argmax(np.array(evaluations_stats), axis = 0)
