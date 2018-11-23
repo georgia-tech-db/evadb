@@ -46,10 +46,10 @@ class PP:
 
   def evaluate(self, X_test, label_dict):
     """
-    self.category_stats[category_name] = {model_name: {"R": reduction_rate,
-                                                       "C": time_to_train,
-                                                       "A": accuracy}
 
+    self.category_stats[category_name] = {model_name: {"reduction_rate": model.score(),
+                                                       "false_negative_rate": model.......,
+                                                       "time_to_train":}
     """
     #TODO: need to include various categories in self.category_stats, but will only include the accuracy for now
     for category_name in self.category_library:
@@ -61,49 +61,10 @@ class PP:
         score = model.score(X_pre, label_dict[category_name])
         if category_name not in self.category_stats:
           self.category_stats[category_name] = {}
-        self.category_stats[category_name][model_name] = {"A": score}
+
+        self.category_stats[category_name][model_name] = {"score": score}
 
     return self.category_stats
-
-  #We will assume that model_name includes preprocessing method
-  #The format of the name would be pre/pro
-  def predict(self, X_test, category_name, model_name, bool = True):
-    """
-    :param X_test: Set of data the user wants to predict
-    :param category_name: "ex: car, van, others, white, gray, ...."
-    :param model_name: "ex: none/kde, pca/dnn, ..."
-    :param bool: "Whether you want the corresponding ones or not;
-                  ex: if category_name was car and bool was False,
-                  the function will return all frames that that don't contain car
-    :return: relevant samples from X
-    """
-    pre, pro = model_name.split("/")
-    X_pre, _ = self.pre_model_library[pre]([X_test, {} ])
-    model = self.category_library[category_name][model_name]
-    y_hat = model.predict(X_pre)
-    if bool:
-      return X_test[y_hat == 1]
-    else:
-      return X_test[y_hat == 0]
-
-  #We will assume that model_name includes preprocessing method
-  #The format of the name would be pre/pro
-  #this will return the labels instead of the frames
-  def predict2(self, X_test, category_name, model_name):
-    """
-    :param X_test: Set of data the user wants to predict
-    :param category_name: "ex: car, van, others, white, gray, ...."
-    :param model_name: "ex: none/kde, pca/dnn, ..."
-    :param bool: "Whether you want the corresponding ones or not;
-                  ex: if category_name was car and bool was False,
-                  the function will return all frames that that don't contain car
-    :return: relevant samples from X
-    """
-    pre, pro = model_name.split("/")
-    X_pre, _ = self.pre_model_library[pre]([X_test, {} ])
-    model = self.category_library[category_name][model_name]
-    y_hat = model.predict(X_pre)
-    return y_hat
 
   #random forest
   def rf(self, args):
