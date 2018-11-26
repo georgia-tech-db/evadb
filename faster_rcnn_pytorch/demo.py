@@ -71,7 +71,7 @@ def parse_args():
                       default=root_dir+"/models")
   parser.add_argument('--image_dir', dest='image_dir',
                       help='directory to load images for demo',
-                      default="/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/Red_Data")
+                      default="/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/")
   parser.add_argument('--cuda', dest='cuda',
                       help='whether use CUDA',
                       action='store_true')
@@ -170,18 +170,17 @@ if __name__ == '__main__':
   load_name = os.path.join(input_dir,
     'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
 
+  '''  
   pascal_classes = np.asarray(['__background__',
                        'aeroplane', 'bicycle', 'bird', 'boat',
                        'bottle', 'bus', 'car', 'cat', 'chair',
                        'cow', 'diningtable', 'dog', 'horse',
                        'motorbike', 'person', 'pottedplant',
                        'sheep', 'sofa', 'train', 'tvmonitor'])
-
+  '''
   pascal_classes = np.asarray(['__background__',  # always index 0
                         'car','bus','van','others'])
 
-  pascal_classes = np.asarray(['__background__',  # always index 0
-                               'sign'])
 
   # initilize the network here.
   if args.net == 'vgg16':

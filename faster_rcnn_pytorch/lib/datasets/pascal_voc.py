@@ -47,12 +47,12 @@ class UADETRAC(imdb):
             else devkit_path
         #print(devkit_path)
 
-        self.data_path = "/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/"
+        self.data_path = "./data/VOCdevkit2007/VOC2007/"
 
         self._classes = ('__background__',  # always index 0
                         'car','bus','van','others')
         self._num_classes = len(self.classes)
-        self.image_set_index = os.listdir(self.data_path + '/Annotations')
+        self.image_set_index = os.listdir(self.data_path + 'Annotations')
         #self.image_set_index = os.listdir(self.data_path)
         #self._num_images = len(self.image_set_index)
         #print('num_images', self._num_images)
@@ -78,7 +78,7 @@ class UADETRAC(imdb):
         """
         Return the default path where PASCAL VOC is expected to be installed.
         """
-        return os.path.join("/home/pballapuram3/Eva/faster_rcnn_pytorch/data/", 'VOCdevkit2007')
+        return os.path.join("./data/", 'VOCdevkit2007')
 
     def image_path_from_index(self, index):
         """
@@ -86,10 +86,9 @@ class UADETRAC(imdb):
         :param index: index of a specific image
         :return: full path of this image
         """
-        #print(index)
-        image_path = os.path.join(self.data_path,index)
-        #image_path = os.path.join(self.data_path, 'Insight-MVT_Annotation_Train',
-        #                          index[:-4])
+        #image_path = os.path.join(self.data_path,index)
+        image_path = os.path.join(self.data_path, 'Insight-MVT_Annotation_Train',
+                                  index[:-4])
         assert os.path.exists(image_path), \
             'Path does not exist: {}'.format(image_path)
         return image_path
@@ -122,10 +121,12 @@ class UADETRAC(imdb):
             print('{} gt roidb loaded from {}'.format(self.name, cache_file))
             return roidb
 
-        gt_roidb = [self.load_UADETRAC_annotation(index) for index in self.image_set_index]
-        #for index in self.image_set_index:
-        #   gt_roidb.extend(self.load_UADETRAC_annotation(index))
-        #with open(cache_file, 'wb') as fid:
+        #gt_roidb = [self.load_UADETRAC_annotation(index) for index in self.image_set_index]
+        gt_roidb = []
+        ind = np.random.randint(0, len(self.image_set_index), 1)[0]
+        index = self.image_set_index[ind]
+        print("Chosen " + str(index))
+        gt_roidb.extend(self.load_UADETRAC_annotation(index))#with open(cache_file, 'wb') as fid:
         #    pickle.dump(gt_roidb, fid, pickle.HIGHEST_PROTOCOL)
         #print('wrote gt roidb to {}'.format(cache_file))
 
@@ -180,10 +181,8 @@ class UADETRAC(imdb):
         :return: record['boxes', 'gt_classes', 'gt_overlaps', 'flipped']
         """
         import xml.etree.ElementTree as ET
-        print("In Annotation")
         roi_recs = []
         #image_folder = self.image_path_from_index(index)
-        print(index)
         filename = os.path.join(self.data_path, 'Annotations',  index)
         tree = ET.parse(filename)
         frames = tree.findall('frame')
@@ -197,7 +196,6 @@ class UADETRAC(imdb):
             img_num = img_num + frame_num
 
             roi_rec = dict()
-            #print("Log!!!!!!")
             roi_rec['image'] = os.path.join(self.image_path_from_index(index), 'img' + img_num + '.jpg')
 
             # print(roi_rec['image'] )
@@ -211,9 +209,6 @@ class UADETRAC(imdb):
                 tl = target_list[0]
                 targets = tl.findall('target')
 
-                # if not self.config['use_diff']:
-                #    non_diff_objs = [obj for obj in objs if int(obj.find('difficult').text) == 0]
-                #    objs = non_diff_objs
                 num_targets = len(targets)
 
                 boxes = np.zeros((num_targets, 4), dtype=np.uint16)
@@ -231,11 +226,6 @@ class UADETRAC(imdb):
                     x2 = x1 + float(bbox['width'])
                     y2 = y1 + float(bbox['height'])
 
-                    # x1 = float(bbox.find('xmin').text) - 1
-                    # y1 = float(bbox.find('ymin').text) - 1
-                    # x2 = float(bbox.find('xmax').text) - 1
-                    # y2 = float(bbox.find('ymax').text) - 1
-                    # cls = class_to_index[obj.find('name').text.lower().strip()]
                     cls = class_to_index[gr_truth]
                     boxes[ix, :] = [x1, y1, x2, y2]
                     gt_classes[ix] = cls
