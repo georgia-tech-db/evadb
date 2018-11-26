@@ -1,6 +1,6 @@
 from filters.color_detection import process_image
 from filters.intersection_detection import intersection_detector
-
+import time
 import numpy as np
 class TaskManager():
 
@@ -20,8 +20,9 @@ class TaskManager():
         print(len(self.images))
         for cnt,img in enumerate(self.images):
             for bbox in self.img_bbox[cnt]:
+                st=time.time()
                 img_to_pass =np.asarray(img[bbox[1]:bbox[3],bbox[0]:bbox[2]])
-                print(img_to_pass.shape)
+                print("Time taken for color detection", time.time()-st)
                 color.append(process_image(img_to_pass))
         print(color)
         return color
