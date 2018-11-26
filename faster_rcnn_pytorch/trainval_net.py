@@ -306,13 +306,13 @@ if __name__ == '__main__':
     if not os.path.exists(output_dir):
       os.makedirs(output_dir)
 
-    #sampler_batch = sampler(train_size, args.batch_size)
+    sampler_batch = sampler(train_size, args.batch_size)
 
     #dataset = roibatchLoader(roidb, ratio_list, ratio_index, args.batch_size, \
     #                       imdb.num_classes, training=True)
 
-    #dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size,
-    #                                          sampler=sampler_batch, num_workers=args.num_workers)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size,
+                                              sampler=sampler_batch, num_workers=args.num_workers)
 
 
 

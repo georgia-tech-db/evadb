@@ -46,9 +46,11 @@ except NameError:
     xrange = range  # Python 3
 
 def accept_input_from_pp(X):
+    st=time.time()
     detected_class_image, detected_bbox, detected_classes=evaluate_inp_from_pp(X)
-    #t=TaskManager(detected_class_image,detected_bbox,detected_classes,'color')
-    t=TaskManager(detected_class_image,detected_bbox,detected_classes,'intersection')
+    print("Total time for UDF", time.time()-st)
+    t=TaskManager(detected_class_image,detected_bbox,detected_classes,'color')
+    #t=TaskManager(detected_class_image,detected_bbox,detected_classes,'intersection')
 def parse_args():
   """
   Parse input arguments
@@ -390,6 +392,7 @@ if __name__ == '__main__':
       cv2.destroyAllWindows()
 
 def evaluate_inp_from_pp(X,save_to_path=False,path_to_save=None):
+    st=time.time()
     args = parse_args()
     detected_class_image=[]
     detected_bbox={}
@@ -485,7 +488,8 @@ def evaluate_inp_from_pp(X,save_to_path=False,path_to_save=None):
     num_images=len(X)
     # Set up webcam or get image directories
     print('Loaded Photo: {} images.'.format(num_images))
-
+    print("Load time", time.time()-st)
+    st=time.time()
     for ind in range(num_images):
         im_in=X[ind]
         if len(im_in.shape) == 2:
@@ -597,12 +601,12 @@ def evaluate_inp_from_pp(X,save_to_path=False,path_to_save=None):
                         np.append(detected_classes[ind],pascal_classes[j])
         misc_toc = time.time()
         nms_time = misc_toc - misc_tic
-
+        print("Inference time", time.time()-st)
 
         #if save_to_path and path_to_save:
             # cv2.imshow('test', im2show)
             # cv2.waitKey(0)
         result_path = os.path.join(args.image_dir, str(ind) + "_det.jpg")
         detected_class_image.append(im2show)
-        cv2.imwrite("output.jpg",im2show[detected_bbox[0][0][1]:detected_bbox[0][0][3],detected_bbox[0][0][0]:detected_bbox[0][0][2]])
+        #cv2.imwrite("output.jpg",im2show[detected_bbox[0][0][1]:detected_bbox[0][0][3],detected_bbox[0][0][0]:detected_bbox[0][0][2]])
     return detected_class_image,detected_bbox,detected_classes
