@@ -58,6 +58,7 @@ along with a string indicating the task="color"/"speed"/"in_out".
 
 1. UDF
 
+
 |Number of Images|Seconds
 
 |       1        | 40.738
@@ -67,6 +68,7 @@ UDF Load time : 10.593
 
 
 2.Color Detection
+
 |Number of Bounding Boxes| Seconds |
 
 |           1            | 1.16 * 10^-5
