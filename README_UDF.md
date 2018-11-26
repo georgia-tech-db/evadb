@@ -52,3 +52,20 @@ the TaskManager Class. The task manager class passes on the results to color_det
 
 4. The TaskManager Class is present in the filters folder. It accepts images,image bounding box,image class lists as input 
 along with a string indicating the task="color"/"speed"/"in_out".
+
+
+#Performance Measure
+
+1. UDF
+
+|Number of Images|Seconds
+|       1        | 40.738
+|       10       | 265.968
+
+UDF Load time : 10.593
+
+
+2.Color Detection
+|Number of Bounding Boxes| Seconds
+|           1            | 1.16 * 10^-5
+|           5            | 2.36 * 10^-5 (on average)
