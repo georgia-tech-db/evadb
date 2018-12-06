@@ -72,6 +72,28 @@ class QueryOptimizer:
     sock.shutdown(socket.SHUT_RDWR)
     sock.close()
 
+
+  def _findParenthesis(self, query):
+
+      start = []
+      end = []
+      query_copy = query
+      index = query_copy.find("(")
+      while index != -1:
+        start.append(index)
+        query_copy = query_copy[index + 1:]
+        index = query_copy.find("(")
+
+      query_copy = query
+      index = query_copy.find(")")
+      while index != -1:
+        end.append(index)
+        query_copy = query_copy[index + 1:]
+        index = query_copy.find(")")
+
+      return [start, end]
+
+
   def _parseQuery(self, query):
     """
     Each sub query will be a list
@@ -79,6 +101,8 @@ class QueryOptimizer:
     :param query:
     :return:
     """
+
+
     query_parsed = []
     query_subs = query.split(" ")
     query_operators = []
@@ -97,6 +121,8 @@ class QueryOptimizer:
     #query_parsed ex: [ ["t", "=", "van"], ["s", ">", "60"]]
     #query_operators ex: ["||", "||", "&&"]
     return query_parsed, query_operators
+
+
 
 
   def _logic_reverse(self, str):
@@ -168,7 +194,6 @@ class QueryOptimizer:
         equivalence.append(alternate_string)
 
       elif l_desc[0] == constants.CONTINUOUS:
-        #TODO: Need to compute the equivalence classes for continuous instances
 
         equivalence = [self.convertL2S([query_sub_list], [])]
         assert(operator == "=" or operator == "!=" or operator == "<"
@@ -193,7 +218,6 @@ class QueryOptimizer:
               #query_tmp, _ = self._parseQuery(alternate_string)
               equivalence.append(alternate_string)
 
-      #TODO: Need to make sure the ones that are just single need to be double listed
       equivalences.append(equivalence)
 
     possible_queries = product(*equivalences)
@@ -362,10 +386,11 @@ if __name__ == "__main__":
                 "c=white", "c!=white", "o=pt211", "c=white && t=suv",
                 "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
                 "t=suv && c!=white", "c=white && t!=suv && t!=van",
-                "t=van && s>60 && s<65",
+                "t=van && s>60 && s<65", "t=sedan || t=truck && c!=white",
                 "i=pt335 && o!=pt211 && o!=pt208", "t=van && i=pt335 && o=pt211",
                 "t!=sedan && c!=black && c!=silver && t!=truck",
                 "t=van && s>60 && s<65 && o=pt211", "t!=suv && t!=van && c!=red && t!=white",
+                "i=pt335 || i=pt342 && o!=pt211 && o!=pt208",
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
   query_list_test = ["c=white && t!=suv && t!=van"]
