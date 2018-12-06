@@ -1,5 +1,4 @@
 pandas
-scikit-learn
 absl-py==0.5.0
 astor==0.7.1
 backports.weakref==1.0.post1
@@ -17,7 +16,6 @@ mock==2.0.0
 numpy==1.14.5
 pbr==4.2.0
 Pillow==5.2.0
-pkg-resources==0.0.0
 protobuf==3.6.1
 PyYAML==3.13
 scikit-learn==0.19.2
