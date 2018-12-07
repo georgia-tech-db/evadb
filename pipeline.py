@@ -3,15 +3,12 @@ import time
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-import cv2
 import os
-from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing.image import img_to_array, load_img, array_to_img, save_img
 
 
-import filters.load as load
+import loaders.load as load
 import filters.pp as pp
-import query_optimizer.query_optimizer as qo
 
 
 #TODO: Fill this file in with the components loaded from other files
@@ -24,15 +21,31 @@ class Pipeline:
      6. Give back result"""
 
   def __init__(self):
-    self.load = load.Load()
-    self.pp = pp.PP()
+    self.LOAD = load.Load()
+    self.PP = pp.PP()
     #self.qo = qo.QueryOptimizer()
 
+  def load(self):
+    eva_dir = os.path.dirname(os.path.abspath(__file__))
+    train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_images")
+    test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
+    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_annotations")
+    labels_of_interest = ["vehicle_type", "color", "speed", "intersection"]
+    dir_dict = {"train_image": train_image_dir,
+                "test_image": test_image_dir,
+                "train_anno": train_anno_dir}
+    data_table = self.LOAD.load(dir_dict, labels_of_interest)
+    return data_table
+
+  def train(self):
+    pass
+
+  """
   # We have access to train and test dataset -> Used for finding the score and evaluation
   def test(self):
     start_time = time.time()
 
-    data, label_dict = self.load.load_dataset()
+    data, label_dict = self.LOAD.load_dataset()
     nsamples, nx, ny, nc = data.shape
     data = data.reshape((nsamples, nx * ny * nc))
 
@@ -74,6 +87,8 @@ class Pipeline:
 
     print "finished saving images..."
     return
+    
+  """
 
   def save_image(self, xs, description):
     project_path = os.path.dirname(os.path.abspath(__file__))
@@ -84,11 +99,12 @@ class Pipeline:
       count += 1
     return
 
+  """
   # Actual run of the pipeline
   def run(self):
     start_time = time.time()
 
-    data, label_dict = self.load.load_dataset()
+    data, label_dict = self.LOAD.load_dataset()
     print("--- Total Execution Time for loading the dataset: %.3f seconds ---" % (time.time() - start_time))
 
     start_time = time.time()
@@ -96,7 +112,7 @@ class Pipeline:
     print("--- Total Execution Time for training the dataset : %.3f seconds ---" % (time.time() - start_time))
 
     return
-
+  """
   def filter_output_test(self):
     prefix = os.path.dirname(os.path.abspath(__file__))
     folder = "data"
@@ -123,3 +139,9 @@ class Pipeline:
 if __name__ == "__main__":
     pipeline = Pipeline()
     pipeline.test()
+
+
+    # the actual pipeline will be train -> execute
+    #pipeline.load() TODO
+    #pipeline.train() # this function should train all the PPs and UDFs TODO
+    #pipeline.execute() # this function should be query -> QO -> PP -> UDFs -> Output TODO
