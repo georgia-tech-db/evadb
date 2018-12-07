@@ -467,6 +467,8 @@ if __name__ == "__main__":
                         "o=pt211" :{ "none/dnn": {"R": 0.13, "C": 0.32, "A": 0.99},
                                      "none/kde": {"R": 0.14, "C": 0.12, "A": 0.93}} }
 
+  #TODO: We will need to convert the queries/labels into "car, bus, van, others". This is how the dataset defines things
+
   label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
                 "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
                 "c": [constants.DISCRETE, ["white", "red", "black", "silver"]],
