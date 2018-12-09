@@ -20,8 +20,16 @@ class Load:
     self.image_width = image_width
     self.image_height = image_height
     self.image_channels = 3
-    self.task_manager = TaskManager.TaskManager
+    self.task_manager = TaskManager.TaskManager()
 
+  @classmethod
+  def save(self, filename, panda_file):
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #Eva / eva
+    csv_folder = os.path.join(project_dir, "data", "pandas")
+    if os.path.exists(csv_folder) == False:
+      os.makedirs(csv_folder)
+    csv_filename = os.path.join(csv_folder, filename)
+    panda_file.to_csv(csv_filename, sep=",")
 
   def load(self, dir_dict):
     # we can extract speed, vehicle_type from the XML
@@ -31,19 +39,40 @@ class Load:
     train_anno_dir = dir_dict['train_anno']
     labels_list = ["vehicle_type", "color", "speed", "intersection"]
 
+    if __debug__: print("Inside load, starting image loading...")
     train_img_list = self._load_images(train_image_dir)
-    test_img_list = self._load_images(test_image_dir)
+    if __debug__: print("Done loading train images.. shape of matrix is " + str(train_img_list.shape))
 
     vehicle_type_labels, speed_labels, color_labels, intersection_labels = self._load_XML(train_anno_dir, train_img_list)
-
+    if __debug__: print("Done loading the labels.. length of labels is " + str(len(vehicle_type_labels)))
 
     data_table = list(zip(train_img_list, vehicle_type_labels, color_labels, speed_labels, intersection_labels))
 
     columns = ["image"] + labels_list
     dt_train = pd.DataFrame(data = data_table, columns = columns)
-    dt_test = pd.DataFrame(data = list(test_img_list), columns = ['image'])
+    if __debug__: print("Done making panda table for train")
+
+    dt_test = None
+    if test_image_dir is not None:
+      test_img_list = self._load_images(test_image_dir)
+      if __debug__: print("Done loading test iamges.. shape of matrix is " + str(test_img_list.shape))
+
+      dt_test = pd.DataFrame(data = list(test_img_list), columns = ['image'])
+      if __debug__: print("Done making panda table for test")
     return [dt_train, dt_test]
 
+
+  def _convert_speed(self, original_speed):
+    """
+    TODO: Need to actually not use this function, because we need to find out what the original speed values mean
+    TODO: However, in the meantime, we will use this extrapolation....
+    :param original_speed:
+    :return: converted_speed
+    """
+    speed_range = [0.0, 20.0]
+    converted_range = [0.0, 100.0]
+
+    return original_speed * 5
 
 
   def _load_XML(self, directory, images):
@@ -56,15 +85,18 @@ class Load:
       files.sort()
       for file in files:
         file_path = os.path.join(root, file)
+        if ".swp" in file_path:
+          continue
         tree = ET.parse(file_path)
         tree_root = tree.getroot()
         start_frame_num = 1
+        start_frame = True
         for frame in tree_root.iter('frame'):
           curr_frame_num = int(frame.attrib['num'])
-          if (curr_frame_num != start_frame_num):
+          if start_frame and curr_frame_num != start_frame_num:
             car_labels.append( [None] * (curr_frame_num - start_frame_num) )
             speed_labels.append( [None] * (curr_frame_num - start_frame_num) )
-          start_frame_num = curr_frame_num
+
 
           car_per_frame = []
           speed_per_frame = []
@@ -73,20 +105,23 @@ class Load:
 
           bboxes = []
           for box in frame.iter('box'):
-            left = float(box.attrib['left'])
-            top = float(box.attrib['top'])
-            right = left + float(box.attrib['width'])
-            bottom = top + float(box.attrib['height'])
+            left = int(eval(box.attrib['left']))
+            top = int(eval(box.attrib['top']))
+            right = left + int(eval(box.attrib['width']))
+            bottom = top + int(eval(box.attrib['height']))
             bboxes.append([left, top, right, bottom])
-          color_per_frame = self.task_manager.call_color(images[curr_frame_num], bboxes)
-          intersection_per_frame = self.task_manager.call_intersection(images[curr_frame_num])
+          # curr_frame_num -1 comes from the fact that indexes start from 0 whereas the start_frame_num = 1
+          color_per_frame = self.task_manager.call_color(images[curr_frame_num - 1], bboxes)
+          #if __debug__: print("colors detected in this frame are " , str(color_per_frame))
+          scene = file.replace(".xml", "") #MVI_20011.xml -> MVI_20011
+          intersection_per_frame = self.task_manager.call_intersection(images[curr_frame_num - 1], scene, bboxes)
 
 
           for att in frame.iter('attribute'):
             if (att.attrib['vehicle_type']):
               car_per_frame.append(att.attrib['vehicle_type'])
             if (att.attrib['speed']):
-              speed_per_frame.append(float(att.attrib['speed']))
+              speed_per_frame.append( self._convert_speed(float(att.attrib['speed'])) )
           assert(len(car_per_frame) == len(speed_per_frame))
           assert(len(car_per_frame) == len(color_per_frame))
           assert(len(car_per_frame) == len(intersection_per_frame))
@@ -110,6 +145,8 @@ class Load:
             intersection_labels.append(None)
           else:
             intersection_labels.append(intersection_per_frame)
+
+          start_frame = False
 
     return [car_labels, speed_labels, color_labels, intersection_labels]
 
@@ -145,10 +182,32 @@ class LoadTest:
   def __init__(self, load):
     self.load = load
 
+
+
   def run(self):
     start_time = time.time()
-    self.load.load_dataset()
-    if __debug__: print("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time))
+    eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "small-data")
+    #test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
+    test_image_dir = None
+    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "small-annotation")
+    dir_dict = {"train_image": train_image_dir,
+                "test_image": test_image_dir,
+                "train_anno": train_anno_dir}
+
+    if __debug__:
+      print("train image dir: " + train_image_dir)
+      #print("test image dir: " + test_image_dir)
+      print("train annotation dir: " + train_anno_dir)
+
+    dt_train, dt_test = self.load.load(dir_dict)
+    Load().save("MVI_20011.csv", dt_train)
+
+    if __debug__:
+      print("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time))
+
+      print(dt_train.shape)
+      if test_image_dir != None: print(dt_test.shape)
 
 
 if __name__ == "__main__":
