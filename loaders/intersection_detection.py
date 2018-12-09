@@ -1,32 +1,41 @@
 import numpy as np
 import pickle as pkl
+import random
 
 
 def intersection_detector(image, scene, bboxes):
   #bboxes is a list of bounding boxes.
-  print(bboxes)
+  #print(bboxes)
   intersections = []
   #TODO: need a keypoint dict
+  keypoint_names = ["pt335", "pt342", "pt211", "pt208"]
 
-  keypoint_dict= pkl.load('keypoint_dict')
-  scene_keypoints  = np.array(keypoint_dict['scene']['keypoints'])
-  scene_threshold  = keypoint_dict['scene']['threshold']
+  keypoint_dict= pkl.load(open('keypoint_dict', 'rb'))
+  if scene not in keypoint_dict:
+    # If the scene is not defined in keypoint_dict, just make a random keypoint list
+    # TODO: When defining the keypoints, it should be (row, col) just as how we see it in an image
+    scene_keypoints = np.array([[442.75, 100.98]])
+    scene_threshold = 20.0
+  else:
+    scene_keypoints  = np.array(keypoint_dict[scene]['keypoints'])
+    scene_threshold  = keypoint_dict[scene]['threshold']
 
   for bbox in bboxes:
     left = bbox[0]
     top = bbox[1]
     right = bbox[2]
     bottom = bbox[3]
-    x = (left + right) / 2
-    y = (top + bottom) / 2
-    current_obj_location = np.array([x,y])
+    col = (left + right) / 2
+    row = (top + bottom) / 2
+    current_obj_location = np.array([row,col])
 
     detected_intersection = False
     for keypoint in scene_keypoints:
-      distance = np.linalg.norm(keypoint-current_obj_location)
+      distance = np.linalg.norm(keypoint - current_obj_location)
     #TODO: It would be nice if we can refer to the keypoints as ["pt335", "pt342", "pt211", "pt208"]
       if distance < scene_threshold:
-        intersections.append(keypoint)
+        #TODO: Definitely need to fix this but for now, I will feed in random keypoint if it is close to any keypoint
+        intersections.append(keypoint_names[random.randint(0,5)])
         detected_intersection = True
         break
     if detected_intersection == False:

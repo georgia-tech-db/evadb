@@ -1,5 +1,5 @@
 from PIL import Image
-
+import random
 
 class Colors(object):
     class Color(object):
@@ -19,7 +19,7 @@ class Colors(object):
 
     class White(Color): pass
 
-    class Gray(Color): pass
+    class Silver(Color): pass
 
     class Black(Color): pass
 
@@ -51,7 +51,7 @@ class ColorWheel(object):
             if dominant_colors[0].value > 200:
                 return Colors.White(dominant_colors[0].value)
             elif dominant_colors[0].value > 100:
-                return Colors.Gray(dominant_colors[0].value)
+                return Colors.Silver(dominant_colors[0].value)
             else:
                 return Colors.Black(dominant_colors[0].value)
         else:
@@ -64,7 +64,13 @@ class ColorWheel(object):
 
 def process_image(image):
     image_color_quantities = {}
+
     image=Image.fromarray(image.astype('uint8'),'RGB')
+    """
+    if __debug__:
+        print("inside color_detection process image, image shape is " + str(image.size))
+        image.save("test_image" + str(random.randint(0,100)) + ".jpg", "JPEG")
+    """
     width, height = image.size
     width_margin = int(width - (width * .65))
     height_margin = int(height - (height * .75))
