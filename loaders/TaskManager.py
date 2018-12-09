@@ -19,12 +19,26 @@ class TaskManager():
             right = bbox[2]
             bottom = bbox[3]
             #image is already going to be an array
-            img_to_pass = image[top:bottom][left:right]
-            colors.append(process_image(img_to_pass))
+
+            img_to_pass = image[top:bottom,left:right,:]
+            """
+            if __debug__:
+                print("inside task manager img shape is " + str(img_to_pass.shape))
+                print("   original image shape is " + str(image.shape))
+                print("   original image type is " + str(type(image)))
+                print("(left, top, right, bottom coords are " + str((left, top, right, bottom)))
+            """
+            color = process_image(img_to_pass).lower()
+            if color != "":
+                colors.append(color)
+            else:
+                colors.append(None)
+
+
         return colors
 
 
-    def call_intersection(self, image, img_bboxes):
+    def call_intersection(self, image, scene, img_bboxes):
 
-        return intersection_detector(image, 'MVI_20011', img_bboxes)
+        return intersection_detector(image, scene, img_bboxes)
 
