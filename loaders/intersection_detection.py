@@ -35,7 +35,7 @@ def intersection_detector(image, scene, bboxes):
     #TODO: It would be nice if we can refer to the keypoints as ["pt335", "pt342", "pt211", "pt208"]
       if distance < scene_threshold:
         #TODO: Definitely need to fix this but for now, I will feed in random keypoint if it is close to any keypoint
-        intersections.append(keypoint_names[random.randint(0,5)])
+        intersections.append(keypoint_names[random.randint(0,len(keypoint_names) - 1)])
         detected_intersection = True
         break
     if detected_intersection == False:
