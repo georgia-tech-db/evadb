@@ -22,14 +22,37 @@ class Load:
     self.image_channels = 3
     self.task_manager = TaskManager.TaskManager()
 
-  @classmethod
-  def save(self, filename, panda_file):
+  @staticmethod
+  def image_eval(image_str):
+    evalled_image = np.array(eval(image_str))
+    height = 540
+    width = 960
+    channels = 3
+    return evalled_image.reshape(height, width, channels)
+
+
+  @staticmethod
+  def load_from_csv(filename):
+    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    full_dir = os.path.join(project_dir, "data", "pandas", filename)
+    converters = {"image": Load().image_eval(), "vehicle_type": eval(), "color": eval(), "intersection": eval()}
+    panda_file = pd.read_csv(full_dir, converters=converters)
+    for key in panda_file:
+      if "Unnamed" in key:
+        continue
+
+
+    return panda_file
+
+
+  @staticmethod
+  def save(filename, panda_data):
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #Eva / eva
     csv_folder = os.path.join(project_dir, "data", "pandas")
     if os.path.exists(csv_folder) == False:
       os.makedirs(csv_folder)
     csv_filename = os.path.join(csv_folder, filename)
-    panda_file.to_csv(csv_filename, sep=",")
+    panda_data.to_csv(csv_filename, sep=",", index = None)
 
   def load(self, dir_dict):
     # we can extract speed, vehicle_type from the XML
@@ -40,13 +63,17 @@ class Load:
     labels_list = ["vehicle_type", "color", "speed", "intersection"]
 
     if __debug__: print("Inside load, starting image loading...")
-    train_img_list = self._load_images(train_image_dir)
-    if __debug__: print("Done loading train images.. shape of matrix is " + str(train_img_list.shape))
+    train_img_array = self._load_images(train_image_dir)
+    if __debug__: print("Done loading train images.. shape of matrix is " + str(train_img_array.shape))
 
-    vehicle_type_labels, speed_labels, color_labels, intersection_labels = self._load_XML(train_anno_dir, train_img_list)
+    vehicle_type_labels, speed_labels, color_labels, intersection_labels = self._load_XML(train_anno_dir, train_img_array)
     if __debug__: print("Done loading the labels.. length of labels is " + str(len(vehicle_type_labels)))
 
-    data_table = list(zip(train_img_list, vehicle_type_labels, color_labels, speed_labels, intersection_labels))
+    n_samples, height, width, channels = train_img_array.shape
+    train_img_array.reshape(n_samples, height*width*channels)
+    data_table = list(zip(train_img_array, vehicle_type_labels, color_labels, speed_labels, intersection_labels))
+
+    if __debug__: print("data_table shape is ", str(len(data_table)))
 
     columns = ["image"] + labels_list
     dt_train = pd.DataFrame(data = data_table, columns = columns)
@@ -55,7 +82,7 @@ class Load:
     dt_test = None
     if test_image_dir is not None:
       test_img_list = self._load_images(test_image_dir)
-      if __debug__: print("Done loading test iamges.. shape of matrix is " + str(test_img_list.shape))
+      if __debug__: print("Done loading test images.. shape of matrix is " + str(test_img_list.shape))
 
       dt_test = pd.DataFrame(data = list(test_img_list), columns = ['image'])
       if __debug__: print("Done making panda table for test")
@@ -201,7 +228,7 @@ class LoadTest:
       print("train annotation dir: " + train_anno_dir)
 
     dt_train, dt_test = self.load.load(dir_dict)
-    Load().save("MVI_20011.csv", dt_train)
+    Load().save("small.csv", dt_train)
 
     if __debug__:
       print("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time))
