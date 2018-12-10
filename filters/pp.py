@@ -1,3 +1,6 @@
+import numpy as np
+
+
 from kdewrapper import KernelDensityWrapper
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
@@ -28,8 +31,81 @@ class PP:
                              #made this just in case there could be stats that are not saved
     self.pre_category_library = {}
 
-  def train_all(self, X, label_dict):
-    X_preprocessed = self.preprocess(X, label_dict)
+  def _generate_binary_labels(self, X):
+    """
+    Example label dict is going to be {"car": [0,0,0,1,0,0,0.....],"others": [0,1,0,0,0...}
+    :param X:
+    :return:
+    """
+
+    labels = {"vehicle_type": ["car", "van", "bus", "others"],
+                  "color": ["red", "white", "black", "silver"],
+                  "speed": [">40", ">50", ">60", "<65", "<70"],
+                  "intersection": ["pt335", "pt211", "pt342", "pt208"]}
+
+
+    label_dict = {}
+
+    for c in X:
+      if c == "speed":
+        #TODO: Need some special parsing to do this
+        column_of_interest = X[c]
+        sub_labels = labels[c]
+        for item in sub_labels:
+          label_dict[item] = []
+        for data in column_of_interest:
+          for item in sub_labels:
+            label_dict[item].append(0)
+          if column_of_interest[data] == None:
+            continue
+          else:
+            for sub_data in data:
+              if sub_data > 40:
+                label_dict[">40"][-1] = 1
+              if sub_data > 50 :
+                label_dict[">50"][-1] = 1
+              if sub_data > 60:
+                label_dict[">60"][-1] = 1
+              if sub_data < 65:
+                label_dict["<65"][-1] = 1
+              if sub_data < 70:
+                label_dict["<70"][-1] = 1
+
+      elif c == "intersection" or c == "vehicle_type":
+        column_of_interest = X[c]
+        sub_labels = labels[c]
+        for item in sub_labels:
+          label_dict[item] = []
+        for data in column_of_interest: #column_of_interest would be vehicle type; data would be ("car", "van", "car")
+          for item in sub_labels:
+            label_dict[item].append(0)
+          if column_of_interest[data] == None:
+            continue
+          else:
+            for sub_data in data: #sub_data would be "car"
+              label_dict[sub_data][-1] = 1
+
+    return label_dict
+
+  def _reshape_image(self, X):
+    images = X['image']
+    reduction_rate = 12
+    #need to down shape them so that the kernels can train faster
+    #image should be num_samples, height, width, channel
+    downsampled_images = np.array(images[:][::reduction_rate][::reduction_rate][:])
+    nsamples, nx, ny, nc = downsampled_images.shape
+    reshaped_images = downsampled_images.reshape((nsamples, nx * ny * nc))
+    return reshaped_images
+
+
+
+
+  def train_all(self, X):
+    label_dict = self._generate_binary_labels(X)
+    image_reshaped = self._reshape_image(X)
+
+
+    X_preprocessed = self.preprocess(image_reshaped, label_dict)
     self.process(X_preprocessed, label_dict)
 
   def process(self, X, label_dict):
