@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import os
 import sys
 from keras.preprocessing.image import img_to_array, load_img, array_to_img, save_img
-from faster_rcnn_pytorch.demo import accept_input_from_pp
+#from faster_rcnn_pytorch.demo import accept_input_from_pp
 
 
 import loaders.load as load
@@ -37,6 +37,11 @@ class Pipeline:
     self.data_table = None
     #self.qo = qo.QueryOptimizer()
 
+
+  def load_from_csv(self, filename):
+      data_table = load.Load().load_from_csv(filename)
+      return data_table
+
   def load(self):
     eva_dir = os.path.dirname(os.path.abspath(__file__))
     train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_images")
@@ -51,14 +56,16 @@ class Pipeline:
     return data_table
 
   def run(self):
-    self.data_table = self.load()
+    start_time = time.time()
+    self.data_table = self.load_from_csv("small.csv")
+    print("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time))
     self.train()
 
   def pass_to_udf(self, test_pred, test_X):
     if len(test_X.shape) != 4:
       test_X = test_X.reshape(1, test_X.shape[0], test_X.shape[1], test_X.shape[2])
     pos_frames = np.where(test_pred == 1)
-    accept_input_from_pp(test_X[pos_frames])
+    #accept_input_from_pp(test_X[pos_frames])
 
   def train(self):
     """
@@ -69,7 +76,7 @@ class Pipeline:
     label_of_interest = "vehicle_type"
     data_series = self.data_table[label_of_interest]
 
-    self.pp.train_all(self.data_table) #TODO: Need to fix this function
+    self.PP.train_all(self.data_table) #TODO: Need to fix this function
     #TODO: train UDF - but for now assume it is already trained
 
 
