@@ -84,14 +84,14 @@ class Pipeline:
     return pp_category_stats
 
   def execute(self, pp_category_stats, pp_category_models):
-    TRAF_20 = ["t=suv", "s>60",
-                "c=white", "c!=white", "o=pt211", "c=white && t=suv",
-                "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
-                "t=suv && c!=white", "c=white && t!=suv && t!=van",
-                "t=van && s>60 && s<65", "t=sedan || t=truck && c!=white",
+    TRAF_20 = ["t=van", "s>60",
+                "c=white", "c!=white", "o=pt211", "c=white && t=van",
+                "s>60 && s<65", "t=car || t=others", "i=pt335 && o=pt211",
+                "t=van && c!=white", "c=white && t!=van && t!=car",
+                "t=van && s>60 && s<65", "t=car || t=others && c!=white",
                 "i=pt335 && o!=pt211 && o!=pt208", "t=van && i=pt335 && o=pt211",
-                "t!=sedan && c!=black && c!=silver && t!=truck",
-                "t=van && s>60 && s<65 && o=pt211", "t!=suv && t!=van && c!=red && t!=white",
+                "t!=car && c!=black && c!=silver && t!=others",
+                "t=van && s>60 && s<65 && o=pt211", "t!=sedan && t!=van && c!=red && t!=white",
                 "i=pt335 || i=pt342 && o!=pt211 && o!=pt208",
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
@@ -147,7 +147,7 @@ class Pipeline:
                           "i=pt208": {"none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
                                       "none/kde": {"R": 0.146, "C": 0.126, "A": 0.936}}}
 
-    label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
+    label_desc = {"t": [constants.DISCRETE, ["car", "others", "bus", "van"]],
                   "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
                   "c": [constants.DISCRETE, ["white", "red", "black", "silver"]],
                   "i": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
@@ -158,9 +158,21 @@ class Pipeline:
     for query in TRAF_20:
     #TODO: After running the query optimizer, we want to the list of PPs to work with
     #TODO: Then we want to execute the queries with the PPs and send it to the UDF after
-      best_query, operators = self.QO.run(query, synthetic_pp_list, pp_category_stats, label_desc)
+      best_query, best_operators, reduction_rate = self.QO.run(query, synthetic_pp_list, pp_category_stats, label_desc)
     #TODO: Assume the best_query is in the form ["(PP_name, model_name) , (PP_name, model_name), (PP_name, model_name), (PP_name, model_name), (UDF_name, model_name - None)]
     #                                   operators will be [np.logical_and, np.logical_or, np.logical_and.....]
+      if __debug__: print("The total reduction rate associated with the query is " + str(reduction_rate))
+      y_hat1 = []
+      y_hat2 = []
+      for i in xrange(len(best_query)):
+        pp_name, model_name = best_query[i]
+        if y_hat1 == []:
+          y_hat1 = self.PP.predict(self.image_table, pp_name, model_name)
+          continue
+        else:
+          y_hat2 = self.PP.predict(self.image_table, pp_name, model_name)
+          y_hat1 = best_operators[i - 1](y_hat1, y_hat2)
+      #result = self.pass_to_udf(X[y_hat1])
 
     """
       y_hat1 = []
