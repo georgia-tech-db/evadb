@@ -2,19 +2,18 @@
 # The query optimizer decide how to label the data points
 # Load the series of queries from a txt file?
 import sys
+import os
 import socket
 import threading
 import numpy as np
 from itertools import product
 from time import sleep
 
+eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(eva_dir)
+import constants
 
-try:
-  import constants
-except:
-  sys.path.append("/nethome/jbang36/eva")
-  sys.path.append("/home/jaeho-linux/fall2018/DDL/Eva")
-  import constants
+
 
 class QueryOptimizer:
   """
@@ -254,6 +253,7 @@ class QueryOptimizer:
     :return: the list of pps to use that maximizes reduction rate (ATM)
     """
     evaluations = []
+    evaluation_models = []
     evaluations_stats = []
     query_transformed, query_operators = query_info
     #query_transformed = [[["t", "!=", "car"], ["t", "=", "van"]], ... ]
@@ -269,6 +269,7 @@ class QueryOptimizer:
           continue
         query_sub_list, query_sub_operators = self._parseQuery(query_sub)
         evaluation_tmp = []
+        evaluation_models_tmp = []
         evaluation_stats_tmp = []
         for i in xrange(len(query_sub_list)):
           query_sub_str = ''.join(query_sub_list[i])
@@ -281,6 +282,7 @@ class QueryOptimizer:
             else:
               model, reduction_rate = data
               evaluation_tmp.append(query_sub_str)
+              evaluation_models_tmp.append(model) #TODO: We need to make sure this is the model_name
               evaluation_stats_tmp.append(reduction_rate)
               k_count += 1
 
@@ -290,6 +292,7 @@ class QueryOptimizer:
           reduc_rate = self._update_stats(evaluation_stats_tmp, query_sub_operators)
 
         evaluation.append(query_sub)
+        evaluation_models.append(evaluation_models_tmp)
         evaluation_stats.append(reduc_rate)
       op_index += 1
 
@@ -298,7 +301,35 @@ class QueryOptimizer:
       evaluations_stats.append( self._update_stats(evaluation_stats, query_operators) )
 
     max_index = np.argmax(np.array(evaluations_stats), axis = 0)
-    return (evaluations[max_index], evaluations_stats[max_index])
+    best_query = evaluations[max_index] #this will be something like "t!=bus && t!=truck && t!=car"
+    best_models = evaluation_models[max_index]
+    best_reduction_rate = evaluation_stats[max_index]
+
+    pp_names, op_names = self._convertQuery2PPOps(best_query)
+    return [zip(pp_names, best_models), op_names, best_reduction_rate]
+
+
+  def _convertQuery2PPOps(self, query):
+    """
+
+    :param query: str (t!=car && t!=truck)
+    :return:
+    """
+    query_split = query.split(" ")
+    pp_names = []
+    op_names = []
+    for i in xrange(len(query_split)):
+      if i % 2 == 0:
+        pp_names.append(query_split[i])
+      else:
+        if query_split[i] == "&&":
+          op_names.append(np.logical_and)
+        else:
+          op_names.append(np.logical_or)
+
+    return pp_names, op_names
+
+
 
 
   #Make this function take in the list of reduction rates and the operator lists
@@ -380,8 +411,6 @@ if __name__ == "__main__":
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
   #TODO: Support for parenthesis queries
-
-
   query_list_mod = ["t=suv", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=suv",
                 "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
