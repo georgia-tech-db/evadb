@@ -35,31 +35,27 @@ class Pipeline:
     self.PP = pp.PP()
     self.QO = qo.QueryOptimizer()
     self.data_table = None
+    self.image_matrix = None
     #self.qo = qo.QueryOptimizer()
 
 
-  def load_from_csv(self, filename):
-      data_table = load.Load().load_from_csv(filename)
-      return data_table
+  def run(self):
+    self.image_matrix, self.data_table = self.load()
+    self.train()
 
   def load(self):
     eva_dir = os.path.dirname(os.path.abspath(__file__))
-    train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_images")
-    test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
-    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_annotations")
-
+    train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-data")
+    #test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
+    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-annotation")
 
     dir_dict = {"train_image": train_image_dir,
-                "test_image": test_image_dir,
-                "train_anno": train_anno_dir}
-    data_table = self.LOAD.load(dir_dict)
-    return data_table
+                "train_anno": train_anno_dir,
+                "test_image": None}
+    image_matrix, train_data_table, test_data_table = self.LOAD.load(dir_dict)
+    return image_matrix, train_data_table
 
-  def run(self):
-    start_time = time.time()
-    self.data_table = self.load_from_csv("small.csv")
-    print("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time))
-    self.train()
+
 
   def pass_to_udf(self, test_pred, test_X):
     if len(test_X.shape) != 4:
@@ -76,7 +72,8 @@ class Pipeline:
     label_of_interest = "vehicle_type"
     data_series = self.data_table[label_of_interest]
 
-    self.PP.train_all(self.data_table) #TODO: Need to fix this function
+
+    self.PP.train_all(self.image_matrix, self.data_table) #TODO: Need to fix this function
     #TODO: train UDF - but for now assume it is already trained
 
 
@@ -159,7 +156,7 @@ class Pipeline:
     for query in TRAF_20:
       qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)
 
-    self.pass_to_udf(np.asarray([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), img)
+    #self.pass_to_udf(np.asarray([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), img)
 
 
 

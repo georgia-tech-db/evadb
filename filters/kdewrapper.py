@@ -20,27 +20,39 @@ class KernelDensityWrapper:
   def fit(self, X, y):
     unique_vals = np.unique(y)
     unique_vals = np.sort(unique_vals)
-    assert(unique_vals[0] == 0)
-    assert(unique_vals[1] == 1)
+    if len(unique_vals) == 1:
+      kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
+      kde.fit(X[y == unique_vals[0]])
+      if unique_vals[0] == 0:
+        self.kernels.append(kde)
+        self.kernels.append(None)
+      else:
+        self.kernels.append(None)
+        self.kernels.append(kde)
 
 
-    kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
-    kde.fit(X[y == 0])
-    self.kernels.append(kde)
+    else:
+      assert( len(unique_vals) == 2 )
+      kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
+      kde.fit(X[y == 0])
+      self.kernels.append(kde)
 
-    kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
-    kde.fit(X[y == 1])
-    self.kernels.append(kde)
+      kde = KernelDensity(kernel=self.kernel, bandwidth=self.bandwidth)
+      kde.fit(X[y == 1])
+      self.kernels.append(kde)
 
 
   def predict(self, X):
     ##assume everything is one-shot
-    score = self.kernels[0].score_samples(X)
-    scores = np.array(score)
-    score = self.kernels[1].score_samples(X)
-    scores = np.vstack((scores, score))
+    scores = []
+    for kernel in self.kernels:
+      if kernel == None:
+        scores.append(0)
+      else:
+        scores.append( kernel.score_samples(X) )
+    scores = np.array(scores)
 
-    return np.argmax(scores, axis = 0)
+    return np.argmax(scores)
 
   def score(self, X, y):
     assert len(self.kernels) != 0
