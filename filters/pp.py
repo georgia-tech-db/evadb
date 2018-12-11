@@ -56,10 +56,12 @@ class PP:
         for data in column_of_interest:
           for item in sub_labels:
             label_dict[item].append(0)
-          if column_of_interest[data] == None:
+          if data == None:
             continue
           else:
             for sub_data in data:
+              if sub_data == None:
+                continue
               if sub_data > 40:
                 label_dict[">40"][-1] = 1
               if sub_data > 50 :
@@ -79,31 +81,31 @@ class PP:
         for data in column_of_interest: #column_of_interest would be vehicle type; data would be ("car", "van", "car")
           for item in sub_labels:
             label_dict[item].append(0)
-          if column_of_interest[data] == None:
+          if data == None:
             continue
           else:
             for sub_data in data: #sub_data would be "car"
-              label_dict[sub_data][-1] = 1
+              if sub_data == None:
+                continue
+              else:
+                label_dict[sub_data][-1] = 1
 
     return label_dict
 
   def _reshape_image(self, X):
-    images = X['image']
+    print('inside reshape images, shape of image dataseries is ' + str(X.shape))
     reduction_rate = 12
     #need to down shape them so that the kernels can train faster
     #image should be num_samples, height, width, channel
-    downsampled_images = np.array(images[:][::reduction_rate][::reduction_rate][:])
+    downsampled_images = X[:,::reduction_rate,::reduction_rate,:]
     nsamples, nx, ny, nc = downsampled_images.shape
     reshaped_images = downsampled_images.reshape((nsamples, nx * ny * nc))
     return reshaped_images
 
 
-
-
-  def train_all(self, X):
-    label_dict = self._generate_binary_labels(X)
-    image_reshaped = self._reshape_image(X)
-
+  def train_all(self, image_matrix, data_table):
+    label_dict = self._generate_binary_labels(data_table)
+    image_reshaped = self._reshape_image(image_matrix)
 
     X_preprocessed = self.preprocess(image_reshaped, label_dict)
     self.process(X_preprocessed, label_dict)
