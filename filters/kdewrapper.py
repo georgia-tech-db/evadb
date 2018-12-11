@@ -45,14 +45,17 @@ class KernelDensityWrapper:
   def predict(self, X):
     ##assume everything is one-shot
     scores = []
+    n_samples, _ = X.shape
     for kernel in self.kernels:
       if kernel == None:
-        scores.append(0)
+        scores.append(np.array([0] * n_samples))
       else:
-        scores.append( kernel.score_samples(X) )
+        log_dens = kernel.score_samples(X)
+        probs = np.exp(log_dens)
+        scores.append( probs )
     scores = np.array(scores)
 
-    return np.argmax(scores)
+    return np.argmax(scores, axis = 1)
 
   def score(self, X, y):
     assert len(self.kernels) != 0
