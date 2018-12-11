@@ -24,18 +24,21 @@ class Load:
 
   @staticmethod
   def image_eval(image_str):
-    evalled_image = np.array(eval(image_str))
+    image_str = ' '.join(image_str.split())
+    image_str = image_str.replace(" ", ",")
+    image_str = image_str[0] + image_str[2:]
+    evaled_image = np.array(eval(image_str))
     height = 540
     width = 960
     channels = 3
-    return evalled_image.reshape(height, width, channels)
+    return evaled_image.reshape(height, width, channels)
 
 
   @staticmethod
   def load_from_csv(filename):
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     full_dir = os.path.join(project_dir, "data", "pandas", filename)
-    converters = {"image": Load().image_eval(), "vehicle_type": eval(), "color": eval(), "intersection": eval()}
+    converters = {"image": Load().image_eval, "vehicle_type": eval, "color": eval, "intersection": eval}
     panda_file = pd.read_csv(full_dir, converters=converters)
     for key in panda_file:
       if "Unnamed" in key:
@@ -69,13 +72,15 @@ class Load:
     vehicle_type_labels, speed_labels, color_labels, intersection_labels = self._load_XML(train_anno_dir, train_img_array)
     if __debug__: print("Done loading the labels.. length of labels is " + str(len(vehicle_type_labels)))
 
-    n_samples, height, width, channels = train_img_array.shape
-    train_img_array.reshape(n_samples, height*width*channels)
-    data_table = list(zip(train_img_array, vehicle_type_labels, color_labels, speed_labels, intersection_labels))
+    #n_samples, height, width, channels = train_img_array.shape
+    #train_img_array = train_img_array.reshape(n_samples, height*width*channels)
+
+    if __debug__: print("train img array flatten is ", str(train_img_array.shape))
+    data_table = list(zip(vehicle_type_labels, color_labels, speed_labels, intersection_labels))
 
     if __debug__: print("data_table shape is ", str(len(data_table)))
 
-    columns = ["image"] + labels_list
+    columns = labels_list
     dt_train = pd.DataFrame(data = data_table, columns = columns)
     if __debug__: print("Done making panda table for train")
 
@@ -86,7 +91,7 @@ class Load:
 
       dt_test = pd.DataFrame(data = list(test_img_list), columns = ['image'])
       if __debug__: print("Done making panda table for test")
-    return [dt_train, dt_test]
+    return [train_img_array, dt_train, dt_test]
 
 
   def _convert_speed(self, original_speed):
@@ -240,5 +245,7 @@ class LoadTest:
 if __name__ == "__main__":
     load = Load()
     load_test = LoadTest(load)
-    load_test.run()
-
+    #load_test.run()
+    panda_table = Load().load_from_csv("small.csv")
+    a = 1 + 2
+    if __debug__: print("panda shape is " + str(panda_table.shape))

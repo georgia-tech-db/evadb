@@ -1,6 +1,7 @@
 import numpy as np
 import pickle as pkl
 import random
+import os
 
 
 def intersection_detector(image, scene, bboxes):
@@ -10,7 +11,8 @@ def intersection_detector(image, scene, bboxes):
   #TODO: need a keypoint dict
   keypoint_names = ["pt335", "pt342", "pt211", "pt208"]
 
-  keypoint_dict= pkl.load(open('keypoint_dict', 'rb'))
+  eva_loader_dir = os.path.dirname(os.path.abspath(__file__))
+  keypoint_dict= pkl.load(open( os.path.join(eva_loader_dir, 'keypoint_dict'), 'rb'))
   if scene not in keypoint_dict:
     # If the scene is not defined in keypoint_dict, just make a random keypoint list
     # TODO: When defining the keypoints, it should be (row, col) just as how we see it in an image
