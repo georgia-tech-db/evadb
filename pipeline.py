@@ -34,17 +34,39 @@ class Pipeline:
     self.LOAD = load.Load()
     self.PP = pp.PP()
     self.QO = qo.QueryOptimizer()
-    self.data_table = None
-    self.image_matrix = None
+    self.image_matrix_train = None
+    self.image_matrix_test = None
+    self.data_table_train = None
+    self.data_table_test = None
     #self.qo = qo.QueryOptimizer()
 
 
   def run(self):
-    self.image_matrix, self.data_table = self.load()
+    image_matrix, data_table = self.load()
+    self.image_matrix_train, self.image_matrix_test, self.data_table_train, self.data_table_test = self._split_train_val(image_matrix, data_table)
     self.train()
     pp_category_stats = self.PP.getCategoryStats()
     pp_models = self.PP.getCategoryModel()
     self.execute(pp_category_stats, pp_models)
+
+
+  def _split_train_val(self, X, label_dict):
+    n_samples, _, _, _= X.shape
+    mixed_indices = np.random.permutation(n_samples)
+    train_index_end = int(len(mixed_indices) * 0.8)
+
+    X_train = X[mixed_indices[:train_index_end]]
+    X_test = X[mixed_indices[train_index_end:]]
+
+
+    label_dict_train = {}
+    label_dict_test = {}
+    for column in label_dict:
+        label_dict_train[column] = label_dict[column][mixed_indices[:train_index_end]]
+        label_dict_test[column] = label_dict[column][mixed_indices[train_index_end:]]
+
+    return X_train, X_test, label_dict_train, label_dict_test
+
 
   def load(self):
     eva_dir = os.path.dirname(os.path.abspath(__file__))
@@ -73,10 +95,9 @@ class Pipeline:
     """
     labels_list = ["image", "vehicle_type", "color", "speed", "intersection"]
     label_of_interest = "vehicle_type"
-    data_series = self.data_table[label_of_interest]
 
 
-    pp_category_stats = self.PP.train_all(self.image_matrix, self.data_table) #TODO: Need to fix this function
+    pp_category_stats = self.PP.train_all(self.image_matrix_train, self.data_table_train) #TODO: Need to fix this function
     #TODO: train UDF - but for now assume it is already trained
     #TODO: Need to get the trained result and feed into the query optimizer
     #TODO: Make query optimizer execute TRAF_20 queries
@@ -95,57 +116,13 @@ class Pipeline:
                 "i=pt335 || i=pt342 && o!=pt211 && o!=pt208",
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
+
     synthetic_pp_list = ["t=car", "t=bus", "t=van", "t=others",
                          "c=red", "c=white", "c=black", "c=silver",
                          "s>40", "s>50", "s>60", "s<65", "s<70",
                          "i=pt335", "i=pt211", "i=pt342", "i=pt208",
                          "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
 
-
-    synthetic_pp_stats = {"t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
-                                    "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
-                                    "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}},
-                          "t=suv": {"none/svm": {"R": 0.13, "C": 0.01, "A": 0.95}},
-                          "t=sedan": {"none/svm": {"R": 0.21, "C": 0.01, "A": 0.94}},
-                          "t=truck": {"none/svm": {"R": 0.05, "C": 0.01, "A": 0.99}},
-
-                          "c=red": {"none/svm": {"R": 0.131, "C": 0.011, "A": 0.951}},
-                          "c=white": {"none/svm": {"R": 0.212, "C": 0.012, "A": 0.942}},
-                          "c=black": {"none/svm": {"R": 0.133, "C": 0.013, "A": 0.953}},
-                          "c=silver": {"none/svm": {"R": 0.214, "C": 0.014, "A": 0.944}},
-
-                          "s>40": {"none/svm": {"R": 0.08, "C": 0.20, "A": 0.8}},
-                          "s>50": {"none/svm": {"R": 0.10, "C": 0.20, "A": 0.82}},
-
-                          "s>60": {"none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
-                                   "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
-
-                          "s<65": {"none/svm": {"R": 0.05, "C": 0.20, "A": 0.8}},
-                          "s<70": {"none/svm": {"R": 0.02, "C": 0.20, "A": 0.9}},
-
-                          "o=pt211": {"none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
-                                      "none/kde": {"R": 0.143, "C": 0.123, "A": 0.932}},
-
-                          "o=pt335": {"none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
-                                      "none/kde": {"R": 0.144, "C": 0.124, "A": 0.934}},
-
-                          "o=pt342": {"none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
-                                      "none/kde": {"R": 0.145, "C": 0.125, "A": 0.935}},
-
-                          "o=pt208": {"none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
-                                      "none/kde": {"R": 0.146, "C": 0.126, "A": 0.936}},
-
-                          "i=pt211": {"none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
-                                      "none/kde": {"R": 0.143, "C": 0.123, "A": 0.932}},
-
-                          "i=pt335": {"none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
-                                      "none/kde": {"R": 0.144, "C": 0.124, "A": 0.934}},
-
-                          "i=pt342": {"none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
-                                      "none/kde": {"R": 0.145, "C": 0.125, "A": 0.935}},
-
-                          "i=pt208": {"none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
-                                      "none/kde": {"R": 0.146, "C": 0.126, "A": 0.936}}}
 
     label_desc = {"t": [constants.DISCRETE, ["car", "others", "bus", "van"]],
                   "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
@@ -156,22 +133,27 @@ class Pipeline:
 
     query_plans = []
     for query in TRAF_20:
-    #TODO: After running the query optimizer, we want to the list of PPs to work with
+    #TODO: After running the query optimizer, we want the list of PPs to work with
     #TODO: Then we want to execute the queries with the PPs and send it to the UDF after
       best_query, best_operators, reduction_rate = self.QO.run(query, synthetic_pp_list, pp_category_stats, label_desc)
     #TODO: Assume the best_query is in the form ["(PP_name, model_name) , (PP_name, model_name), (PP_name, model_name), (PP_name, model_name), (UDF_name, model_name - None)]
     #                                   operators will be [np.logical_and, np.logical_or, np.logical_and.....]
-      if __debug__: print("The total reduction rate associated with the query is " + str(reduction_rate))
+      if __debug__:
+        print("The total reduction rate associated with the query is " + str(reduction_rate))
+        print("The best alternative for " + query + " is " + str(best_query))
+        print("The operators involved are " + str(best_operators))
       y_hat1 = []
       y_hat2 = []
       for i in xrange(len(best_query)):
         pp_name, model_name = best_query[i]
         if y_hat1 == []:
-          y_hat1 = self.PP.predict(self.image_table, pp_name, model_name)
+          y_hat1 = self.PP.predict(self.image_matrix_test, pp_name, model_name)
           continue
         else:
-          y_hat2 = self.PP.predict(self.image_table, pp_name, model_name)
+          y_hat2 = self.PP.predict(self.image_matrix_test, pp_name, model_name)
           y_hat1 = best_operators[i - 1](y_hat1, y_hat2)
+
+      print ("The final boolean array to pass to udf is : \n" + str(y_hat1))
       #result = self.pass_to_udf(X[y_hat1])
 
     """

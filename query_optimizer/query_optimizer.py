@@ -303,7 +303,7 @@ class QueryOptimizer:
     max_index = np.argmax(np.array(evaluations_stats), axis = 0)
     best_query = evaluations[max_index] #this will be something like "t!=bus && t!=truck && t!=car"
     best_models = evaluation_models[max_index]
-    best_reduction_rate = evaluation_stats[max_index]
+    best_reduction_rate = evaluations_stats[max_index]
 
     pp_names, op_names = self._convertQuery2PPOps(best_query)
     return [zip(pp_names, best_models), op_names, best_reduction_rate]
@@ -337,8 +337,6 @@ class QueryOptimizer:
     if len(evaluation_stats) == 0:
         return 0
     final_red = evaluation_stats[0]
-    if __debug__: print("evaluation_stats:   " + str(evaluation_stats))
-    if __debug__: print("  query_operators:  " + str(query_operators))
     assert(len(evaluation_stats) == len(query_operators) + 1)
 
     for i in xrange(1, len(evaluation_stats)):
@@ -410,6 +408,7 @@ if __name__ == "__main__":
                 "(i=pt335 || i=pt342) && o!=pt211 && o!=pt208",
                 "i=pt335 && o=pt211 && t=van && c=red"]
 
+
   #TODO: Support for parenthesis queries
   query_list_mod = ["t=suv", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=suv",
@@ -425,12 +424,29 @@ if __name__ == "__main__":
   query_list_test = ["c=white && t!=suv && t!=van"]
 
 
-
   synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
                        "c=red", "c=white", "c=black", "c=silver",
                        "s>40", "s>50", "s>60", "s<65", "s<70",
                        "i=pt335", "i=pt211", "i=pt342", "i=pt208",
                        "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
+
+  query_list_short = ["t=van && s>60 && o=pt211"]
+
+
+  synthetic_pp_list_short = ["t=van", "s>60", "o=pt211"]
+
+
+  #TODO: Might need to change this to a R vs A curve instead of static numbers
+  #TODO: When selecting appropriate PPs, we only select based on reduction rate
+  synthetic_pp_stats_short = {"t=van" :{ "none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
+                                   "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
+                                  "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}},
+
+                        "s>60" :{ "none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
+                                  "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
+
+                        "o=pt211" :{ "none/dnn": {"R": 0.13, "C": 0.32, "A": 0.99},
+                                     "none/kde": {"R": 0.14, "C": 0.12, "A": 0.93}} }
 
   synthetic_pp_stats = {"t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
                                   "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
@@ -446,7 +462,6 @@ if __name__ == "__main__":
 
                         "s>40": {"none/svm": {"R": 0.08, "C": 0.20, "A": 0.8}},
                         "s>50": {"none/svm": {"R": 0.10, "C": 0.20, "A": 0.82}},
-
 
                         "s>60": {"none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
                                  "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
@@ -477,24 +492,6 @@ if __name__ == "__main__":
 
                         "i=pt208": {"none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
                                     "none/kde": {"R": 0.146, "C": 0.126, "A": 0.936}}}
-
-  query_list_short = ["t=van && s>60 && o=pt211"]
-
-
-  synthetic_pp_list_short = ["t=van", "s>60", "o=pt211"]
-
-
-  #TODO: Might need to change this to a R vs A curve instead of static numbers
-  #TODO: When selecting appropriate PPs, we only select based on reduction rate
-  synthetic_pp_stats_short = {"t=van" :{ "none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
-                                   "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
-                                  "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}},
-
-                        "s>60" :{ "none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
-                                  "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
-
-                        "o=pt211" :{ "none/dnn": {"R": 0.13, "C": 0.32, "A": 0.99},
-                                     "none/kde": {"R": 0.14, "C": 0.12, "A": 0.93}} }
 
   #TODO: We will need to convert the queries/labels into "car, bus, van, others". This is how the dataset defines things
 
