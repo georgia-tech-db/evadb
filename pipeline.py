@@ -42,6 +42,9 @@ class Pipeline:
   def run(self):
     self.image_matrix, self.data_table = self.load()
     self.train()
+    pp_category_stats = self.PP.getCategoryStats()
+    pp_models = self.PP.getCategoryModel()
+    self.execute(pp_category_stats, pp_models)
 
   def load(self):
     eva_dir = os.path.dirname(os.path.abspath(__file__))
@@ -73,12 +76,14 @@ class Pipeline:
     data_series = self.data_table[label_of_interest]
 
 
-    self.PP.train_all(self.image_matrix, self.data_table) #TODO: Need to fix this function
+    pp_category_stats = self.PP.train_all(self.image_matrix, self.data_table) #TODO: Need to fix this function
     #TODO: train UDF - but for now assume it is already trained
+    #TODO: Need to get the trained result and feed into the query optimizer
+    #TODO: Make query optimizer execute TRAF_20 queries
+    #TODO: Use the pipeline and UDF to filter results
+    return pp_category_stats
 
-
-
-  def execute(self):
+  def execute(self, pp_category_stats, pp_category_models):
     TRAF_20 = ["t=suv", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=suv",
                 "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
@@ -96,10 +101,6 @@ class Pipeline:
                          "i=pt335", "i=pt211", "i=pt342", "i=pt208",
                          "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
 
-    load_labels = ["car", "bus", "van", "others",
-                   "red", "white", "black","silver",
-                   ">40", ">50", ">60", "<65", "<70",
-                   "pt335", "pt211", "pt342", "pt208"]
 
     synthetic_pp_stats = {"t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
                                     "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
@@ -153,8 +154,32 @@ class Pipeline:
                   "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]]}
 
 
+    query_plans = []
     for query in TRAF_20:
-      qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)
+    #TODO: After running the query optimizer, we want to the list of PPs to work with
+    #TODO: Then we want to execute the queries with the PPs and send it to the UDF after
+      best_query, operators = self.QO.run(query, synthetic_pp_list, pp_category_stats, label_desc)
+    #TODO: Assume the best_query is in the form ["(PP_name, model_name) , (PP_name, model_name), (PP_name, model_name), (PP_name, model_name), (UDF_name, model_name - None)]
+    #                                   operators will be [np.logical_and, np.logical_or, np.logical_and.....]
+
+    """
+      y_hat1 = []
+      y_hat2 = []
+      for i in xrange len(best_query):
+        pp_name, model_name = best_query[i]
+        if y_hat1 == []:
+            y_hat1 = self.PP.predict(self.image_table, pp_name, model_name)
+            continue
+        else:
+            y_hat2 = self.PP.predict(self.image_table, pp_name, model_name)
+            y_hat1 = operators_returned_from_qorun[i-1](y_hat1, y_hat2)
+    
+      # Now indices we need for this query is complete
+      # result = pass_to_udf(X[y_hat1])
+      # save_result -- this may be in the form of images??
+        
+    
+    """
 
     #self.pass_to_udf(np.asarray([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), img)
 
