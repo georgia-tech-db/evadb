@@ -41,7 +41,7 @@ class PP:
 
     labels = {"vehicle_type": ["car", "van", "bus", "others"],
                   "color": ["red", "white", "black", "silver"],
-                  "speed": [">40", ">50", ">60", "<65", "<70"],
+                  "speed": ["s>40", "s>50", "s>60", "s<65", "s<70"],
                   "intersection": ["pt335", "pt211", "pt342", "pt208"]}
 
 
@@ -64,32 +64,75 @@ class PP:
               if sub_data == None:
                 continue
               if sub_data > 40:
-                label_dict[">40"][-1] = 1
+                label_dict["s>40"][-1] = 1
               if sub_data > 50 :
-                label_dict[">50"][-1] = 1
+                label_dict["s>50"][-1] = 1
               if sub_data > 60:
-                label_dict[">60"][-1] = 1
+                label_dict["s>60"][-1] = 1
               if sub_data < 65:
-                label_dict["<65"][-1] = 1
+                label_dict["s<65"][-1] = 1
               if sub_data < 70:
-                label_dict["<70"][-1] = 1
+                label_dict["s<70"][-1] = 1
 
-      elif c == "intersection" or c == "vehicle_type":
+      elif c == "intersection":
         column_of_interest = X[c]
         sub_labels = labels[c]
         for item in sub_labels:
-          label_dict[item] = []
+          label_dict["i=" + item] = []
+          label_dict["o=" + item] = []
         for data in column_of_interest: #column_of_interest would be vehicle type; data would be ("car", "van", "car")
           for item in sub_labels:
-            label_dict[item].append(0)
+            label_dict["i=" + item].append(0)
+            label_dict["o=" + item].append(0)
           if data == None:
             continue
           else:
             for sub_data in data: #sub_data would be "car"
               if sub_data == None:
                 continue
+              elif sub_data not in sub_labels:
+                continue
               else:
-                label_dict[sub_data][-1] = 1
+                label_dict["i=" + sub_data][-1] = 1
+                label_dict["o=" + sub_data][-1] = 1
+
+      elif c == "vehicle_type":
+        column_of_interest = X[c]
+        sub_labels = labels[c]
+        for item in sub_labels:
+          label_dict["t=" + item] = []
+        for data in column_of_interest: #column_of_interest would be vehicle type; data would be ("car", "van", "car")
+          for item in sub_labels:
+            label_dict["t=" + item].append(0)
+          if data == None:
+            continue
+          else:
+            for sub_data in data: #sub_data would be "car"
+              if sub_data == None:
+                continue
+              elif sub_data not in sub_labels:
+                continue
+              else:
+                label_dict["t=" + sub_data][-1] = 1
+
+      elif c == "color":
+        column_of_interest = X[c]
+        sub_labels = labels[c]
+        for item in sub_labels:
+          label_dict["c=" + item] = []
+        for data in column_of_interest: #column_of_interest would be vehicle type; data would be ("car", "van", "car")
+          for item in sub_labels:
+            label_dict["c=" + item].append(0)
+          if data == None:
+            continue
+          else:
+            for sub_data in data: #sub_data would be "car"
+              if sub_data == None:
+                continue
+              elif sub_data not in sub_labels:
+                continue
+              else:
+                label_dict["c=" + sub_data][-1] = 1
 
     for k,v in label_dict.iteritems():
       label_dict[k] = np.array(v)
@@ -174,13 +217,15 @@ class PP:
           self.category_stats[category_name][model_name] = {}
 
         self.category_stats[category_name][model_name]["A"] = score
-        self.category_stats[category_name][model_name]["R"] = 1 - sum(y_hat) / len(y_hat)
+        self.category_stats[category_name][model_name]["R"] = 1 - float(sum(y_hat)) / len(y_hat)
 
 
   def predict(self, X_test, category_name, model_name):
+    X_test_reduced = self._reshape_image(X_test)
+
     model = self.category_library[category_name][model_name]
     pre, pro = model_name.split("/")
-    X_pre, _ = self.pre_model_library[pre]([X_test, {}])
+    X_pre, _ = self.pre_model_library[pre]([X_test_reduced, {}])
     y_hat = model.predict(X_pre)
     return y_hat
 
