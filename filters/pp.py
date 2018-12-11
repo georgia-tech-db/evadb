@@ -1,5 +1,5 @@
 import numpy as np
-
+import time
 
 from kdewrapper import KernelDensityWrapper
 from sklearn.svm import LinearSVC
@@ -14,13 +14,13 @@ from sklearn.neural_network import MLPClassifier
 class PP:
   def __init__(self):
 
-    self.model_library = {"kde": self.kde,
-                          "svm": self.svm,
-                          "dnn": self.dnn,
-                          "rf": self.rf} #KDE, SVM, NN - this should be a mapping of model name to model CONSTRUCTOR
+    self.model_library = {"kde": self._kde,
+                          "svm": self._svm,
+                          "dnn": self._dnn,
+                          "rf": self._rf} #KDE, SVM, NN - this should be a mapping of model name to model CONSTRUCTOR
 
-    self.pre_model_library = {"none": self.none,
-                              "pca": self.pca,
+    self.pre_model_library = {"none": self._none,
+                              "pca": self._pca,
                               #"fh": self.feature_hashing,
                               # "sampling": self.sampling,
                               } #feature hashing, PCA, None - Separated to do mix and match
@@ -30,6 +30,7 @@ class PP:
     self.category_stats = {} #save the statistics related to the model, although most stats are embedded in the model,
                              #made this just in case there could be stats that are not saved
     self.pre_category_library = {}
+    self.pre_category_stats = {"none": {"C": 0}}
 
   def _generate_binary_labels(self, X):
     """
@@ -90,6 +91,9 @@ class PP:
               else:
                 label_dict[sub_data][-1] = 1
 
+    for k,v in label_dict.iteritems():
+      label_dict[k] = np.array(v)
+
     return label_dict
 
   def _reshape_image(self, X):
@@ -103,82 +107,140 @@ class PP:
     return reshaped_images
 
 
+  def _split_train_val(self, X, label_dict):
+    X_train = {}
+    X_val = {}
+    label_dict_train = {}
+    label_dict_val = {}
+    n_samples, _= X["none"].shape
+    mixed_indices = np.random.permutation(n_samples)
+    train_index_end = int(len(mixed_indices) * 0.8)
+
+    for key, dataset in X.iteritems():
+      X_train[key] = dataset[mixed_indices[:train_index_end]]
+      X_val[key] = dataset[mixed_indices[train_index_end:]]
+
+    for key, labelset in label_dict.iteritems():
+      label_dict_train[key] = labelset[mixed_indices[:train_index_end]]
+      label_dict_val[key] = labelset[mixed_indices[train_index_end:]]
+
+    return X_train, X_val, label_dict_train, label_dict_val
+
+
+
   def train_all(self, image_matrix, data_table):
     label_dict = self._generate_binary_labels(data_table)
     image_reshaped = self._reshape_image(image_matrix)
 
-    X_preprocessed = self.preprocess(image_reshaped, label_dict)
-    self.process(X_preprocessed, label_dict)
+    X_preprocessed = self._preprocess(image_reshaped, label_dict)
+    X_train, X_val, label_dict_train, label_dict_val = self._split_train_val(X_preprocessed, label_dict)
+    self._process(X_train, label_dict_train)
+    self._evaluate(X_val, label_dict_val)
+    return self.category_stats
 
-  def process(self, X, label_dict):
+
+  def _process(self, X, label_dict):
     for process_method in X:
       for model in self.model_library:
         self.model_library[model]([X[process_method], label_dict, process_method])
 
 
-  def preprocess(self, X, label_dict):
+  def _preprocess(self, X, label_dict):
     X_preprocessed = {}
     for model in self.pre_model_library:
       X_preprocessed[model], _ = self.pre_model_library[model]([X,label_dict])
     return X_preprocessed
 
-  def evaluate(self, X_test, label_dict):
+
+  def _evaluate(self, X_test, label_dict):
     """
 
     self.category_stats[category_name] = {model_name: {"reduction_rate": model.score(),
                                                        "false_negative_rate": model.......,
                                                        "time_to_train":}
     """
-    #TODO: need to include various categories in self.category_stats, but will only include the accuracy for now
+
     for category_name in self.category_library:
       for model_name in self.category_library[category_name]:
         #We need to parse by "/" token and apply the proper preprocessing method
         pre, pro = model_name.split("/")
-        X_pre, _ = self.pre_model_library[pre]([X_test, label_dict])
+        X_pre = X_test[pre]
         model = self.category_library[category_name][model_name]
         score = model.score(X_pre, label_dict[category_name])
+        y_hat = model.predict(X_pre)
         if category_name not in self.category_stats:
           self.category_stats[category_name] = {}
+        if model_name not in self.category_stats[category_name]:
+          self.category_stats[category_name][model_name] = {}
 
-        self.category_stats[category_name][model_name] = {"score": score}
+        self.category_stats[category_name][model_name]["A"] = score
+        self.category_stats[category_name][model_name]["R"] = 1 - sum(y_hat) / len(y_hat)
 
-    return self.category_stats
+
+  def predict(self, X_test, category_name, model_name):
+    model = self.category_library[category_name][model_name]
+    pre, pro = model_name.split("/")
+    X_pre, _ = self.pre_model_library[pre]([X_test, {}])
+    y_hat = model.predict(X_pre)
+    return y_hat
+
 
   #random forest
-  def rf(self, args):
+  def _rf(self, args):
     X, label_dict, pre = args
     for label in label_dict:
+      tic = time.time()
       rf = RandomForestClassifier(max_depth=2, random_state=0)
       rf.fit(X, label_dict[label])
       if label not in self.category_library:
         self.category_library[label] = {}
       self.category_library[label][pre + '/rf'] = rf
 
+      if label not in self.category_stats:
+        self.category_stats[label] = {}
+      self.category_stats[label][pre + "/rf"] = {"C": round(time.time() - tic + self.pre_category_stats[pre]["C"], 2) }  #
 
-  def dnn(self, args):
+
+
+  def _dnn(self, args):
     X, label_dict, pre = args
     for label in label_dict:
+      tic = time.time()
       dnn = MLPClassifier(solver='lbfgs', alpha=1e-5,
                           hidden_layer_sizes = (5, 2), random_state = 1)
       dnn.fit(X, label_dict[label])
       if label not in self.category_library:
         self.category_library[label] = {}
       self.category_library[label][pre +'/dnn'] = dnn
+
+      if label not in self.category_stats:
+        self.category_stats[label] = {}
+      self.category_stats[label][pre + "/dnn"] = {"C": round(time.time() - tic + self.pre_category_stats[pre]["C"], 2) }
+
     return
 
-  def svm(self, args):
+  def _svm(self, args):
     X, label_dict, pre = args
     for label in label_dict:
-      svm = LinearSVC(random_state=0)
-      svm.fit(X, label_dict[label])
-      if label not in self.category_library:
-        self.category_library[label] = {}
-      self.category_library[label][pre + '/svm'] = svm
+      tic = time.time()
+      if len(np.unique(label)) == 1:
+        continue
+      else:
+        svm = LinearSVC(random_state=0)
+        svm.fit(X, label_dict[label])
+        if label not in self.category_library:
+          self.category_library[label] = {}
+        self.category_library[label][pre + '/svm'] = svm
+
+        if label not in self.category_stats:
+          self.category_stats[label] = {}
+        self.category_stats[label][pre + "/svm"] = {"C": round(time.time() - tic + self.pre_category_stats[pre]["C"],2) }
     return
 
-  def kde(self, args):
+  def _kde(self, args):
     X, label_dict, pre = args
     for label in label_dict:
+      tic = time.time()
       kde = KernelDensityWrapper(kernel='gaussian', bandwidth=0.2)
       # We will assume each label is one-shot encoding
       kde.fit(X, label_dict[label])
@@ -186,14 +248,21 @@ class PP:
         self.category_library[label] = {}
       self.category_library[label][pre + '/kde'] = kde
 
+      if label not in self.category_stats:
+        self.category_stats[label] = {}
+      self.category_stats[label][pre + "/kde"] = {"C": round(time.time() - tic + self.pre_category_stats[pre]["C"], 2) }
+
     return
 
-  def pca(self, args):
+  def _pca(self, args):
     X, label_dict = args
     if "pca" not in self.pre_category_library:
+      tic = time.time()
       pca = PCA()
       X_new = pca.fit_transform(X)
       self.pre_category_library["pca"] = pca
+      if "pca" not in self.pre_category_stats:
+        self.pre_category_stats["pca"] = {"C": round(time.time() - tic, 2) }
     else:
       pca = self.pre_category_library["pca"]
       X_new = pca.transform(X)
@@ -205,7 +274,7 @@ class PP:
   # We will first try to make each pixel a dimension
   # It is told that if feature vector is dense, accuracy becomes worse
   # Will not do for now...
-  def feature_hashing(self, args):
+  def _feature_hashing(self, args):
     """
     category_count = len(self.category_libary.keys())
     if category_count < 2:
@@ -218,12 +287,18 @@ class PP:
     """
     return args
 
-  def sampling(self, args):
+  def _sampling(self, args):
     pass
 
-  def none(self, args):
+  def _none(self, args):
     return args
 
+
+  def getCategoryStats(self):
+    return self.category_stats
+
+  def getCategoryModel(self):
+    return self.category_library
 
   def getCategoryInfo(self, category_name):
     return self.category_stats[category_name]
