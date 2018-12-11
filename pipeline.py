@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import os
 import sys
 from keras.preprocessing.image import img_to_array, load_img, array_to_img, save_img
-from faster_rcnn_pytorch.demo import accept_input_from_pp
+#from faster_rcnn_pytorch.demo import accept_input_from_pp
 
 
 import loaders.load as load
@@ -35,30 +35,33 @@ class Pipeline:
     self.PP = pp.PP()
     self.QO = qo.QueryOptimizer()
     self.data_table = None
+    self.image_matrix = None
     #self.qo = qo.QueryOptimizer()
+
+  def run(self):
+    self.image_matrix, self.data_table = self.load()
+    self.train()
 
   def load(self):
     eva_dir = os.path.dirname(os.path.abspath(__file__))
-    train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_images")
-    test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
-    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "train_annotations")
-
+    train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-data")
+    #test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
+    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-annotation")
 
     dir_dict = {"train_image": train_image_dir,
-                "test_image": test_image_dir,
-                "train_anno": train_anno_dir}
-    data_table = self.LOAD.load(dir_dict)
-    return data_table
+                "train_anno": train_anno_dir,
+                "test_image": None}
+    image_matrix, train_data_table, test_data_table = self.LOAD.load(dir_dict)
+    return image_matrix, train_data_table
 
-  def run(self):
-    self.data_table = self.load()
-    self.train()
+
 
   def pass_to_udf(self, test_pred, test_X):
     if len(test_X.shape) != 4:
       test_X = test_X.reshape(1, test_X.shape[0], test_X.shape[1], test_X.shape[2])
     pos_frames = np.where(test_pred == 1)
-    accept_input_from_pp(test_X[pos_frames])
+    #accept_input_from_pp(test_X[pos_frames])
+
 
   def train(self):
     """
@@ -69,7 +72,7 @@ class Pipeline:
     label_of_interest = "vehicle_type"
     data_series = self.data_table[label_of_interest]
 
-    self.pp.train_all(self.data_table) #TODO: Need to fix this function
+    self.PP.train_all(self.image_matrix, self.data_table) #TODO: Need to fix this function
     #TODO: train UDF - but for now assume it is already trained
 
 
