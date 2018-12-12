@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 import os
 import sys
 from keras.preprocessing.image import img_to_array, load_img, array_to_img, save_img
-#from faster_rcnn_pytorch.demo import accept_input_from_pp
+from udf_faster_rcnn.demo import accept_input_from_pp
 
 
 import loaders.load as load
@@ -82,11 +82,9 @@ class Pipeline:
 
 
 
-  def pass_to_udf(self, test_pred, test_X):
-    if len(test_X.shape) != 4:
-      test_X = test_X.reshape(1, test_X.shape[0], test_X.shape[1], test_X.shape[2])
-    pos_frames = np.where(test_pred == 1)
-    #accept_input_from_pp(test_X[pos_frames])
+  def pass_to_udf(self, labels, column_name):
+
+    return accept_input_from_pp(self.image_matrix_test, labels, column_name)
 
   def train(self):
     """
@@ -104,7 +102,7 @@ class Pipeline:
     #TODO: Use the pipeline and UDF to filter results
     return pp_category_stats
 
-  def execute(self, pp_category_stats, pp_category_models):
+  def execute(self, X, pp_category_stats, pp_category_models):
     TRAF_20 = ["t=van", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=van",
                 "s>60 && s<65", "t=car || t=others", "i=pt335 && o=pt211",
@@ -154,80 +152,15 @@ class Pipeline:
           y_hat1 = best_operators[i - 1](y_hat1, y_hat2)
 
       print ("The final boolean array to pass to udf is : \n" + str(y_hat1))
-      #result = self.pass_to_udf(X[y_hat1])
 
-    """
-      y_hat1 = []
-      y_hat2 = []
-      for i in xrange len(best_query):
-        pp_name, model_name = best_query[i]
-        if y_hat1 == []:
-            y_hat1 = self.PP.predict(self.image_table, pp_name, model_name)
-            continue
-        else:
-            y_hat2 = self.PP.predict(self.image_table, pp_name, model_name)
-            y_hat1 = operators_returned_from_qorun[i-1](y_hat1, y_hat2)
-    
-      # Now indices we need for this query is complete
-      # result = pass_to_udf(X[y_hat1])
-      # save_result -- this may be in the form of images??
-        
-    
-    """
-
-    #self.pass_to_udf(np.asarray([1, 1, 1, 1, 1, 1, 1, 1, 1, 1]), img)
+      if "t=" in query and query in self.data_table_test:
+        resulting_labels = self.pass_to_udf(y_hat1, query.replace("t=", ""))
+        print("Total score for this query is " + str(np.sum(resulting_labels==self.data_table_test[query]) / len(resulting_labels)) )
+      else:
+        print("No existing udf for this query: " + query)
 
 
 
-  """
-  # We have access to train and test dataset -> Used for finding the score and evaluation
-  def test(self):
-    start_time = time.time()
-
-    data, label_dict = self.LOAD.load_dataset()
-    nsamples, nx, ny, nc = data.shape
-    data = data.reshape((nsamples, nx * ny * nc))
-
-    #TODO: Split the dataset into train, val, test (val should be used for evaluating the pps
-    #TODO: (continued) -> Need to look at paper to make sure it is the correct way
-    X = pd.DataFrame(data)
-    for label in label_dict:
-      y = pd.Series(label_dict[label])
-      X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=42)
-      break
-
-    train_index = X_train.index.values
-    test_index = X_test.index.values
-    label_dict_train = {}
-    label_dict_test = {}
-    for label in label_dict:
-      label_dict_train[label] = label_dict[label][train_index]
-      label_dict_test[label] = label_dict[label][test_index]
-
-
-    print("--- Total Execution Time for loading the dataset: %.3f seconds ---" % (time.time() - start_time))
-
-    start_time = time.time()
-    self.pp.train_all(X_train, label_dict_train)
-    print("--- Total Execution Time for training the dataset : %.3f seconds ---" % (time.time() - start_time))
-    if __debug__:
-      print X_train.shape
-      print X_test.shape
-
-    category_stats = self.pp.evaluate(X_test, label_dict_test)
-    print category_stats
-
-    xs = self.pp.predict(X_test[0:100], "car", "none/dnn", bool=False)
-    xs = xs.values
-    nsamples = xs.shape[0]
-    xs_reshaped = xs.reshape((nsamples, nx, ny, nc))
-    description_str = "label: " + "car\n" + "model: none/dnn\n"
-    self.save_image(xs_reshaped, description_str)
-
-    print "finished saving images..."
-    return
-    
-  """
 
   def save_image(self, xs, description):
     project_path = os.path.dirname(os.path.abspath(__file__))
