@@ -164,8 +164,7 @@ class Kmeans:
       for i in range(k):
         centers_new[i] = np.mean(data[clusters == i], axis=0)
       error = np.linalg.norm(centers_new - centers_old)
-    centers_new
-
+    
     # Plot the data and the centers generated as random
     fig1 = plt.scatter(data[:,0], data[:,1], s=7)
     plt.savefig('fig1.png')
