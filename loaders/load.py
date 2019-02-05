@@ -3,6 +3,7 @@ import os
 import numpy as np
 import xml.etree.ElementTree as ET
 import pandas as pd
+import cv2
 from keras.preprocessing.image import img_to_array, load_img
 
 import TaskManager
@@ -186,24 +187,64 @@ class Load:
 
 
 
-  def _load_images(self, image_dir):
+  def _load_images(self, image_dir, downsize_rate = 1, grayscale = False):
     file_names = []
     for root, subdirs, files in os.walk(image_dir):
       files.sort()
       for file in files:
         file_names.append(os.path.join(root, file))
 
-    img_table = np.ndarray(shape=(len(file_names), self.image_height, self.image_width, self.image_channels), dtype=np.int16)
-
+    if grayscale == False:
+      img_table = np.ndarray(shape=(len(file_names), self.image_height / downsize_rate, self.image_width / downsize_rate, self.image_channels), dtype=np.int16)
+    else:
+      img_table = np.ndarray(shape=(len(file_names), self.image_height / downsize_rate, self.image_width / downsize_rate, 1), dtype=np.int16)
 
     for i in xrange(len(file_names)):
       file_name = file_names[i]
-      img = load_img(file_name, target_size = (self.image_height, self.image_width))
+      if grayscale:
+        img = load_img(file_name, color_mode = "grayscale",
+                       target_size = (self.image_height / downsize_rate, self.image_width / downsize_rate))
+      else:
+        img = load_img(file_name,
+                       target_size=(self.image_height / downsize_rate, self.image_width / downsize_rate))
+
       img_table[i] = img_to_array(img)
 
     return img_table
 
 
+  def load_images_nn(self, image_dir, downsize_rate = 1, grayscale = False):
+    """
+    Loading images in a non normalized form
+    :param image_dir:
+    :param downsize_rate:
+    :param grayscale:
+    :return:
+    """
+    file_names = []
+    for root, subdirs, files in os.walk(image_dir):
+      files.sort()
+      for file in files:
+        file_names.append(os.path.join(root, file))
+
+    if grayscale == False:
+      img_table = np.ndarray(shape=(len(file_names), self.image_height / downsize_rate, self.image_width / downsize_rate, self.image_channels), dtype=np.int16)
+    else:
+      img_table = np.ndarray(shape=(len(file_names), self.image_height / downsize_rate, self.image_width / downsize_rate, 1), dtype=np.int16)
+
+    for i in xrange(len(file_names)):
+      file_name = file_names[i]
+      if grayscale:
+        img = cv2.imread(file_name,0)
+      else:
+        img = cv2.imread(file_name, 1)
+
+      img = cv2.resize(img, (self.image_width / downsize_rate, self.image_height / downsize_rate))
+      img_table[i] = img[:,:, np.newaxis]
+
+
+
+    return img_table
 
 
 
