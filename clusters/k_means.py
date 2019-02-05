@@ -15,6 +15,7 @@ import numpy as np
 import random
 import time
 
+from sklearn.cluster import KMeans
 from scipy.cluster.hierarchy import fclusterdata
 import matplotlib
 matplotlib.use('Agg')
@@ -133,26 +134,84 @@ class Kmeans:
     # For now, we will use both clustering algorithms to see how effective each one is
     # we will include print statments to see how long it takes
     tic = time.time()
+    #Method 1. clustering with custom distance function - we can make this faster but need different hierarchical clustering method
+    """
     fclust1 = fclusterdata(self.frames, t=1.0, metric=self.dc.get_dist)
     toc = time.time()
     print("Time elapsed for custom distance function is %d", toc - tic)
+    print (fclust1)
     x = np.array([i for i in xrange(len(fclust1))])
+    y = np.array([i for i in xrange(len(fclust1))])
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    scatter = ax.scatter(x, c=fclust1)
+    scatter = ax.scatter(x,y, c=fclust1)
     ax.set_xlabel('x')
+    ax.set_ylabel('y')
     plt.colorbar(scatter)
-    plt.savefig('custom_clust.png')
+    plt.savefig('results/custom_clust.png')
+    """
 
+    #Method 2. normal clustering
     fclust2 = fclusterdata(self.frames, t=1.0, metric='euclidean')
+    """
+    Let's try doing some analysis here
+    1. How many categories are there?
+    2. Are there any grouping that are the continuous?"""
+    fclust2_set = set(fclust2)
+    print("Number of individual categories is ", len(fclust2_set))
+    print("Length of array", len(fclust2))
+    fclust2_set_tmp = set()
+    for i in xrange(1, len(fclust2)):
+      if fclust2[i] not in fclust2_set_tmp:
+        fclust2_set_tmp.add(fclust2[i])
+      else:
+        if fclust2[i-1] != fclust2[i]:
+          print("Value ", fclust2[i], " already seen!!!!")
+
     toc2 = time.time()
-    print("Time elasped for euclidean distance is %d", toc2 - toc)
+    print("Time elasped for euclidean distance is %d", toc2 - tic)
+    print (fclust2)
+    x = np.array([i for i in xrange(len(fclust2))])
+    y = np.array([10 for i in xrange(len(fclust2))])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    scatter = ax.scatter(x, y, c=fclust2)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    plt.colorbar(scatter)
+    plt.savefig('results/custom_clust_euc.png')
+
+    # Method 3. K-Means clustering
+
+    # Number of clusters
+    kmeans = KMeans(n_clusters=len(self.frames) / 20)
+    # Fitting the input data
+    kmeans = kmeans.fit(self.frames)
+    # Getting the cluster labels
+    labels = kmeans.predict(self.frames)
+    # Centroid values
+    centroids = kmeans.cluster_centers_
+
+    print("----------------------")
+    print(labels)
+    x = np.array([i for i in xrange(len(fclust2))])
+    y = np.array([10 for i in xrange(len(fclust2))])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    scatter = ax.scatter(x, y, c=labels)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    plt.colorbar(scatter)
+    plt.savefig('results/kmeans.png')
+
+    #Method 4. DEC Deep Learning Clustering
+    
 
 
 if __name__ == "__main__":
   load = Load()
   eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-  image_dir = os.path.join(eva_dir, "data", "ua_detrac", "small-data")
+  image_dir = os.path.join(eva_dir, "data", "ua_detrac", "medium-data")
 
   #TODO: Need to make sure the load comes in grayscale
   img_table = load.load_images_nn(image_dir, downsize_rate = 12, grayscale=True)
