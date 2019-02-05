@@ -17,6 +17,9 @@ import time
 
 from scipy.cluster.hierarchy import fclusterdata
 import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 sys.path.append("/nethome/jbang36/eva")
 from loaders.load import Load
 
@@ -133,6 +136,14 @@ class Kmeans:
     fclust1 = fclusterdata(self.frames, t=1.0, metric=self.dc.get_dist)
     toc = time.time()
     print("Time elapsed for custom distance function is %d", toc - tic)
+    x = np.array([i for i in xrange(len(fclust1))])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    scatter = ax.scatter(x, c=fclust1)
+    ax.set_xlabel('x')
+    plt.colorbar(scatter)
+    plt.savefig('custom_clust.png')
+
     fclust2 = fclusterdata(self.frames, t=1.0, metric='euclidean')
     toc2 = time.time()
     print("Time elasped for euclidean distance is %d", toc2 - toc)
