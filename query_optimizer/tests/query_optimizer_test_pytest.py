@@ -33,7 +33,7 @@ def test_parseQuery():
 
     #case for >> and similar situations, the >> operator should be recognised as >
     predicates, connectors = obj._parseQuery("t>>60 && a<45")
-    print(predicates, connectors)
+    print((predicates, connectors))
     if predicates != [['t','>','60'],['a','<','45']]:
         assert False, "Wrong breakdown of predicates,the >> operator should be recognised as > and likewise for <"
     if connectors != ['&&']:
