@@ -36,7 +36,7 @@ def load_dataset(input_path):
 		X[i] = (X[i] - 128)/128
 		i += 1
 		if (i%10000 == 0):
-			print(("Loaded %d images" %i))
+			print ("Loaded %d images" %i)
 	return X, num_frames_list
 
 def get_vehtype_labels(filter, label_path, num_frames_list):
@@ -75,14 +75,14 @@ def get_vehtype_labels(filter, label_path, num_frames_list):
 def PP(clf,X_train, X_test, y_train, y_test):
 	train_start_time = time.time()
 	clf.fit(X_train,y_train)
-	print(("train time: %.3f sec" % (time.time() - train_start_time)))
+	print("train time: %.3f sec" % (time.time() - train_start_time))
 	test_start_time = time.time()
 	y_pred = clf.predict(X_test)
-	print(("test time: %.3f sec" % (time.time() - test_start_time)))
-	print(("Accuracy: %.3f"%clf.score(X_test,y_test)))
+	print("test time: %.3f sec" % (time.time() - test_start_time))
+	print ("Accuracy: %.3f"%clf.score(X_test,y_test))
 	unique,counts = np.unique(y_pred,return_counts=True)
-	print(("Absolute reduction: ",counts[0],"/",len(y_test)))
-	print(("reduction rate: %.3f"%(counts[0]*1.0/len(y_test))))
+	print("Absolute reduction: ",counts[0],"/",len(y_test))
+	print ("reduction rate: %.3f"%(counts[0]*1.0/len(y_test)))
 
 
 #function to pass the frames that the trained classifer labels as 1 (in the test set) to the udf.
@@ -101,16 +101,16 @@ def main():
 	X, num_frames_list = load_dataset(input_path)
 	nsamples, nx, ny, nc = X.shape
 	X = X.reshape((nsamples,nx*ny*nc))
-	print(("Loaded %d inputs"%len(X)))
+	print ("Loaded %d inputs"%len(X))
 	for item in vehtype_filters:
-		print(("--------------------Working on %s filter--------------------"%item))
+		print ("--------------------Working on %s filter--------------------"%item)
 		y = get_vehtype_labels(item, label_path, num_frames_list)
 		y = np.array(y)
 		# print "number of ",item, unique[1],counts[1]
 		# print ("Loaded %d labels"%len(y))
 		X_train, X_test, y_train, y_test = train_test_split(X,y, test_size=0.33, random_state=42)
 		unique,counts = np.unique(y_test,return_counts=True)
-		print(("No.of test frames without cars :",counts[0],"/",len(y_test)))
+		print ("No.of test frames without cars :",counts[0],"/",len(y_test))
 		########## Linear SVC ############
 		clf = LinearSVC(random_state=0)
 		print ("--- LinearSVC ---")
@@ -128,6 +128,6 @@ if __name__ == '__main__':
 	for i in range(1781,1791):
 		img.append(np.asarray(cv2.imread("img0"+str(i)+".jpg")))
 	img=np.asarray(img)
-	print((img.shape))
+	print(img.shape)
 	pass_to_udf(np.asarray([1,1,1,1,1,1,1,1,1,1]),img)
-	print(("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time)))
+	print("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time))
