@@ -134,7 +134,7 @@ class PP:
               else:
                 label_dict["c=" + sub_data][-1] = 1
 
-    for k,v in list(label_dict.items()):
+    for k,v in label_dict.items():
       label_dict[k] = np.array(v)
 
     return label_dict
@@ -159,11 +159,11 @@ class PP:
     mixed_indices = np.random.permutation(n_samples)
     train_index_end = int(len(mixed_indices) * 0.8)
 
-    for key, dataset in list(X.items()):
+    for key, dataset in X.items():
       X_train[key] = dataset[mixed_indices[:train_index_end]]
       X_val[key] = dataset[mixed_indices[train_index_end:]]
 
-    for key, labelset in list(label_dict.items()):
+    for key, labelset in label_dict.items():
       label_dict_train[key] = labelset[mixed_indices[:train_index_end]]
       label_dict_val[key] = labelset[mixed_indices[train_index_end:]]
 

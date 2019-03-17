@@ -55,7 +55,7 @@ class ColorWheel(object):
             else:
                 return Colors.Black(dominant_colors[0].value)
         else:
-            print(("Dominant Colors : %s" % dominant_colors))
+            print("Dominant Colors : %s" % dominant_colors)
 
     def get_dominant_colors(self):
         max_color = max([x.value for x in self.rgb])
@@ -81,9 +81,9 @@ def process_image(image):
             key = (r, g, b,)
             image_color_quantities[key] = image_color_quantities.get(key, 0) + 1
 
-    total_assessed_pixels = sum([v for k, v in list(image_color_quantities.items()) if v > 10])
+    total_assessed_pixels = sum([v for k, v in image_color_quantities.items() if v > 10])
     strongest_color_wheels = [(ColorWheel(k), v / float(total_assessed_pixels) * 100,) for k, v in
-                              list(image_color_quantities.items()) if v > 10]
+                              image_color_quantities.items() if v > 10]
 
     final_colors = {}
 
@@ -94,7 +94,7 @@ def process_image(image):
         color = color_wheel.estimate_color()
         final_colors[color.__class__] = final_colors.get(color.__class__, 0) + strength
 
-    for color, strength in list(final_colors.items()):
+    for color, strength in final_colors.items():
         # print ("%s - %s" % (color.__name__, strength, ))
         if strong < strength:
             strong = strength

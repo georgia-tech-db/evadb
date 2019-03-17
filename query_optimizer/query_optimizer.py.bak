@@ -34,7 +34,7 @@ class QueryOptimizer:
     thread.daemon = True
     thread.start()
     while True:
-      input = eval(input('Type in your query in the form of __label__ > __number__\n'))
+      input = input('Type in your query in the form of __label__ > __number__\n')
 
       self.parseInput(input)
 
@@ -504,7 +504,7 @@ if __name__ == "__main__":
   qo = QueryOptimizer()
   for query in query_list_mod:
     #print qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc)
-    print((qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
+    print(qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc))
 
 
 
