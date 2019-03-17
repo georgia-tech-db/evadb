@@ -1,12 +1,8 @@
 
-import time
-import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 import os
 import sys
 from keras.preprocessing.image import img_to_array, load_img, array_to_img, save_img
-from udf_faster_rcnn.demo import accept_input_from_pp
 
 
 import loaders.load as load
@@ -72,7 +68,7 @@ class Pipeline:
     eva_dir = os.path.dirname(os.path.abspath(__file__))
     train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-data")
     #test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
-    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-annotation")
+    train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-annotations")
 
     dir_dict = {"train_image": train_image_dir,
                 "train_anno": train_anno_dir,
@@ -83,8 +79,9 @@ class Pipeline:
 
 
   def pass_to_udf(self, labels, column_name):
-
-    return accept_input_from_pp(self.image_matrix_test, labels, column_name)
+    print("Inside pass_to_udf, currently we don't have any UDF installed")
+    return
+    #return accept_input_from_pp(self.image_matrix_test, labels, column_name)
 
   def train(self):
     """
@@ -102,7 +99,7 @@ class Pipeline:
     #TODO: Use the pipeline and UDF to filter results
     return pp_category_stats
 
-  def execute(self, X, pp_category_stats, pp_category_models):
+  def execute(self, pp_category_stats, pp_category_models):
     TRAF_20 = ["t=van", "s>60",
                 "c=white", "c!=white", "o=pt211", "c=white && t=van",
                 "s>60 && s<65", "t=car || t=others", "i=pt335 && o=pt211",
@@ -137,12 +134,12 @@ class Pipeline:
     #TODO: Assume the best_query is in the form ["(PP_name, model_name) , (PP_name, model_name), (PP_name, model_name), (PP_name, model_name), (UDF_name, model_name - None)]
     #                                   operators will be [np.logical_and, np.logical_or, np.logical_and.....]
       if __debug__:
-        print("The total reduction rate associated with the query is " + str(reduction_rate))
-        print("The best alternative for " + query + " is " + str(best_query))
-        print("The operators involved are " + str(best_operators))
+        print(("The total reduction rate associated with the query is " + str(reduction_rate)))
+        print(("The best alternative for " + query + " is " + str(best_query)))
+        print(("The operators involved are " + str(best_operators)))
       y_hat1 = []
       y_hat2 = []
-      for i in xrange(len(best_query)):
+      for i in range(len(best_query)):
         pp_name, model_name = best_query[i]
         if y_hat1 == []:
           y_hat1 = self.PP.predict(self.image_matrix_test, pp_name, model_name)
@@ -151,13 +148,13 @@ class Pipeline:
           y_hat2 = self.PP.predict(self.image_matrix_test, pp_name, model_name)
           y_hat1 = best_operators[i - 1](y_hat1, y_hat2)
 
-      print ("The final boolean array to pass to udf is : \n" + str(y_hat1))
+      print(("The final boolean array to pass to udf is : \n" + str(y_hat1)))
 
       if "t=" in query and query in self.data_table_test:
         resulting_labels = self.pass_to_udf(y_hat1, query.replace("t=", ""))
-        print("Total score for this query is " + str(np.sum(resulting_labels==self.data_table_test[query]) / len(resulting_labels)) )
+        print(("Total score for this query is " + str(np.sum(resulting_labels==self.data_table_test[query]) / len(resulting_labels)) ))
       else:
-        print("No existing udf for this query: " + query)
+        print(("No existing udf for this query: " + query))
 
 
 
