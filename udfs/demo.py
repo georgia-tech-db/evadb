@@ -1,43 +1,8 @@
-# --------------------------------------------------------
-# Tensorflow Faster R-CNN
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Jiasen Lu, Jianwei Yang, based on code from Ross Girshick
-# --------------------------------------------------------
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+"""
+TODO: this file was an adapter for faster_rcnn_pytorch
+Most likely this file will not be needed but left it here just so that when we import new udfs, we have a reference
 
-
-
-import os
-import sys
-import numpy as np
-import argparse
-import pprint
-import pdb
-import time
-import cv2
-import torch
-from torch.autograd import Variable
-import torch.nn as nn
-import torch.optim as optim
-#from filters.TaskManager import TaskManager
-import torchvision.transforms as transforms
-import torchvision.datasets as dset
-from scipy.misc import imread
-from udf_faster_rcnn.lib.roi_data_layer.roidb import combined_roidb
-from udf_faster_rcnn.lib.roi_data_layer.roibatchLoader import roibatchLoader
-from udf_faster_rcnn.lib.model.utils.config import cfg, cfg_from_file, cfg_from_list, get_output_dir
-from udf_faster_rcnn.lib.model.rpn.bbox_transform import clip_boxes
-from udf_faster_rcnn.lib.model.nms.nms_wrapper import nms
-from udf_faster_rcnn.lib.model.rpn.bbox_transform import bbox_transform_inv
-from udf_faster_rcnn.lib.model.utils.net_utils import save_net, load_net, vis_detections
-from udf_faster_rcnn.lib.model.utils.blob import im_list_to_blob
-from udf_faster_rcnn.lib.model.faster_rcnn.vgg16 import vgg16
-from udf_faster_rcnn.lib.model.faster_rcnn.resnet import resnet
-
-from keras.preprocessing.image import img_to_array, load_img
-import pdb
+"""
 
 
 try:
