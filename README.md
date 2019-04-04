@@ -13,7 +13,7 @@
 * Create a virtual environment with conda (explained in detail in the next subsection)
 
 
-#### How to create the virtual environment
+##### How to create the virtual environment
 * Install conda - we have prepared a yaml file that you can directly use with conda to install a virtual environment 
 * Navigate to the eva repository in your local computer
 * conda env create -f environment.yml
@@ -46,12 +46,12 @@ Eva core is consisted of
 * Filters
 * UDFs
 
-#### Query Optimizer
+##### Query Optimizer
 The query optimizer converts a given query to the optimal form. 
 
 All code related to this module is in */query_optimizer*
 
-#### Filters
+##### Filters
 The filters does preliminary filtering to video frames using cheap machine learning models.
 The filters module also outputs statistics such as reduction rate and cost that is used by Query Optimizer module.
 
@@ -66,16 +66,20 @@ The filters below are running:
 
 All code related to this module is in */filters*
 
-#### UDFs
+##### UDFs
 This module contains all imported deep learning models. Currently, there is no code that performs this task. It is a work in progress.
 Information of current work is explained in detail [here](udfs/README.md).
 
 All related code should be inside */udfs*
 
-#### Loaders
+##### Loaders
 The loaders load the dataset with the attributes specified in the *Accelerating Machine Learning Inference with Probabilistic Predicates* by Yao et al.
 
 All code related to this module is in */loaders*
+
+### Eva storage
+Currently a work in progress. Come check back later!
+
 
 ### Dataset
 __[Dataset info](data/README.md)__ explains detailed information about the  datasets
