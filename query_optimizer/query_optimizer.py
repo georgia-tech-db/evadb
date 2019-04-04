@@ -1,4 +1,15 @@
+"""
+This file composes the functions that are needed to perform query optimization.
+Currently, given a query, it does logical changes to forms that are sufficient conditions.
+Using statistics from Filters module, it outputs the optimal plan (converted query with models needed to be used).
 
+To see the query optimizer performance in action, simply run
+
+python query_optimizer/query_optimizer.py
+
+@Jaeho Bang
+
+"""
 # The query optimizer decide how to label the data points
 # Load the series of queries from a txt file?
 import sys
@@ -502,9 +513,14 @@ if __name__ == "__main__":
                 "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]]}
 
   qo = QueryOptimizer()
+
+
+  print("Running Query Optimizer Demo...")
+
+
   for query in query_list_mod:
+    print(query, " -> ", (qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)) )
     #print qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc)
-    print((qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
 
 
 

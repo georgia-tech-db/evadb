@@ -1,3 +1,11 @@
+"""
+This file is composed of the composing preliminary and post filtering techniques.
+There is yet no working test file associated with this folder
+Outputs model statistics needed for the query optimizer
+
+@Jaeho Bang
+"""
+
 import numpy as np
 import time
 
