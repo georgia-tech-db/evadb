@@ -45,6 +45,7 @@ Eva core is consisted of
 * Query Optimizer
 * Filters
 * UDFs
+* Loaders
 
 ##### Query Optimizer
 The query optimizer converts a given query to the optimal form. 
