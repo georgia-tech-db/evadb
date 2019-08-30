@@ -1,0 +1,13 @@
+name: eva_tmp
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - python=3.7
+  - numpy
+  - opencv
+  - scikit-learn
+  - pandas
+prefix: /nethome/jbang36/anaconda3/envs/eva_35
+

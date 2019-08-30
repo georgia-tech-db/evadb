@@ -11,9 +11,8 @@ import time
 import os
 import numpy as np
 import xml.etree.ElementTree as ET
-import pandas as pd
 import cv2
-from keras.preprocessing.image import img_to_array, load_img
+import pandas as pd
 
 from . import TaskManager
 
@@ -43,19 +42,6 @@ class Load:
     channels = 3
     return evaled_image.reshape(height, width, channels)
 
-
-  @staticmethod
-  def load_from_csv(filename):
-    project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    full_dir = os.path.join(project_dir, "data", "pandas", filename)
-    converters = {"image": Load().image_eval, "vehicle_type": eval, "color": eval, "intersection": eval}
-    panda_file = pd.read_csv(full_dir, converters=converters)
-    for key in panda_file:
-      if "Unnamed" in key:
-        continue
-
-
-    return panda_file
 
 
   @staticmethod
@@ -101,7 +87,7 @@ class Load:
 
       dt_test = pd.DataFrame(data = list(test_img_list), columns = ['image'])
       if __debug__: print("Done making panda table for test")
-    return [train_img_array, dt_train, dt_test]
+    return [train_img_array, data_table, dt_test]
 
 
   def _convert_speed(self, original_speed):
@@ -206,20 +192,20 @@ class Load:
     print("Number of files added: ", len(file_names))
 
     if grayscale == False:
-      img_table = np.ndarray(shape=(len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate, self.image_channels), dtype=np.int16)
+      img_table = np.ndarray(shape=(len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate, self.image_channels), dtype=np.uint8)
     else:
-      img_table = np.ndarray(shape=(len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate, 1), dtype=np.int16)
+      img_table = np.ndarray(shape=(len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate, 1), dtype=np.uint8)
 
     for i in range(len(file_names)):
       file_name = file_names[i]
       if grayscale:
-        img = load_img(file_name, color_mode = "grayscale",
-                       target_size = (self.image_height // downsize_rate, self.image_width // downsize_rate))
+        img = cv2.imread(file_name, 0)
+        img = cv2.resize(img, (self.image_height // downsize_rate, self.image_width // downsize_rate))
       else:
-        img = load_img(file_name,
-                       target_size=(self.image_height // downsize_rate, self.image_width // downsize_rate))
+        img = cv2.imread(file_name)
+        img = cv2.resize(img, (self.image_height // downsize_rate, self.image_width // downsize_rate))
 
-      img_table[i] = img_to_array(img)
+      img_table[i] = img
 
     return img_table
 
