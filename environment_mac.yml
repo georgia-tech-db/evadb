@@ -1,4 +1,4 @@
-name: eva_tmp
+name: eva_35
 channels:
   - conda-forge
   - anaconda
@@ -9,5 +9,5 @@ dependencies:
   - opencv
   - scikit-learn
   - pandas
-prefix: /nethome/jbang36/anaconda3/envs/eva_35
+prefix: eva_35
 
