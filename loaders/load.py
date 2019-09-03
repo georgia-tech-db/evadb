@@ -87,7 +87,7 @@ class Load:
 
       dt_test = pd.DataFrame(data = list(test_img_list), columns = ['image'])
       if __debug__: print("Done making panda table for test")
-    return [train_img_array, data_table, dt_test]
+    return [train_img_array, dt_train, dt_test]
 
 
   def _convert_speed(self, original_speed):
@@ -203,7 +203,7 @@ class Load:
         img = cv2.resize(img, (self.image_height // downsize_rate, self.image_width // downsize_rate))
       else:
         img = cv2.imread(file_name)
-        img = cv2.resize(img, (self.image_height // downsize_rate, self.image_width // downsize_rate))
+        img = cv2.resize(img, (self.image_width // downsize_rate, self.image_height // downsize_rate))
 
       img_table[i] = img
 
