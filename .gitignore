@@ -114,3 +114,10 @@ venv.bak/
 **/faster_rcnn_pytorch/output
 **/faster_rcnn_pytorch/output_images
 *.pkl
+
+# data
+data/*
+!data/README.md
+!data/ua_detrac/README.md
+!data/ua_detrac/*.sh
+
