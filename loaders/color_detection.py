@@ -69,7 +69,7 @@ def process_image(image):
         print("inside color_detection process image, image shape is " + str(image.size))
         image.save("test_image" + str(random.randint(0,100)) + ".jpg", "JPEG")
     """
-    height, width = image.shape
+    height, width = image.shape[:2]
     width_margin = int(width - (width * .65))
     height_margin = int(height - (height * .75))
     for row in range(height_margin, height - height_margin):
