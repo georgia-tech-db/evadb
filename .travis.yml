@@ -1,0 +1,38 @@
+# This sets the default config for each job to use full VMs.
+# The VMs have 2 cores and 8 GB of RAM
+dist: trusty
+sudo: required
+
+language: python
+python:
+  - "3.6"
+cache: pip
+
+before_install:
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+
+install:
+  - conda env create -f environment_mac.yml
+#  - conda init bash
+#  - conda env create -n test-env python=$TRAVIS_PYTHON_VERSION -f environment_mac.yml
+  - source activate eva_35
+  - conda list
+  #- cd src/processor/
+  #- protoc object_detection/protos/*.proto --python_out=.
+  #- export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+  #- cd ../../
+  #- cd scripts/
+  #- python download_content.py --models-only
+  #- cd ..
+
+script:
+  - pytest ./query_optimizer/tests/query_optimizer_test_pytest.py --cov-report= --cov=./ -s -v
+
+after_success:
+  - coveralls
