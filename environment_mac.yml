@@ -9,5 +9,8 @@ dependencies:
   - opencv
   - scikit-learn
   - pandas
+  - coveralls
+  - coverage
+  - pytest-cov
 prefix: eva_35
 
