@@ -1,5 +1,7 @@
 ## EVA (Exploratory Video Analytics)
 
+[![Build Status](https://travis-ci.com/georgia-tech-db/Eva.svg?branch=travis-ci-integration)](https://travis-ci.com/georgia-tech-db/Eva)
+[![Coverage Status](https://img.shields.io/coveralls/github/georgia-tech-db/Eva/travis-ci-integration.svg)](https://coveralls.io/github/georgia-tech-db/Eva)
 ### Table of Contents
 * Installation
 * Demos
