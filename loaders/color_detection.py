@@ -1,4 +1,3 @@
-from PIL import Image
 import random
 
 class Colors(object):
@@ -65,18 +64,17 @@ class ColorWheel(object):
 def process_image(image):
     image_color_quantities = {}
 
-    image=Image.fromarray(image.astype('uint8'),'RGB')
     """
     if __debug__:
         print("inside color_detection process image, image shape is " + str(image.size))
         image.save("test_image" + str(random.randint(0,100)) + ".jpg", "JPEG")
     """
-    width, height = image.size
+    width, height = image.shape
     width_margin = int(width - (width * .65))
     height_margin = int(height - (height * .75))
     for x in range(width_margin, width - width_margin, 4):
         for y in range(height_margin, height - height_margin):
-            r, g, b = image.getpixel((x, y))
+            r,g,b = image[y,x]
             key = "%s:%s:%s" % (r, g, b,)
             key = (r, g, b,)
             image_color_quantities[key] = image_color_quantities.get(key, 0) + 1
