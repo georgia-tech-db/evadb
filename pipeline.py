@@ -2,7 +2,6 @@
 import numpy as np
 import os
 import sys
-from keras.preprocessing.image import img_to_array, load_img, array_to_img, save_img
 
 
 import loaders.load as load
@@ -38,11 +37,14 @@ class Pipeline:
 
 
   def run(self):
+    print("Loading data....")
     image_matrix, data_table = self.load()
     self.image_matrix_train, self.image_matrix_test, self.data_table_train, self.data_table_test = self._split_train_val(image_matrix, data_table)
+    print("Training data....")
     self.train()
     pp_category_stats = self.PP.getCategoryStats()
     pp_models = self.PP.getCategoryModel()
+    print("Evaluating data....")
     self.execute(pp_category_stats, pp_models)
 
 
@@ -67,7 +69,6 @@ class Pipeline:
   def load(self):
     eva_dir = os.path.dirname(os.path.abspath(__file__))
     train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-data")
-    #test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
     train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "tiny-annotations")
 
     dir_dict = {"train_image": train_image_dir,
@@ -157,38 +158,6 @@ class Pipeline:
         print(("No existing udf for this query: " + query))
 
 
-
-
-  def save_image(self, xs, description):
-    project_path = os.path.dirname(os.path.abspath(__file__))
-    count = 100
-    for x in xs:
-      img1 = array_to_img(x)
-      save_img(path=os.path.join(project_path, 'examples', str(count) + '.jpg'), x=img1, file_format='jpeg')
-      count += 1
-    return
-
-
-
-  def filter_output_test(self):
-    prefix = os.path.dirname(os.path.abspath(__file__))
-    folder = "data"
-    name = "ua_detrac"
-    self.input_path = os.path.join(prefix,folder, name, 'small-data', 'MVI_20011', 'img00001.jpg')
-    image_width = 960
-    image_height = 540
-    ratio = 12
-    image_width = int(image_width / ratio)
-    image_height = int(image_height / ratio)
-    channels = 3
-    X = np.ndarray(shape=(1, image_height, image_width, channels), dtype=np.float32)
-
-
-    img = load_img(self.input_path, target_size=(image_height, image_width))
-    X[0] = img_to_array(img)
-
-    img1 = array_to_img(X[0])
-    save_img(path=os.path.join(prefix, 'examples' , str(9999) + '.jpg'), x=img1, file_format='jpeg')
 
 
 
