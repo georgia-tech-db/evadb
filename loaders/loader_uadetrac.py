@@ -15,7 +15,7 @@ import pandas as pd
 import cv2
 
 from loaders import TaskManager
-from loaders.loader_template import LoaderBase
+from loaders.loader_template import LoaderTemplate
 import warnings
 import argparse
 
@@ -28,7 +28,7 @@ args = parser.parse_args()
 
 # Make this return a dictionary of label to data for the whole dataset
 
-class LoaderUADetrac(LoaderBase):
+class LoaderUADetrac(LoaderTemplate):
   def __init__(self, image_width = 300, image_height = 300):
     self.data_dict = {}
     self.label_dict = {}
@@ -46,7 +46,7 @@ class LoaderUADetrac(LoaderBase):
     self.images = None
     self.eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-  def load_video(self):
+  def load_video(self, dir:str):
     """
     This function is not needed for ua_detrac
     Should never be called
@@ -54,25 +54,27 @@ class LoaderUADetrac(LoaderBase):
     """
     return None
 
-  def load_boxes(self):
+  def load_boxes(self, dir:str = None):
     """
     Loads boxes from annotation
     Should be same shape as self.labels
     :return: boxes
     """
-    anno_dir = os.path.join(self.eva_dir, 'data', 'ua_detrac', args.anno_path)
-    self.boxes = self.get_boxes(anno_dir)
+    if dir == None:
+      dir = os.path.join(self.eva_dir, 'data', 'ua_detrac', args.anno_path)
+    self.boxes = self.get_boxes(dir)
     return self.boxes
 
 
-  def load_images(self):
+  def load_images(self, dir:str = None):
     """
     This function simply loads image of given image
     :return: image_array (numpy)
     """
-    image_dir = os.path.join(self.eva_dir, 'data', 'ua_detrac', args.image_path)
+    if dir == None:
+      dir = os.path.join(self.eva_dir, 'data', 'ua_detrac', args.image_path)
     file_names = []
-    for root, subdirs, files in os.walk(image_dir):
+    for root, subdirs, files in os.walk(dir):
       files.sort()
       for file in files:
         file_names.append(os.path.join(root, file))
@@ -92,15 +94,17 @@ class LoaderUADetrac(LoaderBase):
     return self.images
 
 
-  def load_labels(self):
+  def load_labels(self, dir:str = None):
     """
     Loads vehicle type, speed, color, and intersection of ua-detrac
     vehicle type, speed is given by the dataset
     color, intersection is derived from functions built-in
     :return: labels
     """
-    anno_dir = os.path.join(self.eva_dir, 'data', 'ua_detrac', args.anno_path)
-    results = self._load_XML(anno_dir)
+
+    if dir == None:
+      dir = os.path.join(self.eva_dir, 'data', 'ua_detrac', args.anno_path)
+    results = self._load_XML(dir)
     if results is not None:
       vehicle_type_labels, speed_labels, color_labels, intersection_labels = results
       return {'vehicle': vehicle_type_labels, 'speed': speed_labels,
