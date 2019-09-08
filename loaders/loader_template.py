@@ -7,23 +7,23 @@ If any issues arise, please email jaeho.bang@gmail.com
 from abc import ABCMeta, abstractmethod
 import numpy as np
 
-class LoaderBase(metaclass=ABCMeta):
+class LoaderTemplate(metaclass=ABCMeta):
 
 
   @abstractmethod
-  def load_images(self):
+  def load_images(self, dir:str):
     pass
 
   @abstractmethod
-  def load_labels(self):
+  def load_labels(self, dir:str):
     pass
 
   @abstractmethod
-  def load_boxes(self):
+  def load_boxes(self, dir:str):
     pass
 
   @abstractmethod
-  def load_video(self):
+  def load_video(self, dir:str):
     pass
 
 
