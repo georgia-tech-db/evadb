@@ -1,0 +1,13 @@
+name: eva_35
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - python=3.7
+  - numpy
+  - opencv
+  - scikit-learn
+  - pandas
+prefix: eva_35
+
