@@ -69,12 +69,13 @@ def process_image(image):
         print("inside color_detection process image, image shape is " + str(image.size))
         image.save("test_image" + str(random.randint(0,100)) + ".jpg", "JPEG")
     """
-    height, width = image.shape[:2]
+    
+    width, height = image.shape
     width_margin = int(width - (width * .65))
     height_margin = int(height - (height * .75))
-    for row in range(height_margin, height - height_margin):
-        for col in range(width_margin, width - width_margin, 4):
-            r,g,b = image[row,col,:]
+    for x in range(width_margin, width - width_margin, 4):
+        for y in range(height_margin, height - height_margin):
+            r,g,b = image[y,x]
             key = "%s:%s:%s" % (r, g, b,)
             key = (r, g, b,)
             image_color_quantities[key] = image_color_quantities.get(key, 0) + 1
