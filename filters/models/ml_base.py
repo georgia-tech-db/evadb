@@ -13,7 +13,7 @@ import numpy as np
 
 
 
-class MLBase(ABCMeta):
+class MLBase(metaclass = ABCMeta):
   def __init__(self):
     # negative numbers indicate they have not been calculated
     # C denotes cost (time it takes to execute)
