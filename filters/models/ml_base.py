@@ -30,7 +30,7 @@ class MLBase(ABCMeta):
     pass
 
   @abstractmethod
-  def predict(self, X:np.ndarray) -> np.ndarray:
+  def predict(self, X:np.ndarray):
     pass
 
 

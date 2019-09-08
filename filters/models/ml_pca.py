@@ -17,17 +17,17 @@ class MLPCA(MLBase):
 
   def train(self, X :np.ndarray, y :np.ndarray):
     n_samples = X.shape[0]
-    division = int(n_samples * self.division_rate)
-    X_val = X[division:]
-    y_val = y[division:]
+
+    self.model.fit_transform(X)
+
 
     tic = time.time()
-    self.model.score(X_val, y_val)
+    self.model.transform(X)
     toc = time.time()
-    val_samples = X_val.shape[0]
 
-    self.C = (toc - tic) / val_samples
+    self.C = (toc - tic) / n_samples
+
 
   def predict(self, X :np.ndarray):
-    return self.model.fit_transform(X)
+    return self.model.transform(X)
 
