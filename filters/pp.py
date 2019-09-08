@@ -12,7 +12,6 @@ import time
 from .kdewrapper import KernelDensityWrapper
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.feature_extraction import FeatureHasher
 from sklearn.decomposition import PCA
 from sklearn.neural_network import MLPClassifier
 
