@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from abc import ABCMeta, abstractmethod
 
-class FilterBase(ABCMeta):
+class FilterTemplate(metaclass = ABCMeta):
 
   @abstractmethod
   def train(self, X:np.ndarray, y:np.ndarray):
