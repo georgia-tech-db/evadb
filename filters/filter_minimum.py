@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from copy import deepcopy
-from filters.filter_base import FilterBase
+from filters.filter_template import FilterTemplate
 from filters.models.ml_randomforest import MLRandomForest
 
 
@@ -20,9 +20,9 @@ Each Filter object considers 1 specific query. Either the query optimizer or the
  
 """
 
-class FilterMinimum(FilterBase):
+class FilterMinimum(FilterTemplate):
   def __init__(self):
-    super(FilterMinimum, self).__init__(FilterBase)
+
 
     """
     self.pre_models = {'pca': pca_model_instance, 'hashing': hashing_model_instance, 'sampling': sampling_model_instance}
@@ -123,10 +123,10 @@ class FilterMinimum(FilterBase):
 
 
   def train(self, X:np.ndarray, y:np.ndarray):
-    for post_model_name, post_model in self.post_models:
+    for post_model_name, post_model in self.post_models.items():
       post_model.train(X, y)
 
-    for pre_model_name, pre_model in self.pre_models:
+    for pre_model_name, pre_model in self.pre_models.items():
       pre_model.train(X,y)
 
     for post_model_names, internal_dict in self.all_models.items():
@@ -214,6 +214,61 @@ class FilterMinimum(FilterBase):
     df = pd.DataFrame(data)
 
     return df
+
+
+if __name__ == "__main__":
+
+
+  filter = FilterMinimum()
+
+  X = np.random.random([100,30,30,3])
+  y = np.random.random([100])
+  y *= 10
+  y = y.astype(np.int32)
+
+  division = int(X.shape[0] * 0.8)
+  X_train = X[:division]
+  X_test = X[division:]
+  y_iscar_train = y[:division]
+  y_iscar_test = y[division:]
+
+  filter.train(X_train, y_iscar_train)
+  print("filter finished training!")
+  y_iscar_hat = filter.predict(X_test, post_model_name='rf')
+  print("filter finished prediction!")
+  stats = filter.getAllStats()
+  print(stats)
+  print("filter got all stats")
+
+
+  """
+  from loaders.loader_uadetrac import LoaderUADetrac
+
+  loader = LoaderUADetrac()
+  X = loader.load_images()
+  y = loader.load_labels()
+  y_vehicle = y['vehicle']
+  y_iscar = []
+
+  vehicle_types = ["car", "van", "bus", "others"]
+  for i in range(len(y_vehicle)):
+    if "Sedan" in y_vehicle[i]:
+      y_iscar.append(1)
+    else:
+      y_iscar.append(0)
+
+  y_iscar = np.array(y_iscar, dtype=np.uint8)
+
+  division = int(X.shape[0] * 0.8)
+  X_train = X[:division]
+  X_test = X[division:]
+  y_iscar_train = y_iscar[:division]
+  y_iscar_test = y_iscar[division:]
+  """
+
+
+
+
 
 
 
