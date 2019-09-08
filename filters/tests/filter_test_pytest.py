@@ -1,4 +1,4 @@
-from filters.filter import *
+from filters.filter_minimum import *
 from filters.pp import PP
 import random
 from sklearn.neural_network import MLPClassifier
