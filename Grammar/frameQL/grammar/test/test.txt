@@ -1,0 +1,3 @@
+SELECT *
+FROM TAIPAI
+WHERE A = 1 AND ((B < 2 && C > 3) XOR D <= 4)
