@@ -1,6 +1,7 @@
 from query_optimizer.query_optimizer import QueryOptimizer
 
-obj=QueryOptimizer()
+obj = QueryOptimizer()
+
 
 # TODO: Fix this test
 # def test_parseQuery():
@@ -50,17 +51,18 @@ obj=QueryOptimizer()
 #     assert True
 
 def test_convertL2S():
-    query_string=obj.convertL2S(["t","!=","10"],[])
-    if query_string!="t!=10":
-        assert False,"Wrong output query string"
+    query_string = obj.convertL2S(["t", "!=", "10"], [])
+    if query_string != "t!=10":
+        assert False, "Wrong output query string"
     assert True
 
-    query_string = obj.convertL2S([["t", "!=", "10"],['a','<','5'],['b','=','1003']], ["&&","||"])
+    query_string = obj.convertL2S([["t", "!=", "10"], ['a', '<', '5'], ['b', '=', '1003']], ["&&", "||"])
     if query_string != "t!=10 && a<5 || b=1003":
         assert False, "Wrong output query string"
 
-    #case for paranthesis hasn't been implemented yet when its done need to add test cases for that.
+    # case for paranthesis hasn't been implemented yet when its done need to add test cases for that.
     assert True
+
 
 # test_parseQuery()
 test_convertL2S()
