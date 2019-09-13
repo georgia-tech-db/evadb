@@ -1,8 +1,5 @@
 from loaders.color_detection import process_image
 from loaders.intersection_detection import intersection_detector
-import time
-import numpy as np
-
 
 
 class TaskManager():
@@ -18,9 +15,9 @@ class TaskManager():
             top = bbox[1]
             right = bbox[2]
             bottom = bbox[3]
-            #image is already going to be an array
+            # image is already going to be an array
 
-            img_to_pass = image[top:bottom,left:right,:]
+            img_to_pass = image[top:bottom, left:right, :]
             """
             if __debug__:
                 print("inside task manager img shape is " + str(img_to_pass.shape))
@@ -34,11 +31,8 @@ class TaskManager():
             else:
                 colors.append(None)
 
-
         return colors
-
 
     def call_intersection(self, image, scene, img_bboxes):
 
         return intersection_detector(image, scene, img_bboxes)
-
