@@ -22,7 +22,7 @@ class MLRandomForest(MLBase):
 
     def train(self, X: np.ndarray, y: np.ndarray):
         X = self._flatten_input(X)
-        y = self._check_label(y)  ## make sure everythin is binary labels!!
+        y = self._check_label(y)  # make sure everything is binary labels!!
 
         n_samples = X.shape[0]
         division = int(n_samples * self.division_rate)
