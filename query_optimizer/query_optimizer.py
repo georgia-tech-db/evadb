@@ -22,9 +22,10 @@ from itertools import product
 
 import numpy as np
 
+import constants
+
 eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(eva_dir)
-import constants
 
 
 class QueryOptimizer:
@@ -122,7 +123,7 @@ class QueryOptimizer:
                 for operator in self.operators:
                     query_sub_list = query_sub.split(operator)
                     if type(query_sub_list) is list and len(
-                        query_sub_list) > 1:
+                            query_sub_list) > 1:
                         query_parsed.append(
                             [query_sub_list[0], operator, query_sub_list[1]])
                         break
@@ -199,7 +200,7 @@ class QueryOptimizer:
                         alternate_string += subject + self._logic_reverse(
                             operator) + category + " && "
                 alternate_string = alternate_string[
-                                   :-len(" && ")]  # must strip the last ' || '
+                    :-len(" && ")]  # must strip the last ' || '
                 # query_tmp, _ = self._parseQuery(alternate_string)
                 equivalence.append(alternate_string)
 
@@ -212,7 +213,7 @@ class QueryOptimizer:
                 alternate_string = ""
                 if operator == "!=":
                     alternate_string += subject + ">" + object + " && " + \
-                                        subject + "<" + object
+                        subject + "<" + object
                     query_tmp, _ = self._parseQuery(alternate_string)
                     equivalence.append(query_tmp)
                 if operator == "<" or operator == "<=":
@@ -299,7 +300,7 @@ class QueryOptimizer:
 
                         data = self._find_model(query_sub_str, pp_stats,
                                                 accuracy_budget)
-                        if data == None:
+                        if data is None:
                             continue
                         else:
                             model, reduction_rate = data
@@ -366,7 +367,7 @@ class QueryOptimizer:
         for i in range(1, len(evaluation_stats)):
             if query_operators[i - 1] == "&&":
                 final_red = final_red + evaluation_stats[i] - final_red * \
-                            evaluation_stats[i]
+                    evaluation_stats[i]
             elif query_operators[i - 1] == "||":
                 final_red = final_red * evaluation_stats[i]
 
@@ -391,7 +392,7 @@ class QueryOptimizer:
                 best = [possible_model, self._compute_cost_red_rate(
                     possible_models[possible_model]["C"],
                     possible_models[possible_model]["R"]),
-                        possible_models[possible_model]["R"]]
+                    possible_models[possible_model]["R"]]
             else:
                 alternative_best_cost = self._compute_cost_red_rate(
                     possible_models[possible_model]["C"],

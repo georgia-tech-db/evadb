@@ -9,7 +9,7 @@ import query_optimizer.query_optimizer as qo
 
 try:
     import constants
-except:
+except ImportError:
     sys.path.append("/nethome/jbang36/eva")
     sys.path.append("/home/jaeho-linux/fall2018/DDL/Eva")
     import constants
@@ -38,8 +38,8 @@ class Pipeline:
         print("Loading data....")
         image_matrix, data_table = self.load()
         self.image_matrix_train, self.image_matrix_test, \
-        self.data_table_train, self.data_table_test = self._split_train_val(
-            image_matrix, data_table)
+            self.data_table_train, self.data_table_test = \
+            self._split_train_val(image_matrix, data_table)
         print("Training data....")
         self.train()
         pp_category_stats = self.PP.getCategoryStats()
@@ -137,10 +137,8 @@ class Pipeline:
             #  PPs to work with
             # TODO: Then we want to execute the queries with the PPs and
             #  send it to the UDF after
-            best_query, best_operators, reduction_rate = self.QO.run(query,
-                                                                     synthetic_pp_list,
-                                                                     pp_category_stats,
-                                                                     label_desc)
+            best_query, best_operators, reduction_rate = self.QO.run(
+                query, synthetic_pp_list, pp_category_stats, label_desc)
             # TODO: Assume the best_query is in the form ["(PP_name,
             #  model_name) , (PP_name, model_name), (PP_name, model_name),
             #  (PP_name, model_name), (UDF_name, model_name - None)]
@@ -149,10 +147,10 @@ class Pipeline:
             #                                   np.logical_or,
             #                                   np.logical_and.....]
             if __debug__:
-                print((
-                    "The total reduction rate associated with "
-                    "the query is " + str(
-                    reduction_rate)))
+                print(
+                    "The total reduction rate associated with the query is "
+                    + str(
+                        reduction_rate))
                 print(("The best alternative for " + query + " is " + str(
                     best_query)))
                 print(("The operators involved are " + str(best_operators)))

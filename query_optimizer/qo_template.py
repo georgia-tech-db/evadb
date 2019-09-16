@@ -5,6 +5,8 @@ If any issues arise please contact jaeho.bang@gmail.com
 @Jaeho Bang
 """
 
+from abc import ABCMeta, abstractmethod
+
 """
 Initial Design Thoughts:
 Query Optimizer by definition should perform two tasks:
@@ -12,8 +14,6 @@ Query Optimizer by definition should perform two tasks:
 2. Determine efficient execution mechanisms (plans)
 
 """
-
-from abc import ABCMeta, abstractmethod
 
 
 class QOTemplate(metaclass=ABCMeta):
