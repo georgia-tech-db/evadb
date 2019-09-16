@@ -1,5 +1,6 @@
 """
-This folder contains all util functions needed to load the dataset with annotation.
+This folder contains all util functions needed to load the dataset with
+annotation.
 
 Demo could be run with the command
 python loaders/load.py
@@ -46,9 +47,10 @@ class Load:
 
     @staticmethod
     def save(filename, panda_data):
-        project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # Eva / eva
+        project_dir = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))  # Eva / eva
         csv_folder = os.path.join(project_dir, "data", "pandas")
-        if os.path.exists(csv_folder) == False:
+        if os.path.exists(csv_folder) is False:
             os.makedirs(csv_folder)
         csv_filename = os.path.join(csv_folder, filename)
         panda_data.to_csv(csv_filename, sep=",", index=None)
@@ -61,38 +63,53 @@ class Load:
         train_anno_dir = dir_dict['train_anno']
         labels_list = ["vehicle_type", "color", "speed", "intersection"]
 
-        if __debug__: print("Inside load, starting image loading...")
+        if __debug__:
+            print("Inside load, starting image loading...")
         train_img_array = self._load_images(train_image_dir)
-        if __debug__: print(("Done loading train images.. shape of matrix is " + str(train_img_array.shape)))
+        if __debug__:
+            print(("Done loading train images.. shape of matrix is " + str(
+                train_img_array.shape)))
 
-        vehicle_type_labels, speed_labels, color_labels, intersection_labels = self._load_XML(train_anno_dir,
-                                                                                              train_img_array)
-        if __debug__: print(("Done loading the labels.. length of labels is " + str(len(vehicle_type_labels))))
+        vehicle_type_labels, speed_labels, color_labels, intersection_labels \
+            = self._load_XML(train_anno_dir, train_img_array)
+        if __debug__:
+            print(("Done loading the labels.. length of labels is " + str(
+                len(vehicle_type_labels))))
 
         # n_samples, height, width, channels = train_img_array.shape
-        # train_img_array = train_img_array.reshape(n_samples, height*width*channels)
+        # train_img_array = train_img_array.reshape(n_samples,
+        # height*width*channels)
 
-        if __debug__: print(("train img array flatten is ", str(train_img_array.shape)))
-        data_table = list(zip(vehicle_type_labels, color_labels, speed_labels, intersection_labels))
+        if __debug__:
+            print(
+                ("train img array flatten is ", str(train_img_array.shape)))
+        data_table = list(zip(vehicle_type_labels, color_labels, speed_labels,
+                              intersection_labels))
 
-        if __debug__: print(("data_table shape is ", str(len(data_table))))
+        if __debug__:
+            print(("data_table shape is ", str(len(data_table))))
 
         columns = labels_list
         dt_train = pd.DataFrame(data=data_table, columns=columns)
-        if __debug__: print("Done making panda table for train")
+        if __debug__:
+            print("Done making panda table for train")
 
         dt_test = None
         if test_image_dir is not None:
             test_img_list = self._load_images(test_image_dir)
-            if __debug__: print(("Done loading test images.. shape of matrix is " + str(test_img_list.shape)))
+            if __debug__:
+                print(("Done loading test images.. shape of matrix is " + str(
+                    test_img_list.shape)))
 
             dt_test = pd.DataFrame(data=list(test_img_list), columns=['image'])
-            if __debug__: print("Done making panda table for test")
+            if __debug__:
+                print("Done making panda table for test")
         return [train_img_array, dt_train, dt_test]
 
     def _convert_speed(self, original_speed):
         """
-        TODO: Need to actually not use this function, because we need to find out what the original speed values mean
+        TODO: Need to actually not use this function, because we need to find
+        out what the original speed values mean
         TODO: However, in the meantime, we will use this extrapolation....
         :param original_speed:
         :return: converted_speed
@@ -121,8 +138,10 @@ class Load:
                 for frame in tree_root.iter('frame'):
                     curr_frame_num = int(frame.attrib['num'])
                     if start_frame and curr_frame_num != start_frame_num:
-                        car_labels.append([None] * (curr_frame_num - start_frame_num))
-                        speed_labels.append([None] * (curr_frame_num - start_frame_num))
+                        car_labels.append(
+                            [None] * (curr_frame_num - start_frame_num))
+                        speed_labels.append(
+                            [None] * (curr_frame_num - start_frame_num))
 
                     car_per_frame = []
                     speed_per_frame = []
@@ -136,18 +155,26 @@ class Load:
                         right = left + int(eval(box.attrib['width']))
                         bottom = top + int(eval(box.attrib['height']))
                         bboxes.append([left, top, right, bottom])
-                    # curr_frame_num -1 comes from the fact that indexes start from 0 whereas the start_frame_num = 1
-                    color_per_frame = self.task_manager.call_color(images[curr_frame_num - 1], bboxes)
-                    # if __debug__: print("colors detected in this frame are " , str(color_per_frame))
-                    scene = file.replace(".xml", "")  # MVI_20011.xml -> MVI_20011
-                    intersection_per_frame = self.task_manager.call_intersection(images[curr_frame_num - 1], scene,
-                                                                                 bboxes)
+                    # curr_frame_num -1 comes from the fact that indexes
+                    # start from 0 whereas the start_frame_num = 1
+                    color_per_frame = self.task_manager.call_color(
+                        images[curr_frame_num - 1], bboxes)
+                    # if __debug__: print("colors detected in this frame are
+                    # " , str(color_per_frame))
+                    scene = file.replace(".xml",
+                                         "")  # MVI_20011.xml -> MVI_20011
+                    intersection_per_frame = \
+                        self.task_manager.call_intersection(
+                            images[curr_frame_num - 1], scene,
+                            bboxes)
 
                     for att in frame.iter('attribute'):
                         if (att.attrib['vehicle_type']):
                             car_per_frame.append(att.attrib['vehicle_type'])
                         if (att.attrib['speed']):
-                            speed_per_frame.append(self._convert_speed(float(att.attrib['speed'])))
+                            speed_per_frame.append(
+                                self._convert_speed(
+                                    float(att.attrib['speed'])))
                     assert (len(car_per_frame) == len(speed_per_frame))
                     assert (len(car_per_frame) == len(color_per_frame))
                     assert (len(car_per_frame) == len(intersection_per_frame))
@@ -185,23 +212,27 @@ class Load:
                 file_names.append(os.path.join(root, file))
         print("Number of files added: ", len(file_names))
 
-        if grayscale == False:
+        if grayscale is False:
             img_table = np.ndarray(shape=(
-            len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate,
-            self.image_channels), dtype=np.uint8)
+                len(file_names), self.image_height // downsize_rate,
+                self.image_width // downsize_rate,
+                self.image_channels), dtype=np.uint8)
         else:
             img_table = np.ndarray(
-                shape=(len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate, 1),
+                shape=(len(file_names), self.image_height // downsize_rate,
+                       self.image_width // downsize_rate, 1),
                 dtype=np.uint8)
 
         for i in range(len(file_names)):
             file_name = file_names[i]
             if grayscale:
                 img = cv2.imread(file_name, 0)
-                img = cv2.resize(img, (self.image_height // downsize_rate, self.image_width // downsize_rate))
+                img = cv2.resize(img, (self.image_height // downsize_rate,
+                                       self.image_width // downsize_rate))
             else:
                 img = cv2.imread(file_name)
-                img = cv2.resize(img, (self.image_width // downsize_rate, self.image_height // downsize_rate))
+                img = cv2.resize(img, (self.image_width // downsize_rate,
+                                       self.image_height // downsize_rate))
 
             img_table[i] = img
 
@@ -221,13 +252,15 @@ class Load:
             for file in files:
                 file_names.append(os.path.join(root, file))
 
-        if grayscale == False:
+        if grayscale is False:
             img_table = np.ndarray(shape=(
-            len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate,
-            self.image_channels), dtype=np.int16)
+                len(file_names), self.image_height // downsize_rate,
+                self.image_width // downsize_rate,
+                self.image_channels), dtype=np.int16)
         else:
             img_table = np.ndarray(
-                shape=(len(file_names), self.image_height // downsize_rate, self.image_width // downsize_rate, 1),
+                shape=(len(file_names), self.image_height // downsize_rate,
+                       self.image_width // downsize_rate, 1),
                 dtype=np.int16)
 
         for i in range(len(file_names)):
@@ -237,7 +270,8 @@ class Load:
             else:
                 img = cv2.imread(file_name, 1)
 
-            img = cv2.resize(img, (self.image_width // downsize_rate, self.image_height // downsize_rate))
+            img = cv2.resize(img, (self.image_width // downsize_rate,
+                                   self.image_height // downsize_rate))
             img_table[i] = img[:, :, np.newaxis]
 
         return img_table
@@ -250,27 +284,31 @@ class LoadTest:
     def run(self):
         start_time = time.time()
         eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        train_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "small-data")
-        # test_image_dir = os.path.join(eva_dir, "data", "ua_detrac", "test_images")
+        train_image_dir = os.path.join(eva_dir, "data", "ua_detrac",
+                                       "small-data")
+        # test_image_dir = os.path.join(eva_dir, "data", "ua_detrac",
+        # "test_images")
         test_image_dir = None
-        train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac", "small-annotation")
+        train_anno_dir = os.path.join(eva_dir, "data", "ua_detrac",
+                                      "small-annotation")
         dir_dict = {"train_image": train_image_dir,
                     "test_image": test_image_dir,
                     "train_anno": train_anno_dir}
 
         if __debug__:
-            print(("train image dir: " + train_image_dir))
+            print("train image dir: " + train_image_dir)
             # print("test image dir: " + test_image_dir)
-            print(("train annotation dir: " + train_anno_dir))
+            print("train annotation dir: " + train_anno_dir)
 
         dt_train, dt_test = self.load.load(dir_dict)
         Load().save("small.csv", dt_train)
 
         if __debug__:
-            print(("--- Total Execution Time : %.3f seconds ---" % (time.time() - start_time)))
-
-            print((dt_train.shape))
-            if test_image_dir != None: print((dt_test.shape))
+            print("--- Total Execution Time : %.3f seconds ---" % (
+                time.time() - start_time))
+            print(dt_train.shape)
+            if test_image_dir is not None:
+                print((dt_test.shape))
 
 
 if __name__ == "__main__":
@@ -279,4 +317,5 @@ if __name__ == "__main__":
     # load_test.run()
     panda_table = Load().load_from_csv("small.csv")
     a = 1 + 2
-    if __debug__: print(("panda shape is " + str(panda_table.shape)))
+    if __debug__:
+        print("panda shape is " + str(panda_table.shape))
