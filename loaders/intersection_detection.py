@@ -13,10 +13,13 @@ def intersection_detector(image, scene, bboxes):
     keypoint_names = ["pt335", "pt342", "pt211", "pt208"]
 
     eva_loader_dir = os.path.dirname(os.path.abspath(__file__))
-    keypoint_dict = pkl.load(open(os.path.join(eva_loader_dir, 'keypoint_dict'), 'rb'))
+    keypoint_dict = pkl.load(
+        open(os.path.join(eva_loader_dir, 'keypoint_dict'), 'rb'))
     if scene not in keypoint_dict:
-        # If the scene is not defined in keypoint_dict, just make a random keypoint list
-        # TODO: When defining the keypoints, it should be (row, col) just as how we see it in an image
+        # If the scene is not defined in keypoint_dict, just make a random
+        # keypoint list
+        # TODO: When defining the keypoints, it should be (row, col) just as
+        #  how we see it in an image
         scene_keypoints = np.array([[442.75, 100.98]])
         scene_threshold = 20.0
     else:
@@ -35,13 +38,16 @@ def intersection_detector(image, scene, bboxes):
         detected_intersection = False
         for keypoint in scene_keypoints:
             distance = np.linalg.norm(keypoint - current_obj_location)
-            # TODO: It would be nice if we can refer to the keypoints as ["pt335", "pt342", "pt211", "pt208"]
+            # TODO: It would be nice if we can refer to the keypoints as [
+            #  "pt335", "pt342", "pt211", "pt208"]
             if distance < scene_threshold:
-                # TODO: Definitely need to fix this but for now, I will feed in random keypoint if it is close to any keypoint
-                intersections.append(keypoint_names[random.randint(0, len(keypoint_names) - 1)])
+                # TODO: Definitely need to fix this but for now, I will feed
+                #  in random keypoint if it is close to any keypoint
+                intersections.append(
+                    keypoint_names[random.randint(0, len(keypoint_names) - 1)])
                 detected_intersection = True
                 break
-        if detected_intersection == False:
+        if detected_intersection is False:
             intersections.append(None)
 
     return intersections
