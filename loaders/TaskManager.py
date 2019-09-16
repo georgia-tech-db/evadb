@@ -20,10 +20,12 @@ class TaskManager():
             img_to_pass = image[top:bottom, left:right, :]
             """
             if __debug__:
-                print("inside task manager img shape is " + str(img_to_pass.shape))
+                print("inside task manager img shape is " + str(
+                img_to_pass.shape))
                 print("   original image shape is " + str(image.shape))
                 print("   original image type is " + str(type(image)))
-                print("(left, top, right, bottom coords are " + str((left, top, right, bottom)))
+                print("(left, top, right, bottom coords are " + str((left, 
+                top, right, bottom)))
             """
             color = process_image(img_to_pass).lower()
             if color != "":
