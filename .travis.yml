@@ -33,7 +33,6 @@ install:
 
 script:
   - pytest ./query_optimizer/tests/query_optimizer_test_pytest.py --cov-report= --cov=./ -s -v
-  - pycodestyle --select E loaders
-
+  - pycodestyle --select E loaders filters query_optimizer
 after_success:
   - coveralls

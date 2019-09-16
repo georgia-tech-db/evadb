@@ -137,7 +137,7 @@ class FilterMinimum(FilterTemplate):
 
         for post_model_names, internal_dict in self.all_models.items():
             for pre_model_names, pre_post_instance_pair in \
-                internal_dict.items():
+                    internal_dict.items():
                 pre_model, post_model = pre_post_instance_pair
                 X_transform = pre_model.predict(X)
                 post_model.train(X_transform)
