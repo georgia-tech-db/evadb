@@ -19,8 +19,8 @@ before_install:
 
 install:
   - conda env create -f environment_mac.yml
-#  - conda init bash
-#  - conda env create -n test-env python=$TRAVIS_PYTHON_VERSION -f environment_mac.yml
+  #  - conda init bash
+  #  - conda env create -n test-env python=$TRAVIS_PYTHON_VERSION -f environment_mac.yml
   - source activate eva_35
   - conda list
   #- cd src/processor/
