@@ -112,6 +112,7 @@ dependencies:
   - yaml=0.1.7=had09818_2
   - zlib=1.2.11=h7b6447c_3
   - zstd=1.3.7=h0b5b093_0
+  - pycodestyle
   - pip:
       - torch==1.0.1
 prefix: /nethome/jbang36/anaconda3/envs/eva_35
