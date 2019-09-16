@@ -12,5 +12,6 @@ dependencies:
   - coveralls
   - coverage
   - pytest-cov
+  - pycodestyle
 prefix: eva_35
 
