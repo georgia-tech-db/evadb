@@ -1,17 +1,17 @@
 """
 TODO: this file was an adapter for faster_rcnn_pytorch
-Most likely this file will not be needed but left it here just so that when we import new udfs, we have a reference
+Most likely this file will not be needed but left it here just so that when
+we import new udfs, we have a reference
 
 """
 
-
 try:
-    xrange          # Python 2
+    xrange  # Python 2
 except NameError:
     xrange = range  # Python 3
 
 udf_dir = os.path.dirname(os.path.abspath(__file__))
-voc_anno_path = os.path.join( udf_dir, "data/gt.txt")
+voc_anno_path = os.path.join(udf_dir, "data/gt.txt")
 
 with open(voc_anno_path, 'r') as f:
     bbox_locations = {}
@@ -19,9 +19,13 @@ with open(voc_anno_path, 'r') as f:
     for line in lines:
         columns = line.split(";")
         if columns[0] not in bbox_locations:
-            bbox_locations[columns[0]] = [[float(columns[1]), float(columns[2]),float(columns[3]),float(columns[4])]]
+            bbox_locations[columns[0]] = [
+                [float(columns[1]), float(columns[2]), float(columns[3]),
+                 float(columns[4])]]
         else:
-            bbox_locations[columns[0]].append([float(columns[1]), float(columns[2]),float(columns[3]), float(columns[4])])
+            bbox_locations[columns[0]].append(
+                [float(columns[1]), float(columns[2]), float(columns[3]),
+                 float(columns[4])])
 
 
 def bbox_iou(box1, box2):
@@ -41,8 +45,10 @@ def bbox_iou(box1, box2):
     inter_rect_y2 = np.min(b1_y2, b2_y2)
 
     # Intersection area
-    inter_area = np.clip(inter_rect_x2 - inter_rect_x1 + 1, a_min=0, a_max=None) * np.clip(inter_rect_y2 - inter_rect_y1 + 1,
-                                                                                     a_min=0,a_max=None)
+    inter_area = np.clip(inter_rect_x2 - inter_rect_x1 + 1, a_min=0,
+                         a_max=None) * np.clip(
+        inter_rect_y2 - inter_rect_y1 + 1,
+        a_min=0, a_max=None)
 
     # Union Area
     b1_area = (b1_x2 - b1_x1 + 1) * (b1_y2 - b1_y1 + 1)
@@ -53,10 +59,10 @@ def bbox_iou(box1, box2):
     return iou
 
 
-
-
 def accept_input_from_pp(X, labels, column_name):
-    detected_class_image, detected_bbox, detected_classes = evaluate_inp_from_pp(X[labels])
+    detected_class_image, detected_bbox, detected_classes = \
+        evaluate_inp_from_pp(
+            X[labels])
     final_list = labels
     d_i = 0
     for i in xrange(len(final_list)):
@@ -71,103 +77,106 @@ def accept_input_from_pp(X, labels, column_name):
     return final_list
 
 
-
 def parse_args():
-  """
-  Parse input arguments
-  """
-  udf_dir = os.path.dirname(os.path.abspath(__file__))
+    """
+    Parse input arguments
+    """
+    udf_dir = os.path.dirname(os.path.abspath(__file__))
 
-  parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
-  parser.add_argument('--dataset', dest='dataset',
-                      help='training dataset',
-                      default='pascal_voc', type=str)
-  parser.add_argument('--cfg', dest='cfg_file',
-                      help='optional config file',
-                      default='cfgs/vgg16.yml', type=str)
-  parser.add_argument('--net', dest='net',
-                      help='vgg16, res50, res101, res152',
-                      default='vgg16', type=str)
-  parser.add_argument('--set', dest='set_cfgs',
-                      help='set config keys', default=None,
-                      nargs=argparse.REMAINDER)
-  parser.add_argument('--load_dir', dest='load_dir',
-                      help='directory to load models',
-                      default=udf_dir+"/models")
-  parser.add_argument('--image_dir', dest='image_dir',
-                      help='directory to load images for demo',
-                      default="/home/pballapuram3/Eva/faster_rcnn_pytorch/data/VOCdevkit2007/VOC2007/Red_Data/")
-  parser.add_argument('--cuda', dest='cuda',
-                      help='whether use CUDA',
-                      action='store_true')
-  parser.add_argument('--mGPUs', dest='mGPUs',
-                      help='whether use multiple GPUs',
-                      action='store_true')
-  parser.add_argument('--cag', dest='class_agnostic',
-                      help='whether perform class_agnostic bbox regression',
-                      action='store_true')
-  parser.add_argument('--parallel_type', dest='parallel_type',
-                      help='which part of model to parallel, 0: all, 1: model before roi pooling',
-                      default=0, type=int)
-  parser.add_argument('--checksession', dest='checksession',
-                      help='checksession to load model',
-                      default=1, type=int)
-  parser.add_argument('--checkepoch', dest='checkepoch',
-                      help='checkepoch to load network',
-                      default=20, type=int)
-  parser.add_argument('--checkpoint', dest='checkpoint',
-                      help='checkpoint to load network',
-                      default=233, type=int)
-  parser.add_argument('--bs', dest='batch_size',
-                      help='batch_size',
-                      default=1, type=int)
-  parser.add_argument('--vis', dest='vis',
-                      help='visualization mode',
-                      action='store_true')
-  parser.add_argument('--webcam_num', dest='webcam_num',
-                      help='webcam ID number',
-                      default=-1, type=int)
+    parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
+    parser.add_argument('--dataset', dest='dataset',
+                        help='training dataset',
+                        default='pascal_voc', type=str)
+    parser.add_argument('--cfg', dest='cfg_file',
+                        help='optional config file',
+                        default='cfgs/vgg16.yml', type=str)
+    parser.add_argument('--net', dest='net',
+                        help='vgg16, res50, res101, res152',
+                        default='vgg16', type=str)
+    parser.add_argument('--set', dest='set_cfgs',
+                        help='set config keys', default=None,
+                        nargs=argparse.REMAINDER)
+    parser.add_argument('--load_dir', dest='load_dir',
+                        help='directory to load models',
+                        default=udf_dir + "/models")
+    parser.add_argument('--image_dir', dest='image_dir',
+                        help='directory to load images for demo',
+                        default="/home/pballapuram3/Eva/faster_rcnn_pytorch"
+                                "/data/VOCdevkit2007/VOC2007/Red_Data/")
+    parser.add_argument('--cuda', dest='cuda',
+                        help='whether use CUDA',
+                        action='store_true')
+    parser.add_argument('--mGPUs', dest='mGPUs',
+                        help='whether use multiple GPUs',
+                        action='store_true')
+    parser.add_argument('--cag', dest='class_agnostic',
+                        help='whether perform class_agnostic bbox regression',
+                        action='store_true')
+    parser.add_argument('--parallel_type', dest='parallel_type',
+                        help='which part of model to parallel, 0: all, '
+                             '1: model before roi pooling',
+                        default=0, type=int)
+    parser.add_argument('--checksession', dest='checksession',
+                        help='checksession to load model',
+                        default=1, type=int)
+    parser.add_argument('--checkepoch', dest='checkepoch',
+                        help='checkepoch to load network',
+                        default=20, type=int)
+    parser.add_argument('--checkpoint', dest='checkpoint',
+                        help='checkpoint to load network',
+                        default=233, type=int)
+    parser.add_argument('--bs', dest='batch_size',
+                        help='batch_size',
+                        default=1, type=int)
+    parser.add_argument('--vis', dest='vis',
+                        help='visualization mode',
+                        action='store_true')
+    parser.add_argument('--webcam_num', dest='webcam_num',
+                        help='webcam ID number',
+                        default=-1, type=int)
 
-  args = parser.parse_args()
-  return args
+    args = parser.parse_args()
+    return args
+
 
 lr = cfg.TRAIN.LEARNING_RATE
 momentum = cfg.TRAIN.MOMENTUM
 weight_decay = cfg.TRAIN.WEIGHT_DECAY
 
+
 def _get_image_blob(im):
-  """Converts an image into a network input.
-  Arguments:
-    im (ndarray): a color image in BGR order
-  Returns:
-    blob (ndarray): a data blob holding an image pyramid
-    im_scale_factors (list): list of image scales (relative to im) used
-      in the image pyramid
-  """
-  im_orig = im.astype(np.float32, copy=True)
-  im_orig -= cfg.PIXEL_MEANS
+    """Converts an image into a network input.
+    Arguments:
+      im (ndarray): a color image in BGR order
+    Returns:
+      blob (ndarray): a data blob holding an image pyramid
+      im_scale_factors (list): list of image scales (relative to im) used
+        in the image pyramid
+    """
+    im_orig = im.astype(np.float32, copy=True)
+    im_orig -= cfg.PIXEL_MEANS
 
-  im_shape = im_orig.shape
-  im_size_min = np.min(im_shape[0:2])
-  im_size_max = np.max(im_shape[0:2])
+    im_shape = im_orig.shape
+    im_size_min = np.min(im_shape[0:2])
+    im_size_max = np.max(im_shape[0:2])
 
-  processed_ims = []
-  im_scale_factors = []
+    processed_ims = []
+    im_scale_factors = []
 
-  for target_size in cfg.TEST.SCALES:
-    im_scale = float(target_size) / float(im_size_min)
-    # Prevent the biggest axis from being more than MAX_SIZE
-    if np.round(im_scale * im_size_max) > cfg.TEST.MAX_SIZE:
-      im_scale = float(cfg.TEST.MAX_SIZE) / float(im_size_max)
-    im = cv2.resize(im_orig, None, None, fx=im_scale, fy=im_scale,
-            interpolation=cv2.INTER_LINEAR)
-    im_scale_factors.append(im_scale)
-    processed_ims.append(im)
+    for target_size in cfg.TEST.SCALES:
+        im_scale = float(target_size) / float(im_size_min)
+        # Prevent the biggest axis from being more than MAX_SIZE
+        if np.round(im_scale * im_size_max) > cfg.TEST.MAX_SIZE:
+            im_scale = float(cfg.TEST.MAX_SIZE) / float(im_size_max)
+        im = cv2.resize(im_orig, None, None, fx=im_scale, fy=im_scale,
+                        interpolation=cv2.INTER_LINEAR)
+        im_scale_factors.append(im_scale)
+        processed_ims.append(im)
 
-  # Create a blob to hold the input images
-  blob = im_list_to_blob(processed_ims)
+    # Create a blob to hold the input images
+    blob = im_list_to_blob(processed_ims)
 
-  return blob, np.array(im_scale_factors)
+    return blob, np.array(im_scale_factors)
 
 
 def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
@@ -192,13 +201,18 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
     np.random.seed(cfg.RNG_SEED)
 
     # train set
-    # -- Note: Use validation set and disable the flipped to enable faster loading.
+    # -- Note: Use validation set and disable the flipped to enable faster
+    # loading.
 
     input_dir = os.path.join(args.load_dir, args.net, args.dataset)
     if not os.path.exists(input_dir):
-        raise Exception('There is no input directory for loading network from ' + input_dir)
+        raise Exception(
+            'There is no input directory for loading network from ' +
+            input_dir)
     load_name = os.path.join(input_dir,
-                             'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
+                             'faster_rcnn_{}_{}_{}.pth'.format(
+                                 args.checksession, args.checkepoch,
+                                 args.checkpoint))
 
     pascal_classes = np.asarray(['__background__',  # always index 0
                                  'car', 'bus', 'van', 'others'])
@@ -209,13 +223,17 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
 
     # initilize the network here.
     if args.net == 'vgg16':
-        fasterRCNN = vgg16(pascal_classes, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = vgg16(pascal_classes, pretrained=False,
+                           class_agnostic=args.class_agnostic)
     elif args.net == 'res101':
-        fasterRCNN = resnet(pascal_classes, 101, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = resnet(pascal_classes, 101, pretrained=False,
+                            class_agnostic=args.class_agnostic)
     elif args.net == 'res50':
-        fasterRCNN = resnet(pascal_classes, 50, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = resnet(pascal_classes, 50, pretrained=False,
+                            class_agnostic=args.class_agnostic)
     elif args.net == 'res152':
-        fasterRCNN = resnet(pascal_classes, 152, pretrained=False, class_agnostic=args.class_agnostic)
+        fasterRCNN = resnet(pascal_classes, 152, pretrained=False,
+                            class_agnostic=args.class_agnostic)
     else:
         print("network is not defined")
         pdb.set_trace()
@@ -226,7 +244,8 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
     if args.cuda > 0:
         checkpoint = torch.load(load_name)
     else:
-        checkpoint = torch.load(load_name, map_location=(lambda storage, loc: storage))
+        checkpoint = torch.load(load_name,
+                                map_location=(lambda storage, loc: storage))
     fasterRCNN.load_state_dict(checkpoint['model'])
     if 'pooling_mode' in checkpoint.keys():
         cfg.POOLING_MODE = checkpoint['pooling_mode']
@@ -285,7 +304,9 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
         blobs, im_scales = _get_image_blob(im)
         assert len(im_scales) == 1, "Only single-image batch implemented"
         im_blob = blobs
-        im_info_np = np.array([[im_blob.shape[1], im_blob.shape[2], im_scales[0]]], dtype=np.float32)
+        im_info_np = np.array(
+            [[im_blob.shape[1], im_blob.shape[2], im_scales[0]]],
+            dtype=np.float32)
 
         im_data_pt = torch.from_numpy(im_blob)
         im_data_pt = im_data_pt.permute(0, 3, 1, 2)
@@ -314,21 +335,34 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
                 # Optionally normalize targets by a precomputed mean and stdev
                 if args.class_agnostic:
                     if args.cuda > 0:
-                        box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
-                                     + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                        box_deltas = box_deltas.view(-1,
+                                                     4) * torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
+                                     + torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
                     else:
-                        box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS) \
-                                     + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
+                        box_deltas = box_deltas.view(-1,
+                                                     4) * torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_STDS) \
+                                     + torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_MEANS)
 
                     box_deltas = box_deltas.view(1, -1, 4)
                 else:
                     if args.cuda > 0:
-                        box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
-                                     + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
+                        box_deltas = box_deltas.view(-1,
+                                                     4) * torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_STDS).cuda() \
+                                     + torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_MEANS).cuda()
                     else:
-                        box_deltas = box_deltas.view(-1, 4) * torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_STDS) \
-                                     + torch.FloatTensor(cfg.TRAIN.BBOX_NORMALIZE_MEANS)
-                    box_deltas = box_deltas.view(1, -1, 4 * len(pascal_classes))
+                        box_deltas = box_deltas.view(-1,
+                                                     4) * torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_STDS) \
+                                     + torch.FloatTensor(
+                            cfg.TRAIN.BBOX_NORMALIZE_MEANS)
+                    box_deltas = box_deltas.view(1, -1,
+                                                 4 * len(pascal_classes))
 
             pred_boxes = bbox_transform_inv(boxes, box_deltas, 1)
             pred_boxes = clip_boxes(pred_boxes, im_info.data, 1)
@@ -360,10 +394,11 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
                 cls_dets = torch.cat((cls_boxes, cls_scores.unsqueeze(1)), 1)
                 # cls_dets = torch.cat((cls_boxes, cls_scores), 1)
                 cls_dets = cls_dets[order]
-                keep = nms(cls_dets, cfg.TEST.NMS, force_cpu=not cfg.USE_GPU_NMS)
+                keep = nms(cls_dets, cfg.TEST.NMS,
+                           force_cpu=not cfg.USE_GPU_NMS)
                 cls_dets = cls_dets[keep.view(-1).long()]
 
-                #cls_dets = cls_dets.cpu().numpy()
+                # cls_dets = cls_dets.cpu().numpy()
                 box_above_thresh = []
                 for i in range(np.minimum(10, cls_dets.shape[0])):
                     bbox = tuple(int(np.round(x)) for x in cls_dets[i, :4])
@@ -372,7 +407,8 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
                         box_above_thresh.append(bbox)
                 box_above_thresh = np.asarray(box_above_thresh)
             if vis:
-                im2show = vis_detections(args.image_dir + "/" + imglist[ind], im2show, pascal_classes[j],
+                im2show = vis_detections(args.image_dir + "/" + imglist[ind],
+                                         im2show, pascal_classes[j],
                                          cls_dets.cpu().numpy(), 0.5)
 
                 if ind not in detected_bbox:
@@ -389,22 +425,26 @@ def evaluate_inp_from_pp(X, imglist, save_to_path=False, path_to_save=None):
         # if save_to_path and path_to_save:
         # cv2.imshow('test', im2show)
         # cv2.waitKey(0)
-        result_path = os.path.join(udf_dir, "output_images", str(ind) + "_det.jpg")
+        result_path = os.path.join(udf_dir, "output_images",
+                                   str(ind) + "_det.jpg")
         cv2.imwrite(result_path, im2show)
         sys.stdout.write('im_detect: {:d}/{:d} {:.3f}s {:.3f}s   \r' \
                          .format(ind + 1, len(imglist), detect_time, nms_time))
         sys.stdout.flush()
         print("Writing to output path " + result_path)
         detected_class_image.append(im2show)
-        # cv2.imwrite("output.jpg",im2show[detected_bbox[0][0][1]:detected_bbox[0][0][3],detected_bbox[0][0][0]:detected_bbox[0][0][2]])
+        # cv2.imwrite("output.jpg",im2show[detected_bbox[0][0][
+        # 1]:detected_bbox[0][0][3],detected_bbox[0][0][0]:detected_bbox[0][
+        # 0][2]])
     return detected_class_image, detected_bbox, detected_classes
+
 
 if __name__ == '__main__':
 
     args = parse_args()
     imglist = os.listdir(args.image_dir)
-    imglist=sorted(imglist)
-    imglist=imglist[-30:]
+    imglist = sorted(imglist)
+    imglist = imglist[-30:]
     num_images = len(imglist)
     height = 540
     width = 960
@@ -416,5 +456,3 @@ if __name__ == '__main__':
         X[i] = img_to_array(img)
 
     evaluate_inp_from_pp(X, imglist)
-
-
