@@ -5,6 +5,8 @@ If any issues arise please contact jaeho.bang@gmail.com
 @Jaeho Bang
 """
 
+from abc import ABCMeta, abstractmethod
+
 """
 Initial Design Thoughts:
 Query Optimizer by definition should perform two tasks:
@@ -14,21 +16,15 @@ Query Optimizer by definition should perform two tasks:
 """
 
 
-from abc import ABCMeta, abstractmethod
-
-
 class QOTemplate(metaclass=ABCMeta):
 
-
-  @abstractmethod
-  def executeQueries(self, queries:list)->list:
-    """
-    Query Optimizer by definition should perform two tasks:
-    1. Analyze given Structured Query Language (SQL)
-    2. Determine efficient execution mechanisms/plans
-    :param queries: input queries / query
-    :return: output plans / plan that can be understood by the system
-    """
-    pass
-
-
+    @abstractmethod
+    def executeQueries(self, queries: list) -> list:
+        """
+        Query Optimizer by definition should perform two tasks:
+        1. Analyze given Structured Query Language (SQL)
+        2. Determine efficient execution mechanisms/plans
+        :param queries: input queries / query
+        :return: output plans / plan that can be understood by the system
+        """
+        pass
