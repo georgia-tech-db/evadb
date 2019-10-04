@@ -1,3 +1,5 @@
+import random
+
 class Colors(object):
     class Color(object):
         def __init__(self, value):
@@ -6,32 +8,23 @@ class Colors(object):
         def __str__(self):
             return "%s : %s" % (self.__class__.__name__, self.value)
 
-    class Red(Color):
-        pass
+    class Red(Color): pass
 
-    class Blue(Color):
-        pass
+    class Blue(Color): pass
 
-    class Green(Color):
-        pass
+    class Green(Color): pass
 
-    class Yellow(Color):
-        pass
+    class Yellow(Color): pass
 
-    class White(Color):
-        pass
+    class White(Color): pass
 
-    class Silver(Color):
-        pass
+    class Silver(Color): pass
 
-    class Black(Color):
-        pass
+    class Black(Color): pass
 
-    class Pink(Color):
-        pass
+    class Pink(Color): pass
 
-    class Teal(Color):
-        pass
+    class Teal(Color): pass
 
 
 class ColorWheel(object):
@@ -51,8 +44,7 @@ class ColorWheel(object):
                 return Colors.Yellow(dominant_colors[0].value)
             elif Colors.Red in color_classes and Colors.Blue in color_classes:
                 return Colors.Pink(dominant_colors[0].value)
-            elif Colors.Blue in color_classes and Colors.Green in \
-                    color_classes:
+            elif Colors.Blue in color_classes and Colors.Green in color_classes:
                 return Colors.Teal(dominant_colors[0].value)
         elif total_colors == 3:
             if dominant_colors[0].value > 200:
@@ -74,27 +66,23 @@ def process_image(image):
 
     """
     if __debug__:
-        print("inside color_detection process image, image shape is " + str(
-        image.size))
+        print("inside color_detection process image, image shape is " + str(image.size))
         image.save("test_image" + str(random.randint(0,100)) + ".jpg", "JPEG")
     """
-
-    width, height = image.shape
+    
+    height, width, channels = image.shape
     width_margin = int(width - (width * .65))
     height_margin = int(height - (height * .75))
-    for x in range(width_margin, width - width_margin, 4):
-        for y in range(height_margin, height - height_margin):
-            r, g, b = image[y, x]
+    for row in range(height_margin, height - height_margin):
+        for col in range(width_margin, width - width_margin):
+            r,g,b = image[row][col]
             key = "%s:%s:%s" % (r, g, b,)
             key = (r, g, b,)
-            image_color_quantities[key] = image_color_quantities.get(key,
-                                                                     0) + 1
+            image_color_quantities[key] = image_color_quantities.get(key, 0) + 1
 
-    total_assessed_pixels = sum(
-        [v for k, v in list(image_color_quantities.items()) if v > 10])
-    strongest_color_wheels = [
-        (ColorWheel(k), v / float(total_assessed_pixels) * 100,) for k, v in
-        list(image_color_quantities.items()) if v > 10]
+    total_assessed_pixels = sum([v for k, v in list(image_color_quantities.items()) if v > 10])
+    strongest_color_wheels = [(ColorWheel(k), v / float(total_assessed_pixels) * 100,) for k, v in
+                              list(image_color_quantities.items()) if v > 10]
 
     final_colors = {}
 
@@ -103,8 +91,7 @@ def process_image(image):
 
     for color_wheel, strength in strongest_color_wheels:
         color = color_wheel.estimate_color()
-        final_colors[color.__class__] = final_colors.get(color.__class__,
-                                                         0) + strength
+        final_colors[color.__class__] = final_colors.get(color.__class__, 0) + strength
 
     for color, strength in list(final_colors.items()):
         # print ("%s - %s" % (color.__name__, strength, ))

@@ -25,19 +25,26 @@
 ### Demos
 We have demos for the following components:
 1. Eva analytics (pipeline for loading the dataset, training the filters, and outputting the optimal plan)
-```bash
-   cd $YOUR_EVA_DIRECTORY
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
    python pipeline.py
 ```
 2. Eva Query Optimizer (Will show converted queries for the original queries)
-```bash
-   cd $YOUR_EVA_DIRECTORY
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
    python query_optimizer/query_optimizer.py
 ```
 3. Eva Loader (Loads UA-DETRAC dataset)
-```bash
-   cd $YOUR_EVA_DIRECTORY
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
    python loaders/load.py
+```
+
+NEW!!! There are new versions of the loaders and filters.
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
+   python loaders/uadetrac_loader.py
+   python filters/minimum_filter.py
 ```
 
 2. EVA storage-system (Video compression and indexing system - *currently in progress*)
