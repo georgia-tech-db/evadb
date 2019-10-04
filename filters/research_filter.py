@@ -1,52 +1,44 @@
 """
-This file is composed of the composing preliminary and post filtering
-techniques.
+This file is composed of the composing preliminary and post filtering techniques.
+Main use of this code is for research purposes - eva_storage
 
 @Jaeho Bang
 """
 
-from copy import deepcopy
-
 import numpy as np
 import pandas as pd
 
-from filters.filter_template import FilterTemplate
+from copy import deepcopy
+from filters.abstract_filter import FilterTemplate
 from filters.models.ml_randomforest import MLRandomForest
+from filters.models.ml_svm import MLSVM
+from filters.models.ml_dnn import MLMLP
 
-# Meant to be a black box for trying all models available and returning
-# statistics and model for
+
+# Meant to be a black box for trying all models available and returning statistics and model for
 # the query optimizer to choose for a given query
 
 """
-Each Filter object considers 1 specific query. Either the query optimizer or 
-the pipeline needs to manage a diction of Filters
- 
+Each Filter object considers 1 specific query. Either the query optimizer or the pipeline needs to manage a diction of Filters
+
 """
 
 
-class FilterMinimum(FilterTemplate):
+class FilterResearch(FilterTemplate):
     def __init__(self):
 
         """
-        self.pre_models = {'pca': pca_model_instance, 'hashing':
-        hashing_model_instance, 'sampling': sampling_model_instance}
-        self.post_models = {'rf': rf_instance, 'svm':svm_instance,
-        'dnn':dnn_instance}
-        self.all_models = {'rf': {'pca': (pca_model_instance,
-        rf_instance_for_pca),
-                                  'hashing': (hashing_instance,
-                                  rf_instance_for_hashing),
-                                  'sampling': (sampling_instance,
-                                  rf_instance_for_sampling),
+        self.pre_models = {'pca': pca_model_instance, 'hashing': hashing_model_instance, 'sampling': sampling_model_instance}
+        self.post_models = {'rf': rf_instance, 'svm':svm_instance, 'dnn':dnn_instance}
+        self.all_models = {'rf': {'pca': (pca_model_instance, rf_instance_for_pca),
+                                  'hashing': (hashing_instance, rf_instance_for_hashing),
+                                  'sampling': (sampling_instance, rf_instance_for_sampling),
                                   },
-                           'svm': {'pca': (pca_model_instance,
-                           svm_instance_for_pca),.....
+                           'svm': {'pca': (pca_model_instance, svm_instance_for_pca),.....
                            }
 
-        -> post models that doesn't use any pre processing models are saved
-        in self.post_models
-        -> post models that do use pre processing models are saved in
-        self.all_models
+        -> post models that doesn't use any pre processing models are saved in self.post_models
+        -> post models that do use pre processing models are saved in self.all_models
         -> in this base class, we take care of those things, so no worries!
         """
 
@@ -55,7 +47,11 @@ class FilterMinimum(FilterTemplate):
         self.all_models = {}
 
         rf = MLRandomForest()
+        svm = MLSVM()
+        dnn = MLMLP()
         self.addPostModel('rf', rf)
+        self.addPostModel('svm', svm)
+        self.addPostModel('dnn', dnn)
 
     def updateModelStatus(self):
         """
@@ -71,14 +67,12 @@ class FilterMinimum(FilterTemplate):
                 self.all_models[post_model_name] = {}
             for pre_model_name in pre_model_names:
                 if pre_model_name not in self.all_models[post_model_name]:
-                    self.all_models[post_model_name][pre_model_name] = (
-                        self.pre_models[pre_model_name],
-                        deepcopy(self.post_models[post_model_name]))
+                    self.all_models[post_model_name][pre_model_name] = (self.pre_models[pre_model_name],
+                                                                        deepcopy(self.post_models[post_model_name]))
 
     def addPreModel(self, model_name, model):
         """
-        Add preprocessing machine learning/statistical models such as PCA,
-        Sampling, etc
+        Add preprocessing machine learning/statistical models such as PCA, Sampling, etc
         :param model_name: name of model must be string
         :param model: model
         :return: None
@@ -88,8 +82,7 @@ class FilterMinimum(FilterTemplate):
 
     def addPostModel(self, model_name, model):
         """
-        Add postprocessing machine learning/statistical models such as SVM,
-        DNN, random forest, etc
+        Add postprocessing machine learning/statistical models such as SVM, DNN, random forest, etc
         :param model_name: name of model must be string
         :param model: model
         :return: None
@@ -136,20 +129,17 @@ class FilterMinimum(FilterTemplate):
             pre_model.train(X, y)
 
         for post_model_names, internal_dict in self.all_models.items():
-            for pre_model_names, pre_post_instance_pair in \
-                    internal_dict.items():
+            for pre_model_names, pre_post_instance_pair in internal_dict.items():
                 pre_model, post_model = pre_post_instance_pair
                 X_transform = pre_model.predict(X)
                 post_model.train(X_transform)
 
-    def predict(self, X: np.ndarray, pre_model_name: str = None,
-                post_model_name: str = None) -> np.ndarray:
+    def predict(self, X: np.ndarray, pre_model_name: str = None, post_model_name: str = None) -> np.ndarray:
         pre_model_names = self.pre_models.keys()
         post_model_names = self.post_models.keys()
 
-        # If we haven't found the post model, there is no prediction to be
-        # done
-        # so we must raise an error
+        ## If we haven't found the post model, there is no prediction to be done
+        ## so we must raise an error
         if post_model_name is None:
             print("No Post Model is found.")
             print("  Available:", post_model_names)
@@ -169,25 +159,20 @@ class FilterMinimum(FilterTemplate):
             print("  Using only given post model for prediction...")
             return self.post_models[post_model_name].predict(X)
         else:
-            pre_model, post_model = self.all_models[post_model_name][
-                pre_model_name]
+            pre_model, post_model = self.all_models[post_model_name][pre_model_name]
             X_transform = pre_model.predict(X)
             return post_model.predict(X_transform)
 
     def getAllStats(self):
         """
         TODO!!!!
-        will need to organize the stats in a panda format where rows
-        correspond to models and cols correspond to RCA values
-        One thing to think about is to whether to separate the stats between
-        preprocessing models or post processing models....
+        will need to organize the stats in a panda format where rows correspond to models and cols correspond to RCA values
+        One thing to think about is to whether to separate the stats between preprocessing models or post processing models....
 
 
         Header(columns) would be [Name, R, C, A]
-        The name of pre_model, post_model pair will be separated using
-        semi-colon(;)
-        However, if no pre_model is used, only the name of the post_model
-        will appear
+        The name of pre_model, post_model pair will be separated using semi-colon(;)
+        However, if no pre_model is used, only the name of the post_model will appear
         ex1) if 'pca' and 'svm' -> 'pca;svm'
         ex2) if 'svm' -> 'svm'
 
@@ -209,8 +194,7 @@ class FilterMinimum(FilterTemplate):
                 pre_model, post_model = model_pair
                 model_name = pre_model_name + ';' + post_model_name
                 name_col.append(model_name)
-                c_col.append(
-                    getattr(pre_model, 'C') + getattr(post_model, 'C'))
+                c_col.append(getattr(pre_model, 'C') + getattr(post_model, 'C'))
                 r_col.append(getattr(post_model, 'R'))
                 a_col.append(getattr(post_model, 'A'))
 
@@ -226,7 +210,7 @@ class FilterMinimum(FilterTemplate):
 
 
 if __name__ == "__main__":
-    filter = FilterMinimum()
+    filter = FilterResearch()
 
     X = np.random.random([100, 30, 30, 3])
     y = np.random.random([100])
@@ -247,27 +231,10 @@ if __name__ == "__main__":
     print(stats)
     print("filter got all stats")
 
-    """
-    from loaders.loader_uadetrac import LoaderUADetrac
-  
-    loader = LoaderUADetrac()
-    X = loader.load_images()
-    y = loader.load_labels()
-    y_vehicle = y['vehicle']
-    y_iscar = []
-  
-    vehicle_types = ["car", "van", "bus", "others"]
-    for i in range(len(y_vehicle)):
-      if "Sedan" in y_vehicle[i]:
-        y_iscar.append(1)
-      else:
-        y_iscar.append(0)
-  
-    y_iscar = np.array(y_iscar, dtype=np.uint8)
-  
-    division = int(X.shape[0] * 0.8)
-    X_train = X[:division]
-    X_test = X[division:]
-    y_iscar_train = y_iscar[:division]
-    y_iscar_test = y_iscar[division:]
-    """
+
+
+
+
+
+
+
