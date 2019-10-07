@@ -3,16 +3,16 @@ import sys
 
 import numpy as np
 
-import filters.pp as pp
+from src import filters as pp, constants
 import loaders.load as load
 import query_optimizer.query_optimizer as qo
 
 try:
-    import constants
+    pass
 except ImportError:
     sys.path.append("/nethome/jbang36/eva")
     sys.path.append("/home/jaeho-linux/fall2018/DDL/Eva")
-    import constants
+    import src.constants
 
 
 # TODO: Fill this file in with the components loaded from other files
