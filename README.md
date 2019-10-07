@@ -78,7 +78,7 @@ All code related to this module is in */filters*
 
 ##### UDFs
 This module contains all imported deep learning models. Currently, there is no code that performs this task. It is a work in progress.
-Information of current work is explained in detail [here](udfs/README.md).
+Information of current work is explained in detail [here](src/udfs/README.md).
 
 All related code should be inside */udfs*
 

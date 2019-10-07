@@ -9,10 +9,10 @@ import numpy as np
 import pandas as pd
 
 from copy import deepcopy
-from filters.abstract_filter import FilterTemplate
-from filters.models.ml_randomforest import MLRandomForest
-from filters.models.ml_svm import MLSVM
-from filters.models.ml_dnn import MLMLP
+from src.filters import FilterTemplate
+from src.filters.models.ml_randomforest import MLRandomForest
+from src.filters import MLSVM
+from src.filters import MLMLP
 
 
 # Meant to be a black box for trying all models available and returning statistics and model for
