@@ -1,5 +1,5 @@
-from loaders.color_detection import process_image
-from loaders.intersection_detection import intersection_detector
+from .color_detection import process_image
+from .intersection_detection import intersection_detector
 import time
 import numpy as np
 
