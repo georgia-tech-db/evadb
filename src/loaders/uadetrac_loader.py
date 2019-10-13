@@ -15,8 +15,8 @@ import xml.etree.ElementTree as ET
 import cv2
 import numpy as np
 
-from .TaskManager import TaskManager
-from .abstract_loader import AbstractLoader
+from src.loaders.TaskManager import TaskManager
+from src.loaders.abstract_loader import AbstractLoader
 
 
 # Make this return a dictionary of label to data for the whole dataset
@@ -40,8 +40,8 @@ class UADetracLoader(AbstractLoader):
         self.images = None
         self.labels = None
         self.boxes = None
-        self.eva_dir = os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__)))
+        self.eva_dir = os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))))
         self.video_start_indices = []
 
     def load_video(self, dir: str):
@@ -112,7 +112,7 @@ class UADetracLoader(AbstractLoader):
         results = self._load_XML(dir)
         if results is not None:
             vehicle_type_labels, speed_labels, color_labels, \
-                intersection_labels = results
+            intersection_labels = results
             self.labels = {'vehicle': vehicle_type_labels,
                            'speed': speed_labels,
                            'color': color_labels,
@@ -219,7 +219,7 @@ class UADetracLoader(AbstractLoader):
                 curr_frame_num = int(frame.attrib['num'])
                 if len(boxes_dataset) < cumu_count + curr_frame_num - 1:
                     boxes_dataset.extend([None] * (
-                        cumu_count + curr_frame_num - len(boxes_dataset)))
+                            cumu_count + curr_frame_num - len(boxes_dataset)))
                 for box in frame.iter('box'):
                     left = int(
                         float(box.attrib['left']) * width / original_width)
@@ -249,6 +249,29 @@ class UADetracLoader(AbstractLoader):
 
         return original_speed * 5
 
+    def parse_frame_att(self, frame):
+        car_per_frame = []
+        speed_per_frame = []
+        color_per_frame = []
+        intersection_per_frame = []
+
+        for att in frame.iter('attribute'):
+            if att.attrib['vehicle_type']:
+                car_per_frame.append(att.attrib['vehicle_type'])
+            if att.attrib['speed']:
+                speed_per_frame.append(self._convert_speed(
+                    float(att.attrib['speed'])))
+            if 'color' in att.attrib.keys():
+                color_per_frame.append(att.attrib['color'])
+        return car_per_frame, speed_per_frame, color_per_frame, \
+               intersection_per_frame
+
+    def populate_label(self, per_frame, labels):
+        if len(per_frame) == 0:
+            labels.append(None)
+        else:
+            labels.append(per_frame)
+
     def _load_XML(self, directory):
         """
         UPDATE: vehicle colors can now be extracted through the xml files!!!
@@ -256,14 +279,15 @@ class UADetracLoader(AbstractLoader):
         :param directory:
         :return:
         """
-        car_labels = []
-        speed_labels = []
-        color_labels = []
-        intersection_labels = []
         if self.images is None:
             warnings.warn("Must load image before loading labels...returning",
                           Warning)
             return None
+
+        car_labels = []
+        speed_labels = []
+        color_labels = []
+        intersection_labels = []
 
         print("walking", directory, "for xml parsing")
         for root, subdirs, files in os.walk(directory):
@@ -284,41 +308,16 @@ class UADetracLoader(AbstractLoader):
                         speed_labels.append(
                             [None] * (curr_frame_num - start_frame_num))
 
-                    car_per_frame = []
-                    speed_per_frame = []
-                    color_per_frame = []
-                    intersection_per_frame = []
-
-                    for att in frame.iter('attribute'):
-                        if (att.attrib['vehicle_type']):
-                            car_per_frame.append(att.attrib['vehicle_type'])
-                        if (att.attrib['speed']):
-                            speed_per_frame.append(self._convert_speed(
-                                float(att.attrib['speed'])))
-                        if ('color' in att.attrib.keys()):
-                            color_per_frame.append(att.attrib['color'])
+                    car_per_frame, speed_per_frame, color_per_frame, \
+                    intersection_per_frame = self.parse_frame_att(frame)
 
                     assert (len(car_per_frame) == len(speed_per_frame))
 
-                    if len(car_per_frame) == 0:
-                        car_labels.append(None)
-                    else:
-                        car_labels.append(car_per_frame)
-
-                    if len(speed_per_frame) == 0:
-                        speed_labels.append(None)
-                    else:
-                        speed_labels.append(speed_per_frame)
-
-                    if len(color_per_frame) == 0:
-                        color_labels.append(None)
-                    else:
-                        color_labels.append(color_per_frame)
-
-                    if len(intersection_per_frame) == 0:
-                        intersection_labels.append(None)
-                    else:
-                        intersection_labels.append(intersection_per_frame)
+                    self.populate_label(car_per_frame, car_labels)
+                    self.populate_label(speed_per_frame, speed_labels)
+                    self.populate_label(color_per_frame, color_labels)
+                    self.populate_label(intersection_per_frame,
+                                        intersection_labels)
 
                     start_frame = False
 
@@ -351,6 +350,7 @@ def get_parser():
 
 
 if __name__ == "__main__":
+
     parser = get_parser()
     args = parser.parse_args()
 
