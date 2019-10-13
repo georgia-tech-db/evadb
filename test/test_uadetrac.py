@@ -1,7 +1,9 @@
 import sys
 
-sys.path.append('../')
-from src.loaders.uadetrac_loader import UADetracLoader
+try:
+    from src.loaders.uadetrac_loader import UADetracLoader
+except ImportError:
+    sys.path.append('../')
 
 
 def test():
