@@ -23,9 +23,7 @@ install:
   - conda list
 
 script:
-  - cd test
-  - pytest
-  - cd ..
+  - pytest test
   - pycodestyle --select E test src/loaders
 
 after_success:
