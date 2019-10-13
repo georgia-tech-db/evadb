@@ -31,8 +31,8 @@ class UADetracLoader(AbstractLoader):
         self.intersection_filters = ["pt335", "pt342", "pt211", "pt208"]
         self.color_filters = ['white', 'black', 'silver', 'red']
 
-        ## original image height = 540
-        ## original image width = 960
+        # original image height = 540
+        # original image width = 960
         self.image_width = image_width
         self.image_height = image_height
         self.image_channels = 3
@@ -58,7 +58,7 @@ class UADetracLoader(AbstractLoader):
         Should be same shape as self.labels
         :return: boxes
         """
-        if dir == None:
+        if dir is None:
             dir = os.path.join(self.eva_dir, 'data', 'ua_detrac',
                                self.args.anno_path)
         self.boxes = np.array(self.get_boxes(dir))
@@ -106,13 +106,13 @@ class UADetracLoader(AbstractLoader):
         :return: labels
         """
 
-        if dir == None:
+        if dir is None:
             dir = os.path.join(self.eva_dir, 'data', 'ua_detrac',
                                self.args.anno_path)
         results = self._load_XML(dir)
         if results is not None:
             vehicle_type_labels, speed_labels, color_labels, \
-            intersection_labels = results
+                intersection_labels = results
             self.labels = {'vehicle': vehicle_type_labels,
                            'speed': speed_labels,
                            'color': color_labels,
@@ -219,8 +219,7 @@ class UADetracLoader(AbstractLoader):
                 curr_frame_num = int(frame.attrib['num'])
                 if len(boxes_dataset) < cumu_count + curr_frame_num - 1:
                     boxes_dataset.extend([None] * (
-                            cumu_count + curr_frame_num - len(
-                        boxes_dataset)))
+                        cumu_count + curr_frame_num - len(boxes_dataset)))
                 for box in frame.iter('box'):
                     left = int(
                         float(box.attrib['left']) * width / original_width)
@@ -349,6 +348,7 @@ def get_parser():
                         help='Define filename for saving and loading cached '
                              'video indices')
     return parser
+
 
 if __name__ == "__main__":
     parser = get_parser()

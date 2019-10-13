@@ -21,11 +21,12 @@ install:
   - conda env create -f environment_mac.yml
   - source activate eva_35
   - conda list
-  - cd test
 
 script:
+  - cd test
   - pytest
-  - pycodestyle --select E loaders filters query_optimizer
+  - cd ..
+  - pycodestyle --select E test src/loaders
 
 after_success:
   - coveralls
