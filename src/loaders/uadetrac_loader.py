@@ -112,7 +112,7 @@ class UADetracLoader(AbstractLoader):
         results = self._load_XML(dir)
         if results is not None:
             vehicle_type_labels, speed_labels, color_labels, \
-            intersection_labels = results
+                intersection_labels = results
             self.labels = {'vehicle': vehicle_type_labels,
                            'speed': speed_labels,
                            'color': color_labels,
@@ -219,7 +219,7 @@ class UADetracLoader(AbstractLoader):
                 curr_frame_num = int(frame.attrib['num'])
                 if len(boxes_dataset) < cumu_count + curr_frame_num - 1:
                     boxes_dataset.extend([None] * (
-                            cumu_count + curr_frame_num - len(boxes_dataset)))
+                        cumu_count + curr_frame_num - len(boxes_dataset)))
                 for box in frame.iter('box'):
                     left = int(
                         float(box.attrib['left']) * width / original_width)
@@ -264,7 +264,7 @@ class UADetracLoader(AbstractLoader):
             if 'color' in att.attrib.keys():
                 color_per_frame.append(att.attrib['color'])
         return car_per_frame, speed_per_frame, color_per_frame, \
-               intersection_per_frame
+            intersection_per_frame
 
     def populate_label(self, per_frame, labels):
         if len(per_frame) == 0:
@@ -309,7 +309,7 @@ class UADetracLoader(AbstractLoader):
                             [None] * (curr_frame_num - start_frame_num))
 
                     car_per_frame, speed_per_frame, color_per_frame, \
-                    intersection_per_frame = self.parse_frame_att(frame)
+                        intersection_per_frame = self.parse_frame_att(frame)
 
                     assert (len(car_per_frame) == len(speed_per_frame))
 
