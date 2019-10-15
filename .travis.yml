@@ -19,20 +19,12 @@ before_install:
 
 install:
   - conda env create -f environment_mac.yml
-  #  - conda init bash
-  #  - conda env create -n test-env python=$TRAVIS_PYTHON_VERSION -f environment_mac.yml
   - source activate eva_35
   - conda list
-  #- cd src/processor/
-  #- protoc object_detection/protos/*.proto --python_out=.
-  #- export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
-  #- cd ../../
-  #- cd scripts/
-  #- python download_content.py --models-only
-  #- cd ..
 
 script:
-  - pytest ./query_optimizer/tests/query_optimizer_test_pytest.py --cov-report= --cov=./ -s -v
-  - pycodestyle --select E loaders filters query_optimizer
+  - pytest test
+  - pycodestyle --select E test src/loaders
+
 after_success:
   - coveralls
