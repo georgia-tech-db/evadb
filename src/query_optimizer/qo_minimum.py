@@ -13,7 +13,7 @@ from itertools import product
 
 import numpy as np
 
-import constants
+from src import constants
 from query_optimizer.qo_template import QOTemplate
 
 
