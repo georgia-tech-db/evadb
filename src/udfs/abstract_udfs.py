@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from eva.models import FrameBatch, FrameInfo, Prediction
+from src.models import FrameBatch, FrameInfo, Prediction
 
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
@@ -41,4 +41,3 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
             List[Prediction]: The predictions made by the classifier
         """
         pass
-
