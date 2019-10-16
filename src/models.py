@@ -85,6 +85,7 @@ class FrameInfo:
                self.height == other.height
 
 
+
 class Frame:
     """
     Data model used for storing video frame related information
@@ -111,7 +112,7 @@ class Frame:
 
     @property
     def info(self):
-        return self._index
+        return self._info
 
     def __eq__(self, other):
         return self.index == other.index and \
@@ -132,6 +133,7 @@ class FrameBatch:
     def __init__(self, frames, info):
         self._info = info
         self._frames = tuple(frames)
+        self._batch_size = len(frames)
 
     @property
     def frames(self):
@@ -140,6 +142,10 @@ class FrameBatch:
     @property
     def info(self):
         return self._info
+    
+    @property
+    def batch_size(self):
+        return self._batch_size
 
     def __eq__(self, other):
         return self.info == other.info and \
