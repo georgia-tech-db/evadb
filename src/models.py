@@ -62,10 +62,11 @@ class FrameInfo:
 
     """
 
-    def __init__(self, height, width, color_space):
+    def __init__(self, height, width, channels, color_space):
         self._color_space = color_space
         self._width = width
         self._height = height
+        self._channels = channels
 
     @property
     def width(self):
@@ -79,11 +80,15 @@ class FrameInfo:
     def color_space(self):
         return self._color_space
 
+    @property
+    def channels(self):
+        return self._channels
+
     def __eq__(self, other):
         return self.color_space == other.color_space and \
                self.width == other.width and \
-               self.height == other.height
-
+               self.height == other.height and \
+               self.channels == other.channels
 
 
 class Frame:
@@ -142,7 +147,7 @@ class FrameBatch:
     @property
     def info(self):
         return self._info
-    
+
     @property
     def batch_size(self):
         return self._batch_size
