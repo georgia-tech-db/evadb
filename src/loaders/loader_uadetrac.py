@@ -221,20 +221,28 @@ class UADetracLoader(AbstractLoader):
                     boxes_dataset.extend([None] * (
                         cumu_count + curr_frame_num - len(boxes_dataset)))
                 for box in frame.iter('box'):
-                    left = int(
-                        float(box.attrib['left']) * width / original_width)
-                    top = int(
-                        float(box.attrib['top']) * height / original_height)
-                    right = int((float(box.attrib['left']) + float(
-                        box.attrib['width'])) * width / original_width)
-                    bottom = int((float(box.attrib['top']) + float(
-                        box.attrib['height'])) * height / original_height)
-
+                    top, left, bottom, right = self.get_corners(box,
+                                                                width /
+                                                                original_width,
+                                                                height /
+                                                                original_height
+                                                                )
                     boxes_frame.append((top, left, bottom, right))
 
-            boxes_dataset.append(boxes_frame)
+                boxes_dataset.append(boxes_frame)
 
         return boxes_dataset
+
+    def get_corners(self, box, width_scale, height_scale):
+        left = int(
+            float(box.attrib['left']) * width_scale)
+        top = int(
+            float(box.attrib['top']) * height_scale)
+        right = int((float(box.attrib['left']) + float(
+            box.attrib['width'])) * width_scale)
+        bottom = int((float(box.attrib['top']) + float(
+            box.attrib['height'])) * height_scale)
+        return top, left, bottom, right
 
     def _convert_speed(self, original_speed):
         """

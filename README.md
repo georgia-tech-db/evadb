@@ -1,7 +1,7 @@
 ## EVA (Exploratory Video Analytics)
 
-[![Build Status](https://travis-ci.org/georgia-tech-db/Eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/Eva)
-[![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/Eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/Eva?branch=master)
+[![Build Status](https://travis-ci.org/georgia-tech-db/Eva.svg?branch=loader-test)](https://travis-ci.com/georgia-tech-db/Eva)
+[![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/Eva/badge.svg?branch=loader-test)](https://coveralls.io/github/georgia-tech-db/Eva?branch=loader-test)
 ### Table of Contents
 * Installation
 * Demos
