@@ -35,8 +35,6 @@ def test_load_annotations2():
         'color': [None, None],
         'intersection': [None, None]
     }
-    print(loader.labels)
-    print(labels)
     assert labels == loader.labels
 
 
