@@ -56,13 +56,14 @@ class FrameInfo:
     Data model contains information about the frame
 
     Arguments:
-        height (int): Height of the image
-        width (int): Width of the image
-        color_space (ColorSpace): color space of the frame (RGB, HSV, BGR, GRAY)
+        height (int)(default: -1): Height of the image : left as -1 when the height of the frame is not required
+        width (int)(default: -1): Width of the image : left as -1 when the height of the frame is not required
+        channels (int)(default: 3): Number of input channels in the video
+        color_space (ColorSpace)(default: ColorSpace.RGB): color space of the frame (RGB, HSV, BGR, GRAY)
 
     """
 
-    def __init__(self, height, width, channels, color_space):
+    def __init__(self, height=-1, width=-1, channels=3, color_space=ColorSpace.RGB):
         self._color_space = color_space
         self._width = width
         self._height = height
@@ -151,6 +152,9 @@ class FrameBatch:
     @property
     def batch_size(self):
         return self._batch_size
+
+    def frames_as_numpy_array(self):
+        return np.array([frame.data for frame in self.frames])
 
     def __eq__(self, other):
         return self.info == other.info and \
