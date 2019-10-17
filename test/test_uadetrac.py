@@ -6,10 +6,10 @@ image_dir = root + "/test/data/small-data"
 anno_dir = root + "/test/data/small-annotations"
 
 try:
-    from src.loaders.uadetrac_loader import UADetracLoader
+    from src.loaders.loader_uadetrac import UADetracLoader
 except ImportError:
     sys.path.append(root)
-    from src.loaders.uadetrac_loader import UADetracLoader
+    from src.loaders.loader_uadetrac import UADetracLoader
 
 
 def test_load_images():
@@ -38,3 +38,17 @@ def test_load_annotations2():
     print(loader.labels)
     print(labels)
     assert labels == loader.labels
+
+
+def test_load_boxes():
+    loader = UADetracLoader(None, 400, 400)
+    width_scale = 400 / 960
+    height_scale = 400 / 540
+    loader.load_boxes(anno_dir)
+
+    top = int(378.8 * height_scale)
+    left = int(592.75 * width_scale)
+    bottom = int((378.8 + 162.2) * height_scale)
+    right = int((592.75 + 160.05) * width_scale)
+    box = (top, left, bottom, right)
+    assert loader.boxes[0][0] == box
