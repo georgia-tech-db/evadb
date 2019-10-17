@@ -23,8 +23,8 @@ install:
   - conda list
 
 script:
-  - pytest test
   - pycodestyle --select E test src/loaders
+  - pytest test/ --cov-report= --cov=./ -s -v
 
 after_success:
   - coveralls
