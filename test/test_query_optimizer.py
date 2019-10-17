@@ -1,4 +1,12 @@
-from query_optimizer.query_optimizer import QueryOptimizer
+import os
+import sys
+
+root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+try:
+    from src.query_optimizer.query_optimizer import QueryOptimizer
+except ImportError:
+    sys.path.append(root)
+    from src.query_optimizer.query_optimizer import QueryOptimizer
 
 obj = QueryOptimizer()
 
@@ -67,8 +75,8 @@ def test_convertL2S():
 
     # case for paranthesis hasn't been implemented yet when its done need to
     # add test cases for that.
-    assert True
+    # assert True
 
 
 # test_parseQuery()
-test_convertL2S()
+# test_convertL2S()
