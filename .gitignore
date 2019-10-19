@@ -121,3 +121,5 @@ data/*
 !data/ua_detrac/README.md
 !data/ua_detrac/*.sh
 
+#Cache
+cache/*

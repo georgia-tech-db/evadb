@@ -3,7 +3,7 @@ This folder contains all util functions needed to load the dataset with
 annotation.
 
 Demo could be run with the command
-python loaders/load.py
+python storage/load.py
 
 @Jaeho Bang
 """

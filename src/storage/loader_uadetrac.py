@@ -15,14 +15,26 @@ import xml.etree.ElementTree as ET
 import cv2
 import numpy as np
 
-from src.loaders.TaskManager import TaskManager
-from src.loaders.abstract_loader import AbstractLoader
+from src.catalog.entity.dataset import Dataset
+from src.storage.TaskManager import TaskManager
+from src.storage.abstract_loader import AbstractLoader
 
 
 # Make this return a dictionary of label to data for the whole dataset
 
-class UADetracLoader(AbstractLoader):
-    def __init__(self, args, image_width=300, image_height=300):
+class LoaderUadetrac(AbstractLoader):
+    def __init__(self, image_width=300, image_height=300,
+                 cache_dir=None, args=None):
+        # original image height = 540
+        # original image width = 960
+        self.image_width = image_width
+        self.image_height = image_height
+        self.image_channels = 3
+        self.name = 'uadetrac'
+        self.cache_dir = os.path.join(cache_dir, self.name)
+        if not os.path.exists(self.cache_dir):
+            os.mkdir(self.cache_dir)
+
         self.args = args
         self.data_dict = {}
         self.label_dict = {}
@@ -30,12 +42,6 @@ class UADetracLoader(AbstractLoader):
         self.speed_filters = [40, 50, 60, 65, 70]
         self.intersection_filters = ["pt335", "pt342", "pt211", "pt208"]
         self.color_filters = ['white', 'black', 'silver', 'red']
-
-        # original image height = 540
-        # original image width = 960
-        self.image_width = image_width
-        self.image_height = image_height
-        self.image_channels = 3
         self.task_manager = TaskManager()
         self.images = None
         self.labels = None
@@ -64,39 +70,53 @@ class UADetracLoader(AbstractLoader):
         self.boxes = np.array(self.get_boxes(dir))
         return self.boxes
 
-    def load_images(self, image_dir: str = None, image_size=None):
+    def get_next_video_id(self):
+        files = os.listdir(self.cache_dir)
+        if len(files) == 0:
+            return 1
+        files.sort()
+        return int(files[-1].split('.')[0]) + 1
+
+    def load_images(self, video_dir: str, conn):
         """
         This function simply loads image of given image
         :return: image_array (numpy)
         """
-        if image_size is not None:
-            self.image_height = image_size
-            self.image_width = image_size
+        images = self.read_images(video_dir)
+        self.save_images(images, self.get_next_video_id())
+        Dataset.increment(conn, self.name, images.shape[0], 1)
 
-        if image_dir is None:
-            image_dir = os.path.join(self.eva_dir, 'data', 'ua_detrac',
-                                     self.args.image_path)
+
+    def save_images(self, images, video_id):
+        if images is None:
+            warnings.warn("No image loaded, call load_images() first", Warning)
+        elif type(images) is np.ndarray:
+            np.save(os.path.join(self.cache_dir, str(video_id)), images)
+        else:
+            warnings.warn("Image array type is not np.....cannot save",
+                          Warning)
+
+    def read_images(self, video_dir):
+        if video_dir is None:
+            raise Exception
+
         file_names = []
-        for root, subdirs, files in os.walk(image_dir):
+        for root, subdirs, files in os.walk(video_dir):
             files.sort()
-            self.video_start_indices.append(len(file_names))
             for file in files:
                 file_names.append(os.path.join(root, file))
 
-        print("Number of files added: ", len(file_names))
-
-        self.images = np.ndarray(shape=(
-            len(file_names), self.image_height, self.image_width,
-            self.image_channels),
-            dtype=np.uint8)
+        images = np.ndarray(shape=(len(file_names), self.image_height,
+                                   self.image_width, self.image_channels),
+                            dtype=np.uint8)
 
         for i in range(len(file_names)):
             file_name = file_names[i]
             img = cv2.imread(file_name)
             img = cv2.resize(img, (self.image_width, self.image_height))
-            self.images[i] = img
+            images[i] = img
 
-        return self.images
+        return images
 
     def load_labels(self, dir: str = None):
         """
@@ -112,7 +132,7 @@ class UADetracLoader(AbstractLoader):
         results = self._load_XML(dir)
         if results is not None:
             vehicle_type_labels, speed_labels, color_labels, \
-                intersection_labels = results
+            intersection_labels = results
             self.labels = {'vehicle': vehicle_type_labels,
                            'speed': speed_labels,
                            'color': color_labels,
@@ -130,23 +150,6 @@ class UADetracLoader(AbstractLoader):
         """
         return self.video_start_indices
 
-    def save_images(self):
-        # we need to save the image / video start indexes
-        # convert list to np.array
-        save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                self.args.cache_image_name)
-        save_dir_vi = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                   self.args.cache_vi_name)
-        if self.images is None:
-            warnings.warn("No image loaded, call load_images() first", Warning)
-        elif type(self.images) is np.ndarray:
-            np.save(save_dir, self.images)
-            np.save(save_dir_vi, np.array(self.video_start_indices))
-            print("saved images to", save_dir)
-            print("saved video indices to", save_dir_vi)
-        else:
-            warnings.warn("Image array type is not np.....cannot save",
-                          Warning)
 
     def save_labels(self):
         save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
@@ -172,14 +175,14 @@ class UADetracLoader(AbstractLoader):
         else:
             warnings.warn("Labels type is not np....cannot save", Warning)
 
-    def load_cached_images(self):
-        save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                self.args.cache_image_name)
-        save_dir_vi = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                   self.args.cache_vi_name)
-        self.images = np.load(save_dir)
-        self.video_start_indices = np.load(save_dir_vi)
-        return self.images
+    def load_cached_images(self, video_id):
+        # save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
+        #                         self.args.cache_image_name)
+        # save_dir_vi = os.path.join(self.eva_dir, 'data', self.args.cache_path,
+        #                            self.args.cache_vi_name)
+        images = np.load(os.path.join(self.cache_dir, str(video_id)+'.npy'))
+        # self.video_start_indices = np.load(save_dir_vi)
+        return images
 
     def load_cached_boxes(self):
         save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
@@ -219,7 +222,7 @@ class UADetracLoader(AbstractLoader):
                 curr_frame_num = int(frame.attrib['num'])
                 if len(boxes_dataset) < cumu_count + curr_frame_num - 1:
                     boxes_dataset.extend([None] * (
-                        cumu_count + curr_frame_num - len(boxes_dataset)))
+                            cumu_count + curr_frame_num - len(boxes_dataset)))
                 for box in frame.iter('box'):
                     top, left, bottom, right = self.get_corners(box,
                                                                 width /
@@ -272,7 +275,7 @@ class UADetracLoader(AbstractLoader):
             if 'color' in att.attrib.keys():
                 color_per_frame.append(att.attrib['color'])
         return car_per_frame, speed_per_frame, color_per_frame, \
-            intersection_per_frame
+               intersection_per_frame
 
     def populate_label(self, per_frame, labels):
         if len(per_frame) == 0:
@@ -317,7 +320,7 @@ class UADetracLoader(AbstractLoader):
                             [None] * (curr_frame_num - start_frame_num))
 
                     car_per_frame, speed_per_frame, color_per_frame, \
-                        intersection_per_frame = self.parse_frame_att(frame)
+                    intersection_per_frame = self.parse_frame_att(frame)
 
                     assert (len(car_per_frame) == len(speed_per_frame))
 
@@ -365,7 +368,7 @@ if __name__ == "__main__":
     import time
 
     st = time.time()
-    loader = UADetracLoader(args)
+    loader = LoaderUadetrac(args)
     images = loader.load_images()
     labels = loader.load_labels()
     boxes = loader.load_boxes()
