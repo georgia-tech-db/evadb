@@ -3,11 +3,26 @@
 [![Build Status](https://travis-ci.org/georgia-tech-db/Eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/Eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/Eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/Eva?branch=master)
 ### Table of Contents
+* Rule Based Query Optimizer Status
 * Installation
 * Demos
 * Eva core
 * Eva storage 
 * Dataset 
+
+### Rule Based Query Optimizer Status
+10/19/2019
+Completed a basic query rewriter. The input is a logial plan tree and the output is a new logical plan tree that has been rewritten to be more optimal. 
+Implementation Milestones 
+* Predicate pushdown 
+* Projection pushdown
+* A print function has been inplemented to visualize the created tree.
+
+To run the newly created code, simply run: 
+python rule_query_optmizer.py 
+This file is located in: the query_optimizer folder. 
+
+Implementation that still needs to be done includes linking up the newly created rule base query optimizer, to the rest of EVA. 
 
 
 ### Installation
