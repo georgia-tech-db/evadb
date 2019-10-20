@@ -16,11 +16,14 @@ Completed a basic query rewriter. The input is a logial plan tree and the output
 Implementation Milestones 
 * Predicate pushdown 
 * Projection pushdown
+* Test cases for Predicate Pushdown and Projection Pushdown
 * A print function has been inplemented to visualize the created tree.
-
 To run the newly created code, simply run: 
 python rule_query_optmizer.py 
 This file is located in: the query_optimizer folder. 
+There are two test cases: 
+* test_predicate_push()
+* test_projection_push()
 
 Implementation that still needs to be done includes linking up the newly created rule base query optimizer, to the rest of EVA. 
 
