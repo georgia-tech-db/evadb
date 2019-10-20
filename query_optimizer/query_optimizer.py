@@ -27,6 +27,15 @@ import constants
 eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(eva_dir)
 
+class Query:
+    def __init__(self, obj, score, model, red_rate):
+        self.obj = obj
+        self.score = score
+        self.model = model
+        self.red_rate = red_rate
+
+    def __lt__(self, other):
+        return self.score < other.score
 
 class QueryOptimizer:
     """
@@ -321,16 +330,17 @@ class QueryOptimizer:
                 evaluation_stats.append(reduc_rate)
             op_index += 1
 
-            evaluations.append(self.convertL2S(evaluation, query_operators))
-            evaluations_stats.append(
-                self._update_stats(evaluation_stats, query_operators))
-
-        max_index = np.argmax(np.array(evaluations_stats), axis=0)
+            evaluations.append(Query(self.convertL2S(evaluation, query_operators), self._update_stats(evaluation_stats, query_operators), evaluation_models_tmp, reduc_rate))
+            # evaluations_stats.append(
+            #     self._update_stats(evaluation_stats, query_operators))
+        evaluations.sort()
+        # max_index = np.argmax(np.array(evaluations_stats), axis=0)
+        max_index = 0
         best_query = evaluations[
-            max_index]  # this will be something like "t!=bus && t!=truck &&
+            max_index].obj  # this will be something like "t!=bus && t!=truck &&
         # t!=car"
-        best_models = evaluation_models[max_index]
-        best_reduction_rate = evaluations_stats[max_index]
+        best_models = evaluations[max_index].model
+        best_reduction_rate = evaluations[max_index].red_rate
 
         pp_names, op_names = self._convertQuery2PPOps(best_query)
         return [list(zip(pp_names, best_models)), op_names,
@@ -362,7 +372,7 @@ class QueryOptimizer:
         if len(evaluation_stats) == 0:
             return 0
         final_red = evaluation_stats[0]
-        assert (len(evaluation_stats) == len(query_operators) + 1)
+        # assert (len(evaluation_stats) == len(query_operators) + 1)
 
         for i in range(1, len(evaluation_stats)):
             if query_operators[i - 1] == "&&":
@@ -578,7 +588,7 @@ if __name__ == "__main__":
     print("Running Query Optimizer Demo...")
 
     for query in query_list_mod:
-        print(query, " -> ", (
-            qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
-        # print qo.run(query, synthetic_pp_list_short,
-        # synthetic_pp_stats_short, label_desc)
+        # print(query, " -> ", (
+        #     qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
+        print(qo.run(query, synthetic_pp_list_short,
+        synthetic_pp_stats_short, label_desc))
