@@ -211,26 +211,37 @@ class RuleQueryOptimizer():
 
 
 def test_predicate_push():
+    print('Testing Predicate Pushdown')
     root = ProjectionNode(columns=['T1.time'])
+    
     s1 = SelectNode(predicate='t=suv')
     s1.tablename = 'T1'
     s1.parent = root
+    
     j1 = JoinNode(tables=['T1', 'T2'], join_attrs=['T1.t', 'T2.t'])
     j1.parent = s1
+    
     t1 = Node(tablename='T1', value='T1')
     t2 = Node(tablename='T2', value='T2')
+    
     s1.children = {j1.tablename: j1}
     t1.parent = j1
     t2.parent = j1
+    
     j1.children = {t1.tablename: t1, t2.tablename: t2}
     root.children = {s1.tablename: s1}
-
+    
     plan_tree = LogicalPlanTree()
     plan_tree.root = root
-    return plan_tree
+    print('Original Plan Tree')
+    print(plan_tree)
+    qo = RuleQueryOptimizer(synthetic_pp_list, synthetic_pp_stats, label_desc)
+    new_tree = qo.run(plan_tree)
+    print(new_tree)
 
 
 def test_projection_push():
+    print('testing projection pushdown')
     root = ProjectionNode(columns=['T1.name', 'T2.timestamp'])
 
     j1 = JoinNode(tables=['T1', 'T2'], join_attrs=['T1.t', 'T2.t'])
@@ -251,18 +262,18 @@ def test_projection_push():
     root.children = {j1.tablename: j1}
     plan_tree = LogicalPlanTree()
     plan_tree.root = root
-    return plan_tree
+    print('Original Plan Tree')
+    print(plan_tree)
+    qo = RuleQueryOptimizer(synthetic_pp_list, synthetic_pp_stats, label_desc)
+    new_tree = qo.run(plan_tree)
+    print(new_tree)
+
+    
 
 
 
 
 if __name__ == '__main__':
-    #plan_tree = test_predicate_push()
+    plan_tree = test_predicate_push()
+    print('\n\n')
     plan_tree = test_projection_push()
-    print(plan_tree)
-    qo = RuleQueryOptimizer(synthetic_pp_list, synthetic_pp_stats, label_desc)
-    new_tree = qo.run(plan_tree)
-    print(new_tree)
-    # for query in query_list:
-    #     print(query, " -> ", (
-    #         qo.run(query)))
