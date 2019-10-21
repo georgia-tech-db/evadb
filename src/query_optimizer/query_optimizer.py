@@ -12,15 +12,10 @@ python query_optimizer/query_optimizer.py
 @Jaeho Bang
 
 """
-import os
 import socket
-# The query optimizer decide how to label the data points
-# Load the series of queries from a txt file?
-import sys
 import threading
 from itertools import product
 import json
-
 import numpy as np
 
 from src import constants
@@ -30,11 +25,11 @@ eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(eva_dir)
 sys.path.append(eva_dir)
 
-import constants
-
-
+# from query_optimizer.optimizer import Optimizer
+#TODO (galipremsagar): getting import issues in Optmizer import. please check
 
 class Query:
+
     def __init__(self, obj, score, model, red_rate):
         self.obj = obj
         self.score = score
@@ -44,7 +39,7 @@ class Query:
     def __lt__(self, other):
         return self.score < other.score
 
-class QueryOptimizer:
+class CostBasedQueryOptimizer:
     """
     TODO: If you have a classifier for =, you can make a classifier for !=
     TODO: Deal with parenthesis
@@ -259,7 +254,7 @@ class QueryOptimizer:
                             accuracy_budget):
         """
 
-        def QueryOptimizer(P, {trained PPs}):
+        def CostBasedQueryOptimizer(P, {trained PPs}):
           P = wrangler(P)
           {E} = compute_expressions(P,{trained PP},k)        #k is a fixed
           constant which limits number of individual PPs
@@ -506,7 +501,7 @@ if __name__ == "__main__":
                   "o": [constants.DISCRETE,
                         ["pt335", "pt342", "pt211", "pt208"]]}
 
-    qo = QueryOptimizer()
+    qo = CostBasedQueryOptimizer()
 
     print("Running Query Optimizer Demo...")
 
