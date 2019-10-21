@@ -1,24 +1,18 @@
 from .expr_parser import parse
 
-def cond_to_func(expr_or_func):
-    """
-    Helper function to help automatically interpret string expressions
-    when you manually construct a query plan.
-    """
-    # if it's a function already, then we're good
-    if hasattr(expr_or_func, "__call__"):
-        return expr_or_func
-    # otherwise, parse it as a string
-    if isinstance(expr_or_func, str):
-        return parse(expr_or_func)
-    raise Exception("Can't interpret as expression: %s" % expr_or_func)
 
-class Op(object):
-    """
-    Base class
+def _parse_expr(expr):
+    if hasattr(expr, "__call__"):
+        return expr
+    if isinstance(expr, str):
+        return parse(expr)
+    raise Exception("Can't interpret as expression: %s" % expr)
 
-    all operators have a single parent
-    an operator may have multiple children
+
+class Operator(object):
+    """
+    Operator Base class.
+    Creates tree structure.
     """
 
     def __init__(self):
@@ -36,14 +30,14 @@ class Op(object):
         """
         if not self.p: return
         p = self.p
-        if isinstance(p, UnaryOp):
+        if isinstance(p, UnaryOperator):
             p.c = newop
-        if isinstance(p, BinaryOp):
+        if isinstance(p, BinaryOperator):
             if p.l == self:
                 p.l = newop
             elif p.r == self:
                 p.r = newop
-        if isinstance(p, NaryOp):
+        if isinstance(p, NaryOperator):
             if self in p.cs:
                 cs[cs.index(self)] = newop
             p.cs = cs
@@ -64,7 +58,7 @@ class Op(object):
     def children(self):
         """
         Go through all attributes of this object and return those that
-        are subclasses of Op
+        are subclasses of Operator
         """
         children = []
         for key, attrval in self.__dict__.items():
@@ -73,7 +67,7 @@ class Op(object):
             if not isinstance(attrval, list):
                 attrval = [attrval]
             for v in attrval:
-                if v and isinstance(v, Op):
+                if v and isinstance(v, Operator):
                     children.append(v)
         return children
 
@@ -150,22 +144,22 @@ class Op(object):
         return "\n".join(lines)
 
 
-class UnaryOp(Op):
+class UnaryOperator(Operator):
     def __init__(self, c):
-        super(UnaryOp, self).__init__()
+        super(UnaryOperator, self).__init__()
         self.c = c
         if c:
             c.p = self
 
     def __setattr__(self, attr, v):
-        super(UnaryOp, self).__setattr__(attr, v)
+        super(UnaryOperator, self).__setattr__(attr, v)
         if attr == "c" and v:
             self.c.p = self
 
 
-class BinaryOp(Op):
+class BinaryOperator(Operator):
     def __init__(self, l, r):
-        super(BinaryOp, self).__init__()
+        super(BinaryOperator, self).__init__()
         self.l = l
         self.r = r
         if l:
@@ -174,34 +168,26 @@ class BinaryOp(Op):
             r.p = self
 
     def __setattr__(self, attr, v):
-        super(BinaryOp, self).__setattr__(attr, v)
+        super(BinaryOperator, self).__setattr__(attr, v)
         if attr in ("l", "r") and v:
             v.p = self
 
 
-class NaryOp(Op):
+class NaryOperator(Operator):
     def __init__(self, cs):
-        super(NaryOp, self).__init__()
+        super(NaryOperator, self).__init__()
         self.cs = cs
         for c in cs:
             if c:
                 c.p = self
 
     def __setattr__(self, attr, v):
-        super(NaryOp, self).__setattr__(attr, v)
+        super(NaryOperator, self).__setattr__(attr, v)
         if attr == "cs":
             for c in self.cs:
                 c.p = self
 
-
-#######################################################
-#
-#  Definition of Query Plan operators
-#
-#######################################################
-
-
-class Print(UnaryOp):
+class Print(UnaryOperator):
     def __iter__(self):
         for row in self.c:
             print(row)
@@ -244,7 +230,7 @@ def binary(op, l, r):
     return True
 
 
-class ExprBase(Op):
+class ExprBase(Operator):
     def __str__(self):
         return self.to_str()
 
@@ -275,7 +261,7 @@ class Expr(ExprBase):
         return binary(self.op, l, r)
 
 
-class Paren(UnaryOp, ExprBase):
+class Paren(UnaryOperator, ExprBase):
     def to_str(self):
         return "(%s)" % self.c
 

@@ -1,5 +1,3 @@
-import os
-import sys
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 from query_optimizer.parse_ops import Attr, Expr, Literal, Paren
