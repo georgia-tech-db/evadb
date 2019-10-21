@@ -19,13 +19,20 @@ import socket
 import sys
 import threading
 from itertools import product
+import json
 
 import numpy as np
 
 from src import constants
 
+
 eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print(eva_dir)
 sys.path.append(eva_dir)
+
+import constants
+
+
 
 class Query:
     def __init__(self, obj, score, model, red_rate):
@@ -481,95 +488,11 @@ if __name__ == "__main__":
     #  numbers
     # TODO: When selecting appropriate PPs, we only select based on reduction
     #  rate
-    synthetic_pp_stats_short = {
-        "t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
-                  "pca/dnn": {"R": 0.2, "C": 0.15, "A": 0.92},
-                  "none/kde": {"R": 0.15, "C": 0.05, "A": 0.95}},
+    with open('utils/synthetic_pp_stats_short.json') as f1:
+        synthetic_pp_stats_short = json.load(f1)
 
-        "s>60": {"none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
-                 "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
-
-        "o=pt211": {"none/dnn": {"R": 0.13, "C": 0.32, "A": 0.99},
-                    "none/kde": {"R": 0.14, "C": 0.12, "A": 0.93}}}
-
-    synthetic_pp_stats = {"t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
-                                    "pca/dnn": {"R": 0.2, "C": 0.15,
-                                                "A": 0.92},
-                                    "none/kde": {"R": 0.15, "C": 0.05,
-                                                 "A": 0.95}},
-                          "t=suv": {
-                              "none/svm": {"R": 0.13, "C": 0.01, "A": 0.95}},
-                          "t=sedan": {
-                              "none/svm": {"R": 0.21, "C": 0.01, "A": 0.94}},
-                          "t=truck": {
-                              "none/svm": {"R": 0.05, "C": 0.01, "A": 0.99}},
-
-                          "c=red": {
-                              "none/svm": {"R": 0.131, "C": 0.011,
-                                           "A": 0.951}},
-                          "c=white": {
-                              "none/svm": {"R": 0.212, "C": 0.012,
-                                           "A": 0.942}},
-                          "c=black": {
-                              "none/svm": {"R": 0.133, "C": 0.013,
-                                           "A": 0.953}},
-                          "c=silver": {
-                              "none/svm": {"R": 0.214, "C": 0.014,
-                                           "A": 0.944}},
-
-                          "s>40": {
-                              "none/svm": {"R": 0.08, "C": 0.20, "A": 0.8}},
-                          "s>50": {
-                              "none/svm": {"R": 0.10, "C": 0.20, "A": 0.82}},
-
-                          "s>60": {
-                              "none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
-                              "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
-
-                          "s<65": {
-                              "none/svm": {"R": 0.05, "C": 0.20, "A": 0.8}},
-                          "s<70": {
-                              "none/svm": {"R": 0.02, "C": 0.20, "A": 0.9}},
-
-                          "o=pt211": {
-                              "none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
-                              "none/kde": {"R": 0.143, "C": 0.123,
-                                           "A": 0.932}},
-
-                          "o=pt335": {
-                              "none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
-                              "none/kde": {"R": 0.144, "C": 0.124,
-                                           "A": 0.934}},
-
-                          "o=pt342": {
-                              "none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
-                              "none/kde": {"R": 0.145, "C": 0.125,
-                                           "A": 0.935}},
-
-                          "o=pt208": {
-                              "none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
-                              "none/kde": {"R": 0.146, "C": 0.126,
-                                           "A": 0.936}},
-
-                          "i=pt211": {
-                              "none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
-                              "none/kde": {"R": 0.143, "C": 0.123,
-                                           "A": 0.932}},
-
-                          "i=pt335": {
-                              "none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
-                              "none/kde": {"R": 0.144, "C": 0.124,
-                                           "A": 0.934}},
-
-                          "i=pt342": {
-                              "none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
-                              "none/kde": {"R": 0.145, "C": 0.125,
-                                           "A": 0.935}},
-
-                          "i=pt208": {
-                              "none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
-                              "none/kde": {"R": 0.146, "C": 0.126,
-                                           "A": 0.936}}}
+    with open('utils/synthetic_pp_stats.json') as f2:
+        synthetic_pp_stats = json.load(f2)
 
     # TODO: We will need to convert the queries/labels into "car, bus, van,
     #  others". This is how the dataset defines things
@@ -588,7 +511,6 @@ if __name__ == "__main__":
     print("Running Query Optimizer Demo...")
 
     for query in query_list_mod:
-        # print(query, " -> ", (
-        #     qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
-        print(qo.run(query, synthetic_pp_list_short,
-        synthetic_pp_stats_short, label_desc))
+        print(query, " -> ", (
+            qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
+        # print(qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc))
