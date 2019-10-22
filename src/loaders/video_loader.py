@@ -18,8 +18,8 @@ class SimpleVideoLoader(AbstractVideoLoader):
 
         info = None
         if frame is not None:
-            (height, width, _) = frame.shape
-            info = FrameInfo(height, width, ColorSpace.BGR)
+            (height, width, channels) = frame.shape
+            info = FrameInfo(height, width, channels, ColorSpace.BGR)
 
         frames = []
         while frame is not None:
