@@ -56,16 +56,18 @@ class FrameInfo:
     Data model contains information about the frame
 
     Arguments:
-        height (int): Height of the image
-        width (int): Width of the image
-        color_space (ColorSpace): color space of the frame (RGB, HSV, BGR, GRAY)
+        height (int)(default: -1): Height of the image : left as -1 when the height of the frame is not required
+        width (int)(default: -1): Width of the image : left as -1 when the height of the frame is not required
+        channels (int)(default: 3): Number of input channels in the video
+        color_space (ColorSpace)(default: ColorSpace.RGB): color space of the frame (RGB, HSV, BGR, GRAY)
 
     """
 
-    def __init__(self, height, width, color_space):
+    def __init__(self, height=-1, width=-1, channels=3, color_space=ColorSpace.RGB):
         self._color_space = color_space
         self._width = width
         self._height = height
+        self._channels = channels
 
     @property
     def width(self):
@@ -79,11 +81,15 @@ class FrameInfo:
     def color_space(self):
         return self._color_space
 
+    @property
+    def channels(self):
+        return self._channels
+
     def __eq__(self, other):
         return self.color_space == other.color_space and \
                self.width == other.width and \
-               self.height == other.height
-
+               self.height == other.height and \
+               self.channels == other.channels
 
 
 class Frame:
@@ -142,10 +148,13 @@ class FrameBatch:
     @property
     def info(self):
         return self._info
-    
+
     @property
     def batch_size(self):
         return self._batch_size
+
+    def frames_as_numpy_array(self):
+        return np.array([frame.data for frame in self.frames])
 
     def __eq__(self, other):
         return self.info == other.info and \
@@ -215,10 +224,11 @@ class Prediction:
 
     """
 
-    def __init__(self, frame: Frame, labels: List[str], boxes: List[BoundingBox] = None):
+    def __init__(self, frame: Frame, labels: List[str], scores: List[float], boxes: List[BoundingBox] = None):
         self._boxes = boxes
         self._labels = labels
         self._frame = frame
+        self._scores = scores
 
     @property
     def boxes(self):
@@ -231,3 +241,41 @@ class Prediction:
     @property
     def frame(self):
         return self._frame
+
+    @property
+    def scores(self):
+        return self._scores
+
+    @staticmethod
+    def predictions_from_batch_and_lists(batch: FrameBatch, predictions: List[List[str]],
+                                         scores: List[List[float]], boxes: List[List[BoundingBox]] = None):
+
+        """
+        Factory method for returning a list of Prediction objects from identified values
+
+        Arguments:
+            batch (FrameBatch): frame batch for which the predictions belong to
+            predictions (List[List[str]]): List of prediction labels per frame in batch
+            scores (List[List[float]]): List of prediction scores per frame in batch
+            boxes (List[List[BoundingBox]]): List of bounding boxes associated with predictions
+
+        Returns:
+            List[Prediction]
+        """
+        assert len(batch.frames) == len(predictions)
+        assert len(batch.frames) == len(scores)
+        if boxes is not None:
+            assert len(batch.frames) == len(boxes)
+
+        predictions_ = []
+        for i in range(len(batch.frames)):
+            prediction_boxes = boxes[i] if boxes is not None else None
+            predictions_.append(Prediction(batch.frames[i], predictions[i], scores[i], boxes=prediction_boxes))
+
+        return predictions_
+
+    def __eq__(self, other):
+        return self.boxes == other.boxes and \
+               self.frame == other.frame and \
+               self.scores == other.scores and \
+               self.labels == other.labels

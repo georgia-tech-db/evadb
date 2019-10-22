@@ -17,7 +17,7 @@ class SimpleVideoLoaderTest(unittest.TestCase):
             filters = range(num_frames)
         for i in filters:
             yield Frame(i, np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255, dtype=np.uint8),
-                        FrameInfo(2, 2, ColorSpace.BGR))
+                        FrameInfo(2, 2, 3, ColorSpace.BGR))
 
     def create_sample_video(self):
         try:
