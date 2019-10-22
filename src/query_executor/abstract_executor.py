@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
+from src.models import FrameBatch
 
 class AbstractExecutor(ABC):
     """
@@ -39,7 +40,7 @@ class AbstractExecutor(ABC):
     def output(self, output : FrameBatch):
         self._output = output
     
-    
+
     @abstractmethod
     def validate(self):
         pass
