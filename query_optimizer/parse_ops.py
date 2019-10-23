@@ -1,14 +1,3 @@
-from .expr_parser import parse
-
-
-def _parse_expr(expr):
-    if hasattr(expr, "__call__"):
-        return expr
-    if isinstance(expr, str):
-        return parse(expr)
-    raise Exception("Can't interpret as expression: %s" % expr)
-
-
 class Operator(object):
     """
     Operator Base class.
@@ -187,6 +176,7 @@ class NaryOperator(Operator):
             for c in self.cs:
                 c.p = self
 
+
 class Print(UnaryOperator):
     def __iter__(self):
         for row in self.c:
@@ -267,6 +257,7 @@ class Paren(UnaryOperator, ExprBase):
 
     def __call__(self, tup, tup2=None):
         return self.c(tup)
+
 
 class Literal(ExprBase):
     def __init__(self, v):

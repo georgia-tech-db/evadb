@@ -1,6 +1,6 @@
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
-from query_optimizer.parse_ops import Attr, Expr, Literal, Paren
+from parse_ops import Attr, Expr, Literal, Paren
 
 
 class ExprParser(NodeVisitor):
@@ -112,8 +112,52 @@ def parse(s):
   return ExprParser().parse(s)
 
 
-if __name__ == '__main__':
+def _parse_expr(expr):
+    if hasattr(expr, "__call__"):
+        return expr
+    if isinstance(expr, str):
+        return parse(expr)
+    raise Exception("Can't interpret as expression: %s" % expr)
 
+
+if __name__ == '__main__':
     query = 't=van && s>60 && o=pt211'
-    expr_parser = ExprParser()
-    parsed = expr_parser.visit(query)
+    grammer  = Grammar(
+                            r"""
+                            exprstmt = ws expr ws
+                            expr     = biexpr / unexpr / value
+                            biexpr   = value ws binaryop ws expr
+                            unexpr   = unaryop ws expr
+                            value    = parenval / 
+                                       number /
+                                       boolean /
+                                       NULL / 
+                                       function /
+                                       col_ref /
+                                       string /
+                                       attr
+                            parenval = "(" ws expr ws ")"
+                            function = fname "(" ws arg_list? ws ")"
+                            arg_list = expr (ws "," ws expr)*
+                            number   = ~"\d*\.?\d+"i
+                            string   = ~"\'\w*\'"i
+                            col_ref  = (name "." (name ".")? )? name
+                            attr     = ~"\w[\w\d]*"i
+                            name     = ~"[a-zA-Z]\w*"i
+                            fname    = ~"\w[\w\d]*"i
+                            boolean  = "true" / "false"
+                            compound_op = "UNION" / "union"
+                            binaryop = "+" / "-" / "*" / "/" / "=" / "<>" /
+                                       "<=" / ">" / "<" / ">" / 
+                                       "and" / "AND" / "or" / "OR" / 
+                                       "&&" / "||" /
+                                       "is" / "IS"
+                            unaryop  = "+" / "-" / "not" / "NOT"
+                            ws       = ~"\s*"i
+                            wsp      = ~"\s+"i
+                            NULL     = "null" / "NULL"
+                            """)
+    tree = grammer.parse(query)
+    iv = ExprParser()
+    output = iv.visit(tree)
+    print(output)
