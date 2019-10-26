@@ -18,6 +18,10 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
 
     """
 
+    @property
+    def name(self) -> str:
+        return "fastrcnn"
+
     def __init__(self, threshold=0.5):
         super().__init__()
         self.threshold = threshold
