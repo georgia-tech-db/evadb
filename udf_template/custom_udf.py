@@ -1,11 +1,9 @@
-from udf_template.udf_template import UDFTemplate
+from abc import ABCMeta
 
 
-class CustomUDF(UDFTemplate):
-    def __init__(self, query):
-        self.udf_query = query
+class CustomUDF(ABCMeta):
 
-    def process(self, data_df):
+    def process(self, data):
         new_df = None
         # custom filter code for this UDF
         return new_df
