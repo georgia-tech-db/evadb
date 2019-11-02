@@ -121,3 +121,6 @@ data/*
 !data/ua_detrac/README.md
 !data/ua_detrac/*.sh
 
+
+# macos data
+*.DS_Store
