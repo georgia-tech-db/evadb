@@ -1,10 +1,21 @@
 import os
 import sqlite3
+import sys
+import time
 from importlib import import_module
 
-from src.catalog.entity.dataset import Dataset
-from src.editing_opr.apply_opr import ApplyOpr
-import cv2
+try:
+    from src.catalog.entity.dataset import Dataset
+except ImportError:
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
+        __file__))))
+    # print(root)
+    sys.path.append(root)
+    from src.catalog.entity.dataset import Dataset
+from src.catalog.mapping_manager import MappingManager
+from src.editing_opr.apply_opr import Operator
+from src.storage.loader_uadetrac import LoaderUadetrac
+
 
 class SqliteConnection:
 
@@ -27,6 +38,10 @@ class SqliteConnection:
         self.cursor.executescript(sql)
         self.conn.commit()
 
+    def exec_multiple(self, concatenated_sql):
+        self.cursor.executescript(concatenated_sql)
+        self.conn.commit()
+
     def execute(self, sql):
         query = '''%s''' % sql
         self.cursor.execute(query)
@@ -41,37 +56,66 @@ def get_loader(cache_dir, name, loaded_height, loaded_width):
 
 
 if __name__ == "__main__":
-    eva_src_dir = os.path.dirname(os.getcwd())
+    UADETRAC = 'uadetrac'
     eva_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-    db_file = os.path.join(eva_src_dir, 'catalog', "eva.db")
-    conn = SqliteConnection(db_file)
+    cache_dir = os.path.join(eva_dir, 'cache')
+    catalog_dir = os.path.join(eva_dir, 'src', 'catalog')
+
+    conn = SqliteConnection(os.path.join(catalog_dir, 'eva.db'))
     conn.connect()
-    # conn.exec_script(os.path.join(eva_src_dir, 'catalog', 'scripts',
-    #                               'create_table.sql'))
+    # conn.exec_script(os.path.join(catalog_dir, 'scripts',
+    # 'create_table.sql'))
+
+    # conn.exec_script(os.path.join(catalog_dir, 'scripts',
+    # 'create_table.sql'))
 
     # create dataset
-    UADETRAC = 'uadetrac'
+
     Dataset.delete_all(conn.conn, UADETRAC)
-    Dataset.create(conn.conn, UADETRAC, 540, 960, 300, 300)
-
-    # use dataset
-    dataset = Dataset.get(conn.conn, UADETRAC)
-
-    # get loader for dataset
-    loader = get_loader(os.path.join(eva_dir, 'cache'), dataset.name,
-                        dataset.loaded_height, dataset.loaded_width)
+    loaded_width = loaded_height = 300
+    Dataset.create(conn.conn, UADETRAC, 540, 960, loaded_height, loaded_width)
+    #
+    # # use dataset
+    dataset = Dataset.get(conn, UADETRAC)
+    print(dataset)
+    #
+    # # get loader for dataset
+    loader = LoaderUadetrac(loaded_width, loaded_height, cache_dir)
 
     # load video/frames
-    data_dir = os.path.join(eva_dir, 'test', 'data', 'small-data')
+    data_dir = os.path.join(eva_dir, 'data', 'ua_detrac',
+                            'Insight-MVT_Annotation_Test')
 
     video_dir_list = os.listdir(data_dir)
     video_dir_list.sort()
-    for video_dir in video_dir_list:
-        loader.load_images(os.path.join(data_dir, video_dir), conn)
+    for video_dir in video_dir_list[:5]:
+        loader.load_images(os.path.join(data_dir, video_dir))
+    print("Number of images loaded: %s" % len(loader.images))
 
-    # apply grayscale
-    ApplyOpr.apply(loader, 1)
-    edited_imgs = loader.load_cached_images(1)
-    print(edited_imgs.shape[0])
-    for i in range(edited_imgs.shape[0]):
-        cv2.imwrite(os.path.join(eva_dir, str(i) + '.png'), edited_imgs[i])
+    # print(loader.images.shape)
+    loader.save_images()
+
+    mmanager = MappingManager(UADETRAC)
+    mmanager.drop_mapping(conn)
+    mmanager.create_table(conn)
+    mmanager.add_frame_mapping(conn, loader.video_start_indices,
+                               loader.images.shape[0])
+
+    frame_ids = mmanager.get_frame_ids(conn, 3)
+    images_arr = loader.get_frames(frame_ids)
+    images_list = list(images_arr)
+    print(len(images_list))
+
+    operator = Operator()
+    s = time.time()
+    images_list = operator.transform(['grayscale'], images_list)
+    loader.update_images(frame_ids, images_list, False)
+    e = time.time()
+    print((e - s)/len(images_list))
+
+    s = time.time()
+    images_list = operator.transform(['grayscale', 'blur'], images_list,
+                                     {"kernel_size": 5})
+    loader.update_images(frame_ids, images_list, False)
+    e = time.time()
+    print((e - s)/len(images_list))

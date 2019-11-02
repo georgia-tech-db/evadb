@@ -1,12 +1,21 @@
-from src.editing_opr.grayscale import Grayscale
+from src.editing_opr.image_opr import ImageOperations
 
 
-class ApplyOpr:
+class Operator:
     def __init__(self):
         pass
 
     @staticmethod
-    def apply(loader, video_id):
-        images = loader.load_cached_images(video_id)
-        edited_images = Grayscale.convert(images)
-        loader.save_images(edited_images, video_id)
+    def apply(opr, images, args=None):
+        if opr == 'grayscale':
+            images = ImageOperations.grayscale(images)
+            return images
+        elif opr == 'blur':
+            images = ImageOperations.blur(images, args['kernel_size'])
+            return images
+
+    @staticmethod
+    def transform(opr_list, images, args=None):
+        for opr in opr_list:
+            images = Operator.apply(opr, images, args)
+        return images

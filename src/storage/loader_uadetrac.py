@@ -15,7 +15,6 @@ import xml.etree.ElementTree as ET
 import cv2
 import numpy as np
 
-from src.catalog.entity.dataset import Dataset
 from src.storage.TaskManager import TaskManager
 from src.storage.abstract_loader import AbstractLoader
 
@@ -77,24 +76,37 @@ class LoaderUadetrac(AbstractLoader):
         files.sort()
         return int(files[-1].split('.')[0]) + 1
 
-    def load_images(self, video_dir: str, conn):
+    def load_images(self, video_dir: str):
         """
         This function simply loads image of given image
         :return: image_array (numpy)
         """
         images = self.read_images(video_dir)
-        self.save_images(images, self.get_next_video_id())
-        Dataset.increment(conn, self.name, images.shape[0], 1)
+        if self.images is None:
+            self.images = images
+            self.video_start_indices.append(0)
+        else:
+            self.images = np.vstack((self.images, images))
+            self.video_start_indices.append(self.video_start_indices[-1] +
+                                            images.shape[0] - 1)
 
-
-    def save_images(self, images, video_id):
-        if images is None:
-            warnings.warn("No image loaded, call load_images() first", Warning)
-        elif type(images) is np.ndarray:
-            np.save(os.path.join(self.cache_dir, str(video_id)), images)
+    def save_images(self):
+        if self.images is None:
+            warnings.warn("No image loaded, call load_images() first",
+                          Warning)
+        elif type(self.images) is np.ndarray:
+            np.save(os.path.join(self.cache_dir, 'uadetrac'), self.images)
         else:
             warnings.warn("Image array type is not np.....cannot save",
                           Warning)
+
+    def update_images(self, frame_ids, modified_images, disk=False):
+        count = 0
+        for id in frame_ids:
+            self.images[id] = modified_images[count]
+            count += 1
+        if disk:
+            self.save_images()
 
     def read_images(self, video_dir):
         if video_dir is None:
@@ -115,6 +127,7 @@ class LoaderUadetrac(AbstractLoader):
             img = cv2.imread(file_name)
             img = cv2.resize(img, (self.image_width, self.image_height))
             images[i] = img
+            print(i)
 
         return images
 
@@ -150,7 +163,6 @@ class LoaderUadetrac(AbstractLoader):
         """
         return self.video_start_indices
 
-
     def save_labels(self):
         save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
                                 self.args.cache_label_name)
@@ -175,14 +187,10 @@ class LoaderUadetrac(AbstractLoader):
         else:
             warnings.warn("Labels type is not np....cannot save", Warning)
 
-    def load_cached_images(self, video_id):
-        # save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-        #                         self.args.cache_image_name)
-        # save_dir_vi = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-        #                            self.args.cache_vi_name)
-        images = np.load(os.path.join(self.cache_dir, str(video_id)+'.npy'))
-        # self.video_start_indices = np.load(save_dir_vi)
-        return images
+    def get_frames(self, frame_ids):
+        if self.images is None:
+            self.images = np.load(os.path.join(self.cache_dir, 'uadetrac.npy'))
+        return self.images[frame_ids]
 
     def load_cached_boxes(self):
         save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
@@ -380,7 +388,7 @@ if __name__ == "__main__":
     loader.save_images()
 
     st = time.time()
-    images_cached = loader.load_cached_images()
+    images_cached = loader.get_frames()
     labels_cached = loader.load_cached_labels()
     boxes_cached = loader.load_cached_boxes()
     print("Time taken to load everything from npy", time.time() - st,

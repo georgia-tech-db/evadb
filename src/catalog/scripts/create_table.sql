@@ -6,13 +6,10 @@ CREATE TABLE IF NOT EXISTS dataset(
     orig_height INTEGER NOT NULL,
     orig_width INTEGER NOT NULL,
     loaded_height INTEGER DEFAULT NULL,
-    loaded_width INTEGER DEFAULT NULL,
-    start_video_id INTEGER DEFAULT NULL,
-    end_video_id INTEGER DEFAULT NULL
+    loaded_width INTEGER DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS video_frame_map(
-	video_id INTEGER PRIMARY KEY,
-	start_frame_id TEXT NOT NULL,
-	end_frame_id INTEGER NOT NULL
-);
+-- CREATE TABLE IF NOT EXISTS uadetrac_frames(
+--     id INTEGER PRIMARY KEY,
+-- 	video_id INTEGER NOT NULL
+-- );

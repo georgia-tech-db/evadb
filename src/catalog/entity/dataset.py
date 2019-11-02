@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-class Dataset():
+class Dataset:
     def __init__(self, args=None):
         self.id = args['id']
         self.name = args['name']
@@ -11,8 +11,6 @@ class Dataset():
         self.loaded_width = args['loaded_width']
         self.orig_height = args['orig_height']
         self.orig_width = args['orig_width']
-        self.start_video_id = args['start_video_id']
-        self.end_video_id = args['end_video_id']
 
     def __str__(self):
         return 'Dataset(name=' + self.name + ', height=' + str(
@@ -23,7 +21,7 @@ class Dataset():
     @staticmethod
     def get(conn, name):
         sql = """SELECT * FROM dataset WHERE name = '%s'""" % (name)
-        df = pd.read_sql_query(sql, conn)
+        df = pd.read_sql_query(sql, conn.conn)
         results = [Dataset(args) for args in df.to_dict(orient='records')]
         if len(results) == 1:
             return results[0]
