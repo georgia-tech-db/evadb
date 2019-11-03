@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
-from src.models import FrameBatch
 
+from src.models import FrameBatch
+from src.query_planner.abstract_plan import AbstractPlan
 class AbstractExecutor(ABC):
     """
     An abstract class for the executor engine
@@ -24,7 +25,7 @@ class AbstractExecutor(ABC):
         self._children.append(child)
 
     @property
-    def children(self) -> List[AbstractExecutor]:
+    def children(self):
         """
         Returns the list of child executor
         Returns:
@@ -43,9 +44,9 @@ class AbstractExecutor(ABC):
 
     @abstractmethod
     def validate(self):
-        pass
+        NotImplementedError('Must be implemented in subclasses.')
 
     @abstractmethod
     def execute(self):
-        pass
+        NotImplementedError('Must be implemented in subclasses.')
 
