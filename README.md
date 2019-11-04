@@ -12,6 +12,7 @@
 
 ### Rule Based Query Optimizer Status
 10/19/2019
+This code can be found in src/query_optimizer/rule_based_query_optimizer.py
 Completed a basic query rewriter. The input is a logial plan tree and the output is a new logical plan tree that has been rewritten to be more optimal. 
 Implementation Milestones 
 * Predicate pushdown 
