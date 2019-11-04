@@ -22,6 +22,11 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
 
     @property
     @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
     def labels(self) -> List[str]:
         """
         Returns:
