@@ -1,8 +1,10 @@
 import unittest
-from src.expression.abstract_expression import ExpressionType
-from src.expression.comparison_expression import ComparisonExpression
-from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.tuple_value_expression import TupleValueExpression
+
+
+from Eva.src.expression.abstract_expression import ExpressionType
+from Eva.src.expression.comparison_expression import ComparisonExpression
+from Eva.src.expression.constant_value_expression import ConstantValueExpression
+from Eva.src.expression.tuple_value_expression import TupleValueExpression
 
 
 class ExpressionsTest(unittest.TestCase):
