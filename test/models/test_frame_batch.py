@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.models import Frame, FrameBatch, Prediction
+from Eva.src.models import Frame, FrameBatch, Prediction
 
 NUM_FRAMES = 10
 
@@ -19,7 +19,8 @@ class FrameBatchTest(unittest.TestCase):
         self.assertEqual([], batch.get_outcomes_for('test'))
 
     def test_frames_as_numpy_array_should_frames_as_numpy_array(self):
-        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None), Frame(1, np.ones((1, 1)), None)], info=None)
+        batch = FrameBatch(
+            frames= [ Frame(1, np.ones((1, 1)), None), Frame(1, np.ones((1, 1)), None)], info=None)
         expected = np.ones((2, 1, 1))
         self.assertEqual(expected, batch.frames_as_numpy_array())
 
