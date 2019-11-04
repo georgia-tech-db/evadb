@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from enum import Enum
-from typing import List
+from typing import List, Callable
 
 import numpy as np
 
@@ -133,13 +134,18 @@ class FrameBatch:
     Arguments:
         frames (List[Frame]): List of video frames
         info (FrameInfo): Information about the frames in the batch
+        outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf with name 'x' as key
 
     """
 
-    def __init__(self, frames, info):
+    def __init__(self, frames, info, outcomes=None):
+        super().__init__()
+        if outcomes is None:
+            outcomes = dict()
         self._info = info
         self._frames = tuple(frames)
         self._batch_size = len(frames)
+        self._outcomes = outcomes
 
     @property
     def frames(self):
@@ -158,7 +164,56 @@ class FrameBatch:
 
     def __eq__(self, other):
         return self.info == other.info and \
-               self.frames == other.frames
+               self.frames == other.frames and \
+               self._outcomes == other._outcomes
+
+    def set_outcomes(self, name, predictions: 'BasePrediction'):
+        """
+        Used for storing outcomes of the UDF predictions
+
+        Arguments:
+            name (str): name of the UDF to which the predictions belong to
+            predictions (BasePrediction): Predictions/Outcome after executing the UDF on prediction
+
+        """
+        self._outcomes[name] = predictions
+
+    def get_outcomes_for(self, name: str) -> List['BasePrediction']:
+        """
+        Returns names corresponding to a name
+        Arguments:
+            name (str): name of the udf on which predicate is being executed
+
+        Returns:
+            List[BasePrediction]
+        """
+        return self._outcomes.get(name, [])
+
+    def _get_frames_from_indices(self, required_frame_ids):
+        # TODO: Implement this using __getitem__
+        new_frames = [self.frames[i] for i in required_frame_ids]
+        new_batch = FrameBatch(new_frames, self.info)
+        for key in self._outcomes:
+            new_batch._outcomes[key] = [self._outcomes[key][i] for i in required_frame_ids]
+        return new_batch
+
+    def __getitem__(self, indices) -> 'FrameBatch':
+        """
+        Takes as input the slice for the list
+        Arguments:
+            item (list or Slice):
+
+        :return:
+        """
+        if type(indices) is list:
+            return self._get_frames_from_indices(indices)
+        elif type(indices) is slice:
+            start = indices.start if indices.start else 0
+            end = indices.stop if indices.stop else len(self.frames)
+            if end < 0:
+                end = len(self.frames) + end
+            step = indices.step if indices.step else 1
+            return self._get_frames_from_indices(range(start, end, step))
 
 
 class Point:
@@ -214,7 +269,44 @@ class BoundingBox:
                self.top_left == other.top_left
 
 
-class Prediction:
+class BasePrediction(ABC):
+    """Base class for any type of prediction from model"""
+
+    @abstractmethod
+    def eq(self, element) -> bool:
+        """
+        Checks if prediction is equal to the element
+        Arguments:
+            element (object): Check if element is equivalent
+        Returns:
+            bool (True if equal else False)
+        """
+        pass
+
+    @abstractmethod
+    def contains(self, element) -> bool:
+        """
+        Checks if the prediction contains the element
+        Arguments:
+            element (object): Element to be checked
+        Returns:
+            bool (True if contains else False)
+        """
+        pass
+
+    @abstractmethod
+    def has_one(self, elements: List[object]) -> bool:
+        """
+        This method is used for defining the 'IN' operation
+        Arguments:
+            elements (List[object]): if the predictions are in the given list
+        Returns:
+            bool
+        """
+        pass
+
+
+class Prediction(BasePrediction):
     """
     Data model used to store the predicted values of the model
 
@@ -279,3 +371,33 @@ class Prediction:
                self.frame == other.frame and \
                self.scores == other.scores and \
                self.labels == other.labels
+
+    def eq(self, element) -> bool:
+        return self.contains(element)
+
+    def has_one(self, element: List[object]) -> bool:
+        pass
+
+    def contains(self, element) -> bool:
+        return element in self.labels
+
+
+class Predicate:
+    """
+    Used for representing the predicates in case of filter operation.
+
+    Arguments:
+        name (str): Name of the field on which predicate needs to be executed
+        predicate (lambda)
+    """
+
+    def __init__(self, name, predicate: Callable[[BasePrediction], bool]):
+        self._name = name
+        self._predicate = predicate
+
+    @property
+    def name(self):
+        return self._name
+
+    def __call__(self, prediction: BasePrediction):
+        return self._predicate(prediction)
