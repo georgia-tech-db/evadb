@@ -11,6 +11,13 @@
 * Dataset 
 
 ### Rule Based Query Optimizer Status
+11/3/2019 Integrated the first verison of the Rule Based Query Optimizer To test run Eva/evaQL/build/testRuleBasedOptimizer.py
+Currently, this only completes the Projection Pushdown rule when the following node is a SelectNode since Joins have not been implemented in the current verision of the logical plan tree. This can be found in the RuleBasedQueryOptimizer Branch. Currently there are no test cases implemented. 
+
+Next Steps
+ * Implement To String for the Expression Tree and Plan Tree similar to the optimizer built in the 10/19/2019 update
+ * Create other cases than test.txt and test2.txt
+
 10/19/2019
 This code can be found in src/query_optimizer/rule_query_optimizer.py
 Completed a basic query rewriter. The input is a logial plan tree and the output is a new logical plan tree that has been rewritten to be more optimal. 
