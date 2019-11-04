@@ -2,8 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List
 from enum import IntEnum, unique
 
+from src.query_planner.abstract_plan import AbstractPlan
+
 @unique
-class NodeType(IntEnum):
+class PlanNodeType(IntEnum):
     SEQSCAN = 1
     #add other types
 
@@ -15,7 +17,7 @@ class AbstractPlan(ABC):
         self._parent = None
         # self._node_type = node_type
 
-    def append_child(self, child : AbstractPlan ):
+    def append_child(self, child):
         """append node to children list
         
         Arguments:
@@ -24,7 +26,7 @@ class AbstractPlan(ABC):
         self._children.append(child)
 
     @property
-    def parent(self) -> AbstractPlan:
+    def parent(self):
         """Returns the parent of current node
         
         Returns:
@@ -44,7 +46,7 @@ class AbstractPlan(ABC):
         self._parent = node
 
     @property
-    def children(self) -> List[AbstractPlan]:
+    def children(self):
         """returns children list pf current node
         
         Returns:
@@ -53,7 +55,7 @@ class AbstractPlan(ABC):
         return self._children
 
     @abstractmethod
-    def get_node_type(self) -> NodeType:
+    def get_node_type(self) -> PlanNodeType:
         pass
 
     
