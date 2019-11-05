@@ -9,7 +9,7 @@ class PlanExecutor():
     def __init__(self, plan: AbstractPlan):
         self._plan = plan
 
-    def _build_execution_tree(plan: AbstractPlan) -> AbstractExecutor:
+    def _build_execution_tree(self, plan: AbstractPlan) -> AbstractExecutor:
         """build the execution tree from plan tree
         
         Arguments:
@@ -26,7 +26,7 @@ class PlanExecutor():
         plan_node_type = plan.get_node_type()
         # ToDo recursively build execution tree based on node type
 
-    def _clean_execution_tree(tree_root: AbstractExecutor):
+    def _clean_execution_tree(self, tree_root: AbstractExecutor):
         """clean the execution tree from memory
         
         Arguments:
