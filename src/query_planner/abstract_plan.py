@@ -33,16 +33,16 @@ class AbstractPlan(ABC):
             AbstractPlan -- parent node
         """
         return self._parent
-    
+
     @parent.setter
-    def parent(self, node : AbstractPlan):
+    def parent(self, node: 'AbstractPlan'):
         """returns parent of current node
         
         Arguments:
             node {AbstractPlan} -- parent node
         """
         ##remove if we don't allow setter function
-        #parent can be constructor only job 
+        # parent can be constructor only job
         self._parent = node
 
     @property
@@ -57,9 +57,3 @@ class AbstractPlan(ABC):
     @abstractmethod
     def get_node_type(self) -> PlanNodeType:
         pass
-
-    
-    
-
-    
-
