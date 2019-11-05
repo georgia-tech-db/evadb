@@ -3,8 +3,8 @@ import unittest
 
 import cv2
 
-from Eva.src.models import Frame, FrameBatch
-from Eva.src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
+from src.models import Frame, FrameBatch
+from src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
 NUM_FRAMES = 10
 
