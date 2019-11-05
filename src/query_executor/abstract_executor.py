@@ -4,6 +4,7 @@ from typing import List
 from src.models import FrameBatch
 from src.query_planner.abstract_plan import AbstractPlan
 
+
 class AbstractExecutor(ABC):
     """
     An abstract class for the executor engine
@@ -40,4 +41,3 @@ class AbstractExecutor(ABC):
     @abstractmethod
     def execute(self, batch: FrameBatch):
         NotImplementedError('Must be implemented in subclasses.')
-

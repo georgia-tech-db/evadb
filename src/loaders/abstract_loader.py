@@ -30,18 +30,21 @@ class AbstractLoader(metaclass=ABCMeta):
 
 class AbstractVideoLoader(metaclass=ABCMeta):
     """
-    Abstract class for defining video loader. All other video loaders use this abstract class.
-    Video loader are expected fetch the videos from storage and return the frames in an iterative manner.
+    Abstract class for defining video loader. All other video loaders use this
+    abstract class. Video loader are expected fetch the videos from storage
+    and return the frames in an iterative manner.
 
     Attributes:
-        video_metadata (eva.models.VideoMetaInfo): An object containing metadata of the video.
-        batch_size (int, optional): Number of frames to fetch in batch from video
-        skip_frames (int, optional): Number of frames to be skipped while fetching the video
+        video_metadata (VideoMetaInfo): Object containing metadata of the video
+        batch_size (int, optional): No. of frames to fetch in batch from video
+        skip_frames (int, optional): Number of frames to be skipped
+                                     while fetching the video
         offset (int, optional): Start frame location in video
         limit (int, optional): Number of frames needed from the video
     """
 
-    def __init__(self, video_metadata: VideoMetaInfo, batch_size=1, skip_frames=0, offset=None, limit=None):
+    def __init__(self, video_metadata: VideoMetaInfo, batch_size=1,
+                 skip_frames=0, offset=None, limit=None):
         self.video_metadata = video_metadata
         self.batch_size = batch_size
         self.skip_frames = skip_frames
@@ -51,9 +54,11 @@ class AbstractVideoLoader(metaclass=ABCMeta):
     @abstractmethod
     def load(self):
         """
-        This is a generator for loading the frames of a video. Uses the video metadata and other class arguments
+        This is a generator for loading the frames of a video.
+         Uses the video metadata and other class arguments
 
         Yields:
-        :obj: `eva.models.FrameBatch`: An object containing a batch of frames and frame specific metadata
+        :obj: `eva.models.FrameBatch`: An object containing a batch of frames
+                                       and frame specific metadata
         """
         pass
