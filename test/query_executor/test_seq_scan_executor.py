@@ -3,10 +3,10 @@ import unittest
 import numpy as np
 
 from src.models import FrameBatch, Frame, Prediction, Predicate
-from src.query_executor.predicate_executor import PredicateExecutor
+from src.query_executor.seq_scan_executor import SequentialScanExecutor
 
 
-class PredicateExecutorTest(unittest.TestCase):
+class SeqScanExecutorTest(unittest.TestCase):
 
     def test_should_return_only_frames_satisfy_predicate(self):
         frame_1 = Frame(1, np.ones((1, 1)), None)
@@ -29,8 +29,8 @@ class PredicateExecutorTest(unittest.TestCase):
         predicate = Predicate(name="test",
                               predicate=lambda prediction: prediction.eq(
                                   "car") and not prediction.eq("bus"))
-        predicate_executor = PredicateExecutor(None,
-                                               predicate=predicate)
+        plan = type("ScanPlan", (), {"predicate": predicate})
+        predicate_executor = SequentialScanExecutor(plan)
 
         expected = FrameBatch(frames=[frame_3], info=None,
                               outcomes={"test": [outcome_3]})
