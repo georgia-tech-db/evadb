@@ -1,13 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List
 from enum import IntEnum, unique
 
-from src.query_planner.abstract_plan import AbstractPlan
 
 @unique
 class PlanNodeType(IntEnum):
     SEQSCAN = 1
-    #add other types
+    # add other types
 
 
 class AbstractPlan(ABC):
@@ -22,7 +20,7 @@ class AbstractPlan(ABC):
         
         Arguments:
             child {AbstractPlan} -- input child node
-        """     
+        """
         self._children.append(child)
 
     @property
