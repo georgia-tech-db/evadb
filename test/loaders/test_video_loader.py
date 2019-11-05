@@ -4,8 +4,8 @@ import unittest
 import cv2
 import numpy as np
 
-from Eva.src.loaders.video_loader import SimpleVideoLoader
-from Eva.src.models import VideoMetaInfo, VideoFormat, Frame, ColorSpace, FrameInfo
+from src.loaders.video_loader import SimpleVideoLoader
+from src.models import VideoMetaInfo, VideoFormat, Frame, ColorSpace, FrameInfo
 
 NUM_FRAMES = 10
 
