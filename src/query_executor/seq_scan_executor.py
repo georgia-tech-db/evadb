@@ -2,19 +2,17 @@ from src.models import FrameBatch, Predicate
 from src.query_executor.abstract_executor import AbstractExecutor
 
 
-class PredicateExecutor(AbstractExecutor):
+class SequentialScanExecutor(AbstractExecutor):
     """
     Applies predicates to filter the frames which satisfy the condition
     Arguments:
-        node (AbstractPlan): ...
-        predicate (Predicate): defines the predicate which needs to be applied
-                               on frames
+        node (AbstractPlan): The SequentialScanPlan
 
     """
 
-    def __init__(self, node: 'AbstractPlan', predicate: Predicate):
+    def __init__(self, node: 'AbstractPlan'):
         super().__init__(node)
-        self.predicate = predicate
+        self.predicate = node.predicate
 
     def validate(self):
         pass
