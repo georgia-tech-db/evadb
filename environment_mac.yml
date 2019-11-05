@@ -13,5 +13,7 @@ dependencies:
   - coverage
   - pytest-cov
   - pycodestyle
+  - torch
+  - torchvision
 prefix: eva_35
 
