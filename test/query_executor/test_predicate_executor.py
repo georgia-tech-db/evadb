@@ -27,10 +27,12 @@ class PredicateExecutorTest(unittest.TestCase):
             ]
         })
         predicate = Predicate(name="test",
-                              predicate=lambda prediction: prediction.eq("car") and not prediction.eq("bus"))
+                              predicate=lambda prediction: prediction.eq(
+                                  "car") and not prediction.eq("bus"))
         predicate_executor = PredicateExecutor(None,
                                                predicate=predicate)
 
-        expected = FrameBatch(frames=[frame_3], info=None, outcomes={"test": [outcome_3]})
+        expected = FrameBatch(frames=[frame_3], info=None,
+                              outcomes={"test": [outcome_3]})
         filtered = predicate_executor.execute(batch)
         self.assertEqual(expected, filtered)
