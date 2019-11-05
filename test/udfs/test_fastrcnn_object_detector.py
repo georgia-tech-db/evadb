@@ -20,8 +20,10 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        frame_dog = Frame(1, self._load_image(os.path.join(self.base_path, 'data', 'dog.jpeg')), None)
-        frame_dog_cat = Frame(1, self._load_image(os.path.join(self.base_path, 'data', 'dog_cat.jpg')), None)
+        frame_dog = Frame(1, self._load_image(
+            os.path.join(self.base_path, 'data', 'dog.jpeg')), None)
+        frame_dog_cat = Frame(1, self._load_image(
+            os.path.join(self.base_path, 'data', 'dog_cat.jpg')), None)
         frame_batch = FrameBatch([frame_dog, frame_dog_cat], None)
         detector = FastRCNNObjectDetector()
         result = detector.classify(frame_batch)

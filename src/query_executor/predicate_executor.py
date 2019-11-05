@@ -7,7 +7,8 @@ class PredicateExecutor(AbstractExecutor):
     Applies predicates to filter the frames which satisfy the condition
     Arguments:
         node (AbstractPlan): ...
-        predicate (Predicate): defines the predicate which needs to be applied on frames
+        predicate (Predicate): defines the predicate which needs to be applied
+                               on frames
 
     """
 
