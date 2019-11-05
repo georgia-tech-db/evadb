@@ -39,7 +39,7 @@ class AbstractPlan(ABC):
         Arguments:
             node {AbstractPlan} -- parent node
         """
-        ##remove if we don't allow setter function
+        # remove if we don't allow setter function
         # parent can be constructor only job
         self._parent = node
 
