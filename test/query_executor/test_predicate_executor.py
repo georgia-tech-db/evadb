@@ -27,7 +27,8 @@ class PredicateExecutorTest(unittest.TestCase):
             ]
         })
         predicate = Predicate(name="test",
-                              predicate=lambda prediction: prediction.eq("car") and not prediction.eq("bus"))
+                              predicate=lambda prediction: prediction.eq(
+                                  "car") and not prediction.eq("bus"))
         predicate_executor = PredicateExecutor(None,
                                                predicate=predicate)
 
