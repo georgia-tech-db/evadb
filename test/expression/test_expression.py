@@ -9,7 +9,6 @@ class ExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
     def test_comparison_compare_equal(self):
         tpl_exp = TupleValueExpression(0)
         const_exp = ConstantValueExpression(1)
@@ -18,13 +17,12 @@ class ExpressionsTest(unittest.TestCase):
             ExpressionType.COMPARE_EQUAL,
             tpl_exp,
             const_exp
-        ) 
-        #ToDo implement a generic tuple class
-        #to fetch the tuple from table
-        tuple1 = [1,2,3]
-        self.assertEqual(True, cmpr_exp.evaluate(tuple1,None))
+        )
+        # ToDo implement a generic tuple class
+        # to fetch the tuple from table
+        tuple1 = [1, 2, 3]
+        self.assertEqual(True, cmpr_exp.evaluate(tuple1, None))
 
 
-
-if __name__ == '__main__': 
-    unittest.main() 
+if __name__ == '__main__':
+    unittest.main()

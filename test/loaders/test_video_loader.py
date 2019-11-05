@@ -16,8 +16,9 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         if not filters:
             filters = range(num_frames)
         for i in filters:
-            yield Frame(i, np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
-                                    dtype=np.uint8),
+            yield Frame(i,
+                        np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                                 dtype=np.uint8),
                         FrameInfo(2, 2, 3, ColorSpace.BGR))
 
     def create_sample_video(self):
@@ -26,7 +27,8 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-        out = cv2.VideoWriter('dummy.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
+        out = cv2.VideoWriter('dummy.avi',
+                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                               (2, 2))
         for i in range(NUM_FRAMES):
             frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
@@ -52,7 +54,8 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         video_loader = SimpleVideoLoader(video_info, skip_frames=2)
         batches = list(video_loader.load())
         dummy_frames = list(
-            self.create_dummy_frames(filters=[i * 2 for i in range(NUM_FRAMES // 2)]))
+            self.create_dummy_frames(
+                filters=[i * 2 for i in range(NUM_FRAMES // 2)]))
         self.assertEqual(len(batches), NUM_FRAMES / 2)
         self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
 
@@ -60,7 +63,8 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
         video_loader = SimpleVideoLoader(video_info, offset=2)
         dummy_frames = list(
-            self.create_dummy_frames(filters=[i for i in range(2, NUM_FRAMES)]))
+            self.create_dummy_frames(
+                filters=[i for i in range(2, NUM_FRAMES)]))
         batches = list(video_loader.load())
         self.assertEqual(NUM_FRAMES - 2, len(batches))
         self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
@@ -69,12 +73,13 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
         limit = 4
         video_loader = SimpleVideoLoader(video_info, limit=limit)
-        dummy_frames = list(self.create_dummy_frames(filters=[i for i in range(limit)]))
+        dummy_frames = list(
+            self.create_dummy_frames(filters=[i for i in range(limit)]))
         batches = list(video_loader.load())
         self.assertEqual(limit, len(batches))
         self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
 
-    def test_should_return_single_batch_if_batch_size_equivalent_to_number_of_frames(
+    def test_should_return_single_batch_if_batch_size_equal_to_no_of_frames(
             self):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
         video_loader = SimpleVideoLoader(video_info, batch_size=NUM_FRAMES)
