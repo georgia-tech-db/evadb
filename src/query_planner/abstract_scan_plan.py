@@ -16,7 +16,7 @@ class AbstractScan(AbstractPlan):
 
     """
 
-    def __init__(self, predicate: Expression, video: Storage,
+    def __init__(self, predicate: 'Expression', video: 'Storage',
                  column_ids: List[int]):
         super(AbstractScan, self).__init__()
         self._predicate = predicate
@@ -24,11 +24,11 @@ class AbstractScan(AbstractPlan):
         self._video = video
 
     @property
-    def video(self) -> Storage:
+    def video(self) -> 'Storage':
         return self._video
 
     @property
-    def predicate(self) -> Expression:
+    def predicate(self) -> 'Expression':
         return self._predicate
 
     @property
