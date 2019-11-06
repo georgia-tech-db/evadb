@@ -29,7 +29,7 @@ class PlanExecutor():
         ## Get plan node type
         plan_node_type = plan.node_type
         if plan_node_type == NodeType.SEQUENTIAL_SCAN_TYPE:
-            executor_node = SequentialScanExecutor(None, node=plan)
+            executor_node = SequentialScanExecutor( node=plan)
         elif plan_node_type == NodeType.PP_FILTER_TYPE:
             pass 
 
