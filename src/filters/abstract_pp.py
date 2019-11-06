@@ -4,8 +4,10 @@ from src.filters.minimum_filter import FilterMinimum
 class abstract_PP_filter_template:
     def __init__(self, model_path):
         self.model_path = model_path
-        self.model = None
-        
+        self.model = self._init_model()
+
+    def _init_model(self):
+        return None
     def predict(self, batch):
         predictions = self.model.predict(batch)
         required_frame_ids = []
