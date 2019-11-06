@@ -4,6 +4,7 @@ import numpy as np
 
 from src.models import FrameBatch, Frame, Prediction, Predicate
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
+from test.query_executor.utils import DummyExecutor
 
 
 class SeqScanExecutorTest(unittest.TestCase):
@@ -31,8 +32,9 @@ class SeqScanExecutorTest(unittest.TestCase):
                                   "car") and not prediction.eq("bus"))
         plan = type("ScanPlan", (), {"predicate": predicate})
         predicate_executor = SequentialScanExecutor(plan)
+        predicate_executor.append_child(DummyExecutor([batch]))
 
         expected = FrameBatch(frames=[frame_3], info=None,
                               outcomes={"test": [outcome_3]})
-        filtered = predicate_executor.execute(batch)
+        filtered = list(predicate_executor.next())[0]
         self.assertEqual(expected, filtered)

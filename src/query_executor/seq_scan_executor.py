@@ -1,4 +1,6 @@
-from src.models import FrameBatch, Predicate
+from typing import Generator, Iterator
+
+from src.models import FrameBatch
 from src.query_executor.abstract_executor import AbstractExecutor
 
 
@@ -17,11 +19,14 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def execute(self, batch: FrameBatch):
-        predictions = batch.get_outcomes_for(self.predicate.name)
-        required_frame_ids = []
-        for i, prediction in enumerate(predictions):
-            if self.predicate(prediction):
-                required_frame_ids.append(i)
+    def next(self) -> Iterator[FrameBatch]:
 
-        return batch[required_frame_ids]
+        child_executor = self.children[0]
+        for batch in child_executor.next():
+            predictions = batch.get_outcomes_for(self.predicate.name)
+            required_frame_ids = []
+            for i, prediction in enumerate(predictions):
+                if self.predicate(prediction):
+                    required_frame_ids.append(i)
+
+            yield batch[required_frame_ids]
