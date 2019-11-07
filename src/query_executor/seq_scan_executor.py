@@ -1,4 +1,4 @@
-from typing import Generator, Iterator
+from typing import Iterator
 
 from src.models import FrameBatch
 from src.query_executor.abstract_executor import AbstractExecutor
@@ -23,10 +23,14 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.next():
-            predictions = batch.get_outcomes_for(self.predicate.name)
-            required_frame_ids = []
-            for i, prediction in enumerate(predictions):
-                if self.predicate(prediction):
-                    required_frame_ids.append(i)
+            if self.predicate is not None:
+                predictions = batch.get_outcomes_for(self.predicate.name)
+                required_frame_ids = []
+                for i, prediction in enumerate(predictions):
+                    if self.predicate(prediction):
+                        required_frame_ids.append(i)
 
-            yield batch[required_frame_ids]
+                yield batch[required_frame_ids]
+
+            else:
+                yield batch
