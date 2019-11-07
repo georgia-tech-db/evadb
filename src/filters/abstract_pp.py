@@ -1,13 +1,11 @@
-import numpy as np
-from src.filters.minimum_filter import FilterMinimum
-
-class abstract_PP_filter_template:
+class AbstractPPTemplate:
     def __init__(self, model_path):
         self.model_path = model_path
         self.model = self._init_model()
 
     def _init_model(self):
         return None
+
     def predict(self, batch):
         predictions = self.model.predict(batch)
         required_frame_ids = []
@@ -15,6 +13,3 @@ class abstract_PP_filter_template:
             if prediction:
                 required_frame_ids.append(i)
         return batch[required_frame_ids]
-
-
-

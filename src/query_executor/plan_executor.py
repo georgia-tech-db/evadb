@@ -1,13 +1,13 @@
-from src.query_planner.abstract_plan import AbstractPlan
 from src.query_executor.abstract_executor import AbstractExecutor
-from src.planner.types import NodeType
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
+from src.query_planner.abstract_plan import AbstractPlan
+from src.query_planner.types import PlanNodeType
 
 
 # This is an interface between plan tree and execution tree.
 # We traverse the plan tree and build execution tree from it
 # select * from video where label = car
-class PlanExecutor():
+class PlanExecutor:
     def __init__(self, plan: AbstractPlan):
         self._plan = plan
 
@@ -24,25 +24,17 @@ class PlanExecutor():
         if plan is None:
             return root
 
-
-        
         ## Get plan node type
         plan_node_type = plan.node_type
-        if plan_node_type == NodeType.SEQUENTIAL_SCAN_TYPE:
+        if plan_node_type == PlanNodeType.SEQUENTIAL_SCAN_TYPE:
             executor_node = SequentialScanExecutor(node=plan)
-        elif plan_node_type == NodeType.PP_FILTER_TYPE:
-            pass 
+        elif plan_node_type == PlanNodeType.PP_FILTER_TYPE:
+            pass
 
-        # ToDo recursively build execution tree based on node type      
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))
-        
+
         return executor_node
-      
-      
-
-
-
 
     def _clean_execution_tree(self, tree_root: AbstractExecutor):
         """clean the execution tree from memory
