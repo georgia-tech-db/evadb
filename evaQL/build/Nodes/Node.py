@@ -6,9 +6,4 @@ class Node(metaclass=ABCMeta):
     def __init__(self, children=[]):
         self.children = children
 
-    @abstractmethod
-    def processing(self):
-        pass
-
-
 
