@@ -1,5 +1,6 @@
 from src.models import VideoMetaInfo
-from src.query_planner.abstract_plan import AbstractPlan, PlanNodeType
+from src.query_planner.abstract_plan import AbstractPlan
+from src.query_planner.types import PlanNodeType
 
 
 class StoragePlan(AbstractPlan):
