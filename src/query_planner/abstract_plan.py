@@ -1,12 +1,6 @@
-from abc import ABC, abstractmethod
-from enum import IntEnum, unique
+from abc import ABC
 
-
-@unique
-class PlanNodeType(IntEnum):
-    SEQSCAN = 1
-    STORAGE_PLAN = 2
-    # add other types
+from src.query_planner.types import PlanNodeType
 
 
 class AbstractPlan(ABC):
@@ -51,7 +45,7 @@ class AbstractPlan(ABC):
         Returns:
             List[AbstractPlan] -- children list
         """
-        return self._children
+        return self._children[:]
 
     @property
     def node_type(self) -> PlanNodeType:
