@@ -5,15 +5,16 @@ from enum import IntEnum, unique
 @unique
 class PlanNodeType(IntEnum):
     SEQSCAN = 1
+    STORAGE_PLAN = 2
     # add other types
 
 
 class AbstractPlan(ABC):
 
-    def __init__(self):
+    def __init__(self, node_type):
         self._children = []
         self._parent = None
-        # self._node_type = node_type
+        self._node_type = node_type
 
     def append_child(self, child):
         """append node to children list
@@ -52,6 +53,12 @@ class AbstractPlan(ABC):
         """
         return self._children
 
-    @abstractmethod
-    def get_node_type(self) -> PlanNodeType:
-        pass
+    @property
+    def node_type(self) -> PlanNodeType:
+        """
+        Property used for returning the node type of Plan.
+
+        Returns:
+            PlanNodeType: The node type corresponding to the plan
+        """
+        return self._node_type
