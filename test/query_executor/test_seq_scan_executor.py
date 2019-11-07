@@ -4,7 +4,7 @@ import numpy as np
 
 from src.models import FrameBatch, Frame, Prediction, Predicate
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
-from test.query_executor.utils import DummyExecutor
+from ..query_executor.utils import DummyExecutor
 
 
 class SeqScanExecutorTest(unittest.TestCase):
