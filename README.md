@@ -44,27 +44,27 @@ The following components have demos:
 1. EVA Analytics: A pipeline for loading a dataset, training filters, and outputting the optimal plan.
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
-   source activate eva_35
+   conda activate eva_35
    python pipeline.py
 ```
 2. EVA Query Optimizer: The optimizer shows converted queries
  (Will show converted queries for the original queries)
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
-   source activate eva_35
+   conda activate eva_35
    python query_optimizer/query_optimizer.py
 ```
 3. Eva Loader (Loads UA-DETRAC dataset)
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
-   source activate eva_35
+   conda activate eva_35
    python loaders/load.py
 ```
 
 4. NEW!!! There are new versions of the loaders and filters.
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
-   source activate eva_35
+   conda activate eva_35
    python loaders/uadetrac_loader.py
    python filters/minimum_filter.py
 ```
@@ -75,6 +75,7 @@ The following components have demos:
 To run unit tests on the system, the following commands can be run:
 
 ```shell
+   conda activate eva_35
    pycodestyle --select E test src/loaders
    pytest test/ --cov-report= --cov=./ -s -v
 ``` 
