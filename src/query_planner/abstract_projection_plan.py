@@ -4,34 +4,27 @@ https://www.postgresql.org/docs/9.5/runtime-config-query.html
 """
 from src.query_planner.abstract_plan import AbstractPlan
 from src.loaders.abstract_loader import AbstractVideoLoader
-from src.expression.abstract_expression import AbstractExpression
 from typing import List
 
 
-class AbstractScan(AbstractPlan):
+class AbstractProjection(AbstractPlan):
     """Abstract class for all the scan based planners
-    
+
     Arguments:
-        predicate : Expression 
+        predicate : Expression
         video : video on which the scan will be executed
-        columns_id :  
+        columns_id :
 
     """
 
-    def __init__(self, predicate: AbstractExpression, video: AbstractVideoLoader,
-                 column_ids: List[int]):
-        super(AbstractScan, self).__init__()
-        self._predicate = predicate
+    def __init__(self, video: AbstractVideoLoader, column_ids: List[int]):
+        super(AbstractProjection, self).__init__()
         self._column_ids = column_ids
         self._video = video
 
     @property
     def video(self) -> AbstractVideoLoader:
         return self._video
-
-    @property
-    def predicate(self) -> AbstractExpression:
-        return self._predicate
 
     @property
     def column_ids(self) -> List:

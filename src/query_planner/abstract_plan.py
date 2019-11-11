@@ -6,6 +6,9 @@ from enum import IntEnum, unique
 class PlanNodeType(IntEnum):
     SEQSCAN = 1
     # add other types
+    LOGICAL_SELECT = 2,
+    LOGICAL_PROJECTION = 3
+    LOGICAL_INNER_JOIN = 4
 
 
 class AbstractPlan(ABC):
