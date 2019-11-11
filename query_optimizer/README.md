@@ -18,7 +18,7 @@ rootdir: /Users/gali/Documents/GitHub/test_main/Eva/query_optimizer/tests
 plugins: cov-2.7.1
 collected 10 items                                                                                                                                                                                                                                                      
 
-query_optimizer_test_pytest.py ..........                                   [100%]
+query_optimizer_test_pytest.py ..........                                         [100%]
 
 ================================== 10 passed in 0.17s ==================================
 ```
