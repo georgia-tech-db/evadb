@@ -1,4 +1,8 @@
-from parse_ops import Attr, Expr, Literal, Paren
+try:
+    from parse_ops import Attr, Expr, Literal, Paren
+except ModuleNotFoundError:
+    from query_optimizer.parse_ops import Attr, Expr, Literal, Paren
+
 from parsimonious.grammar import Grammar
 from parsimonious.nodes import NodeVisitor
 

@@ -493,10 +493,10 @@ if __name__ == "__main__":
     #  numbers
     # TODO: When selecting appropriate PPs, we only select based on reduction
     #  rate
-    with open('utils/synthetic_pp_stats_short.json') as f1:
+    with open('../../query_optimizer/utils/synthetic_pp_stats_short.json') as f1:
         synthetic_pp_stats_short = json.load(f1)
 
-    with open('utils/synthetic_pp_stats.json') as f2:
+    with open('../../query_optimizer/utils/synthetic_pp_stats.json') as f2:
         synthetic_pp_stats = json.load(f2)
 
     # TODO: We will need to convert the queries/labels into "car, bus, van,
