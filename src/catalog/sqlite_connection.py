@@ -3,6 +3,7 @@ import sqlite3
 import sys
 import time
 from importlib import import_module
+from src.catalog.catalog import Catalog
 
 try:
     from src.catalog.entity.dataset import Dataset
@@ -47,6 +48,11 @@ class SqliteConnection:
         self.cursor.execute(query)
         self.conn.commit()
 
+    def execute_and_fetch(self, sql):
+        sql = '''%s''' % sql
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
 
 def get_loader(cache_dir, name, loaded_height, loaded_width):
     mod_name = 'src.storage.' + 'loader_' + name
@@ -61,8 +67,9 @@ if __name__ == "__main__":
     cache_dir = os.path.join(eva_dir, 'cache')
     catalog_dir = os.path.join(eva_dir, 'src', 'catalog')
 
-    conn = SqliteConnection(os.path.join(catalog_dir, 'eva.db'))
-    conn.connect()
+    # conn = SqliteConnection(os.path.join(catalog_dir, 'eva.db'))
+    # conn.connect()
+    catalog = Catalog(UADETRAC)
     # conn.exec_script(os.path.join(catalog_dir, 'scripts',
     # 'create_table.sql'))
 
@@ -70,7 +77,7 @@ if __name__ == "__main__":
     # 'create_table.sql'))
 
     # create dataset
-
+    conn = catalog.getDatabaseConnection()
     Dataset.delete_all(conn.conn, UADETRAC)
     loaded_width = loaded_height = 300
     Dataset.create(conn.conn, UADETRAC, 540, 960, loaded_height, loaded_width)
@@ -94,8 +101,8 @@ if __name__ == "__main__":
 
     # print(loader.images.shape)
     loader.save_images()
-
-    mmanager = MappingManager(UADETRAC)
+    mmanager = catalog.getTableHandler()
+    # mmanager = MappingManager(UADETRAC)
     mmanager.drop_mapping(conn)
     mmanager.create_table(conn)
     mmanager.add_frame_mapping(conn, loader.video_start_indices,

@@ -2,3 +2,6 @@
 # discrete label
 DISCRETE = 0
 CONTINUOUS = 1
+
+# Dataset Names
+UADETRAC = 'uadetrac'
