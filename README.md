@@ -1,7 +1,7 @@
 ## EVA (Exploratory Video Analytics)
 
-[![Build Status](https://travis-ci.com/georgia-tech-db/Eva.svg?branch=travis-ci-integration)](https://travis-ci.com/georgia-tech-db/Eva)
-[![Coverage Status](https://img.shields.io/coveralls/github/georgia-tech-db/Eva/travis-ci-integration.svg)](https://coveralls.io/github/georgia-tech-db/Eva)
+[![Build Status](https://travis-ci.org/georgia-tech-db/Eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/Eva)
+[![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/Eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/Eva?branch=master)
 ### Table of Contents
 * Installation
 * Demos
@@ -13,6 +13,10 @@
 ### Installation
 * Clone the repo
 * Create a virtual environment with conda (explained in detail in the next subsection)
+* Run following command to configure git hooks 
+```shell
+git config core.hooksPath .githooks
+```
 
 
 ##### How to create the virtual environment
@@ -25,19 +29,26 @@
 ### Demos
 We have demos for the following components:
 1. Eva analytics (pipeline for loading the dataset, training the filters, and outputting the optimal plan)
-```bash
-   cd $YOUR_EVA_DIRECTORY
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
    python pipeline.py
 ```
 2. Eva Query Optimizer (Will show converted queries for the original queries)
-```bash
-   cd $YOUR_EVA_DIRECTORY
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
    python query_optimizer/query_optimizer.py
 ```
 3. Eva Loader (Loads UA-DETRAC dataset)
-```bash
-   cd $YOUR_EVA_DIRECTORY
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
    python loaders/load.py
+```
+
+NEW!!! There are new versions of the loaders and filters.
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
+   python loaders/uadetrac_loader.py
+   python filters/minimum_filter.py
 ```
 
 2. EVA storage-system (Video compression and indexing system - *currently in progress*)
@@ -71,7 +82,7 @@ All code related to this module is in */filters*
 
 ##### UDFs
 This module contains all imported deep learning models. Currently, there is no code that performs this task. It is a work in progress.
-Information of current work is explained in detail [here](udfs/README.md).
+Information of current work is explained in detail [here](src/udfs/README.md).
 
 All related code should be inside */udfs*
 
