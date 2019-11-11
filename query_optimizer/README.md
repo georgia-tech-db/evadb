@@ -27,7 +27,7 @@ query_optimizer_test_pytest.py ..........                                       
 To run expression parser:
 ```
 cd query_optimizer
-python  expr_parser.py
+python expr_parser.py
 ```
 
 To run unit-tests for expression parser:
