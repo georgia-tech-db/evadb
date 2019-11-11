@@ -31,8 +31,68 @@ python expr_parser.py
 ```
 
 To run unit-tests for expression parser:
-```
+```bash
 cd query_optimizer
-pytest tests/expr_parser_test.py 
+(eva_35) galis-MBP:query_optimizer gali$ pytest tests/expr_parser_test.py 
+========================================================================================================================== test session starts ==========================================================================================================================
+platform darwin -- Python 3.7.3, pytest-5.1.2, py-1.8.0, pluggy-0.13.0
+rootdir: /Users/gali/Documents/GitHub/test_main/Eva/query_optimizer
+plugins: cov-2.7.1
+collected 6 items                                                                                                                                                                                                                                                       
+
+tests/expr_parser_test.py ..
+....                                                                                                                                                                                                                                  [100%]
+
+=================================================== warnings summary ====================================================================
+<unknown>:1
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+  <unknown>:1: DeprecationWarning: invalid escape sequence \d
+
+<unknown>:1
+<unknown>:1
+<unknown>:1
+<unknown>:1
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+  <unknown>:1: DeprecationWarning: invalid escape sequence \w
+
+<unknown>:1
+<unknown>:1
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_expression_parser
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_number_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_basic_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_string_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+tests/expr_parser_test.py::test_multiple_number_expression
+  <unknown>:1: DeprecationWarning: invalid escape sequence \s
+
+-- Docs: https://docs.pytest.org/en/latest/warnings.html
+================== 6 passed, 42 warnings in 0.15s =======================================================
 ```
 
