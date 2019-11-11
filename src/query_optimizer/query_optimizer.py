@@ -13,7 +13,9 @@ python query_optimizer/query_optimizer.py
 
 """
 import json
+import os
 import socket
+import sys
 import threading
 from itertools import product
 
@@ -21,10 +23,10 @@ import numpy as np
 
 from src import constants
 
-
 eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 print(eva_dir)
 sys.path.append(eva_dir)
+
 
 # from query_optimizer.optimizer import Optimizer
 # TODO (galipremsagar): getting import issues in Optmizer import. please check
