@@ -333,8 +333,8 @@ class CostBasedQueryOptimizer:
             op_index += 1
 
             evaluations.append(Query(self.convertL2S(evaluation, query_operators),
-                                     self._update_stats(evaluation_stats, query_operators), evaluation_models_tmp,
-                                     reduc_rate))
+                                     self._update_stats(evaluation_stats, query_operators), evaluation_models,
+                                     evaluation_stats))
         evaluations.sort()
         max_index = -1
         best_query = evaluations[
@@ -343,7 +343,7 @@ class CostBasedQueryOptimizer:
         best_reduction_rate = evaluations[max_index].red_rate
 
         pp_names, op_names = self._convertQuery2PPOps(best_query)
-        return [list(zip(pp_names, best_models)), op_names,
+        return [(pp_names, op_names, best_models),
                 best_reduction_rate]
 
     def _convertQuery2PPOps(self, query):
@@ -504,6 +504,6 @@ if __name__ == "__main__":
     print("Running Query Optimizer Demo...")
 
     for query in query_list_mod:
-        print(query, " -> ", (
-            qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
-        # print(qo.run(query, synthetic_pp_list_short, synthetic_pp_stats_short, label_desc))
+        print("Actual Query: ",
+              query, " -> ", "Best alternate query: -> ", (
+                  qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
