@@ -46,7 +46,7 @@ class ExprParser(NodeVisitor):
             NULL     = "null" / "NULL"
             """)
 
-    def visit_name(self, node):
+    def visit_name(self, node, children):
         """
         Returns the query present in the node.
         :param node: A node in the Expression parser.
@@ -70,7 +70,7 @@ class ExprParser(NodeVisitor):
             table = dbtable
         return Attr(attrname, table, db)
 
-    def visit_attr(self, node):
+    def visit_attr(self, node, children):
         """
             Returns the attribute object of node.
         :param node: A node in the Expression parser.
@@ -85,7 +85,7 @@ class ExprParser(NodeVisitor):
         """
         return "null"
 
-    def visit_binaryop(self, node):
+    def visit_binaryop(self, node, children):
         """
             Function to visit binary operation
             :param node: A node in the Expression parser.
@@ -109,7 +109,7 @@ class ExprParser(NodeVisitor):
         """
         return node.text.strip()
 
-    def visit_unexpr(self, children):
+    def visit_unexpr(self, node, children):
         """
             Returns a unary expression of the child node(s).
         :param children: Child node(s) in the Expression parser.
@@ -117,7 +117,7 @@ class ExprParser(NodeVisitor):
         """
         return Expr(children[0], children[-1])
 
-    def visit_expr(self, children):
+    def visit_expr(self, node, children):
         """
             Function to visit first child.
         :param children: Child node(s) in the Expression parser.
@@ -125,7 +125,7 @@ class ExprParser(NodeVisitor):
         """
         return children[0]
 
-    def visit_fname(self, node):
+    def visit_fname(self, node, children):
         """
             Function to display function name of present node.
         :param node: A node of Expression tree
@@ -133,7 +133,7 @@ class ExprParser(NodeVisitor):
         """
         return node.text
 
-    def visit_arg_list(self, children):
+    def visit_arg_list(self, node, children):
         """
             Flatten the supplied node and it's childs.
         :param children: A tree of child node(s).
@@ -157,7 +157,7 @@ class ExprParser(NodeVisitor):
         """
         return Literal(node.text)
 
-    def visit_parenval(self, children):
+    def visit_parenval(self, node, children):
         """
             Returns parent node object of children.
         :param children: List of child node(s).
@@ -165,7 +165,7 @@ class ExprParser(NodeVisitor):
         """
         return Paren(children[2])
 
-    def visit_value(self, children):
+    def visit_value(self, node, children):
         """
             Returns value of node
         :param node: A node of Expression tree
@@ -173,7 +173,7 @@ class ExprParser(NodeVisitor):
         """
         return children[0]
 
-    def visit_boolean(self, node):
+    def visit_boolean(self, node, children):
         """
             Return the result of visiting a boolean node.
         :param node: A node of Expression tree
