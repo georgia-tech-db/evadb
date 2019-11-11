@@ -32,7 +32,7 @@ python expr_parser.py
 
 To run unit-tests for expression parser:
 ```bash
-cd query_optimizer
+(eva_35) galis-MBP:gali$ cd query_optimizer
 (eva_35) galis-MBP:query_optimizer gali$ pytest tests/expr_parser_test.py 
 ========================================================================================================================== test session starts ==========================================================================================================================
 platform darwin -- Python 3.7.3, pytest-5.1.2, py-1.8.0, pluggy-0.13.0
