@@ -32,12 +32,22 @@ sys.path.append(eva_dir)
 class Query:
 
     def __init__(self, obj, score, model, red_rate):
+        """
+        :param obj: obj will hold the object representation of the predicate, in future will be a tree node - Now a string.
+        :param score: score will store the PP value of the predicate.
+        :param model: model will store the model responsible for the PP score of the query.
+        :param red_rate: This is the final reduction rate for forming the query.
+        """
         self.obj = obj
         self.score = score
         self.model = model
         self.red_rate = red_rate
 
     def __lt__(self, other):
+        """
+        Implemented primarily for a .sort function to sort list of queries using the score attribute.
+        :param other: other Query object to compare with
+        """
         return self.score < other.score
 
 
