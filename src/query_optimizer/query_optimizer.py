@@ -12,10 +12,11 @@ python query_optimizer/query_optimizer.py
 @Jaeho Bang
 
 """
+import json
 import socket
 import threading
 from itertools import product
-import json
+
 import numpy as np
 
 from src import constants
@@ -26,7 +27,7 @@ print(eva_dir)
 sys.path.append(eva_dir)
 
 # from query_optimizer.optimizer import Optimizer
-#TODO (galipremsagar): getting import issues in Optmizer import. please check
+# TODO (galipremsagar): getting import issues in Optmizer import. please check
 
 class Query:
 
@@ -38,6 +39,7 @@ class Query:
 
     def __lt__(self, other):
         return self.score < other.score
+
 
 class CostBasedQueryOptimizer:
     """
@@ -199,7 +201,7 @@ class CostBasedQueryOptimizer:
             object = query_sub_list[2]
 
             assert (
-                subject in label_desc)  # Label should be in label
+                    subject in label_desc)  # Label should be in label
             # description dictionary
             l_desc = label_desc[subject]
             if l_desc[0] == constants.DISCRETE:
@@ -211,7 +213,7 @@ class CostBasedQueryOptimizer:
                         alternate_string += subject + self._logic_reverse(
                             operator) + category + " && "
                 alternate_string = alternate_string[
-                    :-len(" && ")]  # must strip the last ' || '
+                                   :-len(" && ")]  # must strip the last ' || '
                 # query_tmp, _ = self._parseQuery(alternate_string)
                 equivalence.append(alternate_string)
 
@@ -224,7 +226,7 @@ class CostBasedQueryOptimizer:
                 alternate_string = ""
                 if operator == "!=":
                     alternate_string += subject + ">" + object + " && " + \
-                        subject + "<" + object
+                                        subject + "<" + object
                     query_tmp, _ = self._parseQuery(alternate_string)
                     equivalence.append(query_tmp)
                 if operator == "<" or operator == "<=":
@@ -284,9 +286,7 @@ class CostBasedQueryOptimizer:
         """
         evaluations = []
         evaluation_models = []
-        evaluations_stats = []
         query_transformed, query_operators = query_info
-        # query_transformed = [[["t", "!=", "car"], ["t", "=", "van"]], ... ]
         for possible_query in query_transformed:
             evaluation = []
             evaluation_stats = []
@@ -332,15 +332,13 @@ class CostBasedQueryOptimizer:
                 evaluation_stats.append(reduc_rate)
             op_index += 1
 
-            evaluations.append(Query(self.convertL2S(evaluation, query_operators), self._update_stats(evaluation_stats, query_operators), evaluation_models_tmp, reduc_rate))
-            # evaluations_stats.append(
-            #     self._update_stats(evaluation_stats, query_operators))
+            evaluations.append(Query(self.convertL2S(evaluation, query_operators),
+                                     self._update_stats(evaluation_stats, query_operators), evaluation_models_tmp,
+                                     reduc_rate))
         evaluations.sort()
-        # max_index = np.argmax(np.array(evaluations_stats), axis=0)
-        max_index = 0
+        max_index = -1
         best_query = evaluations[
-            max_index].obj  # this will be something like "t!=bus && t!=truck &&
-        # t!=car"
+            max_index].obj  # this will be something like "t!=bus && t!=truck && t!=car"
         best_models = evaluations[max_index].model
         best_reduction_rate = evaluations[max_index].red_rate
 
@@ -379,7 +377,7 @@ class CostBasedQueryOptimizer:
         for i in range(1, len(evaluation_stats)):
             if query_operators[i - 1] == "&&":
                 final_red = final_red + evaluation_stats[i] - final_red * \
-                    evaluation_stats[i]
+                            evaluation_stats[i]
             elif query_operators[i - 1] == "||":
                 final_red = final_red * evaluation_stats[i]
 
@@ -387,7 +385,7 @@ class CostBasedQueryOptimizer:
 
     def _compute_cost_red_rate(self, C, R):
         assert (
-            R >= 0 and R <= 1)  # R is reduction rate and should be
+                R >= 0 and R <= 1)  # R is reduction rate and should be
         # between 0 and 1
         if R == 0:
             R = 0.000001
@@ -404,7 +402,7 @@ class CostBasedQueryOptimizer:
                 best = [possible_model, self._compute_cost_red_rate(
                     possible_models[possible_model]["C"],
                     possible_models[possible_model]["R"]),
-                    possible_models[possible_model]["R"]]
+                        possible_models[possible_model]["R"]]
             else:
                 alternative_best_cost = self._compute_cost_red_rate(
                     possible_models[possible_model]["C"],
