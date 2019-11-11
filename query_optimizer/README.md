@@ -23,3 +23,16 @@ query_optimizer_test_pytest.py ..........                                       
 ================================== 10 passed in 0.17s ==================================
 ```
 
+
+To run expression parser:
+```
+cd query_optimizer
+python  expr_parser.py
+```
+
+To run unit-tests for expression parser:
+```
+cd query_optimizer
+pytest tests/expr_parser_test.py 
+```
+
