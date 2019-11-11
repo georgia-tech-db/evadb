@@ -29,3 +29,7 @@ class AbstractProjection(AbstractPlan):
     @property
     def column_ids(self) -> List:
         return self._column_ids
+
+    def __str__(self):
+        return 'pi {}'.format(str(self._column_ids))
+

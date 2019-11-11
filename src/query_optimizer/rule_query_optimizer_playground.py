@@ -1,102 +1,5 @@
 # this is an implementation of a Rule Based Query Optimizer
-import constants
 
-query_list_test = ["c=white && t!=suv && t!=van"]
-
-# list of filters available
-synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
-                     "c=red", "c=white", "c=black", "c=silver",
-                     "s>40", "s>50", "s>60", "s<65", "s<70",
-                     "i=pt335", "i=pt211", "i=pt342", "i=pt208",
-                     "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
-
-label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
-              "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
-              "c": [constants.DISCRETE,
-                    ["white", "red", "black", "silver"]],
-              "i": [constants.DISCRETE,
-                    ["pt335", "pt342", "pt211", "pt208"]],
-              "o": [constants.DISCRETE,
-                    ["pt335", "pt342", "pt211", "pt208"]]}
-
-synthetic_pp_stats = {"t=van": {"none/dnn": {"R": 0.1, "C": 0.1, "A": 0.9},
-                                "pca/dnn": {"R": 0.2, "C": 0.15,
-                                            "A": 0.92},
-                                "none/kde": {"R": 0.15, "C": 0.05,
-                                             "A": 0.95}},
-                      "t=suv": {
-                          "none/svm": {"R": 0.13, "C": 0.01, "A": 0.95}},
-                      "t=sedan": {
-                          "none/svm": {"R": 0.21, "C": 0.01, "A": 0.94}},
-                      "t=truck": {
-                          "none/svm": {"R": 0.05, "C": 0.01, "A": 0.99}},
-
-                      "c=red": {
-                          "none/svm": {"R": 0.131, "C": 0.011,
-                                       "A": 0.951}},
-                      "c=white": {
-                          "none/svm": {"R": 0.212, "C": 0.012,
-                                       "A": 0.942}},
-                      "c=black": {
-                          "none/svm": {"R": 0.133, "C": 0.013,
-                                       "A": 0.953}},
-                      "c=silver": {
-                          "none/svm": {"R": 0.214, "C": 0.014,
-                                       "A": 0.944}},
-
-                      "s>40": {
-                          "none/svm": {"R": 0.08, "C": 0.20, "A": 0.8}},
-                      "s>50": {
-                          "none/svm": {"R": 0.10, "C": 0.20, "A": 0.82}},
-
-                      "s>60": {
-                          "none/dnn": {"R": 0.12, "C": 0.21, "A": 0.87},
-                          "none/kde": {"R": 0.15, "C": 0.06, "A": 0.96}},
-
-                      "s<65": {
-                          "none/svm": {"R": 0.05, "C": 0.20, "A": 0.8}},
-                      "s<70": {
-                          "none/svm": {"R": 0.02, "C": 0.20, "A": 0.9}},
-
-                      "o=pt211": {
-                          "none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
-                          "none/kde": {"R": 0.143, "C": 0.123,
-                                       "A": 0.932}},
-
-                      "o=pt335": {
-                          "none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
-                          "none/kde": {"R": 0.144, "C": 0.124,
-                                       "A": 0.934}},
-
-                      "o=pt342": {
-                          "none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
-                          "none/kde": {"R": 0.145, "C": 0.125,
-                                       "A": 0.935}},
-
-                      "o=pt208": {
-                          "none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
-                          "none/kde": {"R": 0.146, "C": 0.126,
-                                       "A": 0.936}},
-
-                      "i=pt211": {
-                          "none/dnn": {"R": 0.135, "C": 0.324, "A": 0.993},
-                          "none/kde": {"R": 0.143, "C": 0.123,
-                                       "A": 0.932}},
-
-                      "i=pt335": {
-                          "none/dnn": {"R": 0.134, "C": 0.324, "A": 0.994},
-                          "none/kde": {"R": 0.144, "C": 0.124,
-                                       "A": 0.934}},
-
-                      "i=pt342": {
-                          "none/dnn": {"R": 0.135, "C": 0.325, "A": 0.995},
-                          "none/kde": {"R": 0.145, "C": 0.125,
-                                       "A": 0.935}},
-
-                      "i=pt208": {
-                          "none/dnn": {"R": 0.136, "C": 0.326, "A": 0.996},
-                          "none/kde": {"R": 0.146, "C": 0.126,
-                                       "A": 0.936}}}
 
 class Node:
     def __init__(self, parent=None, value='', tablename='', children=[]):
@@ -125,6 +28,7 @@ class ProjectionNode(Node):
         self.columns = columns
         self.value ='pi {}'.format(','.join(self.columns))
 
+
 class JoinNode(Node):
     def __init__(self, tables=[], join_attrs=[]):
         super(JoinNode, self).__init__()
@@ -145,11 +49,6 @@ class LogicalPlanTree():
 
 
 class RuleQueryOptimizer():
-    def __init__(self, filters, filter_stats, labels):
-        self.filters = filters
-        self.filter_stats = filter_stats
-        self.labels = labels
-
     def run(self, plan_tree):
         curnode = plan_tree.root
         self.traverse(curnode)
@@ -235,7 +134,7 @@ def test_predicate_push():
     plan_tree.root = root
     print('Original Plan Tree')
     print(plan_tree)
-    qo = RuleQueryOptimizer(synthetic_pp_list, synthetic_pp_stats, label_desc)
+    qo = RuleQueryOptimizer()
     new_tree = qo.run(plan_tree)
     print(new_tree)
 
@@ -264,7 +163,7 @@ def test_projection_push():
     plan_tree.root = root
     print('Original Plan Tree')
     print(plan_tree)
-    qo = RuleQueryOptimizer(synthetic_pp_list, synthetic_pp_stats, label_desc)
+    qo = RuleQueryOptimizer()
     new_tree = qo.run(plan_tree)
     print(new_tree)
 

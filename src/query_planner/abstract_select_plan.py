@@ -37,3 +37,6 @@ class AbstractSelect(AbstractPlan):
     @property
     def column_ids(self) -> List:
         return self._column_ids
+
+    def __str__(self):
+        return 'sigma {}'.format(str(self._predicate))

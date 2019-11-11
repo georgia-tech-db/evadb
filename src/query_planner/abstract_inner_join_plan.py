@@ -30,3 +30,8 @@ class AbstractInnerJoin(AbstractPlan):
     @property
     def join_ids(self) -> List:
         return self._join_ids
+
+    def __str__(self):
+        pt1 = ' join '.join([str(self._video1), str(self._video2)])
+        pt2 = ' = '.join([str(id) for id in self._join_ids])
+        return '{}__{}'.format(pt1, pt2)
