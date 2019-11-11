@@ -361,8 +361,10 @@ class CostBasedQueryOptimizer:
             else:
                 if query_split[i] == "&&":
                     op_names.append(np.logical_and)
-                else:
+                elif query_split[i] == "||":
                     op_names.append(np.logical_or)
+                else:
+                    pass
 
         return pp_names, op_names
 
