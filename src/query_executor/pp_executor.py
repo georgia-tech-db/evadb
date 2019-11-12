@@ -1,7 +1,7 @@
 from src.models import FrameBatch
 
 
-class PpExecutor:
+class PPExecutor:
     """
       Applies PP to filter out the frames that doesn't satisfy the condition
       Arguments:

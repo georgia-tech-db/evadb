@@ -2,7 +2,8 @@ from src.query_executor.abstract_executor import AbstractExecutor
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
 from src.query_planner.abstract_plan import AbstractPlan
 from src.query_planner.types import PlanNodeType
-
+from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
+from src.query_executor.pp_executor import PPExecutor
 
 # This is an interface between plan tree and execution tree.
 # We traverse the plan tree and build execution tree from it
@@ -24,13 +25,17 @@ class PlanExecutor:
         if plan is None:
             return root
 
-        ## Get plan node type
+        # Get plan node type
         plan_node_type = plan.node_type
+
         if plan_node_type == PlanNodeType.SEQUENTIAL_SCAN_TYPE:
             executor_node = SequentialScanExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.STORAGE_PLAN:
+            executor_node = DiskStorageExecutor(node=plan)
         elif plan_node_type == PlanNodeType.PP_FILTER_TYPE:
-            pass
+            executor_node = PPExecutor(node=plan)
 
+        # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))
 
