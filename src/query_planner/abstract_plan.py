@@ -26,6 +26,14 @@ class AbstractPlan(ABC):
         """
         self._children.append(child)
 
+    def set_children(self, children):
+        """create new child list for node
+
+        Arguments:
+            children list of {AbstractPlan} nodes
+        """
+        self._children = children
+
     @property
     def parent(self):
         """Returns the parent of current node
