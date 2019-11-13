@@ -64,7 +64,8 @@ class FrameInfo:
 
     """
 
-    def __init__(self, height=-1, width=-1, channels=3, color_space=ColorSpace.RGB):
+    def __init__(self, height=-1, width=-1, channels=3,
+                 color_space=ColorSpace.RGB):
         self._color_space = color_space
         self._width = width
         self._height = height
@@ -134,18 +135,24 @@ class FrameBatch:
     Arguments:
         frames (List[Frame]): List of video frames
         info (FrameInfo): Information about the frames in the batch
-        outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf with name 'x' as key
+        outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
+        with name 'x' as key
+
 
     """
 
-    def __init__(self, frames, info, outcomes=None):
+    def __init__(self, frames, info, outcomes=None, temp_outcomes=None):
         super().__init__()
         if outcomes is None:
             outcomes = dict()
+        if temp_outcomes is None:
+            temp_outcomes = dict()
+
         self._info = info
         self._frames = tuple(frames)
         self._batch_size = len(frames)
         self._outcomes = outcomes
+        self._temp_outcomes = temp_outcomes
 
     @property
     def frames(self):
@@ -162,21 +169,30 @@ class FrameBatch:
     def frames_as_numpy_array(self):
         return np.array([frame.data for frame in self.frames])
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'FrameBatch'):
         return self.info == other.info and \
                self.frames == other.frames and \
-               self._outcomes == other._outcomes
+               self._outcomes == other._outcomes and \
+               self._temp_outcomes == other._temp_outcomes
 
-    def set_outcomes(self, name, predictions: 'BasePrediction'):
+    def set_outcomes(self, name, predictions: 'BasePrediction',
+                     is_temp: bool = False):
         """
         Used for storing outcomes of the UDF predictions
 
         Arguments:
             name (str): name of the UDF to which the predictions belong to
-            predictions (BasePrediction): Predictions/Outcome after executing the UDF on prediction
+
+            predictions (BasePrediction): Predictions/Outcome after executing
+            the UDF on prediction
+
+            is_temp (bool, default: False): Check if the outcomes are temporary
 
         """
-        self._outcomes[name] = predictions
+        if is_temp:
+            self._temp_outcomes[name] = predictions
+        else:
+            self._outcomes[name] = predictions
 
     def get_outcomes_for(self, name: str) -> List['BasePrediction']:
         """
@@ -187,14 +203,33 @@ class FrameBatch:
         Returns:
             List[BasePrediction]
         """
-        return self._outcomes.get(name, [])
+        if name in self._outcomes:
+            return self._outcomes.get(name, [])
+        else:
+            return self._temp_outcomes.get(name, [])
+
+    def has_outcome(self, name: str):
+        """
+        Method used for checking if the outcome with given name is present.
+        Either in temporary outcomes or actual outcomes.
+
+        Arguments:
+            name (str): name of the outcome to check
+        Returns:
+            bool: True if present else false
+        """
+
+        return name in self._outcomes or name in self._temp_outcomes
 
     def _get_frames_from_indices(self, required_frame_ids):
-        # TODO: Implement this using __getitem__
         new_frames = [self.frames[i] for i in required_frame_ids]
         new_batch = FrameBatch(new_frames, self.info)
         for key in self._outcomes:
-            new_batch._outcomes[key] = [self._outcomes[key][i] for i in required_frame_ids]
+            new_batch._outcomes[key] = [self._outcomes[key][i]
+                                        for i in required_frame_ids]
+        for key in self._temp_outcomes:
+            new_batch._temp_outcomes[key] = [self._temp_outcomes[key][i]
+                                             for i in required_frame_ids]
         return new_batch
 
     def __getitem__(self, indices) -> 'FrameBatch':
@@ -316,7 +351,8 @@ class Prediction(BasePrediction):
 
     """
 
-    def __init__(self, frame: Frame, labels: List[str], scores: List[float], boxes: List[BoundingBox] = None):
+    def __init__(self, frame: Frame, labels: List[str], scores: List[float],
+                 boxes: List[BoundingBox] = None):
         self._boxes = boxes
         self._labels = labels
         self._frame = frame
@@ -339,17 +375,27 @@ class Prediction(BasePrediction):
         return self._scores
 
     @staticmethod
-    def predictions_from_batch_and_lists(batch: FrameBatch, predictions: List[List[str]],
-                                         scores: List[List[float]], boxes: List[List[BoundingBox]] = None):
+    def predictions_from_batch_and_lists(batch: FrameBatch,
+                                         predictions: List[List[str]],
+                                         scores: List[List[float]],
+                                         boxes: List[
+                                             List[BoundingBox]] = None):
 
         """
-        Factory method for returning a list of Prediction objects from identified values
+        Factory method for returning a list of Prediction objects
+        from identified values
 
         Arguments:
             batch (FrameBatch): frame batch for which the predictions belong to
-            predictions (List[List[str]]): List of prediction labels per frame in batch
-            scores (List[List[float]]): List of prediction scores per frame in batch
-            boxes (List[List[BoundingBox]]): List of bounding boxes associated with predictions
+
+            predictions (List[List[str]]): List of prediction labels per
+            frame in batch
+
+            scores (List[List[float]]): List of prediction scores per frame
+            in batch
+
+            boxes (List[List[BoundingBox]]): List of bounding boxes
+            associated with predictions
 
         Returns:
             List[Prediction]
@@ -362,7 +408,9 @@ class Prediction(BasePrediction):
         predictions_ = []
         for i in range(len(batch.frames)):
             prediction_boxes = boxes[i] if boxes is not None else None
-            predictions_.append(Prediction(batch.frames[i], predictions[i], scores[i], boxes=prediction_boxes))
+            predictions_.append(
+                Prediction(batch.frames[i], predictions[i], scores[i],
+                           boxes=prediction_boxes))
 
         return predictions_
 
