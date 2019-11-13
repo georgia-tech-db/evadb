@@ -5,6 +5,7 @@ Provides the methods to infer stats of a Table.
 import pandas as pd
 
 from sqlite_connection import SqliteConnection
+from src import constants
 from base_table_handler import BaseTableHandler
 
 class VideoFrameMap:
@@ -13,20 +14,25 @@ class VideoFrameMap:
         self.video_id = args['video_id']
 
 
-class TableHandler(BaseTableHandler):
-    def __init__(self, database_name, conn: SqliteConnection):
+class UaDetracTableHandler(BaseTableHandler):
+    """
+
+    """
+
+    def __init__(self, conn: SqliteConnection):
+        self.dataset_name = constants.UADETRAC
         BaseTableHandler.__init__(conn)
-        self.table_name = database_name + "_mapping"
+        self.table_name = self.dataset_name + "_mapping"
         self.conn = conn
 
     def __str__(self):
         return 'Frame(table_name=' + self.table_name + ',id=' + str(self.id) \
                + ',video_id=' + str(self.video_id) + ')'
 
-    def create_table(self, conn):
+    def create_uadetrac_table(self, conn):
         sql = """CREATE TABLE IF NOT EXISTS %s(id INTEGER 
                 PRIMARY KEY,video_id INTEGER NOT NULL)""" % self.table_name
-        conn.execute(sql)
+        self.create_table(sql)
 
     def add_frame_mapping(self, conn, video_start_indices, num_frames):
         insert_script = """"""
@@ -47,9 +53,5 @@ class TableHandler(BaseTableHandler):
         mappings = [VideoFrameMap(args) for args in df.to_dict(
             orient='records')]
         return [m.id for m in mappings]
-
-    def drop_mapping(self, conn):
-        sql = """drop table %s""" % self.table_name
-        conn.execute(sql)
 
 

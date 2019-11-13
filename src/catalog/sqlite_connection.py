@@ -10,10 +10,8 @@ try:
 except ImportError:
     root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
         __file__))))
-    # print(root)
     sys.path.append(root)
     from src.catalog.entity.dataset import Dataset
-from src.catalog.mapping_manager import MappingManager
 from src.editing_opr.apply_opr import Operator
 from src.storage.loader_uadetrac import LoaderUadetrac
 

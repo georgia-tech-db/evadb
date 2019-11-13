@@ -9,8 +9,9 @@ import os
 import logging
 
 from sqlite_connection import SqliteConnection
-from handlers.table_handler import TableHandler
 from handlers.prob_predicate_handler import ProbPredicateHandler
+from handlers.base_table_handler import BaseTableHandler
+from handlers.uadetrac_table_handler import UaDetracTableHandler
 from src import constants
 
 
@@ -22,48 +23,50 @@ class Catalog:
         queried with ProbPredicateHandler.
     """
 
-    def __init__(self, database_name: str = None):
-        self.current_database = database_name
+    def __init__(self, dataset_name: str = None):
+        self.current_dataset = dataset_name
         # TODO(rishabh): Read the logger level from config file.
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
         self.db_file_map = {constants.UADETRAC: 'eva.db'}
+        self.db_file_name = 'eva.db'
         self.conn = self._createDatabaseConnection()
 
 
-    def listDatabases(self) -> list[str]:
+    def listDatasets(self) -> list[str]:
         """
-        Return all existing database names.
+        Return all existing supported datasets in Eva.
         :return: list[str]: A list containing databases names.
         """
         return list(self.db_file_map.keys())
 
-    def setDatabase(self, database: str) -> None:
+    def setDataset(self, dataset: str) -> None:
         """
-        Set the current database.
-        :param database: str, Name of the database.
+        Set the current dataset.
+        :param database: str, Name of the dataset.
         """
-        self.logger.info('Changing current database from %s to %s', self.current_database, database)
-        self.conn = self._createDatabaseConnection()
-        self.current_database = database
+        self.current_dataset = dataset
 
-    def getCurrentDatabase(self) -> str:
+    def getCurrentDataset(self) -> str:
         """
         Return the name of the current database to be used.
         :return: str, database name.
         """
         self._checkDatabaseSet()
-        return self.current_database
+        return self.current_dataset
 
-    def getTableHandler(self) -> TableHandler:
+    def getTableHandler(self) -> BaseTableHandler:
         """
         TODO(rishabh): Add detailed definition and examples after finalizing TableHandler methods.
 
         :return:
         """
         self._checkDatabaseSet()
-        table_handler = TableHandler(self.current_database, self.conn)
-        return table_handler
+        if self.current_dataset == constants.UADETRAC:
+            table_handler = UaDetracTableHandler(self.conn)
+            return table_handler
+        else:
+            raise Exception('No implementation found for %s' % (self.current_dataset))
 
     def getProbPredicateHandler(self) -> ProbPredicateHandler:
         """
@@ -71,23 +74,23 @@ class Catalog:
         :return:
         """
         self._checkDatabaseSet()
-        pp_handler = ProbPredicateHandler(self.current_database, self.conn)
+        pp_handler = ProbPredicateHandler(self.current_dataset, self.conn)
         return pp_handler
 
     def _checkDatabaseSet(self) -> None:
-        " Checks if a database if a catalog is initialised with a database."
+        " Checks if a catalog is initialised with a dataset."
 
-        if not self.current_database:
-            raise Exception('Database is not set.')
+        if not self.current_dataset:
+            raise Exception('Dataset is not set.')
 
     def _createDatabaseConnection(self) -> SqliteConnection:
         eva_dir = os.path.dirname(os.path.dirname(os.getcwd()))
         cache_dir = os.path.join(eva_dir, 'cache')
         catalog_dir = os.path.join(eva_dir, 'src', 'catalog')
         try:
-            conn = SqliteConnection(os.path.join(catalog_dir, self.db_file_map[self.current_database]))
+            conn = SqliteConnection(os.path.join(catalog_dir, self.db_file_map[self.current_dataset]))
         except:
-            raise Exception('Database file not found for %s', self.current_database)
+            raise Exception('Database file not found')
         conn.connect()
         return conn
 
