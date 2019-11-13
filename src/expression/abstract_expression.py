@@ -10,6 +10,7 @@ class ExpressionType(IntEnum):
     COMPARE_EQUAL = 1,
     CONSTANT_VALUE = 2,
     TUPLE_VALUE = 3,
+    FUNCTION_EXPRESSION = 4
     # add other types
 
 
