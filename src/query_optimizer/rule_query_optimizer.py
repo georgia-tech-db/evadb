@@ -33,14 +33,13 @@ class RuleQueryOptimizer:
     # Recursive function that traverses the tree and applies all of the rules in the rule list
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     def traverse(self, curnode, rule_list):
-
         if len(curnode.children) == 0:
             return
-        for i, child in enumerate(curnode.children):
+        for child_ix, child in enumerate(curnode.children):
             for rule in rule_list:
                 func, condition = self.rule2value[rule]
                 if condition:
-                    func(curnode, child)
+                    func(curnode, child_ix)
             # if type(curnode) == LogicalSelectPlan:
             #     curnode.predicate = self.simply_predicate(curnode.predicate)
             # # projection pushdown joins
@@ -81,30 +80,39 @@ class RuleQueryOptimizer:
     def projection_pushdown_select(self, curnode, child_ix):
         # curnode is the projection
         # child is the select
-        new_proj = LogicalProjectionPlan(video=curnode.video, column_ids=curnode.column_ids)
+        new_proj = LogicalProjectionPlan(videos=curnode.videos, column_ids=curnode.column_ids)
         old_children = curnode.children[child_ix].children
         curnode.children[child_ix].set_children([new_proj])
         new_proj.set_children(old_children)
 
-    # TODO Refactor for new optimizer
     # push down projects so that we do not have unnecessary attributes
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child_ix : is an integer that represents the index of the child in the curnode's child list
-    def projection_pushdown_join(self, curnode, child):
+    def projection_pushdown_join(self, curnode, child_ix):
         # curnode is the projection
         # child is the join
-        #for c_ix, cc in enumerate(child.children):
-
-        for tabname in child.children.keys():
-            cols = [col for col in child.join_attrs if tabname in col]
-            cols2 = [col for col in curnode.columns if tabname in col]
+        child = curnode.children[child_ix]
+        for cc_ix, cc in enumerate(child.children):
+            cc_tabnames = [col.split('.')[0] for col in [cc.columns]]
+            # getting all of the columns that the join uses that are the same as it's child
+            cols = [col for col in child.join_attrs for tabname in cc_tabnames if tabname in col]
+            # getting all of the columns that the current node uses (other columns not in the join columns)
+            cols2 = [col for col in curnode.columns for tabname in cc_tabnames if tabname in col]
             cols.extend(cols2)
-            new_proj1 = LogicalProjectionPlan(video=curnode.video, column_ids=cols)
-            new_proj1._children = {tabname: child.children[tabname]}
-            new_proj1._parent = child
-            new_proj1.tablename = tabname
-            child.children[new_proj1.tablename].parent = new_proj1
-            child.children[new_proj1.tablename] = new_proj1
+            # creating new Projection Node
+            new_proj1 = LogicalProjectionPlan(videos=[cc.videos], column_ids=cols)
+            new_proj1.set_children([child.children[cc_ix]])
+            new_proj1.parent(child)
+            child.children[cc_ix].parent(new_proj1)
+            child.children[cc_ix] = new_proj1
+
+        # in this case, we have a join of three or more tables.
+        # we already created a projection node in the previous recursive call of projection_pushdown_join
+        # We can delete the projection in the middle between the joins
+        if type(curnode.parent) == LogicalInnerJoinPlan:
+            new_children = curnode.children
+            child.parent(curnode.parent)
+            curnode.parent.set_children(new_children)
 
     # reorder predicates so that DBMS applies most selective first
     def selective_first(self):
