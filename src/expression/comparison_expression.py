@@ -15,11 +15,18 @@ class ComparisonExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        vl = self._children[0].evaluate(*args)
-        vr = self._children[1].evaluate(*args)
+        vls = self._children[0].evaluate(*args)
+        vrs = self._children[1].evaluate(*args)
 
-        # ToDo implement a better way to compare vl and vr
+        # Broadcasting scalars
+        if type(vrs) is not list:
+            vrs = [vrs] * len(vls)
+        # TODO implement a better way to compare vl and vr
         # Implement a generic return type
-        if (self.etype == ExpressionType.COMPARE_EQUAL):
-            return vl == vr
+        outcome = []
+        for vl, vr in zip(vls, vrs):
+            if self.etype == ExpressionType.COMPARE_EQUAL:
+                outcome.append(vl.eq(vr))
+        return outcome
+
         # ToDo add other comparision types
