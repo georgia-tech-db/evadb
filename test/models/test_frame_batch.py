@@ -84,3 +84,39 @@ class FrameBatchTest(unittest.TestCase):
             info=None,
             outcomes={'test': [[None], [None]]})
         self.assertEqual(expected, batch[::2])
+
+    def test_fetching_frames_by_index_should_also_return_temp_outcomes(self):
+        batch = FrameBatch(
+            frames=[Frame(1, np.ones((1, 1)), None),
+                    Frame(1, np.ones((1, 1)), None)],
+            info=None,
+            outcomes={'test': [[1], [2]]},
+            temp_outcomes={'test2': [[3], [4]]})
+        expected = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)],
+                              info=None,
+                              outcomes={'test': [[1]]},
+                              temp_outcomes={'test2': [[3]]})
+        self.assertEqual(expected, batch[[0]])
+
+    def test_set_outcomes_method_should_set_temp_outcome_when_bool_is_true(
+            self):
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+        batch.set_outcomes('test', [1], is_temp=True)
+        expected = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)],
+                              info=None, temp_outcomes={'test': [1]})
+        self.assertEqual(expected, batch)
+
+    def test_has_outcomes_returns_false_if_the_given_name_not_in_outcomes(
+            self):
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+
+        self.assertFalse(batch.has_outcome('temp'))
+
+    def test_has_outcomes_returns_true_if_the_given_name_is_in_outcomes(
+            self):
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+        batch.set_outcomes('test_temp', [1], is_temp=True)
+        batch.set_outcomes('test', [1])
+
+        self.assertTrue(batch.has_outcome('test'))
+        self.assertTrue(batch.has_outcome('test_temp'))
