@@ -6,7 +6,8 @@ from src.models import FrameBatch, FrameInfo, Prediction
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
     """
-    Abstract class for UDFs. All the UDFs which perform classification inherit this calls.
+    Abstract class for UDFs. All the UDFs which perform classification
+    inherit this calls.
 
     Load and initialize the machine learning model in the __init__.
 
@@ -37,12 +38,17 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
     @abstractmethod
     def classify(self, batch: FrameBatch) -> List[Prediction]:
         """
-        Takes as input a batch of frames and returns the predictions by applying the classification model.
+        Takes as input a batch of frames and returns the predictions by
+        applying the classification model.
 
         Arguments:
-            batch (FrameBatch): Input batch of frames on which prediction needs to be made
+            batch (FrameBatch): Input batch of frames on which prediction
+            needs to be made
 
         Returns:
             List[Prediction]: The predictions made by the classifier
         """
         pass
+
+    def __call__(self, *args, **kwargs):
+        self.classify(*args, **kwargs)
