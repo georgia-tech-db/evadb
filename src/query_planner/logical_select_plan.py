@@ -7,10 +7,18 @@ from src.query_planner.abstract_plan import PlanNodeType
 
 
 class LogicalSelectPlan(AbstractSelect):
+    """class for a select based planner
+
+     Arguments:
+         predicate : Expression
+         videos : list of videos on which the select will be executed
+         columns_id : columns used in the select in the form of "tablename.attribute"
+
+     """
     def __init__(self, predicate: AbstractExpression,
-                 video: AbstractVideoLoader,
-                 column_ids: List[int]):
-        super().__init__(predicate, video, column_ids)
+                 videos: List[AbstractVideoLoader],
+                 column_ids: List[str]):
+        super().__init__(predicate, videos, column_ids)
 
     def get_node_type(self):
         return PlanNodeType.LOGICAL_SELECT

@@ -8,30 +8,30 @@ from typing import List
 
 
 class AbstractInnerJoin(AbstractPlan):
-    """Abstract class for all the scan based planners
+    """Abstract class for all the inner join based planners
 
     Arguments:
         predicate : Expression
-        video : video on which the scan will be executed
-        columns_id :
+        videos : list of videos on which the join will be executed
+        join_id : columns that will be joined on in the form of "tablename.attribute"
 
     """
 
-    def __init__(self, video1: AbstractVideoLoader, video2: AbstractVideoLoader, join_ids: List[int]):
+    def __init__(self, videos: List[AbstractVideoLoader], join_ids: List[str]):
         super(AbstractInnerJoin, self).__init__()
         self._join_ids = join_ids
-        self._video1 = video1
-        self._video2 = video2
+        self._videos = videos
+
 
     @property
-    def video(self) -> List:
-        return [self._video1, self._video2]
+    def videos(self) -> List[AbstractVideoLoader]:
+        return self._videos
 
     @property
-    def join_ids(self) -> List:
+    def join_ids(self) -> List[int]:
         return self._join_ids
 
     def __str__(self):
-        pt1 = ' join '.join([str(self._video1), str(self._video2)])
+        pt1 = ' join '.join([str(video) for video in self.videos])
         pt2 = ' = '.join([str(id) for id in self._join_ids])
         return '{}__{}'.format(pt1, pt2)

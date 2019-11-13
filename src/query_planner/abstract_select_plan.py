@@ -10,32 +10,32 @@ from src.loaders.abstract_loader import AbstractVideoLoader
 
 
 class AbstractSelect(AbstractPlan):
-    """Abstract class for all the scan based planners
+    """Abstract class for all the select based planners
 
     Arguments:
         predicate : Expression
-        video : video on which the scan will be executed
-        columns_id :
+        videos : list of videos on which the select will be executed
+        columns_id : columns used in the select in the form of "tablename.attribute"
 
     """
 
-    def __init__(self, predicate: AbstractExpression, video: AbstractVideoLoader,
-                 column_ids: List[int]):
+    def __init__(self, predicate: AbstractExpression, videos: List[AbstractVideoLoader],
+                 column_ids: List[str]):
         super(AbstractSelect, self).__init__()
         self._predicate = predicate
         self._column_ids = column_ids
-        self._video = video
+        self._videos = videos
 
     @property
-    def video(self) -> AbstractVideoLoader:
-        return self._video
+    def videos(self) -> List[AbstractVideoLoader]:
+        return self._videos
 
     @property
     def predicate(self) -> AbstractExpression:
         return self._predicate
 
     @property
-    def column_ids(self) -> List:
+    def column_ids(self) -> List[str]:
         return self._column_ids
 
     def __str__(self):
