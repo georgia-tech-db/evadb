@@ -1,33 +1,62 @@
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_select_plan import LogicalSelectPlan
+from enum import Enum
 
 
+# Enum to encapsulate the list of rules we have available
+class Rules(Enum):
+    PREDICATE_PUSHDOWN = 1,
+    PROJECTION_PUSHDOWN_SELECT = 2,
+    PROJECTION_PUSHDOWN_JOIN= 3,
+    SIMPLIFY_PREDICATE = 4,
+    JOIN_ELIMINATION = 5
+
+
+# Class to Encapsulate the functionality of the Rule Based Query Optimizer (Query Rewriter)
 class RuleQueryOptimizer:
+    def __init__(self):
+        self.rule2value = {Rules.PREDICATE_PUSHDOWN: (self.predicate_pushdown, self.do_predicate_pushdown),
+                           Rules.SIMPLIFY_PREDICATE: (self.simply_predicate, self.do_simplify_predicate),
+                           Rules.PROJECTION_PUSHDOWN_SELECT: (self.projection_pushdown_select, self.do_projection_pushdown_select),
+                           Rules.PROJECTION_PUSHDOWN_JOIN: (self.projection_pushdown_join, self.do_projection_pushdown_join),
+                           Rules.JOIN_ELIMINATION: (self.join_elimination, self.do_join_elimination)}
 
-    def run(self, plan_tree):
-        curnode = plan_tree.root
-        self.traverse(curnode)
-        return plan_tree
 
-    def traverse(self, curnode):
-        if curnode.children == []:
+    # Runs the rule based Optimizer on the list of rules you want
+    # rule_list : a list of Rule Enums. The rules will be ran in the order specified.
+    #             example: [Rules.PREDICATE_PUSHDOWN, Rules.SIMPLIFY_PREDICATE]
+    def run(self, root_node, rule_list):
+        self.traverse(root_node, rule_list)
+        return root_node
+
+    # Recursive function that traverses the tree and applies all of the rules in the rule list
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    def traverse(self, curnode, rule_list):
+
+        if len(curnode.children) == 0:
             return
         for i, child in enumerate(curnode.children):
-            if type(curnode) == LogicalSelectPlan:
-                curnode.predicate = self.simply_predicate(curnode.predicate)
-            # projection pushdown joins
-            if type(curnode) == LogicalProjectionPlan and type(child) == LogicalInnerJoinPlan:
-                self.projection_pushdown_join(curnode, child)
-            # projection pushdown select
-            if type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan:
-                self.projection_pushdown_select(curnode, i)
-            # predicate pushdown
-            if type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan:
-                self.predicate_pushdown(curnode, i)
-            self.traverse(child)
+            for rule in rule_list:
+                func, condition = self.rule2value[rule]
+                if condition:
+                    func(curnode, child)
+            # if type(curnode) == LogicalSelectPlan:
+            #     curnode.predicate = self.simply_predicate(curnode.predicate)
+            # # projection pushdown joins
+            # if type(curnode) == LogicalProjectionPlan and type(child) == LogicalInnerJoinPlan:
+            #     self.projection_pushdown_join(curnode, child)
+            # # projection pushdown select
+            # if type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan:
+            #     self.projection_pushdown_select(curnode, i)
+            # # predicate pushdown
+            # if type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan:
+            #     self.predicate_pushdown(curnode, i)
+            # self.traverse(child, rule_list)
 
     # push down predicates so filters done as early as possible
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def predicate_pushdown(self, curnode, child_ix):
         # curnode is the select and child is the join
         child = curnode.children[child_ix]
@@ -47,6 +76,8 @@ class RuleQueryOptimizer:
         curnode.parent = child
 
     # push down projects so that we do not have unnecessary attributes
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def projection_pushdown_select(self, curnode, child_ix):
         # curnode is the projection
         # child is the select
@@ -57,11 +88,12 @@ class RuleQueryOptimizer:
 
     # TODO Refactor for new optimizer
     # push down projects so that we do not have unnecessary attributes
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def projection_pushdown_join(self, curnode, child):
         # curnode is the projection
         # child is the join
         #for c_ix, cc in enumerate(child.children):
-
 
         for tabname in child.children.keys():
             cols = [col for col in child.join_attrs if tabname in col]
@@ -75,14 +107,43 @@ class RuleQueryOptimizer:
             child.children[new_proj1.tablename] = new_proj1
 
     # reorder predicates so that DBMS applies most selective first
-    def selective_first(self, plan_tree):
+    def selective_first(self):
         pass
 
     # No where clause like 1 = 0 or 0 = 0
     # Merging predicates
+    # pred will be an AbstractExpression type
     def simply_predicate(self, pred):
         new_pred = pred
         return new_pred
 
-    def join_elimination(self, plan_tree):
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
+    def join_elimination(self, curnode, child_ix):
         pass
+
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
+    def do_projection_pushdown_join(self, curnode, child):
+        return type(curnode) == LogicalProjectionPlan and type(child) == LogicalInnerJoinPlan
+
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
+    def do_projection_pushdown_select(self, curnode, child):
+        return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan
+
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
+    def do_predicate_pushdown(self, curnode, child):
+        return type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan
+
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
+    def do_join_elimination(self, curnode, child):
+        return False
+
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
+    def do_simplify_predicate(self, curnode, child):
+        return type(curnode) == LogicalSelectPlan
+
