@@ -1,10 +1,11 @@
 """
-Defines TableHandler.
+Defines UADETRAC TableHandler.
 Provides the methods to infer stats of a Table.
 """
 import pandas as pd
 
 from sqlite_connection import SqliteConnection
+from base_table_handler import BaseTableHandler
 
 class VideoFrameMap:
     def __init__(self, args):
@@ -12,8 +13,9 @@ class VideoFrameMap:
         self.video_id = args['video_id']
 
 
-class TableHandler:
+class TableHandler(BaseTableHandler):
     def __init__(self, database_name, conn: SqliteConnection):
+        BaseTableHandler.__init__(conn)
         self.table_name = database_name + "_mapping"
         self.conn = conn
 
