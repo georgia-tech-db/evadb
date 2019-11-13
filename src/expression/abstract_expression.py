@@ -39,9 +39,9 @@ class AbstractExpression(ABC):
         if index < 0 or index >= len(self._children):
             return None
         else:
-            self._children[index]
+            return self._children[index]
 
-    def append_child(self, index: int, child):
+    def append_child(self, child):
         self._children.append(child)
 
     def get_children_count(self) -> int:
