@@ -11,7 +11,26 @@
 * Dataset 
 
 ### Rule Based Query Optimizer Status
-11/3/2019 Integrated the first verison of the Rule Based Query Optimizer To test run Eva/evaQL/build/testRuleBasedOptimizer.py
+11/14/2019 Integrated second version of the Rule Based Query Optmizer on Master. This optimizer is integrated to the current abstract plans on georgia-tech-db/Eva. 
+Implementation Milestones 
+* Abstract plans for Select, Project, Inner Join, Table
+* Logical plans for Select, Project, Inner Join, Video Table
+* Predicate pushdown 
+* Projection pushdown
+* Test cases for Predicate Pushdown, Projection Pushdown, and them Combined
+* A print function has been inplemented to visualize the created tree.
+
+Plans can be found under src/query_planner
+Rule Based Optmizer can be found under src/query_optimizer/rule_query_optmizer.py
+
+The previous implementation (10/19/2019) of the Rule Based optimizer was renamed to rule_query_optimizer_playground.py
+
+To run the query tests can be found in src/query_optimizer/tests/t_rule_query_optmizer.py
+To run the tests simply run python t_rule_query_optmizer.py
+There is a verbose option that will print the trees before and after. 
+
+11/3/2019 Integrated the first verison of the Rule Based Query Optimizer on the RuleBasedQueryOptimizer branch.
+To test run Eva/evaQL/build/testRuleBasedOptimizer.py
 Currently, this only completes the Projection Pushdown rule when the following node is a SelectNode since Joins have not been implemented in the current verision of the logical plan tree. This can be found in the RuleBasedQueryOptimizer Branch. Currently there are no test cases implemented. 
 
 Next Steps
