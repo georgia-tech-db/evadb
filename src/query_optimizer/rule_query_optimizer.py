@@ -28,20 +28,21 @@ class RuleQueryOptimizer:
     # rule_list : a list of Rule Enums. The rules will be ran in the order specified.
     #             example: [Rules.PREDICATE_PUSHDOWN, Rules.SIMPLIFY_PREDICATE]
     def run(self, root_node, rule_list):
-        self.traverse(root_node, rule_list)
+        for rule in rule_list:
+            self.traverse(root_node, rule)
         return root_node
 
     # Recursive function that traverses the tree and applies all of the rules in the rule list
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-    def traverse(self, curnode, rule_list):
+    def traverse(self, curnode, rule):
         if len(curnode.children) == 0:
             return
+        # for rule in rule_list:
         for child_ix, child in enumerate(curnode.children):
-            for rule in rule_list:
-                func, condition = self.rule2value[rule]
-                if condition(curnode, child):
-                    func(curnode, child_ix)
-            self.traverse(child, rule_list)
+            func, condition = self.rule2value[rule]
+            if condition(curnode, child):
+                func(curnode, child_ix)
+            self.traverse(child, rule)
 
     # push down predicates so filters done as early as possible
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
@@ -103,6 +104,15 @@ class RuleQueryOptimizer:
         new_proj.set_children(old_children)
         for cc in old_children:
             cc.parent = new_proj
+        # we did a previous select projection pushdown of the same columns
+        # This means we need to push down further, and can delete the current node (the first projection)
+        if type(child.parent) == LogicalProjectionPlan \
+                and set(child.parent.column_ids) == set(new_proj.column_ids) \
+                and curnode.parent is not None:
+            cur_children = curnode.children
+            curnode_ix = curnode.parent.children.index(curnode)
+            curnode.parent.children[curnode_ix] = cur_children[0]
+            cur_children[0].parent = curnode.parent
 
     # push down projects so that we do not have unnecessary attributes
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
@@ -168,7 +178,11 @@ class RuleQueryOptimizer:
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_projection_pushdown_select(self, curnode, child):
-        return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan
+        if len(child.children) > 0:
+            joins = any([type(c) == LogicalInnerJoinPlan for c in child.children])
+            return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan and not joins
+        else:
+            return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type

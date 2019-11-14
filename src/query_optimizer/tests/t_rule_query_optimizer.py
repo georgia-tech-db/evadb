@@ -222,9 +222,72 @@ def test_complex_projection_pushdown_join():
     pass
 
 
-def test_both_projection_pushdown_and_predicate_pushdown():
-    pass
+def test_both_projection_pushdown_and_predicate_pushdown(verbose=False):
+    meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+    video1 = SimpleVideoLoader(video_metadata=meta1)
 
+    meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
+    video2 = SimpleVideoLoader(video_metadata=meta2)
+
+    projection_output = ['v1.1', 'v2.2']
+    root = LogicalProjectionPlan(videos=[video1, video2], column_ids=projection_output)
+
+    # Creating Expression for Select: Expression is basically where v1.1 == 4
+    const = ConstantValueExpression(value=4)
+    tup = TupleValueExpression(col_idx=int(projection_output[0].split('.')[1]))
+    expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
+
+    # used both videos because purposely placed BEFORE the join
+    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2])
+    s1.parent = root
+
+    j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
+    j1.parent = s1
+
+    t1 = VideoTablePlan(video=video1, tablename='v1')
+    t2 = VideoTablePlan(video=video2, tablename='v2')
+
+    s1.set_children([j1])
+    t1.parent = j1
+    t2.parent = j1
+
+    j1.set_children([t1, t2])
+    root.set_children([s1])
+
+    rule_list = [Rules.PREDICATE_PUSHDOWN, Rules.PROJECTION_PUSHDOWN_JOIN, Rules.PROJECTION_PUSHDOWN_SELECT]
+    if verbose:
+        print('Original Plan Tree')
+        print(root)
+    qo = RuleQueryOptimizer()
+    new_tree = qo.run(root, rule_list)
+    if verbose:
+        print('New Plan Tree')
+        print(new_tree)
+
+    assert root.parent is None
+    assert root.children == [j1]
+    assert j1.parent == root
+    assert len(j1.children) == 2
+    assert s1 in j1.children
+    assert s1.parent == j1
+    assert s1.videos == [video1]
+    assert len(s1.children) == 1
+    assert type(s1.children[0]) == LogicalProjectionPlan
+    assert 'v1.1' in s1.children[0].column_ids
+    assert 'v1.3' in s1.children[0].column_ids
+    assert s1.children[0].children == [t1]
+    assert t1.parent == s1.children[0]
+    s1_ix = j1.children.index(s1)
+    if s1_ix == 0:
+        proj_ix = 1
+    else:
+        proj_ix = 0
+    assert type(j1.children[proj_ix]) == LogicalProjectionPlan
+    assert j1.children[proj_ix].parent == j1
+    assert 'v2.3' in j1.children[proj_ix].column_ids
+    assert 'v2.2' in j1.children[proj_ix].column_ids
+    assert t2.parent == j1.children[proj_ix]
+    print('Combined Projection Pushdown and Predicate Pushdown Test Successful!')
 
 
 
@@ -233,3 +296,4 @@ if __name__ == '__main__':
     test_simple_projection_pushdown_select()
     test_simple_projection_pushdown_join()
     test_combined_projection_pushdown()
+    test_both_projection_pushdown_and_predicate_pushdown()
