@@ -55,13 +55,17 @@ class RuleQueryOptimizer:
         # find the join child with from the same video
         correct_ix = None
         curnode_tabnames = set([col.split('.')[0] for col in curnode.column_ids])
+        vids = []
         for jc_ix, jc in enumerate(child.children):
             if type(jc) == VideoTablePlan:
                 jc_tabnames = set([jc.tablename])
+                vids = [jc.video]
             elif type(jc) == LogicalSelectPlan:
                 jc_tabnames = set([attr.split('.')[0] for attr in jc.column_ids])
+                vids = jc.videos
             elif type(jc) == LogicalInnerJoinPlan:
-                jc_tabnames = set([attr.split('.')[0] for attr in jc.join_])
+                jc_tabnames = set([attr.split('.')[0] for attr in jc.join_ids])
+                vids = jc.videos
             else:
                 return
             # getting all of the columns that the current node uses (other columns not in the join columns)
@@ -70,6 +74,9 @@ class RuleQueryOptimizer:
                 break
         if correct_ix is None:
             return
+
+        # Set the videos because now, that we are below the join, we do not need both videos
+        curnode.set_videos(vids)
         curnode.set_children([child.children[correct_ix]])
         child.children[correct_ix].parent = curnode
         # set the join's children to be the select
@@ -83,10 +90,19 @@ class RuleQueryOptimizer:
     def projection_pushdown_select(self, curnode, child_ix):
         # curnode is the projection
         # child is the select
-        new_proj = LogicalProjectionPlan(videos=curnode.videos, column_ids=curnode.column_ids)
+        child = curnode.children[child_ix]
+        # getting all of the columns that the current node uses (other columns not in the join columns)
+        cols_project = [col for col in curnode.column_ids]
+        # getting all of the columns that the select uses that are the same as it's child
+        cols_select = [col for col in child.column_ids]
+        cols_project.extend(cols_select)
+        cols_project = list(set(cols_project))
+        new_proj = LogicalProjectionPlan(videos=curnode.videos, column_ids=cols_project)
         old_children = curnode.children[child_ix].children
         curnode.children[child_ix].set_children([new_proj])
         new_proj.set_children(old_children)
+        for cc in old_children:
+            cc.parent = new_proj
 
     # push down projects so that we do not have unnecessary attributes
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
@@ -96,14 +112,25 @@ class RuleQueryOptimizer:
         # child is the join
         child = curnode.children[child_ix]
         for cc_ix, cc in enumerate(child.children):
-            cc_tabnames = [col.split('.')[0] for col in [cc.column_ids]]
+            if type(cc) == VideoTablePlan:
+                cc_tabnames = [cc.tablename]
+            elif type(cc) == LogicalInnerJoinPlan:
+                cc_tabnames = [col.split('.')[0] for col in cc.join_ids]
+            elif type(cc) == LogicalSelectPlan:
+                cc_tabnames = [col.split('.')[0] for col in cc.column_ids]
+            else:
+                break
             # getting all of the columns that the join uses that are the same as it's child
-            cols = [col for col in child.join_attrs for tabname in cc_tabnames if tabname in col]
+            cols = [col for col in child.join_ids for tabname in cc_tabnames if tabname in col]
             # getting all of the columns that the current node uses (other columns not in the join columns)
             cols2 = [col for col in curnode.column_ids for tabname in cc_tabnames if tabname in col]
             cols.extend(cols2)
             # creating new Projection Node
-            new_proj1 = LogicalProjectionPlan(videos=cc.videos, column_ids=cols)
+            if type(cc) == VideoTablePlan:
+                vids = [cc.video]
+            else:
+                vids = cc.videos
+            new_proj1 = LogicalProjectionPlan(videos=vids, column_ids=cols)
             new_proj1.set_children([child.children[cc_ix]])
             new_proj1.parent = child
             child.children[cc_ix].parent = new_proj1

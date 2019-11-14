@@ -38,6 +38,9 @@ class AbstractSelect(AbstractPlan):
     def column_ids(self) -> List[str]:
         return self._column_ids
 
+    def set_videos(self, new_vids):
+        self._videos = new_vids
+
     def __str__(self, level=0):
         res = 'sigma {}'.format(str(self._predicate))
         ret = "\t" * level + res + "\n"
