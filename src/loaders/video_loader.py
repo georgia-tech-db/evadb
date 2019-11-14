@@ -2,6 +2,7 @@ from src.loaders.abstract_loader import AbstractVideoLoader
 import cv2
 
 from src.models import VideoMetaInfo, FrameInfo, ColorSpace, Frame, FrameBatch
+from src.utils import framediff_utils
 
 
 class SimpleVideoLoader(AbstractVideoLoader):
@@ -21,6 +22,8 @@ class SimpleVideoLoader(AbstractVideoLoader):
             (height, width, channels) = frame.shape
             info = FrameInfo(height, width, channels, ColorSpace.BGR)
 
+
+        prev_frame = None
         frames = []
         while frame is not None:
             frame_ind += 1
@@ -28,6 +31,14 @@ class SimpleVideoLoader(AbstractVideoLoader):
             if self.skip_frames > 0 and frame_ind % self.skip_frames != 0:
                 _, frame = video.read()
                 continue
+
+            if self.threshold > 0:
+                if prev_frame != None:
+                    frame_diff = getattr(framediff_utils, self.distance_metric)(frame, prev_frame)
+                    if frame_diff < self.threshold:
+                        _, frame = video.read()
+                        continue
+                prev_frame = frame
 
             frames.append(eva_frame)
             if self.limit and frame_ind >= self.limit:
