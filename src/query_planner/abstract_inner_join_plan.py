@@ -31,7 +31,12 @@ class AbstractInnerJoin(AbstractPlan):
     def join_ids(self) -> List[int]:
         return self._join_ids
 
-    def __str__(self):
-        pt1 = ' join '.join([str(video) for video in self.videos])
+
+    def __str__(self, level=0):
+        pt1 = ' join '.join([str(video.video_metadata.file) for video in self.videos])
         pt2 = ' = '.join([str(id) for id in self._join_ids])
-        return '{}__{}'.format(pt1, pt2)
+        res = '{}__{}'.format(pt1, pt2)
+        ret = "\t" * level + res + "\n"
+        for child in self.children:
+            ret += child.__str__(level + 1)
+        return ret

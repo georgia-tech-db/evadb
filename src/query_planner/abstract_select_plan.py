@@ -38,5 +38,9 @@ class AbstractSelect(AbstractPlan):
     def column_ids(self) -> List[str]:
         return self._column_ids
 
-    def __str__(self):
-        return 'sigma {}'.format(str(self._predicate))
+    def __str__(self, level=0):
+        res = 'sigma {}'.format(str(self._predicate))
+        ret = "\t" * level + res + "\n"
+        for child in self.children:
+            ret += child.__str__(level + 1)
+        return ret

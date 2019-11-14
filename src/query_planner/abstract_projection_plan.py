@@ -30,6 +30,9 @@ class AbstractProjection(AbstractPlan):
     def column_ids(self) -> List[str]:
         return self._column_ids
 
-    def __str__(self):
-        return 'pi {}'.format(str(self._column_ids))
-
+    def __str__(self, level=0):
+        res = 'pi {}'.format(str(self._column_ids))
+        ret = "\t" * level + res + "\n"
+        for child in self.children:
+            ret += child.__str__(level + 1)
+        return ret

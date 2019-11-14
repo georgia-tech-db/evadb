@@ -9,6 +9,7 @@ class PlanNodeType(IntEnum):
     LOGICAL_SELECT = 2,
     LOGICAL_PROJECTION = 3
     LOGICAL_INNER_JOIN = 4
+    TABLE = 5
 
 
 class AbstractPlan(ABC):
@@ -66,3 +67,9 @@ class AbstractPlan(ABC):
     @abstractmethod
     def get_node_type(self) -> PlanNodeType:
         pass
+
+    def __str__(self, level=0):
+        ret = "\t" * level + '' + "\n"
+        for child in self.children:
+            ret += child.__str__(level + 1)
+        return ret
