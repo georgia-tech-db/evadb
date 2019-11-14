@@ -1,6 +1,7 @@
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.video_table_plan import VideoTablePlan
 from enum import Enum
 
 
@@ -38,20 +39,9 @@ class RuleQueryOptimizer:
         for child_ix, child in enumerate(curnode.children):
             for rule in rule_list:
                 func, condition = self.rule2value[rule]
-                if condition:
+                if condition(curnode, child):
                     func(curnode, child_ix)
-            # if type(curnode) == LogicalSelectPlan:
-            #     curnode.predicate = self.simply_predicate(curnode.predicate)
-            # # projection pushdown joins
-            # if type(curnode) == LogicalProjectionPlan and type(child) == LogicalInnerJoinPlan:
-            #     self.projection_pushdown_join(curnode, child)
-            # # projection pushdown select
-            # if type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan:
-            #     self.projection_pushdown_select(curnode, i)
-            # # predicate pushdown
-            # if type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan:
-            #     self.predicate_pushdown(curnode, i)
-            # self.traverse(child, rule_list)
+            self.traverse(child, rule_list)
 
     # push down predicates so filters done as early as possible
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
@@ -64,11 +54,24 @@ class RuleQueryOptimizer:
         # setting the select's child to be after the join
         # find the join child with from the same video
         correct_ix = None
+        curnode_tabnames = set([col.split('.')[0] for col in curnode.column_ids])
         for jc_ix, jc in enumerate(child.children):
-            if jc.video == curnode.video:
+            if type(jc) == VideoTablePlan:
+                jc_tabnames = set([jc.tablename])
+            elif type(jc) == LogicalSelectPlan:
+                jc_tabnames = set([attr.split('.')[0] for attr in jc.column_ids])
+            elif type(jc) == LogicalInnerJoinPlan:
+                jc_tabnames = set([attr.split('.')[0] for attr in jc.join_])
+            else:
+                return
+            # getting all of the columns that the current node uses (other columns not in the join columns)
+            if curnode_tabnames.issubset(jc_tabnames):
                 correct_ix = jc_ix
+                break
+        if correct_ix is None:
+            return
         curnode.set_children([child.children[correct_ix]])
-        child.children[correct_ix].set_parent(curnode)
+        child.children[correct_ix].parent = curnode
         # set the join's children to be the select
         child.children[correct_ix] = curnode
         child.parent = curnode.parent
@@ -93,17 +96,17 @@ class RuleQueryOptimizer:
         # child is the join
         child = curnode.children[child_ix]
         for cc_ix, cc in enumerate(child.children):
-            cc_tabnames = [col.split('.')[0] for col in [cc.columns]]
+            cc_tabnames = [col.split('.')[0] for col in [cc.column_ids]]
             # getting all of the columns that the join uses that are the same as it's child
             cols = [col for col in child.join_attrs for tabname in cc_tabnames if tabname in col]
             # getting all of the columns that the current node uses (other columns not in the join columns)
-            cols2 = [col for col in curnode.columns for tabname in cc_tabnames if tabname in col]
+            cols2 = [col for col in curnode.column_ids for tabname in cc_tabnames if tabname in col]
             cols.extend(cols2)
             # creating new Projection Node
-            new_proj1 = LogicalProjectionPlan(videos=[cc.videos], column_ids=cols)
+            new_proj1 = LogicalProjectionPlan(videos=cc.videos, column_ids=cols)
             new_proj1.set_children([child.children[cc_ix]])
-            new_proj1.parent(child)
-            child.children[cc_ix].parent(new_proj1)
+            new_proj1.parent = child
+            child.children[cc_ix].parent = new_proj1
             child.children[cc_ix] = new_proj1
 
         # in this case, we have a join of three or more tables.
@@ -111,7 +114,7 @@ class RuleQueryOptimizer:
         # We can delete the projection in the middle between the joins
         if type(curnode.parent) == LogicalInnerJoinPlan:
             new_children = curnode.children
-            child.parent(curnode.parent)
+            child.parent = curnode.parent
             curnode.parent.set_children(new_children)
 
     # reorder predicates so that DBMS applies most selective first
