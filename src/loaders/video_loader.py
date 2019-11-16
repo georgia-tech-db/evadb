@@ -22,7 +22,6 @@ class SimpleVideoLoader(AbstractVideoLoader):
             (height, width, channels) = frame.shape
             info = FrameInfo(height, width, channels, ColorSpace.BGR)
 
-
         prev_frame = None
         frames = []
         while frame is not None:
@@ -33,8 +32,9 @@ class SimpleVideoLoader(AbstractVideoLoader):
                 continue
 
             if self.threshold > 0:
-                if prev_frame != None:
-                    frame_diff = getattr(framediff_utils, self.distance_metric)(frame, prev_frame)
+                if prev_frame is not None:
+                    frame_diff = getattr(framediff_utils, 
+                        self.distance_metric)(frame, prev_frame)
                     if frame_diff < self.threshold:
                         _, frame = video.read()
                         continue
