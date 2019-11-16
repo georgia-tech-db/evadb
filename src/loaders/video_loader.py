@@ -34,7 +34,7 @@ class SimpleVideoLoader(AbstractVideoLoader):
             if self.threshold > 0:
                 if prev_frame is not None:
                     frame_diff = getattr(framediff_utils, 
-                        self.distance_metric)(frame, prev_frame)
+                                        self.distance_metric)(frame, prev_frame)
                     if frame_diff < self.threshold:
                         _, frame = video.read()
                         continue
