@@ -13,6 +13,4 @@ def absolute_difference(curr_frame, prev_frame):
 	curr_frame_grayscale = convert_to_grayscale(curr_frame)
 	prev_frame_grayscale = convert_to_grayscale(prev_frame)
 	frame_diff = cv2.absdiff(curr_frame_grayscale, prev_frame_grayscale)
-	print("frame_diff:", frame_diff)
-	print("frame_diff.sum(): ", frame_diff.sum())
 	return frame_diff.sum()
