@@ -35,11 +35,32 @@ class SimpleVideoLoaderTest(unittest.TestCase):
                              dtype=np.uint8)
             out.write(frame)
 
+    def create_sample_video_with_similar_frames(self):
+        """
+        Function to create a video with 2 identical frames. 
+        Useful for testing frame differencing.
+        """
+        try:
+            os.remove('dummy_similar.avi')
+        except FileNotFoundError:
+            pass
+
+        out = cv2.VideoWriter('dummy_similar.avi',
+                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
+                              (2, 2))
+        frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
+                         dtype=np.uint8)
+        # Writing identical frames
+        out.write(frame)
+        out.write(frame)
+
     def setUp(self):
         self.create_sample_video()
+        self.create_sample_video_with_similar_frames()
 
     def tearDown(self):
         os.remove('dummy.avi')
+        os.remove('dummy_similar.avi')
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
@@ -88,3 +109,11 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         batches = list(video_loader.load())
         self.assertEqual(1, len(batches))
         self.assertEqual(dummy_frames, list(batches[0].frames))
+
+    def test_should_skip_identical_frames(self):
+        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
+        video_loader = SimpleVideoLoader(video_info, threshold=0.5, 
+                                        distance_metric='absolute_difference')
+        batches = list(video_loader.load())
+        self.assertEqual(1, len(batches))
+
