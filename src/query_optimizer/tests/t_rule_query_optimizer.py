@@ -290,6 +290,79 @@ def test_both_projection_pushdown_and_predicate_pushdown(verbose=False):
     print('Combined Projection Pushdown and Predicate Pushdown Test Successful!')
 
 
+def test_double_join_predicate_pushdown(verbose=False):
+    meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+    video1 = SimpleVideoLoader(video_metadata=meta1)
+
+    meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
+    video2 = SimpleVideoLoader(video_metadata=meta2)
+
+    meta3 = VideoMetaInfo(file='v3', c_format=VideoFormat.MOV, fps=30)
+    video3 = SimpleVideoLoader(video_metadata=meta3)
+
+    projection_output = ['v1.1', 'v2.2', 'v3.4']
+    root = LogicalProjectionPlan(videos=[video1, video2, video3], column_ids=projection_output)
+
+    # Creating Expression for Select: Expression is basically where v3.3 == 4
+    const = ConstantValueExpression(value=4)
+    tup = TupleValueExpression(col_idx=int(projection_output[2].split('.')[1]))
+    expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
+
+    # used both videos because purposely placed BEFORE the join
+    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3])
+    s1.parent = root
+
+    j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
+    j2 = LogicalInnerJoinPlan(videos=[video1, video2,  video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
+    j1.parent = j2
+
+    t1 = VideoTablePlan(video=video1, tablename='v1')
+    t2 = VideoTablePlan(video=video2, tablename='v2')
+    t3 = VideoTablePlan(video=video3, tablename='v3')
+
+    s1.set_children([j2])
+    t1.parent = j1
+    t2.parent = j1
+    j2.set_children([j1,t3])
+    t3.parent = j2
+    j1.set_children([t1, t2])
+    root.set_children([s1])
+
+    rule_list = [Rules.PREDICATE_PUSHDOWN]
+    if verbose:
+        print('Original Plan Tree')
+        print(root)
+    qo = RuleQueryOptimizer()
+    new_tree = qo.run(root, rule_list)
+    if verbose:
+        print('New Plan Tree')
+        print(new_tree)
+
+    assert root.parent is None
+    assert len(root.children) == 1
+    assert root.children[0].parent == root
+    assert j2.parent == root
+    assert len(j2.children) == 2
+    assert j2.children[0] == j1
+    assert j2.children[1] == s1
+    assert s1.parent == j2
+    assert j1.parent == j2
+    assert len(s1.videos) == 1
+    assert s1.videos[0] == video3
+    assert len(s1.children) == 1
+    assert s1.children[0] == t3
+    assert t3.parent == s1
+    assert len(j1.children) == 2
+    assert j1.children[0] == t1
+    assert j1.children[1] == t2
+    assert t1.parent == j1
+    assert t2.parent == j1
+    print('Double join predicate Pushdown Successful!')
+
+
+def test_double_join_projection_join_pushdown(verbose=False):
+    pass
+
 
 if __name__ == '__main__':
     test_simple_predicate_pushdown()
@@ -297,3 +370,4 @@ if __name__ == '__main__':
     test_simple_projection_pushdown_join()
     test_combined_projection_pushdown()
     test_both_projection_pushdown_and_predicate_pushdown()
+    test_double_join_predicate_pushdown()
