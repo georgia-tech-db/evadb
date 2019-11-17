@@ -4,9 +4,9 @@ Provides the methods to infer stats of a Table.
 """
 import pandas as pd
 
-from sqlite_connection import SqliteConnection
+from src.catalog.sqlite_connection import SqliteConnection
 from src import constants
-from base_table_handler import BaseTableHandler
+from src.catalog.handlers.base_table_handler import BaseTableHandler
 
 class VideoFrameMap:
     def __init__(self, args):

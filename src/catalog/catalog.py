@@ -8,10 +8,10 @@ Usage:
 import os
 import logging
 
-from sqlite_connection import SqliteConnection
-from handlers.prob_predicate_handler import ProbPredicateHandler
-from handlers.base_table_handler import BaseTableHandler
-from handlers.uadetrac_table_handler import UaDetracTableHandler
+from src.catalog.sqlite_connection import SqliteConnection
+from src.catalog.handlers.prob_predicate_handler import ProbPredicateHandler
+from src.catalog.handlers.base_table_handler import BaseTableHandler
+from src.catalog.handlers.uadetrac_table_handler import UaDetracTableHandler
 from src import constants
 
 
@@ -33,7 +33,7 @@ class Catalog:
         self.conn = self._createDatabaseConnection()
 
 
-    def listDatasets(self) -> list[str]:
+    def listDatasets(self) -> list():
         """
         Return all existing supported datasets in Eva.
         :return: list[str]: A list containing databases names.

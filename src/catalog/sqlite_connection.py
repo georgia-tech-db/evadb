@@ -3,7 +3,7 @@ import sqlite3
 import sys
 import time
 from importlib import import_module
-from src.catalog.catalog import Catalog
+from src.catalog.catalog import *
 
 try:
     from src.catalog.entity.dataset import Dataset

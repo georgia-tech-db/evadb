@@ -3,7 +3,7 @@
 """
 from abc import ABCMeta
 
-from sqlite_connection import SqliteConnection
+from src.catalog.sqlite_connection import SqliteConnection
 
 
 class BaseTableHandler(metaclass=ABCMeta):

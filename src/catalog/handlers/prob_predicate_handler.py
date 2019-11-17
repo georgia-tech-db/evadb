@@ -3,8 +3,7 @@ Implement methods to add, get, update, delete a probabilistic predicate.
 Usage:
  TODO(rishabh): Add examples.
 """
-import pandas as pd
-from sqlite_connection import SqliteConnection
+from src.catalog.sqlite_connection import SqliteConnection
 
 
 class ProbPredicateHandler:
@@ -27,8 +26,8 @@ class ProbPredicateHandler:
         :return:
         """
         sql = """insert into %s(name, reduction_rate, filter_cost, accuracy, udf_cost, dataset_name, model_type) 
-                 values(%s, %s, %s, %s, %s, %s, %s)""" %(self.pp_table_name, name, reduction_rate, filter_cost,
-                                                         accuracy, udf_cost, self.pp_dataset_name, model_type)
+                 values(%s, %s, %s, %s, %s, %s, %s)""" % (self.pp_table_name, name, reduction_rate, filter_cost,
+                                                          accuracy, udf_cost, self.pp_dataset_name, model_type)
         self.conn.execute(sql)
 
     def updateProbabilisticFilter(self, name: str, reduction_rate: float,
@@ -45,7 +44,7 @@ class ProbPredicateHandler:
         """
         pass
 
-    def listProbilisticFilters(self) -> list[str]:
+    def listProbilisticFilters(self) -> list():
         """
         List all probabilistic filter names which exists for the current dataset.
         :return: lits[str], name of filter names
@@ -67,7 +66,3 @@ class ProbPredicateHandler:
 
     def deleteProbilisticFilter(self, name: str) -> None:
         pass
-
-
-
-
