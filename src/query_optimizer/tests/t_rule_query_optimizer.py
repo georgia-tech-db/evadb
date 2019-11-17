@@ -359,9 +359,56 @@ def test_double_join_predicate_pushdown(verbose=False):
     assert t2.parent == j1
     print('Double join predicate Pushdown Successful!')
 
-
-def test_double_join_projection_join_pushdown(verbose=False):
-    pass
+# TODO Fix this test
+# def test_double_join_projection_join_pushdown(verbose=False):
+#     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+#     video1 = SimpleVideoLoader(video_metadata=meta1)
+#
+#     meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
+#     video2 = SimpleVideoLoader(video_metadata=meta2)
+#
+#     meta3 = VideoMetaInfo(file='v3', c_format=VideoFormat.MOV, fps=30)
+#     video3 = SimpleVideoLoader(video_metadata=meta3)
+#
+#     projection_output = ['v1.1', 'v2.2', 'v3.4']
+#     root = LogicalProjectionPlan(videos=[video1, video2, video3], column_ids=projection_output)
+#
+#     # Creating Expression for Select: Expression is basically where v3.3 == 4
+#     const = ConstantValueExpression(value=4)
+#     tup = TupleValueExpression(col_idx=int(projection_output[2].split('.')[1]))
+#     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
+#
+#     # used both videos because purposely placed BEFORE the join
+#     #s1 = LogicalSelectPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3])
+#     #s1.parent = root
+#
+#     j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
+#     j2 = LogicalInnerJoinPlan(videos=[video1, video2, video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
+#     j1.parent = j2
+#
+#     t1 = VideoTablePlan(video=video1, tablename='v1')
+#     t2 = VideoTablePlan(video=video2, tablename='v2')
+#     t3 = VideoTablePlan(video=video3, tablename='v3')
+#
+#     #s1.set_children([j2])
+#     t1.parent = j1
+#     t2.parent = j1
+#     j2.set_children([j1, t3])
+#     t3.parent = j2
+#     j1.set_children([t1, t2])
+#     root.set_children([j2])
+#
+#     rule_list = [Rules.PROJECTION_PUSHDOWN_JOIN]
+#     if verbose:
+#         print('Original Plan Tree')
+#         print(root)
+#     qo = RuleQueryOptimizer()
+#     new_tree = qo.run(root, rule_list)
+#     if verbose:
+#         print('New Plan Tree')
+#         print(new_tree)
+#
+#     print('Double join Projection Pushdown Successful!')
 
 
 if __name__ == '__main__':
@@ -371,3 +418,4 @@ if __name__ == '__main__':
     test_combined_projection_pushdown()
     test_both_projection_pushdown_and_predicate_pushdown()
     test_double_join_predicate_pushdown()
+    #test_double_join_projection_join_pushdown()
