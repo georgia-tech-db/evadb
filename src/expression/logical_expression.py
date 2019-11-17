@@ -1,21 +1,45 @@
+from src.expression.comparison_expression import ComparisonExpression
 from .abstract_expression import AbstractExpression
 
 
 class ExpressionLogical(AbstractExpression):
-    def __init__(self, children, operator):
+    def __init__(self, left_expression, operator, right_expression):
         self.operator = operator
-        self.children = children
+        self.left_expression = left_expression
+        self.right_expression = right_expression
 
-    def evaluate(self, Tuple):
-        datainput = []
-        for i in range(len(self.children)):
-            datainput.append(self.children[i].evaluate(Tuple))
+    def evaluate(self):
+        if isinstance(self.left_expression, ExpressionLogical):
+            left_exp = self.left_expression.evaluate()
+        elif isinstance(self.left_expression, ComparisonExpression):
+            left_exp = self.left_expression.evaluate([], None)
+        else:
+            left_exp = self.left_expression[0].evaluate()
+            for element in self.left_expression[1:]:
+                if self.operator == 'AND':
+                    left_exp = left_exp and element.evaluate()
+                elif self.operator == 'OR':
+                    left_exp = left_exp or element.evaluate()
+                else:
+                    raise ValueError("Un-Supported operator passed: " + self.operator)
+
+        if isinstance(self.right_expression, ExpressionLogical):
+            right_exp = self.right_expression.evaluate()
+        elif isinstance(self.right_expression, ComparisonExpression):
+            right_exp = self.right_expression.evaluate([], None)
+        else:
+            right_exp = self.right_expression[0].evaluate()
+            for element in self.right_expression[1:]:
+                if self.operator == 'AND':
+                    right_exp = right_exp and element.evaluate()
+                elif self.operator == 'OR':
+                    right_exp = right_exp or element.evaluate()
+                else:
+                    raise ValueError("Un-Supported operator passed: " + self.operator)
+
         if self.operator == 'AND':
-            output = True
-            for i in range(len(datainput)):
-                output = output and datainput[i]
-        if self.operator == 'OR':
-            output = False
-            for i in range(len(datainput)):
-                output = output or datainput[i]
-        return output
+            return left_exp and right_exp
+        elif self.operator == 'OR':
+            return left_exp or right_exp
+        else:
+            raise ValueError("Un-Supported operator passed: " + self.operator)
