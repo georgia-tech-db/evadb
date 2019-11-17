@@ -289,48 +289,6 @@ def test_both_projection_pushdown_and_predicate_pushdown(verbose=False):
     assert t2.parent == j1.children[proj_ix]
     print('Combined Projection Pushdown and Predicate Pushdown Test Successful!')
 
-
-def test_join_elimination(verbose=True):
-    meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
-    video1 = SimpleVideoLoader(video_metadata=meta1)
-
-    meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
-    video2 = SimpleVideoLoader(video_metadata=meta2)
-
-    # Creating Expression for Select: Expression is basically where v1.1 == v2.2
-    # Also creating a foreign key constraint for v1 where it requires v2.2
-    # hence join elimination should delete the join node and just return all of v1.1 for select
-    tup1 = TupleValueExpression(col_idx=1)
-    tup2 = TupleValueExpression(col_idx=1)
-    expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup1, right=tup2)
-
-    # used both videos because purposely placed BEFORE the join
-    root = LogicalSelectPlan(predicate=expression, column_ids=['v1.1', 'v2.2'], videos=[video1, video2],
-                             foreign_column_ids=['v2.2'])
-
-    j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.1', 'v2.2'])
-    j1.parent = root
-
-    t1 = VideoTablePlan(video=video1, tablename='v1')
-    t2 = VideoTablePlan(video=video2, tablename='v2')
-
-    root.set_children([j1])
-    t1.parent = j1
-    t2.parent = j1
-
-    j1.set_children([t1, t2])
-
-    rule_list = [Rules.JOIN_ELIMINATION]
-    if verbose:
-        print('Original Plan Tree')
-        print(root)
-    qo = RuleQueryOptimizer()
-    new_tree = qo.run(root, rule_list)
-    if verbose:
-        print('New Plan Tree')
-        print(new_tree)
-
-
 if __name__ == '__main__':
     test_simple_predicate_pushdown()
     test_simple_projection_pushdown_select()
