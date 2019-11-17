@@ -1,6 +1,10 @@
 """Finds Optimal Probabilistic Predicates for an expression"""
-from src.expression.abstract_expression import AbstractExpression
+from src.expression.abstract_expression import AbstractExpression, ExpressionType
+from src.expression.comparison_expression import ComparisonExpression
+from src.expression.logical_expression import LogicalExpression
+from src.expression.constant_value_expression import ConstantValueExpression
 from src.catalog.catalog import Catalog
+from src.query_optimizer.memo import Memo
 import constants
 
 
@@ -8,6 +12,7 @@ class PPOptmizer:
 
     def __init__(self, catalog: Catalog, predicates: list, accuracy_budget: float = 0.9):
         self._catalog = catalog
+        self._memo = Memo()
         self._pp_handler = self._catalog.getProbPredicateHandler()
         self._predicates = predicates
         self.accuracy_budget = accuracy_budget
@@ -29,16 +34,65 @@ class PPOptmizer:
             stats[f] = filter_dict
         return stats
 
-    def _wrangler(self, expression: AbstractExpression, label_desc: dict) -> list:
+    def _wrangler(self, expression: LogicalExpression, label_desc: dict) -> list:
         """ Generate possible enumerations of the `expression`
 
-        :param expression: An Abstract Expression (usually Logical Expression)
+        TODO: Currently supporting LogicalExpression, but its a easy modification to support AbstractExpression
+
+        :param expression: A Logical Expression
         :param label_desc: Description of all possible PP filters of a type
         :return:
         list, A list of Logical Expressions which are possible enumerations of the input expression
         """
+        leftExpr = expression.getLeftExpression()
+        rightExpr = expression.getRightExpression()
+        operator = expression.getOperator() # AND / OR
 
-        pass
+        new_left_exprs = [leftExpr]
+        new_right_exprs = [rightExpr]
+
+        # Explore left expr
+        if leftExpr.etype == ExpressionType.COMPARE_EQUAL:
+            lValue = leftExpr.left.evaluate()
+            rValue = leftExpr.right.evaluate()
+            rValues = label_desc[lValue][1] # fetching all possible rvalues
+            new_not_expr = None
+            for rVal in rValues:
+                if rVal != rValue:
+                    new_r_expr = ConstantValueExpression(rVal)
+                    new_comp_expr = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, leftExpr.left, new_r_expr)
+                    if not new_not_expr:
+                        new_not_expr = new_comp_expr
+                    else:
+                        new_not_expr = LogicalExpression(new_not_expr, 'AND', new_comp_expr)
+            new_left_exprs.append(new_not_expr)
+        elif leftExpr.etype == ExpressionType.COMPARE_LOGICAL:
+            new_left_exprs.extend(self._wrangler(leftExpr, label_desc))
+
+        # Explore right expr
+        if rightExpr.etype == ExpressionType.COMPARE_EQUAL:
+            lValue = rightExpr.left.evaluate()
+            rValue = rightExpr.right.evaluate()
+            rValues = label_desc[lValue][1]  # fetching all possible rvalues
+            new_not_expr = None
+            for rVal in rValues:
+                if rVal != rValue:
+                    new_r_expr = ConstantValueExpression(rVal)
+                    new_comp_expr = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, rightExpr.left, new_r_expr)
+                    if not new_not_expr:
+                        new_not_expr = new_comp_expr
+                    else:
+                        new_not_expr = LogicalExpression(new_not_expr, 'AND', new_comp_expr)
+            new_right_exprs.append(new_not_expr)
+        elif rightExpr.etype == ExpressionType.COMPARE_LOGICAL:
+            new_right_exprs.extend(self._wrangler(leftExpr, label_desc))
+
+        enumerated_exprs = []
+        for left in new_left_exprs:
+            for right in new_right_exprs:
+                new_logical_expr = LogicalExpression(left, operator, right)
+                enumerated_exprs.append(new_logical_expr)
+        return enumerated_exprs
 
     def _compute_expression_costs(self, expression: AbstractExpression) -> float:
         """Compute cost of applying PP filters to an expression
@@ -74,7 +128,13 @@ class PPOptmizer:
         # TODO: Generalize this all list of expression. A for loop.
         expr = self._predicates[0]
         enumerations = self._wrangler(expr, label_desc)
+        candidate_cost_list = []
+        for candidate in enumerations:
+            execution_cost = self._compute_expression_costs(candidate)
+            candidate_cost_list.append((candidate, execution_cost))
 
+        # Sort based on optimal execution cost
+        # return the best candidate
 
 
 if __name__ == '__main__':

@@ -2,14 +2,14 @@ from src.expression.comparison_expression import ComparisonExpression
 from .abstract_expression import AbstractExpression
 
 
-class ExpressionLogical(AbstractExpression):
+class LogicalExpression(AbstractExpression):
     def __init__(self, left_expression, operator, right_expression):
         self.operator = operator
         self.left_expression = left_expression
         self.right_expression = right_expression
 
     def evaluate(self):
-        if isinstance(self.left_expression, ExpressionLogical):
+        if isinstance(self.left_expression, LogicalExpression):
             left_exp = self.left_expression.evaluate()
         elif isinstance(self.left_expression, ComparisonExpression):
             left_exp = self.left_expression.evaluate([], None)
@@ -26,7 +26,7 @@ class ExpressionLogical(AbstractExpression):
             else:
                 left_exp = self.left_expression.evaluate()
 
-        if isinstance(self.right_expression, ExpressionLogical):
+        if isinstance(self.right_expression, LogicalExpression):
             right_exp = self.right_expression.evaluate()
         elif isinstance(self.right_expression, ComparisonExpression):
             right_exp = self.right_expression.evaluate([], None)
@@ -61,3 +61,6 @@ class ExpressionLogical(AbstractExpression):
             return defaultExpression
         else:
             return self.right_expression
+
+    def getOperator(self):
+        return self.operator
