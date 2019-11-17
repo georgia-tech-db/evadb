@@ -58,7 +58,7 @@ if __name__ == "__main__":
     with open('../../query_optimizer/utils/synthetic_pp_stats.json') as f2:
         synthetic_pp_stats = json.load(f2)
     print(synthetic_pp_stats)
-    conn = SqliteConnection(os.path.join(catalog_dir, 'pps.db'))
+    conn = SqliteConnection(os.path.join(catalog_dir, 'eva.db'))
     conn.connect()
     # catalog = Catalog(UADETRAC)
     conn.exec_script(os.path.join(catalog_dir, 'scripts',
@@ -81,7 +81,7 @@ if __name__ == "__main__":
                 synthetic_pp_stats[key][model]['C'],
                 synthetic_pp_stats[key][model]['A'],
                 "0",
-                "UADETRAC",
+                "UADETRAC".lower(),
                 model
             )
             conn.execute(sql)
