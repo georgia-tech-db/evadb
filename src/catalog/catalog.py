@@ -85,9 +85,10 @@ class Catalog:
 
     def _createDatabaseConnection(self) -> SqliteConnection:
         eva_dir = os.path.dirname(os.path.dirname(os.getcwd()))
-        cache_dir = os.path.join(eva_dir, 'cache')
         catalog_dir = os.path.join(eva_dir, 'src', 'catalog')
         try:
+            logging.info("Initiating DB connection with " +
+                         os.path.join(catalog_dir, self.db_file_map[self.current_dataset]))
             conn = SqliteConnection(os.path.join(catalog_dir, self.db_file_map[self.current_dataset]))
         except:
             raise Exception('Database file not found')

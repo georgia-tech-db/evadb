@@ -3,6 +3,7 @@ Implement methods to add, get, update, delete a probabilistic predicate.
 Usage:
  TODO(rishabh): Add examples.
 """
+import logging
 from src.catalog.sqlite_connection import SqliteConnection
 
 
@@ -49,7 +50,8 @@ class ProbPredicateHandler:
         List all probabilistic filter names which exists for the current dataset.
         :return: lits[str], name of filter names
         """
-        sql = """select name from pp_filter where dataset_name = %s""" % (self.pp_dataset_name)
+        sql = """select distinct(name) from pp_filter where dataset_name = '%s'""" % (self.pp_dataset_name)
+        logging.info('Fetching all filters with ' + sql )
         filter_list = self.conn.execute_and_fetch(sql)
         return filter_list
 
@@ -59,10 +61,12 @@ class ProbPredicateHandler:
         :param name:
         :return:
         """
-        sql = """select * from pp_filter where name=%s and dataset_name = %s""" % (name, self.pp_dataset_name)
+        sql = """select * from pp_filter where name='%s' and dataset_name = '%s'""" % (name, self.pp_dataset_name)
+        logging.info("Fetching filter info for "+ name + " using "+ sql)
         filter_info = self.conn.execute_and_fetch(sql)
         # TODO(rishabh): Check if we should return a PPFilter Object. Needs to be defined.
         return filter_info
+
 
     def deleteProbilisticFilter(self, name: str) -> None:
         pass
