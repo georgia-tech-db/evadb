@@ -73,7 +73,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-
+Rough.ipynb
 # pyenv
 .python-version
 
@@ -124,3 +124,5 @@ data/*
 
 # macos data
 *.DS_Store
+#Cache
+cache/*

@@ -242,7 +242,7 @@ if __name__ == "__main__":
 
 
   """
-  from loaders.loader_uadetrac import LoaderUADetrac
+  from storage.loader_uadetrac import LoaderUADetrac
 
   loader = LoaderUADetrac()
   X = loader.load_images()

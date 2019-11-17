@@ -1,5 +1,5 @@
 """
-This file defines the interface all dataset loaders need to follow / implement
+This file defines the interface all dataset storage need to follow / implement
 If any issues arise, please email jaeho.bang@gmail.com
 
 @Jaeho Bang
