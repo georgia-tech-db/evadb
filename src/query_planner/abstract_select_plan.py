@@ -16,15 +16,17 @@ class AbstractSelect(AbstractPlan):
         predicate : Expression
         videos : list of videos on which the select will be executed
         columns_id : columns used in the select in the form of "tablename.attribute"
+        foreign_column_id: columns in the form of "tablename.attribute"
 
     """
 
     def __init__(self, predicate: AbstractExpression, videos: List[AbstractVideoLoader],
-                 column_ids: List[str]):
+                 column_ids: List[str], foreign_column_ids: List[str]):
         super(AbstractSelect, self).__init__()
         self._predicate = predicate
         self._column_ids = column_ids
         self._videos = videos
+        self._foreign_column_ids = foreign_column_ids
 
     @property
     def videos(self) -> List[AbstractVideoLoader]:
@@ -38,11 +40,18 @@ class AbstractSelect(AbstractPlan):
     def column_ids(self) -> List[str]:
         return self._column_ids
 
+    @property
+    def foreign_column_ids(self) -> List[str]:
+        return self._foreign_column_ids
+
     def set_videos(self, new_vids):
         self._videos = new_vids
 
+    def set_predicate(self, new_pred):
+        self._predicate = new_pred
+
     def __str__(self, level=0):
-        res = 'sigma {}'.format(str(self._predicate))
+        res = 'sigma {} {}'.format(str(self._predicate), str(self._foreign_column_ids))
         ret = "\t" * level + res + "\n"
         for child in self.children:
             ret += child.__str__(level + 1)

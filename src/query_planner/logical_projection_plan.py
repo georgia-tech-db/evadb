@@ -15,8 +15,8 @@ class LogicalProjectionPlan(AbstractProjection):
 
         """
     def __init__(self, videos: List[AbstractVideoLoader],
-                 column_ids: List[str]):
-        super().__init__(videos, column_ids)
+                 column_ids: List[str], foreign_column_ids: List[str]):
+        super().__init__(videos, column_ids, foreign_column_ids)
 
     def get_node_type(self):
         return PlanNodeType.LOGICAL_PROJECTION
