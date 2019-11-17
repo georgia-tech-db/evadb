@@ -26,8 +26,8 @@ class ProbPredicateHandler:
         :return:
         """
         sql = """insert into %s(name, reduction_rate, filter_cost, accuracy, udf_cost, dataset_name, model_type) 
-                 values(%s, %s, %s, %s, %s, %s, %s)""" % (self.pp_table_name, name, reduction_rate, filter_cost,
-                                                          accuracy, udf_cost, self.pp_dataset_name, model_type)
+                 values('%s', %s, %s, %s, '%s', '%s', '%s')""" % (self.pp_table_name, name, reduction_rate, filter_cost,
+                                                                  accuracy, udf_cost, self.pp_dataset_name, model_type)
         self.conn.execute(sql)
 
     def updateProbabilisticFilter(self, name: str, reduction_rate: float,
@@ -49,7 +49,7 @@ class ProbPredicateHandler:
         List all probabilistic filter names which exists for the current dataset.
         :return: lits[str], name of filter names
         """
-        sql = """select name from pp_filter where dataset_name = %s""" % (self.pp_dataset_name)
+        sql = """select name from pp_filter where dataset_name = '%s'""" % (self.pp_dataset_name)
         filter_list = self.conn.execute_and_fetch(sql)
         return filter_list
 
@@ -59,7 +59,7 @@ class ProbPredicateHandler:
         :param name:
         :return:
         """
-        sql = """select * from pp_filter where name=%s and dataset_name = %s""" % (name, self.pp_dataset_name)
+        sql = """select * from pp_filter where name='%s' and dataset_name = '%s'""" % (name, self.pp_dataset_name)
         filter_info = self.conn.execute_and_fetch(sql)
         # TODO(rishabh): Check if we should return a PPFilter Object. Needs to be defined.
         return filter_info
