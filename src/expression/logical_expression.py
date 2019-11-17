@@ -43,3 +43,15 @@ class ExpressionLogical(AbstractExpression):
             return left_exp or right_exp
         else:
             raise ValueError("Un-Supported operator passed: " + self.operator)
+
+    def getLeftExpression(self, defaultExpression=None):
+        if self.left_expression is None:
+            return defaultExpression
+        else:
+            return self.left_expression
+
+    def getRightExpression(self, defaultExpression=None):
+        if self.right_expression is None:
+            return defaultExpression
+        else:
+            return self.right_expression
