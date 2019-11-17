@@ -14,28 +14,34 @@ class ExpressionLogical(AbstractExpression):
         elif isinstance(self.left_expression, ComparisonExpression):
             left_exp = self.left_expression.evaluate([], None)
         else:
-            left_exp = self.left_expression[0].evaluate()
-            for element in self.left_expression[1:]:
-                if self.operator == 'AND':
-                    left_exp = left_exp and element.evaluate()
-                elif self.operator == 'OR':
-                    left_exp = left_exp or element.evaluate()
-                else:
-                    raise ValueError("Un-Supported operator passed: " + self.operator)
+            if isinstance(self.left_expression, list):
+                left_exp = self.left_expression[0].evaluate()
+                for element in self.left_expression[1:]:
+                    if self.operator == 'AND':
+                        left_exp = left_exp and element.evaluate()
+                    elif self.operator == 'OR':
+                        left_exp = left_exp or element.evaluate()
+                    else:
+                        raise ValueError("Un-Supported operator passed: " + self.operator)
+            else:
+                left_exp = self.left_expression.evaluate()
 
         if isinstance(self.right_expression, ExpressionLogical):
             right_exp = self.right_expression.evaluate()
         elif isinstance(self.right_expression, ComparisonExpression):
             right_exp = self.right_expression.evaluate([], None)
         else:
-            right_exp = self.right_expression[0].evaluate()
-            for element in self.right_expression[1:]:
-                if self.operator == 'AND':
-                    right_exp = right_exp and element.evaluate()
-                elif self.operator == 'OR':
-                    right_exp = right_exp or element.evaluate()
-                else:
-                    raise ValueError("Un-Supported operator passed: " + self.operator)
+            if isinstance(self.right_expression, list):
+                right_exp = self.right_expression[0].evaluate()
+                for element in self.right_expression[1:]:
+                    if self.operator == 'AND':
+                        right_exp = right_exp and element.evaluate()
+                    elif self.operator == 'OR':
+                        right_exp = right_exp or element.evaluate()
+                    else:
+                        raise ValueError("Un-Supported operator passed: " + self.operator)
+            else:
+                right_exp = self.right_expression.evaluate()
 
         if self.operator == 'AND':
             return left_exp and right_exp

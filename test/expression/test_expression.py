@@ -1,11 +1,10 @@
 import unittest
 
-
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.logical_expression import ExpressionLogical
+from src.expression.tuple_value_expression import TupleValueExpression
 
 
 class ExpressionsTest(unittest.TestCase):
@@ -28,15 +27,32 @@ class ExpressionsTest(unittest.TestCase):
 
     def test_logical_expression(self):
         tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(1)
+        const_exp_1 = ConstantValueExpression(1)
+        const_exp_0 = ConstantValueExpression(0)
 
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_EQUAL,
             tpl_exp,
-            const_exp
+            const_exp_1
         )
-        self.assertEqual(True, ExpressionLogical(cmpr_exp, "AND", cmpr_exp).evaluate())
 
+        logical_expression = ExpressionLogical(const_exp_1, "AND", const_exp_1)
+        self.assertEqual(True, logical_expression.evaluate())
+
+        logical_expression = ExpressionLogical(const_exp_1, "OR", const_exp_1)
+        self.assertEqual(True, logical_expression.evaluate())
+
+        logical_expression = ExpressionLogical(const_exp_0, "OR", const_exp_1)
+        self.assertEqual(True, logical_expression.evaluate())
+
+        logical_expression = ExpressionLogical(const_exp_0, "AND", const_exp_1)
+        self.assertEqual(False, logical_expression.evaluate())
+
+        logical_expression = ExpressionLogical(const_exp_0, "AND", const_exp_0)
+        self.assertEqual(False, logical_expression.evaluate())
+
+        logical_expression = ExpressionLogical(const_exp_0, "OR", const_exp_0)
+        self.assertEqual(False, logical_expression.evaluate())
 
 
 if __name__ == '__main__':
