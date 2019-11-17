@@ -27,8 +27,8 @@ class ProbPredicateHandler:
         :return:
         """
         sql = """insert into %s(name, reduction_rate, filter_cost, accuracy, udf_cost, dataset_name, model_type) 
-                 values(%s, %s, %s, %s, %s, %s, %s)""" % (self.pp_table_name, name, reduction_rate, filter_cost,
-                                                          accuracy, udf_cost, self.pp_dataset_name, model_type)
+                 values('%s', %s, %s, %s, '%s', '%s', '%s')""" % (self.pp_table_name, name, reduction_rate, filter_cost,
+                                                                  accuracy, udf_cost, self.pp_dataset_name, model_type)
         self.conn.execute(sql)
 
     def updateProbabilisticFilter(self, name: str, reduction_rate: float,
