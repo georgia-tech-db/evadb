@@ -17,8 +17,8 @@ class LogicalSelectPlan(AbstractSelect):
      """
     def __init__(self, predicate: AbstractExpression,
                  videos: List[AbstractVideoLoader],
-                 column_ids: List[str]):
-        super().__init__(predicate, videos, column_ids)
+                 column_ids: List[str], foreign_column_ids: List[str]):
+        super().__init__(predicate, videos, column_ids, foreign_column_ids)
 
     def get_node_type(self):
         return PlanNodeType.LOGICAL_SELECT

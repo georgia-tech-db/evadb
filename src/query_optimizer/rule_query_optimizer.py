@@ -1,3 +1,4 @@
+from expression.constant_value_expression import ConstantValueExpression
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_select_plan import LogicalSelectPlan
@@ -98,7 +99,7 @@ class RuleQueryOptimizer:
         cols_select = [col for col in child.column_ids]
         cols_project.extend(cols_select)
         cols_project = list(set(cols_project))
-        new_proj = LogicalProjectionPlan(videos=curnode.videos, column_ids=cols_project)
+        new_proj = LogicalProjectionPlan(videos=curnode.videos, column_ids=cols_project, foreign_column_ids=[])
         old_children = curnode.children[child_ix].children
         curnode.children[child_ix].set_children([new_proj])
         new_proj.set_children(old_children)
@@ -140,7 +141,7 @@ class RuleQueryOptimizer:
                 vids = [cc.video]
             else:
                 vids = cc.videos
-            new_proj1 = LogicalProjectionPlan(videos=vids, column_ids=cols)
+            new_proj1 = LogicalProjectionPlan(videos=vids, column_ids=cols, foreign_column_ids=[])
             new_proj1.set_children([child.children[cc_ix]])
             new_proj1.parent = child
             child.children[cc_ix].parent = new_proj1
@@ -168,7 +169,14 @@ class RuleQueryOptimizer:
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child_ix : is an integer that represents the index of the child in the curnode's child list
     def join_elimination(self, curnode, child_ix):
-        pass
+        child = curnode.children[child_ix]
+        cur_col = curnode.column_ids
+        foreign_col = curnode.foreign_column_ids
+        if foreign_col and cur_col[1] == foreign_col[0]:
+            grandchild = child.children[0]
+            new_expression = ConstantValueExpression(grandchild)
+            curnode.set_predicate(new_expression)
+            curnode.set_children([])
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
@@ -192,7 +200,7 @@ class RuleQueryOptimizer:
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_join_elimination(self, curnode, child):
-        return False
+        return type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
