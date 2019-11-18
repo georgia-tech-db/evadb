@@ -20,8 +20,8 @@ class ComparisonExpression(AbstractExpression):
 
         # ToDo implement a better way to compare vl and vr
         # Implement a generic return type
-        if (self.etype == ExpressionType.COMPARE_EQUAL):
+        if self.etype == ExpressionType.COMPARE_EQUAL:
             return vl == vr
-        elif (self.etype == ExpressionType.COMPARE_NOT_EQUAL):
+        elif self.etype == ExpressionType.COMPARE_NOT_EQUAL:
             return vl != vr
         # ToDo add other comparision types
