@@ -105,8 +105,10 @@ def test_simple_projection_pushdown_join(verbose=False):
     assert j1.parent == root
     assert type(j1.children[0]) == LogicalProjectionPlan
     assert type(j1.children[1]) == LogicalProjectionPlan
-    assert j1.children[0].column_ids == ['v1.1', 'v1.3']
-    assert j1.children[1].column_ids == ['v2.1', 'v2.4']
+    assert 'v1.1' in j1.children[0].column_ids
+    assert 'v1.3' in j1.children[0].column_ids
+    assert 'v2.1' in j1.children[1].column_ids
+    assert 'v2.4' in j1.children[1].column_ids
     assert type(t2.parent) == LogicalProjectionPlan
     assert type(t1.parent) == LogicalProjectionPlan
     assert j1.children[0].children == [t1]
@@ -309,12 +311,11 @@ def test_double_join_predicate_pushdown(verbose=False):
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
     # used both videos because purposely placed BEFORE the join
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3],
-                           foreign_column_ids=[])
+    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3], foreign_column_ids=[])
     s1.parent = root
 
     j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
-    j2 = LogicalInnerJoinPlan(videos=[video1, video2, video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
+    j2 = LogicalInnerJoinPlan(videos=[video1, video2,  video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
     j1.parent = j2
 
     t1 = VideoTablePlan(video=video1, tablename='v1')
@@ -324,7 +325,7 @@ def test_double_join_predicate_pushdown(verbose=False):
     s1.set_children([j2])
     t1.parent = j1
     t2.parent = j1
-    j2.set_children([j1, t3])
+    j2.set_children([j1,t3])
     t3.parent = j2
     j1.set_children([t1, t2])
     root.set_children([s1])
@@ -360,9 +361,87 @@ def test_double_join_predicate_pushdown(verbose=False):
     assert t2.parent == j1
     print('Double join predicate Pushdown Successful!')
 
-
+# TODO Fix this test
 def test_double_join_projection_join_pushdown(verbose=False):
-    pass
+    meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+    video1 = SimpleVideoLoader(video_metadata=meta1)
+
+    meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
+    video2 = SimpleVideoLoader(video_metadata=meta2)
+
+    meta3 = VideoMetaInfo(file='v3', c_format=VideoFormat.MOV, fps=30)
+    video3 = SimpleVideoLoader(video_metadata=meta3)
+
+    projection_output = ['v1.1', 'v2.2', 'v3.4']
+    root = LogicalProjectionPlan(videos=[video1, video2, video3], column_ids=projection_output, foreign_column_ids=[])
+
+    j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
+    j2 = LogicalInnerJoinPlan(videos=[video1, video2, video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
+    j1.parent = j2
+    j2.parent = root
+    t1 = VideoTablePlan(video=video1, tablename='v1')
+    t2 = VideoTablePlan(video=video2, tablename='v2')
+    t3 = VideoTablePlan(video=video3, tablename='v3')
+
+    t1.parent = j1
+    t2.parent = j1
+    j2.set_children([t3, j1])
+    t3.parent = j2
+    j1.set_children([t1, t2])
+    root.set_children([j2])
+
+    rule_list = [Rules.PROJECTION_PUSHDOWN_JOIN]
+    if verbose:
+        print('Original Plan Tree')
+        print(root)
+    qo = RuleQueryOptimizer()
+    new_tree = qo.run(root, rule_list)
+    if verbose:
+        print('New Plan Tree')
+        print(new_tree)
+
+    assert root.parent is None
+    assert 'v1.1'in root.column_ids
+    assert 'v2.2'in root.column_ids
+    assert 'v3.4'in root.column_ids
+    assert len(root.children) == 1
+    assert root.children[0] == j2
+    assert j2.parent == root
+    assert len(j2.videos) == 3
+    assert video1 in j2.videos
+    assert video2 in j2.videos
+    assert video3 in j2.videos
+    assert len(j2.children) == 2
+    assert j1 in j2.children
+    j1_ix = j2.children.index(j1)
+    pix = 1 - j1_ix
+    assert type(j2.children[pix]) == LogicalProjectionPlan
+    assert len(j2.children[pix].column_ids) == 2
+    assert 'v3.4' in j2.children[pix].column_ids
+    assert 'v3.3' in j2.children[pix].column_ids
+    assert j2.children[pix].parent == j2
+    assert len(j2.children[pix].children) == 1
+    assert j2.children[pix].children[0] == t3
+    assert len(j1.videos) == 2
+    assert video1 in j1.videos
+    assert video2 in j1.videos
+    assert len(j1.children) == 2
+    assert type(j1.children[0]) == LogicalProjectionPlan
+    assert type(j1.children[1]) == LogicalProjectionPlan
+    assert len(j1.children[0].column_ids) == 2
+    assert len(j1.children[0].children) == 1
+    assert j1.children[0].children[0] == t1
+    assert len(j1.children[1].children) == 1
+    assert j1.children[1].children[0] == t2
+    assert 'v1.3' in j1.children[0].column_ids
+    assert 'v1.1' in j1.children[0].column_ids
+    assert len(j1.children[1].column_ids) == 2
+    assert 'v2.3' in j1.children[1].column_ids
+    assert 'v2.2' in j1.children[1].column_ids
+    assert j1.children[0].parent == j1
+    assert j1.children[1].parent == j1
+    print('Double join Projection Pushdown Successful!')
+
 
 
 def test_join_elimination(verbose=True):
@@ -410,6 +489,7 @@ def test_join_elimination(verbose=True):
         print(new_tree)
 
 
+
 if __name__ == '__main__':
     test_simple_predicate_pushdown()
     test_simple_projection_pushdown_select()
@@ -417,4 +497,5 @@ if __name__ == '__main__':
     test_combined_projection_pushdown()
     test_both_projection_pushdown_and_predicate_pushdown()
     test_double_join_predicate_pushdown()
+    test_double_join_projection_join_pushdown()
     test_join_elimination()

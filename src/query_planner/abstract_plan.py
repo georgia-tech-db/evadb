@@ -69,7 +69,7 @@ class AbstractPlan(ABC):
         pass
 
     def __str__(self, level=0):
-        ret = "\t" * level + '' + "\n"
+        out_string = "\t" * level + '' + "\n"
         for child in self.children:
-            ret += child.__str__(level + 1)
-        return ret
+            out_string += child.__str__(level + 1)
+        return out_string

@@ -141,7 +141,7 @@ class RuleQueryOptimizer:
                 vids = [cc.video]
             else:
                 vids = cc.videos
-            new_proj1 = LogicalProjectionPlan(videos=vids, column_ids=cols, foreign_column_ids=[])
+            new_proj1 = LogicalProjectionPlan(videos=vids, column_ids=list(set(cols)), foreign_column_ids=[])
             new_proj1.set_children([child.children[cc_ix]])
             new_proj1.parent = child
             child.children[cc_ix].parent = new_proj1
@@ -151,9 +151,9 @@ class RuleQueryOptimizer:
         # we already created a projection node in the previous recursive call of projection_pushdown_join
         # We can delete the projection in the middle between the joins
         if type(curnode.parent) == LogicalInnerJoinPlan:
-            new_children = curnode.children
             child.parent = curnode.parent
-            curnode.parent.set_children(new_children)
+            curnode_ix = curnode.parent.children.index(curnode)
+            curnode.parent.children[curnode_ix] = child
 
     # reorder predicates so that DBMS applies most selective first
     def selective_first(self):
