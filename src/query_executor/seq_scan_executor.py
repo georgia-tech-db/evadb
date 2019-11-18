@@ -24,10 +24,10 @@ class SequentialScanExecutor(AbstractExecutor):
         child_executor = self.children[0]
         for batch in child_executor.next():
             if self.predicate is not None:
-                predictions = batch.get_outcomes_for(self.predicate.name)
+                outcomes = self.predicate.evaluate(batch)
                 required_frame_ids = []
-                for i, prediction in enumerate(predictions):
-                    if self.predicate(prediction):
+                for i, outcome in enumerate(outcomes):
+                    if outcome:
                         required_frame_ids.append(i)
 
                 yield batch[required_frame_ids]
