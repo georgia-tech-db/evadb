@@ -21,10 +21,10 @@ class ExpressionType(IntEnum):
     LOGICAL_OR = 10,
     LOGICAL_NOT = 11,
     #Arithmetic operators
-    ADDITION = 12,
-    SUBTRACTION = 13,
-    MULTIPLICATION = 14,
-    DIVISION = 15
+    ARITHMETIC_ADD = 12,
+    ARITHMETIC_SUBTRACT= 13,
+    ARITHMETIC_MULTIPLY= 14,
+    ARITHMETIC_DIVIDE = 15
     # add other types
 
 
@@ -34,6 +34,7 @@ class ExpressionReturnType(IntEnum):
     BOOLEAN = 1,
     INTEGER = 2,
     VARCHAR = 3,
+    FLOAT = 4,
     # add others
 
 
