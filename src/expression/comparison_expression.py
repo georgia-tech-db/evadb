@@ -24,4 +24,14 @@ class ComparisonExpression(AbstractExpression):
             return vl == vr
         elif self.etype == ExpressionType.COMPARE_NOT_EQUAL:
             return vl != vr
+        elif self.etype == ExpressionType.GREATER:
+            return vl > vr
+        elif self.etype == ExpressionType.LESS:
+            return vl < vr
+        elif self.etype == ExpressionType.GREATER_EQUAL:
+            return vl >= vr
+        elif self.etype == ExpressionType.LESS_EQUAL:
+            return vl <= vr
+        else:
+            raise ValueError("Not supported types.")
         # ToDo add other comparision types
