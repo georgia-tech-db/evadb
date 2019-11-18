@@ -59,7 +59,7 @@ class ExpressionsTest(unittest.TestCase):
             const_exp
         )
        
-        # checking greater
+        # checking greater x>=1
         tuple1 = [2, 2, 3]
         self.assertEqual(True, cmpr_exp.evaluate(tuple1, None))
         # checking equal
@@ -76,7 +76,7 @@ class ExpressionsTest(unittest.TestCase):
             const_exp
         )
        
-        # checking lesser
+        # checking lesser x<=1
         tuple1 = [1, 2, 3]
         self.assertEqual(True, cmpr_exp.evaluate(tuple1, None))
         # checking equal
@@ -93,7 +93,7 @@ class ExpressionsTest(unittest.TestCase):
             const_exp
         )
        
-        # checking not equal
+        # checking not equal x!=1
         tuple1 = [2, 2, 3]
         self.assertEqual(True, cmpr_exp.evaluate(tuple1, None))
 
