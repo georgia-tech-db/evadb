@@ -7,14 +7,24 @@ from src.utils import generic_utils
 @unique
 class ExpressionType(IntEnum):
     INVALID = 0,
-    COMPARE_EQUAL = 1,
-    CONSTANT_VALUE = 2,
-    TUPLE_VALUE = 3,
+    CONSTANT_VALUE = 1,
+    TUPLE_VALUE = 2,
+    #Compare operators
+    COMPARE_EQUAL = 3,
     COMPARE_GREATER = 4,
     COMPARE_LESSER = 5,
     COMPARE_GEQ = 6,
     COMPARE_LEQ = 7,
     COMPARE_NEQ = 8,
+    #Logical operators
+    LOGICAL_AND = 9,
+    LOGICAL_OR = 10,
+    LOGICAL_NOT = 11,
+    #Arithmetic operators
+    ADDITION = 12,
+    SUBTRACTION = 13,
+    MULTIPLICATION = 14,
+    DIVISION = 15
     # add other types
 
 
