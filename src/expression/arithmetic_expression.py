@@ -1,4 +1,4 @@
-from .abstract_expression import AbstractExpression, ExpressionType, \
+from src.expression.abstract_expression import AbstractExpression, ExpressionType, \
     ExpressionReturnType
 
 class ArithmeticExpression(AbstractExpression):
@@ -14,8 +14,8 @@ class ArithmeticExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        vl = self._children[0].evaluate(*args)
-        vr = self._children[1].evaluate(*args)
+        vl = self.get_child(0).evaluate(*args)
+        vr = self.get_child(1).evaluate(*args)
 
         if (self.etype == ExpressionType.ARITHMETIC_ADD):
             return vl + vr
