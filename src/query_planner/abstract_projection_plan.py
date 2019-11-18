@@ -37,8 +37,8 @@ class AbstractProjection(AbstractPlan):
         return self._foreign_column_ids
 
     def __str__(self, level=0):
-        res = 'pi {} {}'.format(str(self._column_ids), str(self._foreign_column_ids))
-        ret = "\t" * level + res + "\n"
+        project_cols_str = 'pi {} {}'.format(str(self._column_ids), str(self._foreign_column_ids))
+        out_string = "\t" * level + project_cols_str + "\n"
         for child in self.children:
-            ret += child.__str__(level + 1)
-        return ret
+            out_string += child.__str__(level + 1)
+        return out_string

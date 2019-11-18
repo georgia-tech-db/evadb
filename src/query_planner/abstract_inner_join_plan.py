@@ -35,8 +35,8 @@ class AbstractInnerJoin(AbstractPlan):
     def __str__(self, level=0):
         pt1 = ' join '.join([str(video.video_metadata.file) for video in self.videos])
         pt2 = ' = '.join([str(id) for id in self._join_ids])
-        res = '{}__{}'.format(pt1, pt2)
-        ret = "\t" * level + res + "\n"
+        join_cols_str = '{}__{}'.format(pt1, pt2)
+        out_string = "\t" * level + join_cols_str + "\n"
         for child in self.children:
-            ret += child.__str__(level + 1)
-        return ret
+            out_string += child.__str__(level + 1)
+        return out_string

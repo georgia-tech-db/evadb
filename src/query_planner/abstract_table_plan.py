@@ -28,8 +28,8 @@ class AbstractTable(AbstractPlan):
         return self._tablename
 
     def __str__(self, level=0):
-        res = '{}'.format(str(self.video.video_metadata.file))
-        ret = "\t" * level + res + "\n"
+        table_str = '{}'.format(str(self.video.video_metadata.file))
+        out_string = "\t" * level + table_str + "\n"
         for child in self.children:
-            ret += child.__str__(level + 1)
-        return ret
+            out_string += child.__str__(level + 1)
+        return out_string

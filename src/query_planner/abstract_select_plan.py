@@ -51,8 +51,8 @@ class AbstractSelect(AbstractPlan):
         self._predicate = new_pred
 
     def __str__(self, level=0):
-        res = 'sigma {} {}'.format(str(self._predicate), str(self._foreign_column_ids))
-        ret = "\t" * level + res + "\n"
+        select_cols_str = 'sigma {} {}'.format(str(self._predicate), str(self._foreign_column_ids))
+        out_string = "\t" * level + select_cols_str + "\n"
         for child in self.children:
-            ret += child.__str__(level + 1)
-        return ret
+            out_string += child.__str__(level + 1)
+        return out_string
