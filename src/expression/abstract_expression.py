@@ -15,6 +15,9 @@ class ExpressionType(IntEnum):
     COMPARE_GEQ = 6,
     COMPARE_LEQ = 7,
     COMPARE_NEQ = 8,
+    LOGICAL_AND = 9,
+    LOGICAL_OR = 10,
+    LOGICAL_NOT = 11,
     # add other types
 
 
