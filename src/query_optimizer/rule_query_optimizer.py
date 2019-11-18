@@ -36,7 +36,7 @@ class RuleQueryOptimizer:
     # Recursive function that traverses the tree and applies all of the rules in the rule list
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     def traverse(self, curnode, rule):
-        if len(curnode.children) == 0:
+        if type(curnode.children) == VideoTablePlan or len(curnode.children) == 0:
             return
         # for rule in rule_list:
         for child_ix, child in enumerate(curnode.children):
@@ -172,11 +172,18 @@ class RuleQueryOptimizer:
         child = curnode.children[child_ix]
         cur_col = curnode.column_ids
         foreign_col = curnode.foreign_column_ids
+        foreign_col_id = curnode.foreign_column_ids[0].split(".")[1]
+        cur_col_id = curnode.column_ids[0].split(".")[0]
         if foreign_col and cur_col[1] == foreign_col[0]:
-            grandchild = child.children[0]
+            join = child.children
+            grandchild = join[0].children[0]
             new_expression = ConstantValueExpression(grandchild)
-            curnode.set_predicate(new_expression)
-            curnode.set_children([])
+            child.set_predicate(new_expression)
+            child.set_children([grandchild])
+            child.set_foreign_column_ids([])
+            curnode.set_foreign_column_ids([])
+            new_pred = [curnode.column_ids[0], cur_col_id + "." + foreign_col_id]
+            curnode.set_column_ids(new_pred)
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
@@ -200,7 +207,8 @@ class RuleQueryOptimizer:
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_join_elimination(self, curnode, child):
-        return type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan
+        return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan \
+               and type(child.children[0]) == LogicalInnerJoinPlan
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type

@@ -50,6 +50,9 @@ class AbstractSelect(AbstractPlan):
     def set_predicate(self, new_pred):
         self._predicate = new_pred
 
+    def set_foreign_column_ids(self, foreign):
+        self._foreign_column_ids = foreign
+
     def __str__(self, level=0):
         res = 'sigma {} {}'.format(str(self._predicate), str(self._foreign_column_ids))
         ret = "\t" * level + res + "\n"
