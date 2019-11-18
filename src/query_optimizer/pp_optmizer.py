@@ -181,6 +181,13 @@ class PPOptmizer:
             execution_cost = self._compute_expression_costs(candidate, stats)
             candidate_cost_list.append((candidate, execution_cost))
 
+        def sort_on_second_index(x):
+            return x[1]
+
+        zipped_cost_list = list(zip(enumerations, candidate_cost_list))
+        zipped_cost_list.sort(key=sort_on_second_index)
+
+        return zipped_cost_list[0]
         # Sort based on optimal execution cost
         # return the best candidate
 
@@ -190,12 +197,4 @@ if __name__ == '__main__':
     pp_handler = catalog.getProbPredicateHandler()
     pp_filter_names = pp_handler.listProbilisticFilters()
     pp_filter_names = [f[0] for f in pp_filter_names]
-    # stats = {}
-    # for f in pp_filter_names:
-    #     filter_rows = pp_handler.getProbabilisticFilter(f)
-    #     filter_dict = {}
-    #     for row in filter_rows:
-    #         filter_dict[row[7]]= {'R': row[2], 'C': row[3], 'A': row[4]}
-    #     stats[f] = filter_dict
-    # print(stats)
     print(pp_filter_names)
