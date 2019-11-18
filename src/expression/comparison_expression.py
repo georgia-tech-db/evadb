@@ -1,6 +1,5 @@
-from .abstract_expression import AbstractExpression, ExpressionType, \
+from src.expression.abstract_expression import AbstractExpression, ExpressionType, \
     ExpressionReturnType
-
 
 class ComparisonExpression(AbstractExpression):
     def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
@@ -14,8 +13,8 @@ class ComparisonExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        vl = self._children[0].evaluate(*args)
-        vr = self._children[1].evaluate(*args)
+        vl = self.get_child(0).evaluate(*args)
+        vr = self.get_child(1).evaluate(*args)
 
         if (self.etype == ExpressionType.COMPARE_EQUAL):
             return vl == vr
