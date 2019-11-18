@@ -140,9 +140,9 @@ class PPOptmizer:
 
             filter = str(expression)
             if left_cost != 0 and right_cost != 0:
-                if expression.operator == "&&":
+                if expression.operator == "AND":
                     reduction_rate = left_cost + right_cost - left_cost * right_cost
-                elif expression.operator == "||":
+                elif expression.operator == "OR":
                     reduction_rate = left_cost * right_cost
                 else:
                     raise ValueError("Invalid operator: " + expression.operator)

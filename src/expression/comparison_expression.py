@@ -35,3 +35,17 @@ class ComparisonExpression(AbstractExpression):
         else:
             raise ValueError("Not supported types.")
         # ToDo add other comparision types
+
+    def __str__(self):
+        op = None
+        if self.etype == ExpressionType.COMPARE_EQUAL:
+            op = '='
+        elif self.etype == ExpressionType.COMPARE_NOT_EQUAL:
+            op = '!='
+        else:
+            raise Exception('Operator is not supported')
+        vl = self._children[0].evaluate()
+        vr = self._children[1].evaluate()
+        return str(vl) + str(op) + str(vr)
+
+
