@@ -10,6 +10,11 @@ class ExpressionType(IntEnum):
     COMPARE_EQUAL = 1,
     CONSTANT_VALUE = 2,
     TUPLE_VALUE = 3,
+    COMPARE_GREATER = 4,
+    COMPARE_LESSER = 5,
+    COMPARE_GEQ = 6,
+    COMPARE_LEQ = 7,
+    COMPARE_NEQ = 8,
     # add other types
 
 
