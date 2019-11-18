@@ -3,7 +3,7 @@ import unittest
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.logical_expression import ExpressionLogical
+from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 
 
@@ -30,37 +30,37 @@ class ExpressionsTest(unittest.TestCase):
         const_exp_1 = ConstantValueExpression(1)
         const_exp_0 = ConstantValueExpression(0)
 
-        logical_expression = ExpressionLogical(const_exp_1, "AND", const_exp_1)
+        logical_expression = LogicalExpression(const_exp_1, "AND", const_exp_1)
         self.assertEqual(True, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_1, "OR", const_exp_1)
+        logical_expression = LogicalExpression(const_exp_1, "OR", const_exp_1)
         self.assertEqual(True, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "OR", const_exp_1)
+        logical_expression = LogicalExpression(const_exp_0, "OR", const_exp_1)
         self.assertEqual(True, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "AND", const_exp_1)
+        logical_expression = LogicalExpression(const_exp_0, "AND", const_exp_1)
         self.assertEqual(False, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "AND", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "AND", const_exp_0)
         self.assertEqual(False, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "OR", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "OR", const_exp_0)
         self.assertEqual(False, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "NOR", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "NOR", const_exp_0)
         self.assertRaises(ValueError, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "XOR", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "XOR", const_exp_0)
         self.assertRaises(ValueError, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "^", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "^", const_exp_0)
         self.assertRaises(ValueError, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "&&", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "&&", const_exp_0)
         self.assertRaises(ValueError, logical_expression.evaluate())
 
-        logical_expression = ExpressionLogical(const_exp_0, "||", const_exp_0)
+        logical_expression = LogicalExpression(const_exp_0, "||", const_exp_0)
         self.assertRaises(ValueError, logical_expression.evaluate())
 
     def test_logical_expression(self):
