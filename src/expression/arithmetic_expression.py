@@ -1,5 +1,5 @@
-from .abstract_expression import AbstractExpression, ExpressionType
-
+from .abstract_expression import AbstractExpression, ExpressionType, \
+    ExpressionReturnType
 
 class ArithmeticExpression(AbstractExpression):
 
@@ -10,22 +10,19 @@ class ArithmeticExpression(AbstractExpression):
             children.append(left)
         if right is not None:
             children.append(right)
-        super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
+        super().__init__(exp_type, rtype=ExpressionReturnType.FLOAT,
                          children=children)
 
     def evaluate(self, *args):
         vl = self._children[0].evaluate(*args)
         vr = self._children[1].evaluate(*args)
 
-        # ToDo implement a better way to compare vl and vr
-        # Implement a generic return type
-
-        if (self.etype == ExpressionType.ADDITION):
+        if (self.etype == ExpressionType.ARITHMETIC_ADD):
             return vl + vr
-        elif(self.etype == ExpressionType.SUBTRACTION):
+        elif(self.etype == ExpressionType.ARITHMETIC_SUBTRACT):
             return vl - vr
-        elif(self.etype == ExpressionType.MULTIPLICATION):
+        elif(self.etype == ExpressionType.ARITHMETIC_MULTIPLY):
             return vl * vr
-        elif(self.etype == ExpressionType.DIVISION):
+        elif(self.etype == ExpressionType.ARITHMETIC_DIVIDE):
             return vl / vr
 

@@ -17,9 +17,6 @@ class ComparisonExpression(AbstractExpression):
         vl = self._children[0].evaluate(*args)
         vr = self._children[1].evaluate(*args)
 
-        # ToDo implement a better way to compare vl and vr
-        # Implement a generic return type
-
         if (self.etype == ExpressionType.COMPARE_EQUAL):
             return vl == vr
         elif(self.etype == ExpressionType.COMPARE_GREATER):
