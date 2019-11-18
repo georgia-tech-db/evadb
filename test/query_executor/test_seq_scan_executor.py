@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from src.models import FrameBatch, Frame, Prediction, Predicate
+from src.models import FrameBatch, Frame, Prediction
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
 from ..query_executor.utils import DummyExecutor
 
@@ -27,10 +27,10 @@ class SeqScanExecutorTest(unittest.TestCase):
                 outcome_3
             ]
         })
-        predicate = Predicate(name="test",
-                              predicate=lambda prediction: prediction.eq(
-                                  "car") and not prediction.eq("bus"))
-        plan = type("ScanPlan", (), {"predicate": predicate})
+        expression = type("AbstractExpression", (), {"evaluate": lambda x: [
+            False, False, True]})
+
+        plan = type("ScanPlan", (), {"predicate": expression})
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
