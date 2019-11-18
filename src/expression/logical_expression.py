@@ -64,3 +64,9 @@ class LogicalExpression(AbstractExpression):
 
     def getOperator(self):
         return self.operator
+
+    def __eq__(self, other):
+        if self.operator == other.operator and self.left_expression == other.left_expression and self.right_expression == other.right_expression:
+            return True
+        else:
+            return False

@@ -40,6 +40,12 @@ class AbstractExpression(ABC):
         self._children = kwargs.get('children', [])
         self._predicates = []
 
+    def __eq__(self, other):
+        if self._etype == other._etype and self._rtype == other._rtype and self._children == other._children and self._predicates == other._predicates:
+            return True
+        else:
+            return False
+
     def get_child(self, index: int):
         if index < 0 or index >= len(self._children):
             return None
