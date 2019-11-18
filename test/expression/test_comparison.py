@@ -8,6 +8,8 @@ from src.expression.tuple_value_expression import TupleValueExpression
 
 
 class ComparisonExpressionsTest(unittest.TestCase):
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -100,5 +102,3 @@ class ComparisonExpressionsTest(unittest.TestCase):
         tuple1 = [3, 2, 3]
         self.assertEqual(True, cmpr_exp.evaluate(tuple1, None))
     
-if __name__ == '__main__':
-    unittest.main()
