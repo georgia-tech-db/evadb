@@ -11,6 +11,13 @@
 * Dataset 
 
 ### Rule Based Query Optimizer Status
+11/18/2019 Created more rules for the rule based optimizer
+Implementation Milestones
+* Join Eliminiation
+* Integration of Foreign Key constraints into Plans
+* Tests for more complext queries (two joins) for predicate pushdown
+* Tests for more complext queries (two joins) for projection pushdown
+
 11/14/2019 Integrated second version of the Rule Based Query Optmizer on Master. This optimizer is integrated to the current abstract plans on georgia-tech-db/Eva. 
 Implementation Milestones 
 * Abstract plans for Select, Project, Inner Join, Table
