@@ -12,6 +12,7 @@
 
 ### Rule Based Query Optimizer Status
 11/18/2019 Created more rules for the rule based optimizer.
+
 Implementation Milestones
 * Join Eliminiation
 * Integration of Foreign Key constraints into Plans
