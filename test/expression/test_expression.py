@@ -74,6 +74,8 @@ class ExpressionsTest(unittest.TestCase):
             const_exp_1
         )
 
+        self.assertEqual(0, tpl_exp.evaluate([1]))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,11 +1,11 @@
 """Finds Optimal Probabilistic Predicates for an expression"""
+import src.constants as constants
+from src.catalog.catalog import Catalog
 from src.expression.abstract_expression import AbstractExpression, ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
-from src.expression.logical_expression import LogicalExpression
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.catalog.catalog import Catalog
+from src.expression.logical_expression import LogicalExpression
 from src.query_optimizer.memo import Memo
-import constants
 
 
 class PPOptmizer:
@@ -34,6 +34,31 @@ class PPOptmizer:
             stats[f] = filter_dict
         return stats
 
+    def _find_model(self, pp_name, pp_stats, accuracy_budget=0.9):
+        possible_models = pp_stats[pp_name]
+        best = []
+
+        for possible_model in possible_models:
+            if possible_models[possible_model]["A"] < accuracy_budget:
+                continue
+            if best == []:
+                best = [possible_model, self._compute_cost_red_rate(
+                    possible_models[possible_model]["C"],
+                    possible_models[possible_model]["R"]),
+                        possible_models[possible_model]["R"]]
+            else:
+                alternative_best_cost = self._compute_cost_red_rate(
+                    possible_models[possible_model]["C"],
+                    possible_models[possible_model]["R"])
+                if alternative_best_cost < best[1]:
+                    best = [possible_model, alternative_best_cost,
+                            possible_models[possible_model]["R"]]
+
+        if best == []:
+            return None, 0
+        else:
+            return best[0], best[2]
+
     def _wrangler(self, expression: LogicalExpression, label_desc: dict) -> list:
         """ Generate possible enumerations of the `expression`
 
@@ -46,7 +71,7 @@ class PPOptmizer:
         """
         leftExpr = expression.getLeftExpression()
         rightExpr = expression.getRightExpression()
-        operator = expression.getOperator() # AND / OR
+        operator = expression.getOperator()  # AND / OR
 
         new_left_exprs = [leftExpr]
         new_right_exprs = [rightExpr]
@@ -55,7 +80,7 @@ class PPOptmizer:
         if leftExpr.etype == ExpressionType.COMPARE_EQUAL:
             lValue = leftExpr.left.evaluate()
             rValue = leftExpr.right.evaluate()
-            rValues = label_desc[lValue][1] # fetching all possible rvalues
+            rValues = label_desc[lValue][1]  # fetching all possible rvalues
             new_not_expr = None
             for rVal in rValues:
                 if rVal != rValue:
@@ -94,13 +119,36 @@ class PPOptmizer:
                 enumerated_exprs.append(new_logical_expr)
         return enumerated_exprs
 
-    def _compute_expression_costs(self, expression: AbstractExpression) -> float:
+    def _compute_expression_costs(self, expression: AbstractExpression, stats) -> float:
         """Compute cost of applying PP filters to an expression
 
         :param expression: Input Expression (Logical Expression)
         :return: Execution Cost of the  expressions
         """
-        pass
+        if isinstance(expression, LogicalExpression):
+            left_expression = expression.getLeftExpression()
+            right_expression = expression.getRightExpression()
+
+            if isinstance(left_expression, LogicalExpression):
+                left_cost = self._compute_cost_red_rate(left_expression, stats)
+            else:
+                left_cost = 0
+            if isinstance(right_expression, LogicalExpression):
+                right_cost = self._compute_cost_red_rate(right_expression, stats)
+            else:
+                right_cost = 0
+
+            filter = str(expression)
+            if left_cost != 0 and right_cost != 0:
+                if expression.operator == "&&":
+                    reduction_rate = left_cost + right_cost - left_cost * right_cost
+                elif expression.operator == "||":
+                    reduction_rate = left_cost * right_cost
+                else:
+                    raise ValueError("Invalid operator: " + expression.operator)
+            else:
+                _, reduction_rate = self._find_model(filter, stats)
+            return reduction_rate
 
     def _compute_cost_red_rate(self, cost: float, reduction_rate: float) -> float:
         """Compute Execution Cost of PP filter"""
@@ -130,7 +178,7 @@ class PPOptmizer:
         enumerations = self._wrangler(expr, label_desc)
         candidate_cost_list = []
         for candidate in enumerations:
-            execution_cost = self._compute_expression_costs(candidate)
+            execution_cost = self._compute_expression_costs(candidate, stats)
             candidate_cost_list.append((candidate, execution_cost))
 
         # Sort based on optimal execution cost
@@ -138,7 +186,6 @@ class PPOptmizer:
 
 
 if __name__ == '__main__':
-
     catalog = Catalog(constants.UADETRAC)
     pp_handler = catalog.getProbPredicateHandler()
     pp_filter_names = pp_handler.listProbilisticFilters()

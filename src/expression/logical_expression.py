@@ -64,3 +64,6 @@ class LogicalExpression(AbstractExpression):
 
     def getOperator(self):
         return self.operator
+
+    def __str__(self):
+        return str(self.left_expression) + str(self.operator) + str(self.right_expression)

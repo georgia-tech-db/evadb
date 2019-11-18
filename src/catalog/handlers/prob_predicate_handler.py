@@ -52,8 +52,8 @@ class ProbPredicateHandler:
         """
         sql = """select distinct(name) from pp_filter where dataset_name = '%s'""" % (self.pp_dataset_name)
         logging.info('Fetching all filters with ' + sql )
-        filter_list = self.conn.execute_and_fetch(sql)
-        return filter_list
+        filters_list = self.conn.execute_and_fetch(sql)
+        return filters_list
 
     def getProbabilisticFilter(self, name: str) -> list():
         """
