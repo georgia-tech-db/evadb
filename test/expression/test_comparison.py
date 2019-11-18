@@ -7,7 +7,7 @@ from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 
 
-class ExpressionsTest(unittest.TestCase):
+class ComparisonExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
