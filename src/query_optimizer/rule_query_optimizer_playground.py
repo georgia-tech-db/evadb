@@ -1,7 +1,12 @@
 # this is an implementation of a Rule Based Query Optimizer
 
 
+# class that represents a generic node in the logical plan tree
+# This will mostly be used for the table nodes
 class Node:
+    # Parent: Node type
+    # value: Used as the "to-string" representation
+    # children: List of Node objects
     def __init__(self, parent=None, value='', tablename='', children=[]):
         self.parent = parent
         self.children = {}
@@ -9,27 +14,34 @@ class Node:
         self.tablename = tablename
 
     def __str__(self, level=0):
-        ret = "\t" * level + self.value + "\n"
+        out_string = "\t" * level + self.value + "\n"
         for child in self.children.values():
-            ret += child.__str__(level + 1)
-        return ret
+            out_string += child.__str__(level + 1)
+        return out_string
 
 
+# class that represents a select in the logical plan tree
 class SelectNode(Node):
+    # predicate: string type that will represent expression tree e.g. "v1.1 == 7"
     def __init__(self, predicate=''):
         super(SelectNode, self).__init__()
         self.predicate = predicate
         self.value = 'sigma {}'.format(self.predicate)
 
 
+# class that represents projection in the logical plan tree
 class ProjectionNode(Node):
+    # columns: List of columns in a table that we want to project
     def __init__(self, columns=[]):
         super(ProjectionNode, self).__init__()
         self.columns = columns
         self.value ='pi {}'.format(','.join(self.columns))
 
 
+# class that represents a natural join in the logical plan tree
 class JoinNode(Node):
+    # join_attrs: List of columns in a table that are the join variables
+    # tables: List of string objects that represent the tables that are being joined
     def __init__(self, tables=[], join_attrs=[]):
         super(JoinNode, self).__init__()
         self.columns = tables
@@ -40,6 +52,7 @@ class JoinNode(Node):
         self.value = '{}__{}'.format(pt1, pt2)
 
 
+# Class that represents the logical plan tree
 class LogicalPlanTree():
     def __init__(self):
         self.root = None
@@ -47,13 +60,16 @@ class LogicalPlanTree():
     def __str__(self, level=0):
         return str(self.root)
 
-
+# Class that encapsulates the functionality of the Rule Based Query Optimizer
 class RuleQueryOptimizer():
+    # Runs the query optimization
     def run(self, plan_tree):
         curnode = plan_tree.root
         self.traverse(curnode)
         return plan_tree
 
+    # Traverses the tree recursively starting at the current node (curnode)
+    # curnode is a Node type
     def traverse(self, curnode):
         if curnode.children == {}:
             return
@@ -70,6 +86,8 @@ class RuleQueryOptimizer():
             self.traverse(child)
 
     # push down predicates so filters done as early as possible
+    # curnode is a Node type
+    # child is a Node type
     def predicate_pushdown(self, curnode, child):
         del curnode.parent.children[curnode.tablename]
         curnode.parent.children[child.tablename] = child
@@ -101,35 +119,38 @@ class RuleQueryOptimizer():
 
     # No where clause like 1 = 0 or 0 = 0
     # Merging predicates
+    # TODO
     def simply_predicate(self, pred):
         new_pred = pred
         return new_pred
 
+    # TODO
     def join_elimination(self, plan_tree):
         pass
 
 
+# Function that test Predicate Pushdown on Hard Coded Tree
 def test_predicate_push():
     print('Testing Predicate Pushdown')
     root = ProjectionNode(columns=['T1.time'])
-    
+
     s1 = SelectNode(predicate='t=suv')
     s1.tablename = 'T1'
     s1.parent = root
-    
+
     j1 = JoinNode(tables=['T1', 'T2'], join_attrs=['T1.t', 'T2.t'])
     j1.parent = s1
-    
+
     t1 = Node(tablename='T1', value='T1')
     t2 = Node(tablename='T2', value='T2')
-    
+
     s1.children = {j1.tablename: j1}
     t1.parent = j1
     t2.parent = j1
-    
+
     j1.children = {t1.tablename: t1, t2.tablename: t2}
     root.children = {s1.tablename: s1}
-    
+
     plan_tree = LogicalPlanTree()
     plan_tree.root = root
     print('Original Plan Tree')
@@ -139,6 +160,7 @@ def test_predicate_push():
     print(new_tree)
 
 
+# Function that test Projection Pushdown on Hard Coded Tree
 def test_projection_push():
     print('testing projection pushdown')
     root = ProjectionNode(columns=['T1.name', 'T2.timestamp'])
@@ -166,10 +188,6 @@ def test_projection_push():
     qo = RuleQueryOptimizer()
     new_tree = qo.run(plan_tree)
     print(new_tree)
-
-    
-
-
 
 
 if __name__ == '__main__':
