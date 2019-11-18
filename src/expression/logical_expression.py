@@ -14,7 +14,7 @@ class LogicalExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        # print(*args)
+        
         if len(self._children) == 2 :
             vl = self._children[0].evaluate(*args)
             vr = self._children[1].evaluate(*args)
