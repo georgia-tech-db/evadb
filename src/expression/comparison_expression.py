@@ -26,6 +26,12 @@ class ComparisonExpression(AbstractExpression):
             return vl != vr
         # ToDo add other comparision types
 
+    def getLeft(self):
+        return self._children[0]
+
+    def getRight(self):
+        return self._children[1]
+
     def __str__(self):
         op = None
         if self.etype == ExpressionType.COMPARE_EQUAL:

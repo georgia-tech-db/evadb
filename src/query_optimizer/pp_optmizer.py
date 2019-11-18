@@ -77,15 +77,22 @@ class PPOptmizer:
         new_right_exprs = [rightExpr]
 
         # Explore left expr
-        if leftExpr.etype == ExpressionType.COMPARE_EQUAL:
-            lValue = leftExpr.left.evaluate()
-            rValue = leftExpr.right.evaluate()
+        if leftExpr.etype == ExpressionType.COMPARE_EQUAL or leftExpr.etype == ExpressionType.COMPARE_NOT_EQUAL:
+            lValue = leftExpr.getLeft().evaluate()
+            rValue = leftExpr.getRight().evaluate()
             rValues = label_desc[lValue][1]  # fetching all possible rvalues
             new_not_expr = None
             for rVal in rValues:
                 if rVal != rValue:
                     new_r_expr = ConstantValueExpression(rVal)
-                    new_comp_expr = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, leftExpr.left, new_r_expr)
+
+                    #TODO extract out this in a function
+                    if leftExpr.etype == ExpressionType.COMPARE_EQUAL:
+                        new_exptype = ExpressionType.COMPARE_NOT_EQUAL
+                    else:
+                        new_exptype = ExpressionType.COMPARE_EQUAL
+
+                    new_comp_expr = ComparisonExpression(new_exptype, leftExpr.getLeft(), new_r_expr)
                     if not new_not_expr:
                         new_not_expr = new_comp_expr
                     else:
@@ -95,15 +102,21 @@ class PPOptmizer:
             new_left_exprs.extend(self._wrangler(leftExpr, label_desc))
 
         # Explore right expr
-        if rightExpr.etype == ExpressionType.COMPARE_EQUAL:
-            lValue = rightExpr.left.evaluate()
-            rValue = rightExpr.right.evaluate()
+        if rightExpr.etype == ExpressionType.COMPARE_EQUAL or rightExpr.etype == ExpressionType.COMPARE_NOT_EQUAL:
+            lValue = rightExpr.getLeft().evaluate()
+            rValue = rightExpr.getRight().evaluate()
             rValues = label_desc[lValue][1]  # fetching all possible rvalues
             new_not_expr = None
             for rVal in rValues:
                 if rVal != rValue:
                     new_r_expr = ConstantValueExpression(rVal)
-                    new_comp_expr = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, rightExpr.left, new_r_expr)
+
+                    if rightExpr.etype == ExpressionType.COMPARE_EQUAL:
+                        new_exptype = ExpressionType.COMPARE_NOT_EQUAL
+                    else:
+                        new_exptype = ExpressionType.COMPARE_EQUAL
+
+                    new_comp_expr = ComparisonExpression(new_exptype, rightExpr.getLeft(), new_r_expr)
                     if not new_not_expr:
                         new_not_expr = new_comp_expr
                     else:
@@ -119,7 +132,7 @@ class PPOptmizer:
                 enumerated_exprs.append(new_logical_expr)
         return enumerated_exprs
 
-    def _compute_expression_costs(self, expression: AbstractExpression, stats) -> float:
+    def _compute_expression_costs(self, expression: AbstractExpression, stats: dict) -> float:
         """Compute cost of applying PP filters to an expression
 
         :param expression: Input Expression (Logical Expression)
@@ -128,26 +141,29 @@ class PPOptmizer:
         if isinstance(expression, LogicalExpression):
             left_expression = expression.getLeftExpression()
             right_expression = expression.getRightExpression()
+            left_cost, right_cost = 0.999, 0.999
 
             if isinstance(left_expression, LogicalExpression):
-                left_cost = self._compute_cost_red_rate(left_expression, stats)
-            else:
-                left_cost = 0
-            if isinstance(right_expression, LogicalExpression):
-                right_cost = self._compute_cost_red_rate(right_expression, stats)
-            else:
-                right_cost = 0
+                left_cost = self._compute_expression_costs(left_expression, stats)
+            elif isinstance(left_expression, ComparisonExpression):
+                left_str_expr = str(left_expression)
+                if left_str_expr in stats.keys():
+                    _, left_cost = self._find_model(left_str_expr, stats)
 
-            filter = str(expression)
-            if left_cost != 0 and right_cost != 0:
-                if expression.operator == "AND":
-                    reduction_rate = left_cost + right_cost - left_cost * right_cost
-                elif expression.operator == "OR":
-                    reduction_rate = left_cost * right_cost
-                else:
-                    raise ValueError("Invalid operator: " + expression.operator)
+            if isinstance(right_expression, LogicalExpression):
+                right_cost = self._compute_expression_costs(right_expression, stats)
+            elif isinstance(right_expression,ComparisonExpression):
+                right_str_expr = str(right_expression)
+                if right_str_expr in stats.keys():
+                    _, right_cost = self._find_model(right_str_expr, stats)
+
+            if expression.operator == "AND":
+                reduction_rate = left_cost + right_cost - left_cost * right_cost
+            elif expression.operator == "OR":
+                reduction_rate = left_cost * right_cost
             else:
-                _, reduction_rate = self._find_model(filter, stats)
+                raise ValueError("Invalid operator: " + expression.operator)
+
             return reduction_rate
 
     def _compute_cost_red_rate(self, cost: float, reduction_rate: float) -> float:
@@ -161,7 +177,6 @@ class PPOptmizer:
         """Finds optimal order expression based on PP execution cost evaluation."""
 
         stats = self._get_pp_stats()
-        filter_names = stats.keys()
 
         # TODO: Need to query this from DB. Check how to do this. Or we cal split the filter names to generate this.
         label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
@@ -173,7 +188,7 @@ class PPOptmizer:
                       "o": [constants.DISCRETE,
                             ["pt335", "pt342", "pt211", "pt208"]]}
 
-        # TODO: Generalize this all list of expression. A for loop.
+        # TODO: Generalize this all list of expression. A loop.
         expr = self._predicates[0]
         enumerations = self._wrangler(expr, label_desc)
         candidate_cost_list = []
@@ -181,20 +196,37 @@ class PPOptmizer:
             execution_cost = self._compute_expression_costs(candidate, stats)
             candidate_cost_list.append((candidate, execution_cost))
 
+        # Sort based on optimal execution cost
         def sort_on_second_index(x):
             return x[1]
 
-        zipped_cost_list = list(zip(enumerations, candidate_cost_list))
-        zipped_cost_list.sort(key=sort_on_second_index)
-
-        return zipped_cost_list[0]
-        # Sort based on optimal execution cost
+        candidate_cost_list.sort(key=sort_on_second_index)
         # return the best candidate
+        return candidate_cost_list[0]
 
 
 if __name__ == '__main__':
-    catalog = Catalog(constants.UADETRAC)
-    pp_handler = catalog.getProbPredicateHandler()
-    pp_filter_names = pp_handler.listProbilisticFilters()
-    pp_filter_names = [f[0] for f in pp_filter_names]
-    print(pp_filter_names)
+    # catalog = Catalog(constants.UADETRAC)
+    # pp_handler = catalog.getProbPredicateHandler()
+    # pp_filter_names = pp_handler.listProbilisticFilters()
+    # pp_filter_names = [f[0] for f in pp_filter_names]
+    # print(pp_filter_names)
+    const_exp_01 = ConstantValueExpression("t")
+    const_exp_02 = ConstantValueExpression("suv")
+    cmpr_exp1 = ComparisonExpression(ExpressionType.COMPARE_EQUAL, const_exp_01, const_exp_02)
+
+    const_exp_11 = ConstantValueExpression("c")
+    const_exp_12 = ConstantValueExpression("white")
+    cmpr_exp2 = ComparisonExpression(ExpressionType.COMPARE_EQUAL, const_exp_11, const_exp_12)
+
+    const_exp_21 = ConstantValueExpression("c")
+    const_exp_22 = ConstantValueExpression("white")
+    cmpr_exp3 = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, const_exp_21, const_exp_22)
+
+    logical_expr1 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp2)
+    logical_expr2 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp3)
+
+    catalog= Catalog(constants.UADETRAC)
+    predicates = [logical_expr2]
+    pp_optimizer = PPOptmizer(catalog, predicates)
+    out = pp_optimizer.execute()
