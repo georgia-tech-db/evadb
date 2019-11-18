@@ -8,7 +8,7 @@ from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.arithmetic_expression import ArithmeticExpression
 
 
-class ExpressionsTest(unittest.TestCase):
+class ArithmeticExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
