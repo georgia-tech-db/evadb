@@ -31,10 +31,20 @@ class SimpleVideoLoader(AbstractVideoLoader):
                 _, frame = video.read()
                 continue
 
+            # Skip similar frames if threshold is a positive value
             if self.threshold > 0:
                 if prev_frame is not None:
-                    diff = getattr(framediff_utils, self.distance_metric)
-                    frame_diff = diff(frame, prev_frame)
+                    """
+                    If compare_foreground set to true, calculate distance 
+                    metric on only the foreground pixels 
+                    else on the entire image.
+                    """
+                    if self.compare_foreground is True:
+                        frame_diff = framediff_utils.compare_foreground_mask(
+                            frame, prev_frame, self.distance_metric)
+                    else: 
+                        frame_diff = framediff_utils.frame_difference(
+                            frame, prev_frame, self.distance_metric)
                     if frame_diff < self.threshold:
                         _, frame = video.read()
                         continue

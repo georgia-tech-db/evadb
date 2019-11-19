@@ -45,7 +45,8 @@ class AbstractVideoLoader(metaclass=ABCMeta):
 
     def __init__(self, video_metadata: VideoMetaInfo, batch_size=1,
                  skip_frames=0, offset=None, limit=None, threshold=0, 
-                 distance_metric='absolute_difference'):
+                 distance_metric='absolute_difference',
+                 compare_foreground=False):
         self.video_metadata = video_metadata
         self.batch_size = batch_size
         self.skip_frames = skip_frames
@@ -53,6 +54,7 @@ class AbstractVideoLoader(metaclass=ABCMeta):
         self.limit = limit
         self.threshold = threshold
         self.distance_metric = distance_metric
+        self.compare_foreground = compare_foreground
 
     @abstractmethod
     def load(self):
