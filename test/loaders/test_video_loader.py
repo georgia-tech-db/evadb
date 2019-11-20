@@ -6,7 +6,6 @@ import numpy as np
 
 from src.loaders.video_loader import SimpleVideoLoader
 from src.models import VideoMetaInfo, VideoFormat, Frame, ColorSpace, FrameInfo
-import matplotlib.pyplot as plt
 import glob
 from src.utils import framediff_utils
 
