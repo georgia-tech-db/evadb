@@ -36,6 +36,12 @@ class AbstractProjection(AbstractPlan):
     def foreign_column_ids(self) -> List[str]:
         return self._foreign_column_ids
 
+    def set_foreign_column_ids(self, foreign):
+        self._foreign_column_ids = foreign
+
+    def set_column_ids(self, new_id):
+        self._column_ids = new_id
+
     def __str__(self, level=0):
         project_cols_str = 'pi {} {}'.format(str(self._column_ids), str(self._foreign_column_ids))
         out_string = "\t" * level + project_cols_str + "\n"
