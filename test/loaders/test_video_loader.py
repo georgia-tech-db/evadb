@@ -6,6 +6,8 @@ import numpy as np
 
 from src.loaders.video_loader import SimpleVideoLoader
 from src.models import VideoMetaInfo, VideoFormat, Frame, ColorSpace, FrameInfo
+import glob
+from src.utils import framediff_utils
 
 NUM_FRAMES = 10
 
@@ -35,6 +37,29 @@ class SimpleVideoLoaderTest(unittest.TestCase):
                              dtype=np.uint8)
             out.write(frame)
 
+    def create_sample_video_with_contours(self):
+        """
+        Function to create a video with 2 identical frames with a circle.
+        Circle is used by the compare_foreground_mask of framediff_utils 
+        module to identify background and mask it.
+        Useful for testing frame differencing.
+        """
+        try:
+            os.remove('dummy_contours.avi')
+        except FileNotFoundError:
+            pass
+
+        out = cv2.VideoWriter('dummy_contours.avi',
+                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
+                              (2000, 2000))
+        frame = np.array(np.ones((2000, 2000, 3)) * 80,
+                         dtype=np.uint8)
+        frame = cv2.circle(frame, (1010, 1000), 150, (36, 36, 36), 2)
+
+        # Writing identical frames
+        out.write(frame)
+        out.write(frame)       
+
     def create_sample_video_with_similar_frames(self):
         """
         Function to create a video with 2 identical frames. 
@@ -50,6 +75,7 @@ class SimpleVideoLoaderTest(unittest.TestCase):
                               (2, 2))
         frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
                          dtype=np.uint8)
+
         # Writing identical frames
         out.write(frame)
         out.write(frame)
@@ -57,10 +83,12 @@ class SimpleVideoLoaderTest(unittest.TestCase):
     def setUp(self):
         self.create_sample_video()
         self.create_sample_video_with_similar_frames()
+        self.create_sample_video_with_contours()
 
     def tearDown(self):
         os.remove('dummy.avi')
         os.remove('dummy_similar.avi')
+        os.remove('dummy_contours.avi')
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
@@ -121,5 +149,13 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
         video_loader = SimpleVideoLoader(
             video_info, threshold=0.5, distance_metric='mse_difference')
+        batches = list(video_loader.load())
+        self.assertEqual(1, len(batches))
+
+    def test_should_skip_identical_frames_only_foreground(self):
+        video_info = VideoMetaInfo('dummy_contours.avi', 10, VideoFormat.MPEG)
+        video_loader = SimpleVideoLoader(
+            video_info, threshold=0.5, distance_metric='absolute_difference',
+            compare_foreground=True)
         batches = list(video_loader.load())
         self.assertEqual(1, len(batches))
