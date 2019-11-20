@@ -1,9 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
-
 from src.models.catalog.frame_info import FrameInfo
 from src.models.inference.base_prediction import BasePrediction
 from src.models.storage.batch import FrameBatch
+from src.models import FrameBatch, FrameInfo, Prediction
+from src.depth_estimation_result import DepthEstimationResult
 
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
@@ -52,5 +53,17 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         """
         pass
 
+
     def __call__(self, *args, **kwargs):
         self.classify(*args, **kwargs)
+
+    @abstractmethod
+    def process_frames(self, batch: FrameBatch) -> List[DepthEstimationResult]:
+        """
+        Takes as input a batch of frames. Returns the depth estimate and segmentation by applying the deep learning model.
+        Arguments:
+            batch (FrameBatch): Input batch of frames on which depth estimation needs to be made
+        Returns:
+            List[DepthEstimationResult]: The depth estimation result made by the model
+        """
+        pass
