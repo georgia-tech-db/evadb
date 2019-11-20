@@ -110,10 +110,16 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         self.assertEqual(1, len(batches))
         self.assertEqual(dummy_frames, list(batches[0].frames))
 
-    def test_should_skip_identical_frames(self):
+    def test_should_skip_identical_frames_absdiff(self):
         video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
         video_loader = SimpleVideoLoader(
             video_info, threshold=0.5, distance_metric='absolute_difference')
         batches = list(video_loader.load())
         self.assertEqual(1, len(batches))
 
+    def test_should_skip_identical_frames_msediff(self):
+        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
+        video_loader = SimpleVideoLoader(
+            video_info, threshold=0.5, distance_metric='mse_difference')
+        batches = list(video_loader.load())
+        self.assertEqual(1, len(batches))
