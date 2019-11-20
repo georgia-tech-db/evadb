@@ -3,7 +3,9 @@ from third_party.evaQL.parser.frameQLParser import frameQLParser
 from third_party.evaQL.parser.frameQLParserVisitor import frameQLParserVisitor
 from src.query_parser.select_statement import SelectStatement
 from src.expression.logical_expression import LogicalExpression
+from src.expression.comparison_expression import ComparisonExpression
 from src.expression.abstract_expression import AbstractExpression, ExpressionType
+from src.expression.constant_value_expression import ConstantValueExpression
 
 class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#root.
@@ -1263,7 +1265,7 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#fromClause.
     def visitFromClause(self, ctx:frameQLParser.FromClauseContext):
-        print(ctx.children)
+        # print(ctx.children)
         from_table = None
         where_clause = None
 
@@ -2238,7 +2240,7 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#decimalLiteral.
     def visitDecimalLiteral(self, ctx:frameQLParser.DecimalLiteralContext):
-        return int(ctx.getText())
+        return ConstantValueExpression(int(ctx.getText()))
         
 
     # Visit a parse tree produced by frameQLParser#fileSizeLiteral.
@@ -2249,8 +2251,7 @@ class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#stringLiteral.
     def visitStringLiteral(self, ctx:frameQLParser.StringLiteralContext):
         if ctx.STRING_LITERAL() is not None:
-            return ctx.getText()
-
+            return ConstantValueExpression(ctx.getText())
         #todo handle other types    
         return self.visitChildren(ctx)
 
@@ -2273,7 +2274,7 @@ class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#constant.
     def visitConstant(self, ctx:frameQLParser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
-             return float(ctx.getText())
+             return ConstantValueExpression(float(ctx.getText()))
         
         return self.visitChildren(ctx)
 
@@ -2525,13 +2526,13 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#logicalExpression.
     def visitLogicalExpression(self, ctx:frameQLParser.LogicalExpressionContext):
-        
         if len(ctx.children) < 3:
             #error scenario, should have 3 children
-            return
+            return None
         left =  self.visit(ctx.getChild(0))
         op   =  self.visit(ctx.getChild(1))
         right=  self.visit(ctx.getChild(2))        
+        # print("2534 logical Expression", left,op,right)
         return LogicalExpression(op, left, right)
 
 
@@ -2547,7 +2548,7 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#expressionAtomPredicate.
     def visitExpressionAtomPredicate(self, ctx:frameQLParser.ExpressionAtomPredicateContext):
-        print(ctx.children)
+        # print("2550", ctx.children, ctx.getText())
         return self.visitChildren(ctx)
 
 
@@ -2571,8 +2572,9 @@ class EvaParserVisitor(frameQLParserVisitor):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
         op   = self.visit(ctx.comparisonOperator())
-        print(ctx.children)
-        return self.visitChildren(ctx)
+        print("2574", left, right, op)
+        return ComparisonExpression(op, left, right)
+        # return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by frameQLParser#isNullPredicate.
@@ -2612,7 +2614,9 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#nestedExpressionAtom.
     def visitNestedExpressionAtom(self, ctx:frameQLParser.NestedExpressionAtomContext):
-        return self.visitChildren(ctx)
+        #ToDo Can there be >1 expression in this case
+        expr = ctx.expression(0)
+        return self.visit(expr)
 
 
     # Visit a parse tree produced by frameQLParser#nestedRowExpressionAtom.
@@ -2668,11 +2672,11 @@ class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#comparisonOperator.
     def visitComparisonOperator(self, ctx:frameQLParser.ComparisonOperatorContext):
         op = ctx.getText()
-        if op is '=':
+        if op == '=':
             return ExpressionType.COMPARE_EQUAL
-        elif op is '<':
+        elif op == '<':
             return ExpressionType.COMPARE_LESSER
-        elif op is '>':
+        elif op == '>':
             return ExpressionType.COMPARE_GREATER
         else:
             return ExpressionType.INVALID
@@ -2681,9 +2685,10 @@ class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#logicalOperator.
     def visitLogicalOperator(self, ctx:frameQLParser.LogicalOperatorContext):
         op = ctx.getText()
-        if op is 'OR':
+        
+        if op == 'OR':
             return ExpressionType.LOGICAL_OR
-        elif op is 'AND':
+        elif op == 'AND':
             return ExpressionType.LOGICAL_AND
         else:
             return ExpressionType.INVALID
