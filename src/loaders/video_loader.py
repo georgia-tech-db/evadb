@@ -53,7 +53,7 @@ class SimpleVideoLoader(AbstractVideoLoader):
             frames.append(eva_frame)
             if self.limit and frame_ind >= self.limit:
                 return FrameBatch(frames, info)
-
+                
             if len(frames) % self.batch_size == 0:
                 yield FrameBatch(frames, info)
                 frames = []
