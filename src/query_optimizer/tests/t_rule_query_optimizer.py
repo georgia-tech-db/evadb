@@ -361,7 +361,7 @@ def test_double_join_predicate_pushdown(verbose=False):
     assert t2.parent == j1
     print('Double join predicate Pushdown Successful!')
 
-# TODO Fix this test
+
 def test_double_join_projection_join_pushdown(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
