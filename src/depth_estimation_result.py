@@ -19,14 +19,17 @@ class DepthEstimationResult:
         self._segm = segm
         self._depth = depth
 
+    # stores the depth value for the frame
     @property
     def depth(self):
         return self._depth
 
+    # stores the frame
     @property
     def frame(self):
         return self._frame
 
+    # stores the segmentation value for the frame
     @property
     def segm(self):
         return self._segm
@@ -46,9 +49,12 @@ class DepthEstimationResult:
         Returns:
             List[DepthEstimationResult]
         """
+        # length of frame batch should be equal to length of segmentation and depth arrays
         assert len(batch.frames) == len(segms)
         assert len(batch.frames) == len(depths)
         results = []
+
+        # iterate over each frame and the depth/segmentation results to create a list of DepthEstimationResult objects
         for i in range(len(batch.frames)):
             results.append(DepthEstimationResult(batch.frames[i], segms[i], depths[i]))
 
