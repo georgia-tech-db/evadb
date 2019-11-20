@@ -76,7 +76,7 @@ class SimpleVideoLoaderTest(unittest.TestCase):
                               (2, 2))
         frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
                          dtype=np.uint8)
-        
+
         # Writing identical frames
         out.write(frame)
         out.write(frame)
@@ -140,7 +140,7 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         self.assertEqual(dummy_frames, list(batches[0].frames))
 
     def test_should_skip_identical_frames(self):
-        video_info = VideoMetaInfo('dummy_contours.avi', 10, VideoFormat.MPEG)
+        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
         video_loader = SimpleVideoLoader(
             video_info, threshold=0.5, distance_metric='absolute_difference')
         batches = list(video_loader.load())
