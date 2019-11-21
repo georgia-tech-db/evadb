@@ -69,35 +69,35 @@ The notebook invokes functions implemented in the source python files.
 
 We have followed the existing code hierarchy of Eva repository. No new hierarchy is added.
 
-We have added our main file for processing the frames under /UDFs directory.
 
-#### src/udfs/depth_estimator.py
+We have added our main file for processing the frames under /UDFs directory.
+##### src/udfs/depth_estimator.py
 UDF class for depth estimation feature. responsible for taking batch of frames.
 It processes the frames, sends them to deep learning model for predictions.
 Consolidates the model output and store them in DepthEstimationResult object.
 
-#### src/udfs/abstract_udfs.py
+
+##### src/udfs/abstract_udfs.py
 This is existing abstract UDF class in eva repository.
 We have updated this class to also extend a new method called process_frames which is implemented by depth_estimator class.
 
 
-#### src/udfs/ExpKITTI_joint.ckpt
+##### src/udfs/ExpKITTI_joint.ckpt
 Model checkpoint file
 
 
 We have added unit tests under the /test/udfs directory
-#### test/udfs/test_depth_estimator.py
+##### test/udfs/test_depth_estimator.py
 A class for implementing unit tests for depth estimator.
 
 
 Data files for unit test are stored under /test/udfs/data directory
-#### test/udfs/data/kitti_car_1.png
-#### test/udfs/data/kitti_car_2.png
+##### test/udfs/data/kitti_car_1.png
+##### test/udfs/data/kitti_car_2.png
 
 
-Under /src directory we have implemented a data model for storing depth estimation results.
+Under /src directory we have implemented a data model file  depth_estimation_result.py for storing depth estimation results.
 #### src/depth_estimation_result.py
-This is a data model class to store the result for each frame after it is processed by deep learning model.
 
 
 
