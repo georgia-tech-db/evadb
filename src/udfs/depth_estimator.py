@@ -13,6 +13,7 @@ from src.models import FrameBatch, Prediction, FrameInfo, Point, BoundingBox, Co
 from torch.autograd import Variable
 from torchvision import transforms
 from src.depth_estimation_result import DepthEstimationResult
+from src.utils.frame_filter_util import FrameFilter
 
 sys.path.append('../')
 sys.path.append('.')
@@ -80,8 +81,13 @@ class DepthEstimator(AbstractClassifierUDF):
         depths = []
         segms = []
 
+        frame_filter = FrameFilter()
+        depth_mask = np.ones(frames[0].shape)
         # process frames in a loop
-        for img in frames:
+        for i,img in enumerate(frames):
+
+            img = frame_filter.apply_filter(img, depth_mask)
+
             # create tensor from numpy for each image
             img_var = Variable(torch.from_numpy(self.prepare_img(img).transpose(2, 0, 1)[None]),
                                requires_grad=False).float()
@@ -101,6 +107,10 @@ class DepthEstimator(AbstractClassifierUDF):
             depth = np.abs(depth)
             depths.append(depth)
             segms.append(segm)
+
+            if i % 5 == 0:
+                depth_mask = depth > 15
+                depth_mask[100: ] = True
 
         return segms, depths
 
