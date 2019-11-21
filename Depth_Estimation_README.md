@@ -4,10 +4,10 @@ Course project for CS 8803 - Data Analysis with Deep Learning at Georgia Institu
 
 ### Contributors:
 
-  1. jShay - Jhanavi Sanjay Sheth
+  1. pratrajv - Prateek Rajvanshi
   2. vaishnavik22 - Vaishnavi Kannan
   3. imvinod - Vinod Kumar
-  4. pratrajv - Prateek Rajvanshi
+  4. jShay - Jhanavi Sanjay Sheth
 
 ### Problem Statement
 1. The problem is about performing depth estimation of a scene during robot navigation
