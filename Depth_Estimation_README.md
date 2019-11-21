@@ -47,17 +47,17 @@ Credits to the Author: Vladimir Nekrasov et al. (https://arxiv.org/abs/1809.0476
 There are two approaches to execute the project.
 
 #### Approach 1:
-This approach uses the code integrated with Eva repository. (https://github.com/jhanavi/Eva).
-Please note that currently entire code has not been integrated with Eva. And, hence there is no direct project execution file in this repository.
-You can run the project using pytest framework. The unit test itself calls the deep learning model for prediction.
-Once the integration with Eva is completed before final phase, there will be a main process file which will be responsible for project execution.
-For now, you just need to type pytest command from the root directory and it will execute all the unit tests.
+* This approach uses the code integrated with Eva repository. (https://github.com/jhanavi/Eva).
+* Please note that currently entire code has not been integrated with Eva. And, hence there is no direct project execution file in this repository.
+* You can run the project using pytest framework. The unit test itself calls the deep learning model for prediction.
+* Once the integration with Eva is completed before final phase, there will be a main process file which will be responsible for project execution.
+* For now, you just need to type pytest command from the root directory and it will execute all the unit tests.
 
 
 #### Approach 2:
-This approach uses the code from previous checkpoint before we migrated to Eva repository. (https://github.com/imvinod/ddl_depth_estimation)
-Main file to simulate DL model - process.ipynb
-The python notebook simulates performance comparison of the DL model for all improvements done:
+* This approach uses the code from previous checkpoint before we migrated to Eva repository. (https://github.com/imvinod/ddl_depth_estimation)
+* Main file to simulate DL model - process.ipynb
+* The python notebook simulates performance comparison of the DL model for all improvements done:
 1. PCA
 2. Frame skipping
 3. Depth map projection
@@ -68,7 +68,6 @@ The notebook invokes functions implemented in the source python files.
 ### Code structure
 
 We have followed the existing code hierarchy of Eva repository. No new hierarchy is added.
-
 
 We have added our main file for processing the frames under /UDFs directory.
 ##### src/udfs/depth_estimator.py
