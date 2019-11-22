@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from src.models import FrameBatch, FrameInfo, Prediction
+from src.models import FrameBatch, FrameInfo, BasePrediction
 
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
@@ -36,7 +36,7 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def classify(self, batch: FrameBatch) -> List[Prediction]:
+    def classify(self, batch: FrameBatch) -> List[BasePrediction]:
         """
         Takes as input a batch of frames and returns the predictions by
         applying the classification model.
@@ -46,7 +46,7 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
             needs to be made
 
         Returns:
-            List[Prediction]: The predictions made by the classifier
+            List[BasePrediction]: The predictions made by the classifier
         """
         pass
 
