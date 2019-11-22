@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Iterator
 
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 from src.query_planner.abstract_plan import AbstractPlan
 
 

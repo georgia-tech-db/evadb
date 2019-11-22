@@ -4,12 +4,14 @@ from typing import List, Tuple
 
 import numpy as np
 import torchvision
-
-from src.models import FrameBatch, Prediction, FrameInfo, Point, BoundingBox, \
-    ColorSpace
-from src.udfs.abstract_udfs import AbstractClassifierUDF
-
 from torchvision import transforms
+
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import ColorSpace
+from src.models.inference.classifier_prediction import Prediction
+from src.models.inference.representation import BoundingBox, Point
+from src.models.storage.batch import FrameBatch
+from src.udfs.abstract_udfs import AbstractClassifierUDF
 
 
 class FastRCNNObjectDetector(AbstractClassifierUDF):

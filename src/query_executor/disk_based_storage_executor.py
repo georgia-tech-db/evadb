@@ -1,7 +1,7 @@
 from typing import Iterator
 
 from src.loaders.video_loader import SimpleVideoLoader
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_storage_executor import \
     AbstractStorageExecutor
 from src.query_planner.storage_plan import StoragePlan

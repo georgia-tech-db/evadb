@@ -1,7 +1,11 @@
 from src.loaders.abstract_loader import AbstractVideoLoader
 import cv2
 
-from src.models import VideoMetaInfo, FrameInfo, ColorSpace, Frame, FrameBatch
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import ColorSpace
+from src.models.catalog.video_info import VideoMetaInfo
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 
 class SimpleVideoLoader(AbstractVideoLoader):

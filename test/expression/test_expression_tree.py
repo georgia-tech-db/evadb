@@ -6,7 +6,9 @@ from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.function_expression import FunctionExpression
-from src.models import Prediction, FrameBatch, Frame
+from src.models.inference.classifier_prediction import Prediction
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 
 class ExpressionEvaluationTest(unittest.TestCase):
