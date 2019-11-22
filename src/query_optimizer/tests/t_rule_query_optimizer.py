@@ -524,6 +524,8 @@ def test_should_simply_predicate(verbose=True):
     # Creating Expression for Select: Expression is basically where 0==1
     const1 = ConstantValueExpression(value=0)
     const2 = ConstantValueExpression(value=1)
+    # Comparing if 0 is equal to 1
+    # It will be False which will trigger the simplify predicate function
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
     s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
 
