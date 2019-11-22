@@ -162,10 +162,17 @@ class RuleQueryOptimizer:
     # No where clause like 1 = 0 or 0 = 0
     # Merging predicates
     # pred will be an AbstractExpression type
-    def simply_predicate(self, pred):
-        new_pred = pred
-        return new_pred
+    def simply_predicate(self, curnode, child_ix):
+        boolean=curnode.predicate.evaluate()
+        if not boolean:
+            delete_node(curnode)
 
+    #curnode : 
+    def delete_node(self, curnode):
+        curnode.parent.set_children(curnode.children)
+        for child in curnode.children:
+            child.parent=curnode.parent
+        
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child_ix : is an integer that represents the index of the child in the curnode's child list
     def join_elimination(self, curnode, child_ix):
