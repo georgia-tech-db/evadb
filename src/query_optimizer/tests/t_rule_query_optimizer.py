@@ -557,5 +557,5 @@ if __name__ == '__main__':
     test_double_join_predicate_pushdown()
     test_double_join_projection_join_pushdown()
     test_join_elimination()
-    test_shouldnot_simply_predicate()
-    test_should_simply_predicate()
+    #test_shouldnot_simply_predicate()
+    #test_should_simply_predicate()
