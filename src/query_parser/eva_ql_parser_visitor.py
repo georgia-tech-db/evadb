@@ -12,7 +12,9 @@ from src.expression.tuple_value_expression import TupleValueExpression
 class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#root.
     def visitRoot(self, ctx:frameQLParser.RootContext):
-        return self.visitChildren(ctx)
+        for child in ctx.children:
+            if child is not TerminalNode:
+                return self.visit(child)
 
 
     # Visit a parse tree produced by frameQLParser#sqlStatements.
@@ -987,7 +989,6 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#simpleSelect.
     def visitSimpleSelect(self, ctx:frameQLParser.SimpleSelectContext):
-        print(len(ctx.children))
         select_stm = self.visitChildren(ctx)
         return select_stm
 
