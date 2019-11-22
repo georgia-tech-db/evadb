@@ -444,7 +444,7 @@ def test_double_join_projection_join_pushdown(verbose=False):
 
 
 
-def test_join_elimination(verbose=True):
+def test_join_elimination(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
 
@@ -488,7 +488,8 @@ def test_join_elimination(verbose=True):
         print('New Plan Tree')
         print(new_tree)
 
-def test_shouldnot_simply_predicate(verbose=True):
+
+def test_shouldnot_simply_predicate(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
 
@@ -517,7 +518,8 @@ def test_shouldnot_simply_predicate(verbose=True):
         print('New Plan Tree')
         print(new_tree)
 
-def test_should_simply_predicate(verbose=True):
+
+def test_should_simply_predicate(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
 
@@ -548,6 +550,7 @@ def test_should_simply_predicate(verbose=True):
         print('New Plan Tree')
         print(new_tree)
 
+
 if __name__ == '__main__':
     test_simple_predicate_pushdown()
     test_simple_projection_pushdown_select()
@@ -557,5 +560,10 @@ if __name__ == '__main__':
     test_double_join_predicate_pushdown()
     test_double_join_projection_join_pushdown()
     test_join_elimination()
+<<<<<<< HEAD
     #test_shouldnot_simply_predicate()
     #test_should_simply_predicate()
+=======
+    test_shouldnot_simply_predicate()
+    test_should_simply_predicate()
+>>>>>>> 62fbf696c0f62ba82b8f8653de6d7af488e780d4
