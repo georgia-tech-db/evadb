@@ -220,10 +220,6 @@ def test_combined_projection_pushdown(verbose=False):
     print('Combined Projection Pushdown Select Test Successful!')
 
 
-def test_complex_projection_pushdown_join():
-    pass
-
-
 def test_both_projection_pushdown_and_predicate_pushdown(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
@@ -362,7 +358,7 @@ def test_double_join_predicate_pushdown(verbose=False):
     print('Double join predicate Pushdown Successful!')
 
 
-def test_double_join_projection_join_pushdown(verbose=False):
+def test_double_join_projection_pushdown(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
 
@@ -443,7 +439,6 @@ def test_double_join_projection_join_pushdown(verbose=False):
     print('Double join Projection Pushdown Successful!')
 
 
-
 def test_join_elimination(verbose=True):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
@@ -489,7 +484,6 @@ def test_join_elimination(verbose=True):
         print(new_tree)
 
 
-
 if __name__ == '__main__':
     test_simple_predicate_pushdown()
     test_simple_projection_pushdown_select()
@@ -497,5 +491,5 @@ if __name__ == '__main__':
     test_combined_projection_pushdown()
     test_both_projection_pushdown_and_predicate_pushdown()
     test_double_join_predicate_pushdown()
-    test_double_join_projection_join_pushdown()
+    test_double_join_projection_pushdown()
     test_join_elimination()
