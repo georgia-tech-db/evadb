@@ -3,7 +3,7 @@ from typing import Callable
 
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 
 
 @unique

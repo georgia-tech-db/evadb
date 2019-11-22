@@ -5,6 +5,7 @@ from src.query_planner.types import PlanNodeType
 from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
 from src.query_executor.pp_executor import PPExecutor
 
+
 # This is an interface between plan tree and execution tree.
 # We traverse the plan tree and build execution tree from it
 # select * from video where label = car

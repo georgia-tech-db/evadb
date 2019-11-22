@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_executor import AbstractExecutor
 
 

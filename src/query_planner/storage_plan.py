@@ -1,4 +1,4 @@
-from src.models import VideoMetaInfo
+from src.models.catalog.video_info import VideoMetaInfo
 from src.query_planner.abstract_plan import AbstractPlan
 from src.query_planner.types import PlanNodeType
 

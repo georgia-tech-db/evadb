@@ -2,7 +2,7 @@ import unittest
 
 from src.expression.function_expression import FunctionExpression, \
     ExecutionMode
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 
 
 class FunctionExpressionTest(unittest.TestCase):

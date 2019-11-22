@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from src.models import FrameBatch, FrameInfo, BasePrediction
+from src.models.catalog.frame_info import FrameInfo
+from src.models.inference.base_prediction import BasePrediction
+from src.models.storage.batch import FrameBatch
 
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
