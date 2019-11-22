@@ -20,7 +20,7 @@ class EvaStatement():
         self._stmt_type = stmt_type
 
     @property
-    def get_type(self):
+    def stmt_type(self):
         return self._stmt_type
     
 class EvaStatementList():
