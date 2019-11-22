@@ -1,7 +1,8 @@
 import unittest
 from unittest.mock import patch
 
-from src.models import VideoMetaInfo, VideoFormat
+from src.models.catalog.properties import VideoFormat
+from src.models.catalog.video_info import VideoMetaInfo
 from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
 from src.query_planner.storage_plan import StoragePlan
 

@@ -2,7 +2,8 @@ import unittest
 
 import numpy as np
 
-from src.models import Frame, FrameBatch
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 NUM_FRAMES = 10
 

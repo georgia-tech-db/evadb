@@ -4,7 +4,8 @@ from unittest import mock
 import numpy as np
 
 from src.filters.abstract_pp import AbstractPPTemplate
-from src.models import FrameBatch, Frame
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 
 class AbstractPPTest(unittest.TestCase):
