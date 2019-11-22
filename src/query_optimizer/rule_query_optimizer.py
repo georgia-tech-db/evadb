@@ -165,7 +165,7 @@ class RuleQueryOptimizer:
     def simply_predicate(self, curnode, child_ix):
         boolean=curnode.predicate.evaluate()
         if not boolean:
-            delete_node(curnode)
+            self.delete_node(curnode)
 
     #curnode : 
     def delete_node(self, curnode):
