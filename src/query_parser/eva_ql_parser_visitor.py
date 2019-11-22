@@ -1,11 +1,13 @@
 from antlr4 import *
 from third_party.evaQL.parser.frameQLParser import frameQLParser
 from third_party.evaQL.parser.frameQLParserVisitor import frameQLParserVisitor
+from src.query_parser.eva_statement import EvaStatementList
 from src.query_parser.select_statement import SelectStatement
 from src.expression.logical_expression import LogicalExpression
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.abstract_expression import AbstractExpression, ExpressionType
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.tuple_value_expression import TupleValueExpression
 
 class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#root.
@@ -15,8 +17,13 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#sqlStatements.
     def visitSqlStatements(self, ctx:frameQLParser.SqlStatementsContext):
-        return self.visitChildren(ctx)
-
+        eva_statements = EvaStatementList();
+        for child in ctx.children:
+            stmt = self.visit(child)
+            if stmt is not None:
+                eva_statements.add_statement(stmt)
+        
+        return eva_statements
 
     # Visit a parse tree produced by frameQLParser#sqlStatement.
     def visitSqlStatement(self, ctx:frameQLParser.SqlStatementContext):
@@ -35,11 +42,6 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#dmlStatement.
     def visitDmlStatement(self, ctx:frameQLParser.DmlStatementContext):
-        print("dmlStatement")
-        print(len(ctx.children))
-        for i in range(len(ctx.children)):
-            print("Select(",i, ")", ctx.children[i].getText())
-        # print(ctx.selectStatement().getText())
         return self.visitChildren(ctx)
 
 
@@ -985,8 +987,8 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#simpleSelect.
     def visitSimpleSelect(self, ctx:frameQLParser.SimpleSelectContext):
-        select_stm = SelectStatement()
-        self.visitChildren(ctx)
+        print(len(ctx.children))
+        select_stm = self.visitChildren(ctx)
         return select_stm
 
     # Visit a parse tree produced by frameQLParser#parenthesisSelect.
@@ -1156,21 +1158,25 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#querySpecification.
     def visitQuerySpecification(self, ctx:frameQLParser.QuerySpecificationContext):
-
+        select_list = None
+        from_clause = None
+        where_clause = None
         #first child will be a SELECT terminal token
         for child in ctx.children[1:]:
             try:
                 rule_idx = child.getRuleIndex()
                 if rule_idx == frameQLParser.RULE_selectElements:
-                    select_list = self.visit(child)
+                    target_list = self.visit(child)
 
                 elif rule_idx == frameQLParser.RULE_fromClause:
-                    from_clause, where_clause = self.visit(child) 
+                    clause = self.visit(child) 
+                    from_clause = clause.get('from', None)
+                    where_clause = clause.get('where', None)
             except:
                 #stop parsing something bad happened
                 return None
 
-        select_stmt = SelectStatement(select_list, from_clause, where_clause)
+        select_stmt = SelectStatement(target_list, from_clause, where_clause)
         return select_stmt
 
     # Visit a parse tree produced by frameQLParser#querySpecificationNointo.
@@ -1195,7 +1201,6 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#selectElements.
     def visitSelectElements(self, ctx:frameQLParser.SelectElementsContext):
-        print("selectElements")
         select_list = []
         for child in ctx.children:
             element = self.visit(child)
@@ -1206,15 +1211,11 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#selectStarElement.
     def visitSelectStarElement(self, ctx:frameQLParser.SelectStarElementContext):
-        print("selectElementsStar")
-        print(len(ctx.children))
         return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by frameQLParser#selectColumnElement.
     def visitSelectColumnElement(self, ctx:frameQLParser.SelectColumnElementContext):
-        # print("selectColumnElement")
-        # print(len(ctx.children))
         return self.visitChildren(ctx)
 
 
@@ -1265,7 +1266,6 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#fromClause.
     def visitFromClause(self, ctx:frameQLParser.FromClauseContext):
-        # print(ctx.children)
         from_table = None
         where_clause = None
 
@@ -2229,7 +2229,8 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#simpleId.
     def visitSimpleId(self, ctx:frameQLParser.SimpleIdContext):
-        return ctx.getText()
+        #todo handle children, right now assuming TupleValueExpr
+        return TupleValueExpression(ctx.getText())
         # return self.visitChildren(ctx)
 
 
@@ -2532,7 +2533,6 @@ class EvaParserVisitor(frameQLParserVisitor):
         left =  self.visit(ctx.getChild(0))
         op   =  self.visit(ctx.getChild(1))
         right=  self.visit(ctx.getChild(2))        
-        # print("2534 logical Expression", left,op,right)
         return LogicalExpression(op, left, right)
 
 
@@ -2548,7 +2548,6 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#expressionAtomPredicate.
     def visitExpressionAtomPredicate(self, ctx:frameQLParser.ExpressionAtomPredicateContext):
-        # print("2550", ctx.children, ctx.getText())
         return self.visitChildren(ctx)
 
 
@@ -2572,10 +2571,8 @@ class EvaParserVisitor(frameQLParserVisitor):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
         op   = self.visit(ctx.comparisonOperator())
-        print("2574", left, right, op)
         return ComparisonExpression(op, left, right)
-        # return self.visitChildren(ctx)
-
+       
 
     # Visit a parse tree produced by frameQLParser#isNullPredicate.
     def visitIsNullPredicate(self, ctx:frameQLParser.IsNullPredicateContext):
