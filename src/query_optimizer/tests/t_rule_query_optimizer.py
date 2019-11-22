@@ -488,15 +488,44 @@ def test_join_elimination(verbose=True):
         print('New Plan Tree')
         print(new_tree)
 
-def test_simply_predicate(verbose=True):
+def test_shouldnot_simply_predicate(verbose=True):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
 
-    # Creating Expression for Select: Expression is basically where v2.7 == 4
+    # Creating Expression for Select: Expression is basically where v1.7 == 4
     const = ConstantValueExpression(value=4)
     tup = TupleValueExpression(col_idx=int(7))
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
     s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
+
+    projection_output = ['v1.3', 'v1.4']
+    root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
+
+    t1 = VideoTablePlan(video=video1, tablename='v1')
+
+    root.set_children([s1])
+    s1.parent = root
+    s1.set_children([t1])
+    t1.parent = s1
+    rule_list = [Rules.SIMPLIFY_PREDICATE]
+    if verbose:
+        print('Original Plan Tree')
+        print(root)
+    qo = RuleQueryOptimizer()
+    new_tree = qo.run(root, rule_list)
+    if verbose:
+        print('New Plan Tree')
+        print(new_tree)
+
+def test_should_simply_predicate(verbose=True):
+    meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+    video1 = SimpleVideoLoader(video_metadata=meta1)
+
+    # Creating Expression for Select: Expression is basically where 0==1
+    const1 = ConstantValueExpression(value=0)
+    const2 = ConstantValueExpression(value=1)
+    expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
+    s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
 
     projection_output = ['v1.3', 'v1.4']
     root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
@@ -526,4 +555,5 @@ if __name__ == '__main__':
     test_double_join_predicate_pushdown()
     test_double_join_projection_join_pushdown()
     test_join_elimination()
-    test_simply_predicate()
+    test_shouldnot_simply_predicate()
+    test_should_simply_predicate()
