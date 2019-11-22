@@ -2,7 +2,9 @@ import unittest
 
 import numpy as np
 
-from src.models import FrameBatch, Frame, Prediction
+from src.models.inference.classifier_prediction import Prediction
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
 from ..query_executor.utils import DummyExecutor
 
