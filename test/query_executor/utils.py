@@ -1,6 +1,6 @@
 from typing import List
 
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 
 
 class DummyExecutor:

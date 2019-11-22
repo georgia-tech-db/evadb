@@ -1,6 +1,5 @@
 import unittest
 
-from src.models import Predicate
 from src.query_planner.seq_scan_plan import SeqScanPlan
 from src.query_executor.plan_executor import PlanExecutor
 
@@ -18,9 +17,7 @@ class PlanExecutorTest(unittest.TestCase):
                    c1_1
         """
 
-        predicate = Predicate(name="test",
-                              predicate=lambda prediction: prediction.eq(
-                                  "car") and not prediction.eq("bus"))
+        predicate = None
 
         root_abs_plan = SeqScanPlan(predicate=predicate)
         child_1_abs_plan = SeqScanPlan(predicate=predicate)
