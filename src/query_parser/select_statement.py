@@ -9,7 +9,7 @@ class SelectStatement(EvaStatement):
     
     Attributes
     ----------
-    _select_elements : List[AbstractExpression]
+    _target_list : List[AbstractExpression]
         select elements in the select statement
     _from_table : AbstractLoader
         from part of the select query
@@ -17,11 +17,11 @@ class SelectStatement(EvaStatement):
         predicate of the select statement
     """
 
-    def __init__(self, select_elements = None, from_table = None, where_clause=None):
+    def __init__(self, target_list = None, from_table = None, where_clause=None):
         super().__init__(StatementType.SELECT)
         self._from_table = from_table
         self._where_clause = where_clause
-        self._select_elements = select_elements
+        self._target_list = target_list
     
     @property
     def where_clause(self):
@@ -32,12 +32,12 @@ class SelectStatement(EvaStatement):
         self._where_clause = where_expr
 
     @property
-    def select_elements(self):
-        return self._select_elements
+    def target_list(self):
+        return self._target_list
     
-    @select_elements.setter
-    def select_elements(self, select_expr_list : List[AbstractExpression]):
-        self._select_elements = select_expr_list
+    @target_list.setter
+    def target_list(self, target_expr_list : List[AbstractExpression]):
+        self._target_list = target_expr_list
 
     @property
     def from_table(self):
