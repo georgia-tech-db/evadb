@@ -14,14 +14,9 @@ class EvaFrameQLParser():
         parser = frameQLParser(stream)
         tree = parser.root()
         visitor = EvaParserVisitor()
-        visitor.visit(tree)
+        return visitor.visit(tree)
         # print(tree.toStringTree(recog=parser))
 
-
-if __name__ == "__main__":
-    eva = EvaFrameQLParser()
-    query = 'SELECT CLASS , REDNESS FROM TAIPAI WHERE ( CLASS = "VAN" AND REDNESS = 200 ) OR REDNESS > 300'
-    eva.build_eva_parse_tree(query)
     
 
 
