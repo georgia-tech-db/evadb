@@ -25,7 +25,7 @@ class DiskStorageExecutorTest(unittest.TestCase):
                                            batch_size=storage_plan.batch_size,
                                            limit=storage_plan.limit,
                                            offset=storage_plan.offset,
-                                           skip_frames=storage_plan.skip_frames,
+                                           skip_frames=storage_plan.skip_frames
                                            )
         class_instance.load.assert_called_once()
         self.assertEqual(list(range(5)), actual)
