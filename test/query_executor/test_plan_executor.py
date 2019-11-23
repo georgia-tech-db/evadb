@@ -1,7 +1,12 @@
 import unittest
+from unittest.mock import patch
 
-from src.query_planner.seq_scan_plan import SeqScanPlan
+from src.models.catalog.properties import VideoFormat
+from src.models.catalog.video_info import VideoMetaInfo
+from src.models.storage.batch import FrameBatch
 from src.query_executor.plan_executor import PlanExecutor
+from src.query_planner.seq_scan_plan import SeqScanPlan
+from src.query_planner.storage_plan import StoragePlan
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -48,3 +53,35 @@ class PlanExecutorTest(unittest.TestCase):
             for gc_abs, gc_exec in zip(child_abs.children,
                                        child_exec.children):
                 self.assertEqual(gc_abs.node_type, gc_exec._node.node_type)
+
+    @patch(
+        'src.query_executor.disk_based_storage_executor.SimpleVideoLoader')
+    def test_should_return_the_new_path_after_execution(self, mock_class):
+        class_instatnce = mock_class.return_value
+
+        dummy_expr = type('dummy_expr', (),
+                          {"evaluate": lambda x=None: [True, False,
+                                                       True]})
+
+        # Build plan tree
+        video = VideoMetaInfo("dummy.avi", 10, VideoFormat.AVI)
+        class_instatnce.load.return_value = map(lambda x: x, [
+            FrameBatch([1, 2, 3], None),
+            FrameBatch([4, 5, 6], None)])
+
+        storage_plan = StoragePlan(video)
+        seq_scan = SeqScanPlan(predicate=dummy_expr)
+        seq_scan.append_child(storage_plan)
+
+        # Execute the plan
+        executor = PlanExecutor(seq_scan)
+        actual = executor.execute_plan()
+        expected = [
+            FrameBatch([1, 3], None),
+            FrameBatch([4, 6], None)]
+
+        mock_class.assert_called_once()
+
+        self.assertEqual(
+            expected, actual
+        )
