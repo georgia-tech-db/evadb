@@ -6,10 +6,16 @@ class FrameInfo:
     Data model contains information about the frame
 
     Arguments:
-        height (int)(default: -1): Height of the image : left as -1 when the height of the frame is not required
-        width (int)(default: -1): Width of the image : left as -1 when the height of the frame is not required
+        height (int)(default: -1): Height of the image : left as -1
+        when the height of the frame is not required
+
+        width (int)(default: -1):  Width of the image : left as -1 when the
+        height of the frame is not required
+
         channels (int)(default: 3): Number of input channels in the video
-        color_space (ColorSpace)(default: ColorSpace.RGB): color space of the frame (RGB, HSV, BGR, GRAY)
+
+        color_space (ColorSpace)(default: ColorSpace.RGB): color space of
+        the frame (RGB, HSV, BGR, GRAY)
 
     """
 

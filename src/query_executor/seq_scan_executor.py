@@ -2,6 +2,7 @@ from typing import Iterator
 
 from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_executor import AbstractExecutor
+from src.query_planner.seq_scan_plan import SeqScanPlan
 
 
 class SequentialScanExecutor(AbstractExecutor):
@@ -12,7 +13,7 @@ class SequentialScanExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: 'AbstractPlan'):
+    def __init__(self, node: SeqScanPlan):
         super().__init__(node)
         self.predicate = node.predicate
 
