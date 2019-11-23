@@ -9,21 +9,21 @@ class ExpressionType(IntEnum):
     INVALID = 0,
     CONSTANT_VALUE = 1,
     TUPLE_VALUE = 2,
-    #Compare operators
+    # Compare operators
     COMPARE_EQUAL = 3,
     COMPARE_GREATER = 4,
     COMPARE_LESSER = 5,
     COMPARE_GEQ = 6,
     COMPARE_LEQ = 7,
     COMPARE_NEQ = 8,
-    #Logical operators
+    # Logical operators
     LOGICAL_AND = 9,
     LOGICAL_OR = 10,
     LOGICAL_NOT = 11,
-    #Arithmetic operators
+    # Arithmetic operators
     ARITHMETIC_ADD = 12,
-    ARITHMETIC_SUBTRACT= 13,
-    ARITHMETIC_MULTIPLY= 14,
+    ARITHMETIC_SUBTRACT = 13,
+    ARITHMETIC_MULTIPLY = 14,
     ARITHMETIC_DIVIDE = 15
     # add other types
 
