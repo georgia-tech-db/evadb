@@ -4,9 +4,10 @@ from src.expression.abstract_expression import AbstractExpression
 from src.loaders.abstract_loader import AbstractLoader
 from typing import List
 
+
 class SelectStatement(EvaStatement):
-    """Select Statemet 
-    
+    """Select Statemet
+
     Attributes
     ----------
     _target_list : List[AbstractExpression]
@@ -17,26 +18,26 @@ class SelectStatement(EvaStatement):
         predicate of the select statement
     """
 
-    def __init__(self, target_list = None, from_table = None, where_clause=None):
+    def __init__(self, target_list=None, from_table=None, where_clause=None):
         super().__init__(StatementType.SELECT)
         self._from_table = from_table
         self._where_clause = where_clause
         self._target_list = target_list
-    
+
     @property
     def where_clause(self):
         return self._where_clause
-    
+
     @where_clause.setter
-    def where_clause(self, where_expr : AbstractExpression):
+    def where_clause(self, where_expr: AbstractExpression):
         self._where_clause = where_expr
 
     @property
     def target_list(self):
         return self._target_list
-    
+
     @target_list.setter
-    def target_list(self, target_expr_list : List[AbstractExpression]):
+    def target_list(self, target_expr_list: List[AbstractExpression]):
         self._target_list = target_expr_list
 
     @property
@@ -44,7 +45,5 @@ class SelectStatement(EvaStatement):
         return self._from_table
 
     @from_table.setter
-    def from_table(self, table : AbstractLoader):
+    def from_table(self, table: AbstractLoader):
         self._from_table = table
-    
-    

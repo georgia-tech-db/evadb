@@ -23,7 +23,7 @@ class TupleValueExpression(AbstractExpression):
 
     # remove this once doen with tuple class
     def evaluate(self, *args):
-        if args == None:
+        if args is None:
             # error Handling
             pass
         tuple1 = args[0]
