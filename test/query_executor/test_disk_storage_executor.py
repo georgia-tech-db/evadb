@@ -21,6 +21,11 @@ class DiskStorageExecutorTest(unittest.TestCase):
         class_instance.load.return_value = range(5)
         actual = list(executor.next())
 
-        mock_class.assert_called_once_with(video_info)
+        mock_class.assert_called_once_with(video_info,
+                                           batch_size=storage_plan.batch_size,
+                                           limit=storage_plan.limit,
+                                           offset=storage_plan.offset,
+                                           skip_frames=storage_plan.skip_frames,
+                                           )
         class_instance.load.assert_called_once()
         self.assertEqual(list(range(5)), actual)
