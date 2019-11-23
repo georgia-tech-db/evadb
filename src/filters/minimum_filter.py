@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from copy import deepcopy
-from src.filters import FilterTemplate
+from src.filters.abstract_filter import FilterTemplate
 from src.filters.models.ml_randomforest import MLRandomForest
 
 
