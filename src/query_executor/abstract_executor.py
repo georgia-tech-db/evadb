@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Iterator
 
-from src.models import FrameBatch
+from src.models.storage.batch import FrameBatch
 from src.query_planner.abstract_plan import AbstractPlan
 
 
@@ -39,5 +39,13 @@ class AbstractExecutor(ABC):
         NotImplementedError('Must be implemented in subclasses.')
 
     @abstractmethod
-    def execute(self, batch: FrameBatch):
+    def next(self) -> Iterator[FrameBatch]:
+        """
+        This method is implemented by every executor. Includes logic for
+        fetching frame batches from child nodes and emitting it to parent
+        node.
+
+        Yields:
+             FrameBatch
+        """
         NotImplementedError('Must be implemented in subclasses.')

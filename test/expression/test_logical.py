@@ -1,6 +1,5 @@
 import unittest
 
-
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.logical_expression import LogicalExpression
@@ -9,12 +8,12 @@ from src.expression.tuple_value_expression import TupleValueExpression
 
 
 class LogicalExpressionsTest(unittest.TestCase):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def test_logical_and(self):
-        tpl_exp = TupleValueExpression(0)   
+        tpl_exp = TupleValueExpression(0)
         const_exp = ConstantValueExpression(1)
 
         comparison_expression_left = ComparisonExpression(
@@ -34,8 +33,8 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_left,
             comparison_expression_right
         )
-        tuple1 = [1, 2, 3]
-        self.assertEqual(True, logical_expr.evaluate(tuple1, None))
+        tuple1 = [[1], [2], 3]
+        self.assertEqual([True], logical_expr.evaluate(tuple1, None))
 
     def test_comparison_compare_greater(self):
         tpl_exp = TupleValueExpression(0)
@@ -58,8 +57,8 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_left,
             comparison_expression_right
         )
-        tuple1 = [1, 2, 3]
-        self.assertEqual(True, logical_expr.evaluate(tuple1, None))
+        tuple1 = [[1], 2, 3]
+        self.assertEqual([True], logical_expr.evaluate(tuple1, None))
 
     def test_logical_not(self):
         tpl_exp = TupleValueExpression(0)
@@ -75,5 +74,5 @@ class LogicalExpressionsTest(unittest.TestCase):
             None,
             comparison_expression_right
         )
-        tuple1 = [1, 2, 3]
-        self.assertEqual(True, logical_expr.evaluate(tuple1, None))
+        tuple1 = [[1], 2, 3]
+        self.assertEqual([True], logical_expr.evaluate(tuple1, None))

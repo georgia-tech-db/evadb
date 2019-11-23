@@ -2,7 +2,9 @@ import unittest
 
 import numpy as np
 
-from src.models import Frame, FrameBatch, Prediction
+from src.models.inference.classifier_prediction import Prediction
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 NUM_FRAMES = 10
 
