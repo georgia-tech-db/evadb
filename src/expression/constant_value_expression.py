@@ -1,4 +1,5 @@
-from src.expression.abstract_expression import AbstractExpression, ExpressionType
+from src.expression.abstract_expression import AbstractExpression, \
+    ExpressionType
 
 
 class ConstantValueExpression(AbstractExpression):
