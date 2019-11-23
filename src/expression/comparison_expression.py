@@ -15,8 +15,8 @@ class ComparisonExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        vls = self._children[0].evaluate(*args)
-        vrs = self._children[1].evaluate(*args)
+        vls = self.get_child(0).evaluate(*args)
+        vrs = self.get_child(1).evaluate(*args)
 
         # Broadcasting scalars
         if type(vrs) is not list:

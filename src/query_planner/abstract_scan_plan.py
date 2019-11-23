@@ -20,5 +20,5 @@ class AbstractScan(AbstractPlan):
         self._predicate = predicate
 
     @property
-    def predicate(self) -> 'Expression':
+    def predicate(self) -> AbstractExpression:
         return self._predicate
