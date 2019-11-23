@@ -3,7 +3,8 @@ import unittest
 
 import cv2
 
-from src.models import Frame, FrameBatch
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 from src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
 NUM_FRAMES = 10
