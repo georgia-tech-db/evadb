@@ -26,7 +26,7 @@ class ComparisonExpression(AbstractExpression):
         outcome = []
         for vl, vr in zip(vls, vrs):
             if self.etype == ExpressionType.COMPARE_EQUAL:
-                outcome.append(vl.eq(vr))
+                outcome.append(vl == vr)
         return outcome
 
         # ToDo add other comparision types
