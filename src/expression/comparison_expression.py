@@ -1,5 +1,6 @@
-from src.expression.abstract_expression import AbstractExpression, ExpressionType, \
-    ExpressionReturnType
+from src.expression.abstract_expression import AbstractExpression, \
+    ExpressionType, ExpressionReturnType
+
 
 class ComparisonExpression(AbstractExpression):
     def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
@@ -27,4 +28,4 @@ class ComparisonExpression(AbstractExpression):
         elif(self.etype == ExpressionType.COMPARE_LEQ):
             return vl <= vr
         elif(self.etype == ExpressionType.COMPARE_NEQ):
-            return vl != vr          
+            return vl != vr
