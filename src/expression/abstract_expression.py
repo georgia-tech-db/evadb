@@ -25,6 +25,8 @@ class ExpressionType(IntEnum):
     ARITHMETIC_SUBTRACT = 13,
     ARITHMETIC_MULTIPLY = 14,
     ARITHMETIC_DIVIDE = 15
+
+    FUNCTION_EXPRESSION = 16
     # add other types
 
 
@@ -57,7 +59,7 @@ class AbstractExpression(ABC):
         else:
             return self._children[index]
 
-    def append_child(self, index: int, child):
+    def append_child(self, child):
         self._children.append(child)
 
     def get_children_count(self) -> int:
