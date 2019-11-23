@@ -53,17 +53,16 @@ class PlanExecutor:
 
     def execute_plan(self):
         """execute the plan tree
-        
+
         """
+        # TODO: for now this returns list of batch frames. Update to return
+        # a stitched output
         execution_tree = self._build_execution_tree(self._plan)
 
-        ### ToDo
         output_batches = []
 
-        '''
-        for child in execution_tree.children:
-            while (batch = child.next() != None:
+        for batch in execution_tree.next():
             output_batches.append(batch)
-        '''
 
         self._clean_execution_tree(execution_tree)
+        return output_batches
