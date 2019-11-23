@@ -3,10 +3,13 @@ from typing import List
 
 
 class BasePrediction(ABC):
-    """Base class for any type of prediction from model"""
+    """
+    Base class for any type of prediction from model.
+    Subclasses should override the comparators which are suitable for them.
+    All the comparators default to False.
+    """
 
-    @abstractmethod
-    def eq(self, element) -> bool:
+    def __eq__(self, other):
         """
         Checks if prediction is equal to the element
         Arguments:
@@ -14,10 +17,9 @@ class BasePrediction(ABC):
         Returns:
             bool (True if equal else False)
         """
-        pass
+        return False
 
-    @abstractmethod
-    def contains(self, element) -> bool:
+    def __contains__(self, element) -> bool:
         """
         Checks if the prediction contains the element
         Arguments:
@@ -25,15 +27,54 @@ class BasePrediction(ABC):
         Returns:
             bool (True if contains else False)
         """
-        pass
+        return False
 
-    @abstractmethod
-    def has_one(self, elements: List[object]) -> bool:
+    def __gt__(self, other):
         """
-        This method is used for defining the 'IN' operation
+        Checks for > operation
         Arguments:
-            elements (List[object]): if the predictions are in the given list
+            other (Any): Element to be checked
         Returns:
-            bool
+            bool (True if greater)
         """
-        pass
+        return False
+
+    def __ge__(self, other):
+        """
+        Checks for >= operation
+        Arguments:
+            other (Any): Element to be checked
+        Returns:
+            bool (True if greater)
+        """
+        return self > other and self == other
+
+    def __lt__(self, other):
+        """
+        Checks for < operation
+        Arguments:
+            other (Any): Element to be checked
+        Returns:
+            bool (True if greater)
+        """
+        return False
+
+    def __le__(self, other):
+        """
+        Checks for <= operation
+        Arguments:
+            other (Any): Element to be checked
+        Returns:
+            bool (True if less than or equal)
+        """
+        return self < other and self == other
+
+    def __ne__(self, other):
+        """
+        Checks for not equals operation
+        Arguments:
+            other (Any): Element to be checked
+        Returns:
+            bool (True if not equal)
+        """
+        return not (self == other)
