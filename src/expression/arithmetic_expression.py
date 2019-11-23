@@ -1,5 +1,6 @@
-from src.expression.abstract_expression import AbstractExpression, ExpressionType, \
-    ExpressionReturnType
+from src.expression.abstract_expression import AbstractExpression, \
+    ExpressionType, ExpressionReturnType
+
 
 class ArithmeticExpression(AbstractExpression):
 
