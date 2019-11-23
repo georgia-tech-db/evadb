@@ -1,12 +1,15 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from src.models import FrameBatch, FrameInfo, Prediction
+from src.models.catalog.frame_info import FrameInfo
+from src.models.inference.base_prediction import BasePrediction
+from src.models.storage.batch import FrameBatch
 
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
     """
-    Abstract class for UDFs. All the UDFs which perform classification inherit this calls.
+    Abstract class for UDFs. All the UDFs which perform classification
+    inherit this calls.
 
     Load and initialize the machine learning model in the __init__.
 
@@ -35,14 +38,19 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def classify(self, batch: FrameBatch) -> List[Prediction]:
+    def classify(self, batch: FrameBatch) -> List[BasePrediction]:
         """
-        Takes as input a batch of frames and returns the predictions by applying the classification model.
+        Takes as input a batch of frames and returns the predictions by
+        applying the classification model.
 
         Arguments:
-            batch (FrameBatch): Input batch of frames on which prediction needs to be made
+            batch (FrameBatch): Input batch of frames on which prediction
+            needs to be made
 
         Returns:
-            List[Prediction]: The predictions made by the classifier
+            List[BasePrediction]: The predictions made by the classifier
         """
         pass
+
+    def __call__(self, *args, **kwargs):
+        self.classify(*args, **kwargs)
