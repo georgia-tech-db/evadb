@@ -1106,7 +1106,7 @@ class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#querySpecification.
     def visitQuerySpecification(
             self, ctx: frameQLParser.QuerySpecificationContext):
-        select_list = None
+        target_list = None
         from_clause = None
         where_clause = None
         # first child will be a SELECT terminal token
