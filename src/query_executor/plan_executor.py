@@ -6,10 +6,16 @@ from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
 from src.query_executor.pp_executor import PPExecutor
 
 
-# This is an interface between plan tree and execution tree.
-# We traverse the plan tree and build execution tree from it
-# select * from video where label = car
 class PlanExecutor:
+    """
+    This is an interface between plan tree and execution tree.
+    We traverse the plan tree and build execution tree from it
+
+    Arguments:
+        plan (AbstractPlan): Physical plan tree which needs to be executed
+
+    """
+
     def __init__(self, plan: AbstractPlan):
         self._plan = plan
 
