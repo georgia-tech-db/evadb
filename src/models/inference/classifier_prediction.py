@@ -80,16 +80,12 @@ class Prediction(BasePrediction):
         return predictions_
 
     def __eq__(self, other):
-        return self.boxes == other.boxes and \
-               self.frame == other.frame and \
-               self.scores == other.scores and \
-               self.labels == other.labels
+        if type(self) is type(other):
+            return self.boxes == other.boxes and \
+                   self.frame == other.frame and \
+                   self.scores == other.scores and \
+                   self.labels == other.labels
+        return other in self
 
-    def eq(self, element) -> bool:
-        return self.contains(element)
-
-    def has_one(self, element: List[object]) -> bool:
-        pass
-
-    def contains(self, element) -> bool:
-        return element in self.labels
+    def __contains__(self, item):
+        return item in self.labels
