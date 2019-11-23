@@ -5,8 +5,10 @@ import cv2
 import numpy as np
 
 from src.loaders.video_loader import SimpleVideoLoader
-from src.models import VideoMetaInfo, VideoFormat, Frame, ColorSpace, FrameInfo
-import glob
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import ColorSpace, VideoFormat
+from src.models.catalog.video_info import VideoMetaInfo
+from src.models.storage.frame import Frame
 from src.utils import framediff_utils
 
 NUM_FRAMES = 10
