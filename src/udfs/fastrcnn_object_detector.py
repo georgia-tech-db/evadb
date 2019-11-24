@@ -108,10 +108,8 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
 
     def classify(self, batch: FrameBatch) -> List[Prediction]:
         frames = batch.frames_as_numpy_array()
-        (prediction_classes, prediction_scores,
-         prediction_boxes) = self._get_predictions(frames)
-        return Prediction.predictions_from_batch_and_lists(
-                                                        batch,
-                                                        prediction_classes,
-                                                        prediction_scores,
-                                                        boxes=prediction_boxes)
+        (pred_classes, pred_scores, pred_boxes) = self._get_predictions(frames)
+        return Prediction.predictions_from_batch_and_lists(batch,
+                                                           pred_classes,
+                                                           pred_scores, 
+                                                           boxes=pred_boxes)
