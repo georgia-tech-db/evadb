@@ -79,25 +79,7 @@ class PPOptmizer:
         # Explore left expr
         if leftExpr is not None:
             if leftExpr.etype == ExpressionType.COMPARE_EQUAL or leftExpr.etype == ExpressionType.COMPARE_NOT_EQUAL:
-                lValue = leftExpr.getLeft().evaluate()
-                rValue = leftExpr.getRight().evaluate()
-                rValues = label_desc[lValue][1]  # fetching all possible rvalues
-                new_not_expr = None
-                for rVal in rValues:
-                    if rVal != rValue:
-                        new_r_expr = ConstantValueExpression(rVal)
-
-                        # TODO extract out this in a function
-                        if leftExpr.etype == ExpressionType.COMPARE_EQUAL:
-                            new_exptype = ExpressionType.COMPARE_NOT_EQUAL
-                        else:
-                            new_exptype = ExpressionType.COMPARE_EQUAL
-
-                        new_comp_expr = ComparisonExpression(new_exptype, leftExpr.getLeft(), new_r_expr)
-                        if not new_not_expr:
-                            new_not_expr = new_comp_expr
-                        else:
-                            new_not_expr = LogicalExpression(new_not_expr, 'AND', new_comp_expr)
+                new_not_expr = self.get_identical_expression(label_desc, leftExpr)
                 new_left_exprs.append(new_not_expr)
             elif leftExpr.etype == ExpressionType.COMPARE_LOGICAL:
                 new_left_exprs.extend(self._wrangler(leftExpr, label_desc))
@@ -105,24 +87,7 @@ class PPOptmizer:
         # Explore right expr
         if rightExpr is not None:
             if rightExpr.etype == ExpressionType.COMPARE_EQUAL or rightExpr.etype == ExpressionType.COMPARE_NOT_EQUAL:
-                lValue = rightExpr.getLeft().evaluate()
-                rValue = rightExpr.getRight().evaluate()
-                rValues = label_desc[lValue][1]  # fetching all possible rvalues
-                new_not_expr = None
-                for rVal in rValues:
-                    if rVal != rValue:
-                        new_r_expr = ConstantValueExpression(rVal)
-
-                        if rightExpr.etype == ExpressionType.COMPARE_EQUAL:
-                            new_exptype = ExpressionType.COMPARE_NOT_EQUAL
-                        else:
-                            new_exptype = ExpressionType.COMPARE_EQUAL
-
-                        new_comp_expr = ComparisonExpression(new_exptype, rightExpr.getLeft(), new_r_expr)
-                        if not new_not_expr:
-                            new_not_expr = new_comp_expr
-                        else:
-                            new_not_expr = LogicalExpression(new_not_expr, 'AND', new_comp_expr)
+                new_not_expr = self.get_identical_expression(label_desc, rightExpr)
                 new_right_exprs.append(new_not_expr)
             elif rightExpr.etype == ExpressionType.COMPARE_LOGICAL:
                 new_right_exprs.extend(self._wrangler(leftExpr, label_desc))
@@ -133,6 +98,27 @@ class PPOptmizer:
                 new_logical_expr = LogicalExpression(left, operator, right)
                 enumerated_exprs.append(new_logical_expr)
         return enumerated_exprs
+
+    def get_identical_expression(self, label_desc, rightExpr):
+        lValue = rightExpr.getLeft().evaluate()
+        rValue = rightExpr.getRight().evaluate()
+        rValues = label_desc[lValue][1]  # fetching all possible rvalues
+        new_not_expr = None
+        for rVal in rValues:
+            if rVal != rValue:
+                new_r_expr = ConstantValueExpression(rVal)
+
+                if rightExpr.etype == ExpressionType.COMPARE_EQUAL:
+                    new_exptype = ExpressionType.COMPARE_NOT_EQUAL
+                else:
+                    new_exptype = ExpressionType.COMPARE_EQUAL
+
+                new_comp_expr = ComparisonExpression(new_exptype, rightExpr.getLeft(), new_r_expr)
+                if not new_not_expr:
+                    new_not_expr = new_comp_expr
+                else:
+                    new_not_expr = LogicalExpression(new_not_expr, 'AND', new_comp_expr)
+        return new_not_expr
 
     def _compute_expression_costs(self, expression: AbstractExpression, stats: dict) -> float:
         """Compute cost of applying PP filters to an expression
@@ -232,3 +218,4 @@ if __name__ == '__main__':
     predicates = [logical_expr2]
     pp_optimizer = PPOptmizer(catalog, predicates)
     out = pp_optimizer.execute()
+    print(out)
