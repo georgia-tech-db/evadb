@@ -24,7 +24,7 @@ class FunctionExpression(AbstractExpression):
 
         mode (ExecutionMode): The mode in which execution needs to happen.
         Will just return the output in EVAL mode. EXEC mode updates the
-        BathFrame with output.
+        BatchFrame with output.
 
         is_temp (bool, default:False): In case of EXEC type, decides if the
         outcome needs to be stored in BatchFrame temporarily.
