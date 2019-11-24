@@ -1,3 +1,9 @@
+"""
+Do not change the skeleton of this file. 
+We have extended functionalities by overriding few visitor functions.
+Original source file: third_party/evaQL/frameQLParserVisitor
+@author Gaurav Tarlok Kakkar
+"""
 from antlr4 import TerminalNode
 from src.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
@@ -5,10 +11,11 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.query_parser.eva_statement import EvaStatementList
 from src.query_parser.select_statement import SelectStatement
 from third_party.evaQL.parser.frameQLParser import frameQLParser
 from third_party.evaQL.parser.frameQLParserVisitor import frameQLParserVisitor
+from src.query_parser.table_ref import TableRef, TableInfo
+import warnings
 
 
 class EvaParserVisitor(frameQLParserVisitor):
@@ -20,11 +27,11 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#sqlStatements.
     def visitSqlStatements(self, ctx: frameQLParser.SqlStatementsContext):
-        eva_statements = EvaStatementList()
+        eva_statements = []
         for child in ctx.children:
             stmt = self.visit(child)
             if stmt is not None:
-                eva_statements.add_statement(stmt)
+                eva_statements.append(stmt)
 
         return eva_statements
 
@@ -1123,7 +1130,9 @@ class EvaParserVisitor(frameQLParserVisitor):
             except BaseException:
                 # stop parsing something bad happened
                 return None
-
+        # we don't support multiple table sources 
+        if from_clause is not None:
+            from_clause = from_clause[0]
         select_stmt = SelectStatement(target_list, from_clause, where_clause)
         return select_stmt
 
@@ -2042,11 +2051,24 @@ class EvaParserVisitor(frameQLParserVisitor):
 
     # Visit a parse tree produced by frameQLParser#tableName.
     def visitTableName(self, ctx: frameQLParser.TableNameContext):
-        return self.visitChildren(ctx)
+        table_name = self.visit(ctx.fullId())
+        # assuming we get just table name
+        # todo
+        # handle database name and schema names
+        if table_name is not None:
+            table_info = TableInfo(table_name=table_name)
+            return TableRef(table_info) 
+        else:
+            warnings.warn("Invalid from table", SyntaxWarning)
 
     # Visit a parse tree produced by frameQLParser#fullColumnName.
     def visitFullColumnName(self, ctx: frameQLParser.FullColumnNameContext):
-        return self.visitChildren(ctx)
+        # dotted id not supported yet
+        column_name = self.visit(ctx.uid())
+        if column_name is not None:
+            return TupleValueExpression(column_name)
+        else:
+            warnings.warn("Column Name Missing", SyntaxWarning)
 
     # Visit a parse tree produced by frameQLParser#indexColumnName.
     def visitIndexColumnName(self, ctx: frameQLParser.IndexColumnNameContext):
@@ -2095,7 +2117,7 @@ class EvaParserVisitor(frameQLParserVisitor):
     # Visit a parse tree produced by frameQLParser#simpleId.
     def visitSimpleId(self, ctx: frameQLParser.SimpleIdContext):
         # todo handle children, right now assuming TupleValueExpr
-        return TupleValueExpression(ctx.getText())
+        return ctx.getText()
         # return self.visitChildren(ctx)
 
     # Visit a parse tree produced by frameQLParser#dottedId.
