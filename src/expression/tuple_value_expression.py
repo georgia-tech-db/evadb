@@ -3,7 +3,7 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_name: str):
+    def __init__(self, col_idx=None, col_name=None):
         # setting return type to be invalid not sure if that is correct
         # no child so that is okay
         super().__init__(ExpressionType.TUPLE_VALUE,
@@ -11,7 +11,7 @@ class TupleValueExpression(AbstractExpression):
         self._col_name = col_name
         # todo
         self._table_name = None
-        self._col_idx = None
+        self._col_idx = col_idx
 
     # def evaluate(AbstractTuple tuple1, AbstractTuple tuple2):
 
