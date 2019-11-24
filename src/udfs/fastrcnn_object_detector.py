@@ -1,4 +1,4 @@
-# Credits: https://github.com/spmallick/learnopencv/blob/master/PyTorch-faster-RCNN/PyTorch_faster_RCNN.ipynb
+# Credits: https://github.com/spmallick/learnopencv/blob/master/PyTorch-faster-RCNN/PyTorch_faster_RCNN.ipynb # noqa
 
 from typing import List, Tuple
 
@@ -72,10 +72,12 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
         """
         Performs predictions on input frames
         Arguments:
-            frames (np.ndarray): Frames on which predictions need to be performed
+            frames (np.ndarray): Frames on which predictions need 
+            to be performed
 
         Returns:
-            tuple containing predicted_classes (List[List[str]]), predicted_boxes (List[List[BoundingBox]]),
+            tuple containing predicted_classes (List[List[str]]), 
+            predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
 
         """
@@ -108,7 +110,8 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
         frames = batch.frames_as_numpy_array()
         (prediction_classes, prediction_scores,
          prediction_boxes) = self._get_predictions(frames)
-        return Prediction.predictions_from_batch_and_lists(batch,
-                                                           prediction_classes,
-                                                           prediction_scores,
-                                                           boxes=prediction_boxes)
+        return Prediction.predictions_from_batch_and_lists(
+                                                        batch,
+                                                        prediction_classes,
+                                                        prediction_scores,
+                                                        boxes=prediction_boxes)
