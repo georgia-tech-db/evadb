@@ -1,24 +1,30 @@
 from src.query_parser.eva_statement import EvaStatement
-from src.query_parser.eva_statement import StatementType
+from src.query_parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
 from src.loaders.abstract_loader import AbstractLoader
+from src.query_parser.table_ref import TableRef
 from typing import List
 
 
 class SelectStatement(EvaStatement):
-    """Select Statemet
+    """
+    Select Statement constructed after parsing the input query
 
     Attributes
     ----------
     _target_list : List[AbstractExpression]
-        select elements in the select statement
-    _from_table : AbstractLoader
-        from part of the select query
+        list of target attributes in the select query,
+        each attribute is represented as a Abstract Expression
+    _from_table : TableRef
+        table reference in the select query
     _where_clause : AbstractExpression
-        predicate of the select statement
+        predicate of the select query, represented as a expression tree.
+    **kwargs : to support other functionality, Orderby, Distinct, Groupby.
     """
 
-    def __init__(self, target_list=None, from_table=None, where_clause=None):
+    def __init__(self, target_list=None, from_table=None,
+                 where_clause=None,
+                 **kwargs):
         super().__init__(StatementType.SELECT)
         self._from_table = from_table
         self._where_clause = where_clause
@@ -45,5 +51,13 @@ class SelectStatement(EvaStatement):
         return self._from_table
 
     @from_table.setter
-    def from_table(self, table: AbstractLoader):
+    def from_table(self, table: TableRef):
         self._from_table = table
+
+    def __str__(self):
+        print_str = "SELECT" + " "\
+                    + str(self._target_list) + " "\
+                    + str(self._from_table) + " "\
+                    + str(self._where_clause)
+
+        return print_str
