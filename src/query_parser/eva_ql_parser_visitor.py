@@ -2066,7 +2066,7 @@ class EvaParserVisitor(frameQLParserVisitor):
         # dotted id not supported yet
         column_name = self.visit(ctx.uid())
         if column_name is not None:
-            return TupleValueExpression(column_name)
+            return TupleValueExpression(col_name=column_name)
         else:
             warnings.warn("Column Name Missing", SyntaxWarning)
 
