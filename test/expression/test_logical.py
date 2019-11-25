@@ -36,7 +36,7 @@ class LogicalExpressionsTest(unittest.TestCase):
         tuple1 = [[1], [2], 3]
         self.assertEqual([True], logical_expr.evaluate(tuple1, None))
 
-    def test_comparison_compare_greater(self):
+    def test_logical_or(self):
         tpl_exp = TupleValueExpression(0)
         const_exp = ConstantValueExpression(1)
 
