@@ -36,11 +36,6 @@ class frameQLParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by frameQLParser#dmlStatement.
     def visitDmlStatement(self, ctx:frameQLParser.DmlStatementContext):
-        print("dmlStatement")
-        print(len(ctx.children))
-        for i in range(len(ctx.children)):
-            print("Select(",i, ")", ctx.children[i].getText())
-        # print(ctx.selectStatement().getText())
         return self.visitChildren(ctx)
 
 
@@ -1176,24 +1171,16 @@ class frameQLParserVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by frameQLParser#selectElements.
     def visitSelectElements(self, ctx:frameQLParser.SelectElementsContext):
-        print("selectElements")
-        print(len(ctx.children))
-        for i in range(len(ctx.children)):
-            print("Select(",i, ")", ctx.children[i].getText())
         return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by frameQLParser#selectStarElement.
     def visitSelectStarElement(self, ctx:frameQLParser.SelectStarElementContext):
-        print("selectElementsStar")
-        print(len(ctx.children))
         return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by frameQLParser#selectColumnElement.
     def visitSelectColumnElement(self, ctx:frameQLParser.SelectColumnElementContext):
-        print("selectColumnElement")
-        print(len(ctx.children))
         return self.visitChildren(ctx)
 
 
