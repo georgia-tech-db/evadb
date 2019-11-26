@@ -20,7 +20,7 @@ class TableInfo:
         return self._database_name
 
 
-class TableRef():
+class TableRef:
     """
     dummy class right now need to handle join expression
     Attributes:

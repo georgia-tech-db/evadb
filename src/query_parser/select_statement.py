@@ -22,8 +22,9 @@ class SelectStatement(EvaStatement):
     **kwargs : to support other functionality, Orderby, Distinct, Groupby.
     """
 
-    def __init__(self, target_list=None, from_table=None,
-                 where_clause=None,
+    def __init__(self, target_list: List[AbstractExpression] = None,
+                 from_table: TableRef = None,
+                 where_clause: AbstractExpression = None,
                  **kwargs):
         super().__init__(StatementType.SELECT)
         self._from_table = from_table
@@ -54,10 +55,8 @@ class SelectStatement(EvaStatement):
     def from_table(self, table: TableRef):
         self._from_table = table
 
-    def __str__(self):
-        print_str = "SELECT" + " "\
-                    + str(self._target_list) + " "\
-                    + str(self._from_table) + " "\
-                    + str(self._where_clause)
-
+    def __str__(self) -> str:
+        print_str = "SELECT {} FROM {} WHERE {}".format(self._target_list,
+                                                        self._from_table,
+                                                        self._where_clause)
         return print_str
