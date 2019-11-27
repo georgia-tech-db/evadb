@@ -3,7 +3,7 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_idx=None, col_name=None):
+    def __init__(self, col_idx: int = None, col_name: str = None):
         # setting return type to be invalid not sure if that is correct
         # no child so that is okay
         super().__init__(ExpressionType.TUPLE_VALUE,
