@@ -431,3 +431,84 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertTrue('v2.2' in j1.children[1].column_ids)
         self.assertEqual(j1.children[0].parent, j1)
         self.assertEqual(j1.children[1].parent, j1)
+
+    def test_should_simply_predicate(self,verbose=False):
+        meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+        video1 = SimpleVideoLoader(video_metadata=meta1)
+
+        # Creating Expression for Select: Expression is basically where 0==1
+        const1 = ConstantValueExpression(value=0)
+        const2 = ConstantValueExpression(value=1)
+        expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
+        s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
+
+        projection_output = ['v1.3', 'v1.4']
+        root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
+
+        t1 = VideoTablePlan(video=video1, tablename='v1')
+
+        root.set_children([s1])
+        s1.parent = root
+        s1.set_children([t1])
+        t1.parent = s1
+        rule_list = [Rules.SIMPLIFY_PREDICATE]
+        if verbose:
+            print('Original Plan Tree')
+            print(root)
+        qo = RuleQueryOptimizer()
+        new_tree = qo.run(root, rule_list)
+        if verbose:
+            print('New Plan Tree')
+            print(new_tree)
+        
+        self.assertIsNone(root.parent)
+        self.assertEqual(root.children, [s1])
+        self.assertEqual(s1.parent, root)
+        self.assertEqual(len(s1.children), 1)
+        self.assertEqual(type(s1.children[0]), LogicalProjectionPlan)
+        self.assertTrue('v1.7' in s1.children[0].column_ids)
+        self.assertTrue('v1.3' in s1.children[0].column_ids)
+        self.assertTrue('v1.4' in s1.children[0].column_ids)
+        self.assertEqual(type(t1.parent) , LogicalProjectionPlan)
+        self.assertEqual(s1.children[0].children, [t1])
+
+    def test_should_not_simply_predicate(self,verbose=False):
+        meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+        video1 = SimpleVideoLoader(video_metadata=meta1)
+
+        # Creating Expression for Select: Expression is basically where 1==1
+        const1 = ConstantValueExpression(value=1)
+        const2 = ConstantValueExpression(value=1)
+        expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
+        s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
+
+        projection_output = ['v1.3', 'v1.4']
+        root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
+
+        t1 = VideoTablePlan(video=video1, tablename='v1')
+
+        root.set_children([s1])
+        s1.parent = root
+        s1.set_children([t1])
+        t1.parent = s1
+        rule_list = [Rules.SIMPLIFY_PREDICATE]
+        if verbose:
+            print('Original Plan Tree')
+            print(root)
+        qo = RuleQueryOptimizer()
+        new_tree = qo.run(root, rule_list)
+        if verbose:
+            print('New Plan Tree')
+            print(new_tree)
+        
+        self.assertIsNone(root.parent)
+        self.assertEqual(root.children, [s1])
+        self.assertEqual(s1.parent, root)
+        self.assertEqual(len(s1.children), 1)
+        self.assertEqual(type(s1.children[0]), LogicalProjectionPlan)
+        self.assertTrue('v1.7' in s1.children[0].column_ids)
+        self.assertTrue('v1.3' in s1.children[0].column_ids)
+        self.assertTrue('v1.4' in s1.children[0].column_ids)
+        self.assertEqual(type(t1.parent) , LogicalProjectionPlan)
+        self.assertEqual(s1.children[0].children, [t1])
+
