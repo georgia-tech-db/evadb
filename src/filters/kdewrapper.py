@@ -12,7 +12,7 @@ class KernelDensityWrapper:
   #need .fit function
   #need .predict function
 
-  def __init__(self, kernel='guassian', bandwidth=0.2):
+  def __init__(self, kernel='gaussian', bandwidth=0.2):
     self.kernels = [] #assume everything is one shot
     self.kernel = kernel
     self.bandwidth = bandwidth
