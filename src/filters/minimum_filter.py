@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from copy import deepcopy
-from src.filters import FilterTemplate
+from src.filters.abstract_filter import FilterTemplate
 from src.filters.models.ml_randomforest import MLRandomForest
 
 
@@ -214,31 +214,6 @@ class FilterMinimum(FilterTemplate):
     df = pd.DataFrame(data)
 
     return df
-
-
-if __name__ == "__main__":
-
-
-  filter = FilterMinimum()
-
-  X = np.random.random([100,30,30,3])
-  y = np.random.random([100])
-  y *= 10
-  y = y.astype(np.int32)
-
-  division = int(X.shape[0] * 0.8)
-  X_train = X[:division]
-  X_test = X[division:]
-  y_iscar_train = y[:division]
-  y_iscar_test = y[division:]
-
-  filter.train(X_train, y_iscar_train)
-  print("filter finished training!")
-  y_iscar_hat = filter.predict(X_test, post_model_name='rf')
-  print("filter finished prediction!")
-  stats = filter.getAllStats()
-  print(stats)
-  print("filter got all stats")
 
 
   """

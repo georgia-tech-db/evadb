@@ -15,6 +15,7 @@ from src.filters.models.ml_svm import MLSVM
 from src.filters.models.ml_dnn import MLMLP
 
 
+
 # Meant to be a black box for trying all models available and returning statistics and model for
 # the query optimizer to choose for a given query
 
