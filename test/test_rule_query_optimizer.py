@@ -512,3 +512,62 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertEqual(type(t1.parent) , LogicalProjectionPlan)
         self.assertEqual(s1.children[0].children, [t1])
 
+    def test_join_elimination(self, verbose=False):
+        meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+        video1 = SimpleVideoLoader(video_metadata=meta1)
+
+        meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
+        video2 = SimpleVideoLoader(video_metadata=meta2)
+
+        projection_output = ['v1.1', 'v2.2']
+        root = LogicalProjectionPlan(videos=[video1, video2], column_ids=projection_output, foreign_column_ids=['v2.2'])
+
+        # Creating Expression for Select: Expression is basically where v1.1 == v2.2
+        # Also creating a foreign key constraint for v1 where it requires v2.2
+        # hence join elimination should delete the join node and just return all of v1.1 for select
+        tup1 = TupleValueExpression(col_idx=1)
+        tup2 = TupleValueExpression(col_idx=2)
+        expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup1, right=tup2)
+
+        # used both videos because purposely placed BEFORE the join
+        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1', 'v2.2'], videos=[video1, video2],
+                               foreign_column_ids=['v2.2'])
+        s1.parent = root
+
+        j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.1', 'v2.2'])
+        j1.parent = s1
+
+        t1 = VideoTablePlan(video=video1, tablename='v1')
+        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1.parent = j1
+        t2.parent = j1
+
+        root.set_children([s1])
+        s1.set_children([j1])
+        j1.set_children([t1, t2])
+
+        rule_list = [Rules.JOIN_ELIMINATION]
+
+        if verbose:
+            print('Original Plan Tree')
+            print(root)
+        qo = RuleQueryOptimizer()
+        new_tree = qo.run(root, rule_list)
+        if verbose:
+            print('New Plan Tree')
+            print(new_tree)
+
+        self.assertIsNone(root.parent)
+        self.assertEqual(type(t1.parent), LogicalSelectPlan)
+        self.assertEqual(type(s1.children[0]), VideoTablePlan)
+        self.assertEqual(len(s1.children), 1)
+        self.assertEqual(len(s1.foreign_column_ids), 0)
+        self.assertTrue('v1.2' in root.column_ids)
+        self.assertEqual(len(root.column_ids), 2)
+        self.assertEqual(len(root.foreign_column_ids), 0)
+        self.assertEqual(root.children[0], LogicalSelectPlan)
+        self.assertEqual('v1.1' in s1.predicate)
+
+
+
+
