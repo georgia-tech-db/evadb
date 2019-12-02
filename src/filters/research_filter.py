@@ -133,7 +133,7 @@ class FilterResearch(FilterTemplate):
             for pre_model_names, pre_post_instance_pair in internal_dict.items():
                 pre_model, post_model = pre_post_instance_pair
                 X_transform = pre_model.predict(X)
-                post_model.train(X_transform)
+                post_model.train(X_transform, y)
 
     def predict(self, X: np.ndarray, pre_model_name: str = None, post_model_name: str = None) -> np.ndarray:
         pre_model_names = self.pre_models.keys()
