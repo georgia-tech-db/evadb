@@ -1,12 +1,12 @@
-from src.models import FrameBatch, Prediction, FrameInfo, Point, BoundingBox, ColorSpace, VideoMetaInfo, VideoFormat
+from src.models import Frame, FrameBatch, Prediction, FrameInfo, Point, BoundingBox, ColorSpace, VideoMetaInfo, VideoFormat
 from src.loaders.video_loader import SimpleVideoLoader
 from src.udfs.abstract_udfs import AbstractClassifierUDF
 
-#from keras.models import Sequential
-#from keras.layers import Dense, Conv2D, Flatten
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Conv2D, Flatten
+
+import cv2
 
 from typing import List, Tuple
 from glob import glob
@@ -14,18 +14,14 @@ import numpy as np
 import random
 import os
 
-class VideoToFrameClassifier(AbstractClassifierUDF):
 
-    def __init__(self):
-        # Build the model
-        self.model = self.buildModel()
+class ActionClassificationLoader:
+    def __init__(self, path):
+        self.path = path
+        self.videoMetaList, self.labelList, self.labelMap = self.findDataNames(self.path)
 
-        # Get dataset directory and stored data
-        dataset = "./data/hmdb/"
-        videoMetaList, labelList, self.inverseLabelMap = self.findDataNames(dataset)
-
-        # Train the model using shuffled data
-        self.trainModel(self.model, videoMetaList, labelList, 10)
+    def getLabelMap(self):
+        return self.labelMap
 
     def findDataNames(self, searchDir):
         """
@@ -60,7 +56,69 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
 
         return (videoMetaList, labelList, inverseLabelMap)
 
-    def trainModel(self, model, videoMetaList, labelList, n = 10):
+    def load(self, batchSize):
+
+        print("load")
+       
+        videoMetaIndex = 0
+        while videoMetaIndex < len(self.videoMetaList):
+
+            # Get a single batch
+            frames = []
+            labels = np.zeros((0,51))
+            while len(frames) < batchSize:
+
+                # Load a single video
+                meta = self.videoMetaList[videoMetaIndex]
+                videoFrames, info = self.loadVideo(meta)
+                videoLabels = np.zeros((len(videoFrames),51))
+                videoLabels[:,self.labelList[videoMetaIndex]] = 1
+                videoMetaIndex += 1
+                    
+                # Skip unsupported frame types
+                if info != FrameInfo(240, 320, 3, ColorSpace.RGB): continue
+
+                # Append onto frames and labels
+                frames += videoFrames
+                labels = np.append(labels, videoLabels, axis=0)
+
+            yield FrameBatch(frames, info), labels
+
+    def loadVideo(self, meta):
+        video = cv2.VideoCapture(meta.file)
+        video.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+        _, frame = video.read()
+        frame_ind = 0
+
+        info = None
+        if frame is not None:
+            (height, width, channels) = frame.shape
+            info = FrameInfo(height, width, channels, ColorSpace.RGB)
+
+        frames = []
+        while frame is not None:
+            # Save frame
+            eva_frame = Frame(frame_ind, frame, info)
+            frames.append(eva_frame)
+            
+            # Read next frame
+            _, frame = video.read()
+            frame_ind += 1
+
+        return (frames, info)
+
+class VideoToFrameClassifier(AbstractClassifierUDF):
+
+    def __init__(self):
+        # Build the model
+        self.model = self.buildModel()
+
+        # Train the model using shuffled data
+        self.trainModel()
+
+
+    def trainModel(self):
         """
         trainModel trains the built model using chunks of data of size n videos
 
@@ -72,40 +130,26 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
          - labelList = list of labels derived from the labelMap
          - n = integer value for how many videos to act on at a time
         """
+        videoLoader = ActionClassificationLoader("./data/hmdb/")
+        self.labelMap = videoLoader.getLabelMap()
 
-        labelArray = np.array(labelList)
+        for batch,labels in videoLoader.load(1000):
+            # Get the frames as a numpy array
+            frames = batch.frames_as_numpy_array()
 
-        for i,videoInfo in enumerate(videoMetaList):
-            # Load the video from disk into memory
-            videoLoader = SimpleVideoLoader(videoInfo)
-            batches = videoLoader.load()
+            print(frames.shape)
+            print(labels.shape)
+            
+            # Split x and y into training and validation sets
+            xTrain = frames[0:int(0.8*frames.shape[0])]
+            yTrain = labels[0:int(0.8*labels.shape[0])]
+            xTest  = frames[int(0.8*frames.shape[0]):]
+            yTest  = labels[int(0.8*labels.shape[0]):]
+            
+            # Train the model using cross-validation (so we don't need to explicitly do CV outside of training)
+            self.model.fit(xTrain, yTrain, validation_data = (xTest, yTest), epochs = 2)    
+            self.model.save("./data/hmdb/2d_action_classifier.h5")        
 
-            for b in batches:
-                # Get the frames as a numpy array
-                frames = b.frames_as_numpy_array()
-
-                # Skip unsupported frame sizes
-                if frames.shape[1:] != (240, 320, 3):
-                    break
-
-                labels = np.zeros((frames.shape[0],51))
-                labels[:,labelList[i]] = 1
-
-                print(frames.shape)
-                print(labels.shape)
-
-                # Split x and y into training and validation sets
-                xTrain = frames[0:int(0.8*frames.shape[0])]
-                yTrain = labels[0:int(0.8*labels.shape[0])]
-
-                xTest = frames[int(0.8*frames.shape[0]):]
-                yTest = labels[int(0.8*labels.shape[0]):]
-
-                print(xTrain)
-                print(yTrain)
-
-                # Train the model using cross-validation (so we don't need to explicitly do CV outside of training)
-                model.fit(xTrain, yTrain, validation_data = (xTest, yTest), epochs = 2)            
 
     def buildModel(self):
         """
@@ -157,4 +201,4 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
         """
         
         pred = model.predict(batch.frames_as_numpy_array())
-        return [self.inverseLabelMap[l] for l in pred]
+        return [self.labelMap[l] for l in pred]
