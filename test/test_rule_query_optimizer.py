@@ -475,11 +475,11 @@ class RuleQueryOptimizerTest(unittest.TestCase):
     def test_should_not_simply_predicate(self,verbose=False):
         meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
         video1 = SimpleVideoLoader(video_metadata=meta1)
-
-        # Creating Expression for Select: Expression is basically where 1==1
-        const1 = ConstantValueExpression(value=1)
-        const2 = ConstantValueExpression(value=1)
-        expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
+        
+        # Creating Expression for Select: Expression is basically where v1.7 == 4
+        const = ConstantValueExpression(value=4)
+        tup = TupleValueExpression(col_idx=int(7))
+        expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
         s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
 
         projection_output = ['v1.3', 'v1.4']
