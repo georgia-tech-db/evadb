@@ -1,7 +1,8 @@
 from src.filters.research_filter import FilterResearch
-from src.filters.models.ml_pca  import MLPCA
-from src.filters.models.ml_dnn  import MLMLP
+from src.filters.models.ml_pca import MLPCA
+from src.filters.models.ml_dnn import MLMLP
 import numpy as np
+
 
 def test_FilterResearch():
     # Construct the filter research and test it with randomized values
@@ -26,7 +27,8 @@ def test_FilterResearch():
     filter.addPreModel("pca", MLPCA())
 
     filter.train(X_train, y_iscar_train)
-    y_iscar_hat = filter.predict(X_test, pre_model_name='pca', post_model_name='dnn')
+    y_iscar_hat = filter.predict(X_test, pre_model_name='pca', 
+                                 post_model_name='dnn')
     stats = filter.getAllStats()
 
     filter.deletePostModel("dnn")

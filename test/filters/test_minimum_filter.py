@@ -1,7 +1,8 @@
 from src.filters.minimum_filter import FilterMinimum
-from src.filters.models.ml_pca  import MLPCA
-from src.filters.models.ml_dnn  import MLMLP
+from src.filters.models.ml_pca import MLPCA
+from src.filters.models.ml_dnn import MLMLP
 import numpy as np
+
 
 def test_FilterMinimum():
     # Construct the filter minimum and test it with randomized values
@@ -10,7 +11,7 @@ def test_FilterMinimum():
     filter = FilterMinimum()
 
     # Set up the randomized input for testing
-    X = np.random.random([100,30])
+    X = np.random.random([100, 30])
     y = np.random.random([100])
     y *= 10
     y = y.astype(np.int32)
@@ -26,7 +27,8 @@ def test_FilterMinimum():
     filter.addPreModel("pca", MLPCA())
 
     filter.train(X_train, y_iscar_train)
-    y_iscar_hat = filter.predict(X_test, pre_model_name='pca', post_model_name='dnn')
+    y_iscar_hat = filter.predict(X_test, pre_model_name='pca', 
+                                 post_model_name='dnn')
     stats = filter.getAllStats()
 
     filter.deletePostModel("dnn")
