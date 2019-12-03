@@ -1,4 +1,10 @@
-from src.models import Frame, FrameBatch, Prediction, FrameInfo, Point, BoundingBox, ColorSpace, VideoMetaInfo, VideoFormat
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import VideoFormat, ColorSpace
+from src.models.catalog.video_info import VideoMetaInfo
+from src.models.storage.frame      import Frame
+from src.models.storage.batch      import FrameBatch
+from src.models.inference.classifier_prediction import Prediction
+
 from src.loaders.video_loader import SimpleVideoLoader
 from src.udfs.abstract_udfs import AbstractClassifierUDF
 
