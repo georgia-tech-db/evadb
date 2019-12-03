@@ -1,23 +1,13 @@
-from abc import ABC, abstractmethod
-from enum import IntEnum, unique
-
-
-@unique
-class PlanNodeType(IntEnum):
-    SEQSCAN = 1
-    # add other types
-    LOGICAL_SELECT = 2,
-    LOGICAL_PROJECTION = 3
-    LOGICAL_INNER_JOIN = 4
-    TABLE = 5
+from abc import ABC
+from src.query_planner.types import PlanNodeType
 
 
 class AbstractPlan(ABC):
 
-    def __init__(self):
+    def __init__(self, node_type):
         self._children = []
         self._parent = None
-        # self._node_type = node_type
+        self._node_type = node_type
 
     def append_child(self, child):
         """append node to children list
@@ -62,11 +52,16 @@ class AbstractPlan(ABC):
         Returns:
             List[AbstractPlan] -- children list
         """
-        return self._children
+        return self._children[:]
 
-    @abstractmethod
-    def get_node_type(self) -> PlanNodeType:
-        pass
+    @property
+    def node_type(self) -> PlanNodeType:
+        """
+        Property used for returning the node type of Plan.
+                Returns:
+            PlanNodeType: The node type corresponding to the plan
+        """
+        return self._node_type
 
     def __str__(self, level=0):
         out_string = "\t" * level + '' + "\n"

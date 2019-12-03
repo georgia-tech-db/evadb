@@ -7,9 +7,26 @@ from src.utils import generic_utils
 @unique
 class ExpressionType(IntEnum):
     INVALID = 0,
-    COMPARE_EQUAL = 1,
-    CONSTANT_VALUE = 2,
-    TUPLE_VALUE = 3,
+    CONSTANT_VALUE = 1,
+    TUPLE_VALUE = 2,
+    # Compare operators
+    COMPARE_EQUAL = 3,
+    COMPARE_GREATER = 4,
+    COMPARE_LESSER = 5,
+    COMPARE_GEQ = 6,
+    COMPARE_LEQ = 7,
+    COMPARE_NEQ = 8,
+    # Logical operators
+    LOGICAL_AND = 9,
+    LOGICAL_OR = 10,
+    LOGICAL_NOT = 11,
+    # Arithmetic operators
+    ARITHMETIC_ADD = 12,
+    ARITHMETIC_SUBTRACT = 13,
+    ARITHMETIC_MULTIPLY = 14,
+    ARITHMETIC_DIVIDE = 15
+
+    FUNCTION_EXPRESSION = 16
     # add other types
 
 
@@ -19,6 +36,7 @@ class ExpressionReturnType(IntEnum):
     BOOLEAN = 1,
     INTEGER = 2,
     VARCHAR = 3,
+    FLOAT = 4,
     # add others
 
 
@@ -39,9 +57,9 @@ class AbstractExpression(ABC):
         if index < 0 or index >= len(self._children):
             return None
         else:
-            self._children[index]
+            return self._children[index]
 
-    def append_child(self, index: int, child):
+    def append_child(self, child):
         self._children.append(child)
 
     def get_children_count(self) -> int:
