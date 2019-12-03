@@ -483,6 +483,16 @@ def test_join_elimination(verbose=False):
         print('New Plan Tree')
         print(new_tree)
 
+    assert root.parent is None
+    assert (type(t1.parent) == LogicalSelectPlan)
+    assert (type(s1.children[0]) == VideoTablePlan)
+    assert (len(s1.children) == 1)
+    assert (len(s1.foreign_column_ids) == 0)
+    assert ('v1.2' in root.column_ids)
+    assert (len(root.column_ids) == 2)
+    assert (len(root.foreign_column_ids) == 0)
+    assert (type(root.children[0]) == LogicalSelectPlan)
+
 
 def test_shouldnot_simply_predicate(verbose=False):
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)

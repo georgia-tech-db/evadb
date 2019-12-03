@@ -568,7 +568,3 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertEqual(len(root.foreign_column_ids), 0)
         self.assertEqual(type(root.children[0]), LogicalSelectPlan)
         self.assertTrue('v1.1' in s1.column_ids)
-
-
-
-
