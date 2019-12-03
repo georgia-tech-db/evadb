@@ -460,7 +460,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         if verbose:
             print('New Plan Tree')
             print(new_tree)
-        
+
         self.assertIsNone(root.parent)
         self.assertEqual(root.children, [s1])
         self.assertEqual(s1.parent, root)
@@ -475,7 +475,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
     def test_should_not_simply_predicate(self,verbose=False):
         meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
         video1 = SimpleVideoLoader(video_metadata=meta1)
-        
+
         # Creating Expression for Select: Expression is basically where v1.7 == 4
         const = ConstantValueExpression(value=4)
         tup = TupleValueExpression(col_idx=int(7))
@@ -500,7 +500,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         if verbose:
             print('New Plan Tree')
             print(new_tree)
-        
+
         self.assertIsNone(root.parent)
         self.assertEqual(root.children, [s1])
         self.assertEqual(s1.parent, root)
@@ -565,7 +565,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertTrue('v1.2' in root.column_ids)
         self.assertEqual(len(root.column_ids), 2)
         self.assertEqual(len(root.foreign_column_ids), 0)
-        self.assertEqual(root.children[0], LogicalSelectPlan)
+        self.assertEqual(type(root.children[0]), LogicalSelectPlan)
 
 
 
