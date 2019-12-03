@@ -32,3 +32,7 @@ class TupleValueExpression(AbstractExpression):
 
     # ToDo
     # implement other boilerplate functionality
+
+    @property
+    def col_name(self) -> str:
+        return self._col_name

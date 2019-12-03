@@ -7,18 +7,25 @@ from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.video_table_plan import VideoTablePlan
 
 
-class RuleQueryOptimizerTest(unittest.TestCase):
+# Test cases to test if we can go from SQL statement to logical plan tree
+class TestStatement2PlanTree(unittest.TestCase):
 
+    # Tests a Simple Select Statement with no Where clause
     def test_simple_select(self):
         parser = EvaFrameQLParser()
         query = "SELECT CLASS FROM TAIPAI;"
         eva_statement_list = parser.parse(query)
-        plan_tree = Statement2Plantree.convert(eva_statement_list[0])
+        plan_tree = Statement2Plantree.convert(eva_statement_list)
         self.assertIsNone(plan_tree.parent)
         self.assertTrue(type(plan_tree), LogicalSelectPlan)
         self.assertTrue(len(plan_tree.children) == 1)
         self.assertTrue(type(plan_tree.children[0]) == VideoTablePlan)
-        self.assertTrue(len(plan_tree.children[0]) == 0)
 
+    # Todo select statement with where clause
     def test_simple_where(self):
         pass
+
+    # Todo select statement with join clause
+    def test_simple_join(self):
+        pass
+
