@@ -52,7 +52,7 @@ class AbstractPlan(ABC):
         Returns:
             List[AbstractPlan] -- children list
         """
-        return self._children[:]
+        return self._children
 
     @property
     def node_type(self) -> PlanNodeType:

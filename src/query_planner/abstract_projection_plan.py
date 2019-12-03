@@ -5,6 +5,7 @@ https://www.postgresql.org/docs/9.5/runtime-config-query.html
 from src.query_planner.abstract_plan import AbstractPlan
 from src.loaders.abstract_loader import AbstractVideoLoader
 from typing import List
+from src.query_planner.abstract_plan import PlanNodeType
 
 
 class AbstractProjection(AbstractPlan):
@@ -19,7 +20,7 @@ class AbstractProjection(AbstractPlan):
     """
 
     def __init__(self, videos: List[AbstractVideoLoader], column_ids: List[str], foreign_column_ids: List[str]):
-        super(AbstractProjection, self).__init__()
+        super(AbstractProjection, self).__init__(PlanNodeType.LOGICAL_PROJECTION)
         self._column_ids = column_ids
         self._videos = videos
         self._foreign_column_ids = foreign_column_ids

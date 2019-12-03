@@ -8,10 +8,10 @@ from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.video_table_plan import VideoTablePlan
 from loaders.video_loader import SimpleVideoLoader
-from src.models import VideoMetaInfo, VideoFormat
+from models import VideoMetaInfo, VideoFormat
 
 
-def test_simple_predicate_pushdown(verbose=False):
+def test_simple_predicate_pushdown(verbose=True):
     # Creating the videos
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
