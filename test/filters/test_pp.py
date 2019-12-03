@@ -1,6 +1,7 @@
 import numpy as np
 from src.filters.pp import PP
 
+
 def test_PP():
     pp = PP()
 
@@ -15,4 +16,4 @@ def test_PP():
         'intersection': [None, None]
     }
 
-    stats = pp.train_all(x,y)
+    stats = pp.train_all(x, y)
