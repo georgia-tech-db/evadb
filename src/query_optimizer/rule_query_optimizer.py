@@ -184,6 +184,7 @@ class RuleQueryOptimizer:
         if foreign_col and cur_col[1] == foreign_col[0]:
             join = child.children
             grandchild = join[0].children[0]
+            grandchild.parent = child
             new_expression = ConstantValueExpression(grandchild)
             child.set_predicate(new_expression)
             child.set_children([grandchild])
