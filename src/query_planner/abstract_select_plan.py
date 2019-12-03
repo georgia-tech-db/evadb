@@ -6,7 +6,7 @@ from src.query_planner.abstract_plan import AbstractPlan
 from src.expression.abstract_expression import AbstractExpression
 from typing import List
 from src.loaders.abstract_loader import AbstractVideoLoader
-
+from query_planner.types import PlanNodeType
 
 
 class AbstractSelect(AbstractPlan):
@@ -22,7 +22,7 @@ class AbstractSelect(AbstractPlan):
 
     def __init__(self, predicate: AbstractExpression, videos: List[AbstractVideoLoader],
                  column_ids: List[str], foreign_column_ids: List[str]):
-        super(AbstractSelect, self).__init__()
+        super(AbstractSelect, self).__init__(PlanNodeType.LOGICAL_SELECT)
         self._predicate = predicate
         self._column_ids = column_ids
         self._videos = videos
