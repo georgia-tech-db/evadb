@@ -191,6 +191,7 @@ class RuleQueryOptimizer:
             curnode.set_foreign_column_ids([])
             new_pred = [curnode.column_ids[0], cur_col_id + "." + foreign_col_id]
             curnode.set_column_ids(new_pred)
+            grandchild.parent = grandchild.parent.parent
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child : is a child of curnode and is a type that inherits from the AbstractPlan type
