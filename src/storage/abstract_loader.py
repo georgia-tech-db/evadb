@@ -6,7 +6,7 @@ If any issues arise, please email jaeho.bang@gmail.com
 """
 from abc import ABCMeta, abstractmethod
 
-from src.models import VideoMetaInfo
+from src.models.catalog.video_info import VideoMetaInfo
 
 
 class AbstractLoader(metaclass=ABCMeta):

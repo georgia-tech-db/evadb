@@ -5,6 +5,7 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
+from src.models.inference.base_prediction import BasePrediction
 
 
 class ExpressionsTest(unittest.TestCase):
@@ -22,8 +23,27 @@ class ExpressionsTest(unittest.TestCase):
         )
         # ToDo implement a generic tuple class
         # to fetch the tuple from table
-        tuple1 = [1, 2, 3]
-        self.assertEqual(True, cmpr_exp.evaluate(tuple1, None))
+        compare = type("compare", (BasePrediction,), {
+            "value": 1,
+            "__eq__": lambda s, x: s.value == x
+        })
+        tuple1 = [[compare()], 2, 3]
+        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+
+    def test_compare_doesnt_broadcast_when_rhs_is_list(self):
+        tpl_exp = TupleValueExpression(0)
+        const_exp = ConstantValueExpression([1])
+
+        cmpr_exp = ComparisonExpression(
+            ExpressionType.COMPARE_EQUAL,
+            tpl_exp,
+            const_exp
+        )
+
+        compare = type("compare", (), {"value": 1,
+                                       "__eq__": lambda s, x: s.value == x})
+        tuple1 = [[compare()], 2, 3]
+        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
 
     def test_constant_logical_expression(self):
         tpl_exp = TupleValueExpression(0)

@@ -1,5 +1,8 @@
 from src.expression.comparison_expression import ComparisonExpression
-from .abstract_expression import AbstractExpression
+from src.expression.abstract_expression import AbstractExpression, \
+    ExpressionType, \
+    ExpressionReturnType
+
 
 
 class LogicalExpression(AbstractExpression):
