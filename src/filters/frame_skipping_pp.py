@@ -1,19 +1,21 @@
-from abstract_pp import AbstractPP
+from src.filters.abstract_pp import AbstractPP
 from src.utils import image_utils
+from typing import List
 
 
 class frameSkippingPP(AbstractPP):
 
-    def __init__(threshold, compare_foreground, distance_metric):
+    def __init__(self, threshold=0.0, compare_foreground=False, 
+            distance_metric='absolute_difference'):
         self.threshold = threshold
         self.compare_foreground = compare_foreground
         self.distance_metric = distance_metric
 
     def predict(self, batch) -> List[bool]:
-        frames = batch.frames().tolist()
         prev_frame = None
         skipFrames = []
-        for frame in frames:
+        for frame_batch in batch:
+            frame = frame_batch.frames_as_numpy_array()[0]
             if prev_frame is not None:
                 """
                 If compare_foreground set to true, calculate distance

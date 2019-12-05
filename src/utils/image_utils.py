@@ -7,15 +7,15 @@ def convert_to_grayscale(frame):
 
 
 def absolute_difference(curr_frame, prev_frame):
-    curr_frame_grayscale = self.convert_to_grayscale(curr_frame)
-    prev_frame_grayscale = self.convert_to_grayscale(prev_frame)
+    curr_frame_grayscale = convert_to_grayscale(curr_frame)
+    prev_frame_grayscale = convert_to_grayscale(prev_frame)
     frame_diff = cv2.absdiff(curr_frame_grayscale, prev_frame_grayscale)
     return frame_diff.sum()
 
 
 def mse_difference(curr_frame, prev_frame):
-    curr_frame_gray = self.convert_to_grayscale(curr_frame)
-    prev_frame_gray = self.convert_to_grayscale(prev_frame)
+    curr_frame_gray = convert_to_grayscale(curr_frame)
+    prev_frame_gray = convert_to_grayscale(prev_frame)
     total_pixels = curr_frame_gray.shape[0] * curr_frame_gray.shape[1]
     frame_diff = curr_frame_gray.astype('float') - prev_frame_gray
     mse_diff = np.sum(frame_diff**2) / float(total_pixels)

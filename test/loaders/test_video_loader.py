@@ -9,6 +9,7 @@ from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace, VideoFormat
 from src.models.catalog.video_info import VideoMetaInfo
 from src.models.storage.frame import Frame
+from src.filters.frame_skipping_pp import frameSkippingPP
 
 NUM_FRAMES = 10
 
@@ -38,11 +39,35 @@ class SimpleVideoLoaderTest(unittest.TestCase):
                              dtype=np.uint8)
             out.write(frame)
 
-    def setUp(self):
-        self.create_sample_video()
+    def create_sample_video_with_similar_frames(self):
+        """
+        Function to create a video with 2 identical frames. 
+        Useful for testing frame differencing.
+        """
+        try:
+            os.remove('dummy_similar.avi')
+        except FileNotFoundError:
+            pass
 
-    def tearDown(self):
+        out = cv2.VideoWriter('dummy_similar.avi',
+                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
+                              (2, 2))
+        frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
+                         dtype=np.uint8)
+
+        # Writing identical frames
+        out.write(frame)
+        out.write(frame)
+
+    @classmethod
+    def setUpClass(self):
+        self.create_sample_video(self)
+        self.create_sample_video_with_similar_frames(self)
+
+    @classmethod
+    def tearDownClass(self):
         os.remove('dummy.avi')
+        os.remove('dummy_similar.avi')
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
@@ -91,3 +116,23 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         batches = list(video_loader.load())
         self.assertEqual(1, len(batches))
         self.assertEqual(dummy_frames, list(batches[0].frames))
+
+    def test_should_skip_identical_frames_absdiff(self):
+        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
+        video_loader = SimpleVideoLoader(video_info)
+        batch = list(video_loader.load())
+        frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
+        skip_list = frame_skipping_pp.predict(batch)
+        self.assertEqual(2, len(skip_list))
+        self.assertEqual(False, skip_list[0])
+        self.assertEqual(True, skip_list[1])
+
+    def test_should_skip_identical_frames_msediff(self):
+        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
+        video_loader = SimpleVideoLoader(video_info)
+        batch = list(video_loader.load())
+        frame_skipping_pp = frameSkippingPP(0.5, False, 'mse_difference')
+        skip_list = frame_skipping_pp.predict(batch)
+        self.assertEqual(2, len(skip_list))
+        self.assertEqual(False, skip_list[0])
+        self.assertEqual(True, skip_list[1])
