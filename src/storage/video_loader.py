@@ -1,4 +1,4 @@
-from src.loaders.abstract_loader import AbstractVideoLoader
+from src.storage.abstract_loader import AbstractVideoLoader
 import cv2
 
 from src.models.catalog.frame_info import FrameInfo

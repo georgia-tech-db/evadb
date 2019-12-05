@@ -14,7 +14,7 @@ class PredicateExecutorTest(unittest.TestCase):
         # c=white
         const_exp_21 = ConstantValueExpression("c")
         const_exp_22 = ConstantValueExpression("white")
-        cmpr_exp3 = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, const_exp_21, const_exp_22)
+        cmpr_exp3 = ComparisonExpression(ExpressionType.COMPARE_NEQ, const_exp_21, const_exp_22)
 
         logical_expr2 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp3)
 

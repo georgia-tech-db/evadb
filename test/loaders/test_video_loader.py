@@ -4,7 +4,7 @@ import unittest
 import cv2
 import numpy as np
 
-from src.loaders.video_loader import SimpleVideoLoader
+from src.storage.video_loader import SimpleVideoLoader
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace, VideoFormat
 from src.models.catalog.video_info import VideoMetaInfo
