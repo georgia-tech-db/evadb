@@ -53,7 +53,7 @@ class ComparisonExpression(AbstractExpression):
         op = None
         if self.etype == ExpressionType.COMPARE_EQUAL:
             op = '='
-        elif self.etype == ExpressionType.COMPARE_NOT_EQUAL:
+        elif self.etype == ExpressionType.COMPARE_NEQ:
             op = '!='
         else:
             raise Exception('Operator is not supported')

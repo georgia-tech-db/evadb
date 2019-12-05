@@ -78,7 +78,7 @@ class PPOptmizer:
 
         # Explore left expr
         if leftExpr is not None:
-            if leftExpr.etype == ExpressionType.COMPARE_EQUAL or leftExpr.etype == ExpressionType.COMPARE_NOT_EQUAL:
+            if leftExpr.etype == ExpressionType.COMPARE_EQUAL or leftExpr.etype == ExpressionType.COMPARE_NEQ:
                 new_not_expr = self.get_identical_expression(label_desc, leftExpr)
                 new_left_exprs.append(new_not_expr)
             elif leftExpr.etype == ExpressionType.COMPARE_LOGICAL:
@@ -86,7 +86,7 @@ class PPOptmizer:
 
         # Explore right expr
         if rightExpr is not None:
-            if rightExpr.etype == ExpressionType.COMPARE_EQUAL or rightExpr.etype == ExpressionType.COMPARE_NOT_EQUAL:
+            if rightExpr.etype == ExpressionType.COMPARE_EQUAL or rightExpr.etype == ExpressionType.COMPARE_NEQ:
                 new_not_expr = self.get_identical_expression(label_desc, rightExpr)
                 new_right_exprs.append(new_not_expr)
             elif rightExpr.etype == ExpressionType.COMPARE_LOGICAL:
@@ -109,7 +109,7 @@ class PPOptmizer:
                 new_r_expr = ConstantValueExpression(rVal)
 
                 if rightExpr.etype == ExpressionType.COMPARE_EQUAL:
-                    new_exptype = ExpressionType.COMPARE_NOT_EQUAL
+                    new_exptype = ExpressionType.COMPARE_NEQ
                 else:
                     new_exptype = ExpressionType.COMPARE_EQUAL
 
@@ -209,7 +209,7 @@ if __name__ == '__main__':
 
     const_exp_21 = ConstantValueExpression("c")
     const_exp_22 = ConstantValueExpression("white")
-    cmpr_exp3 = ComparisonExpression(ExpressionType.COMPARE_NOT_EQUAL, const_exp_21, const_exp_22)
+    cmpr_exp3 = ComparisonExpression(ExpressionType.COMPARE_NEQ, const_exp_21, const_exp_22)
 
     logical_expr1 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp2)
     logical_expr2 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp3)
