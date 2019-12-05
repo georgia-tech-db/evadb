@@ -26,12 +26,10 @@ class VideoMetaInfo:
     """
     Data model used for storing video related information
     # TODO: This is database metadata. Need to discuss what goes in here
-
     Arguments:
         file (str): path where the video is stored
         fps (int): Frames per second in the video
         c_format (VideoFormat): Video File Format
-
     """
 
     def __init__(self, file, fps, c_format):
@@ -55,13 +53,11 @@ class VideoMetaInfo:
 class FrameInfo:
     """
     Data model contains information about the frame
-
     Arguments:
         height (int)(default: -1): Height of the image : left as -1 when the height of the frame is not required
         width (int)(default: -1): Width of the image : left as -1 when the height of the frame is not required
         channels (int)(default: 3): Number of input channels in the video
         color_space (ColorSpace)(default: ColorSpace.RGB): color space of the frame (RGB, HSV, BGR, GRAY)
-
     """
 
     def __init__(self, height=-1, width=-1, channels=3, color_space=ColorSpace.RGB):
@@ -96,12 +92,10 @@ class FrameInfo:
 class Frame:
     """
     Data model used for storing video frame related information
-
     Arguments:
         index (int): The index of the frame in video
         data (numpy.ndarray): Frame object from video
         info (FrameInfo): Contains properties of the frame
-
     """
 
     def __init__(self, index, data, info):
@@ -130,12 +124,10 @@ class Frame:
 class FrameBatch:
     """
     Data model used for storing a batch of frames
-
     Arguments:
         frames (List[Frame]): List of video frames
         info (FrameInfo): Information about the frames in the batch
         outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf with name 'x' as key
-
     """
 
     def __init__(self, frames, info, outcomes=None):
@@ -170,11 +162,9 @@ class FrameBatch:
     def set_outcomes(self, name, predictions: 'BasePrediction'):
         """
         Used for storing outcomes of the UDF predictions
-
         Arguments:
             name (str): name of the UDF to which the predictions belong to
             predictions (BasePrediction): Predictions/Outcome after executing the UDF on prediction
-
         """
         self._outcomes[name] = predictions
 
@@ -183,7 +173,6 @@ class FrameBatch:
         Returns names corresponding to a name
         Arguments:
             name (str): name of the udf on which predicate is being executed
-
         Returns:
             List[BasePrediction]
         """
@@ -202,7 +191,6 @@ class FrameBatch:
         Takes as input the slice for the list
         Arguments:
             item (list or Slice):
-
         :return:
         """
         if type(indices) is list:
@@ -219,7 +207,6 @@ class FrameBatch:
 class Point:
     """
     Data model used for storing the point in coordinate space
-
     Arguments:
         x (int): x coordinate
         y (int): y coordinate
@@ -245,11 +232,9 @@ class Point:
 class BoundingBox:
     """
     Data model used for storing bounding box
-
     Arguments:
         top_left (Point): Top left point of the bounding box
         bottom_right (Point): Bottom right point of the bounding box
-
     """
 
     def __init__(self, top_left: Point, bottom_right: Point):
@@ -309,11 +294,8 @@ class BasePrediction(ABC):
 class Prediction(BasePrediction):
     """
     Data model used to store the predicted values of the model
-
     Arguments:
         frame (Frame): Frame in which the predictions are made
-
-
     """
 
     def __init__(self, frame: Frame, labels: List[str], scores: List[float], boxes: List[BoundingBox] = None):
@@ -344,13 +326,11 @@ class Prediction(BasePrediction):
 
         """
         Factory method for returning a list of Prediction objects from identified values
-
         Arguments:
             batch (FrameBatch): frame batch for which the predictions belong to
             predictions (List[List[str]]): List of prediction labels per frame in batch
             scores (List[List[float]]): List of prediction scores per frame in batch
             boxes (List[List[BoundingBox]]): List of bounding boxes associated with predictions
-
         Returns:
             List[Prediction]
         """
@@ -385,7 +365,6 @@ class Prediction(BasePrediction):
 class Predicate:
     """
     Used for representing the predicates in case of filter operation.
-
     Arguments:
         name (str): Name of the field on which predicate needs to be executed
         predicate (lambda)

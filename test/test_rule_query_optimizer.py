@@ -9,8 +9,9 @@ from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.video_table_plan import VideoTablePlan
 from loaders.video_loader import SimpleVideoLoader
-from src.models import VideoMetaInfo, VideoFormat
-
+#from models import VideoFormat, VideoMetaInfo
+from models.catalog.video_info import VideoMetaInfo
+from models.catalog.properties import VideoFormat
 
 class RuleQueryOptimizerTest(unittest.TestCase):
 
@@ -460,7 +461,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         if verbose:
             print('New Plan Tree')
             print(new_tree)
-        
+
         self.assertIsNone(root.parent)
         self.assertEqual(root.children, [s1])
         self.assertEqual(s1.parent, root)
@@ -475,7 +476,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
     def test_should_not_simply_predicate(self,verbose=False):
         meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
         video1 = SimpleVideoLoader(video_metadata=meta1)
-        
+
         # Creating Expression for Select: Expression is basically where v1.7 == 4
         const = ConstantValueExpression(value=4)
         tup = TupleValueExpression(col_idx=int(7))
@@ -500,7 +501,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         if verbose:
             print('New Plan Tree')
             print(new_tree)
-        
+
         self.assertIsNone(root.parent)
         self.assertEqual(root.children, [s1])
         self.assertEqual(s1.parent, root)
@@ -566,7 +567,4 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertEqual(len(root.column_ids), 2)
         self.assertEqual(len(root.foreign_column_ids), 0)
         self.assertEqual(type(root.children[0]), LogicalSelectPlan)
-
-
-
 

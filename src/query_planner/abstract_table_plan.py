@@ -4,6 +4,7 @@ https://www.postgresql.org/docs/9.5/runtime-config-query.html
 """
 from src.query_planner.abstract_plan import AbstractPlan
 from src.loaders.abstract_loader import AbstractVideoLoader
+from src.query_planner.abstract_plan import PlanNodeType
 
 
 class AbstractTable(AbstractPlan):
@@ -15,7 +16,7 @@ class AbstractTable(AbstractPlan):
     """
 
     def __init__(self, video: AbstractVideoLoader, tablename: str):
-        super(AbstractTable, self).__init__()
+        super(AbstractTable, self).__init__(PlanNodeType.TABLE)
         self._video = video
         self._tablename = tablename
 

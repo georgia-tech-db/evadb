@@ -5,6 +5,8 @@ https://www.postgresql.org/docs/9.5/runtime-config-query.html
 from src.query_planner.abstract_plan import AbstractPlan
 from src.loaders.abstract_loader import AbstractVideoLoader
 from typing import List
+from src.query_planner.abstract_plan import PlanNodeType
+
 
 
 class AbstractInnerJoin(AbstractPlan):
@@ -18,7 +20,7 @@ class AbstractInnerJoin(AbstractPlan):
     """
 
     def __init__(self, videos: List[AbstractVideoLoader], join_ids: List[str]):
-        super(AbstractInnerJoin, self).__init__()
+        super(AbstractInnerJoin, self).__init__(PlanNodeType.LOGICAL_INNER_JOIN)
         self._join_ids = join_ids
         self._videos = videos
 

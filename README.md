@@ -11,6 +11,22 @@
 * Dataset 
 
 ### Rule Based Query Optimizer Status
+12/03/2019 Created first iteration of merging the pipeline from Parser to Rule Query Optimizer. Note currently we only handle simple cases like SELECT CLASS FROM TAIPAI;
+Also Converted Rule Based Query Optimizer Tests to the Unittest format.
+
+Implementation Milestones
+* Basic Conversion from the Select Statement class to Plan Tree implementation 
+* Test for Select Statement to Plan Tree implementation in test/test_statement2plantree.py
+* Test for Pipeline in test/pipeline/test_parser_to_rule_query_optimizer.py
+* Converted Rule Query Optimizer Tests to use Unittest format in test/test_rule_query_optimizer.py
+
+
+Future Work
+* Where clause implementation 
+* Join Implementation 
+* Test cases for each
+* Parser to Optimized Plan Tree test cases utilizing where clauses and joins. 
+
 11/18/2019 Created more rules for the rule based optimizer.
 
 Implementation Milestones
