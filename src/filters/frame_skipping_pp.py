@@ -6,7 +6,7 @@ from typing import List
 class frameSkippingPP(AbstractPP):
 
     def __init__(self, threshold=0.0, compare_foreground=False, 
-            distance_metric='absolute_difference'):
+                 distance_metric='absolute_difference'):
         self.threshold = threshold
         self.compare_foreground = compare_foreground
         self.distance_metric = distance_metric
@@ -45,8 +45,8 @@ class frameSkippingPP(AbstractPP):
         frame_diff = diff(curr_frame, prev_frame)
         return frame_diff
 
+    # Function to calculate difference of only foreground images
     def compare_foreground_mask(self, curr_frame, prev_frame, distance_metric):
-        # curr_foreground = mask_background(curr_frame)
-        # prev_foreground = mask_background(prev_frame)
-        # return frame_difference(curr_foreground, prev_foreground, distance_metric)
-        pass
+        curr_foreground = mask_background(curr_frame)
+        prev_foreground = mask_background(prev_frame)
+        return frame_difference(curr_foreground, prev_foreground, distance_metric)

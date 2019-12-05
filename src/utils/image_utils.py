@@ -2,10 +2,12 @@ import numpy as np
 import cv2
 
 
+# Converts frame to grayscale
 def convert_to_grayscale(frame):
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
 
+# Function to find the absolute difference between two frames
 def absolute_difference(curr_frame, prev_frame):
     curr_frame_grayscale = convert_to_grayscale(curr_frame)
     prev_frame_grayscale = convert_to_grayscale(prev_frame)
@@ -13,6 +15,7 @@ def absolute_difference(curr_frame, prev_frame):
     return frame_diff.sum()
 
 
+# Function to find the mean squared error between two frames
 def mse_difference(curr_frame, prev_frame):
     curr_frame_gray = convert_to_grayscale(curr_frame)
     prev_frame_gray = convert_to_grayscale(prev_frame)
