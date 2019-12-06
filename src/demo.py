@@ -1,4 +1,3 @@
-# import unittest
 import sys, os
 sys.path.append('.')
 from PIL import Image
@@ -10,11 +9,6 @@ matplotlib.use('TkAgg')
 from matplotlib.pyplot import imshow
 
 from src.query_parser.eva_parser import EvaFrameQLParser
-# from src.query_parser.eva_statement import EvaStatement
-# from src.query_parser.eva_statement import StatementType
-# from src.query_parser.select_statement import SelectStatement
-# from src.expression.abstract_expression import ExpressionType
-# from src.query_parser.table_ref import TableRef
 
 from cmd import Cmd
 
@@ -36,7 +30,6 @@ class EVADemo(Cmd):
                 #### Connect and Query from Eva #####
                 parser = EvaFrameQLParser()
                 eva_statement = parser.parse(query)
-                print(eva_statement)
                 select_stmt = eva_statement[0]
                 print("Result from the parser:")
                 print(select_stmt)
@@ -62,7 +55,7 @@ class EVADemo(Cmd):
 
                 print("Refer pop-up for a sample of the output")
                 ouput_frames[0].show()
-                
+
             except TypeError:
                 print("SQL Statement improperly formatted. Try again.")
                     
