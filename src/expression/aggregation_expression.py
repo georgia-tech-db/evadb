@@ -4,6 +4,7 @@ from src.expression.abstract_expression import AbstractExpression, \
 import statistics
 
 class AggregationExpression(AbstractExpression):
+
     def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
                  right: AbstractExpression):
         children = []
@@ -11,8 +12,8 @@ class AggregationExpression(AbstractExpression):
             children.append(left)
         if right is not None:
             children.append(right)
-        super().__init__(exp_type, rtype=ExpressionReturnType.INTEGER, ## can also be a float
-                         children=children)
+        super().__init__(exp_type, rtype=ExpressionReturnType.INTEGER, 
+                         children=children)  #can also be a float
 
     def evaluate(self, *args):
         values = self.get_child(0).evaluate(*args)

@@ -1,4 +1,7 @@
-import sys, os
+from src.query_parser.eva_parser import EvaFrameQLParser
+
+import sys
+import os
 sys.path.append('.')
 from PIL import Image
 import glob
@@ -7,17 +10,15 @@ import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.pyplot import imshow
-
-from src.query_parser.eva_parser import EvaFrameQLParser
-
 from cmd import Cmd
+
 
 class EVADemo(Cmd):
 
     def default(self, query):
         """Takes in SQL query and generates the output"""
 
-        # Type exit to exit program
+        # Type exit to stop program
         if(query == "exit" or query == "EXIT"):
             raise SystemExit
 
@@ -27,7 +28,7 @@ class EVADemo(Cmd):
         else:
             try:
     
-                #### Connect and Query from Eva #####
+                ## Connect and Query from Eva 
                 parser = EvaFrameQLParser()
                 eva_statement = parser.parse(query)
                 select_stmt = eva_statement[0]
@@ -35,17 +36,17 @@ class EVADemo(Cmd):
                 print(select_stmt)
                 print('\n')
 
-                #### Read Input Videos #####
-                #### Replace with Input Pipeline once finished ####
+                ## Read Input Videos 
+                ## Replace with Input Pipeline once finished 
                 input_video = []
                 for filename in glob.glob('data/sample_video/*.jpg'):
                     im=Image.open(filename)
-                    im_copy = im.copy()## too handle 'too many open files' error
+                    im_copy = im.copy()  # to handle 'too many open files' error
                     input_video.append(im_copy)
                     im.close()
 
-                #### Write Output to final folder #####
-                #### Replace with output pipeline once finished ####
+                ## Write Output to final folder 
+                ## Replace with output pipeline once finished 
                 ouput_frames = random.sample(input_video, 50)
                 output_folder = "data/sample_output/"
 
@@ -59,13 +60,10 @@ class EVADemo(Cmd):
             except TypeError:
                 print("SQL Statement improperly formatted. Try again.")
                     
-        
-
     def do_quit(self, args):
         """Quits the program."""
-        print ("Quitting.")
+        print   ("Quitting.")
         raise SystemExit
-
 
 if __name__ == '__main__': 
     prompt = EVADemo()
