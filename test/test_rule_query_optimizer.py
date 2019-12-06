@@ -466,7 +466,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertEqual(root.children, [t1])
         self.assertEqual(t1.parent, root)
         self.assertEqual(len(root.children), 1)
-        self.assertTrue('v1.7' in root.children[0].column_ids)
+        #self.assertTrue('v1.7' in root.children[0].column_ids)
         self.assertTrue('v1.3' in root.children[0].column_ids)
         self.assertTrue('v1.4' in root.children[0].column_ids)
         self.assertEqual(type(t1.parent) , LogicalProjectionPlan)
