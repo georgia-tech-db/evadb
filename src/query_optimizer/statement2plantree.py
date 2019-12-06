@@ -2,6 +2,7 @@ from src.query_parser.select_statement import SelectStatement
 from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
+from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.video_table_plan import VideoTablePlan
 from loaders.video_loader import SimpleVideoLoader
 from models.catalog.video_info import VideoMetaInfo
@@ -33,6 +34,12 @@ class Statement2Plantree:
             where_stuff = statement.where_clause
             # Need to create the sigma plan
             if where_stuff is not None:
+                #this needs to be modified
+                #s1=LogicalSelectPlan(predicate=expression, column_ids=[], videos=[video1], foreign_column_ids=[])
+                #t1.parent.set_children(s1)
+                #s1.set_parent(root)
+                #s1.set_children(t1)
+                #t1.set_parent(s1)
                 pass
             else:
                 root.set_children([t1])
