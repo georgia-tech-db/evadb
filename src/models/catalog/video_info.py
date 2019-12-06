@@ -36,7 +36,6 @@ class VideoMetaInfo:
     @property
     def compressed(self) -> bool:
         return self._compressed
-
     
     @property
     def compressed_index(self) -> list:
