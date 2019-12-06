@@ -44,6 +44,6 @@ class FrameInfo:
 
     def __eq__(self, other):
         return self.color_space == other.color_space and \
-               self.width == other.width and \
-               self.height == other.height and \
-               self.channels == other.channels
+            self.width == other.width and \
+            self.height == other.height and \
+            self.channels == other.channels
