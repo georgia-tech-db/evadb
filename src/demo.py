@@ -1,6 +1,6 @@
 # import unittest
 import sys, os
-sys.path.append('../')
+sys.path.append('.')
 from PIL import Image
 import glob
 import random
@@ -20,47 +20,51 @@ from cmd import Cmd
 
 class EVADemo(Cmd):
 
-    def default(self, args):
+    def default(self, query):
         """Takes in SQL query and generates the output"""
 
-        # Type exit 
-        if(args == "exit" or args == "EXIT"):
+        # Type exit to exit program
+        if(query == "exit" or query == "EXIT"):
             raise SystemExit
 
-        if len(args) == 0:
-            
-            query = 'Unknown'
+        if len(query) == 0:      
+            print("Empty query")
+
         else:
-            #### Read Input Videos #####
-            input_video = []
-            for filename in glob.glob('../data/sample_video/*.jpg'):
-                im=Image.open(filename)
-                im_copy = im.copy()## too handle 'too many open files' error
-                input_video.append(im_copy)
-                im.close()
+            try:
+    
+                #### Connect and Query from Eva #####
+                parser = EvaFrameQLParser()
+                eva_statement = parser.parse(query)
+                print(eva_statement)
+                select_stmt = eva_statement[0]
+                print("Result from the parser:")
+                print(select_stmt)
+                print('\n')
 
-            #### Connect and Query from Eva #####
-            parser = EvaFrameQLParser()
-            eva_statement = parser.parse(args)
-            query = args
-            print(eva_statement)
-            select_stmt = eva_statement[0]
-            print("Result from the parser:")
-            print(select_stmt)
-            print('\n')
+                #### Read Input Videos #####
+                #### Replace with Input Pipeline once finished ####
+                input_video = []
+                for filename in glob.glob('data/sample_video/*.jpg'):
+                    im=Image.open(filename)
+                    im_copy = im.copy()## too handle 'too many open files' error
+                    input_video.append(im_copy)
+                    im.close()
 
+                #### Write Output to final folder #####
+                #### Replace with output pipeline once finished ####
+                ouput_frames = random.sample(input_video, 50)
+                output_folder = "data/sample_output/"
 
-            #### Write Output to final folder #####
+                for i in range(len(ouput_frames)):
+                    frame_name = output_folder + "output" + str(i) + ".jpg"
+                    op = ouput_frames[i].save(frame_name) 
 
-            ouput_frames = random.sample(input_video, 50)
-            output_folder = "../data/sample_output/"
-
-            for i in range(len(ouput_frames)):
-                frame_name = output_folder + "output" + str(i) + ".jpg"
-                op = ouput_frames[i].save(frame_name) 
-
-            print("Refer pop-up for a sample of the output")
-            ouput_frames[0].show()
+                print("Refer pop-up for a sample of the output")
+                ouput_frames[0].show()
+                
+            except TypeError:
+                print("SQL Statement improperly formatted. Try again.")
                     
         
 
