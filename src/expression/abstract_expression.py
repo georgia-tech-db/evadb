@@ -34,6 +34,7 @@ class ExpressionType(IntEnum):
     AGGREGATION_MAX = 20,
     AGGREGATION_AVG = 21,
 
+    CASE = 22,
     # add other types
 
 
