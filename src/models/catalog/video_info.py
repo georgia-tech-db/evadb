@@ -8,8 +8,20 @@ class VideoMetaInfo:
 
     Arguments:
         file (str): path where the video is stored
+
         fps (int): Frames per second in the video
+
         c_format (VideoFormat): Video File Format
+
+        compressed(bool)(default : False): Flag indicating whether video 
+        is compressed 
+
+        compressed_index(array)(default: None): Array of compressed video 
+        mapping to original video 
+
+        original_path(str)(default: None): path to original video only 
+        applicable if compressed bool is set to True
+
 
     """
 
