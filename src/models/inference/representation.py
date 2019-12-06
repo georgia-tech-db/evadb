@@ -21,7 +21,7 @@ class Point:
 
     def __eq__(self, other):
         return self.x == other.x and \
-               self.y == other.y
+            self.y == other.y
 
 
 class BoundingBox:
@@ -48,4 +48,4 @@ class BoundingBox:
 
     def __eq__(self, other):
         return self.bottom_right == other.bottom_right and \
-               self.top_left == other.top_left
+            self.top_left == other.top_left
