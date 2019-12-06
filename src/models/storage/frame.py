@@ -31,5 +31,5 @@ class Frame:
 
     def __eq__(self, other):
         return self.index == other.index and \
-               np.array_equal(self.data, other.data) and \
-               self.info == other.info
+            np.array_equal(self.data, other.data) and \
+            self.info == other.info
