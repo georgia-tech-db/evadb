@@ -463,15 +463,15 @@ class RuleQueryOptimizerTest(unittest.TestCase):
             print(new_tree)
 
         self.assertIsNone(root.parent)
-        self.assertEqual(root.children, [s1])
-        self.assertEqual(s1.parent, root)
-        self.assertEqual(len(s1.children), 1)
-        self.assertEqual(type(s1.children[0]), LogicalProjectionPlan)
-        self.assertTrue('v1.7' in s1.children[0].column_ids)
-        self.assertTrue('v1.3' in s1.children[0].column_ids)
-        self.assertTrue('v1.4' in s1.children[0].column_ids)
+        self.assertEqual(root.children, [t1])
+        self.assertEqual(t1.parent, root)
+        self.assertEqual(len(root.children), 1)
+        #self.assertEqual(type(.children[0]), LogicalProjectionPlan)
+        self.assertTrue('v1.7' in root.children[0].column_ids)
+        self.assertTrue('v1.3' in root.children[0].column_ids)
+        self.assertTrue('v1.4' in root.children[0].column_ids)
         self.assertEqual(type(t1.parent) , LogicalProjectionPlan)
-        self.assertEqual(s1.children[0].children, [t1])
+        self.assertEqual(root.children[0].children, [t1])
 
     def test_should_not_simply_predicate(self,verbose=False):
         meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
