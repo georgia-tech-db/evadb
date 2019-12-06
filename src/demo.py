@@ -1,6 +1,14 @@
 # import unittest
 import sys, os
 sys.path.append('../')
+from PIL import Image
+import glob
+import random
+import numpy as np
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.pyplot import imshow
+
 from src.query_parser.eva_parser import EvaFrameQLParser
 # from src.query_parser.eva_statement import EvaStatement
 # from src.query_parser.eva_statement import StatementType
@@ -23,14 +31,36 @@ class EVADemo(Cmd):
             
             query = 'Unknown'
         else:
+            #### Read Input Videos #####
+            input_video = []
+            for filename in glob.glob('../data/sample_video/*.jpg'):
+                im=Image.open(filename)
+                im_copy = im.copy()## too handle 'too many open files' error
+                input_video.append(im_copy)
+                im.close()
+
+            #### Connect and Query from Eva #####
             parser = EvaFrameQLParser()
             eva_statement = parser.parse(args)
             query = args
-            # print(eva_statement)
+            print(eva_statement)
             select_stmt = eva_statement[0]
             print("Result from the parser:")
             print(select_stmt)
             print('\n')
+
+
+            #### Write Output to final folder #####
+
+            ouput_frames = random.sample(input_video, 50)
+            output_folder = "../data/sample_output/"
+
+            for i in range(len(ouput_frames)):
+                frame_name = output_folder + "output" + str(i) + ".jpg"
+                op = ouput_frames[i].save(frame_name) 
+
+            print("Refer pop-up for a sample of the output")
+            ouput_frames[0].show()
                     
         
 
