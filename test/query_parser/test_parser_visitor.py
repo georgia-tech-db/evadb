@@ -115,8 +115,8 @@ class ParserVisitorTest(unittest.TestCase):
             visitor.visitTableName(ctx)
 
     def test_logical_expression(self):
-        '''Testing for break in code if len(children) < 3 
-        Function : visitLogicalExpression
+        ''' Testing for break in code if len(children) < 3 
+            Function : visitLogicalExpression
         '''
         ctx = MagicMock()
         visitor = EvaParserVisitor()
@@ -140,7 +140,7 @@ class ParserVisitorTest(unittest.TestCase):
         self.assertEqual(expected, None)
 
     def test_visit_string_literal_none(self):
-        '''Testing when string literal is None
+        ''' Testing when string literal is None
             Function: visitStringLiteral
         '''
         visitor = EvaParserVisitor()
@@ -154,8 +154,8 @@ class ParserVisitorTest(unittest.TestCase):
         mock_visit.assert_has_calls([call(ctx)])
 
     def test_visit_constant(self):
-        '''Testing for value of returned constant when real literal is not None
-        Function: visitConstant
+        ''' Testing for value of returned constant when real literal is not None
+            Function: visitConstant
         '''
         ctx = MagicMock()
         visitor = EvaParserVisitor()
@@ -166,6 +166,9 @@ class ParserVisitorTest(unittest.TestCase):
             float(ctx.getText()))
 
     def test_visit_query_specification_base_exception(self):
+        ''' Testing Base Exception error handling
+            Function: visitQuerySpecification
+        '''
         EvaParserVisitor.visit = MagicMock()
         mock_visit = EvaParserVisitor.visit
 
@@ -179,6 +182,7 @@ class ParserVisitorTest(unittest.TestCase):
         expected = visitor.visitQuerySpecification(ctx)
 
         self.assertEqual(expected, None)
+
 
 if __name__ == '__main__':
     unittest.main()
