@@ -1,6 +1,13 @@
 import unittest
 
-from src.query_optimizer.pp_optmizer import *
+from src.query_optimizer.pp_optimizer import PPOptimizer
+
+from src import constants
+from src.catalog.catalog import Catalog
+from src.expression.abstract_expression import ExpressionType
+from src.expression.comparison_expression import ComparisonExpression
+from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.logical_expression import LogicalExpression
 
 
 class PredicateExecutorTest(unittest.TestCase):
@@ -22,9 +29,9 @@ class PredicateExecutorTest(unittest.TestCase):
             cmpr_exp1, ExpressionType.LOGICAL_AND, cmpr_exp3)
 
         catalog = Catalog(constants.UADETRAC)
-        predicates = [logical_expr2]
-        pp_optimizer = PPOptmizer(catalog, predicates)
-        out = pp_optimizer.execute()
+        predicate = logical_expr2
+        pp_optimizer = PPOptimizer(catalog)
+        out = pp_optimizer.execute(predicate)
         self.assertIsNotNone(out, "Should not be none")
 
         # expected
@@ -69,9 +76,9 @@ class PredicateExecutorTest(unittest.TestCase):
         child = LogicalExpression(cmpr_exp1, ExpressionType.LOGICAL_OR, None)
 
         catalog = Catalog(constants.UADETRAC)
-        predicates = [child]
-        pp_optimizer = PPOptmizer(catalog, predicates)
-        out = pp_optimizer.execute()
+        predicate = child
+        pp_optimizer = PPOptimizer(catalog)
+        out = pp_optimizer.execute(predicate)
         self.assertIsNotNone(out, "Should not be none")
 
         self.assertEqual(out[0], child)
