@@ -99,7 +99,7 @@ class ExpressionsTest(unittest.TestCase):
             const_exp_1
         )
 
-        self.assertEqual(0, tpl_exp.evaluate([1]))
+        self.assertEqual(0, tpl_exp.evaluate([0]))
 
 
 if __name__ == '__main__':
