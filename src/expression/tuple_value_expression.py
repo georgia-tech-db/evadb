@@ -1,13 +1,18 @@
-from .abstract_expression import AbstractExpression, ExpressionType, \
-    ExpressionReturnType
+from .abstract_expression import (
+    AbstractExpression,
+    ExpressionType,
+    ExpressionReturnType,
+)
 
 
 class TupleValueExpression(AbstractExpression):
     def __init__(self, col_idx: int = None, col_name: str = None):
         # setting return type to be invalid not sure if that is correct
         # no child so that is okay
-        super().__init__(ExpressionType.TUPLE_VALUE,
-                         rtype=ExpressionReturnType.INVALID)
+        super().__init__(
+            ExpressionType.TUPLE_VALUE,
+            rtype=ExpressionReturnType.INVALID
+        )
         self._col_name = col_name
         # todo
         self._table_name = None
@@ -28,7 +33,7 @@ class TupleValueExpression(AbstractExpression):
     def evaluate(self, *args):
         if self._col_name:
             return self._col_name
-        if args == None:
+        if args is None:
             tuple1 = None
         if args is None:
             # error Handling

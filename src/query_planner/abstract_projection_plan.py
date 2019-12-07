@@ -14,11 +14,19 @@ class AbstractProjection(AbstractPlan):
         predicate : Expression
         videos : list of videos on which the projection will be executed
         columns_id : columns in the form of "tablename.attribute"
-        foreign_column_id: columns in the form of "tablename.attribute"
+        foreign_column_id: columns in the form of
+        "tablename.attribute"
     """
 
-    def __init__(self, videos: List[AbstractVideoLoader], column_ids: List[str], foreign_column_ids: List[str]):
-        super(AbstractProjection, self).__init__(PlanNodeType.LOGICAL_PROJECTION)
+    def __init__(
+        self,
+        videos: List[AbstractVideoLoader],
+        column_ids: List[str],
+        foreign_column_ids: List[str],
+    ):
+        super(AbstractProjection, self).__init__(
+            PlanNodeType.LOGICAL_PROJECTION
+        )
         self._column_ids = column_ids
         self._videos = videos
         self._foreign_column_ids = foreign_column_ids
@@ -42,7 +50,9 @@ class AbstractProjection(AbstractPlan):
         self._column_ids = new_id
 
     def __str__(self, level=0):
-        project_cols_str = 'pi {} {}'.format(str(self._column_ids), str(self._foreign_column_ids))
+        project_cols_str = "pi {} {}".format(
+            str(self._column_ids), str(self._foreign_column_ids)
+        )
         out_string = "\t" * level + project_cols_str + "\n"
         for child in self.children:
             out_string += child.__str__(level + 1)

@@ -177,8 +177,8 @@ class PPOptimizer:
                     _, right_cost = self._find_model(right_str_expr, stats)
 
             if expression.operator in ("AND", ExpressionType.LOGICAL_AND):
-                reduction_rate = left_cost + right_cost \
-                                 - left_cost * right_cost
+                reduction_rate = \
+                    left_cost + right_cost - left_cost * right_cost
             elif expression.operator in ("OR", ExpressionType.LOGICAL_OR):
                 reduction_rate = left_cost * right_cost
             else:

@@ -75,8 +75,9 @@ class CostBasedQueryOptimizer:
         thread.start()
         while True:
             input = eval(
-                input("Type in your query in the form of"
-                      " __label__ > __number__\n"))
+                input(
+                    "Type in your query in the form of"
+                    " __label__ > __number__\n"))
 
             self.parseInput(input)
 
@@ -148,8 +149,7 @@ class CostBasedQueryOptimizer:
             else:
 
                 if True not in [
-                    operator in self.operators
-                        for operator in query_sub]:
+                        operator in self.operators for operator in query_sub]:
                     return [], []
                 for operator in self.operators:
                     query_sub_list = query_sub.split(operator)
@@ -184,7 +184,7 @@ class CostBasedQueryOptimizer:
         for sub_parsed_query in parsed_query:
             if len(parsed_query) >= 2 and index < len(query_ops):
                 final_str += "".join(sub_parsed_query) + \
-                             " " + query_ops[index] + " "
+                    " " + query_ops[index] + " "
                 index += 1
             else:
                 final_str += "".join(sub_parsed_query)
@@ -234,8 +234,8 @@ class CostBasedQueryOptimizer:
                                              category +
                                              " && ")
                 alternate_string = alternate_string[
-                                   : -len(" && ")
-                                   ]  # must strip the last ' || '
+                    : -len(" && ")
+                ]  # must strip the last ' || '
                 # query_tmp, _ = self._parseQuery(alternate_string)
                 equivalence.append(alternate_string)
 
@@ -243,12 +243,12 @@ class CostBasedQueryOptimizer:
 
                 equivalence = [self.convertL2S([query_sub_list], [])]
                 assert (
-                        operator == "="
-                        or operator == "!="
-                        or operator == "<"
-                        or operator == "<="
-                        or operator == ">"
-                        or operator == ">="
+                    operator == "="
+                    or operator == "!="
+                    or operator == "<"
+                    or operator == "<="
+                    or operator == ">"
+                    or operator == ">="
                 )
                 alternate_string = ""
                 if operator == "!=":
@@ -424,10 +424,10 @@ class CostBasedQueryOptimizer:
         for i in range(1, len(evaluation_stats)):
             if query_operators[i - 1] == "&&":
                 final_red = (
-                        final_red +
-                        evaluation_stats[i] -
-                        final_red *
-                        evaluation_stats[i])
+                    final_red +
+                    evaluation_stats[i] -
+                    final_red *
+                    evaluation_stats[i])
             elif query_operators[i - 1] == "||":
                 final_red = final_red * evaluation_stats[i]
 
