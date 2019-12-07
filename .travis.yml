@@ -23,8 +23,8 @@ install:
   - conda list
 
 script:
-  - pycodestyle --select E test src/storage
-  - pytest test/ --cov-report= --cov=./ -s -v
+  - pycodestyle  --select E src/ test/ --exclude src/filters
+  - pytest test/ --cov-report= --cov=src/ -s -v
 
 after_success:
   - coveralls

@@ -82,9 +82,9 @@ class Prediction(BasePrediction):
     def __eq__(self, other):
         if type(self) is type(other):
             return self.boxes == other.boxes and \
-                   self.frame == other.frame and \
-                   self.scores == other.scores and \
-                   self.labels == other.labels
+                self.frame == other.frame and \
+                self.scores == other.scores and \
+                self.labels == other.labels
         return other in self
 
     def __contains__(self, item):
