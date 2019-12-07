@@ -23,7 +23,9 @@ from src.storage.abstract_loader import AbstractLoader
 
 class LoaderUadetrac(AbstractLoader):
     def __init__(self, image_width=300, image_height=300,
-                 cache_dir=None, args=None):
+                 cache_dir='./cache/', args=None):
+        if not os.path.exists(cache_dir):
+            os.mkdir(cache_dir)
         # original image height = 540
         # original image width = 960
         self.image_width = image_width
