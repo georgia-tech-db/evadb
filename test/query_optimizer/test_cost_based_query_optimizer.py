@@ -16,7 +16,7 @@ class PredicateExecutorTest(unittest.TestCase):
         const_exp_22 = ConstantValueExpression("white")
         cmpr_exp3 = ComparisonExpression(ExpressionType.COMPARE_NEQ, const_exp_21, const_exp_22)
 
-        logical_expr2 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp3)
+        logical_expr2 = LogicalExpression(cmpr_exp1, ExpressionType.LOGICAL_AND, cmpr_exp3)
 
         catalog = Catalog(constants.UADETRAC)
         predicates = [logical_expr2]
@@ -35,11 +35,11 @@ class PredicateExecutorTest(unittest.TestCase):
         const_exp_1222 = ConstantValueExpression("black")
         black = ComparisonExpression(ExpressionType.COMPARE_EQUAL, const_exp_1111, const_exp_1222)
 
-        child = LogicalExpression(red, 'AND', black)
+        child = LogicalExpression(red, ExpressionType.LOGICAL_AND, black)
         silver = ComparisonExpression(ExpressionType.COMPARE_EQUAL, ConstantValueExpression("c"),
                                       ConstantValueExpression("silver"))
-        logical_expr3 = LogicalExpression(child, 'AND', silver)
-        expected_result = LogicalExpression(a, 'AND', logical_expr3)
+        logical_expr3 = LogicalExpression(child, ExpressionType.LOGICAL_AND, silver)
+        expected_result = LogicalExpression(a, ExpressionType.LOGICAL_AND, logical_expr3)
 
         self.assertEqual(out[0], expected_result)
 
@@ -49,7 +49,7 @@ class PredicateExecutorTest(unittest.TestCase):
 
         # t=suv
         cmpr_exp1 = ComparisonExpression(ExpressionType.COMPARE_EQUAL, const_exp_01, const_exp_02)
-        child = LogicalExpression(cmpr_exp1, 'OR', None)
+        child = LogicalExpression(cmpr_exp1, ExpressionType.LOGICAL_OR, None)
 
 
         catalog = Catalog(constants.UADETRAC)
