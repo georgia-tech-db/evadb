@@ -25,7 +25,8 @@ class LogicalExpression(AbstractExpression):
                     elif self.operator == ExpressionType.LOGICAL_OR:
                         left_exp = left_exp or element.evaluate()
                     else:
-                        raise ValueError("Un-Supported operator passed: " + self.operator)
+                        raise ValueError(
+                            "Un-Supported operator passed: " + self.operator)
             else:
                 if self.left_expression is None:
                     left_exp = None
@@ -45,7 +46,8 @@ class LogicalExpression(AbstractExpression):
                     elif self.operator == ExpressionType.LOGICAL_OR:
                         right_exp = right_exp or element.evaluate()
                     else:
-                        raise ValueError("Un-Supported operator passed: " + self.operator)
+                        raise ValueError(
+                            "Un-Supported operator passed: " + self.operator)
             else:
                 if self.right_expression is None:
                     right_exp = None
@@ -62,7 +64,8 @@ class LogicalExpression(AbstractExpression):
             elif right_exp is None:
                 return list(map(operator.not_, left_exp))
             else:
-                raise ValueError("Either of left or right expression should be None")
+                raise ValueError(
+                    "Either of left or right expression should be None")
         else:
             raise ValueError("Un-Supported operator passed: " + self.operator)
 
@@ -82,7 +85,9 @@ class LogicalExpression(AbstractExpression):
         return self.operator
 
     def __eq__(self, other):
-        if self.operator == other.operator and self.left_expression == other.left_expression and self.right_expression == other.right_expression:
+        if self.operator == other.operator and \
+                self.left_expression == other.left_expression and \
+                self.right_expression == other.right_expression:
             return True
         else:
             return False
