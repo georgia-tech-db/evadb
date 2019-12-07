@@ -21,9 +21,14 @@ from src.storage.abstract_loader import AbstractLoader
 
 # Make this return a dictionary of label to data for the whole dataset
 
+
 class LoaderUadetrac(AbstractLoader):
-    def __init__(self, image_width=300, image_height=300,
-                 cache_dir='./cache/', args=None):
+    def __init__(
+            self,
+            image_width=300,
+            image_height=300,
+            cache_dir="./cache/",
+            args=None):
         if not os.path.exists(cache_dir):
             os.mkdir(cache_dir)
         # original image height = 540
@@ -31,7 +36,7 @@ class LoaderUadetrac(AbstractLoader):
         self.image_width = image_width
         self.image_height = image_height
         self.image_channels = 3
-        self.name = 'uadetrac'
+        self.name = "uadetrac"
         self.cache_dir = os.path.join(cache_dir, self.name)
         if not os.path.exists(self.cache_dir):
             os.mkdir(self.cache_dir)
@@ -39,16 +44,17 @@ class LoaderUadetrac(AbstractLoader):
         self.args = args
         self.data_dict = {}
         self.label_dict = {}
-        self.vehicle_type_filters = ['car', 'van', 'bus', 'others']
+        self.vehicle_type_filters = ["car", "van", "bus", "others"]
         self.speed_filters = [40, 50, 60, 65, 70]
         self.intersection_filters = ["pt335", "pt342", "pt211", "pt208"]
-        self.color_filters = ['white', 'black', 'silver', 'red']
+        self.color_filters = ["white", "black", "silver", "red"]
         self.task_manager = TaskManager()
         self.images = None
         self.labels = None
         self.boxes = None
-        self.eva_dir = os.path.dirname(os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__))))
+        self.eva_dir = os.path.dirname(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        )
         self.video_start_indices = []
 
     def load_video(self, dir: str):
@@ -66,8 +72,11 @@ class LoaderUadetrac(AbstractLoader):
         :return: boxes
         """
         if dir is None:
-            dir = os.path.join(self.eva_dir, 'data', 'ua_detrac',
-                               self.args.anno_path)
+            dir = os.path.join(
+                self.eva_dir,
+                "data",
+                "ua_detrac",
+                self.args.anno_path)
         self.boxes = np.array(self.get_boxes(dir))
         return self.boxes
 
@@ -76,7 +85,7 @@ class LoaderUadetrac(AbstractLoader):
         if len(files) == 0:
             return 1
         files.sort()
-        return int(files[-1].split('.')[0]) + 1
+        return int(files[-1].split(".")[0]) + 1
 
     def load_images(self, video_dir: str):
         """
@@ -89,18 +98,19 @@ class LoaderUadetrac(AbstractLoader):
             self.video_start_indices.append(0)
         else:
             self.images = np.vstack((self.images, images))
-            self.video_start_indices.append(self.video_start_indices[-1] +
-                                            images.shape[0] - 1)
+            self.video_start_indices.append(
+                self.video_start_indices[-1] + images.shape[0] - 1
+            )
 
     def save_images(self):
         if self.images is None:
-            warnings.warn("No image loaded, call load_images() first",
-                          Warning)
-        elif type(self.images) is np.ndarray:
-            np.save(os.path.join(self.cache_dir, 'uadetrac'), self.images)
+            warnings.warn("No image loaded, call load_images() first", Warning)
+        elif isinstance(self.images, np.ndarray):
+            np.save(os.path.join(self.cache_dir, "uadetrac"), self.images)
         else:
-            warnings.warn("Image array type is not np.....cannot save",
-                          Warning)
+            warnings.warn(
+                "Image array type is not np.....cannot save",
+                Warning)
 
     def update_images(self, frame_ids, modified_images, disk=False):
         count = 0
@@ -120,9 +130,15 @@ class LoaderUadetrac(AbstractLoader):
             for file in files:
                 file_names.append(os.path.join(root, file))
 
-        images = np.ndarray(shape=(len(file_names), self.image_height,
-                                   self.image_width, self.image_channels),
-                            dtype=np.uint8)
+        images = np.ndarray(
+            shape=(
+                len(file_names),
+                self.image_height,
+                self.image_width,
+                self.image_channels,
+            ),
+            dtype=np.uint8,
+        )
 
         for i in range(len(file_names)):
             file_name = file_names[i]
@@ -142,16 +158,25 @@ class LoaderUadetrac(AbstractLoader):
         """
 
         if dir is None:
-            dir = os.path.join(self.eva_dir, 'data', 'ua_detrac',
-                               self.args.anno_path)
+            dir = os.path.join(
+                self.eva_dir,
+                "data",
+                "ua_detrac",
+                self.args.anno_path)
         results = self._load_XML(dir)
         if results is not None:
-            vehicle_type_labels, speed_labels, color_labels, \
-            intersection_labels = results
-            self.labels = {'vehicle': vehicle_type_labels,
-                           'speed': speed_labels,
-                           'color': color_labels,
-                           'intersection': intersection_labels}
+            (
+                vehicle_type_labels,
+                speed_labels,
+                color_labels,
+                intersection_labels,
+            ) = results
+            self.labels = {
+                "vehicle": vehicle_type_labels,
+                "speed": speed_labels,
+                "color": color_labels,
+                "intersection": intersection_labels,
+            }
 
             return self.labels
         else:
@@ -166,12 +191,16 @@ class LoaderUadetrac(AbstractLoader):
         return self.video_start_indices
 
     def save_labels(self):
-        save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                self.args.cache_label_name)
+        save_dir = os.path.join(
+            self.eva_dir,
+            "data",
+            self.args.cache_path,
+            self.args.cache_label_name)
         if self.labels is None:
-            warnings.warn("No labels loaded, call load_labels() first",
-                          Warning)
-        elif type(self.labels) is dict:
+            warnings.warn(
+                "No labels loaded, call load_labels() first",
+                Warning)
+        elif isinstance(self.labels, dict):
             np.save(save_dir, self.labels, allow_pickle=True)
             print("saved labels to", save_dir)
         else:
@@ -179,11 +208,14 @@ class LoaderUadetrac(AbstractLoader):
             print("labels type is ", type(self.labels))
 
     def save_boxes(self):
-        save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                self.args.cache_box_name)
+        save_dir = os.path.join(
+            self.eva_dir,
+            "data",
+            self.args.cache_path,
+            self.args.cache_box_name)
         if self.images is None:
             warnings.warn("No labels loaded, call load_boxes() first", Warning)
-        elif type(self.images) is np.ndarray:
+        elif isinstance(self.images, np.ndarray):
             np.save(save_dir, self.boxes)
             print("saved boxes to", save_dir)
         else:
@@ -191,18 +223,24 @@ class LoaderUadetrac(AbstractLoader):
 
     def get_frames(self, frame_ids):
         if self.images is None:
-            self.images = np.load(os.path.join(self.cache_dir, 'uadetrac.npy'))
+            self.images = np.load(os.path.join(self.cache_dir, "uadetrac.npy"))
         return self.images[frame_ids]
 
     def load_cached_boxes(self):
-        save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                self.args.cache_box_name)
+        save_dir = os.path.join(
+            self.eva_dir,
+            "data",
+            self.args.cache_path,
+            self.args.cache_box_name)
         self.boxes = np.load(save_dir, allow_pickle=True)
         return self.boxes
 
     def load_cached_labels(self):
-        save_dir = os.path.join(self.eva_dir, 'data', self.args.cache_path,
-                                self.args.cache_label_name)
+        save_dir = os.path.join(
+            self.eva_dir,
+            "data",
+            self.args.cache_path,
+            self.args.cache_label_name)
         labels_pickeled = np.load(save_dir, allow_pickle=True)
         self.labels = labels_pickeled.item()
         return self.labels
@@ -211,10 +249,10 @@ class LoaderUadetrac(AbstractLoader):
         width = self.image_width
         height = self.image_height
         import xml.etree.ElementTree as ET
+
         original_height = 540
         original_width = 960
-        anno_files = os.listdir(anno_dir)
-        anno_files.sort()
+        anno_files = sorted(os.listdir(anno_dir))
         boxes_dataset = []
         cumu_count = 0
 
@@ -227,19 +265,18 @@ class LoaderUadetrac(AbstractLoader):
             tree = ET.parse(file_path)
             tree_root = tree.getroot()
 
-            for frame in tree_root.iter('frame'):
+            for frame in tree_root.iter("frame"):
                 boxes_frame = []
-                curr_frame_num = int(frame.attrib['num'])
+                curr_frame_num = int(frame.attrib["num"])
                 if len(boxes_dataset) < cumu_count + curr_frame_num - 1:
-                    boxes_dataset.extend([None] * (
-                            cumu_count + curr_frame_num - len(boxes_dataset)))
-                for box in frame.iter('box'):
-                    top, left, bottom, right = self.get_corners(box,
-                                                                width /
-                                                                original_width,
-                                                                height /
-                                                                original_height
-                                                                )
+                    boxes_dataset.extend(
+                        [None] *
+                        (cumu_count + curr_frame_num - len(boxes_dataset))
+                    )
+                for box in frame.iter("box"):
+                    top, left, bottom, right = self.get_corners(
+                        box, width / original_width, height / original_height
+                    )
                     boxes_frame.append((top, left, bottom, right))
 
                 boxes_dataset.append(boxes_frame)
@@ -247,14 +284,20 @@ class LoaderUadetrac(AbstractLoader):
         return boxes_dataset
 
     def get_corners(self, box, width_scale, height_scale):
-        left = int(
-            float(box.attrib['left']) * width_scale)
-        top = int(
-            float(box.attrib['top']) * height_scale)
-        right = int((float(box.attrib['left']) + float(
-            box.attrib['width'])) * width_scale)
-        bottom = int((float(box.attrib['top']) + float(
-            box.attrib['height'])) * height_scale)
+        left = int(float(box.attrib["left"]) * width_scale)
+        top = int(float(box.attrib["top"]) * height_scale)
+        right = int(
+            (float(
+                box.attrib["left"]) +
+             float(
+                 box.attrib["width"])) *
+            width_scale)
+        bottom = int(
+            (float(
+                box.attrib["top"]) +
+             float(
+                 box.attrib["height"])) *
+            height_scale)
         return top, left, bottom, right
 
     def _convert_speed(self, original_speed):
@@ -276,16 +319,21 @@ class LoaderUadetrac(AbstractLoader):
         color_per_frame = []
         intersection_per_frame = []
 
-        for att in frame.iter('attribute'):
-            if att.attrib['vehicle_type']:
-                car_per_frame.append(att.attrib['vehicle_type'])
-            if att.attrib['speed']:
-                speed_per_frame.append(self._convert_speed(
-                    float(att.attrib['speed'])))
-            if 'color' in att.attrib.keys():
-                color_per_frame.append(att.attrib['color'])
-        return car_per_frame, speed_per_frame, color_per_frame, \
-               intersection_per_frame
+        for att in frame.iter("attribute"):
+            if att.attrib["vehicle_type"]:
+                car_per_frame.append(att.attrib["vehicle_type"])
+            if att.attrib["speed"]:
+                speed_per_frame.append(
+                    self._convert_speed(
+                        float(
+                            att.attrib["speed"])))
+            if "color" in att.attrib.keys():
+                color_per_frame.append(att.attrib["color"])
+        return \
+            car_per_frame, \
+            speed_per_frame, \
+            color_per_frame, \
+            intersection_per_frame
 
     def populate_label(self, per_frame, labels):
         if len(per_frame) == 0:
@@ -301,8 +349,9 @@ class LoaderUadetrac(AbstractLoader):
         :return:
         """
         if self.images is None:
-            warnings.warn("Must load image before loading labels...returning",
-                          Warning)
+            warnings.warn(
+                "Must load image before loading labels...returning",
+                Warning)
             return None
 
         car_labels = []
@@ -321,24 +370,28 @@ class LoaderUadetrac(AbstractLoader):
                 tree_root = tree.getroot()
                 start_frame_num = 1
                 start_frame = True
-                for frame in tree_root.iter('frame'):
-                    curr_frame_num = int(frame.attrib['num'])
+                for frame in tree_root.iter("frame"):
+                    curr_frame_num = int(frame.attrib["num"])
                     if start_frame and curr_frame_num != start_frame_num:
                         car_labels.append(
                             [None] * (curr_frame_num - start_frame_num))
                         speed_labels.append(
                             [None] * (curr_frame_num - start_frame_num))
 
-                    car_per_frame, speed_per_frame, color_per_frame, \
-                    intersection_per_frame = self.parse_frame_att(frame)
+                    (
+                        car_per_frame,
+                        speed_per_frame,
+                        color_per_frame,
+                        intersection_per_frame,
+                    ) = self.parse_frame_att(frame)
 
-                    assert (len(car_per_frame) == len(speed_per_frame))
+                    assert len(car_per_frame) == len(speed_per_frame)
 
                     self.populate_label(car_per_frame, car_labels)
                     self.populate_label(speed_per_frame, speed_labels)
                     self.populate_label(color_per_frame, color_labels)
-                    self.populate_label(intersection_per_frame,
-                                        intersection_labels)
+                    self.populate_label(
+                        intersection_per_frame, intersection_labels)
 
                     start_frame = False
 
@@ -346,27 +399,42 @@ class LoaderUadetrac(AbstractLoader):
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description='Define arguments for loader')
-    parser.add_argument('--image_path', default='small-data',
-                        help='Define data folder within eva/data/uadetrac')
-    parser.add_argument('--anno_path', default='small-annotations',
-                        help='Define annotation folder within '
-                             'eva/data/uadetrac')
-    parser.add_argument('--cache_path', default='npy_files',
-                        help='Define save folder for images, annotations, '
-                             'boxes')
-    parser.add_argument('--cache_image_name', default='ua_detrac_images.npy',
-                        help='Define filename for saving and loading cached '
-                             'images')
-    parser.add_argument('--cache_label_name', default='ua_detrac_labels.npy',
-                        help='Define filename for saving and loading cached '
-                             'labels')
-    parser.add_argument('--cache_box_name', default='ua_detrac_boxes.npy',
-                        help='Define filename for saving and loading cached '
-                             'boxes')
-    parser.add_argument('--cache_vi_name', default='ua_detrac_vi.npy',
-                        help='Define filename for saving and loading cached '
-                             'video indices')
+    parser = argparse.ArgumentParser(description="Define arguments for loader")
+    parser.add_argument(
+        "--image_path",
+        default="small-data",
+        help="Define data folder within eva/data/uadetrac",
+    )
+    parser.add_argument(
+        "--anno_path",
+        default="small-annotations",
+        help="Define annotation folder within " "eva/data/uadetrac",
+    )
+    parser.add_argument(
+        "--cache_path",
+        default="npy_files",
+        help="Define save folder for images, annotations, " "boxes",
+    )
+    parser.add_argument(
+        "--cache_image_name",
+        default="ua_detrac_images.npy",
+        help="Define filename for saving and loading cached " "images",
+    )
+    parser.add_argument(
+        "--cache_label_name",
+        default="ua_detrac_labels.npy",
+        help="Define filename for saving and loading cached " "labels",
+    )
+    parser.add_argument(
+        "--cache_box_name",
+        default="ua_detrac_boxes.npy",
+        help="Define filename for saving and loading cached " "boxes",
+    )
+    parser.add_argument(
+        "--cache_vi_name",
+        default="ua_detrac_vi.npy",
+        help="Define filename for saving and loading cached " "video indices",
+    )
     return parser
 
 
@@ -383,8 +451,10 @@ if __name__ == "__main__":
     labels = loader.load_labels()
     boxes = loader.load_boxes()
 
-    print("Time taken to load everything from disk", time.time() - st,
-          "seconds")
+    print(
+        "Time taken to load everything from disk",
+        time.time() - st,
+        "seconds")
     loader.save_boxes()
     loader.save_labels()
     loader.save_images()
@@ -393,12 +463,12 @@ if __name__ == "__main__":
     images_cached = loader.get_frames()
     labels_cached = loader.load_cached_labels()
     boxes_cached = loader.load_cached_boxes()
-    print("Time taken to load everything from npy", time.time() - st,
-          "seconds")
+    print("Time taken to load everything from npy",
+          time.time() - st, "seconds")
 
-    assert (images.shape == images_cached.shape)
-    assert (boxes.shape == boxes_cached.shape)
+    assert images.shape == images_cached.shape
+    assert boxes.shape == boxes_cached.shape
 
     for key, value in labels.items():
-        assert (labels[key] == labels_cached[key])
-    assert (labels.keys() == labels_cached.keys())
+        assert labels[key] == labels_cached[key]
+    assert labels.keys() == labels_cached.keys()

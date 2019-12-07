@@ -31,14 +31,17 @@ sys.path.append(eva_dir)
 # from query_optimizer.optimizer import Optimizer
 # TODO (galipremsagar): getting import issues in Optmizer import. please check
 
-class Query:
 
+class Query:
     def __init__(self, obj, score, model, red_rate):
         """
-        :param obj: obj will hold the object representation of the predicate, in future will be a tree node - Now a string.
+        :param obj: obj will hold the object representation of the predicate,
+            in future will be a tree node - Now a string.
         :param score: score will store the PP value of the predicate.
-        :param model: model will store the model responsible for the PP score of the query.
-        :param red_rate: This is the final reduction rate for forming the query.
+        :param model: model will store the model responsible for the PP score
+            of the query.
+        :param red_rate: This is the final reduction rate for forming the
+         query.
         """
         self.obj = obj
         self.score = score
@@ -47,7 +50,8 @@ class Query:
 
     def __lt__(self, other):
         """
-        Implemented primarily for a .sort function to sort list of queries using the score attribute.
+        Implemented primarily for a .sort function to sort list
+        of queries using the score attribute.
         :param other: other Query object to compare with
         """
         return self.score < other.score
@@ -70,8 +74,9 @@ class CostBasedQueryOptimizer:
         thread.daemon = True
         thread.start()
         while True:
-            input = eval(input(
-                'Type in your query in the form of __label__ > __number__\n'))
+            input = eval(
+                input("Type in your query in the form of"
+                      " __label__ > __number__\n"))
 
             self.parseInput(input)
 
@@ -142,15 +147,18 @@ class CostBasedQueryOptimizer:
                 query_operators.append(query_sub)
             else:
 
-                if True not in [operator in self.operators for operator in
-                                query_sub]:
+                if True not in [
+                    operator in self.operators
+                        for operator in query_sub]:
                     return [], []
                 for operator in self.operators:
                     query_sub_list = query_sub.split(operator)
-                    if type(query_sub_list) is list and len(
-                            query_sub_list) > 1:
+                    if isinstance(
+                            query_sub_list,
+                            list) and len(query_sub_list) > 1:
                         query_parsed.append(
-                            [query_sub_list[0], operator, query_sub_list[1]])
+                            [query_sub_list[0], operator, query_sub_list[1]]
+                        )
                         break
         # query_parsed ex: [ ["t", "=", "van"], ["s", ">", "60"]]
         # query_operators ex: ["||", "||", "&&"]
@@ -175,11 +183,11 @@ class CostBasedQueryOptimizer:
         index = 0
         for sub_parsed_query in parsed_query:
             if len(parsed_query) >= 2 and index < len(query_ops):
-                final_str += ''.join(sub_parsed_query) + " " + query_ops[
-                    index] + " "
+                final_str += "".join(sub_parsed_query) + \
+                             " " + query_ops[index] + " "
                 index += 1
             else:
-                final_str += ''.join(sub_parsed_query)
+                final_str += "".join(sub_parsed_query)
         return final_str
 
     def _wrangler(self, query, label_desc):
@@ -212,33 +220,45 @@ class CostBasedQueryOptimizer:
             operator = query_sub_list[1]
             object = query_sub_list[2]
 
-            assert (
-                    subject in label_desc)  # Label should be in label
+            assert subject in label_desc  # Label should be in label
             # description dictionary
             l_desc = label_desc[subject]
             if l_desc[0] == constants.DISCRETE:
                 equivalence = [self.convertL2S([query_sub_list], [])]
-                assert (operator == "=" or operator == "!=")
+                assert operator == "=" or operator == "!="
                 alternate_string = ""
                 for category in l_desc[1]:
                     if category != object:
-                        alternate_string += subject + self._logic_reverse(
-                            operator) + category + " && "
+                        alternate_string += (subject +
+                                             self._logic_reverse(operator) +
+                                             category +
+                                             " && ")
                 alternate_string = alternate_string[
-                                   :-len(" && ")]  # must strip the last ' || '
+                                   : -len(" && ")
+                                   ]  # must strip the last ' || '
                 # query_tmp, _ = self._parseQuery(alternate_string)
                 equivalence.append(alternate_string)
 
             elif l_desc[0] == constants.CONTINUOUS:
 
                 equivalence = [self.convertL2S([query_sub_list], [])]
-                assert (operator == "=" or operator == "!=" or operator == "<"
-                        or operator == "<=" or operator == ">" or operator ==
-                        ">=")
+                assert (
+                        operator == "="
+                        or operator == "!="
+                        or operator == "<"
+                        or operator == "<="
+                        or operator == ">"
+                        or operator == ">="
+                )
                 alternate_string = ""
                 if operator == "!=":
-                    alternate_string += subject + ">" + object + " && " + \
-                                        subject + "<" + object
+                    alternate_string += (subject +
+                                         ">" +
+                                         object +
+                                         " && " +
+                                         subject +
+                                         "<" +
+                                         object)
                     query_tmp, _ = self._parseQuery(alternate_string)
                     equivalence.append(query_tmp)
                 if operator == "<" or operator == "<=":
@@ -264,8 +284,13 @@ class CostBasedQueryOptimizer:
 
         return query_transformed, query_operators
 
-    def _compute_expression(self, query_info, pp_list, pp_stats, k,
-                            accuracy_budget):
+    def _compute_expression(
+            self,
+            query_info,
+            pp_list,
+            pp_stats,
+            k,
+            accuracy_budget):
         """
 
         def CostBasedQueryOptimizer(P, {trained PPs}):
@@ -317,46 +342,54 @@ class CostBasedQueryOptimizer:
                 evaluation_models_tmp = []
                 evaluation_stats_tmp = []
                 for i in range(len(query_sub_list)):
-                    query_sub_str = ''.join(query_sub_list[i])
+                    query_sub_str = "".join(query_sub_list[i])
                     if query_sub_str in pp_list:
                         # Find the best model for the pp
 
-                        data = self._find_model(query_sub_str, pp_stats,
-                                                accuracy_budget)
+                        data = self._find_model(
+                            query_sub_str, pp_stats, accuracy_budget
+                        )
                         if data is None:
                             continue
                         else:
                             model, reduction_rate = data
                             evaluation_tmp.append(query_sub_str)
                             evaluation_models_tmp.append(
-                                model)  # TODO: We need to make sure this is
+                                model
+                            )  # TODO: We need to make sure this is
                             # the model_name
                             evaluation_stats_tmp.append(reduction_rate)
                             k_count += 1
 
                 reduc_rate = 0
                 if len(evaluation_stats_tmp) != 0:
-                    reduc_rate = self._update_stats(evaluation_stats_tmp,
-                                                    query_sub_operators)
+                    reduc_rate = self._update_stats(
+                        evaluation_stats_tmp, query_sub_operators
+                    )
 
                 evaluation.append(query_sub)
                 evaluation_models.append(evaluation_models_tmp)
                 evaluation_stats.append(reduc_rate)
             op_index += 1
 
-            evaluations.append(Query(self.convertL2S(evaluation, query_operators),
-                                     self._update_stats(evaluation_stats, query_operators), evaluation_models,
-                                     evaluation_stats))
+            evaluations.append(
+                Query(
+                    self.convertL2S(evaluation, query_operators),
+                    self._update_stats(evaluation_stats, query_operators),
+                    evaluation_models,
+                    evaluation_stats,
+                )
+            )
         evaluations.sort()
         max_index = -1
         best_query = evaluations[
-            max_index].obj  # this will be something like "t!=bus && t!=truck && t!=car"
+            max_index
+        ].obj  # this will be something like "t!=bus && t!=truck && t!=car"
         best_models = evaluations[max_index].model
         best_reduction_rate = evaluations[max_index].red_rate
 
         pp_names, op_names = self._convertQuery2PPOps(best_query)
-        return [(pp_names, op_names, best_models),
-                best_reduction_rate]
+        return [(pp_names, op_names, best_models), best_reduction_rate]
 
     def _convertQuery2PPOps(self, query):
         """
@@ -390,16 +423,18 @@ class CostBasedQueryOptimizer:
 
         for i in range(1, len(evaluation_stats)):
             if query_operators[i - 1] == "&&":
-                final_red = final_red + evaluation_stats[i] - final_red * \
-                            evaluation_stats[i]
+                final_red = (
+                        final_red +
+                        evaluation_stats[i] -
+                        final_red *
+                        evaluation_stats[i])
             elif query_operators[i - 1] == "||":
                 final_red = final_red * evaluation_stats[i]
 
         return final_red
 
     def _compute_cost_red_rate(self, C, R):
-        assert (
-                R >= 0 and R <= 1)  # R is reduction rate and should be
+        assert R >= 0 and R <= 1  # R is reduction rate and should be
         # between 0 and 1
         if R == 0:
             R = 0.000001
@@ -413,24 +448,38 @@ class CostBasedQueryOptimizer:
             if possible_models[possible_model]["A"] < accuracy_budget:
                 continue
             if best == []:
-                best = [possible_model, self._compute_cost_red_rate(
-                    possible_models[possible_model]["C"],
-                    possible_models[possible_model]["R"]),
-                        possible_models[possible_model]["R"]]
+                best = [
+                    possible_model,
+                    self._compute_cost_red_rate(
+                        possible_models[possible_model]["C"],
+                        possible_models[possible_model]["R"],
+                    ),
+                    possible_models[possible_model]["R"],
+                ]
             else:
                 alternative_best_cost = self._compute_cost_red_rate(
                     possible_models[possible_model]["C"],
-                    possible_models[possible_model]["R"])
+                    possible_models[possible_model]["R"],
+                )
                 if alternative_best_cost < best[1]:
-                    best = [possible_model, alternative_best_cost,
-                            possible_models[possible_model]["R"]]
+                    best = [
+                        possible_model,
+                        alternative_best_cost,
+                        possible_models[possible_model]["R"],
+                    ]
 
         if best == []:
             return None
         else:
             return best[0], best[2]
 
-    def run(self, query, pp_list, pp_stats, label_desc, k=3,
+    def run(
+            self,
+            query,
+            pp_list,
+            pp_stats,
+            label_desc,
+            k=3,
             accuracy_budget=0.9):
         """
 
@@ -444,48 +493,92 @@ class CostBasedQueryOptimizer:
         """
         query_transformed, query_operators = self._wrangler(query, label_desc)
         # query_transformed is a comprehensive list of transformed queries
-        return self._compute_expression([query_transformed, query_operators],
-                                        pp_list, pp_stats, k, accuracy_budget)
+        return self._compute_expression(
+            [
+                query_transformed,
+                query_operators
+            ],
+            pp_list,
+            pp_stats,
+            k,
+            accuracy_budget
+        )
 
 
 if __name__ == "__main__":
 
-    query_list = ["t=suv", "s>60",
-                  "c=white", "c!=white", "o=pt211", "c=white && t=suv",
-                  "s>60 && s<65", "t=sedan || t=truck", "i=pt335 && o=pt211",
-                  "t=suv && c!=white", "c=white && t!=suv && t!=van",
-                  "t=van && s>60 && s<65", "c!=white && (t=sedan || t=truck)",
-                  "i=pt335 && o!=pt211 && o!=pt208",
-                  "t=van && i=pt335 && o=pt211",
-                  "t!=sedan && c!=black && c!=silver && t!=truck",
-                  "t=van && s>60 && s<65 && o=pt211",
-                  "t!=suv && t!=van && c!=red && t!=white",
-                  "(i=pt335 || i=pt342) && o!=pt211 && o!=pt208",
-                  "i=pt335 && o=pt211 && t=van && c=red"]
+    query_list = [
+        "t=suv",
+        "s>60",
+        "c=white",
+        "c!=white",
+        "o=pt211",
+        "c=white && t=suv",
+        "s>60 && s<65",
+        "t=sedan || t=truck",
+        "i=pt335 && o=pt211",
+        "t=suv && c!=white",
+        "c=white && t!=suv && t!=van",
+        "t=van && s>60 && s<65",
+        "c!=white && (t=sedan || t=truck)",
+        "i=pt335 && o!=pt211 && o!=pt208",
+        "t=van && i=pt335 && o=pt211",
+        "t!=sedan && c!=black && c!=silver && t!=truck",
+        "t=van && s>60 && s<65 && o=pt211",
+        "t!=suv && t!=van && c!=red && t!=white",
+        "(i=pt335 || i=pt342) && o!=pt211 && o!=pt208",
+        "i=pt335 && o=pt211 && t=van && c=red",
+    ]
 
     # TODO: Support for parenthesis queries
-    query_list_mod = ["t=suv", "s>60",
-                      "c=white", "c!=white", "o=pt211", "c=white && t=suv",
-                      "s>60 && s<65", "t=sedan || t=truck",
-                      "i=pt335 && o=pt211",
-                      "t=suv && c!=white", "c=white && t!=suv && t!=van",
-                      "t=van && s>60 && s<65",
-                      "t=sedan || t=truck && c!=white",
-                      "i=pt335 && o!=pt211 && o!=pt208",
-                      "t=van && i=pt335 && o=pt211",
-                      "t!=sedan && c!=black && c!=silver && t!=truck",
-                      "t=van && s>60 && s<65 && o=pt211",
-                      "t!=suv && t!=van && c!=red && t!=white",
-                      "i=pt335 || i=pt342 && o!=pt211 && o!=pt208",
-                      "i=pt335 && o=pt211 && t=van && c=red"]
+    query_list_mod = [
+        "t=suv",
+        "s>60",
+        "c=white",
+        "c!=white",
+        "o=pt211",
+        "c=white && t=suv",
+        "s>60 && s<65",
+        "t=sedan || t=truck",
+        "i=pt335 && o=pt211",
+        "t=suv && c!=white",
+        "c=white && t!=suv && t!=van",
+        "t=van && s>60 && s<65",
+        "t=sedan || t=truck && c!=white",
+        "i=pt335 && o!=pt211 && o!=pt208",
+        "t=van && i=pt335 && o=pt211",
+        "t!=sedan && c!=black && c!=silver && t!=truck",
+        "t=van && s>60 && s<65 && o=pt211",
+        "t!=suv && t!=van && c!=red && t!=white",
+        "i=pt335 || i=pt342 && o!=pt211 && o!=pt208",
+        "i=pt335 && o=pt211 && t=van && c=red",
+    ]
 
     query_list_test = ["c=white && t!=suv && t!=van"]
 
-    synthetic_pp_list = ["t=suv", "t=van", "t=sedan", "t=truck",
-                         "c=red", "c=white", "c=black", "c=silver",
-                         "s>40", "s>50", "s>60", "s<65", "s<70",
-                         "i=pt335", "i=pt211", "i=pt342", "i=pt208",
-                         "o=pt335", "o=pt211", "o=pt342", "o=pt208"]
+    synthetic_pp_list = [
+        "t=suv",
+        "t=van",
+        "t=sedan",
+        "t=truck",
+        "c=red",
+        "c=white",
+        "c=black",
+        "c=silver",
+        "s>40",
+        "s>50",
+        "s>60",
+        "s<65",
+        "s<70",
+        "i=pt335",
+        "i=pt211",
+        "i=pt342",
+        "i=pt208",
+        "o=pt335",
+        "o=pt211",
+        "o=pt342",
+        "o=pt208",
+    ]
 
     query_list_short = ["t=van && s>60 && o=pt211"]
 
@@ -495,29 +588,34 @@ if __name__ == "__main__":
     #  numbers
     # TODO: When selecting appropriate PPs, we only select based on reduction
     #  rate
-    with open('../../query_optimizer/utils/synthetic_pp_stats_short.json') as f1:
+    stats_short_file = "../../query_optimizer/utils/" \
+                       "synthetic_pp_stats_short.json"
+    with open(stats_short_file) as f1:
         synthetic_pp_stats_short = json.load(f1)
 
-    with open('../../query_optimizer/utils/synthetic_pp_stats.json') as f2:
+    with open("../../query_optimizer/utils/synthetic_pp_stats.json") as f2:
         synthetic_pp_stats = json.load(f2)
 
     # TODO: We will need to convert the queries/labels into "car, bus, van,
     #  others". This is how the dataset defines things
 
-    label_desc = {"t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
-                  "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
-                  "c": [constants.DISCRETE,
-                        ["white", "red", "black", "silver"]],
-                  "i": [constants.DISCRETE,
-                        ["pt335", "pt342", "pt211", "pt208"]],
-                  "o": [constants.DISCRETE,
-                        ["pt335", "pt342", "pt211", "pt208"]]}
+    label_desc = {
+        "t": [constants.DISCRETE, ["sedan", "suv", "truck", "van"]],
+        "s": [constants.CONTINUOUS, [40, 50, 60, 65, 70]],
+        "c": [constants.DISCRETE, ["white", "red", "black", "silver"]],
+        "i": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
+        "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
+    }
 
     qo = CostBasedQueryOptimizer()
 
     print("Running Query Optimizer Demo...")
 
     for query in query_list_mod:
-        print("Actual Query: ",
-              query, " -> ", "Best alternate query: -> ", (
-                  qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)))
+        print(
+            "Actual Query: ",
+            query,
+            " -> ",
+            "Best alternate query: -> ",
+            (qo.run(query, synthetic_pp_list, synthetic_pp_stats, label_desc)),
+        )
