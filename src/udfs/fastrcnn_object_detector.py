@@ -3,6 +3,7 @@
 from typing import List, Tuple
 
 import numpy as np
+import torch
 import torchvision
 from torchvision import transforms
 
