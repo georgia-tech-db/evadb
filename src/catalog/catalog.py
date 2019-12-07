@@ -84,7 +84,7 @@ class Catalog:
             raise Exception('Dataset is not set.')
 
     def _createDatabaseConnection(self) -> SqliteConnection:
-        eva_dir = os.path.dirname(os.path.dirname(os.getcwd()))
+        eva_dir = os.getcwd()
         catalog_dir = os.path.join(eva_dir, 'src', 'catalog')
 
         try:
