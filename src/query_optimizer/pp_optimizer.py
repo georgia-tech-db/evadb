@@ -8,13 +8,12 @@ from src.expression.logical_expression import LogicalExpression
 from src.query_optimizer.memo import Memo
 
 
-class PPOptmizer:
+class PPOptimizer:
 
-    def __init__(self, catalog: Catalog, predicates: list, accuracy_budget: float = 0.9):
+    def __init__(self, catalog: Catalog, accuracy_budget: float = 0.9):
         self._catalog = catalog
         self._memo = Memo()
         self._pp_handler = self._catalog.getProbPredicateHandler()
-        self._predicates = predicates
         self.accuracy_budget = accuracy_budget
 
     def _get_pp_stats(self) -> dict:
@@ -59,7 +58,7 @@ class PPOptmizer:
         else:
             return best[0], best[2]
 
-    def _wrangler(self, expression: LogicalExpression, label_desc: dict) -> list:
+    def _resolve_logical_expr(self, expression: LogicalExpression, label_desc: dict) -> list:
         """ Generate possible enumerations of the `expression`
 
         TODO: Currently supporting LogicalExpression, but its a easy modification to support AbstractExpression
@@ -82,7 +81,7 @@ class PPOptmizer:
                 new_not_expr = self.get_identical_expression(label_desc, leftExpr)
                 new_left_exprs.append(new_not_expr)
             elif leftExpr.etype == ExpressionType.COMPARE_LOGICAL:
-                new_left_exprs.extend(self._wrangler(leftExpr, label_desc))
+                new_left_exprs.extend(self._resolve_logical_expr(leftExpr, label_desc))
 
         # Explore right expr
         if rightExpr is not None:
@@ -90,7 +89,7 @@ class PPOptmizer:
                 new_not_expr = self.get_identical_expression(label_desc, rightExpr)
                 new_right_exprs.append(new_not_expr)
             elif rightExpr.etype == ExpressionType.COMPARE_LOGICAL:
-                new_right_exprs.extend(self._wrangler(leftExpr, label_desc))
+                new_right_exprs.extend(self._resolve_logical_expr(leftExpr, label_desc))
 
         enumerated_exprs = []
         for left in new_left_exprs:
@@ -161,7 +160,7 @@ class PPOptmizer:
             reduction_rate = 0.000001
         return cost / reduction_rate
 
-    def execute(self):
+    def execute(self, predicate: AbstractExpression):
         """Finds optimal order expression based on PP execution cost evaluation."""
 
         stats = self._get_pp_stats()
@@ -176,21 +175,27 @@ class PPOptmizer:
                       "o": [constants.DISCRETE,
                             ["pt335", "pt342", "pt211", "pt208"]]}
 
-        # TODO: Generalize this all list of expression. A loop.
-        expr = self._predicates[0]
-        enumerations = self._wrangler(expr, label_desc)
-        candidate_cost_list = []
-        for candidate in enumerations:
-            execution_cost = self._compute_expression_costs(candidate, stats)
-            candidate_cost_list.append((candidate, execution_cost))
+        expr = predicate
+        if isinstance(expr, LogicalExpression):
+            enumerations = self._resolve_logical_expr(expr, label_desc)
+            candidate_cost_list = []
+            for candidate in enumerations:
+                execution_cost = self._compute_expression_costs(candidate, stats)
+                candidate_cost_list.append((candidate, execution_cost))
 
-        # Sort based on optimal execution cost
-        def sort_on_second_index(x):
-            return x[1]
+            # Sort based on optimal execution cost
+            def sort_on_second_index(x):
+                return x[1]
 
-        candidate_cost_list.sort(key=sort_on_second_index)
-        # return the best candidate
-        return candidate_cost_list[0]
+            candidate_cost_list.sort(key=sort_on_second_index)
+            # return the best candidate
+            return candidate_cost_list[0]
+        else:
+            # As of now, we are optimizing LogicalExpresson using PPs. Need to add support for Constant Expression
+            # in next iteration.
+            #TODO: Define cost of unevaluated expressions. Currently setting a constant 0.5
+            cost = 0.5
+            return expr, cost
 
 
 if __name__ == '__main__':
@@ -215,7 +220,7 @@ if __name__ == '__main__':
     logical_expr2 = LogicalExpression(cmpr_exp1, 'AND', cmpr_exp3)
 
     catalog = Catalog(constants.UADETRAC)
-    predicates = [logical_expr2]
-    pp_optimizer = PPOptmizer(catalog, predicates)
-    out = pp_optimizer.execute()
+    predicate = logical_expr2
+    pp_optimizer = PPOptimizer(catalog)
+    out = pp_optimizer.execute(predicate)
     print(out)

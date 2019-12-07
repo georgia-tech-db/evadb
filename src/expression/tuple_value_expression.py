@@ -13,6 +13,9 @@ class TupleValueExpression(AbstractExpression):
         self._table_name = None
         self._col_name = None
 
+    def set_col_name(self, col_name: str):
+        self._col_name = col_name
+
     # def evaluate(AbstractTuple tuple1, AbstractTuple tuple2):
 
     # don't know why are we getting 2 tuples
@@ -23,6 +26,8 @@ class TupleValueExpression(AbstractExpression):
 
     # remove this once doen with tuple class
     def evaluate(self, *args):
+        if self._col_name:
+            return self._col_name
         if args == None:
             # error Handling
             pass
