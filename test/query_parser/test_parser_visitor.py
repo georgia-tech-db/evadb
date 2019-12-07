@@ -92,7 +92,10 @@ class ParserVisitorTest(unittest.TestCase):
             visitor.visitComparisonOperator(ctx),
             ExpressionType.COMPARE_GREATER)
 
-    def test_visit_full_column_name(self):
+    def test_visit_full_column_name_none(self):
+        ''' Testing for getting a Warning when column name is None 
+            Function: visitFullColumnName 
+        '''
         ctx = MagicMock()
         visitor = EvaParserVisitor()
         EvaParserVisitor.visit = MagicMock()
