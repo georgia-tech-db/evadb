@@ -14,12 +14,18 @@ class AbstractSelect(AbstractPlan):
     Arguments:
         predicate : Expression
         videos : list of videos on which the select will be executed
-        columns_id : columns used in the select in the form of "tablename.attribute"
+        columns_id : columns used in the select in the
+        form of "tablename.attribute"
         foreign_column_id: columns in the form of "tablename.attribute"
     """
 
-    def __init__(self, predicate: AbstractExpression, videos: List[AbstractVideoLoader],
-                 column_ids: List[str], foreign_column_ids: List[str]):
+    def __init__(
+        self,
+        predicate: AbstractExpression,
+        videos: List[AbstractVideoLoader],
+        column_ids: List[str],
+        foreign_column_ids: List[str],
+    ):
         super(AbstractSelect, self).__init__(PlanNodeType.LOGICAL_SELECT)
         self._predicate = predicate
         self._column_ids = column_ids
@@ -52,7 +58,9 @@ class AbstractSelect(AbstractPlan):
         self._foreign_column_ids = foreign
 
     def __str__(self, level=0):
-        select_cols_str = 'sigma {} {}'.format(str(self._predicate), str(self._foreign_column_ids))
+        select_cols_str = "sigma {} {}".format(
+            str(self._predicate), str(self._foreign_column_ids)
+        )
         out_string = "\t" * level + select_cols_str + "\n"
         for child in self.children:
             out_string += child.__str__(level + 1)

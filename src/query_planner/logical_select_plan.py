@@ -11,11 +11,17 @@ class LogicalSelectPlan(AbstractSelect):
      Arguments:
          predicate : Expression
          videos : list of videos on which the select will be executed
-         columns_id : columns used in the select in the form of "tablename.attribute"
+         columns_id : columns used in the select in the
+         form of "tablename.attribute"
      """
-    def __init__(self, predicate: AbstractExpression,
-                 videos: List[AbstractVideoLoader],
-                 column_ids: List[str], foreign_column_ids: List[str]):
+
+    def __init__(
+        self,
+        predicate: AbstractExpression,
+        videos: List[AbstractVideoLoader],
+        column_ids: List[str],
+        foreign_column_ids: List[str],
+    ):
         super().__init__(predicate, videos, column_ids, foreign_column_ids)
 
     def get_node_type(self):

@@ -5,8 +5,10 @@ from src.query_planner.abstract_plan import PlanNodeType
 
 class VideoTablePlan(AbstractTable):
     """Class for all the table based planners
-       Basically used to represent a table at the bottom of the logical plan tree
-       Note that this implementation assumes that each video is a table like in Blazeit
+       Basically used to represent a table at the bottom
+        of the logical plan tree
+       Note that this implementation assumes that each
+       video is a table like in Blazeit
     Arguments:
         video : video encapsulated by the table
     """
