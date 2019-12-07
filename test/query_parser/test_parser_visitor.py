@@ -111,7 +111,7 @@ class ParserVisitorTest(unittest.TestCase):
         visitor = EvaParserVisitor()
         EvaParserVisitor.visit = MagicMock()
         EvaParserVisitor.visit.return_value = None
-        with self.assertWarns(SyntaxWarning, msg='Column Name Missing'):
+        with self.assertWarns(SyntaxWarning, msg='Invalid from table'):
             visitor.visitTableName(ctx)
 
     def test_logical_expression(self):
@@ -139,6 +139,19 @@ class ParserVisitorTest(unittest.TestCase):
         expected = visitor.visitLogicalExpression(ctx)
         self.assertEqual(expected,None)
 
+    def test_visit_string_literal_none(self):
+        '''Testing when string literal is None
+            Function: visitStringLiteral
+        '''
+        visitor = EvaParserVisitor()
+        ctx = MagicMock()
+        ctx.STRING_LITERAL.return_value = None
+
+        EvaParserVisitor.visitChildren = MagicMock()
+        mock_visit = EvaParserVisitor.visitChildren
+
+        expected = visitor.visitStringLiteral(ctx)
+        mock_visit.assert_has_calls([call(ctx)])
 
 
 
