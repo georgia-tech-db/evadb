@@ -103,6 +103,33 @@ class ParserVisitorTest(unittest.TestCase):
         with self.assertWarns(SyntaxWarning, msg='Column Name Missing'):
             visitor.visitFullColumnName(ctx)
 
+    def test_logical_expression(self):
+        '''Testing for break in code if len(children) < 3 
+        Function : visitLogicalExpression
+        '''
+        ctx = MagicMock()
+        visitor = EvaParserVisitor()
+        
+        # Test for no children
+        ctx.children = []
+        expected = visitor.visitLogicalExpression(ctx)
+        self.assertEqual(expected,None)
+
+        # Test for one children
+        child_1 = MagicMock()
+        ctx.children = [child_1]
+        expected = visitor.visitLogicalExpression(ctx)
+        self.assertEqual(expected,None)
+
+        # Test for two children
+        child_1 = MagicMock()
+        child_2 = MagicMock()
+        ctx.children = [child_1, child_2]
+        expected = visitor.visitLogicalExpression(ctx)
+        self.assertEqual(expected,None)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
