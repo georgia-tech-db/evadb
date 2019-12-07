@@ -124,20 +124,20 @@ class ParserVisitorTest(unittest.TestCase):
         # Test for no children
         ctx.children = []
         expected = visitor.visitLogicalExpression(ctx)
-        self.assertEqual(expected,None)
+        self.assertEqual(expected, None)
 
         # Test for one children
         child_1 = MagicMock()
         ctx.children = [child_1]
         expected = visitor.visitLogicalExpression(ctx)
-        self.assertEqual(expected,None)
+        self.assertEqual(expected, None)
 
         # Test for two children
         child_1 = MagicMock()
         child_2 = MagicMock()
         ctx.children = [child_1, child_2]
         expected = visitor.visitLogicalExpression(ctx)
-        self.assertEqual(expected,None)
+        self.assertEqual(expected, None)
 
     def test_visit_string_literal_none(self):
         '''Testing when string literal is None
@@ -153,7 +153,17 @@ class ParserVisitorTest(unittest.TestCase):
         expected = visitor.visitStringLiteral(ctx)
         mock_visit.assert_has_calls([call(ctx)])
 
-
+    def test_visit_constant(self):
+        '''Testing for value of returned constant when real literal is not None
+        Function: visitConstant
+        '''
+        ctx = MagicMock()
+        visitor = EvaParserVisitor()
+        ctx.REAL_LITERAL.return_value = '5'
+        expected = visitor.visitConstant(ctx)
+        self.assertEqual(
+            expected.evaluate(),
+            float(ctx.getText()))
 
 if __name__ == '__main__':
     unittest.main()
