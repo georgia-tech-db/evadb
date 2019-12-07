@@ -165,5 +165,20 @@ class ParserVisitorTest(unittest.TestCase):
             expected.evaluate(),
             float(ctx.getText()))
 
+    def test_visit_query_specification_base_exception(self):
+        EvaParserVisitor.visit = MagicMock()
+        mock_visit = EvaParserVisitor.visit
+
+        visitor = EvaParserVisitor()
+        ctx = MagicMock()
+        child_1 = MagicMock()
+        child_2 = MagicMock()
+        ctx.children = [None, child_1, child_2]
+        child_1.getRuleIndex.side_effect = BaseException()
+
+        expected = visitor.visitQuerySpecification(ctx)
+
+        self.assertEqual(expected, None)
+
 if __name__ == '__main__':
     unittest.main()
