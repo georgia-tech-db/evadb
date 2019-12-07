@@ -9,7 +9,7 @@ class SobelX:
 
     def apply(self, frames):
         for frame in frames:
-            sobelx = cv2.Sobel(frame.image,cv2.CV_64F, 1, 0, self.kernel_size)
+            sobelx = cv2.Sobel(frame.image, cv2.CV_64F, 1, 0, self.kernel_size)
             frame.image = sobelx
         return frames
 
@@ -21,6 +21,6 @@ class SobelY:
 
     def apply(self, frames):
         for frame in frames:
-            sobely = cv2.Sobel(frame.image,cv2.CV_64F, 0, 1, self.kernel_size)
+            sobely = cv2.Sobel(frame.image, cv2.CV_64F, 0, 1, self.kernel_size)
             frame.image = sobely
         return frames

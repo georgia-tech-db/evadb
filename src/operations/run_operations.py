@@ -8,12 +8,12 @@ from sobel import SobelX, SobelY
 from scipy import misc
 import matplotlib.pyplot as plt
 supported_filters = {"blur": Blur(), 
-					 "equalised_histogram": Equalised_Histogram(), 
-					 "grayscale": Grayscale(), 
-					 "laplacian": Laplacian(), 
-					 "scharr": ScharrX(), 
-					 "sobel": SobelX(),
-					 }
+					"equalised_histogram": Equalised_Histogram(), 
+					"grayscale": Grayscale(), 
+					"laplacian": Laplacian(), 
+					"scharr": ScharrX(), 
+					"sobel": SobelX(),
+					}
 def get_help():
 	print("--- Filters supported ---")
 	print("blur")
@@ -24,7 +24,8 @@ def get_help():
 	print("sobel")
 	print("\n")
 	print("--- Usage ---")
-	print("python run_operations.py --fiter_name='filter_name' --image='image_name/images_path'")
+	print("python run_operations.py \
+		--fiter_name='filter_name' --image='image_name/images_path'")
 
 if __name__ == "__main__":
 
