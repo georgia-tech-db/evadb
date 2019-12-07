@@ -39,7 +39,7 @@ class UaDetracTableHandler(BaseTableHandler):
 
     def create_uadetrac_table(self, conn):
         sql = (
-            """CREATE TABLE IF NOT EXISTS %s(id INTEGER 
+            """CREATE TABLE IF NOT EXISTS %s(id INTEGER
                 PRIMARY KEY,video_id INTEGER NOT NULL)"""
             % self.table_name
         )
@@ -63,7 +63,9 @@ class UaDetracTableHandler(BaseTableHandler):
         conn.exec_multiple(insert_script)
 
     def get_frame_ids(self, conn, video_id):
-        sql = """select * from %s  where video_id = %s""" % (self.table_name, video_id)
+        sql = """select * from %s  where video_id = %s""" % (
+            self.table_name, video_id)
         df = pd.read_sql_query(sql, conn.conn)
-        mappings = [VideoFrameMap(args) for args in df.to_dict(orient="records")]
+        mappings = [VideoFrameMap(args)
+                    for args in df.to_dict(orient="records")]
         return [m.id for m in mappings]

@@ -8,7 +8,6 @@ from typing import List
 from src.query_planner.abstract_plan import PlanNodeType
 
 
-
 class AbstractInnerJoin(AbstractPlan):
     """Abstract class for all the inner join based planners
     Arguments:
@@ -22,7 +21,6 @@ class AbstractInnerJoin(AbstractPlan):
         self._join_ids = join_ids
         self._videos = videos
 
-
     @property
     def videos(self) -> List[AbstractVideoLoader]:
         return self._videos
@@ -31,11 +29,10 @@ class AbstractInnerJoin(AbstractPlan):
     def join_ids(self) -> List[int]:
         return self._join_ids
 
-
     def __str__(self, level=0):
-        pt1 = ' join '.join([str(video.video_metadata.file) for video in self.videos])
-        pt2 = ' = '.join([str(id) for id in self._join_ids])
-        join_cols_str = '{}__{}'.format(pt1, pt2)
+        pt1 = " join ".join([str(video.video_metadata.file) for video in self.videos])
+        pt2 = " = ".join([str(id) for id in self._join_ids])
+        join_cols_str = "{}__{}".format(pt1, pt2)
         out_string = "\t" * level + join_cols_str + "\n"
         for child in self.children:
             out_string += child.__str__(level + 1)
