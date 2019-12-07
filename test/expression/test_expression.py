@@ -69,19 +69,24 @@ class ExpressionsTest(unittest.TestCase):
         self.assertEqual(False, logical_expression.evaluate())
 
         logical_expression = LogicalExpression(const_exp_0, "NOR", const_exp_0)
-        self.assertRaises(ValueError, logical_expression.evaluate())
+        with self.assertRaises(ValueError):
+            logical_expression.evaluate()
 
         logical_expression = LogicalExpression(const_exp_0, "XOR", const_exp_0)
-        self.assertRaises(ValueError, logical_expression.evaluate())
+        with self.assertRaises(ValueError):
+            logical_expression.evaluate()
 
         logical_expression = LogicalExpression(const_exp_0, "^", const_exp_0)
-        self.assertRaises(ValueError, logical_expression.evaluate())
+        with self.assertRaises(ValueError):
+            logical_expression.evaluate()
 
         logical_expression = LogicalExpression(const_exp_0, "&&", const_exp_0)
-        self.assertRaises(ValueError, logical_expression.evaluate())
+        with self.assertRaises(ValueError):
+            logical_expression.evaluate()
 
         logical_expression = LogicalExpression(const_exp_0, "||", const_exp_0)
-        self.assertRaises(ValueError, logical_expression.evaluate())
+        with self.assertRaises(ValueError):
+            logical_expression.evaluate()
 
     def test_logical_expression(self):
         tpl_exp = TupleValueExpression(0)
