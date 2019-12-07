@@ -22,6 +22,7 @@ install:
   - conda env create -f environment_mac.yml
   - source activate eva_35
   - conda list
+  - export PYTHONPATH=. py.test
 
 script:
   - pycodestyle  --select E src/ test/ --exclude src/filters
