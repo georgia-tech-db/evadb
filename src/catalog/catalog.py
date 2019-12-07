@@ -17,9 +17,11 @@ from src import constants
 
 class Catalog:
     """
-        Catalog provides all the meta information for a database. Its methods can be used
-        to add, refresh and query the existing meta information.
-        Table meta can be queried using TableHandler and Probabilistic Filter meta information can be
+        Catalog provides all the meta information for a database.
+        Its methods can be used to add, refresh and query the
+        existing meta information.
+        Table meta can be queried using TableHandler and
+        Probabilistic Filter meta information can be
         queried with ProbPredicateHandler.
     """
 
@@ -28,10 +30,9 @@ class Catalog:
         # TODO(rishabh): Read the logger level from config file.
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
-        self.db_file_map = {constants.UADETRAC: 'eva.db'}
-        self.db_file_name = 'eva.db'
+        self.db_file_map = {constants.UADETRAC: "eva.db"}
+        self.db_file_name = "eva.db"
         self.conn = self._createDatabaseConnection()
-
 
     def listDatasets(self) -> list():
         """
@@ -57,8 +58,8 @@ class Catalog:
 
     def getTableHandler(self) -> BaseTableHandler:
         """
-        TODO(rishabh): Add detailed definition and examples after finalizing TableHandler methods.
-
+        TODO(rishabh): Add detailed definition and
+        examples after finalizing TableHandler methods.
         :return:
         """
         self._checkDatabaseSet()
@@ -66,11 +67,14 @@ class Catalog:
             table_handler = UaDetracTableHandler(self.conn)
             return table_handler
         else:
-            raise Exception('No implementation found for %s' % (self.current_dataset))
+            raise Exception(
+                "No implementation found for %s" %
+                (self.current_dataset))
 
     def getProbPredicateHandler(self) -> ProbPredicateHandler:
         """
-        TODO(rishabh): Add detailed definition and examples after finalizing PPHandler methods.
+        TODO(rishabh): Add detailed definition
+        and examples after finalizing PPHandler methods.
         :return:
         """
         self._checkDatabaseSet()
@@ -81,27 +85,27 @@ class Catalog:
         " Checks if a catalog is initialised with a dataset."
 
         if not self.current_dataset:
-            raise Exception('Dataset is not set.')
+            raise Exception("Dataset is not set.")
 
     def _createDatabaseConnection(self) -> SqliteConnection:
         eva_dir = os.getcwd()
-        catalog_dir = os.path.join(eva_dir, 'src', 'catalog')
+        catalog_dir = os.path.join(eva_dir, "src", "catalog")
 
         try:
             logging.info("Initiating DB connection with " +
-                         os.path.join(catalog_dir, self.db_file_map[self.current_dataset]))
-            conn = SqliteConnection(os.path.join(catalog_dir, self.db_file_map[self.current_dataset]))
-        except:
-            raise Exception('Database file not found')
+                         os.path.join(catalog_dir,
+                                      self.db_file_map[self.current_dataset]))
+            conn = SqliteConnection(os.path.join(
+                catalog_dir, self.db_file_map[self.current_dataset]))
+        except BaseException:
+            raise Exception("Database file not found")
         conn.connect()
         return conn
 
     def getDatabaseConnection(self) -> SqliteConnection:
         """
-           TODO(rishabh): This needs to be deleted. Used to support existing code. Discuss this.
+           TODO(rishabh): This needs to be deleted
+        Used to support existing code. Discuss this.
         :return:
         """
         return self.conn
-
-
-
