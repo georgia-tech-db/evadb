@@ -3,15 +3,15 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_idx: int):
+    def __init__(self, col_idx: int = None, col_name: str = None):
         # setting return type to be invalid not sure if that is correct
         # no child so that is okay
         super().__init__(ExpressionType.TUPLE_VALUE,
                          rtype=ExpressionReturnType.INVALID)
-        self._col_idx = col_idx
+        self._col_name = col_name
         # todo
         self._table_name = None
-        self._col_name = None
+        self._col_idx = col_idx
 
     def set_col_name(self, col_name: str):
         self._col_name = col_name
@@ -29,6 +29,8 @@ class TupleValueExpression(AbstractExpression):
         if self._col_name:
             return self._col_name
         if args == None:
+        tuple1 = None
+        if args is None:
             # error Handling
             pass
         tuple1 = args[0]

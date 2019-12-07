@@ -2,8 +2,8 @@ import unittest
 
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
-from src.expression.logical_expression import LogicalExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 
 
@@ -29,12 +29,12 @@ class LogicalExpressionsTest(unittest.TestCase):
             const_exp
         )
         logical_expr = LogicalExpression(
-            ExpressionType.LOGICAL_AND,
-            comparison_expression_left,
-            comparison_expression_right
+            operator=ExpressionType.LOGICAL_AND,
+            left_expression=comparison_expression_left,
+            right_expression=comparison_expression_right
         )
         tuple1 = [[1], [2], 3]
-        self.assertEqual([True], logical_expr.evaluate(tuple1, None))
+        self.assertEqual([True], logical_expr.evaluate(tuple1))
 
     def test_comparison_compare_greater(self):
         tpl_exp = TupleValueExpression(0)
@@ -53,26 +53,26 @@ class LogicalExpressionsTest(unittest.TestCase):
             const_exp
         )
         logical_expr = LogicalExpression(
-            ExpressionType.LOGICAL_OR,
-            comparison_expression_left,
-            comparison_expression_right
+            left_expression=comparison_expression_left,
+            operator=ExpressionType.LOGICAL_OR,
+            right_expression=comparison_expression_right
         )
         tuple1 = [[1], 2, 3]
-        self.assertEqual([True], logical_expr.evaluate(tuple1, None))
+        self.assertEqual([True], logical_expr.evaluate(tuple1))
 
     def test_logical_not(self):
         tpl_exp = TupleValueExpression(0)
         const_exp = ConstantValueExpression(1)
 
         comparison_expression_right = ComparisonExpression(
-            ExpressionType.COMPARE_GREATER,
-            tpl_exp,
-            const_exp
+            exp_type=ExpressionType.COMPARE_GREATER,
+            left=tpl_exp,
+            right=const_exp
         )
         logical_expr = LogicalExpression(
-            ExpressionType.LOGICAL_NOT,
-            None,
-            comparison_expression_right
+            operator=ExpressionType.LOGICAL_NOT,
+            left_expression=None,
+            right_expression=comparison_expression_right
         )
         tuple1 = [[1], 2, 3]
-        self.assertEqual([True], logical_expr.evaluate(tuple1, None))
+        self.assertEqual([True], logical_expr.evaluate(tuple1))

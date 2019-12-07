@@ -116,7 +116,7 @@ class PPOptimizer:
                 if not new_not_expr:
                     new_not_expr = new_comp_expr
                 else:
-                    new_not_expr = LogicalExpression(new_not_expr, 'AND', new_comp_expr)
+                    new_not_expr = LogicalExpression(new_not_expr, ExpressionType.LOGICAL_AND, new_comp_expr)
         return new_not_expr
 
     def _compute_expression_costs(self, expression: AbstractExpression, stats: dict) -> float:
@@ -144,9 +144,9 @@ class PPOptimizer:
                 if right_str_expr in stats.keys():
                     _, right_cost = self._find_model(right_str_expr, stats)
 
-            if expression.operator == "AND":
+            if expression.operator in ("AND", ExpressionType.LOGICAL_AND):
                 reduction_rate = left_cost + right_cost - left_cost * right_cost
-            elif expression.operator == "OR":
+            elif expression.operator in ("OR", ExpressionType.LOGICAL_OR):
                 reduction_rate = left_cost * right_cost
             else:
                 raise ValueError("Invalid operator: " + expression.operator)
