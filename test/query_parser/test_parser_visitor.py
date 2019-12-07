@@ -103,6 +103,17 @@ class ParserVisitorTest(unittest.TestCase):
         with self.assertWarns(SyntaxWarning, msg='Column Name Missing'):
             visitor.visitFullColumnName(ctx)
 
+    def test_visit_table_name_none(self):
+        ''' Testing for getting a Warning when table name is None 
+            Function: visitTableName 
+        '''
+        ctx = MagicMock()
+        visitor = EvaParserVisitor()
+        EvaParserVisitor.visit = MagicMock()
+        EvaParserVisitor.visit.return_value = None
+        with self.assertWarns(SyntaxWarning, msg='Column Name Missing'):
+            visitor.visitTableName(ctx)
+
     def test_logical_expression(self):
         '''Testing for break in code if len(children) < 3 
         Function : visitLogicalExpression
