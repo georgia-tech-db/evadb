@@ -13,9 +13,9 @@ dependencies:
   - coverage
   - pytest-cov
   - pycodestyle
-  - torchvision
   - antlr-python-runtime=4.7.2=py37_1000
   - pip:
     - torch
+    - torchvision
 prefix: eva_35
 

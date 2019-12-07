@@ -1,9 +1,9 @@
 import unittest
+
+from src.expression.abstract_expression import ExpressionType
 from src.query_parser.eva_parser import EvaFrameQLParser
 from src.query_parser.eva_statement import EvaStatement
 from src.query_parser.eva_statement import StatementType
-from src.query_parser.select_statement import SelectStatement
-from src.expression.abstract_expression import ExpressionType
 from src.query_parser.table_ref import TableRef
 
 

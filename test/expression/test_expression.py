@@ -50,22 +50,28 @@ class ExpressionsTest(unittest.TestCase):
         const_exp_1 = ConstantValueExpression(1)
         const_exp_0 = ConstantValueExpression(0)
 
-        logical_expression = LogicalExpression(const_exp_1, ExpressionType.LOGICAL_AND, const_exp_1)
+        logical_expression = LogicalExpression(
+            const_exp_1, ExpressionType.LOGICAL_AND, const_exp_1)
         self.assertEqual(True, logical_expression.evaluate())
 
-        logical_expression = LogicalExpression(const_exp_1, ExpressionType.LOGICAL_OR, const_exp_1)
+        logical_expression = LogicalExpression(
+            const_exp_1, ExpressionType.LOGICAL_OR, const_exp_1)
         self.assertEqual(True, logical_expression.evaluate())
 
-        logical_expression = LogicalExpression(const_exp_0, ExpressionType.LOGICAL_OR, const_exp_1)
+        logical_expression = LogicalExpression(
+            const_exp_0, ExpressionType.LOGICAL_OR, const_exp_1)
         self.assertEqual(True, logical_expression.evaluate())
 
-        logical_expression = LogicalExpression(const_exp_0, ExpressionType.LOGICAL_AND, const_exp_1)
+        logical_expression = LogicalExpression(
+            const_exp_0, ExpressionType.LOGICAL_AND, const_exp_1)
         self.assertEqual(False, logical_expression.evaluate())
 
-        logical_expression = LogicalExpression(const_exp_0, ExpressionType.LOGICAL_AND, const_exp_0)
+        logical_expression = LogicalExpression(
+            const_exp_0, ExpressionType.LOGICAL_AND, const_exp_0)
         self.assertEqual(False, logical_expression.evaluate())
 
-        logical_expression = LogicalExpression(const_exp_0, ExpressionType.LOGICAL_OR, const_exp_0)
+        logical_expression = LogicalExpression(
+            const_exp_0, ExpressionType.LOGICAL_OR, const_exp_0)
         self.assertEqual(False, logical_expression.evaluate())
 
         logical_expression = LogicalExpression(const_exp_0, "NOR", const_exp_0)

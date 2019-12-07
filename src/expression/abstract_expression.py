@@ -54,7 +54,10 @@ class AbstractExpression(ABC):
         self._predicates = []
 
     def __eq__(self, other):
-        if self._etype == other._etype and self._rtype == other._rtype and self._children == other._children and self._predicates == other._predicates:
+        if self._etype == other._etype and \
+                self._rtype == other._rtype and \
+                self._children == other._children and \
+                self._predicates == other._predicates:
             return True
         else:
             return False
