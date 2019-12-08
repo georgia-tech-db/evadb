@@ -12,7 +12,8 @@ class Rules(Enum):
     PROJECTION_PUSHDOWN_SELECT = 2,
     PROJECTION_PUSHDOWN_JOIN= 3,
     SIMPLIFY_PREDICATE = 4,
-    JOIN_ELIMINATION = 5
+    JOIN_ELIMINATION = 5,
+    TRANSITIVE_CLOSURE = 6
 
 
 # Class to Encapsulate the functionality of the Rule Based Query Optimizer (Query Rewriter)
@@ -20,6 +21,7 @@ class RuleQueryOptimizer:
     def __init__(self):
         self.rule2value = {Rules.PREDICATE_PUSHDOWN: (self.predicate_pushdown, self.do_predicate_pushdown),
                            Rules.SIMPLIFY_PREDICATE: (self.simply_predicate, self.do_simplify_predicate),
+                           Rules.TRANSITIVE_CLOSURE: (self.transitive_closure, self.do_transitive_closure),
                            Rules.PROJECTION_PUSHDOWN_SELECT: (self.projection_pushdown_select, self.do_projection_pushdown_select),
                            Rules.PROJECTION_PUSHDOWN_JOIN: (self.projection_pushdown_join, self.do_projection_pushdown_join),
                            Rules.JOIN_ELIMINATION: (self.join_elimination, self.do_join_elimination)}
