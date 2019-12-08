@@ -39,49 +39,6 @@ class SimpleVideoLoaderTest(unittest.TestCase):
                              dtype=np.uint8)
             out.write(frame)
 
-    def create_sample_video_with_similar_frames(self):
-        """
-        Function to create a video with 2 identical frames. 
-        Useful for testing frame differencing.
-        """
-        try:
-            os.remove('dummy_similar.avi')
-        except FileNotFoundError:
-            pass
-
-        out = cv2.VideoWriter('dummy_similar.avi',
-                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
-                              (2, 2))
-        frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
-                         dtype=np.uint8)
-
-        # Writing identical frames
-        out.write(frame)
-        out.write(frame)
-
-    def create_sample_video_with_contours(self):
-        """
-        Function to create a video with 2 identical frames with a circle.
-        Circle is used by the compare_foreground_mask of framediff_utils 
-        module to identify background and mask it.
-        Useful for testing frame differencing.
-        """
-        try:
-            os.remove('dummy_contours.avi')
-        except FileNotFoundError:
-            pass
-
-        out = cv2.VideoWriter('dummy_contours.avi',
-                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
-                              (2000, 2000))
-        frame = np.array(np.ones((2000, 2000, 3)) * 80,
-                         dtype=np.uint8)
-        frame = cv2.circle(frame, (1010, 1000), 150, (36, 36, 36), 2)
-
-        # Writing identical frames
-        out.write(frame)
-        out.write(frame)       
-
     @classmethod
     def setUpClass(self):
         self.create_sample_video(self)
@@ -137,13 +94,4 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         batches = list(video_loader.load())
         self.assertEqual(1, len(batches))
         self.assertEqual(dummy_frames, list(batches[0].frames))
-
-    # def test_should_skip_identical_frames_only_foreground(self):
-    #     video_info = VideoMetaInfo('dummy_contours.avi', 10, VideoFormat.MPEG)
-    #     video_loader = SimpleVideoLoader(video_info)
-    #     batches = list(video_loader.load())
-    #     frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
-    #     skip_list = frame_skipping_pp.predict(batches)
-    #     self.assertEqual(2, len(skip_list))
-    #     self.assertEqual(False, skip_list[0])
-    #     self.assertEqual(True, skip_list[1])
+        
