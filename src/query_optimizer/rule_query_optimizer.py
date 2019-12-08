@@ -161,9 +161,6 @@ class RuleQueryOptimizer:
     def selective_first(self):
         pass
 
-    
-    # Simplyfying predicates
-    # pred will be an AbstractExpression type
     # simply_predicate so that we do not have unnecessary conditions
     # No where clause like 1 = 0 or 0 = 0
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
@@ -174,14 +171,99 @@ class RuleQueryOptimizer:
             self.delete_node(curnode)
     
     # delete_node function recreates the parent and cild pointers and skips the sigma     
-    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def delete_node(self, curnode):
         curnode.parent.set_children(curnode.children)
         for child in curnode.children:
             child.parent=curnode.parent
       
+    # transitive_closure is extremely important to apply in the case when same predicate is being applied to both tables
+    # and ensures precise cardinality estimation as we can select a concrete predicate value 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
+    def transitive_closure(self, curnode, child_ix):
+        child = curnode.children[child_ix]
+        # checking if the current node is a comparison expression
+        if type(curnode.predicate) == ComparisonExpression:
+            const_idx = None
+            col_tab_idx = None
+            const_val = None
+            if type(curnode.predicate.get_child(1)) == ConstantValueExpression:
+                ##print ("R.H.S. Is constant val")
+                const_idx = 1
+                col_tab_idx = 0
+            elif type(curnode.predicate.get_child(0)) == ConstantValueExpression:
+                ##print ("L.H.S. is constant val")
+                const_idx = 0
+                col_tab_idx = 1
+                
+            # extracting the constant value from the predicate and table name and attribute
+            const_val = curnode.predicate.get_child(const_idx).evaluate()
+            selection_table = curnode.column_ids[0].split(".")[0]
+            selection_column = curnode.column_ids[0].split(".")[1]
+            
+            # Now looking at the child
+            join_cols = child.join_ids
+            matched_join_idx = None
+            for join_col_idx in range(len(join_cols)):
+                if join_cols[join_col_idx] == curnode.column_ids[0]:
+                    # remembering which of all the join columns matched with the parent selection column
+                    matched_join_idx = join_col_idx 
+            
+            # If the columns did not matched
+            if matched_join_idx == None:
+                print ("Not possible")
+                return 
 
+            # checking supported types for grand child
+            for gc_idx, gc in enumerate(child.children):
+                if type(gc) == VideoTablePlan:
+                    jc_tabnames = set([gc.tablename])
+                    vids = [gc.video]
+                elif type(gc) == LogicalSelectPlan:
+                    jc_tabnames = set([attr.split('.')[0] for attr in gc.column_ids])
+                    vids = gc.videos
+                elif type(gc) == LogicalInnerJoinPlan:
+                    jc_tabnames = set([attr.split('.')[0] for attr in gc.join_ids])
+                    vids = gc.videos
+                else:
+                    print ("Grand child type is not suported")
+                    return
+    
+                # Now calculate the join columns that are from jc_tablenames
+                select_cols = []
+                for c in join_cols:
+                    if c.split(".")[0] in jc_tabnames:
+                        select_cols.append(c)
+
+                # For future improvement if multiple cols need to be added to selection, current implementation dont support that yet
+                if len(select_cols) > 1:
+                    return
+                
+                if len(select_cols) == 0:
+                    continue 
+
+                selected_col = select_cols[0]
+                const = ConstantValueExpression(value=const_val)
+                tup = TupleValueExpression(col_idx=int(selected_col.split('.')[1]))
+                expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
+            
+                # using both videos as purposely place "before" the join
+                s1 = LogicalSelectPlan(predicate=expression, column_ids=[selected_col], videos=vids, foreign_column_ids=[])
+                
+                # parent of selection is join
+                s1.parent = child 
+                child.children[gc_idx] = s1
+                s1.set_children([gc])
+                # parent of grand child is now the newly added selection
+                gc.parent = s1 
+
+            # modifying the parent pointers after addition of the selection
+            child.parent = curnode.parent
+            curnode.parent.set_children([child])
+        
+        # setting the children and column ids
+        child=curnode.children[child_ix]
+        cur_col=curnode.column_ids
 
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child_ix : is an integer that represents the index of the child in the curnode's child list
