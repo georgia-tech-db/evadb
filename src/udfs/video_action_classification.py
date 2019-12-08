@@ -20,6 +20,7 @@ import numpy as np
 import random
 import os
 
+
 class VideoToFrameClassifier(AbstractClassifierUDF):
 
     def __init__(self):
@@ -112,5 +113,5 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
             List[Prediction]: The predictions made by the classifier
         """
         
-        pred = model.predict(batch.frames_as_numpy_array())
-        return [self.labelMap[l] for l in pred]
+        pred = self.model.predict(batch.frames_as_numpy_array())
+        return [self.labels()[np.argmax(l)] for l in pred]
