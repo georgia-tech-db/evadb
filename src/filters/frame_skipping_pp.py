@@ -14,8 +14,8 @@ class frameSkippingPP(AbstractPP):
     def predict(self, batch) -> List[bool]:
         prev_frame = None
         skipFrames = []
-        for frame_batch in batch:
-            frame = frame_batch.frames_as_numpy_array()[0]
+        frames = batch.frames_as_numpy_array()
+        for frame in frames:
             if prev_frame is not None:
                 """
                 If compare_foreground set to true, calculate distance

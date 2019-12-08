@@ -85,14 +85,10 @@ class SimpleVideoLoaderTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         self.create_sample_video(self)
-        self.create_sample_video_with_similar_frames(self)
-        self.create_sample_video_with_contours(self)
 
     @classmethod
     def tearDownClass(self):
         os.remove('dummy.avi')
-        os.remove('dummy_similar.avi')
-        os.remove('dummy_contours.avi')
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
@@ -142,32 +138,12 @@ class SimpleVideoLoaderTest(unittest.TestCase):
         self.assertEqual(1, len(batches))
         self.assertEqual(dummy_frames, list(batches[0].frames))
 
-    def test_should_skip_identical_frames_absdiff(self):
-        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
-        video_loader = SimpleVideoLoader(video_info)
-        batches = list(video_loader.load())
-        frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
-        skip_list = frame_skipping_pp.predict(batches)
-        self.assertEqual(2, len(skip_list))
-        self.assertEqual(False, skip_list[0])
-        self.assertEqual(True, skip_list[1])
-
-    def test_should_skip_identical_frames_msediff(self):
-        video_info = VideoMetaInfo('dummy_similar.avi', 10, VideoFormat.MPEG)
-        video_loader = SimpleVideoLoader(video_info)
-        batches = list(video_loader.load())
-        frame_skipping_pp = frameSkippingPP(0.5, False, 'mse_difference')
-        skip_list = frame_skipping_pp.predict(batches)
-        self.assertEqual(2, len(skip_list))
-        self.assertEqual(False, skip_list[0])
-        self.assertEqual(True, skip_list[1])
-
-    def test_should_skip_identical_frames_only_foreground(self):
-        video_info = VideoMetaInfo('dummy_contours.avi', 10, VideoFormat.MPEG)
-        video_loader = SimpleVideoLoader(video_info)
-        batches = list(video_loader.load())
-        frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
-        skip_list = frame_skipping_pp.predict(batches)
-        self.assertEqual(2, len(skip_list))
-        self.assertEqual(False, skip_list[0])
-        self.assertEqual(True, skip_list[1])
+    # def test_should_skip_identical_frames_only_foreground(self):
+    #     video_info = VideoMetaInfo('dummy_contours.avi', 10, VideoFormat.MPEG)
+    #     video_loader = SimpleVideoLoader(video_info)
+    #     batches = list(video_loader.load())
+    #     frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
+    #     skip_list = frame_skipping_pp.predict(batches)
+    #     self.assertEqual(2, len(skip_list))
+    #     self.assertEqual(False, skip_list[0])
+    #     self.assertEqual(True, skip_list[1])
