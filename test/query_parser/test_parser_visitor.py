@@ -93,8 +93,8 @@ class ParserVisitorTest(unittest.TestCase):
             ExpressionType.COMPARE_GREATER)
 
     def test_visit_full_column_name_none(self):
-        ''' Testing for getting a Warning when column name is None 
-            Function: visitFullColumnName 
+        ''' Testing for getting a Warning when column name is None
+            Function: visitFullColumnName
         '''
         ctx = MagicMock()
         visitor = EvaParserVisitor()
@@ -104,8 +104,8 @@ class ParserVisitorTest(unittest.TestCase):
             visitor.visitFullColumnName(ctx)
 
     def test_visit_table_name_none(self):
-        ''' Testing for getting a Warning when table name is None 
-            Function: visitTableName 
+        ''' Testing for getting a Warning when table name is None
+            Function: visitTableName
         '''
         ctx = MagicMock()
         visitor = EvaParserVisitor()
@@ -115,12 +115,12 @@ class ParserVisitorTest(unittest.TestCase):
             visitor.visitTableName(ctx)
 
     def test_logical_expression(self):
-        ''' Testing for break in code if len(children) < 3 
+        ''' Testing for break in code if len(children) < 3
             Function : visitLogicalExpression
         '''
         ctx = MagicMock()
         visitor = EvaParserVisitor()
-        
+
         # Test for no children
         ctx.children = []
         expected = visitor.visitLogicalExpression(ctx)
@@ -154,7 +154,7 @@ class ParserVisitorTest(unittest.TestCase):
         mock_visit.assert_has_calls([call(ctx)])
 
     def test_visit_constant(self):
-        ''' Testing for value of returned constant 
+        ''' Testing for value of returned constant
             when real literal is not None
             Function: visitConstant
         '''
