@@ -46,9 +46,9 @@ class FrameBatch:
 
     def __eq__(self, other: 'FrameBatch'):
         return self.info == other.info and \
-               self.frames == other.frames and \
-               self._outcomes == other._outcomes and \
-               self._temp_outcomes == other._temp_outcomes
+            self.frames == other.frames and \
+            self._outcomes == other._outcomes and \
+            self._temp_outcomes == other._temp_outcomes
 
     def set_outcomes(self, name, predictions: 'BasePrediction',
                      is_temp: bool = False):
