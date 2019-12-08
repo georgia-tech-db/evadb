@@ -23,7 +23,9 @@ class FrameSkippingPPTest(unittest.TestCase):
         info = FrameInfo(height, width, channels, ColorSpace.BGR)
         frames = []
 
-        # Creating identical frames
+        """
+        Creating identical frames
+        """
         eva_frame1 = Frame(1, frame, info)
         eva_frame2 = Frame(1, frame, info)
         frames.append(eva_frame1)
@@ -34,8 +36,11 @@ class FrameSkippingPPTest(unittest.TestCase):
 
     def create_batch_with_similar_frames_contours(self):
         """
-        Function to create a batch with 2 identical frames. 
-        Useful for testing frame differencing.
+        Function to create a batch with 2 identical frames with contours. 
+        Useful for testing frame differencing by conparing foregound objects.
+
+        :param None
+        :return batch: EVA FrameBatch of 2 frames
         """
 
         frame = np.array(np.ones((2000, 2000, 3)) * 80,
@@ -46,7 +51,9 @@ class FrameSkippingPPTest(unittest.TestCase):
         info = FrameInfo(height, width, channels, ColorSpace.BGR)
         frames = []
 
-        # Creating identical frames
+        """
+        Creating identical frames with contours
+        """
         eva_frame1 = Frame(1, frame, info)
         eva_frame2 = Frame(1, frame, info)
         frames.append(eva_frame1)
@@ -56,6 +63,19 @@ class FrameSkippingPPTest(unittest.TestCase):
         return batch
 
     def test_should_skip_identical_frames_absdiff(self):
+        """
+        -> Test to create a batch of two identical frames and skip 
+            identical ones.
+        -> Test compares all the pixels in the two frames using
+            distance metric as absolute difference.
+        -> Test should return a list of two booleans with the first value
+        set to False and the second set to True. Indicates that the first
+        frame should not be skipped while the second frame should be as it
+        is identical to the first.
+
+        :param None
+        :return None
+        """
         batch = self.create_batch_with_similar_frames()
         frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
         skip_list = frame_skipping_pp.predict(batch)
@@ -64,6 +84,19 @@ class FrameSkippingPPTest(unittest.TestCase):
         self.assertEqual(True, skip_list[1])
 
     def test_should_skip_identical_frames_msediff(self):
+        """
+        -> Test to create a batch of two identical frames and skip 
+            identical ones.
+        -> Test compares all the pixels in the two frames using
+            distance metric as mean squared error.
+        -> Test should return a list of two booleans with the first value
+        set to False and the second set to True. Indicates that the first
+        frame should not be skipped while the second frame should be as it
+        is identical to the first.
+
+        :param None
+        :return None
+        """
         batch = self.create_batch_with_similar_frames()
         frame_skipping_pp = frameSkippingPP(0.5, False, 'mse_difference')
         skip_list = frame_skipping_pp.predict(batch)
@@ -72,6 +105,19 @@ class FrameSkippingPPTest(unittest.TestCase):
         self.assertEqual(True, skip_list[1])
 
     def test_should_skip_identical_frames_only_foreground(self):
+        """
+        -> Test to create a batch of two identical frames with contours 
+            and skip identical ones.
+        -> Test compares only foreground objects in the two frames using
+        distance metric as absolute difference.
+        -> Test should return a list of two booleans with the first value
+        set to False and the second set to True. Indicates that the first
+        frame should not be skipped while the second frame should be as it
+        is identical to the first.
+
+        :param None
+        :return None
+        """
         batch = self.create_batch_with_similar_frames()
         frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
         skip_list = frame_skipping_pp.predict(batch)
