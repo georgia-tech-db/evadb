@@ -4,6 +4,7 @@ from src.models.catalog.video_info import VideoMetaInfo
 from src.models.storage.frame      import Frame
 from src.models.storage.batch      import FrameBatch
 from src.loaders.video_loader import SimpleVideoLoader
+from src.loaders.abstract_loader import AbstractLoader
 
 import cv2
 from typing import List, Tuple
@@ -13,10 +14,18 @@ import random
 import os
 
 
-class ActionClassificationLoader:
-    def __init__(self, path):
-        self.path = path
-        self.videoMetaList, self.labelList, self.labelMap = self.findDataNames(self.path)
+class ActionClassificationLoader(AbstractLoader):
+    def __init__(self, batchSize):
+        self.batchSize = batchSize
+
+    def load_images(self, dir: str):
+        return None
+
+    def load_labels(self, dir: str):
+        return None
+
+    def load_boxes(self, dir: str):
+        return None
 
     def getLabelMap(self):
         return self.labelMap
@@ -54,9 +63,12 @@ class ActionClassificationLoader:
 
         return (videoMetaList, labelList, inverseLabelMap)
 
-    def load(self, batchSize):
+    def load_video(self, searchDir):
 
         print("load")
+
+        self.path = searchDir
+        self.videoMetaList, self.labelList, self.labelMap = self.findDataNames(self.path)
        
         videoMetaIndex = 0
         while videoMetaIndex < len(self.videoMetaList):
@@ -64,7 +76,7 @@ class ActionClassificationLoader:
             # Get a single batch
             frames = []
             labels = np.zeros((0,51))
-            while len(frames) < batchSize:
+            while len(frames) < self.batchSize:
 
                 # Load a single video
                 meta = self.videoMetaList[videoMetaIndex]
