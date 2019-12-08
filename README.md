@@ -2,9 +2,6 @@
 
 [![Build Status](https://travis-ci.org/georgia-tech-db/Eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/Eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/Eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/Eva?branch=master)
-
-We have worked on adding Unit test cases for EVA.
-
 ### Table of Contents
 * Installation
 * Demos
