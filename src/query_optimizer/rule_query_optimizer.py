@@ -161,20 +161,28 @@ class RuleQueryOptimizer:
     def selective_first(self):
         pass
 
-    # No where clause like 1 = 0 or 0 = 0
-    # Merging predicates
+    
+    # Simplyfying predicates
     # pred will be an AbstractExpression type
+    # simply_predicate so that we do not have unnecessary conditions
+    # No where clause like 1 = 0 or 0 = 0
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def simply_predicate(self, curnode, child_ix):
         boolean=curnode.predicate.evaluate()
         if not boolean:
             self.delete_node(curnode)
-
-    #curnode : 
+    
+    # delete_node function recreates the parent and cild pointers and skips the sigma     
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def delete_node(self, curnode):
         curnode.parent.set_children(curnode.children)
         for child in curnode.children:
             child.parent=curnode.parent
-        
+      
+
+
     # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     # child_ix : is an integer that represents the index of the child in the curnode's child list
     def join_elimination(self, curnode, child_ix):
