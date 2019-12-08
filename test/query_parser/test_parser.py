@@ -73,6 +73,28 @@ class ParserTest(unittest.TestCase):
         self.assertIsNotNone(select_stmt.where_clause)
         # other tests should go in expression testing
 
+    def test_select_statement_class(self):
+        ''' Testing setting different clauses for Select
+        Statement class 
+        Class: SelectStatement'''
+
+        select_stmt_new = SelectStatement()
+        parser = EvaFrameQLParser()
+
+        select_query_new = "SELECT CLASS, REDNESS FROM TAIPAI \
+            WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700;"
+        eva_statement_list = parser.parse(select_query_new)
+        select_stmt = eva_statement_list[0]
+
+        select_stmt_new.where_clause = select_stmt.where_clause
+        select_stmt_new.target_list = select_stmt.target_list
+        select_stmt_new.from_table = select_stmt.from_table
+
+        self.assertEqual(select_stmt_new.where_clause, select_stmt.where_clause)
+        self.assertEqual(select_stmt_new.target_list, select_stmt.target_list)
+        self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
+        self.assertEqual(str(select_stmt_new), str(select_stmt))
+
 
 if __name__ == '__main__':
     unittest.main()
