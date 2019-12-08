@@ -154,7 +154,8 @@ class ParserVisitorTest(unittest.TestCase):
         mock_visit.assert_has_calls([call(ctx)])
 
     def test_visit_constant(self):
-        ''' Testing for value of returned constant when real literal is not None
+        ''' Testing for value of returned constant 
+            when real literal is not None
             Function: visitConstant
         '''
         ctx = MagicMock()
