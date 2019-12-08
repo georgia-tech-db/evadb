@@ -1,13 +1,12 @@
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import VideoFormat, ColorSpace
 from src.models.catalog.video_info import VideoMetaInfo
-from src.models.storage.frame      import Frame
-from src.models.storage.batch      import FrameBatch
+from src.models.storage.frame import Frame
+from src.models.storage.batch import FrameBatch
 from src.models.inference.classifier_prediction import Prediction
 
 from src.loaders.action_classify_loader import ActionClassificationLoader
 from src.udfs.abstract_udfs import AbstractClassifierUDF
-
 
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Dense, Conv2D, Flatten
@@ -30,14 +29,14 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
         # Train the model using shuffled data
         self.trainModel()
 
-
     def trainModel(self):
         """
         trainModel trains the built model using chunks of data of size n videos
 
         Inputs:
          - model = model object to be trained
-         - videoMetaList = list of tuples where the first element is a EVA VideoMetaInfo 
+         - videoMetaList = list of tuples where the first element is 
+                           a EVA VideoMetaInfo 
                            object and the second is a string label of the 
                            correct video classification
          - labelList = list of labels derived from the labelMap
@@ -45,7 +44,7 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
         """
         videoLoader = ActionClassificationLoader(1000)
         
-        for batch,labels in videoLoader.load_video("./data/hmdb/"):
+        for batch, labels in videoLoader.load_video("./data/hmdb/"):
             self.labelMap = videoLoader.getLabelMap()
 
             # Get the frames as a numpy array
@@ -54,34 +53,39 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
             print(labels.shape)
             
             # Split x and y into training and validation sets
-            xTrain = frames[0:int(0.8*frames.shape[0])]
-            yTrain = labels[0:int(0.8*labels.shape[0])]
-            xTest  = frames[int(0.8*frames.shape[0]):]
-            yTest  = labels[int(0.8*labels.shape[0]):]
+            xTrain = frames[0:int(0.8 * frames.shape[0])]
+            yTrain = labels[0:int(0.8 * labels.shape[0])]
+            xTest = frames[int(0.8 * frames.shape[0]):]
+            yTest = labels[int(0.8 * labels.shape[0]):]
             
-            # Train the model using cross-validation (so we don't need to explicitly do CV outside of training)
-            self.model.fit(xTrain, yTrain, validation_data = (xTest, yTest), epochs = 2)    
+            # Train the model using cross-validation 
+            # (so we don't need to explicitly do CV outside of training)
+            self.model.fit(xTrain, yTrain, 
+                           validation_data=(xTest, yTest), epochs=2)    
             self.model.save("./data/hmdb/2d_action_classifier.h5")        
-
 
     def buildModel(self):
         """
-        buildModel sets up a convolutional 2D network using a reLu activation function
+        buildModel sets up a convolutional 2D network 
+        using a reLu activation function
 
         Outputs:
-         - model = model object to be used later for training and classification
+         - model = model obj to be used later for training and classification
         """
-        # We need to incrementally train the model so we'll set it up before preparing the data
+        # We must incrementally train the model so 
+        # we'll set it up before preparing the data
         model = Sequential()
 
         # Add layers to the model
-        model.add(Conv2D(64, kernel_size = 3, activation = "relu", input_shape=(240, 320, 3)))
-        model.add(Conv2D(32, kernel_size = 3, activation = "relu"))
+        model.add(Conv2D(64, kernel_size=3, activation="relu", 
+                         input_shape=(240, 320, 3)))
+        model.add(Conv2D(32, kernel_size=3, activation="relu"))
         model.add(Flatten())
-        model.add(Dense(51, activation = "softmax"))
+        model.add(Dense(51, activation="softmax"))
 
         # Compile model and use accuracy to measure performance
-        model.compile(optimizer = "adam", loss = "categorical_crossentropy", metrics = ["accuracy"])
+        model.compile(optimizer="adam", 
+                      loss="categorical_crossentropy", metrics=["accuracy"])
 
         return model
 
@@ -94,20 +98,27 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
 
     def labels(self) -> List[str]:
         return [
-        'brush_hair', 'clap', 'draw_sword', 'fall_floor', 'handstand', 'kick', 'pick', 'push', 'run', 
-        'shoot_gun', 'smoke', 'sword', 'turn', 'cartwheel', 'climb', 'dribble', 'fencing', 'hit', 
-        'kick_ball', 'pour', 'pushup', 'shake_hands', 'sit', 'somersault', 'sword_exercise', 'walk', 'catch', 
-        'climb_stairs', 'drink', 'flic_flac', 'hug', 'kiss', 'pullup', 'ride_bike', 'shoot_ball', 'situp', 
-        'stand', 'talk', 'wave', 'chew', 'dive', 'eat', 'golf', 'jump', 'laugh', 'punch', 'ride_horse', 
-        'shoot_bow', 'smile', 'swing_baseball', 'throw', 
+            'brush_hair', 'clap', 'draw_sword', 'fall_floor', 'handstand', 
+            'kick', 'pick', 'push', 'run', 
+            'shoot_gun', 'smoke', 'sword', 'turn', 'cartwheel', 'climb', 
+            'dribble', 'fencing', 'hit', 
+            'kick_ball', 'pour', 'pushup', 'shake_hands', 'sit', 'somersault', 
+            'sword_exercise', 'walk', 'catch', 
+            'climb_stairs', 'drink', 'flic_flac', 'hug', 'kiss', 'pullup', 
+            'ride_bike', 'shoot_ball', 'situp', 
+            'stand', 'talk', 'wave', 'chew', 'dive', 'eat', 'golf', 
+            'jump', 'laugh', 'punch', 'ride_horse', 
+            'shoot_bow', 'smile', 'swing_baseball', 'throw'
         ]
 
     def classify(self, batch: FrameBatch) -> List[Prediction]:
         """
-        Takes as input a batch of frames and returns the predictions by applying the classification model.
+        Takes as input a batch of frames and returns the 
+        predictions by applying the classification model.
 
         Arguments:
-            batch (FrameBatch): Input batch of frames on which prediction needs to be made
+            batch (FrameBatch): Input batch of frames 
+            on which prediction needs to be made
 
         Returns:
             List[Prediction]: The predictions made by the classifier
