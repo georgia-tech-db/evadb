@@ -42,13 +42,13 @@ class VideoToFrameClassifier(AbstractClassifierUDF):
          - labelList = list of labels derived from the labelMap
          - n = integer value for how many videos to act on at a time
         """
-        videoLoader = ActionClassificationLoader("./data/hmdb/")
-        self.labelMap = videoLoader.getLabelMap()
+        videoLoader = ActionClassificationLoader(1000)
+        
+        for batch,labels in videoLoader.load_video("./data/hmdb/"):
+            self.labelMap = videoLoader.getLabelMap()
 
-        for batch,labels in videoLoader.load(1000):
             # Get the frames as a numpy array
             frames = batch.frames_as_numpy_array()
-
             print(frames.shape)
             print(labels.shape)
             
