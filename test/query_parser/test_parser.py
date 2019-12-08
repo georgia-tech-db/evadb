@@ -95,6 +95,21 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
 
+    def test_table_ref(self):
+        ''' Testing table info in TableRef
+            Class: TableInfo
+        '''
+        table_info = TableInfo('TAIPAI', 'Schema', 'Database')
+        table_ref_obj = TableRef(table_info)
+        select_stmt_new = SelectStatement()
+        select_stmt_new.from_table = table_ref_obj
+        self.assertEqual(
+            select_stmt_new.from_table.table_info.table_name, 'TAIPAI')
+        self.assertEqual(
+            select_stmt_new.from_table.table_info.schema_name, 'Schema')
+        self.assertEqual(
+            select_stmt_new.from_table.table_info.database_name, 'Database')
+
 
 if __name__ == '__main__':
     unittest.main()
