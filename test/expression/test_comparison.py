@@ -1,9 +1,12 @@
 import unittest
+import numpy as np
 
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.tuple_value_expression import TupleValueExpression
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 
 class ComparisonExpressionsTest(unittest.TestCase):
@@ -20,10 +23,19 @@ class ComparisonExpressionsTest(unittest.TestCase):
             tpl_exp,
             const_exp
         )
-        # ToDo implement a generic tuple class
-        # to fetch the tuple from table
-        tuple1 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+
+        frame_1 = Frame(1, np.ones((1, 1)), None)
+        frame_2 = Frame(2, 2 * np.ones((1, 1)), None)
+        frame_3 = Frame(3, 3 * np.ones((1, 1)), None)
+        input_batch = FrameBatch(frames=[
+            frame_1,
+            frame_2,
+            frame_3,
+        ], info=None)
+
+        expected_value = [[True], [False], [False]]
+        output_value  = cmpr_exp.evaluate(input_batch)
+        self.assertEqual(expected_value, output_value)
 
     def test_comparison_compare_greater(self):
         tpl_exp = TupleValueExpression(0)
@@ -34,8 +46,19 @@ class ComparisonExpressionsTest(unittest.TestCase):
             tpl_exp,
             const_exp
         )
-        tuple1 = [[2], 1, 1]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+
+        frame_1 = Frame(1, np.ones((1, 1)), None)
+        frame_2 = Frame(2, 2 * np.ones((1, 1)), None)
+        frame_3 = Frame(3, 3 * np.ones((1, 1)), None)
+        input_batch = FrameBatch(frames=[
+            frame_1,
+            frame_2,
+            frame_3,
+        ], info=None)
+
+        expected_value = [[False], [True], [True]]
+        output_value  = cmpr_exp.evaluate(input_batch)
+        self.assertEqual(expected_value, output_value)
 
     def test_comparison_compare_lesser(self):
         tpl_exp = TupleValueExpression(0)
@@ -46,8 +69,19 @@ class ComparisonExpressionsTest(unittest.TestCase):
             tpl_exp,
             const_exp
         )
-        tuple1 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+
+        frame_1 = Frame(1, np.ones((1, 1)), None)
+        frame_2 = Frame(2, 2 * np.ones((1, 1)), None)
+        frame_3 = Frame(3, 3 * np.ones((1, 1)), None)
+        input_batch = FrameBatch(frames=[
+            frame_1,
+            frame_2,
+            frame_3,
+        ], info=None)
+
+        expected_value = [[True], [False], [False]]
+        output_value  = cmpr_exp.evaluate(input_batch)
+        self.assertEqual(expected_value, output_value)
 
     def test_comparison_compare_geq(self):
         tpl_exp = TupleValueExpression(0)
@@ -59,12 +93,18 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp
         )
 
-        # checking greater x>=1
-        tuple1 = [[2], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
-        # checking equal
-        tuple2 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple2, None))
+        frame_1 = Frame(1, np.ones((1, 1)), None)
+        frame_2 = Frame(2, 2 * np.ones((1, 1)), None)
+        frame_3 = Frame(3, 3 * np.ones((1, 1)), None)
+        input_batch = FrameBatch(frames=[
+            frame_1,
+            frame_2,
+            frame_3,
+        ], info=None)
+
+        expected_value = [[True], [True], [True]]
+        output_value  = cmpr_exp.evaluate(input_batch)
+        self.assertEqual(expected_value, output_value)
 
     def test_comparison_compare_leq(self):
         tpl_exp = TupleValueExpression(0)
@@ -76,12 +116,18 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp
         )
 
-        # checking lesser x<=1
-        tuple1 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
-        # checking equal
-        tuple2 = [[2], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple2, None))
+        frame_1 = Frame(1, np.ones((1, 1)), None)
+        frame_2 = Frame(2, 2 * np.ones((1, 1)), None)
+        frame_3 = Frame(3, 3 * np.ones((1, 1)), None)
+        input_batch = FrameBatch(frames=[
+            frame_1,
+            frame_2,
+            frame_3,
+        ], info=None)
+
+        expected_value = [[True], [True], [False]]
+        output_value  = cmpr_exp.evaluate(input_batch)
+        self.assertEqual(expected_value, output_value)
 
     def test_comparison_compare_neq(self):
         tpl_exp = TupleValueExpression(0)
@@ -93,9 +139,15 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp
         )
 
-        # checking not equal x!=1
-        tuple1 = [[2], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        frame_1 = Frame(1, np.ones((1, 1)), None)
+        frame_2 = Frame(2, 2 * np.ones((1, 1)), None)
+        frame_3 = Frame(3, 3 * np.ones((1, 1)), None)
+        input_batch = FrameBatch(frames=[
+            frame_1,
+            frame_2,
+            frame_3,
+        ], info=None)
 
-        tuple1 = [[3], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        expected_value = [[False], [True], [True]]
+        output_value  = cmpr_exp.evaluate(input_batch)
+        self.assertEqual(expected_value, output_value)

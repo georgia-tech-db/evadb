@@ -1,6 +1,7 @@
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
+from src.models.storage.batch import FrameBatch
 
 
 class ComparisonExpression(AbstractExpression):
@@ -14,9 +15,11 @@ class ComparisonExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
-    def evaluate(self, *args):
-        left_values = self.get_child(0).evaluate(*args)
-        right_values = self.get_child(1).evaluate(*args)
+    def evaluate(self, batch: FrameBatch):
+        frames = [frame._data for frame in batch._frames]
+
+        left_values = self.get_child(0).evaluate(frames)
+        right_values = self.get_child(1).evaluate(frames)
 
         # Broadcasting scalars
         if type(right_values) is not list:

@@ -1,6 +1,8 @@
 from .abstract_expression import AbstractExpression, ExpressionType, \
     ExpressionReturnType
 
+import numpy as np
+
 
 class TupleValueExpression(AbstractExpression):
     def __init__(self, col_idx: int = None, col_name: str = None):
@@ -27,8 +29,10 @@ class TupleValueExpression(AbstractExpression):
         if args is None:
             # error Handling
             pass
-        tuple1 = args[0]
-        return tuple1[(self._col_idx)]
+        frames = args
+        
+        frames_np = [np.array(tuple1)[:,  self._col_idx] for tuple1 in frames]
+        return frames_np[0]
 
     # ToDo
     # implement other boilerplate functionality

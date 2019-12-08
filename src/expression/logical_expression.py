@@ -2,6 +2,8 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
 
+from src.models.storage.batch import FrameBatch
+
 
 class LogicalExpression(AbstractExpression):
     def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
@@ -14,11 +16,11 @@ class LogicalExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
-    def evaluate(self, *args):
+    def evaluate(self, batch: FrameBatch):
         if self.get_children_count() == 2:
             outcomes = []
-            left_values = self.get_child(0).evaluate(*args)
-            right_values = self.get_child(1).evaluate(*args)
+            left_values = self.get_child(0).evaluate(batch)
+            right_values = self.get_child(1).evaluate(batch)
             for value_left, value_right in zip(left_values, right_values):
                 if self.etype == ExpressionType.LOGICAL_AND:
                     outcomes.append(value_left and value_right)
@@ -27,7 +29,7 @@ class LogicalExpression(AbstractExpression):
             return outcomes
 
         else:
-            values = self.get_child(0).evaluate(*args)
+            values = self.get_child(0).evaluate(batch)
 
             if self.etype == ExpressionType.LOGICAL_NOT:
                 return [not value for value in values]

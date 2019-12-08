@@ -1,5 +1,6 @@
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, ExpressionReturnType
+from src.models.storage.batch import FrameBatch
 
 
 class ArithmeticExpression(AbstractExpression):
@@ -14,9 +15,10 @@ class ArithmeticExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.FLOAT,
                          children=children)
 
-    def evaluate(self, *args):
-        vl = self.get_child(0).evaluate(*args)
-        vr = self.get_child(1).evaluate(*args)
+    def evaluate(self, batch:FrameBatch):
+        frames = [frame._data for frame in batch._frames]
+        vl = self.get_child(0).evaluate(frames)
+        vr = self.get_child(1).evaluate(frames)
 
         if (self.etype == ExpressionType.ARITHMETIC_ADD):
             return vl + vr
