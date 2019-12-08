@@ -4,7 +4,7 @@ from src.query_parser.eva_statement import EvaStatement
 from src.query_parser.eva_statement import StatementType
 from src.query_parser.select_statement import SelectStatement
 from src.expression.abstract_expression import ExpressionType
-from src.query_parser.table_ref import TableRef
+from src.query_parser.table_ref import TableRef, TableInfo
 
 
 class ParserTest(unittest.TestCase):
@@ -90,9 +90,12 @@ class ParserTest(unittest.TestCase):
         select_stmt_new.target_list = select_stmt.target_list
         select_stmt_new.from_table = select_stmt.from_table
 
-        self.assertEqual(select_stmt_new.where_clause, select_stmt.where_clause)
-        self.assertEqual(select_stmt_new.target_list, select_stmt.target_list)
-        self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
+        self.assertEqual(select_stmt_new.where_clause, 
+                            select_stmt.where_clause)
+        self.assertEqual(select_stmt_new.target_list, 
+                            select_stmt.target_list)
+        self.assertEqual(select_stmt_new.from_table, 
+                            select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
 
     def test_table_ref(self):
@@ -104,11 +107,14 @@ class ParserTest(unittest.TestCase):
         select_stmt_new = SelectStatement()
         select_stmt_new.from_table = table_ref_obj
         self.assertEqual(
-            select_stmt_new.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt_new.from_table.table_info.table_name, 
+                        'TAIPAI')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.schema_name, 'Schema')
+            select_stmt_new.from_table.table_info.schema_name, 
+                        'Schema')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.database_name, 'Database')
+            select_stmt_new.from_table.table_info.database_name, 
+                        'Database')
 
 
 if __name__ == '__main__':
