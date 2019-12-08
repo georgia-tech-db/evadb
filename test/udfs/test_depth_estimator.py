@@ -4,8 +4,9 @@ import cv2
 import sys
 import numpy as np
 
-from src.models import Frame, FrameBatch
-from src.udfs.depth_estimator import DepthEstimator
+from src.models.storage.frame import Frame
+from src.models.storage.batch import FrameBatch
+from src.udfs.depth_estimation.depth_estimator import DepthEstimator
 from src.utils.frame_filter_util import FrameFilter
 
 
@@ -60,8 +61,8 @@ class DepthEstimatorTest(unittest.TestCase):
         frame_batch = FrameBatch([frame_1, frame_2], None)
 
         # process the batch frames for depth and segmentation prediction
-        estimator = DepthEstimator()
-        result = estimator.process_frames(frame_batch)
+        estimator = DepthEstimator('ExpKITTI_joint.ckpt')
+        result = estimator.classify(frame_batch)
 
         # assert if result size is same as the batch size
         self.assertEqual(len(result), 2)
@@ -114,6 +115,3 @@ class DepthEstimatorTest(unittest.TestCase):
             else:
                 # Every other frame should be transformed after applying depth mask
                 self.assertTrue(np.array_equal(img, frames[i]*depth_mask[:, :, None]))
-
-
-
