@@ -1,6 +1,13 @@
 from src.filters.abstract_pp import AbstractPP
 from src.utils import image_utils
 from typing import List
+from enum import Enum, unique
+
+
+@unique
+class DistanceMetric(Enum):
+    ABSOLUTE_DIFFERENCE = "absolute_difference"
+    MSE_DIFFERENCE = "mse_difference"
 
 
 class FrameSkippingPP(AbstractPP):
@@ -12,7 +19,7 @@ class FrameSkippingPP(AbstractPP):
     """
 
     def __init__(self, threshold=0.0, compare_foreground=False, 
-                 distance_metric='absolute_difference'):
+                 distance_metric=DistanceMetric.ABSOLUTE_DIFFERENCE.value):
         """
         Constructor for this class.
 
@@ -20,8 +27,7 @@ class FrameSkippingPP(AbstractPP):
                           below which frames are skipped
         :param compare_foreground: boolean value to indicate if only 
                                    foreground pixels are to be compared.
-        :param distance_metric: the distance metric to be used for 
-                                frame comparison
+        :param distance_metric: DistanceMetric ENUM attribute
         :return None
         """        
         self.threshold = threshold
@@ -71,8 +77,7 @@ class FrameSkippingPP(AbstractPP):
         
         :param curr_frame: current frame to be processed from a batch
         :param prev_frame: previous frame that was not skipped
-        :param distance_metric: the distance metric to be used for 
-                                comparing two frames
+        :param distance_metric: DistanceMetric ENUM attribute
         :return difference value of the two frames
         """
         diff = getattr(image_utils, distance_metric)
@@ -87,8 +92,7 @@ class FrameSkippingPP(AbstractPP):
 
         :param curr_frame: current frame to be processed from a batch
         :param prev_frame: previous frame that was not skipped
-        :param distance_metric: the distance metric to be used for 
-                                comparing two frames
+        :param distance_metric: DistanceMetric ENUM attributes
         :return difference value of the two frames
         """
         curr_foreground = mask_background(curr_frame)

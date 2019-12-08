@@ -7,7 +7,7 @@ from src.models.storage.frame import Frame
 from src.models.catalog.frame_info import FrameInfo
 from src.models.storage.batch import FrameBatch
 from src.models.catalog.properties import ColorSpace
-from src.filters.frame_skipping_pp import FrameSkippingPP
+from src.filters.frame_skipping_pp import FrameSkippingPP, DistanceMetric as DM
 
 
 class FrameSkippingPPTest(unittest.TestCase):
@@ -79,7 +79,8 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = FrameSkippingPP(0.5, False, 'absolute_difference')
+        frame_skipping_pp = FrameSkippingPP(0.5, False, 
+                                            DM.ABSOLUTE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])
@@ -99,7 +100,8 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = FrameSkippingPP(0.5, False, 'mse_difference')
+        frame_skipping_pp = FrameSkippingPP(0.5, False, 
+                                            DM.MSE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])
@@ -119,7 +121,8 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = FrameSkippingPP(0.5, False, 'absolute_difference')
+        frame_skipping_pp = FrameSkippingPP(0.5, False, 
+                                            DM.ABSOLUTE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])
