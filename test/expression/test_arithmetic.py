@@ -7,7 +7,6 @@ from src.expression.arithmetic_expression import ArithmeticExpression
 
 
 class ArithmeticExpressionsTest(unittest.TestCase):
-    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -38,7 +37,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         tuple1 = [5, 2, 3]
         # 5-5 = 0
         self.assertEqual(0, cmpr_exp.evaluate(tuple1, None))
-    
+
     def test_multiply(self):
         tpl_exp = TupleValueExpression(0)
         const_exp = ConstantValueExpression(5)
@@ -66,5 +65,3 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         tuple1 = [5, 2, 3]
         # 5/5 = 1
         self.assertEqual(1, cmpr_exp.evaluate(tuple1, None))
-    
-
