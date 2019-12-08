@@ -4,11 +4,12 @@ from src.filters.models.ml_dnn import MLMLP
 import numpy as np
 import unittest
 
+
 class ResearchFilter_Test(unittest.TestCase):
 
     def test_FilterResearch(self):
         # Construct the filter research and test it with randomized values
-        # The idea is just to run it and make sure that things run to completion
+        # Idea is just to run it and make sure that things run to completion
         # No actual output or known inputs are tested
         filter = FilterResearch()
 

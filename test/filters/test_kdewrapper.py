@@ -2,11 +2,13 @@ from src.filters.kdewrapper import KernelDensityWrapper
 import numpy as np
 import unittest
 
+
 class KDE_Wrapper_Test(unittest.TestCase):
 
     def test_KD_Wrapper(self):
-        # Construct the filter research and test it with randomized values
-        # The idea is just to run it and make sure that things run to completion
+        # Construct the filter research and test it with 
+        # randomized values -- idea is just to run it
+        # and make sure that things run to completion
         # No actual output or known inputs are tested
         wrapper = KernelDensityWrapper()
 

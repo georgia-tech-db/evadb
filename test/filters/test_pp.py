@@ -2,6 +2,7 @@ import numpy as np
 from src.filters.pp import PP
 import unittest
 
+
 class PP_Test(unittest.TestCase):
 
     def test_PP(self):
