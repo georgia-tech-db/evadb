@@ -225,3 +225,15 @@ class RuleQueryOptimizer:
     def do_simplify_predicate(self, curnode, child):
         return type(curnode) == LogicalSelectPlan
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
+    def do_transitive_closure(self, curnode, child):
+        if type(curnode) == LogicalSelectPlan:
+            if type(child) == LogicalInnerJoinPlan:
+                return True
+        '''
+        if type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan:
+            if type(child.children[0]) == LogicalInnerJoinPlan:
+                return True
+        '''
+        return False
