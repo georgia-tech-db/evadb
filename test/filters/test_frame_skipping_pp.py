@@ -7,7 +7,7 @@ from src.models.storage.frame import Frame
 from src.models.catalog.frame_info import FrameInfo
 from src.models.storage.batch import FrameBatch
 from src.models.catalog.properties import ColorSpace
-from src.filters.frame_skipping_pp import frameSkippingPP
+from src.filters.frame_skipping_pp import FrameSkippingPP
 
 
 class FrameSkippingPPTest(unittest.TestCase):
@@ -15,6 +15,9 @@ class FrameSkippingPPTest(unittest.TestCase):
         """
         Function to create a batch with 2 identical frames. 
         Useful for testing frame differencing.
+
+        :param: None
+        :return batch: EVA FrameBatch of 2 frames        
         """
 
         frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
@@ -39,7 +42,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         Function to create a batch with 2 identical frames with contours. 
         Useful for testing frame differencing by conparing foregound objects.
 
-        :param None
+        :param: None
         :return batch: EVA FrameBatch of 2 frames
         """
 
@@ -69,15 +72,14 @@ class FrameSkippingPPTest(unittest.TestCase):
         -> Test compares all the pixels in the two frames using
             distance metric as absolute difference.
         -> Test should return a list of two booleans with the first value
-        set to False and the second set to True. Indicates that the first
-        frame should not be skipped while the second frame should be as it
-        is identical to the first.
+        set to False and the second set to True. This implies only second
+        frame is skipped since it is the same as the first one.
 
-        :param None
-        :return None
+        :param: None
+        :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
+        frame_skipping_pp = FrameSkippingPP(0.5, False, 'absolute_difference')
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])
@@ -90,15 +92,14 @@ class FrameSkippingPPTest(unittest.TestCase):
         -> Test compares all the pixels in the two frames using
             distance metric as mean squared error.
         -> Test should return a list of two booleans with the first value
-        set to False and the second set to True. Indicates that the first
-        frame should not be skipped while the second frame should be as it
-        is identical to the first.
+        set to False and the second set to True. This implies only second
+        frame is skipped since it is the same as the first one.
 
-        :param None
-        :return None
+        :param: None
+        :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = frameSkippingPP(0.5, False, 'mse_difference')
+        frame_skipping_pp = FrameSkippingPP(0.5, False, 'mse_difference')
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])
@@ -111,15 +112,14 @@ class FrameSkippingPPTest(unittest.TestCase):
         -> Test compares only foreground objects in the two frames using
         distance metric as absolute difference.
         -> Test should return a list of two booleans with the first value
-        set to False and the second set to True. Indicates that the first
-        frame should not be skipped while the second frame should be as it
-        is identical to the first.
+        set to False and the second set to True. This implies only second
+        frame is skipped since it is the same as the first one.
 
-        :param None
-        :return None
+        :param: None
+        :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = frameSkippingPP(0.5, False, 'absolute_difference')
+        frame_skipping_pp = FrameSkippingPP(0.5, False, 'absolute_difference')
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])

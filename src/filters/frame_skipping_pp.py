@@ -3,21 +3,23 @@ from src.utils import image_utils
 from typing import List
 
 
-class frameSkippingPP(AbstractPP):
+class FrameSkippingPP(AbstractPP):
     """
     Class that performs the task of frame skipping. 
     Frame skipping can be done in two ways:
         1. Compare all pixels of a frame
         2. Compare only foreground pixels.
     """
+
     def __init__(self, threshold=0.0, compare_foreground=False, 
                  distance_metric='absolute_difference'):
         """
         Constructor for this class.
 
-        :param threshold: threshold value below which frames are skipped
+        :param threshold: threshold value for difference
+                          below which frames are skipped
         :param compare_foreground: boolean value to indicate if only 
-                                   foreground objects are to be compared.
+                                   foreground pixels are to be compared.
         :param distance_metric: the distance metric to be used for 
                                 frame comparison
         :return None
@@ -31,14 +33,14 @@ class frameSkippingPP(AbstractPP):
         Function that predicts whether a frame needs to be skipped or not
         based on the threshold value set.
 
-        :param batch: an EVA batch of frames
+        :param batch: an EVA batch of EVA frames
         :return List of booleans that indicates whether the frame at a given
                 index should be skipped or not.
-                True => skip frame
                 False => do not skip frame
+                True => skip frame
         """
         prev_frame = None
-        skipFrames = []
+        skip_frames = []
         frames = batch.frames_as_numpy_array()
         for frame in frames:
             if prev_frame is not None:
@@ -54,23 +56,23 @@ class frameSkippingPP(AbstractPP):
                     frame_diff = self.frame_difference(
                         frame, prev_frame, self.distance_metric)
                 if frame_diff < self.threshold:
-                    skipFrames.append(True)
+                    skip_frames.append(True)
                 else:
-                    skipFrames.append(False)
+                    skip_frames.append(False)
                     prev_frame = frame
             else:
-                skipFrames.append(False)
+                skip_frames.append(False)
                 prev_frame = frame
-        return skipFrames
+        return skip_frames
 
     def frame_difference(self, curr_frame, prev_frame, distance_metric):
         """
         Function to calculate frame difference based on distance metric
         
         :param curr_frame: current frame to be processed from a batch
-        :param prev_frame: previous frame with difference > threshold
+        :param prev_frame: previous frame that was not skipped
         :param distance_metric: the distance metric to be used for 
-                                frame comparison
+                                comparing two frames
         :return difference value of the two frames
         """
         diff = getattr(image_utils, distance_metric)
@@ -84,11 +86,12 @@ class frameSkippingPP(AbstractPP):
         objects and then calculates the frame difference
 
         :param curr_frame: current frame to be processed from a batch
-        :param prev_frame: previous frame with difference > threshold
+        :param prev_frame: previous frame that was not skipped
         :param distance_metric: the distance metric to be used for 
-                                frame comparison
+                                comparing two frames
         :return difference value of the two frames
         """
         curr_foreground = mask_background(curr_frame)
         prev_foreground = mask_background(prev_frame)
-        return frame_difference(curr_foreground, prev_foreground, distance_metric)
+        return frame_difference(curr_foreground, prev_foreground, 
+                                distance_metric)

@@ -9,7 +9,6 @@ from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace, VideoFormat
 from src.models.catalog.video_info import VideoMetaInfo
 from src.models.storage.frame import Frame
-from src.filters.frame_skipping_pp import frameSkippingPP
 
 NUM_FRAMES = 10
 

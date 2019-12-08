@@ -11,13 +11,13 @@ def convert_to_grayscale(frame):
     """
     return cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
+
 def absolute_difference(curr_frame, prev_frame):
     """
     Function to find the absolute difference between two frames.
     Takes the sum of pixel wise difference.
     :param curr_frame: the current frame to be processed from the batch
-    :param prev_frame: the previous frame in consideration that had 
-                        difference > threshold
+    :param prev_frame: the previous frame that was not skipped
     """
     curr_frame_grayscale = convert_to_grayscale(curr_frame)
     prev_frame_grayscale = convert_to_grayscale(prev_frame)
@@ -29,8 +29,7 @@ def mse_difference(curr_frame, prev_frame):
     """
     Function to find the mean squared error difference between two frames.
     :param curr_frame: the current frame to be processed from the batch
-    :param prev_frame: the previous frame in consideration that had 
-                        difference > threshold
+    :param prev_frame: the previous frame that was not skipped
     """
     curr_frame_gray = convert_to_grayscale(curr_frame)
     prev_frame_gray = convert_to_grayscale(prev_frame)
@@ -39,12 +38,12 @@ def mse_difference(curr_frame, prev_frame):
     mse_diff = np.sum(frame_diff**2) / float(total_pixels)
     return mse_diff
 
+
 def mask_background(frame, dim=21, threshold1=10, threshold2=200, 
                     iterations=10, color=(0.0, 0.0, 0.0)):
     """
     Function that removes background from frame to help compare only
     foreground objects.
-
     :param frame: the current frame for which background needs to be masked
     :param dim: dimensions for Gaussian Blur
     :param threshold1, threshold2: the threshold values passed to the Canny
