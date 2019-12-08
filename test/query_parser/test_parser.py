@@ -75,7 +75,7 @@ class ParserTest(unittest.TestCase):
 
     def test_select_statement_class(self):
         ''' Testing setting different clauses for Select
-        Statement class 
+        Statement class
         Class: SelectStatement'''
 
         select_stmt_new = SelectStatement()
@@ -90,12 +90,12 @@ class ParserTest(unittest.TestCase):
         select_stmt_new.target_list = select_stmt.target_list
         select_stmt_new.from_table = select_stmt.from_table
 
-        self.assertEqual(select_stmt_new.where_clause, 
-                            select_stmt.where_clause)
-        self.assertEqual(select_stmt_new.target_list, 
-                            select_stmt.target_list)
-        self.assertEqual(select_stmt_new.from_table, 
-                            select_stmt.from_table)
+        self.assertEqual(
+            select_stmt_new.where_clause, select_stmt.where_clause)
+        self.assertEqual(
+            select_stmt_new.target_list, select_stmt.target_list)
+        self.assertEqual(
+            select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
 
     def test_table_ref(self):
@@ -108,13 +108,13 @@ class ParserTest(unittest.TestCase):
         select_stmt_new.from_table = table_ref_obj
         self.assertEqual(
             select_stmt_new.from_table.table_info.table_name, 
-                        'TAIPAI')
+            'TAIPAI')
         self.assertEqual(
             select_stmt_new.from_table.table_info.schema_name, 
-                        'Schema')
+            'Schema')
         self.assertEqual(
             select_stmt_new.from_table.table_info.database_name, 
-                        'Database')
+            'Database')
 
 
 if __name__ == '__main__':
