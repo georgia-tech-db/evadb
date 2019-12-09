@@ -21,9 +21,16 @@ class TestStatement2PlanTree(unittest.TestCase):
         self.assertTrue(len(plan_tree.children) == 1)
         self.assertTrue(type(plan_tree.children[0]) == VideoTablePlan)
 
-    # Todo select statement with where clause
+    # Test a select statement with where clause
     def test_simple_where(self):
-        pass
+        parser = EvaFrameQLParser()
+        query = "SELECT CLASS FROM TAIPAI WHERE T='To';"
+        eva_statement_list = parser.parse(query)
+        plan_tree = Statement2Plantree.convert(eva_statement_list)
+    
+        self.assertIsNone(plan_tree.parent)
+        self.assertEqual(type(plan_tree.children), LogicalSelectPlan)
+        self.assertTrue('CLASS' in plan_tree.children.column_ids)
 
     # Todo select statement with join clause
     def test_simple_join(self):

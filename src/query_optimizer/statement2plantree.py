@@ -8,7 +8,6 @@ from loaders.video_loader import SimpleVideoLoader
 from models.catalog.video_info import VideoMetaInfo
 from models.catalog.properties import VideoFormat
 
-
 # class that will handle converting a statement to a plan tree
 class Statement2Plantree:
     def __init__(self):
@@ -32,15 +31,15 @@ class Statement2Plantree:
             projection_output = [target.col_name for target in statement.target_list]
             root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
             where_stuff = statement.where_clause
+            print(where_stuff)
             # Need to create the sigma plan
             if where_stuff is not None:
-                #this needs to be modified
-                #s1=LogicalSelectPlan(predicate=expression, column_ids=[], videos=[video1], foreign_column_ids=[])
-                #t1.parent.set_children(s1)
-                #s1.set_parent(root)
-                #s1.set_children(t1)
-                #t1.set_parent(s1)
-                pass
+                # Creating a select Node
+                select_node = LogicalSelectPlan(predicate=where_stuff, column_ids=projection_output, videos=[video1], foreign_column_ids=[])
+                root.set_children(select_node)
+                select_node.parent=root
+                select_node.set_children([t1])
+                t1.parent=select_node
             else:
                 root.set_children([t1])
                 t1.parent = root
