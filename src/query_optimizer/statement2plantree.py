@@ -17,8 +17,8 @@ class Statement2Plantree:
     # Outputs: root node of plan tree. Will be of type LogicalProjectionPlan.
     @staticmethod
     def convert(statement_list):
-        if len(statement_list) > 1:
-            print('nested queries are not handled yet')
+        if len(statement_list) > 1 or len(statement_list) == 0:
+            print('statement list must be length 1 and it was len: {}'.format(len(statement_list)))
         else:
             statement = statement_list[0]
             # Need to Create the table and projection
