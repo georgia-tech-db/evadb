@@ -7,7 +7,7 @@ import torch
 import torch.utils as utils
 import os
 import torch.utils.data as utils
-
+from preprocessing import preprocessing
 
 """
 Data Loader function handles both scenarios where UE-DETRAC dataset is 
@@ -17,9 +17,15 @@ in the video. e.g frame_1 --> frame_00001 when there are less than 10000
 frames. Failure to do so will result in frames misordering such as 
 frame_1,frame_10 appearing next to one another
 
-Inputs: path to the datasets files, flag to use UE-DETRAC data
+Inputs: 
+    - path : path to the datasets files, 
+    - detrac : flag to use UE-DETRAC data, Fasle by default
+    - train = False by default, True is training, Fasle if testing
 
-Output: loaded data resized to 100x100 tensor ready to input into the dataset
+Output: 
+    - train_loader : The dataloader 
+    - frames : A list a numpy arrays
+    
 """
 def load_data(path, detrac = False, train = False):
 
@@ -28,7 +34,7 @@ def load_data(path, detrac = False, train = False):
     #detrac had an unconventional naming sequence that needs to be accounted seperately so as to not mix up the frame order
     #note that this was simply for testing functionality on the first video in detrac
     
-    print( '\n Loading Data .. \n')
+    print( '\n Loading Data .. ')
     
     if detrac:
         c = 0
@@ -47,10 +53,8 @@ def load_data(path, detrac = False, train = False):
             break
         
     else:
-        frames = glob(path + '/*.jpg')
-        
-        for f in tqdm(frames):
-            img = imageio.imread(f)
+        frames = preprocessing(path)
+        for img in tqdm(frames):
             data.append(cv2.resize(img, (100, 100), interpolation = cv2.INTER_AREA))
                          
     data_load = np.array(data).transpose(0,3,1,2)
@@ -66,4 +70,4 @@ def load_data(path, detrac = False, train = False):
     train_dataset = utils.TensorDataset(tensor_x,tensor_x)
     train_loader = utils.DataLoader(train_dataset, batch_size=batch_size, shuffle = train)
 
-    return train_loader
+    return train_loader, frames

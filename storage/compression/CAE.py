@@ -1,6 +1,7 @@
 import torch.nn as nn
 class CAE(nn.Module):
     """
+    CAE stands for Convolutional Autoencoder.
     This AE module will be fed 3x100x100 images
     Shapes are (batch_size, channels, height, width)
     Latent representation vector 1250 per image

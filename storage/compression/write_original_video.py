@@ -2,27 +2,27 @@
 This function takes in index_list, data_path , save_path as the arguments. It writes a video consisting 
 of the frame in data_path into save_path and writes a text file with the indexed of the representative 
 frame into the same directory 
+
+inputs :
+
+    - frames = list of frames i.e. numpy arrays
+    - scale = scale to resize, int
+    - data_path = path to original data, string
+    - save_original_path = path to save scaled video, string
+    - Detrac = For development purposes only, True
+    
+outputs : None
+
 '''
 
 import cv2
 import os
 import imageio
 from glob import glob
+from tqdm import tqdm
 
-def write_data(index_list,data_path='',save_path='',Detrac = False):
-    
-    p = save_path.split('/')
-    
-    index_path = ''
-    for i in p[:-1]:
-        index_path+=i + '/'
-    
-    with open(index_path + 'representative_frame.txt', 'w') as f:
-        for item in index_list:
-            f.write("%s\n" % item)
-    
-        
-        
+def write_original_video(frames, scale=1 , data_path='', save_original_path='' ,Detrac = False):
+
     if Detrac:
         c = 0
         width = 960
@@ -45,18 +45,28 @@ def write_data(index_list,data_path='',save_path='',Detrac = False):
         cv2.destroyAllWindows()
 
     else:
+        
         c = 0
         
         fourcc = cv2.VideoWriter_fourcc(*'MP42')
-        frames = glob( data_path + '/*jpg') 
-        frames = sorted(frames)
-        img_for_shape = imageio.imread( frames[0] )
-        width = img_for_shape.shape[1]
-        height = img_for_shape.shape[0]
-        video = cv2.VideoWriter(save_path,fourcc,30, (width,height))
-        for f in frames:
-            #print(f)
-            img = imageio.imread( f )
+        
+        if type(scale) == tuple:
+            width = scale[1]
+            height = scale[0]
+        
+        else:
+            cap = cv2.VideoCapture(data_path)
+            ret, img_for_shape = cap.read()
+            cap.release()
+            width = float(scale) * int(img_for_shape.shape[1])
+            height = float(scale) * int(img_for_shape.shape[0])
+        
+        width = int(width)
+        height = int(height)
+        video = cv2.VideoWriter(save_original_path,fourcc,30, (width,height))
+        print()
+        for img in tqdm(list(frames)):
+            img = cv2.resize( img , (width, height))
             video.write(img)
     
         video.release()

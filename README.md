@@ -51,7 +51,14 @@ NEW!!! There are new versions of the loaders and filters.
    python filters/minimum_filter.py
 ```
 
-2. EVA storage-system (Video compression and indexing system - *currently in progress*)
+### EVA storage-system (Video compression and indexing system - *New*)
+
+New storage and indexing system has been integrated. 
+
+Storage system will provide efficient compression techniques and index original videos to 
+supplement efficient content based image retrieval
+
+Compressed videos maintain all relevant content but decrease size by upto 87 percent. All files relevant to usage of the compression engine are present in the compression folder. 
 
 ### Eva Core
 Eva core is consisted of
@@ -91,8 +98,6 @@ The loaders load the dataset with the attributes specified in the *Accelerating 
 
 All code related to this module is in */loaders*
 
-### Eva storage
-Currently a work in progress. Come check back later!
 
 
 ### Dataset

@@ -16,10 +16,24 @@ import torchvision.transforms as transforms
 from load_data import load_data
 from CAE import CAE
 
-def train(path,DETRAC,train,epoch,verbose=False):
+'''
+A function that is used to train the model for a specified number of epochs
+
+Inputs : 
+
+    -path : to call the load_data function that returns the dataloader
+    -DETRAC : True if being tested on DETRAC ( for development only )
+    -train : 
+    -epoch : Number of epochs to train for
+    -verbose : True if loss is to be displayed at each epoch
+    
+Outputs : None
+'''
+
+def train(path,epoch,verbose=False,DETRAC=False):
 
     #Dataloading
-    train_loader = load_data(path,DETRAC,train)
+    train_loader, _ = load_data(path,DETRAC,True)
     images, _ = next(iter(train_loader))  
     
     # Load pre-trained model 
