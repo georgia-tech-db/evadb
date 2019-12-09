@@ -555,15 +555,12 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertIsNone(root.parent)
         self.assertTrue(root.children,[j1])
         self.assertTrue(j1.parent,root)
-        self.assertEqual(len(j1.parent),1)
-        self.assertTrue(len(j1.parent),1)
+        self.assertTrue(type(j1.parent),LogicalProjectionPlan)
         self.assertEqual(len(j1.children),2)
         self.assertTrue(type(j1.children[0]), LogicalSelectPlan)
         self.assertTrue(type(j1.children[1]), LogicalSelectPlan)
         self.assertTrue(t1.parent in j1.children)
-        self.assertEqual(len(t1.parent), 1)
         self.assertTrue(t2.parent in j1.children)
-        self.assertEqual(len(t2.parent), 1)
 
     def test_join_elimination(self, verbose=False):
         meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
