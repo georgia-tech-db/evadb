@@ -8,7 +8,8 @@ from expression.tuple_value_expression import TupleValueExpression
 from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
-from query_planner.video_table_plan import VideoTablePlan
+# from query_planner.video_table_plan import VideoTablePlan
+from query_parser.table_ref import TableRef, TableInfo
 from loaders.video_loader import SimpleVideoLoader
 from models.catalog.video_info import VideoMetaInfo
 from models.catalog.properties import VideoFormat
@@ -39,8 +40,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
         j1.parent = s1
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
 
         s1.set_children([j1])
         t1.parent = j1
@@ -83,8 +84,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.1', 'v2.1'])
         j1.parent = root
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
 
         t1.parent = j1
         t2.parent = j1
@@ -129,7 +130,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         projection_output = ['v1.3', 'v1.4']
         root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
 
         root.set_children([s1])
         s1.parent = root
@@ -177,8 +178,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         s1 = SeqScanPlan(predicate=expression, column_ids=['v2.7'], videos=[video1], foreign_column_ids=[])
         s1.parent = j1
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
         s1.set_children([t2])
         t1.parent = j1
         t2.parent = s1
@@ -239,8 +240,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
         j1.parent = s1
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
 
         s1.set_children([j1])
         t1.parent = j1
@@ -311,9 +312,9 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j2 = LogicalInnerJoinPlan(videos=[video1, video2, video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
         j1.parent = j2
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
-        t3 = VideoTablePlan(video=video3, tablename='v3')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
+        t3 = TableRef(video=video3, table_info=TableInfo(table_name='v3'))
 
         s1.set_children([j2])
         t1.parent = j1
@@ -371,9 +372,9 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j2 = LogicalInnerJoinPlan(videos=[video1, video2, video3], join_ids=['v1.3', 'v2.3', 'v3.3'])
         j1.parent = j2
         j2.parent = root
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
-        t3 = VideoTablePlan(video=video3, tablename='v3')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
+        t3 = TableRef(video=video3, table_info=TableInfo(table_name='v3'))
 
         t1.parent = j1
         t2.parent = j1
@@ -446,7 +447,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         projection_output = ['v1.3', 'v1.4']
         root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
 
         root.set_children([s1])
         s1.parent = root
@@ -484,7 +485,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         projection_output = ['v1.3', 'v1.4']
         root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
 
         root.set_children([s1])
         s1.parent = root
@@ -533,8 +534,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j1.parent = s1
         s1.set_children([j1])
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
 
         # adding parent and children pointers
         t1.parent = j1
@@ -587,8 +588,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.1', 'v2.2'])
         j1.parent = s1
 
-        t1 = VideoTablePlan(video=video1, tablename='v1')
-        t2 = VideoTablePlan(video=video2, tablename='v2')
+        t1 = TableRef(video=video1, table_info=TableInfo(table_name='v1'))
+        t2 = TableRef(video=video2, table_info=TableInfo(table_name='v2'))
         t1.parent = j1
         t2.parent = j1
 
@@ -609,7 +610,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
 
         self.assertIsNone(root.parent)
         self.assertEqual(type(t1.parent), SeqScanPlan)
-        self.assertEqual(type(s1.children[0]), VideoTablePlan)
+        self.assertEqual(type(s1.children[0]), TableRef)
         self.assertEqual(len(s1.children), 1)
         self.assertEqual(len(s1.foreign_column_ids), 0)
         self.assertTrue('v1.2' in root.column_ids)

@@ -1,3 +1,6 @@
+from loaders.abstract_loader import AbstractVideoLoader
+
+
 class TableInfo:
     """
     stores all the table info, inspired from postgres
@@ -26,9 +29,14 @@ class TableRef:
     Attributes:
     table_info: expression of table name and database name
     """
-    def __init__(self, table_info: TableInfo):
+    def __init__(self, table_info: TableInfo, video: AbstractVideoLoader):
         self._table_info = table_info
+        self._video = video
 
     @property
     def table_info(self):
         return self._table_info
+
+    @property
+    def video(self):
+        return self._video

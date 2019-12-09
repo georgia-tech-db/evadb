@@ -5,7 +5,8 @@ from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 # from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.seq_scan_plan import SeqScanPlan
-from query_planner.video_table_plan import VideoTablePlan
+# from query_planner.video_table_plan import VideoTablePlan
+from query_parser.table_ref import TableRef
 from enum import Enum
 
 from expression.tuple_value_expression import TupleValueExpression
@@ -53,7 +54,7 @@ class RuleQueryOptimizer:
 
             :return: Void
         """
-        if type(curnode.children) == VideoTablePlan or len(curnode.children) == 0:
+        if type(curnode) == TableRef or type(curnode.children) == TableRef or len(curnode.children) == 0:
             return
         # for rule in rule_list:
         for child_ix, child in enumerate(curnode.children):
@@ -81,8 +82,8 @@ class RuleQueryOptimizer:
         curnode_tabnames = set([col.split('.')[0] for col in curnode.column_ids])
         vids = []
         for jc_ix, jc in enumerate(child.children):
-            if type(jc) == VideoTablePlan:
-                jc_tabnames = set([jc.tablename])
+            if type(jc) == TableRef:
+                jc_tabnames = set([jc.table_info.table_name])
                 vids = [jc.video]
             elif type(jc) == SeqScanPlan:
                 jc_tabnames = set([attr.split('.')[0] for attr in jc.column_ids])
@@ -155,8 +156,8 @@ class RuleQueryOptimizer:
         # child is the join
         child = curnode.children[child_ix]
         for cc_ix, cc in enumerate(child.children):
-            if type(cc) == VideoTablePlan:
-                cc_tabnames = [cc.tablename]
+            if type(cc) == TableRef:
+                cc_tabnames = [cc.table_info.table_name]
             elif type(cc) == LogicalInnerJoinPlan:
                 cc_tabnames = [col.split('.')[0] for col in cc.join_ids]
             elif type(cc) == SeqScanPlan:
@@ -169,7 +170,7 @@ class RuleQueryOptimizer:
             cols2 = [col for col in curnode.column_ids for tabname in cc_tabnames if tabname in col]
             cols.extend(cols2)
             # creating new Projection Node
-            if type(cc) == VideoTablePlan:
+            if type(cc) == TableRef:
                 vids = [cc.video]
             else:
                 vids = cc.videos
@@ -260,8 +261,8 @@ class RuleQueryOptimizer:
 
             # checking supported types for grand child
             for gc_idx, gc in enumerate(child.children):
-                if type(gc) == VideoTablePlan:
-                    jc_tabnames = set([gc.tablename])
+                if type(gc) == TableRef:
+                    jc_tabnames = set([gc.table_info.table_name()])
                     vids = [gc.video]
                 elif type(gc) == SeqScanPlan:
                     jc_tabnames = set([attr.split('.')[0] for attr in gc.column_ids])
@@ -356,7 +357,7 @@ class RuleQueryOptimizer:
 
             :return: Boolean value if given arguments are true or not
         """
-        if len(child.children) > 0:
+        if type(child) != TableRef and len(child.children) > 0:
             joins = any([type(c) == LogicalInnerJoinPlan for c in child.children])
             return type(curnode) == LogicalProjectionPlan and type(child) == SeqScanPlan and not joins
         else:
