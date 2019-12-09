@@ -510,6 +510,61 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertEqual(type(t1.parent) , LogicalProjectionPlan)
         self.assertEqual(s1.children[0].children, [t1])
 
+    def test_transitive_closure(self,verbose=False):
+        meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
+        video1 = SimpleVideoLoader(video_metadata=meta1)
+
+        meta2 = VideoMetaInfo(file='v2', c_format=VideoFormat.MOV, fps=30)
+        video2 = SimpleVideoLoader(video_metadata=meta2)
+
+        projection_output = ['v1.1', 'v1.2', 'v2.2']
+        root = LogicalProjectionPlan(videos=[video1, video2], column_ids=projection_output, foreign_column_ids=[])
+
+        # Creating Expression for Select: Expression is basically where v1.1 == 43
+        const = ConstantValueExpression(value=43)
+        tup = TupleValueExpression(col_idx=int(projection_output[0].split('.')[1]))
+        expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
+        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1], foreign_column_ids=[]) # For later Check if videos should also contain video2
+        s1.parent = root
+        root.set_children([s1])
+
+        # Declaring the join node 
+        j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.1', 'v2.1'])
+        j1.parent = s1
+        s1.set_children([j1])
+
+        t1 = VideoTablePlan(video=video1, tablename='v1')
+        t2 = VideoTablePlan(video=video2, tablename='v2')
+
+        # adding parent and children pointers
+        t1.parent = j1
+        t2.parent = j1
+        j1.set_children([t1, t2])
+
+        rule_list = [Rules.TRANSITIVE_CLOSURE]
+        if verbose:
+            print('Original Plan Tree')
+            print(root)
+
+        qo = RuleQueryOptimizer()
+        new_tree = qo.run(root, rule_list)
+        if verbose:
+            print('New Plan Tree')
+            print(new_tree)
+
+        self.assertIsNone(root.parent)
+        self.assertTrue(root.children,[j1])
+        self.assertTrue(j1.parent,root)
+        self.assertEqual(len(j1.parent),1)
+        self.assertTrue(len(j1.parent),1)
+        self.assertEqual(len(j1.children),2)
+        self.assertTrue(type(j1.children[0]), LogicalSelectPlan)
+        self.assertTrue(type(j1.children[1]), LogicalSelectPlan)
+        self.assertTrue(t1.parent in j1.children)
+        self.assertEqual(len(t1.parent), 1)
+        self.assertTrue(t2.parent in j1.children)
+        self.assertEqual(len(t2.parent), 1)
+
     def test_join_elimination(self, verbose=False):
         meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
         video1 = SimpleVideoLoader(video_metadata=meta1)
