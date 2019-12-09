@@ -28,17 +28,22 @@ git config core.hooksPath .githooks
     
 ### Demos
 We have demos for the following components:
-1. Eva analytics (pipeline for loading the dataset, training the filters, and outputting the optimal plan)
+1. Command Line Interface Demo. Type in queries to get results in terms of frames and file names. Exit the command line interface by typing exit.
+```commandline
+   cd <YOUR_EVA_DIRECTORY>
+   python demo.py
+```
+2. Eva analytics (pipeline for loading the dataset, training the filters, and outputting the optimal plan)
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
    python pipeline.py
 ```
-2. Eva Query Optimizer (Will show converted queries for the original queries)
+3. Eva Query Optimizer (Will show converted queries for the original queries)
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
    python query_optimizer/query_optimizer.py
 ```
-3. Eva Loader (Loads UA-DETRAC dataset)
+4. Eva Loader (Loads UA-DETRAC dataset)
 ```commandline
    cd <YOUR_EVA_DIRECTORY>
    python loaders/load.py
