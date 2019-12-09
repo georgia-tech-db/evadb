@@ -262,7 +262,7 @@ class RuleQueryOptimizer:
             # checking supported types for grand child
             for gc_idx, gc in enumerate(child.children):
                 if type(gc) == TableRef:
-                    jc_tabnames = set([gc.table_info.table_name()])
+                    jc_tabnames = set([gc.table_info.table_name])
                     vids = [gc.video]
                 elif type(gc) == SeqScanPlan:
                     jc_tabnames = set([attr.split('.')[0] for attr in gc.column_ids])

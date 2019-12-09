@@ -1,7 +1,8 @@
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 # from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.seq_scan_plan import SeqScanPlan
-from query_planner.video_table_plan import VideoTablePlan
+# from query_planner.video_table_plan import VideoTablePlan
+from query_parser.table_ref import TableRef, TableInfo
 from loaders.video_loader import SimpleVideoLoader
 from models.catalog.video_info import VideoMetaInfo
 from models.catalog.properties import VideoFormat
@@ -24,7 +25,7 @@ class Statement2Plantree:
             from_stuff = statement.from_table
             meta1 = VideoMetaInfo(file=from_stuff.table_info.table_name, c_format=VideoFormat.MOV, fps=30)
             video1 = SimpleVideoLoader(video_metadata=meta1)
-            t1 = VideoTablePlan(video=video1, tablename=from_stuff.table_info.table_name)
+            t1 = TableRef(video=video1, table_info=TableInfo(table_name=from_stuff.table_info.table_name))
             # Creating projection (root)
             projection_output = [target.col_name for target in statement.target_list]
             root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])

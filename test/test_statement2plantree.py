@@ -3,7 +3,8 @@ from query_optimizer.statement2plantree import Statement2Plantree
 from src.query_parser.eva_parser import EvaFrameQLParser
 # from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.seq_scan_plan import SeqScanPlan
-from query_planner.video_table_plan import VideoTablePlan
+# from query_planner.video_table_plan import VideoTablePlan
+from query_parser.table_ref import TableRef
 
 
 # Test cases to test if we can go from SQL statement to logical plan tree
@@ -18,7 +19,7 @@ class TestStatement2PlanTree(unittest.TestCase):
         self.assertIsNone(plan_tree.parent)
         self.assertTrue(type(plan_tree), SeqScanPlan)
         self.assertTrue(len(plan_tree.children) == 1)
-        self.assertTrue(type(plan_tree.children[0]) == VideoTablePlan)
+        self.assertTrue(type(plan_tree.children[0]) == TableRef)
 
     # Test a select statement with where clause
     def test_simple_where(self):
