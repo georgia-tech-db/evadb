@@ -24,18 +24,17 @@ class AbstractInnerJoin(AbstractPlan):
         self._join_ids = join_ids
         self._videos = videos
 
+
     @property
     def videos(self) -> List[AbstractVideoLoader]:
-        """Returns the videos of the current node"""
         return self._videos
 
     @property
     def join_ids(self) -> List[int]:
-        """Returns the join ids of the current node"""
         return self._join_ids
 
+
     def __str__(self, level=0):
-        """returns the representation of the node in string format"""
         pt1 = ' join '.join([str(video.video_metadata.file) for video in self.videos])
         pt2 = ' = '.join([str(id) for id in self._join_ids])
         join_cols_str = '{}__{}'.format(pt1, pt2)

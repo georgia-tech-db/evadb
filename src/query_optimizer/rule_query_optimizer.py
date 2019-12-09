@@ -1,5 +1,3 @@
-from abstract_expression import ExpressionType
-from comparison_expression import ComparisonExpression
 from expression.constant_value_expression import ConstantValueExpression
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
@@ -7,11 +5,9 @@ from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.video_table_plan import VideoTablePlan
 from enum import Enum
 
-from tuple_value_expression import TupleValueExpression
 
-
+# Enum to encapsulate the list of rules we have available
 class Rules(Enum):
-    """Enum to encapsulate the list of rules we have available"""
     PREDICATE_PUSHDOWN = 1,
     PROJECTION_PUSHDOWN_SELECT = 2,
     PROJECTION_PUSHDOWN_JOIN= 3,
@@ -19,8 +15,9 @@ class Rules(Enum):
     JOIN_ELIMINATION = 5,
     TRANSITIVE_CLOSURE = 6
 
+
+# Class to Encapsulate the functionality of the Rule Based Query Optimizer (Query Rewriter)
 class RuleQueryOptimizer:
-    """Class to Encapsulate the functionality of the Rule Based Query Optimizer (Query Rewriter)"""
     def __init__(self):
         self.rule2value = {Rules.PREDICATE_PUSHDOWN: (self.predicate_pushdown, self.do_predicate_pushdown),
                            Rules.SIMPLIFY_PREDICATE: (self.simply_predicate, self.do_simplify_predicate),
@@ -29,29 +26,18 @@ class RuleQueryOptimizer:
                            Rules.PROJECTION_PUSHDOWN_JOIN: (self.projection_pushdown_join, self.do_projection_pushdown_join),
                            Rules.JOIN_ELIMINATION: (self.join_elimination, self.do_join_elimination)}
 
+
+    # Runs the rule based Optimizer on the list of rules you want
+    # rule_list : a list of Rule Enums. The rules will be ran in the order specified.
+    #             example: [Rules.PREDICATE_PUSHDOWN, Rules.SIMPLIFY_PREDICATE]
     def run(self, root_node, rule_list):
-        """ Runs the rule based Optimizer on the list of rules user selects
-
-            Keyword Arguments:
-            root_node -- The root node of the logical plan tree.
-            rule_list -- The list containing rules user want to apply to the logical plan tree
-                            (i.e. [Rules.PREDICATE_PUSHDOWN, Rules.SIMPLIFY_PREDICATE])
-
-            :return: The modified logical tree (pointing the root node)
-        """
         for rule in rule_list:
             self.traverse(root_node, rule)
         return root_node
 
+    # Recursive function that traverses the tree and applies all of the rules in the rule list
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
     def traverse(self, curnode, rule):
-        """ Recursive function that traverses the tree and applies all of the rules in the rule list
-
-            Keyword Arguments:
-            curnode -- Current node in the logical plan tree. Type will always be one of the Abstract Plan types.
-            rule -- Rule applied to the current node.
-
-            :return: Void
-        """
         if type(curnode.children) == VideoTablePlan or len(curnode.children) == 0:
             return
         # for rule in rule_list:
@@ -61,15 +47,10 @@ class RuleQueryOptimizer:
                 func(curnode, child_ix)
             self.traverse(child, rule)
 
+    # push down predicates so filters done as early as possible
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def predicate_pushdown(self, curnode, child_ix):
-        """ Push down predicates so filters done as early as possible
-
-            Keyword Arguments:
-            curnode -- is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child_ix -- is an integer that represents the index of the child in the curnode's child list
-
-            :return: Void
-        """
         # curnode is the select and child is the join
         child = curnode.children[child_ix]
         # setting the parent's new child to be the join node
@@ -107,15 +88,10 @@ class RuleQueryOptimizer:
         child.parent = curnode.parent
         curnode.parent = child
 
+    # push down projects so that we do not have unnecessary attributes
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def projection_pushdown_select(self, curnode, child_ix):
-        """ Push down projects so that we do not have unnecessary attributes
-
-            Keyword Arguments:
-            curnode -- is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child_ix -- is an integer that represents the index of the child in the curnode's child list
-
-            :return: Void
-        """
         # curnode is the projection
         # child is the select
         child = curnode.children[child_ix]
@@ -141,15 +117,10 @@ class RuleQueryOptimizer:
             curnode.parent.children[curnode_ix] = cur_children[0]
             cur_children[0].parent = curnode.parent
 
+    # push down projects so that we do not have unnecessary attributes
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def projection_pushdown_join(self, curnode, child_ix):
-        """ Push down projects so that we do not have unnecessary attributes
-
-        Keyword Arguments:
-        curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-        child_ix -- An integer that represents the index of the child in the curnode's child list
-
-        :return: Void
-        """
         # curnode is the projection
         # child is the join
         child = curnode.children[child_ix]
@@ -186,44 +157,30 @@ class RuleQueryOptimizer:
             curnode_ix = curnode.parent.children.index(curnode)
             curnode.parent.children[curnode_ix] = child
 
+    # reorder predicates so that DBMS applies most selective first
     def selective_first(self):
-        """reorder predicates so that DBMS applies most selective first"""
         pass
 
+    # simply_predicate so that we do not have unnecessary conditions
+    # No where clause like 1 = 0 or 0 = 0
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def simply_predicate(self, curnode, child_ix):
-        """ Simplify predicate to remove unnecessary conditions (i.e.  1 = 0 or 0 = 0)
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child_ix -- An integer that represents the index of the child in the curnode's child list
-
-            :return: Void
-        """
         boolean=curnode.predicate.evaluate()
         if not boolean:
             self.delete_node(curnode)
-
+    
+    # delete_node function recreates the parent and cild pointers and skips the sigma     
     def delete_node(self, curnode):
-        """ Recreates the parent and child pointers to skip the sigma
-
-           Keyword Arguments:
-           curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-
-           :return: void
-        """
         curnode.parent.set_children(curnode.children)
         for child in curnode.children:
             child.parent=curnode.parent
-
+      
+    # transitive_closure is extremely important to apply in the case when same predicate is being applied to both tables
+    # and ensures precise cardinality estimation as we can select a concrete predicate value 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def transitive_closure(self, curnode, child_ix):
-        """ Ensures precise cardinality estimation when same predicate is being applied to both tables
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child_ix -- An integer that represents the index of the child in the curnode's child list
-
-            :return: void
-        """
         child = curnode.children[child_ix]
         # checking if the current node is a comparison expression
         if type(curnode.predicate) == ComparisonExpression:
@@ -291,8 +248,7 @@ class RuleQueryOptimizer:
                 expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
             
                 # using both videos as purposely place "before" the join
-                s1 = LogicalSelectPlan(predicate=expression, column_ids=[selected_col],
-                                       videos=vids, foreign_column_ids=[])
+                s1 = LogicalSelectPlan(predicate=expression, column_ids=[selected_col], videos=vids, foreign_column_ids=[])
                 
                 # parent of selection is join
                 s1.parent = child 
@@ -309,15 +265,9 @@ class RuleQueryOptimizer:
         child=curnode.children[child_ix]
         cur_col=curnode.column_ids
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child_ix : is an integer that represents the index of the child in the curnode's child list
     def join_elimination(self, curnode, child_ix):
-        """ Avoid unnecessary joins in case first table has foreign key constraint on the second table
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child_ix -- An integer that represents the index of the child in the curnode's child list
-
-            :return: void
-        """
         child = curnode.children[child_ix]
         cur_col = curnode.column_ids
         foreign_col = curnode.foreign_column_ids
@@ -335,76 +285,39 @@ class RuleQueryOptimizer:
             new_pred = [curnode.column_ids[0], cur_col_id + "." + foreign_col_id]
             curnode.set_column_ids(new_pred)
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_projection_pushdown_join(self, curnode, child):
-        """ Type of nodes required to perform projection pushdown with join node
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child -- A child of curnode and is a type that inherits from the AbstractPlan type
-
-            :return: Boolean value if given arguments are true or not
-        """
         return type(curnode) == LogicalProjectionPlan and type(child) == LogicalInnerJoinPlan
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_projection_pushdown_select(self, curnode, child):
-        """ Type of nodes required to perform projection pushdown with select node
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child -- A child of curnode and is a type that inherits from the AbstractPlan type
-
-            :return: Boolean value if given arguments are true or not
-        """
         if len(child.children) > 0:
             joins = any([type(c) == LogicalInnerJoinPlan for c in child.children])
             return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan and not joins
         else:
             return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_predicate_pushdown(self, curnode, child):
-        """ Type of nodes required to perform prediate pushdown
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child -- A child of curnode and is a type that inherits from the AbstractPlan type
-
-            :return: Boolean value if given arguments are true or not
-        """
         return type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_join_elimination(self, curnode, child):
-        """ Type of nodes required to join elimination
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child -- A child of curnode and is a type that inherits from the AbstractPlan type
-
-            :return: Boolean value if given arguments are true or not
-        """
         return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan \
                and type(child.children[0]) == LogicalInnerJoinPlan
 
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_simplify_predicate(self, curnode, child):
-        """ Type of nodes required to perform simplify predicate
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child -- A child of curnode and is a type that inherits from the AbstractPlan type
-
-            :return: Boolean value if given arguments are true or not
-        """
         return type(curnode) == LogicalSelectPlan
 
-
+    # curnode : is the current node visited in the plan tree and is a type that inherits from the AbstractPlan type
+    # child : is a child of curnode and is a type that inherits from the AbstractPlan type
     def do_transitive_closure(self, curnode, child):
-        """ Type of nodes required to perform transitive closure
-
-            Keyword Arguments:
-            curnode -- The current node visited in the plan tree and is a type that inherits from the AbstractPlan type
-            child -- A child of curnode and is a type that inherits from the AbstractPlan type
-
-            :return: Boolean value if given arguments are true or not
-        """
         if type(curnode) == LogicalSelectPlan:
             if type(child) == LogicalInnerJoinPlan:
                 return True

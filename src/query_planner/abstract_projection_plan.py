@@ -27,29 +27,23 @@ class AbstractProjection(AbstractPlan):
 
     @property
     def videos(self) -> List[AbstractVideoLoader]:
-        """Returns the videos of the current node"""
         return self._videos
 
     @property
     def column_ids(self) -> List[str]:
-        """Returns the column ids of the current node"""
         return self._column_ids
 
     @property
     def foreign_column_ids(self) -> List[str]:
-        """Returns the foreign key constraints of the current node"""
         return self._foreign_column_ids
 
     def set_foreign_column_ids(self, foreign):
-        """Sets the foreign key constraints of the current node"""
         self._foreign_column_ids = foreign
 
     def set_column_ids(self, new_id):
-        """Sets the column ids of the current node"""
         self._column_ids = new_id
 
     def __str__(self, level=0):
-        """Returns a representation of teh current node in string format"""
         project_cols_str = 'pi {} {}'.format(str(self._column_ids), str(self._foreign_column_ids))
         out_string = "\t" * level + project_cols_str + "\n"
         for child in self.children:
