@@ -33,3 +33,4 @@ class CostBasedOptimizer:
                     )
                     child.set_predicate(optimized_predicate)
                     self.execute(child)
+        return node

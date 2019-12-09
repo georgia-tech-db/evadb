@@ -91,3 +91,13 @@ class LogicalExpression(AbstractExpression):
             return True
         else:
             return False
+
+    def __str__(self):
+        if self.operator is not None:
+            if self.operator == ExpressionType.LOGICAL_AND:
+                operator = " AND "
+            elif self.operator == ExpressionType.LOGICAL_OR:
+                operator = " OR "
+            else:
+                operator = " " + self.operator + " "
+            return str(self.left_expression) + operator + str(self.right_expression)
