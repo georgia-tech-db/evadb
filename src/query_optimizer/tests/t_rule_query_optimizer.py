@@ -3,15 +3,17 @@ from expression.comparison_expression import ComparisonExpression
 from expression.abstract_expression import ExpressionType
 from expression.constant_value_expression import ConstantValueExpression
 from expression.tuple_value_expression import TupleValueExpression
-from query_planner.logical_select_plan import LogicalSelectPlan
+# from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.video_table_plan import VideoTablePlan
 from loaders.video_loader import SimpleVideoLoader
-from models import VideoMetaInfo, VideoFormat
+from models.catalog.video_info import VideoMetaInfo
+from models.catalog.properties import VideoFormat
 
 
-def test_simple_predicate_pushdown(verbose=True):
+def test_simple_predicate_pushdown(verbose=False):
     # Creating the videos
     meta1 = VideoMetaInfo(file='v1', c_format=VideoFormat.MOV, fps=30)
     video1 = SimpleVideoLoader(video_metadata=meta1)
@@ -28,7 +30,7 @@ def test_simple_predicate_pushdown(verbose=True):
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
     # used both videos because purposely placed BEFORE the join
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2], foreign_column_ids=[])
     s1.parent = root
 
     j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
@@ -124,7 +126,7 @@ def test_simple_projection_pushdown_select(verbose=False):
     const = ConstantValueExpression(value=4)
     tup = TupleValueExpression(col_idx=int(7))
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
 
     projection_output = ['v1.3', 'v1.4']
     root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
@@ -176,7 +178,7 @@ def test_combined_projection_pushdown(verbose=False):
     const = ConstantValueExpression(value=4)
     tup = TupleValueExpression(col_idx=int(7))
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v2.7'], videos=[video1], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v2.7'], videos=[video1], foreign_column_ids=[])
     s1.parent = j1
 
     t1 = VideoTablePlan(video=video1, tablename='v1')
@@ -236,7 +238,7 @@ def test_both_projection_pushdown_and_predicate_pushdown(verbose=False):
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
     # used both videos because purposely placed BEFORE the join
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2], foreign_column_ids=[])
     s1.parent = root
 
     j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
@@ -307,7 +309,7 @@ def test_double_join_predicate_pushdown(verbose=False):
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
     # used both videos because purposely placed BEFORE the join
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3], foreign_column_ids=[])
     s1.parent = root
 
     j1 = LogicalInnerJoinPlan(videos=[video1, video2], join_ids=['v1.3', 'v2.3'])
@@ -457,7 +459,7 @@ def test_join_elimination(verbose=False):
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup1, right=tup2)
 
     # used both videos because purposely placed BEFORE the join
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1', 'v2.2'], videos=[video1, video2],
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1', 'v2.2'], videos=[video1, video2],
                            foreign_column_ids=['v2.2'])
     s1.parent = root
 
@@ -484,14 +486,14 @@ def test_join_elimination(verbose=False):
         print(new_tree)
 
     assert root.parent is None
-    assert (type(t1.parent) == LogicalSelectPlan)
+    assert (type(t1.parent) == SeqScanPlan)
     assert (type(s1.children[0]) == VideoTablePlan)
     assert (len(s1.children) == 1)
     assert (len(s1.foreign_column_ids) == 0)
     assert ('v1.2' in root.column_ids)
     assert (len(root.column_ids) == 2)
     assert (len(root.foreign_column_ids) == 0)
-    assert (type(root.children[0]) == LogicalSelectPlan)
+    assert (type(root.children[0]) == SeqScanPlan)
 
 
 def test_shouldnot_simply_predicate(verbose=False):
@@ -502,7 +504,7 @@ def test_shouldnot_simply_predicate(verbose=False):
     const = ConstantValueExpression(value=4)
     tup = TupleValueExpression(col_idx=int(7))
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
 
     projection_output = ['v1.3', 'v1.4']
     root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
@@ -534,7 +536,7 @@ def test_should_simply_predicate(verbose=False):
     # Comparing if 0 is equal to 1
     # It will be False which will trigger the simplify predicate function
     expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
-    s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
+    s1 = SeqScanPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
 
     projection_output = ['v1.3', 'v1.4']
     root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])

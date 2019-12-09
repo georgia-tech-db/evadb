@@ -1,9 +1,8 @@
 import unittest
 from query_optimizer.statement2plantree import Statement2Plantree
 from src.query_parser.eva_parser import EvaFrameQLParser
-from query_planner.logical_select_plan import LogicalSelectPlan
-from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
-from query_planner.logical_projection_plan import LogicalProjectionPlan
+# from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.video_table_plan import VideoTablePlan
 
 
@@ -17,7 +16,7 @@ class TestStatement2PlanTree(unittest.TestCase):
         eva_statement_list = parser.parse(query)
         plan_tree = Statement2Plantree.convert(eva_statement_list)
         self.assertIsNone(plan_tree.parent)
-        self.assertTrue(type(plan_tree), LogicalSelectPlan)
+        self.assertTrue(type(plan_tree), SeqScanPlan)
         self.assertTrue(len(plan_tree.children) == 1)
         self.assertTrue(type(plan_tree.children[0]) == VideoTablePlan)
 
@@ -29,7 +28,7 @@ class TestStatement2PlanTree(unittest.TestCase):
         plan_tree = Statement2Plantree.convert(eva_statement_list)
     
         self.assertIsNone(plan_tree.parent)
-        self.assertEqual(type(plan_tree.children), LogicalSelectPlan)
+        self.assertEqual(type(plan_tree.children), SeqScanPlan)
         self.assertTrue('CLASS' in plan_tree.children.column_ids)
 
     # Todo select statement with join clause

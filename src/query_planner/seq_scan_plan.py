@@ -1,6 +1,7 @@
 from typing import List
 
 from src.expression.abstract_expression import AbstractExpression
+from src.loaders.abstract_loader import AbstractVideoLoader
 from src.query_planner.abstract_scan_plan import AbstractScan
 from src.query_planner.types import PlanNodeType
 
@@ -19,12 +20,9 @@ class SeqScanPlan(AbstractScan):
     """
 
     def __init__(self, predicate: AbstractExpression,
-                 column_ids: List[int] = None):
-        if column_ids is None:
-            column_ids = []
-        super().__init__(PlanNodeType.SEQUENTIAL_SCAN_TYPE, predicate)
-        self._column_ids = column_ids
+                 videos: List[AbstractVideoLoader],
+                 column_ids: List[str], foreign_column_ids: List[str]):
+        super().__init__(predicate, videos, column_ids, foreign_column_ids)
 
-    @property
-    def column_ids(self) -> List:
-        return self._column_ids
+    def get_node_type(self):
+        return PlanNodeType.SEQUENTIAL_SCAN_TYPE

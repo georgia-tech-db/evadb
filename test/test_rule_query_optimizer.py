@@ -4,12 +4,12 @@ from expression.comparison_expression import ComparisonExpression
 from expression.abstract_expression import ExpressionType
 from expression.constant_value_expression import ConstantValueExpression
 from expression.tuple_value_expression import TupleValueExpression
-from query_planner.logical_select_plan import LogicalSelectPlan
+# from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.video_table_plan import VideoTablePlan
 from loaders.video_loader import SimpleVideoLoader
-#from models import VideoFormat, VideoMetaInfo
 from models.catalog.video_info import VideoMetaInfo
 from models.catalog.properties import VideoFormat
 
@@ -32,7 +32,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
         # used both videos because purposely placed BEFORE the join
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2],
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2],
                                foreign_column_ids=[])
         s1.parent = root
 
@@ -124,7 +124,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         const = ConstantValueExpression(value=4)
         tup = TupleValueExpression(col_idx=int(7))
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v1.7'], videos=[video1], foreign_column_ids=[])
 
         projection_output = ['v1.3', 'v1.4']
         root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
@@ -174,7 +174,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         const = ConstantValueExpression(value=4)
         tup = TupleValueExpression(col_idx=int(7))
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v2.7'], videos=[video1], foreign_column_ids=[])
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v2.7'], videos=[video1], foreign_column_ids=[])
         s1.parent = j1
 
         t1 = VideoTablePlan(video=video1, tablename='v1')
@@ -232,7 +232,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
         # used both videos because purposely placed BEFORE the join
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2],
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1'], videos=[video1, video2],
                                foreign_column_ids=[])
         s1.parent = root
 
@@ -303,7 +303,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
 
         # used both videos because purposely placed BEFORE the join
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3],
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v3.3'], videos=[video1, video2, video3],
                                foreign_column_ids=[])
         s1.parent = root
 
@@ -441,7 +441,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         const1 = ConstantValueExpression(value=0)
         const2 = ConstantValueExpression(value=1)
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=const1, right=const2)
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
+        s1 = SeqScanPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
 
         projection_output = ['v1.3', 'v1.4']
         root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
@@ -479,7 +479,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         const = ConstantValueExpression(value=4)
         tup = TupleValueExpression(col_idx=int(7))
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
+        s1 = SeqScanPlan(predicate=expression, column_ids=[], videos=[], foreign_column_ids=[])
 
         projection_output = ['v1.3', 'v1.4']
         root = LogicalProjectionPlan(videos=[video1], column_ids=projection_output, foreign_column_ids=[])
@@ -524,7 +524,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         const = ConstantValueExpression(value=43)
         tup = TupleValueExpression(col_idx=int(projection_output[0].split('.')[1]))
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1'], videos=[video1], foreign_column_ids=[]) # For later Check if videos should also contain video2
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1'], videos=[video1], foreign_column_ids=[]) # For later Check if videos should also contain video2
         s1.parent = root
         root.set_children([s1])
 
@@ -557,8 +557,8 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         self.assertTrue(j1.parent,root)
         self.assertTrue(type(j1.parent),LogicalProjectionPlan)
         self.assertEqual(len(j1.children),2)
-        self.assertTrue(type(j1.children[0]), LogicalSelectPlan)
-        self.assertTrue(type(j1.children[1]), LogicalSelectPlan)
+        self.assertTrue(type(j1.children[0]), SeqScanPlan)
+        self.assertTrue(type(j1.children[1]), SeqScanPlan)
         self.assertTrue(t1.parent in j1.children)
         self.assertTrue(t2.parent in j1.children)
 
@@ -580,7 +580,7 @@ class RuleQueryOptimizerTest(unittest.TestCase):
         expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup1, right=tup2)
 
         # used both videos because purposely placed BEFORE the join
-        s1 = LogicalSelectPlan(predicate=expression, column_ids=['v1.1', 'v2.2'], videos=[video1, video2],
+        s1 = SeqScanPlan(predicate=expression, column_ids=['v1.1', 'v2.2'], videos=[video1, video2],
                                foreign_column_ids=['v2.2'])
         s1.parent = root
 
@@ -608,12 +608,12 @@ class RuleQueryOptimizerTest(unittest.TestCase):
             print(new_tree)
 
         self.assertIsNone(root.parent)
-        self.assertEqual(type(t1.parent), LogicalSelectPlan)
+        self.assertEqual(type(t1.parent), SeqScanPlan)
         self.assertEqual(type(s1.children[0]), VideoTablePlan)
         self.assertEqual(len(s1.children), 1)
         self.assertEqual(len(s1.foreign_column_ids), 0)
         self.assertTrue('v1.2' in root.column_ids)
         self.assertEqual(len(root.column_ids), 2)
         self.assertEqual(len(root.foreign_column_ids), 0)
-        self.assertEqual(type(root.children[0]), LogicalSelectPlan)
+        self.assertEqual(type(root.children[0]), SeqScanPlan)
 

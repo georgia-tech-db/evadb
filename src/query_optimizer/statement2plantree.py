@@ -1,8 +1,6 @@
-from src.query_parser.select_statement import SelectStatement
-from query_planner.logical_select_plan import LogicalSelectPlan
-from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
 from query_planner.logical_projection_plan import LogicalProjectionPlan
-from query_planner.logical_select_plan import LogicalSelectPlan
+# from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.video_table_plan import VideoTablePlan
 from loaders.video_loader import SimpleVideoLoader
 from models.catalog.video_info import VideoMetaInfo
@@ -35,7 +33,7 @@ class Statement2Plantree:
             # Need to create the sigma plan
             if where_stuff is not None:
                 # Creating a select Node
-                select_node = LogicalSelectPlan(predicate=where_stuff, column_ids=projection_output, videos=[video1], foreign_column_ids=[])
+                select_node = SeqScanPlan(predicate=where_stuff, column_ids=projection_output, videos=[video1], foreign_column_ids=[])
                 root.set_children(select_node)
                 select_node.parent=root
                 select_node.set_children([t1])

@@ -1,13 +1,14 @@
-from abstract_expression import ExpressionType
-from comparison_expression import ComparisonExpression
+from expression.abstract_expression import ExpressionType
+from expression.comparison_expression import ComparisonExpression
 from expression.constant_value_expression import ConstantValueExpression
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
-from query_planner.logical_select_plan import LogicalSelectPlan
+# from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.video_table_plan import VideoTablePlan
 from enum import Enum
 
-from tuple_value_expression import TupleValueExpression
+from expression.tuple_value_expression import TupleValueExpression
 
 
 class Rules(Enum):
@@ -83,7 +84,7 @@ class RuleQueryOptimizer:
             if type(jc) == VideoTablePlan:
                 jc_tabnames = set([jc.tablename])
                 vids = [jc.video]
-            elif type(jc) == LogicalSelectPlan:
+            elif type(jc) == SeqScanPlan:
                 jc_tabnames = set([attr.split('.')[0] for attr in jc.column_ids])
                 vids = jc.videos
             elif type(jc) == LogicalInnerJoinPlan:
@@ -158,7 +159,7 @@ class RuleQueryOptimizer:
                 cc_tabnames = [cc.tablename]
             elif type(cc) == LogicalInnerJoinPlan:
                 cc_tabnames = [col.split('.')[0] for col in cc.join_ids]
-            elif type(cc) == LogicalSelectPlan:
+            elif type(cc) == SeqScanPlan:
                 cc_tabnames = [col.split('.')[0] for col in cc.column_ids]
             else:
                 break
@@ -262,7 +263,7 @@ class RuleQueryOptimizer:
                 if type(gc) == VideoTablePlan:
                     jc_tabnames = set([gc.tablename])
                     vids = [gc.video]
-                elif type(gc) == LogicalSelectPlan:
+                elif type(gc) == SeqScanPlan:
                     jc_tabnames = set([attr.split('.')[0] for attr in gc.column_ids])
                     vids = gc.videos
                 elif type(gc) == LogicalInnerJoinPlan:
@@ -291,7 +292,7 @@ class RuleQueryOptimizer:
                 expression = ComparisonExpression(exp_type=ExpressionType.COMPARE_EQUAL, left=tup, right=const)
             
                 # using both videos as purposely place "before" the join
-                s1 = LogicalSelectPlan(predicate=expression, column_ids=[selected_col],
+                s1 = SeqScanPlan(predicate=expression, column_ids=[selected_col],
                                        videos=vids, foreign_column_ids=[])
                 
                 # parent of selection is join
@@ -357,9 +358,9 @@ class RuleQueryOptimizer:
         """
         if len(child.children) > 0:
             joins = any([type(c) == LogicalInnerJoinPlan for c in child.children])
-            return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan and not joins
+            return type(curnode) == LogicalProjectionPlan and type(child) == SeqScanPlan and not joins
         else:
-            return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan
+            return type(curnode) == LogicalProjectionPlan and type(child) == SeqScanPlan
 
     def do_predicate_pushdown(self, curnode, child):
         """ Type of nodes required to perform prediate pushdown
@@ -370,7 +371,7 @@ class RuleQueryOptimizer:
 
             :return: Boolean value if given arguments are true or not
         """
-        return type(curnode) == LogicalSelectPlan and type(child) == LogicalInnerJoinPlan
+        return type(curnode) == SeqScanPlan and type(child) == LogicalInnerJoinPlan
 
     def do_join_elimination(self, curnode, child):
         """ Type of nodes required to join elimination
@@ -381,7 +382,7 @@ class RuleQueryOptimizer:
 
             :return: Boolean value if given arguments are true or not
         """
-        return type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan \
+        return type(curnode) == LogicalProjectionPlan and type(child) == SeqScanPlan \
                and type(child.children[0]) == LogicalInnerJoinPlan
 
     def do_simplify_predicate(self, curnode, child):
@@ -393,7 +394,7 @@ class RuleQueryOptimizer:
 
             :return: Boolean value if given arguments are true or not
         """
-        return type(curnode) == LogicalSelectPlan
+        return type(curnode) == SeqScanPlan
 
 
     def do_transitive_closure(self, curnode, child):
@@ -405,11 +406,11 @@ class RuleQueryOptimizer:
 
             :return: Boolean value if given arguments are true or not
         """
-        if type(curnode) == LogicalSelectPlan:
+        if type(curnode) == SeqScanPlan:
             if type(child) == LogicalInnerJoinPlan:
                 return True
         '''
-        if type(curnode) == LogicalProjectionPlan and type(child) == LogicalSelectPlan:
+        if type(curnode) == LogicalProjectionPlan and type(child) == SeqScanPlan:
             if type(child.children[0]) == LogicalInnerJoinPlan:
                 return True
         '''

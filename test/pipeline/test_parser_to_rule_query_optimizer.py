@@ -1,9 +1,7 @@
 import unittest
 from src.query_parser.eva_parser import EvaFrameQLParser
-from src.query_parser.eva_statement import EvaStatement
-from query_planner.logical_select_plan import LogicalSelectPlan
-from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
-from query_planner.logical_projection_plan import LogicalProjectionPlan
+# from query_planner.logical_select_plan import LogicalSelectPlan
+from query_planner.seq_scan_plan import SeqScanPlan
 from query_planner.video_table_plan import VideoTablePlan
 from query_optimizer.statement2plantree import Statement2Plantree
 from query_optimizer.rule_query_optimizer import RuleQueryOptimizer, Rules
@@ -19,7 +17,7 @@ class ParserToRuleQueryOptimizer(unittest.TestCase):
         eva_statement_list = parser.parse(query)
         plan_tree = Statement2Plantree.convert(eva_statement_list)
         self.assertIsNone(plan_tree.parent)
-        self.assertTrue(type(plan_tree), LogicalSelectPlan)
+        self.assertTrue(type(plan_tree), SeqScanPlan)
         self.assertTrue(len(plan_tree.children) == 1)
         self.assertTrue(type(plan_tree.children[0]) == VideoTablePlan)
         rule_list = [Rules.PREDICATE_PUSHDOWN, Rules.PROJECTION_PUSHDOWN_JOIN, Rules.PROJECTION_PUSHDOWN_SELECT]
@@ -32,6 +30,6 @@ class ParserToRuleQueryOptimizer(unittest.TestCase):
             print('New Plan Tree')
             print(new_tree)
         self.assertIsNone(new_tree.parent)
-        self.assertTrue(type(new_tree), LogicalSelectPlan)
+        self.assertTrue(type(new_tree), SeqScanPlan)
         self.assertTrue(len(new_tree.children) == 1)
         self.assertTrue(type(new_tree.children[0]) == VideoTablePlan)
