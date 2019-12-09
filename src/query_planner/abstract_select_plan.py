@@ -30,30 +30,38 @@ class AbstractSelect(AbstractPlan):
 
     @property
     def videos(self) -> List[AbstractVideoLoader]:
+        """Returns the videos of the current node"""
         return self._videos
 
     @property
     def predicate(self) -> AbstractExpression:
+        """Returns the predicate of the current node"""
         return self._predicate
 
     @property
     def column_ids(self) -> List[str]:
+        """Returns the column ids of the current node"""
         return self._column_ids
 
     @property
     def foreign_column_ids(self) -> List[str]:
+        """Returns the foreign key constraints of the current node"""
         return self._foreign_column_ids
 
     def set_videos(self, new_vids):
+        """Sets the videos for the current node"""
         self._videos = new_vids
 
     def set_predicate(self, new_pred):
+        """Sets the predicate for the current node"""
         self._predicate = new_pred
 
     def set_foreign_column_ids(self, foreign):
+        """Sets the foreign key constraints of the current node"""
         self._foreign_column_ids = foreign
 
     def __str__(self, level=0):
+        """Returns the representation of the node in string format"""
         select_cols_str = 'sigma {} {}'.format(str(self._predicate), str(self._foreign_column_ids))
         out_string = "\t" * level + select_cols_str + "\n"
         for child in self.children:

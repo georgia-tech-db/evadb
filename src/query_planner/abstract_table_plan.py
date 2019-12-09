@@ -22,13 +22,16 @@ class AbstractTable(AbstractPlan):
 
     @property
     def video(self) -> AbstractVideoLoader:
+        """Returns the videos of the current node"""
         return self._video
 
     @property
     def tablename(self) -> str:
+        """Returns the table name of the current node """
         return self._tablename
 
     def __str__(self, level=0):
+        """returns the representation of the node in string format"""
         table_str = '{}'.format(str(self.video.video_metadata.file))
         out_string = "\t" * level + table_str + "\n"
         for child in self.children:
