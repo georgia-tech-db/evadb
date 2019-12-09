@@ -24,7 +24,7 @@ class TestStatement2PlanTree(unittest.TestCase):
     # Test a select statement with where clause
     def test_simple_where(self):
         parser = EvaFrameQLParser()
-        query = "SELECT CLASS FROM TAIPAI WHERE T='To';"
+        query = "SELECT CLASS FROM TAIPAI WHERE CLASS='First';"
         eva_statement_list = parser.parse(query)
         plan_tree = Statement2Plantree.convert(eva_statement_list)
     
