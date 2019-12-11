@@ -110,4 +110,3 @@ def mask_background(frame, dim=21, threshold1=10, threshold2=200,
     masked_image = (masked_image * 255).astype('uint8')
 
     return masked_image
-    

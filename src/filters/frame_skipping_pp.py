@@ -1,5 +1,5 @@
 from src.filters.abstract_pp import AbstractPP
-from src.utils import image_utils
+from src.utils import image_utils as im
 from typing import List
 
 
@@ -12,8 +12,7 @@ class FrameSkippingPP(AbstractPP):
     """
 
     def __init__(self, threshold=0.0, compare_foreground=False, 
-                 distance_metric=
-                 image_utils.DistanceMetric.ABSOLUTE_DIFFERENCE.value):
+                 distance_metric=im.DistanceMetric.ABSOLUTE_DIFFERENCE.value):
         """
         Constructor for this class.
 
@@ -74,7 +73,7 @@ class FrameSkippingPP(AbstractPP):
         :param distance_metric: DistanceMetric ENUM attribute
         :return difference value of the two frames
         """
-        diff = getattr(image_utils, distance_metric)
+        diff = getattr(im, distance_metric)
         frame_diff = diff(curr_frame, prev_frame)
         return frame_diff
 
@@ -89,7 +88,7 @@ class FrameSkippingPP(AbstractPP):
         :param distance_metric: DistanceMetric ENUM attributes
         :return difference value of the two frames
         """
-        curr_foreground = image_utils.mask_background(curr_frame)
-        prev_foreground = image_utils.mask_background(prev_frame)
+        curr_foreground = im.mask_background(curr_frame)
+        prev_foreground = im.mask_background(prev_frame)
         return self.frame_difference(curr_foreground, prev_foreground, 
-                                distance_metric)
+                                     distance_metric)
