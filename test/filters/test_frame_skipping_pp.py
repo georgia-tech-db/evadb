@@ -7,7 +7,8 @@ from src.models.storage.frame import Frame
 from src.models.catalog.frame_info import FrameInfo
 from src.models.storage.batch import FrameBatch
 from src.models.catalog.properties import ColorSpace
-from src.filters.frame_skipping_pp import FrameSkippingPP, DistanceMetric as DM
+from src.filters.frame_skipping_pp import FrameSkippingPP
+from src.utils import image_utils
 
 
 class FrameSkippingPPTest(unittest.TestCase):
@@ -79,6 +80,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
+        DM = image_utils.DistanceMetric
         frame_skipping_pp = FrameSkippingPP(0.5, False, 
                                             DM.ABSOLUTE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
@@ -100,6 +102,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
+        DM = image_utils.DistanceMetric
         frame_skipping_pp = FrameSkippingPP(0.5, False, 
                                             DM.MSE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
@@ -121,7 +124,8 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = FrameSkippingPP(0.5, False, 
+        DM = image_utils.DistanceMetric
+        frame_skipping_pp = FrameSkippingPP(0.5, True, 
                                             DM.ABSOLUTE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
@@ -133,7 +137,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         -> Test to create a batch of two identical frames with contours 
             and skip identical ones.
         -> Test compares only foreground objects in the two frames using
-        distance metric as absolute difference.
+        distance metric as mean squared difference.
         -> Test should return a list of two booleans with the first value
         set to False and the second set to True. This implies only second
         frame is skipped since it is the same as the first one.
@@ -142,7 +146,8 @@ class FrameSkippingPPTest(unittest.TestCase):
         :return: None
         """
         batch = self.create_batch_with_similar_frames()
-        frame_skipping_pp = FrameSkippingPP(0.5, False, 
+        DM = image_utils.DistanceMetric
+        frame_skipping_pp = FrameSkippingPP(0.5, True, 
                                             DM.MSE_DIFFERENCE.value)
         skip_list = frame_skipping_pp.predict(batch)
         self.assertEqual(2, len(skip_list))
