@@ -123,7 +123,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         :param: None
         :return: None
         """
-        batch = self.create_batch_with_similar_frames()
+        batch = self.create_batch_with_similar_frames_contours()
         DM = image_utils.DistanceMetric
         frame_skipping_pp = FrameSkippingPP(0.5, True, 
                                             DM.ABSOLUTE_DIFFERENCE.value)
@@ -145,7 +145,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         :param: None
         :return: None
         """
-        batch = self.create_batch_with_similar_frames()
+        batch = self.create_batch_with_similar_frames_contours()
         DM = image_utils.DistanceMetric
         frame_skipping_pp = FrameSkippingPP(0.5, True, 
                                             DM.MSE_DIFFERENCE.value)
