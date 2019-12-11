@@ -132,7 +132,7 @@ class FrameSkippingPPTest(unittest.TestCase):
         self.assertEqual(False, skip_list[0])
         self.assertEqual(True, skip_list[1])
 
-    def test_should_skip_identical_frames_only_foreground_abs(self):
+    def test_should_skip_identical_frames_only_foreground_mse(self):
         """
         -> Test to create a batch of two identical frames with contours 
             and skip identical ones.
