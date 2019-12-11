@@ -153,3 +153,22 @@ class FrameSkippingPPTest(unittest.TestCase):
         self.assertEqual(2, len(skip_list))
         self.assertEqual(False, skip_list[0])
         self.assertEqual(True, skip_list[1])
+
+    def test_should_return_abs_difference(self):
+        """
+        -> Test compares all the pixels in the two frames using
+            distance metric as absolute difference.
+        -> Difference between identical frames should be 0
+
+        :param: None
+        :return: None
+        """
+
+        frame = np.array(np.ones((2, 2, 3)) * 0.1 * 255,
+                         dtype=np.uint8)
+        DM = image_utils.DistanceMetric
+        frame_skipping_pp = FrameSkippingPP(0.5, True, 
+                                            DM.MSE_DIFFERENCE.value)
+        diff = frame_skipping_pp.frame_difference(frame, frame, 
+                                                  DM.ABSOLUTE_DIFFERENCE.value)
+        self.assertEqual(0, diff)
