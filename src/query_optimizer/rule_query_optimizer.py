@@ -3,9 +3,7 @@ from expression.comparison_expression import ComparisonExpression
 from expression.constant_value_expression import ConstantValueExpression
 from query_planner.logical_projection_plan import LogicalProjectionPlan
 from query_planner.logical_inner_join_plan import LogicalInnerJoinPlan
-# from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.seq_scan_plan import SeqScanPlan
-# from query_planner.video_table_plan import VideoTablePlan
 from query_parser.table_ref import TableRef
 from enum import Enum
 

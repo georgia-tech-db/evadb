@@ -1,11 +1,9 @@
 from query_planner.logical_projection_plan import LogicalProjectionPlan
-# from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.seq_scan_plan import SeqScanPlan
-# from query_planner.video_table_plan import VideoTablePlan
-from query_parser.table_ref import TableRef, TableInfo
-from loaders.video_loader import SimpleVideoLoader
-from models.catalog.video_info import VideoMetaInfo
-from models.catalog.properties import VideoFormat
+from src.query_parser.table_ref import TableRef, TableInfo
+from src.loaders.video_loader import SimpleVideoLoader
+from src.models.catalog.video_info import VideoMetaInfo
+from src.models.catalog.properties import VideoFormat
 
 # class that will handle converting a statement to a plan tree
 class Statement2Plantree:

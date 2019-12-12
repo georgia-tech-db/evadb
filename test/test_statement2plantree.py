@@ -1,10 +1,8 @@
 import unittest
 from query_optimizer.statement2plantree import Statement2Plantree
 from src.query_parser.eva_parser import EvaFrameQLParser
-# from query_planner.logical_select_plan import LogicalSelectPlan
 from query_planner.seq_scan_plan import SeqScanPlan
-# from query_planner.video_table_plan import VideoTablePlan
-from query_parser.table_ref import TableRef
+from src.query_parser.table_ref import TableRef
 
 
 # Test cases to test if we can go from SQL statement to logical plan tree

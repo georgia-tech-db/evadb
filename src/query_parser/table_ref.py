@@ -1,4 +1,4 @@
-from loaders.abstract_loader import AbstractVideoLoader
+from src.loaders.abstract_loader import AbstractVideoLoader
 
 
 class TableInfo:
