@@ -110,9 +110,10 @@ class DepthEstimator(AbstractClassifierUDF):
             segm, depth = self.model(img_var)
 
             # resize the segmentation and depth arrays
-            d_arr = segm[0, :NUM_CLASSES].cpu().data.numpy().transpose(
-                1, 2, 0), img.shape[:2][::-1], interpolation = cv2.INTER_CUBIC
-            segm = cv2.resize(d_arr)
+            d_arr = segm[0, :NUM_CLASSES].cpu().data.numpy().transpose(1, 2, 0)
+            segm = cv2.resize(d_arr,
+                              img.shape[:2][::-1],
+                              interpolation=cv2.INTER_CUBIC)
             depth = cv2.resize(depth[0, 0].cpu().data.numpy(),
                                img.shape[:2][::-1],
                                interpolation=cv2.INTER_CUBIC)
@@ -146,6 +147,5 @@ class DepthEstimator(AbstractClassifierUDF):
         (segms, depths) = self._get_depth_estimation(frames)
 
         # process the model output and store it in DepthEstimationResult object
-        return DepthEstimationResult
-        .depth_estimation_result_from_batch_and_lists(
+        return DepthEstimationResult.depth_result_from_batch_and_lists(
             batch, segms, depths)

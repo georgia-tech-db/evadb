@@ -37,7 +37,7 @@ class DepthEstimationResult(BasePrediction):
         return self._segm
 
     @staticmethod
-    def depth_estimation_result_from_batch_and_lists(
+    def depth_result_from_batch_and_lists(
             batch: FrameBatch, segms: List[np.ndarray],
             depths: List[np.ndarray]):
         """
