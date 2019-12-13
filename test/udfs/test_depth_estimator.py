@@ -31,7 +31,6 @@ class DepthEstimatorTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         self.base_path = os.path.dirname(os.path.abspath(__file__))
 
-
     def _load_image(self, path):
         """
                method to load the image from a given input path
@@ -43,10 +42,10 @@ class DepthEstimatorTest(unittest.TestCase):
         img = cv2.imread(path)
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         """
-                Unit test method which creates a batch of frames, sends it for model prediction.
+                Unit test method which creates a batch of frames, sends it for
+                model prediction.
                 It then checks if the returned object size is as expected.
 
         """
@@ -81,8 +80,10 @@ class DepthEstimatorTest(unittest.TestCase):
     def test_frame_filtering_for_depth_estimation(self):
         """
             Unit test method to test frame filtering functionality.
-            it loops over frames and sends them over to frame filtering object's apply_filter method.
-            Finally it verifies that depth mask is applied to the frames except every fifth one.
+            it loops over frames and sends them over to frame filtering
+            object's apply_filter method.
+            Finally it verifies that depth mask is applied to the frames
+            except every fifth one.
 
         """
 
@@ -101,17 +102,24 @@ class DepthEstimatorTest(unittest.TestCase):
         frame_filter = FrameFilter()
 
         # create a random depth mask array
-        depth_mask = np.random.rand(frames[0].shape[0], frames[0].shape[1], frames[0].shape[2])
+        depth_mask = np.random.rand(
+            frames[0].shape[0],
+            frames[0].shape[1],
+            frames[0].shape[2])
 
         # iterate over frames in the batch
-        for i,img in enumerate(frames):
+        for i, img in enumerate(frames):
 
             # apply frame filter on each frame
             img = frame_filter.apply_filter(img, depth_mask)
 
-            # For every fifth frame the mask should not be applied. Hence, the frame returned by apply_filter method should be same as original frame
+            # For every fifth frame the mask should not be applied. Hence, the
+            # frame returned by apply_filter method should be same as original
+            # frame
             if i % 5 == 0:
                 self.assertTrue(np.array_equal(img, frames[0]))
             else:
-                # Every other frame should be transformed after applying depth mask
-                self.assertTrue(np.array_equal(img, frames[i]*depth_mask[:, :, None]))
+                # Every other frame should be transformed after applying depth
+                # mask
+                self.assertTrue(np.array_equal(
+                    img, frames[i] * depth_mask[:, :, None]))
