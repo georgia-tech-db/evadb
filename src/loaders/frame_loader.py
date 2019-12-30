@@ -1,33 +1,14 @@
-import cv2
+from src.loaders.abstract_loader import AbstractFrameLoader
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.models.catalog.video_info import VideoMetaInfo
 from src.models.storage.batch import FrameBatch
 from src.models.storage.frame import Frame
 
 
-class VideoLoader():
-    def __init__(self, video_metadata: VideoMetaInfo, batch_size=1,
-                 skip_frames=0, offset=None, limit=None):
-        """
-         Abstract class for defining video loader. All other video loaders use this
-         abstract class. Video loader are expected fetch the videos from storage
-         and return the frames in an iterative manner.
-    
-         Attributes:
-             video_metadata (VideoMetaInfo): Object containing metadata of the video
-             batch_size (int, optional): No. of frames to fetch in batch from video
-             skip_frames (int, optional): Number of frames to be skipped
-                                          while fetching the video
-             offset (int, optional): Start frame location in video
-             limit (int, optional): Number of frames needed from the video
-         """
-        self.video_metadata = video_metadata
-        self.batch_size = batch_size
-        self.skip_frames = skip_frames
-        self.offset = offset
-        self.limit = limit
+class FrameLoader(AbstractFrameLoader):
+    def __init__(self, frame_metadata: FrameInfo, *args, **kwargs):
+        super().__init__(frame_metadata, *args, **kwargs)
 
     def load(self):
         video = cv2.VideoCapture(self.video_metadata.file)

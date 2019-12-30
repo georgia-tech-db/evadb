@@ -1,6 +1,6 @@
 from typing import Iterator
 
-from src.loaders.video_loader import SimpleVideoLoader
+from src.loaders.video_loader import VideoLoader
 from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_storage_executor import \
     AbstractStorageExecutor
@@ -18,7 +18,7 @@ class DiskStorageExecutor(AbstractStorageExecutor):
 
     def __init__(self, node: StoragePlan):
         super().__init__(node)
-        self.storage = SimpleVideoLoader(node.video,
+        self.storage = VideoLoader(node.video,
                                          batch_size=node.batch_size,
                                          skip_frames=node.skip_frames,
                                          limit=node.limit,
