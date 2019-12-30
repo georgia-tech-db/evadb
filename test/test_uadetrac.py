@@ -2,8 +2,8 @@ import os
 import sys
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-image_dir = root + "/test/data/small-data"
-anno_dir = root + "/test/data/small-annotations"
+image_dir = os.path.join(root, "test", "data", "uadetrac", "small-data")
+anno_dir = os.path.join(root, "test", "data", "uadetrac", "small-annotations")
 
 try:
     from src.loaders.loader_uadetrac import UADetracLoader

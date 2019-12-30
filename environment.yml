@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - python=3.7
+  - pip
   - numpy
   - opencv
   - scikit-learn
