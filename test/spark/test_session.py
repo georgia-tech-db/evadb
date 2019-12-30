@@ -4,7 +4,9 @@ from pyspark.sql import SparkSession
 
 from src.spark.session import Session
 
+
 class SparkSessionTest(unittest.TestCase):
+        
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -17,5 +19,7 @@ class SparkSessionTest(unittest.TestCase):
         
         self.assertIsInstance(spark_session, SparkSession)
 
+
 if __name__ == '__main__':
+        
     unittest.main()
