@@ -127,3 +127,6 @@ data/*
 
 # macos data
 *.DS_Store
+
+tmp/*
+.settings/*
