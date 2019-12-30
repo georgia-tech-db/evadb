@@ -87,7 +87,7 @@ dependencies:
   - pyqt=5.9.2=py36h05f1152_2
   - python=3.6.8=h0371630_0
   - python-dateutil=2.8.0=py36_0
-  - pytorch=1.0.1=cuda92py36h65efead_0
+  - pytorch=1.1.0=cuda92py36h65efead_0
   - pytz=2018.9=py36_0
   - pyyaml=5.1=py36h7b6447c_0
   - qt=5.9.7=h5867ecd_1
@@ -116,5 +116,6 @@ dependencies:
   - pip:
       - torch==1.0.1
       - antlr4-python3-runtime==4.7
+      - petastorm==0.8.0
 prefix: /nethome/jbang36/anaconda3/envs/eva_35
 
