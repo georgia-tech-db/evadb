@@ -16,12 +16,11 @@ import cv2
 import numpy as np
 
 from src.loaders.TaskManager import TaskManager
-from src.loaders.abstract_loader import AbstractLoader
 
 
 # Make this return a dictionary of label to data for the whole dataset
 
-class UADetracLoader(AbstractLoader):
+class UADetracLoader():
     def __init__(self, args, image_width=300, image_height=300):
         self.args = args
         self.data_dict = {}
