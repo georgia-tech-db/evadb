@@ -55,7 +55,7 @@ class PlanExecutorTest(unittest.TestCase):
                 self.assertEqual(gc_abs.node_type, gc_exec._node.node_type)
 
     @patch(
-        'src.query_executor.disk_based_storage_executor.SimpleVideoLoader')
+        'src.query_executor.disk_based_storage_executor.VideoLoader')
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value
 

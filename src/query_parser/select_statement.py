@@ -1,7 +1,6 @@
 from src.query_parser.eva_statement import EvaStatement
 from src.query_parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
-from src.loaders.abstract_loader import AbstractLoader
 from src.query_parser.table_ref import TableRef
 from typing import List
 
