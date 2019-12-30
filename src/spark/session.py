@@ -24,8 +24,10 @@ class Session:
     def __init__(self, application_name, spark_master=None):
         """Setup a spark session.
     
-        :param spark_master: A master parameter used by spark session builder. Use default value (None) to use system
-          environment configured spark cluster. Use 'local[*]' to run on a local box.
+        :param spark_master: A master parameter used by spark session builder. 
+          Use default value (None) to use system
+          environment configured spark cluster. 
+          Use 'local[*]' to run on a local box.
     
         :return: spark_session: A spark session
         """    
@@ -39,7 +41,8 @@ class Session:
             session_builder.master(spark_master)
     
         # Gets an existing SparkSession or, 
-        # if there is no existing one, creates a new one based on the options set in this builder.
+        # if there is no existing one, creates a new one based 
+        # on the options set in this builder.
         self._session = session_builder.getOrCreate()
         
     def get_session(self):
