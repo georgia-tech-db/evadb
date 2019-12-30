@@ -9,7 +9,7 @@ from src.query_planner.storage_plan import StoragePlan
 
 class DiskStorageExecutorTest(unittest.TestCase):
 
-    @patch('src.query_executor.disk_based_storage_executor.SimpleVideoLoader')
+    @patch('src.query_executor.disk_based_storage_executor.VideoLoader')
     def test_calling_storage_executor_should_return_batches(self, mock_class):
         class_instance = mock_class.return_value
 
