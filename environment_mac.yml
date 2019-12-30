@@ -1,4 +1,4 @@
-name: eva_35
+name: eva
 channels:
   - conda-forge
   - anaconda
@@ -13,9 +13,10 @@ dependencies:
   - coverage
   - pytest-cov
   - pycodestyle
-  - torchvision
-  - antlr-python-runtime=4.7.2=py37_1000
+  - torchvision=0.4.2
+  - pytorch=1.3.1
+  - tensorboard=1.12.2
   - pip:
-    - torch
-prefix: eva_35
-
+    - antlr4-python3-runtime==4.7
+    - petastorm==0.8.0
+prefix: eva
