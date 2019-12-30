@@ -18,8 +18,8 @@ before_install:
   - conda info -a
 
 install:
-  - conda env create -f environment_mac.yml
-  - source activate eva_35
+  - conda env create -f environment.yml
+  - source activate eva
   - conda list
 
 script:
