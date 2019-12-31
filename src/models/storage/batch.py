@@ -115,9 +115,9 @@ class FrameBatch:
 
         :return:
         """
-        if type(indices) is list:
+        if isinstance(indices, list):
             return self._get_frames_from_indices(indices)
-        elif type(indices) is slice:
+        elif isinstance(indices, slice):
             start = indices.start if indices.start else 0
             end = indices.stop if indices.stop else len(self.frames)
             if end < 0:

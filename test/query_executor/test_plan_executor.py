@@ -12,7 +12,6 @@ from src.query_planner.storage_plan import StoragePlan
 class PlanExecutorTest(unittest.TestCase):
 
     def test_tree_structure_for_build_execution_tree(self):
-
         """
             Build an Abastract Plan with nodes:
          ß               root
@@ -36,7 +35,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         child_1_abs_plan.append_child(child_1_1_abs_plan)
 
-        '''Build Execution Tree and check the nodes 
+        '''Build Execution Tree and check the nodes
             are of the same type'''
         root_abs_executor = PlanExecutor(
             plan=root_abs_plan)._build_execution_tree(plan=root_abs_plan)

@@ -26,4 +26,3 @@ class ArithmeticExpression(AbstractExpression):
             return vl * vr
         elif(self.etype == ExpressionType.ARITHMETIC_DIVIDE):
             return vl / vr
-
