@@ -72,11 +72,11 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
         """
         Performs predictions on input frames
         Arguments:
-            frames (np.ndarray): Frames on which predictions need 
+            frames (np.ndarray): Frames on which predictions need
             to be performed
 
         Returns:
-            tuple containing predicted_classes (List[List[str]]), 
+            tuple containing predicted_classes (List[List[str]]),
             predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
 
@@ -111,5 +111,5 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
         (pred_classes, pred_scores, pred_boxes) = self._get_predictions(frames)
         return Prediction.predictions_from_batch_and_lists(batch,
                                                            pred_classes,
-                                                           pred_scores, 
+                                                           pred_scores,
                                                            boxes=pred_boxes)

@@ -122,7 +122,7 @@ class QueryOptimizer:
                     return [], []
                 for operator in self.operators:
                     query_sub_list = query_sub.split(operator)
-                    if type(query_sub_list) is list and len(
+                    if isinstance(query_sub_list, list) and len(
                             query_sub_list) > 1:
                         query_parsed.append(
                             [query_sub_list[0], operator, query_sub_list[1]])

@@ -138,7 +138,7 @@ class UADetracLoader():
                                    self.args.cache_vi_name)
         if self.images is None:
             warnings.warn("No image loaded, call load_images() first", Warning)
-        elif type(self.images) is np.ndarray:
+        elif isinstance(self.images, np.ndarray):
             np.save(save_dir, self.images)
             np.save(save_dir_vi, np.array(self.video_start_indices))
             print("saved images to", save_dir)
@@ -153,7 +153,7 @@ class UADetracLoader():
         if self.labels is None:
             warnings.warn("No labels loaded, call load_labels() first",
                           Warning)
-        elif type(self.labels) is dict:
+        elif isinstance(self.labels, dict):
             np.save(save_dir, self.labels, allow_pickle=True)
             print("saved labels to", save_dir)
         else:
@@ -165,7 +165,7 @@ class UADetracLoader():
                                 self.args.cache_box_name)
         if self.images is None:
             warnings.warn("No labels loaded, call load_boxes() first", Warning)
-        elif type(self.images) is np.ndarray:
+        elif isinstance(self.images, np.ndarray):
             np.save(save_dir, self.boxes)
             print("saved boxes to", save_dir)
         else:
@@ -199,8 +199,7 @@ class UADetracLoader():
         import xml.etree.ElementTree as ET
         original_height = 540
         original_width = 960
-        anno_files = os.listdir(anno_dir)
-        anno_files.sort()
+        anno_files = sorted(os.listdir(anno_dir))
         boxes_dataset = []
         cumu_count = 0
 
@@ -226,7 +225,7 @@ class UADetracLoader():
                                                                 height /
                                                                 original_height
                                                                 )
-                    boxes_frame.append((top, left, bottom, right))
+                    boxes_frame.append([top, left, bottom, right])
 
                 boxes_dataset.append(boxes_frame)
 

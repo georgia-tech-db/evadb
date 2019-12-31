@@ -45,7 +45,6 @@ class Prediction(BasePrediction):
                                          scores: List[List[float]],
                                          boxes: List[
                                              List[BoundingBox]] = None):
-
         """
         Factory method for returning a list of Prediction objects
         from identified values
@@ -80,7 +79,7 @@ class Prediction(BasePrediction):
         return predictions_
 
     def __eq__(self, other):
-        if type(self) is type(other):
+        if isinstance(self, type(other)):
             return self.boxes == other.boxes and \
                 self.frame == other.frame and \
                 self.scores == other.scores and \

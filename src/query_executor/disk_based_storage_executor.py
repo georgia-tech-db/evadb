@@ -19,10 +19,10 @@ class DiskStorageExecutor(AbstractStorageExecutor):
     def __init__(self, node: StoragePlan):
         super().__init__(node)
         self.storage = VideoLoader(node.video,
-                                         batch_size=node.batch_size,
-                                         skip_frames=node.skip_frames,
-                                         limit=node.limit,
-                                         offset=node.offset)
+                                   batch_size=node.batch_size,
+                                   skip_frames=node.skip_frames,
+                                   limit=node.limit,
+                                   offset=node.offset)
 
     def validate(self):
         pass
