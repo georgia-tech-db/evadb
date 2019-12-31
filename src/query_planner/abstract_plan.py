@@ -12,7 +12,7 @@ class AbstractPlan(ABC):
 
     def append_child(self, child):
         """append node to children list
-        
+
         Arguments:
             child {AbstractPlan} -- input child node
         """
@@ -21,7 +21,7 @@ class AbstractPlan(ABC):
     @property
     def parent(self):
         """Returns the parent of current node
-        
+
         Returns:
             AbstractPlan -- parent node
         """
@@ -30,7 +30,7 @@ class AbstractPlan(ABC):
     @parent.setter
     def parent(self, node: 'AbstractPlan'):
         """returns parent of current node
-        
+
         Arguments:
             node {AbstractPlan} -- parent node
         """
@@ -41,7 +41,7 @@ class AbstractPlan(ABC):
     @property
     def children(self):
         """returns children list pf current node
-        
+
         Returns:
             List[AbstractPlan] -- children list
         """
