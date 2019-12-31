@@ -10,7 +10,7 @@ from src.query_planner.types import PlanNodeType
 
 class AbstractScan(AbstractPlan):
     """Abstract class for all the scan based planners
-    
+
     Arguments:
         predicate (AbstractExpression): An expression used for filtering
     """

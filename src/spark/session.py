@@ -23,33 +23,33 @@ class Session:
 
     def __init__(self, application_name, spark_master=None):
         """Setup a spark session.
-    
-        :param spark_master: A master parameter used by spark session builder. 
+
+        :param spark_master: A master parameter used by spark session builder.
           Use default value (None) to use system
-          environment configured spark cluster. 
+          environment configured spark cluster.
           Use 'local[*]' to run on a local box.
-    
+
         :return: spark_session: A spark session
-        """    
+        """
         print("Starting session")
 
         session_builder = SparkSession \
             .builder \
             .appName(application_name)
-        
+
         if spark_master:
             session_builder.master(spark_master)
-    
-        # Gets an existing SparkSession or, 
-        # if there is no existing one, creates a new one based 
+
+        # Gets an existing SparkSession or,
+        # if there is no existing one, creates a new one based
         # on the options set in this builder.
         self._session = session_builder.getOrCreate()
-        
+
     def get_session(self):
         print("Getting session")
 
         return self._session
-    
+
     def __del__(self):
         # Stop spark session
         print("Stopping session")

@@ -18,8 +18,8 @@ class AbstractExecutor(ABC):
 
     def append_child(self, child: 'AbstractExecutor'):
         """
-        appends a child exector node 
-        
+        appends a child exector node
+
         Arguments:
             child {AbstractExecutor} -- child node
         """

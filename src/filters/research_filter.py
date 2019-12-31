@@ -26,7 +26,6 @@ Each Filter object considers 1 specific query. Either the query optimizer or the
 
 class FilterResearch(FilterTemplate):
     def __init__(self):
-
         """
         self.pre_models = {'pca': pca_model_instance, 'hashing': hashing_model_instance, 'sampling': sampling_model_instance}
         self.post_models = {'rf': rf_instance, 'svm':svm_instance, 'dnn':dnn_instance}
@@ -67,8 +66,9 @@ class FilterResearch(FilterTemplate):
                 self.all_models[post_model_name] = {}
             for pre_model_name in pre_model_names:
                 if pre_model_name not in self.all_models[post_model_name]:
-                    self.all_models[post_model_name][pre_model_name] = (self.pre_models[pre_model_name],
-                                                                        deepcopy(self.post_models[post_model_name]))
+                    self.all_models[post_model_name][pre_model_name] = (
+                        self.pre_models[pre_model_name], deepcopy(
+                            self.post_models[post_model_name]))
 
     def addPreModel(self, model_name, model):
         """
@@ -134,12 +134,13 @@ class FilterResearch(FilterTemplate):
                 X_transform = pre_model.predict(X)
                 post_model.train(X_transform)
 
-    def predict(self, X: np.ndarray, pre_model_name: str = None, post_model_name: str = None) -> np.ndarray:
+    def predict(self, X: np.ndarray, pre_model_name: str = None,
+                post_model_name: str = None) -> np.ndarray:
         pre_model_names = self.pre_models.keys()
         post_model_names = self.post_models.keys()
 
-        ## If we haven't found the post model, there is no prediction to be done
-        ## so we must raise an error
+        # If we haven't found the post model, there is no prediction to be done
+        # so we must raise an error
         if post_model_name is None:
             print("No Post Model is found.")
             print("  Available:", post_model_names)
@@ -194,7 +195,13 @@ class FilterResearch(FilterTemplate):
                 pre_model, post_model = model_pair
                 model_name = pre_model_name + ';' + post_model_name
                 name_col.append(model_name)
-                c_col.append(getattr(pre_model, 'C') + getattr(post_model, 'C'))
+                c_col.append(
+                    getattr(
+                        pre_model,
+                        'C') +
+                    getattr(
+                        post_model,
+                        'C'))
                 r_col.append(getattr(post_model, 'R'))
                 a_col.append(getattr(post_model, 'A'))
 
@@ -230,11 +237,3 @@ if __name__ == "__main__":
     stats = filter.getAllStats()
     print(stats)
     print("filter got all stats")
-
-
-
-
-
-
-
-

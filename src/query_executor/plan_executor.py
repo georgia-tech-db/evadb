@@ -21,10 +21,10 @@ class PlanExecutor:
 
     def _build_execution_tree(self, plan: AbstractPlan) -> AbstractExecutor:
         """build the execution tree from plan tree
-        
+
         Arguments:
             plan {AbstractPlan} -- Input Plan tree
-        
+
         Returns:
             AbstractExecutor -- Compiled Execution tree
         """
@@ -50,7 +50,7 @@ class PlanExecutor:
 
     def _clean_execution_tree(self, tree_root: AbstractExecutor):
         """clean the execution tree from memory
-        
+
         Arguments:
             tree_root {AbstractExecutor} -- root of execution tree to delete
         """

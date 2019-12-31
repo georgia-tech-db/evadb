@@ -14,13 +14,17 @@ class MLMLP(MLBase):
     def __init__(self, **kwargs):
         super(MLMLP, self).__init__()
         if kwargs:
-            self.model = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                                   hidden_layer_sizes=(5, 2), random_state=1)
+            self.model = MLPClassifier(
+                solver='lbfgs',
+                alpha=1e-5,
+                hidden_layer_sizes=(
+                    5,
+                    2),
+                random_state=1)
         else:
             self.model = MLPClassifier(**kwargs)
 
-
-    def train(self, X :np.ndarray, y :np.ndarray):
+    def train(self, X: np.ndarray, y: np.ndarray):
         n_samples = X.shape[0]
         X = X / 255.0
         X = X.reshape(n_samples, -1)
@@ -42,9 +46,8 @@ class MLMLP(MLBase):
         self.A = score
         self.R = 1 - float(sum(y_hat)) / len(y_hat)
 
-    def predict(self, X :np.ndarray):
+    def predict(self, X: np.ndarray):
         n_samples = X.shape[0]
         X = X / 255.0
         X = X.reshape(n_samples, -1)
         return self.model.predict(X)
-
