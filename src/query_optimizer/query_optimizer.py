@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 This file composes the functions that are needed to perform query optimization.
 Currently, given a query, it does logical changes to forms that are
@@ -56,7 +70,6 @@ class QueryOptimizer:
         :param input: string to be parsed
         :return: something that the Load() class can understand
         """
-        pass
 
     def inputQueriesFromTxt(self, input_path):
         """
@@ -65,7 +78,6 @@ class QueryOptimizer:
         :param input_path: full directory + file name
         :return: method of training the pps
         """
-        pass
 
     def inputQueriesFromSocket(self):
         sock = socket.socket()
@@ -180,7 +192,6 @@ class QueryOptimizer:
 
         query_transformed = []
         equivalences = []
-        equivalences_op = []
 
         for query_sub_list in query_parsed:
             subject = query_sub_list[0]
