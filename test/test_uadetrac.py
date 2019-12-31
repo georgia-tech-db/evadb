@@ -48,5 +48,7 @@ def test_load_boxes():
     left = int(592.75 * width_scale)
     bottom = int((378.8 + 162.2) * height_scale)
     right = int((592.75 + 160.05) * width_scale)
-    box = (top, left, bottom, right)
+    box = [top, left, bottom, right]
+
+    print(loader.boxes[0])
     assert loader.boxes[0][0] == box

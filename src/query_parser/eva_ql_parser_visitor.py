@@ -1,5 +1,5 @@
 """
-Do not change the skeleton of this file. 
+Do not change the skeleton of this file.
 We have extended functionalities by overriding few visitor functions.
 Original source file: third_party/evaQL/frameQLParserVisitor
 @author Gaurav Tarlok Kakkar
@@ -69,7 +69,7 @@ class EvaParserVisitor(frameQLParserVisitor):
             except BaseException:
                 # stop parsing something bad happened
                 return None
-        # we don't support multiple table sources 
+        # we don't support multiple table sources
         if from_clause is not None:
             from_clause = from_clause[0]
         select_stmt = SelectStatement(target_list, from_clause, where_clause)
@@ -105,7 +105,7 @@ class EvaParserVisitor(frameQLParserVisitor):
         # handle database name and schema names
         if table_name is not None:
             table_info = TableInfo(table_name=table_name)
-            return TableRef(table_info) 
+            return TableRef(table_info)
         else:
             warnings.warn("Invalid from table", SyntaxWarning)
 
@@ -137,7 +137,7 @@ class EvaParserVisitor(frameQLParserVisitor):
             return ConstantValueExpression(float(ctx.getText()))
 
         return self.visitChildren(ctx)
-    
+
     # Visit a parse tree produced by frameQLParser#logicalExpression.
     def visitLogicalExpression(
             self, ctx: frameQLParser.LogicalExpressionContext):
@@ -163,7 +163,7 @@ class EvaParserVisitor(frameQLParserVisitor):
         # ToDo Can there be >1 expression in this case
         expr = ctx.expression(0)
         return self.visit(expr)
- 
+
     # Visit a parse tree produced by frameQLParser#comparisonOperator.
     def visitComparisonOperator(
             self, ctx: frameQLParser.ComparisonOperatorContext):

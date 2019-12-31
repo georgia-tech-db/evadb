@@ -2,6 +2,7 @@ class TableInfo:
     """
     stores all the table info, inspired from postgres
     """
+
     def __init__(self, table_name=None, schema_name=None, database_name=None):
         self._table_name = table_name
         self._schema_name = schema_name
@@ -26,6 +27,7 @@ class TableRef:
     Attributes:
     table_info: expression of table name and database name
     """
+
     def __init__(self, table_info: TableInfo):
         self._table_info = table_info
 

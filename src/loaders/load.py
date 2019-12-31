@@ -42,8 +42,8 @@ class Load:
         evaled_image = np.array(eval(image_str))
         height = 540
         width = 960
-        channels = 3
-        return evaled_image.reshape(height, width, channels)
+        num_channels = 3
+        return evaled_image.reshape(height, width, num_channels)
 
     @staticmethod
     def save(filename, panda_data):
@@ -76,9 +76,9 @@ class Load:
             print(("Done loading the labels.. length of labels is " + str(
                 len(vehicle_type_labels))))
 
-        # n_samples, height, width, channels = train_img_array.shape
+        # n_samples, height, width, num_channels = train_img_array.shape
         # train_img_array = train_img_array.reshape(n_samples,
-        # height*width*channels)
+        # height*width*num_channels)
 
         if __debug__:
             print(("train img array flatten is ", str(train_img_array.shape)))

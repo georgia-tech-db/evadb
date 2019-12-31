@@ -4,7 +4,6 @@ import unittest
 import cv2
 import numpy as np
 
-
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace, VideoFormat
 from src.models.storage.frame import Frame
@@ -23,10 +22,8 @@ class FrameLoaderTest(unittest.TestCase):
                                  dtype=np.uint8),
                         FrameInfo(2, 2, 3, ColorSpace.BGR))
 
-
     def setUp(self):
         self.create_sample_video()
 
     def tearDown(self):
         os.remove('dummy.avi')
-

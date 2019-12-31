@@ -12,7 +12,8 @@ class FrameInfo:
         width (int)(default: -1):  Width of the image : left as -1 when the
         height of the frame is not required
 
-        channels (int)(default: 3): Number of input channels in the video
+        num_channels (int)(default: 3):
+        Number of input num_channels in the video
 
         color_space (ColorSpace)(default: ColorSpace.RGB): color space of
         the frame (RGB, HSV, BGR, GRAY)
@@ -39,11 +40,11 @@ class FrameInfo:
         return self._color_space
 
     @property
-    def channels(self):
+    def num_channels(self):
         return self._channels
 
     def __eq__(self, other):
         return self.color_space == other.color_space and \
             self.width == other.width and \
             self.height == other.height and \
-            self.channels == other.channels
+            self.num_channels == other.num_channels
