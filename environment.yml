@@ -15,6 +15,7 @@ dependencies:
   - pytest-cov
   - pycodestyle
   - autopep8
+  - autoflake
   - torchvision
   - pytorch
   - tensorboard
