@@ -86,3 +86,7 @@ class FrameLoader():
     def load_images(self):
 
         Logger().log("Load images")
+        name = ""
+        Logger().__getattr__(name)
+
+        Logger().log("Logger name: " + name)
