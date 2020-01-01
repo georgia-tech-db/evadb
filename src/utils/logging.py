@@ -34,7 +34,8 @@ class Logger:
             self.LOG = logging.getLogger(__name__)
             LOG_handler = logging.StreamHandler()
             LOG_formatter = logging.Formatter(
-                fmt='%(asctime)s [%(funcName)s:%(lineno)03d] %(levelname)-5s: %(message)s',
+                fmt='%(asctime)s [%(funcName)s:%(lineno)03d]'
+                '%(levelname)-5s: %(message)s',
                 datefmt='%m-%d-%Y %H:%M:%S'
             )
             LOG_handler.setFormatter(LOG_formatter)
