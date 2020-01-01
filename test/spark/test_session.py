@@ -13,10 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import logging
 
 from pyspark.sql import SparkSession
 
 from src.spark.session import Session
+
+
+def suppress_py4j_logging():
+    logger = logging.getLogger('py4j')
+    logger.setLevel(logging.ERROR)
 
 
 class SparkSessionTest(unittest.TestCase):
@@ -24,13 +30,20 @@ class SparkSessionTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def setUp(self):
+        suppress_py4j_logging()
+        self.session = Session()
+
+    def tearDown(self):
+        self.session = Session()
+        self.session.stop()
+
     def test_session(self):
 
-        application_name = "default"
-        session = Session(application_name)
+        spark_session = self.session.get_session()
 
-        spark_session = session.get_session()
-
+        session2 = Session()
+        self.assertEqual(self.session, session2)
         self.assertIsInstance(spark_session, SparkSession)
 
 

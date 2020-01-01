@@ -13,15 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from pyspark.sql import SparkSession
 
 
-class Session:
+class Session(object):
     """
     Wrapper around Spark Session
     """
 
-    def __init__(self, application_name, spark_master=None):
+    _instance = None
+    _session = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(Session, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        self.init_spark_session("eva")
+
+    def init_spark_session(self, application_name, spark_master=None):
         """Setup a spark session.
 
         :param spark_master: A master parameter used by spark session builder.
@@ -31,8 +43,6 @@ class Session:
 
         :return: spark_session: A spark session
         """
-        print("Starting session")
-
         session_builder = SparkSession \
             .builder \
             .appName(application_name)
@@ -46,11 +56,10 @@ class Session:
         self._session = session_builder.getOrCreate()
 
     def get_session(self):
-        print("Getting session")
-
         return self._session
 
+    def stop(self):
+        self._session.stop()
+
     def __del__(self):
-        # Stop spark session
-        print("Stopping session")
         self._session.stop()
