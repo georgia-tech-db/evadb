@@ -28,6 +28,7 @@ from src.models.storage.batch import FrameBatch
 from src.models.storage.frame import Frame
 from tensorflow.python.debug.examples.debug_mnist import NUM_LABELS
 
+from src.utils.logging import Logger
 
 class FrameLoader():
     def __init__(
@@ -84,3 +85,5 @@ class FrameLoader():
                 .parquet(output_url)
 
     def load_images(self):
+        
+        Logger().log("Load images")
