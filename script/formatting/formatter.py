@@ -95,6 +95,7 @@ LOG.setLevel(logging.INFO)
 def format_file(file_path, add_header, strip_header, format_code):
 
     abs_path = os.path.abspath(file_path)
+    LOG.info(file_path)
 
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
@@ -125,14 +126,14 @@ def format_file(file_path, add_header, strip_header, format_code):
             # AUTOPEP
             autopep_command = AUTOPEP_BINARY + \
                 " --in-place --aggressive " + file_path
-            LOG.info(autopep_command)
+            #LOG.info(autopep_command)
             os.system(autopep_command)
 
             # AUTOFLAKE
             autoflake_command = AUTOFLAKE_BINARY + \
                 " --in-place --remove-all-unused-imports"\
                 " --remove-unused-variables " + file_path
-            LOG.info(autoflake_command)
+            #LOG.info(autoflake_command)
             os.system(autoflake_command)
 
     # END WITH

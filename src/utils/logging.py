@@ -33,7 +33,6 @@ class Logger(object):
 
     def __new__(cls):
         if cls._instance is None:
-            print('Creating the object')
             cls._instance = super(Logger, cls).__new__(cls)
 
             # LOGGING INITIALIZATION
