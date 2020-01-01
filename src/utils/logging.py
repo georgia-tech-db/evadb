@@ -26,12 +26,18 @@ class LoggingLevel(Enum):
     CRITICAL = 5
 
 
-class Logger:
-    class __Logger:
-        def __init__(self):
+class Logger(object):
 
-            # LOGGING CONFIGURATION
-            self.LOG = logging.getLogger(__name__)
+    _instance = None
+    _LOG = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            print('Creating the object')
+            cls._instance = super(Logger, cls).__new__(cls)
+
+            # LOGGING INITIALIZATION
+            cls._LOG = logging.getLogger(__name__)
             LOG_handler = logging.StreamHandler()
             LOG_formatter = logging.Formatter(
                 fmt='%(asctime)s [%(funcName)s:%(lineno)03d]'
@@ -39,30 +45,20 @@ class Logger:
                 datefmt='%m-%d-%Y %H:%M:%S'
             )
             LOG_handler.setFormatter(LOG_formatter)
-            self.LOG.addHandler(LOG_handler)
-            self.LOG.setLevel(logging.INFO)
+            cls._LOG.addHandler(LOG_handler)
+            cls._LOG.setLevel(logging.INFO)
 
-        def __str__(self):
-            return repr(self)
-
-    instance = None
-
-    def __init__(self):
-        if not Logger.instance:
-            Logger.instance = Logger.__Logger()
-
-    def __getattr__(self, name):
-        return getattr(self.instance, name)
+        return cls._instance
 
     def log(self, string, level: LoggingLevel = LoggingLevel.DEBUG):
 
         if level == LoggingLevel.DEBUG:
-            Logger.instance.LOG.debug(string)
+            self._LOG.debug(string)
         elif level == LoggingLevel.INFO:
-            Logger.instance.LOG.info(string)
+            self._LOG.info(string)
         elif level == LoggingLevel.WARNING:
-            Logger.instance.LOG.warn(string)
+            self._LOG.warn(string)
         elif level == LoggingLevel.ERROR:
-            Logger.instance.LOG.error(string)
+            self._LOG.error(string)
         elif level == LoggingLevel.CRITICAL:
-            Logger.instance.LOG.critical(string)
+            self._LOG.critical(string)
