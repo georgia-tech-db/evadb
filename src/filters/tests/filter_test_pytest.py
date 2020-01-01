@@ -14,7 +14,6 @@
 # limitations under the License.
 
 
-
 # TODO: FIX TEST CASES
 
 # def test_normalization():

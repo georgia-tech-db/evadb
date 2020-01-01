@@ -69,7 +69,7 @@ header = """# coding=utf-8
 """
 
 # regular expression used to track header
-header_regex = re.compile("((\#.*[\n|.])*)",re.M)
+header_regex = re.compile(r"((\#.*[\n|.])*)", re.M)
 
 # ==============================================
 # LOGGING CONFIGURATION
