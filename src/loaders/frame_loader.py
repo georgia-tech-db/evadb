@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import numpy as np
+import os
 from pyspark.sql.types import IntegerType
 
 from petastorm.codecs import ScalarCodec
@@ -25,6 +26,8 @@ from src.models.catalog.frame_info import FrameInfo
 from src.spark.session import Session
 
 from src.utils.logging import Logger
+
+EVA_DATASETS_DIR = "file:///tmp/eva_dataset"
 
 
 def row_generator(x, H, W, C):
@@ -41,41 +44,42 @@ class FrameLoader():
             dataset_name: str,
             frame_metadata: FrameInfo):
 
-        self.dataset_schema_name = dataset_name + 'Schema'
+        self.dataset_name = dataset_name
         self.H = frame_metadata.height
         self.W = frame_metadata.width
         self.C = frame_metadata.num_channels
 
         # The schema defines how the dataset schema looks like
-        self.FrameDatasetSchema = Unischema(self.dataset_schema_name, [
+        self.dataset_schema = Unischema(self.dataset_name, [
             UnischemaField('frame_id', np.int32, (),
                            ScalarCodec(IntegerType()), False),
             UnischemaField('frame_data', np.uint8, (self.H, self.W, self.C),
                            CompressedNdarrayCodec(), False),
         ])
 
-        output_url = 'file:///tmp/eva_dataset'
+        # Construct output location
+        output_url = os.path.join(EVA_DATASETS_DIR, self.dataset_name)
+        print(output_url)
         rowgroup_size_mb = 256
 
+        # Get session handle
         session = Session()
         spark = session.get_session()
-        sc = spark.sparkContext
+        spark_context = session.get_context()
 
         # Wrap dataset materialization portion.
-        # Will take care of setting up spark environment variables as
-        # well as save petastorm specific metadata
         rows_count = 10
         with materialize_dataset(spark,
                                  output_url,
-                                 self.FrameDatasetSchema,
+                                 self.dataset_schema,
                                  rowgroup_size_mb):
 
-            rows_rdd = sc.parallelize(range(rows_count))\
+            rows_rdd = spark_context.parallelize(range(rows_count))\
                 .map(lambda x: row_generator(x, self.H, self.W, self.C))\
-                .map(lambda x: dict_to_spark_row(self.FrameDatasetSchema, x))
+                .map(lambda x: dict_to_spark_row(self.dataset_schema, x))
 
             spark.createDataFrame(rows_rdd,
-                                  self.FrameDatasetSchema.as_spark_schema()) \
+                                  self.dataset_schema.as_spark_schema()) \
                 .coalesce(10) \
                 .write \
                 .mode('overwrite') \
@@ -83,8 +87,4 @@ class FrameLoader():
 
     def load_images(self):
 
-        Logger().log("Load images")
-        name = ""
-        Logger().__getattr__(name)
-
-        Logger().log("Logger name: " + name)
+        Logger().log("Load Images")
