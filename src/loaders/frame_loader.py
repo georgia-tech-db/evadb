@@ -57,9 +57,7 @@ class FrameLoader():
         output_url = 'file:///tmp/eva_dataset'
         rowgroup_size_mb = 256
 
-        application_name = "default"
-        session = Session(application_name)
-
+        session = Session()
         spark = session.get_session()
         sc = spark.sparkContext
 
