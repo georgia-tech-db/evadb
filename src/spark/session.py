@@ -58,6 +58,9 @@ class Session(object):
     def get_session(self):
         return self._session
 
+    def get_context(self):
+        return self._session.sparkContext
+
     def stop(self):
         self._session.stop()
 
