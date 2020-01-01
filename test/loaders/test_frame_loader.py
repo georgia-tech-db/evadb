@@ -57,3 +57,10 @@ class FrameLoaderTest(unittest.TestCase):
         f = FrameLoader("appname", frame_info)
 
         self.assertEqual(f.H, 2)
+
+    def test_load_images(self):
+
+        frame_info = FrameInfo(28, 28, 1, ColorSpace.GRAY)
+        f = FrameLoader("mnist", frame_info)
+
+        f.load_images()
