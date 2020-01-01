@@ -17,18 +17,14 @@ import numpy as np
 from pyspark.sql.types import IntegerType
 
 from petastorm.codecs import ScalarCodec
-from petastorm.codecs import CompressedImageCodec
 from petastorm.codecs import CompressedNdarrayCodec
 from petastorm.etl.dataset_metadata import materialize_dataset
 from petastorm.unischema import dict_to_spark_row, Unischema, UnischemaField
 
 from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import ColorSpace
-from src.models.storage.batch import FrameBatch
-from src.models.storage.frame import Frame
-from tensorflow.python.debug.examples.debug_mnist import NUM_LABELS
 
 from src.utils.logging import Logger
+
 
 class FrameLoader():
     def __init__(
@@ -85,5 +81,5 @@ class FrameLoader():
                 .parquet(output_url)
 
     def load_images(self):
-        
+
         Logger().log("Load images")
