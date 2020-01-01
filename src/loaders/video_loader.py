@@ -23,6 +23,7 @@ from src.models.storage.frame import Frame
 from src.utils.logging import Logger
 from src.utils.logging import LoggingLevel
 
+
 class VideoLoader():
     def __init__(self, video_metadata: VideoMetaInfo, batch_size=1,
                  skip_frames=0, offset=None, limit=None):
