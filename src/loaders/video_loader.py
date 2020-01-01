@@ -20,6 +20,8 @@ from src.models.catalog.video_info import VideoMetaInfo
 from src.models.storage.batch import FrameBatch
 from src.models.storage.frame import Frame
 
+from src.utils.logging import Logger
+from src.utils.logging import LoggingLevel
 
 class VideoLoader():
     def __init__(self, video_metadata: VideoMetaInfo, batch_size=1,
@@ -50,6 +52,8 @@ class VideoLoader():
         video = cv2.VideoCapture(self.video_metadata.file)
         video_start = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
+
+        Logger().log("Loading frames", LoggingLevel.CRITICAL)
 
         _, frame = video.read()
         frame_ind = video_start - 1
