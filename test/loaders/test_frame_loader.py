@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 
 import numpy as np
@@ -20,6 +19,8 @@ import numpy as np
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
+
+from src.loaders.frame_loader import FrameLoader
 
 NUM_FRAMES = 10
 
@@ -36,7 +37,11 @@ class FrameLoaderTest(unittest.TestCase):
                         FrameInfo(2, 2, 3, ColorSpace.BGR))
 
     def setUp(self):
-        self.create_sample_video()
+        self.create_dummy_frames(NUM_FRAMES)
 
-    def tearDown(self):
-        os.remove('dummy.avi')
+    def test_frameinfo_information(self):
+
+        frame_info = FrameInfo(2, 2, 3, ColorSpace.BGR)
+        f = FrameLoader("appname", frame_info)
+
+        self.assertEqual(f.H, 2)
