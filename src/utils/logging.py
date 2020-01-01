@@ -25,11 +25,12 @@ class LoggingLevel(Enum):
     ERROR = 4
     CRITICAL = 5
 
+
 class Logger:
     class __Logger:
         def __init__(self):
 
-            # LOGGING CONFIGURATION            
+            # LOGGING CONFIGURATION
             self.LOG = logging.getLogger(__name__)
             LOG_handler = logging.StreamHandler()
             LOG_formatter = logging.Formatter(
@@ -48,14 +49,13 @@ class Logger:
     def __init__(self):
         if not Logger.instance:
             Logger.instance = Logger.__Logger()
-    
+
     def __getattr__(self, name):
         return getattr(self.instance, name)
 
+    def log(self, string, level: LoggingLevel = LoggingLevel.DEBUG):
 
-    def log(self, string, level:LoggingLevel = LoggingLevel.DEBUG):
-        
-        if level == LoggingLevel.DEBUG:      
+        if level == LoggingLevel.DEBUG:
             Logger.instance.LOG.debug(string)
         elif level == LoggingLevel.INFO:
             Logger.instance.LOG.info(string)
