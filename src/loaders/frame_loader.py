@@ -22,42 +22,45 @@ from petastorm.etl.dataset_metadata import materialize_dataset
 from petastorm.unischema import dict_to_spark_row, Unischema, UnischemaField
 
 from src.models.catalog.frame_info import FrameInfo
+from src.spark.session import Session
 
 from src.utils.logging import Logger
+
+
+def row_generator(x, H, W, C):
+    """Returns a single entry in the generated dataset.
+    Return a bunch of random values as an example."""
+    return {'frame_id': x,
+            'frame_data': np.random.randint(0, 10,
+                                            dtype=np.uint8, size=(H, W, C))}
 
 
 class FrameLoader():
     def __init__(
             self,
             dataset_name: str,
-            frame_metadata: FrameInfo,
-            *args,
-            **kwargs):
-        super().__init__(frame_metadata, *args, **kwargs)
+            frame_metadata: FrameInfo):
 
-        dataset_schema_name = dataset_name + 'Schema'
-        H = frame_metadata.height
-        W = frame_metadata.width
-        C = frame_metadata.num_channels
-        NUM_LABELS = 5
+        self.dataset_schema_name = dataset_name + 'Schema'
+        self.H = frame_metadata.height
+        self.W = frame_metadata.width
+        self.C = frame_metadata.num_channels
 
         # The schema defines how the dataset schema looks like
-        FrameDatasetSchema = Unischema(dataset_schema_name, [
+        self.FrameDatasetSchema = Unischema(self.dataset_schema_name, [
             UnischemaField('frame_id', np.int32, (),
                            ScalarCodec(IntegerType()), False),
-            UnischemaField('frame_data', np.uint8, (H, W, C),
-                           CompressedNdarrayCodec(), False),
-            UnischemaField('frame_labels', np.float16,
-                           (NUM_LABELS, None, None, None),
+            UnischemaField('frame_data', np.uint8, (self.H, self.W, self.C),
                            CompressedNdarrayCodec(), False),
         ])
 
-        output_url = 'file:///tmp/hello_world_dataset'
+        output_url = 'file:///tmp/eva_dataset'
         rowgroup_size_mb = 256
 
-        spark = SparkSession.builder.config(
-            'spark.driver.memory',
-            '2g').master('local[2]').getOrCreate()
+        application_name = "default"
+        session = Session(application_name)
+
+        spark = session.get_session()
         sc = spark.sparkContext
 
         # Wrap dataset materialization portion.
@@ -66,15 +69,15 @@ class FrameLoader():
         rows_count = 10
         with materialize_dataset(spark,
                                  output_url,
-                                 FrameDatasetSchema,
+                                 self.FrameDatasetSchema,
                                  rowgroup_size_mb):
 
             rows_rdd = sc.parallelize(range(rows_count))\
-                .map(row_generator)\
-                .map(lambda x: dict_to_spark_row(FrameDatasetSchema, x))
+                .map(lambda x: row_generator(x, self.H, self.W, self.C))\
+                .map(lambda x: dict_to_spark_row(self.FrameDatasetSchema, x))
 
             spark.createDataFrame(rows_rdd,
-                                  FrameDatasetSchema.as_spark_schema()) \
+                                  self.FrameDatasetSchema.as_spark_schema()) \
                 .coalesce(10) \
                 .write \
                 .mode('overwrite') \
