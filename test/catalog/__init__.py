@@ -12,22 +12,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-
-from src.utils.logging_manager import LoggingManager
-
-
-class LoggingTest(unittest.TestCase):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def test_logger_singleton_pattern(self):
-        x = LoggingManager()
-        y = LoggingManager()
-        self.assertEqual(x, y)
-
-
-if __name__ == '__main__':
-
-    unittest.main()
