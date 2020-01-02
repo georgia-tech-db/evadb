@@ -130,3 +130,6 @@ data/*
 
 tmp/*
 .settings/*
+
+# configuration
+eva.yml
