@@ -25,6 +25,7 @@ install:
 script:
   - pycodestyle  --select E src/ test/ --exclude src/filters
   - pytest test/ --cov-report= --cov=src/ -s -v
+  - cp eva.template.yml eva.yml
 
 after_success:
   - coveralls
