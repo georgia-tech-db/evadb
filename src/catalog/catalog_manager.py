@@ -43,7 +43,7 @@ class CatalogManager(object):
         LoggingManager().log("Bootstrapping catalog" + str(output_url),
                              LoggingLevel.INFO)
 
-        if os.path.exists(output_url) == False:
+        if not os.path.exists(output_url):
             os.makedirs(output_url, exist_ok=True)
         else:
             LoggingManager().log("Found folder" + str(output_url),
