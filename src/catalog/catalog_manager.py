@@ -15,6 +15,8 @@
 
 import os
 
+from pyspark.sql import Row
+
 from src.spark.session import Session
 from src.utils.configuration_manager import ConfigurationManager
 from src.utils.logging_manager import LoggingManager
@@ -43,10 +45,11 @@ class CatalogManager(object):
         LoggingManager().log("Bootstrapping catalog" + str(output_url),
                              LoggingLevel.INFO)
 
-        if not os.path.exists(output_url):
-            os.makedirs(output_url, exist_ok=True)
-        else:
-            LoggingManager().log("Found folder" + str(output_url),
-                                 LoggingLevel.INFO)
+        spark = Session().get_session()
+        sc = Session().get_context()
 
-        Session().get_session()
+        squaresDF = spark.createDataFrame(sc.parallelize(range(1, 6))
+                                          .map(lambda i: 
+                                               Row(single=i, double=i ** 2)))
+
+        squaresDF.show(2)
