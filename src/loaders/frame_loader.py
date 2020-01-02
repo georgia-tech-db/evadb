@@ -25,9 +25,8 @@ from petastorm.unischema import dict_to_spark_row, Unischema, UnischemaField
 from src.models.catalog.frame_info import FrameInfo
 from src.spark.session import Session
 
-from src.utils.logging import Logger
-
-EVA_DATASETS_DIR = "file:///tmp/eva_dataset"
+from src.utils.logging_manager import LoggingManager
+from src.utils.configuration_manager import ConfigurationManager
 
 
 def row_generator(x, H, W, C):
@@ -58,7 +57,9 @@ class FrameLoader():
         ])
 
         # Construct output location
-        output_url = os.path.join(EVA_DATASETS_DIR, self.dataset_name)
+        eva_dir = ConfigurationManager().get_value("core", "location")
+        output_url = os.path.join(eva_dir, self.dataset_name)
+
         rowgroup_size_mb = 256
 
         # Get session handle
@@ -86,4 +87,4 @@ class FrameLoader():
 
     def load_images(self):
 
-        Logger().log("Load Images")
+        LoggingManager().log("Load Images")
