@@ -59,7 +59,6 @@ class FrameLoader():
 
         # Construct output location
         output_url = os.path.join(EVA_DATASETS_DIR, self.dataset_name)
-        print(output_url)
         rowgroup_size_mb = 256
 
         # Get session handle
