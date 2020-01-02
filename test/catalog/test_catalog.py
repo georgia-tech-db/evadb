@@ -13,18 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import logging
 
-from src.utils.logging_manager import LoggingManager
+from src.catalog.catalog_manager import CatalogManager
+from src.spark.session import Session
 
 
-class LoggingTest(unittest.TestCase):
+def suppress_py4j_logging():
+    logger = logging.getLogger('py4j')
+    logger.setLevel(logging.ERROR)
+
+
+class CatalogManagerTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_logger_singleton_pattern(self):
-        x = LoggingManager()
-        y = LoggingManager()
+    def setUp(self):
+        suppress_py4j_logging()
+
+    def tearDown(self):
+        self.session = Session()
+        self.session.stop()
+
+    def test_catalog_manager_singleton_pattern(self):
+        x = CatalogManager()
+        y = CatalogManager()
         self.assertEqual(x, y)
 
 
