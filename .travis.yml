@@ -16,7 +16,6 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - cp eva.template.yml eva.yml
 
 install:
   - conda env create -f environment.yml

@@ -48,8 +48,8 @@ class CatalogManager(object):
         spark = Session().get_session()
         sc = Session().get_context()
 
-        squaresDF = spark.createDataFrame(sc.parallelize(range(1, 6))
-                                          .map(lambda i:
-                                               Row(single=i, double=i ** 2)))
+        squaresDF = spark.createDataFrame(
+            sc.parallelize(range(1, 100)).map(lambda i:
+                                              Row(single=i, double=i ** 2)))
 
         squaresDF.show(2)
