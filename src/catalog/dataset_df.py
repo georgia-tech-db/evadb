@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from src.catalog.schema import Column
 from src.catalog.schema import ColumnType
 from src.catalog.schema import Schema
@@ -20,11 +21,15 @@ from src.spark.session import Session
 
 from petastorm.etl.dataset_metadata import materialize_dataset
 
+from pyspark.sql.functions import (
+    col, max as max_, struct, monotonically_increasing_id
+)
+
 
 def get_dataset_df_schema():
 
     column_1 = Column("dataset_id", ColumnType.INTEGER, False)
-    column_2 = Column("dataset_name", ColumnType.STRING, False)
+    column_2 = Column("dataset_name", ColumnType.INTEGER, False)
 
     datset_df_schema = Schema("dataset_df_schema",
                               [column_1, column_2])
@@ -38,6 +43,50 @@ def load_dataset_df(dataset_df_url: str):
     dataset_df = spark.read.load(dataset_df_url)
 
     return dataset_df
+
+
+def append_row(dataset_df_url: str, dataset_name: str):
+
+    dataset_df = load_dataset_df(dataset_df_url)
+
+    row_count = dataset_df.count()
+
+    if row_count == 0:
+        dataset_id = 0
+    else:
+        max_id = dataset_df.agg({"dataset_id": "max"}).collect()[0][0]
+        print(max_id)
+        dataset_id = max_id + 1
+
+    print(dataset_id)
+
+    datset_df_schema = get_dataset_df_schema()
+    petastorm_schema = datset_df_schema.get_petastorm_schema()
+    dataset_pyspark_schema = petastorm_schema.as_spark_schema()
+
+    spark = Session().get_session()
+    Session().get_context()
+
+    row_1 = [dataset_id, dataset_id * 500]
+    rows = [row_1]
+    print(rows)
+    rows_df = spark.createDataFrame(rows, schema=dataset_pyspark_schema)
+    rows_rdd = rows_df.rdd
+
+    # Wrap dataset materialization portion.
+    with materialize_dataset(spark,
+                             dataset_df_url,
+                             petastorm_schema):
+
+        spark.createDataFrame(rows_rdd,
+                              petastorm_schema.as_spark_schema()) \
+            .coalesce(1) \
+            .write \
+            .mode('append') \
+            .parquet(dataset_df_url)
+
+    dataset_df = spark.read.load(dataset_df_url)
+    dataset_df.show(10)
 
 
 def create_datset_df(dataset_df_url: str):
