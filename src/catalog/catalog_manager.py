@@ -15,14 +15,18 @@
 
 import os
 
-from pyspark.sql import Row
-
-from src.spark.session import Session
 from src.utils.configuration_manager import ConfigurationManager
 from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
+from urllib.parse import urlparse
+
+from src.catalog.dataset_df import *
+
 CATALOG_DIR = "catalog"
+DATASET_FILE = "dataset"
+
+catalog = {}
 
 
 class CatalogManager(object):
@@ -45,11 +49,24 @@ class CatalogManager(object):
         LoggingManager().log("Bootstrapping catalog" + str(output_url),
                              LoggingLevel.INFO)
 
-        spark = Session().get_session()
-        sc = Session().get_context()
+        # Construct output location
+        eva_dir = ConfigurationManager().get_value("core", "location")
+        catalog_dir_url = os.path.join(eva_dir, "catalog")
 
-        squaresDF = spark.createDataFrame(
-            sc.parallelize(range(1, 100)).map(lambda i:
-                                              Row(single=i, double=i ** 2)))
+        # Get filesystem path
+        catalog_os_path = urlparse(catalog_dir_url).path
 
-        squaresDF.show(2)
+        # Check if catalog exists
+        if os.path.exists(catalog_os_path):
+
+            dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
+            dataset_df = load_dataset_df(dataset_file_url)
+            dataset_df.show(1)
+
+        # Create catalog if it does not exist
+        else:
+
+            print("Catalog not found")
+
+            dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
+            create_datset_df(dataset_file_url)
