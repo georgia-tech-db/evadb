@@ -103,9 +103,8 @@ def get_petastorm_column(column):
     elif column_type == ColumnType.STRING:
         petastorm_column = UnischemaField(column_name,
                                           np.unicode_,
-                                          (1,),
-                                          NdarrayCodec(),
-                                          column_is_nullable)
+                                          ()
+                                          )
     elif column_type == ColumnType.NDARRAY:
         petastorm_column = UnischemaField(column_name,
                                           np.uint8,
