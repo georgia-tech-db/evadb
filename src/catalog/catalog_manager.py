@@ -63,6 +63,8 @@ class CatalogManager(object):
             dataset_df = load_dataset_df(dataset_file_url)
             dataset_df.show(1)
 
+            append_row(dataset_file_url, 'foo')
+
         # Create catalog if it does not exist
         else:
 
