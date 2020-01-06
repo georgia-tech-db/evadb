@@ -16,6 +16,17 @@
 from enum import Enum
 from typing import List
 
+import numpy as np
+
+from src.utils.logging_manager import LoggingManager
+from src.utils.logging_manager import LoggingLevel
+
+from pyspark.sql.types import IntegerType, FloatType
+
+from petastorm.codecs import ScalarCodec
+from petastorm.codecs import NdarrayCodec
+from petastorm.unischema import Unischema, UnischemaField
+
 
 class ColumnType(Enum):
     INTEGER = 1
@@ -66,16 +77,73 @@ class Column(object):
         return column_str
 
 
+def get_petastorm_column(column):
+
+    column_type = column.get_type()
+    column_name = column.get_name()
+    column_is_nullable = column.is_nullable()
+    column_array_dimensions = column.get_array_dimensions()
+
+    # Reference:
+    # https://github.com/uber/petastorm/blob/master/petastorm/
+    # tests/test_common.py
+
+    if column_type == ColumnType.INTEGER:
+        petastorm_column = UnischemaField(column_name,
+                                          np.int32,
+                                          (),
+                                          ScalarCodec(IntegerType()),
+                                          column_is_nullable)
+    elif column_type == ColumnType.FLOAT:
+        petastorm_column = UnischemaField(column_name,
+                                          np.float64,
+                                          (),
+                                          ScalarCodec(FloatType()),
+                                          column_is_nullable)
+    elif column_type == ColumnType.STRING:
+        petastorm_column = UnischemaField(column_name,
+                                          np.unicode_,
+                                          (1,),
+                                          NdarrayCodec(),
+                                          column_is_nullable)
+    elif column_type == ColumnType.NDARRAY:
+        petastorm_column = UnischemaField(column_name,
+                                          np.uint8,
+                                          column_array_dimensions,
+                                          NdarrayCodec(),
+                                          column_is_nullable)
+    else:
+        LoggingManager().log("Invalid column type: " + str(column_type),
+                             LoggingLevel.ERROR)
+
+    return petastorm_column
+
+
 class Schema(object):
 
+    _schema_name = None
     _column_list = []
+    _petastorm_schema = None
 
-    def __init__(self, column_list: List[Column]):
+    def __init__(self, schema_name: str, column_list: List[Column]):
+
+        self._schema_name = schema_name
         self._column_list = column_list
 
+        petastorm_column_list = []
+        for _column in self._column_list:
+            petastorm_column = get_petastorm_column(_column)
+            petastorm_column_list.append(petastorm_column)
+
+        self._petastorm_schema = Unischema(self._schema_name,
+                                           petastorm_column_list)
+
     def __str__(self):
-        schema_str = "SCHEMA::\n"
+        schema_str = "SCHEMA:: (" + self._schema_name + ")\n"
         for column in self._column_list:
             schema_str += str(column)
 
         return schema_str
+
+    def get_petastorm_schema(self):
+        return self._petastorm_schema
