@@ -15,6 +15,7 @@
 
 import numpy as np
 import os
+
 from pyspark.sql.types import IntegerType
 
 from petastorm.codecs import ScalarCodec
@@ -60,8 +61,6 @@ class FrameLoader():
         eva_dir = ConfigurationManager().get_value("core", "location")
         output_url = os.path.join(eva_dir, self.dataset_name)
 
-        rowgroup_size_mb = 256
-
         # Get session handle
         session = Session()
         spark = session.get_session()
@@ -71,8 +70,7 @@ class FrameLoader():
         rows_count = 10
         with materialize_dataset(spark,
                                  output_url,
-                                 self.dataset_schema,
-                                 rowgroup_size_mb):
+                                 self.dataset_schema):
 
             rows_rdd = spark_context.parallelize(range(rows_count))\
                 .map(lambda x: row_generator(x, self.H, self.W, self.C))\
