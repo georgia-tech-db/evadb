@@ -15,24 +15,23 @@
 
 import os
 
-from src.utils.configuration_manager import ConfigurationManager
 from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
+
+from src.configuration.configuration_manager import ConfigurationManager
+from src.configuration.dictionary import CATALOG_DIR
+from src.configuration.dictionary import DATASET_FILE
 
 from urllib.parse import urlparse
 
 from src.catalog.dataset_df import *
-
-CATALOG_DIR = "catalog"
-DATASET_FILE = "dataset"
-
-catalog = {}
 
 
 class CatalogManager(object):
 
     _instance = None
     _catalog = None
+    _catalog_dictionary = {}
 
     def __new__(cls):
         if cls._instance is None:
