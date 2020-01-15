@@ -21,15 +21,11 @@ from src.spark.session import Session
 
 from petastorm.etl.dataset_metadata import materialize_dataset
 
-from pyspark.sql.functions import (
-    col, max as max_, struct, monotonically_increasing_id
-)
-
 
 def get_dataset_df_schema():
 
     column_1 = Column("dataset_id", ColumnType.INTEGER, False)
-    column_2 = Column("dataset_name", ColumnType.INTEGER, False)
+    column_2 = Column("dataset_name", ColumnType.STRING, False)
 
     datset_df_schema = Schema("dataset_df_schema",
                               [column_1, column_2])
@@ -48,7 +44,6 @@ def load_dataset_df(dataset_df_url: str):
 def append_row(dataset_df_url: str, dataset_name: str):
 
     dataset_df = load_dataset_df(dataset_df_url)
-
     row_count = dataset_df.count()
 
     if row_count == 0:
@@ -58,8 +53,6 @@ def append_row(dataset_df_url: str, dataset_name: str):
         print(max_id)
         dataset_id = max_id + 1
 
-    print(dataset_id)
-
     datset_df_schema = get_dataset_df_schema()
     petastorm_schema = datset_df_schema.get_petastorm_schema()
     dataset_pyspark_schema = petastorm_schema.as_spark_schema()
@@ -67,9 +60,8 @@ def append_row(dataset_df_url: str, dataset_name: str):
     spark = Session().get_session()
     Session().get_context()
 
-    row_1 = [dataset_id, dataset_id * 500]
+    row_1 = [dataset_id, dataset_name]
     rows = [row_1]
-    print(rows)
     rows_df = spark.createDataFrame(rows, schema=dataset_pyspark_schema)
     rows_rdd = rows_df.rdd
 

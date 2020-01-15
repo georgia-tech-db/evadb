@@ -27,7 +27,7 @@ from src.models.catalog.frame_info import FrameInfo
 from src.spark.session import Session
 
 from src.utils.logging_manager import LoggingManager
-from src.utils.configuration_manager import ConfigurationManager
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 def row_generator(x, H, W, C):
