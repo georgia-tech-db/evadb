@@ -50,7 +50,6 @@ def append_row(dataset_df_url: str, dataset_name: str):
         dataset_id = 0
     else:
         max_id = dataset_df.agg({"dataset_id": "max"}).collect()[0][0]
-        print(max_id)
         dataset_id = max_id + 1
 
     datset_df_schema = get_dataset_df_schema()
@@ -83,9 +82,7 @@ def append_row(dataset_df_url: str, dataset_name: str):
 
 def create_datset_df(dataset_df_url: str):
 
-    datset_df_schema = get_dataset_df_schema()
-
-    print(datset_df_schema)
+    datset_df_schema = get_dataset_df_schema()    
 
     petastorm_schema = datset_df_schema.get_petastorm_schema()
 
@@ -106,4 +103,3 @@ def create_datset_df(dataset_df_url: str):
             .mode('overwrite') \
             .parquet(dataset_df_url)
 
-        print(empty_rdd.take(1))
