@@ -21,7 +21,7 @@ import numpy as np
 from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
-from pyspark.sql.types import IntegerType, FloatType
+from pyspark.sql.types import IntegerType, FloatType, StringType
 
 from petastorm.codecs import ScalarCodec
 from petastorm.codecs import NdarrayCodec
@@ -102,9 +102,10 @@ def get_petastorm_column(column):
                                           column_is_nullable)
     elif column_type == ColumnType.STRING:
         petastorm_column = UnischemaField(column_name,
-                                          np.unicode_,
-                                          ()
-                                          )
+                                          np.string_,
+                                          (),
+                                          ScalarCodec(StringType()),
+                                          column_is_nullable)
     elif column_type == ColumnType.NDARRAY:
         petastorm_column = UnischemaField(column_name,
                                           np.uint8,
