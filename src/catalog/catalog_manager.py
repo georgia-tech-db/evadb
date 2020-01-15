@@ -67,7 +67,5 @@ class CatalogManager(object):
         # Create catalog if it does not exist
         else:
 
-            print("Catalog not found")
-
             dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
             create_datset_df(dataset_file_url)
