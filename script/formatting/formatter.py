@@ -205,23 +205,23 @@ if __name__ == '__main__':
         for dir in DEFAULT_DIRS:
             LOG.info("Scanning : " + dir + "\n\n")
 
-#             LOG.info("Stripping headers : " + dir)
-#             args.add_header = False
-#             args.strip_header = True
-#             args.format_code = False
-#             format_dir(dir,
-#                        args.add_header,
-#                        args.strip_header,
-#                        args.format_code)
-# 
-#             LOG.info("Adding headers : " + dir)
-#             args.add_header = True
-#             args.strip_header = False
-#             args.format_code = False
-#             format_dir(dir,
-#                        args.add_header,
-#                        args.strip_header,
-#                        args.format_code)
+            LOG.info("Stripping headers : " + dir)
+            args.add_header = False
+            args.strip_header = True
+            args.format_code = False
+            format_dir(dir,
+                       args.add_header,
+                       args.strip_header,
+                       args.format_code)
+ 
+            LOG.info("Adding headers : " + dir)
+            args.add_header = True
+            args.strip_header = False
+            args.format_code = False
+            format_dir(dir,
+                       args.add_header,
+                       args.strip_header,
+                       args.format_code)
 
             LOG.info("Formatting code : " + dir)
             args.add_header = False

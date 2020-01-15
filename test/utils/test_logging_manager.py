@@ -14,26 +14,18 @@
 # limitations under the License.
 import unittest
 
-from src.utils.configuration_manager import ConfigurationManager
+from src.utils.logging_manager import LoggingManager
 
 
-class ConfigurationManagerTest(unittest.TestCase):
+class LoggingManagerTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_configuration_read(self):
-
-        configuration_manager = ConfigurationManager()
-
-        value = configuration_manager.get_value("core", "location")
-        self.assertNotEqual(value, None)
-
-        value = configuration_manager.get_value("invalid", "")
-        self.assertEqual(value, None)
-
-        value = configuration_manager.get_value("core", "invalid")
-        self.assertEqual(value, None)
+    def test_logging_manager_singleton_pattern(self):
+        x = LoggingManager()
+        y = LoggingManager()
+        self.assertEqual(x, y)
 
 
 if __name__ == '__main__':
