@@ -33,7 +33,8 @@ class SchemaTests(unittest.TestCase):
 
         schema = Schema(schema_name,
                         [column_1, column_2, column_3])
-        print(schema)
+        
+        self.assertEqual(schema._column_list[0].get_name(), "frame_id")
 
 
 if __name__ == '__main__':
