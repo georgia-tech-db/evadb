@@ -28,9 +28,9 @@ import functools
 # CONFIGURATION
 # ==============================================
 
-# NOTE: absolute path to peloton directory is calculated from current directory
-# directory structure: peloton/scripts/formatting/<this_file>
-# PELOTON_DIR needs to be redefined if the directory structure is changed
+# NOTE: absolute path to eva directory is calculated from current directory
+# directory structure: eva/scripts/formatting/<this_file>
+# EVA_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 EVA_DIR = functools.reduce(os.path.join,
                            [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir])
