@@ -17,7 +17,6 @@ import os
 
 from src.configuration.dictionary import DATASET_DATAFRAME_NAME
 
-from src.storage.dataframe import load_dataframe
 from src.storage.dataframe import create_dataframe
 from src.storage.dataframe import DataFrameMetadata
 
@@ -39,10 +38,6 @@ def load_catalog_dataframes(catalog_dir_url: str,
                             catalog_dictionary):
 
     dataset_file_url = os.path.join(catalog_dir_url, DATASET_DATAFRAME_NAME)
-    dataset_df = load_dataframe(dataset_file_url)
-
-    dataset_df.show(10)
-
     dataset_df_schema = get_dataset_schema()
     dataset_catalog_entry = DataFrameMetadata(dataset_file_url,
                                               dataset_df_schema)
