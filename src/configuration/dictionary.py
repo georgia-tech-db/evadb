@@ -14,4 +14,4 @@
 # limitations under the License.
 
 CATALOG_DIR = "catalog"
-DATASET_FILE = "dataset"
+DATASET_DATAFRAME_NAME = "dataset"
