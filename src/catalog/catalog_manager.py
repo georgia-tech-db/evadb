@@ -28,6 +28,7 @@ from src.catalog.catalog_dataframes import create_catalog_dataframes
 
 from src.configuration.dictionary import DATASET_DATAFRAME_NAME
 
+from src.storage.dataframe import load_dataframe
 from src.storage.dataframe import append_rows
 
 
@@ -69,15 +70,13 @@ class CatalogManager(object):
 
     def create_dataset(self, dataset_name: str):
 
-        catalog_entry = self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
+        dataset_catalog_entry = \
+            self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
 
-        dataset_df = catalog_entry[0]
-        dataset_file_url = catalog_entry[1]
-        dataset_df_petastorm_schema = catalog_entry[3]
-        dataset_df_pyspark_schema = catalog_entry[4]
+        dataset_df = \
+            load_dataframe(dataset_catalog_entry.get_dataframe_file_url())
 
         row_count = dataset_df.count()
-
         if row_count == 0:
             dataset_id = 0
         else:
@@ -87,13 +86,4 @@ class CatalogManager(object):
         row_1 = [dataset_id, dataset_name]
         rows = [row_1]
 
-        append_rows(dataset_file_url,
-                    dataset_df_pyspark_schema,
-                    dataset_df_petastorm_schema,
-                    rows)
-
-        # Construct output location
-        eva_dir = ConfigurationManager().get_value("core", "location")
-        catalog_dir_url = os.path.join(eva_dir, "catalog")
-
-        load_catalog_dataframes(catalog_dir_url, self._catalog_dictionary)
+        append_rows(dataset_catalog_entry, rows)
