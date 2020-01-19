@@ -19,6 +19,7 @@ from src.configuration.dictionary import DATASET_DATAFRAME_NAME
 
 from src.storage.dataframe import load_dataframe
 from src.storage.dataframe import create_dataframe
+from src.storage.dataframe import DataFrameMetadata
 
 from src.catalog.schema import Column
 from src.catalog.schema import ColumnType
@@ -43,36 +44,21 @@ def load_catalog_dataframes(catalog_dir_url: str,
     dataset_df.show(10)
 
     dataset_df_schema = get_dataset_schema()
-    dataset_df_petastorm_schema = dataset_df_schema.get_petastorm_schema()
-    dataset_df_pyspark_schema = dataset_df_petastorm_schema.as_spark_schema()
+    dataset_catalog_entry = DataFrameMetadata(dataset_file_url,
+                                              dataset_df_schema)
 
-    catalog_dictionary.update(
-        {DATASET_DATAFRAME_NAME:
-                             (dataset_df,
-                              dataset_file_url,
-                              dataset_df_schema,
-                              dataset_df_petastorm_schema,
-                              dataset_df_pyspark_schema)})
+    catalog_dictionary.update({DATASET_DATAFRAME_NAME: dataset_catalog_entry})
 
 
 def create_catalog_dataframes(catalog_dir_url: str,
                               catalog_dictionary):
 
     dataset_df_schema = get_dataset_schema()
-    dataset_df_petastorm_schema = dataset_df_schema.get_petastorm_schema()
-    dataset_df_pyspark_schema = dataset_df_petastorm_schema.as_spark_schema()
-
     dataset_file_url = os.path.join(catalog_dir_url, DATASET_DATAFRAME_NAME)
-    create_dataframe(dataset_file_url,
-                     dataset_df_pyspark_schema,
-                     dataset_df_petastorm_schema)
+    dataset_catalog_entry = DataFrameMetadata(dataset_file_url,
+                                              dataset_df_schema)
 
-    dataset_df = load_dataframe(dataset_file_url)
+    create_dataframe(dataset_catalog_entry)
 
     # dataframe name : (schema, petastorm_schema, pyspark_schema)
-    catalog_dictionary.update({DATASET_DATAFRAME_NAME:
-                               (dataset_df,
-                                dataset_file_url,
-                                dataset_df_schema,
-                                dataset_df_petastorm_schema,
-                                dataset_df_pyspark_schema)})
+    catalog_dictionary.update({DATASET_DATAFRAME_NAME: dataset_catalog_entry})
