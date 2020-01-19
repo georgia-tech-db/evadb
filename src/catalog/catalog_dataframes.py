@@ -15,11 +15,10 @@
 
 import os
 
-from src.configuration.dictionary import DATASET_FILE
+from src.configuration.dictionary import DATASET_DATAFRAME_NAME
 
 from src.storage.dataframe import load_dataframe
 from src.storage.dataframe import create_dataframe
-from src.storage.dataframe import append_rows
 
 from src.catalog.schema import Column
 from src.catalog.schema import ColumnType
@@ -35,9 +34,10 @@ def get_dataset_schema():
     return datset_df_schema
 
 
-def load_catalog_dataframes(catalog_dir_url: str):
+def load_catalog_dataframes(catalog_dir_url: str,
+                            catalog_dictionary):
 
-    dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
+    dataset_file_url = os.path.join(catalog_dir_url, DATASET_DATAFRAME_NAME)
     dataset_df = load_dataframe(dataset_file_url)
 
     dataset_df.show(10)
@@ -46,32 +46,33 @@ def load_catalog_dataframes(catalog_dir_url: str):
     dataset_df_petastorm_schema = dataset_df_schema.get_petastorm_schema()
     dataset_df_pyspark_schema = dataset_df_petastorm_schema.as_spark_schema()
 
-    row_count = dataset_df.count()
-
-    if row_count == 0:
-        dataset_id = 0
-    else:
-        max_id = dataset_df.agg({"dataset_id": "max"}).collect()[0][0]
-        dataset_id = max_id + 1
-
-    dataset_name = "dataset_foo"
-
-    row_1 = [dataset_id, dataset_name]
-    rows = [row_1]
-
-    append_rows(dataset_file_url,
-                dataset_df_pyspark_schema,
-                dataset_df_petastorm_schema,
-                rows)
+    catalog_dictionary.update(
+        {DATASET_DATAFRAME_NAME:
+                             (dataset_df,
+                              dataset_file_url,
+                              dataset_df_schema,
+                              dataset_df_petastorm_schema,
+                              dataset_df_pyspark_schema)})
 
 
-def create_catalog_dataframes(catalog_dir_url: str):
+def create_catalog_dataframes(catalog_dir_url: str,
+                              catalog_dictionary):
 
     dataset_df_schema = get_dataset_schema()
     dataset_df_petastorm_schema = dataset_df_schema.get_petastorm_schema()
     dataset_df_pyspark_schema = dataset_df_petastorm_schema.as_spark_schema()
 
-    dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
+    dataset_file_url = os.path.join(catalog_dir_url, DATASET_DATAFRAME_NAME)
     create_dataframe(dataset_file_url,
                      dataset_df_pyspark_schema,
                      dataset_df_petastorm_schema)
+
+    dataset_df = load_dataframe(dataset_file_url)
+
+    # dataframe name : (schema, petastorm_schema, pyspark_schema)
+    catalog_dictionary.update({DATASET_DATAFRAME_NAME:
+                               (dataset_df,
+                                dataset_file_url,
+                                dataset_df_schema,
+                                dataset_df_petastorm_schema,
+                                dataset_df_pyspark_schema)})

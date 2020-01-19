@@ -26,6 +26,10 @@ from urllib.parse import urlparse
 from src.catalog.catalog_dataframes import load_catalog_dataframes
 from src.catalog.catalog_dataframes import create_catalog_dataframes
 
+from src.configuration.dictionary import DATASET_DATAFRAME_NAME
+
+from src.storage.dataframe import append_rows
+
 
 class CatalogManager(object):
 
@@ -49,7 +53,6 @@ class CatalogManager(object):
                              LoggingLevel.INFO)
 
         # Construct output location
-        eva_dir = ConfigurationManager().get_value("core", "location")
         catalog_dir_url = os.path.join(eva_dir, "catalog")
 
         # Get filesystem path
@@ -58,7 +61,39 @@ class CatalogManager(object):
         # Check if catalog exists
         if os.path.exists(catalog_os_path):
             # Load catalog if it exists
-            load_catalog_dataframes(catalog_dir_url)
+            load_catalog_dataframes(catalog_dir_url, self._catalog_dictionary)
         else:
             # Create catalog if it does not exist
-            create_catalog_dataframes(catalog_dir_url)
+            create_catalog_dataframes(
+                catalog_dir_url, self._catalog_dictionary)
+
+    def create_dataset(self, dataset_name: str):
+
+        catalog_entry = self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
+
+        dataset_df = catalog_entry[0]
+        dataset_file_url = catalog_entry[1]
+        dataset_df_petastorm_schema = catalog_entry[3]
+        dataset_df_pyspark_schema = catalog_entry[4]
+
+        row_count = dataset_df.count()
+
+        if row_count == 0:
+            dataset_id = 0
+        else:
+            max_id = dataset_df.agg({"dataset_id": "max"}).collect()[0][0]
+            dataset_id = max_id + 1
+
+        row_1 = [dataset_id, dataset_name]
+        rows = [row_1]
+
+        append_rows(dataset_file_url,
+                    dataset_df_pyspark_schema,
+                    dataset_df_petastorm_schema,
+                    rows)
+
+        # Construct output location
+        eva_dir = ConfigurationManager().get_value("core", "location")
+        catalog_dir_url = os.path.join(eva_dir, "catalog")
+
+        load_catalog_dataframes(catalog_dir_url, self._catalog_dictionary)
