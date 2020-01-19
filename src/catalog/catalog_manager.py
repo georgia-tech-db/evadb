@@ -20,11 +20,11 @@ from src.utils.logging_manager import LoggingLevel
 
 from src.configuration.configuration_manager import ConfigurationManager
 from src.configuration.dictionary import CATALOG_DIR
-from src.configuration.dictionary import DATASET_FILE
 
 from urllib.parse import urlparse
 
-from src.catalog.dataset_df import *
+from src.catalog.catalog_dataframes import load_catalog_dataframes
+from src.catalog.catalog_dataframes import create_catalog_dataframes
 
 
 class CatalogManager(object):
@@ -57,15 +57,8 @@ class CatalogManager(object):
 
         # Check if catalog exists
         if os.path.exists(catalog_os_path):
-
-            dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
-            dataset_df = load_dataset_df(dataset_file_url)
-            dataset_df.show(1)
-
-            append_row(dataset_file_url, 'foo')
-
-        # Create catalog if it does not exist
+            # Load catalog if it exists
+            load_catalog_dataframes(catalog_dir_url)
         else:
-
-            dataset_file_url = os.path.join(catalog_dir_url, DATASET_FILE)
-            create_datset_df(dataset_file_url)
+            # Create catalog if it does not exist
+            create_catalog_dataframes(catalog_dir_url)
