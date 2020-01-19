@@ -58,30 +58,30 @@ def load_dataframe(dataframe_url: str):
     return dataframe
 
 
-def append_rows(data_frame_metadata: DataFrameMetadata,
+def append_rows(df_metadata: DataFrameMetadata,
                 rows):
 
     spark = Session().get_session()
 
     # Convert a list of rows to RDD
     rows_df = spark.createDataFrame(rows,
-                                    schema=data_frame_metadata.get_dataframe_pyspark_schema())
+                                    df_metadata.get_dataframe_pyspark_schema())
     rows_rdd = rows_df.rdd
 
     # Use petastorm to appends rows
     with materialize_dataset(spark,
-                             data_frame_metadata.get_dataframe_file_url(),
-                             data_frame_metadata.get_dataframe_petastorm_schema()):
+                             df_metadata.get_dataframe_file_url(),
+                             df_metadata.get_dataframe_petastorm_schema()):
 
         spark.createDataFrame(rows_rdd,
-                              data_frame_metadata.get_dataframe_pyspark_schema()) \
+                              df_metadata.get_dataframe_pyspark_schema()) \
             .coalesce(1) \
             .write \
             .mode('append') \
-            .parquet(data_frame_metadata.get_dataframe_file_url())
+            .parquet(df_metadata.get_dataframe_file_url())
 
 
-def create_dataframe(data_frame_metadata: DataFrameMetadata):
+def create_dataframe(df_metadata: DataFrameMetadata):
 
     spark = Session().get_session()
     spark_context = Session().get_context()
@@ -91,12 +91,26 @@ def create_dataframe(data_frame_metadata: DataFrameMetadata):
 
     # Use petastorm to create dataframe
     with materialize_dataset(spark,
-                             data_frame_metadata.get_dataframe_file_url(),
-                             data_frame_metadata.get_dataframe_petastorm_schema()):
+                             df_metadata.get_dataframe_file_url(),
+                             df_metadata.get_dataframe_petastorm_schema()):
 
         spark.createDataFrame(empty_rdd,
-                              data_frame_metadata.get_dataframe_pyspark_schema()) \
+                              df_metadata.get_dataframe_pyspark_schema()) \
             .coalesce(1) \
             .write \
             .mode('overwrite') \
-            .parquet(data_frame_metadata.get_dataframe_file_url())
+            .parquet(df_metadata.get_dataframe_file_url())
+
+
+def get_next_row_id(dataframe, dataframe_name: str):
+
+    id_column_name = dataframe_name + "_id"
+    row_count = dataframe.count()
+
+    if row_count == 0:
+        next_row_id = 0
+    else:
+        max_id = dataframe.agg({id_column_name: "max"}).collect()[0][0]
+        next_row_id = max_id + 1
+
+    return next_row_id
