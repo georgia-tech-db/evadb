@@ -41,6 +41,10 @@ class CatalogManagerTests(unittest.TestCase):
         y = CatalogManager()
         self.assertEqual(x, y)
 
+        x.create_dataset("foo")
+        x.create_dataset("bar")
+        x.create_dataset("baz")
+
 
 if __name__ == '__main__':
 
