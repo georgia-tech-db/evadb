@@ -28,7 +28,7 @@ from src.catalog.catalog_dataframes import create_catalog_dataframes
 
 from src.configuration.dictionary import DATASET_DATAFRAME_NAME
 
-from src.storage.dataframe import load_dataframe
+from src.storage.dataframe import load_dataframe, get_next_row_id
 from src.storage.dataframe import append_rows
 
 
@@ -76,14 +76,11 @@ class CatalogManager(object):
         dataset_df = \
             load_dataframe(dataset_catalog_entry.get_dataframe_file_url())
 
-        row_count = dataset_df.count()
-        if row_count == 0:
-            dataset_id = 0
-        else:
-            max_id = dataset_df.agg({"dataset_id": "max"}).collect()[0][0]
-            dataset_id = max_id + 1
+        dataset_df.show(10)
 
-        row_1 = [dataset_id, dataset_name]
+        next_row_id = get_next_row_id(dataset_df, DATASET_DATAFRAME_NAME)
+
+        row_1 = [next_row_id, dataset_name]
         rows = [row_1]
 
         append_rows(dataset_catalog_entry, rows)
