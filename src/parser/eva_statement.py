@@ -15,6 +15,7 @@
 
 from src.parser.types import StatementType
 
+
 class EvaStatement:
     """
     Base class for all the EvaStatement

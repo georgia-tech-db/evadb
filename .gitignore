@@ -138,5 +138,6 @@ tmp/*
 evaql_lexer.py
 evaql_parser.py
 evaql_parserListener.py
+evaql_parserVisitor.py
 *.tokens
 *.interp
