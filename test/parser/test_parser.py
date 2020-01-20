@@ -12,15 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import unittest
-from src.query_parser.eva_parser import EvaFrameQLParser
-from src.query_parser.eva_statement import EvaStatement
-from src.query_parser.eva_statement import StatementType
+
+from src.parser.eva_parser import EvaFrameQLParser
+from src.parser.eva_statement import EvaStatement
+from src.parser.eva_statement import StatementType
 from src.expression.abstract_expression import ExpressionType
-from src.query_parser.table_ref import TableRef
+from src.parser.table_ref import TableRef
 
-
-class ParserTest(unittest.TestCase):
+class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

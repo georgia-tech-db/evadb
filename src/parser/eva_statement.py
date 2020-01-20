@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.query_parser.types import StatementType
 
+from src.parser.types import StatementType
 
 class EvaStatement:
     """
