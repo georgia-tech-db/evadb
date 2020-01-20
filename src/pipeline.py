@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 import sys
 
@@ -12,7 +26,6 @@ try:
 except ImportError:
     sys.path.append("/nethome/jbang36/eva")
     sys.path.append("/home/jaeho-linux/fall2018/DDL/Eva")
-    import src.constants
 
 
 # TODO: Fill this file in with the components loaded from other files
@@ -92,7 +105,6 @@ class Pipeline:
         """
         labels_list = ["image", "vehicle_type", "color", "speed",
                        "intersection"]
-        label_of_interest = "vehicle_type"
 
         pp_category_stats = self.PP.train_all(self.image_matrix_train,
                                               self.data_table_train)  #
@@ -131,7 +143,6 @@ class Pipeline:
             "i": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]],
             "o": [constants.DISCRETE, ["pt335", "pt342", "pt211", "pt208"]]}
 
-        query_plans = []
         for query in TRAF_20:
             # TODO: After running the query optimizer, we want the list of
             #  PPs to work with

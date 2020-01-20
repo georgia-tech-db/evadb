@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 Shallow Neural Network Wrapper
 
@@ -14,13 +28,17 @@ class MLMLP(MLBase):
     def __init__(self, **kwargs):
         super(MLMLP, self).__init__()
         if kwargs:
-            self.model = MLPClassifier(solver='lbfgs', alpha=1e-5,
-                                   hidden_layer_sizes=(5, 2), random_state=1)
+            self.model = MLPClassifier(
+                solver='lbfgs',
+                alpha=1e-5,
+                hidden_layer_sizes=(
+                    5,
+                    2),
+                random_state=1)
         else:
             self.model = MLPClassifier(**kwargs)
 
-
-    def train(self, X :np.ndarray, y :np.ndarray):
+    def train(self, X: np.ndarray, y: np.ndarray):
         n_samples = X.shape[0]
         X = X / 255.0
         X = X.reshape(n_samples, -1)
@@ -42,9 +60,8 @@ class MLMLP(MLBase):
         self.A = score
         self.R = 1 - float(sum(y_hat)) / len(y_hat)
 
-    def predict(self, X :np.ndarray):
+    def predict(self, X: np.ndarray):
         n_samples = X.shape[0]
         X = X / 255.0
         X = X.reshape(n_samples, -1)
         return self.model.predict(X)
-
