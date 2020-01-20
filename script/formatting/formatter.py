@@ -45,6 +45,13 @@ DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
 
+IGNORE_FILES = [
+    "evaql_lexer.py",    
+    "evaql_parser.py",
+    "evaql_parserListener.py",
+    "evaql_parserVisitor.py",
+]
+
 AUTOPEP_BINARY = "autopep8"
 AUTOFLAKE_BINARY = "autoflake"
 
@@ -146,8 +153,11 @@ def format_file(file_path, add_header, strip_header, format_code):
 def format_dir(dir_path, add_header, strip_header, format_code):
 
     for subdir, dir, files in os.walk(dir_path):
+                
         for file in files:
-            # print os.path.join(subdir, file)
+            if file in IGNORE_FILES:
+                continue
+
             file_path = subdir + os.path.sep + file
 
             if file_path.endswith(".py"):
@@ -213,7 +223,7 @@ if __name__ == '__main__':
                        args.add_header,
                        args.strip_header,
                        args.format_code)
- 
+
             LOG.info("Adding headers : " + dir)
             args.add_header = True
             args.strip_header = False
