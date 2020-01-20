@@ -25,7 +25,7 @@ install:
 script:
   - pwd
   - ls -larth
-  - ./scripts/antlr4/setup.sh
+  - ./script/antlr4/setup.sh
   - pycodestyle  --select E src/ test/ --exclude src/filters,src/parser/evaql
   - pytest test/ --cov-report= --cov=src/ -s -v
 
