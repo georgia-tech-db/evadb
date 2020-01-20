@@ -12,12 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Do not change the skeleton of this file.
-We have extended functionalities by overriding few visitor functions.
-Original source file: third_party/evaQL/evaql_parserVisitor
-@author Gaurav Tarlok Kakkar
-"""
+
 from antlr4 import TerminalNode
 from src.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
