@@ -133,5 +133,10 @@ tmp/*
 
 # configuration
 
-# jar
+# Grammar files and ANTLR4
 *.jar
+evaql_lexer.py
+evaql_parser.py
+evaql_parserListener.py
+*.tokens
+*.interp
