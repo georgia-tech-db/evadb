@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from antlr4 import InputStream, CommonTokenStream
-from third_party.evaQL.parser.frameQLParser import frameQLParser
-from third_party.evaQL.parser.frameQLLexer import frameQLLexer
-from src.query_parser.eva_ql_parser_visitor import EvaParserVisitor
 
+from antlr4 import InputStream, CommonTokenStream
+
+from src.parser.evaql.parser.frameQLParser import frameQLParser
+from src.parser.evaql.parser.frameQLLexer import frameQLLexer
+from src.parser.eva_ql_parser_visitor import EvaParserVisitor
 
 class EvaFrameQLParser():
     """
