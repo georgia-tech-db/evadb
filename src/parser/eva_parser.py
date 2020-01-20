@@ -12,10 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from antlr4 import InputStream, CommonTokenStream
-from third_party.evaQL.parser.frameQLParser import frameQLParser
-from third_party.evaQL.parser.frameQLLexer import frameQLLexer
-from src.query_parser.eva_ql_parser_visitor import EvaParserVisitor
+
+from src.parser.evaql.evaql_parser import evaql_parser
+from src.parser.evaql.evaql_lexer import evaql_lexer
+from src.parser.eva_ql_parser_visitor import EvaParserVisitor
 
 
 class EvaFrameQLParser():
@@ -27,8 +29,8 @@ class EvaFrameQLParser():
         self._visitor = EvaParserVisitor()
 
     def parse(self, query_string: str) -> list:
-        lexer = frameQLLexer(InputStream(query_string))
+        lexer = evaql_lexer(InputStream(query_string))
         stream = CommonTokenStream(lexer)
-        parser = frameQLParser(stream)
+        parser = evaql_parser(stream)
         tree = parser.root()
         return self._visitor.visit(tree)

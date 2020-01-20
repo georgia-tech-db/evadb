@@ -12,12 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-Do not change the skeleton of this file.
-We have extended functionalities by overriding few visitor functions.
-Original source file: third_party/evaQL/frameQLParserVisitor
-@author Gaurav Tarlok Kakkar
-"""
+
 from antlr4 import TerminalNode
 from src.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
@@ -25,22 +20,22 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.query_parser.select_statement import SelectStatement
-from third_party.evaQL.parser.frameQLParser import frameQLParser
-from third_party.evaQL.parser.frameQLParserVisitor import frameQLParserVisitor
-from src.query_parser.table_ref import TableRef, TableInfo
+from src.parser.select_statement import SelectStatement
+from src.parser.evaql.evaql_parser import evaql_parser
+from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from src.parser.table_ref import TableRef, TableInfo
 import warnings
 
 
-class EvaParserVisitor(frameQLParserVisitor):
-    # Visit a parse tree produced by frameQLParser#root.
-    def visitRoot(self, ctx: frameQLParser.RootContext):
+class EvaParserVisitor(evaql_parserVisitor):
+    # Visit a parse tree produced by evaql_parser#root.
+    def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
             if child is not TerminalNode:
                 return self.visit(child)
 
-    # Visit a parse tree produced by frameQLParser#sqlStatements.
-    def visitSqlStatements(self, ctx: frameQLParser.SqlStatementsContext):
+    # Visit a parse tree produced by evaql_parser#sqlStatements.
+    def visitSqlStatements(self, ctx: evaql_parser.SqlStatementsContext):
         eva_statements = []
         for child in ctx.children:
             stmt = self.visit(child)
@@ -49,13 +44,13 @@ class EvaParserVisitor(frameQLParserVisitor):
 
         return eva_statements
 
-    # Visit a parse tree produced by frameQLParser#simpleSelect.
-    def visitSimpleSelect(self, ctx: frameQLParser.SimpleSelectContext):
+    # Visit a parse tree produced by evaql_parser#simpleSelect.
+    def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
         select_stm = self.visitChildren(ctx)
         return select_stm
 
-    # Visit a parse tree produced by frameQLParser#tableSources.
-    def visitTableSources(self, ctx: frameQLParser.TableSourcesContext):
+    # Visit a parse tree produced by evaql_parser#tableSources.
+    def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
         table_list = []
         for child in ctx.children:
             table = self.visit(child)
@@ -63,9 +58,9 @@ class EvaParserVisitor(frameQLParserVisitor):
                 table_list.append(table)
         return table_list
 
-    # Visit a parse tree produced by frameQLParser#querySpecification.
+    # Visit a parse tree produced by evaql_parser#querySpecification.
     def visitQuerySpecification(
-            self, ctx: frameQLParser.QuerySpecificationContext):
+            self, ctx: evaql_parser.QuerySpecificationContext):
         target_list = None
         from_clause = None
         where_clause = None
@@ -73,10 +68,10 @@ class EvaParserVisitor(frameQLParserVisitor):
         for child in ctx.children[1:]:
             try:
                 rule_idx = child.getRuleIndex()
-                if rule_idx == frameQLParser.RULE_selectElements:
+                if rule_idx == evaql_parser.RULE_selectElements:
                     target_list = self.visit(child)
 
-                elif rule_idx == frameQLParser.RULE_fromClause:
+                elif rule_idx == evaql_parser.RULE_fromClause:
                     clause = self.visit(child)
                     from_clause = clause.get('from', None)
                     where_clause = clause.get('where', None)
@@ -89,8 +84,8 @@ class EvaParserVisitor(frameQLParserVisitor):
         select_stmt = SelectStatement(target_list, from_clause, where_clause)
         return select_stmt
 
-    # Visit a parse tree produced by frameQLParser#selectElements.
-    def visitSelectElements(self, ctx: frameQLParser.SelectElementsContext):
+    # Visit a parse tree produced by evaql_parser#selectElements.
+    def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
         select_list = []
         for child in ctx.children:
             element = self.visit(child)
@@ -99,8 +94,8 @@ class EvaParserVisitor(frameQLParserVisitor):
 
         return select_list
 
-    # Visit a parse tree produced by frameQLParser#fromClause.
-    def visitFromClause(self, ctx: frameQLParser.FromClauseContext):
+    # Visit a parse tree produced by evaql_parser#fromClause.
+    def visitFromClause(self, ctx: evaql_parser.FromClauseContext):
         from_table = None
         where_clause = None
 
@@ -111,8 +106,8 @@ class EvaParserVisitor(frameQLParserVisitor):
 
         return {"from": from_table, "where": where_clause}
 
-    # Visit a parse tree produced by frameQLParser#tableName.
-    def visitTableName(self, ctx: frameQLParser.TableNameContext):
+    # Visit a parse tree produced by evaql_parser#tableName.
+    def visitTableName(self, ctx: evaql_parser.TableNameContext):
         table_name = self.visit(ctx.fullId())
         # assuming we get just table name
         # todo
@@ -123,8 +118,8 @@ class EvaParserVisitor(frameQLParserVisitor):
         else:
             warnings.warn("Invalid from table", SyntaxWarning)
 
-    # Visit a parse tree produced by frameQLParser#fullColumnName.
-    def visitFullColumnName(self, ctx: frameQLParser.FullColumnNameContext):
+    # Visit a parse tree produced by evaql_parser#fullColumnName.
+    def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
         # dotted id not supported yet
         column_name = self.visit(ctx.uid())
         if column_name is not None:
@@ -132,29 +127,29 @@ class EvaParserVisitor(frameQLParserVisitor):
         else:
             warnings.warn("Column Name Missing", SyntaxWarning)
 
-    # Visit a parse tree produced by frameQLParser#simpleId.
-    def visitSimpleId(self, ctx: frameQLParser.SimpleIdContext):
+    # Visit a parse tree produced by evaql_parser#simpleId.
+    def visitSimpleId(self, ctx: evaql_parser.SimpleIdContext):
         # todo handle children, right now assuming TupleValueExpr
         return ctx.getText()
         # return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by frameQLParser#stringLiteral.
-    def visitStringLiteral(self, ctx: frameQLParser.StringLiteralContext):
+    # Visit a parse tree produced by evaql_parser#stringLiteral.
+    def visitStringLiteral(self, ctx: evaql_parser.StringLiteralContext):
         if ctx.STRING_LITERAL() is not None:
             return ConstantValueExpression(ctx.getText())
         # todo handle other types
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by frameQLParser#constant.
-    def visitConstant(self, ctx: frameQLParser.ConstantContext):
+    # Visit a parse tree produced by evaql_parser#constant.
+    def visitConstant(self, ctx: evaql_parser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
             return ConstantValueExpression(float(ctx.getText()))
 
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by frameQLParser#logicalExpression.
+    # Visit a parse tree produced by evaql_parser#logicalExpression.
     def visitLogicalExpression(
-            self, ctx: frameQLParser.LogicalExpressionContext):
+            self, ctx: evaql_parser.LogicalExpressionContext):
         if len(ctx.children) < 3:
             # error scenario, should have 3 children
             return None
@@ -163,24 +158,24 @@ class EvaParserVisitor(frameQLParserVisitor):
         right = self.visit(ctx.getChild(2))
         return LogicalExpression(op, left, right)
 
-    # Visit a parse tree produced by frameQLParser#binaryComparasionPredicate.
+    # Visit a parse tree produced by evaql_parser#binaryComparasionPredicate.
     def visitBinaryComparasionPredicate(
-            self, ctx: frameQLParser.BinaryComparasionPredicateContext):
+            self, ctx: evaql_parser.BinaryComparisonPredicateContext):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
         op = self.visit(ctx.comparisonOperator())
         return ComparisonExpression(op, left, right)
 
-    # Visit a parse tree produced by frameQLParser#nestedExpressionAtom.
+    # Visit a parse tree produced by evaql_parser#nestedExpressionAtom.
     def visitNestedExpressionAtom(
-            self, ctx: frameQLParser.NestedExpressionAtomContext):
+            self, ctx: evaql_parser.NestedExpressionAtomContext):
         # ToDo Can there be >1 expression in this case
         expr = ctx.expression(0)
         return self.visit(expr)
 
-    # Visit a parse tree produced by frameQLParser#comparisonOperator.
+    # Visit a parse tree produced by evaql_parser#comparisonOperator.
     def visitComparisonOperator(
-            self, ctx: frameQLParser.ComparisonOperatorContext):
+            self, ctx: evaql_parser.ComparisonOperatorContext):
         op = ctx.getText()
         if op == '=':
             return ExpressionType.COMPARE_EQUAL
@@ -191,8 +186,8 @@ class EvaParserVisitor(frameQLParserVisitor):
         else:
             return ExpressionType.INVALID
 
-    # Visit a parse tree produced by frameQLParser#logicalOperator.
-    def visitLogicalOperator(self, ctx: frameQLParser.LogicalOperatorContext):
+    # Visit a parse tree produced by evaql_parser#logicalOperator.
+    def visitLogicalOperator(self, ctx: evaql_parser.LogicalOperatorContext):
         op = ctx.getText()
 
         if op == 'OR':
