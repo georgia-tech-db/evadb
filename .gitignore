@@ -132,3 +132,6 @@ tmp/*
 .settings/*
 
 # configuration
+
+# jar
+*.jar
