@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import unittest
 from unittest.mock import patch
 
@@ -12,7 +26,6 @@ from src.query_planner.storage_plan import StoragePlan
 class PlanExecutorTest(unittest.TestCase):
 
     def test_tree_structure_for_build_execution_tree(self):
-
         """
             Build an Abastract Plan with nodes:
          ß               root
@@ -36,7 +49,7 @@ class PlanExecutorTest(unittest.TestCase):
 
         child_1_abs_plan.append_child(child_1_1_abs_plan)
 
-        '''Build Execution Tree and check the nodes 
+        '''Build Execution Tree and check the nodes
             are of the same type'''
         root_abs_executor = PlanExecutor(
             plan=root_abs_plan)._build_execution_tree(plan=root_abs_plan)
@@ -55,7 +68,7 @@ class PlanExecutorTest(unittest.TestCase):
                 self.assertEqual(gc_abs.node_type, gc_exec._node.node_type)
 
     @patch(
-        'src.query_executor.disk_based_storage_executor.SimpleVideoLoader')
+        'src.query_executor.disk_based_storage_executor.VideoLoader')
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value
 

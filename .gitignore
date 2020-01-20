@@ -121,6 +121,14 @@ data/*
 !data/ua_detrac/README.md
 !data/ua_detrac/*.sh
 
+# Eclipse
+.pydevproject
+.project
 
 # macos data
 *.DS_Store
+
+tmp/*
+.settings/*
+
+# configuration

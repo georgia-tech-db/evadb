@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 from src.query_executor.abstract_executor import AbstractExecutor
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
 from src.query_planner.abstract_plan import AbstractPlan
@@ -21,10 +35,10 @@ class PlanExecutor:
 
     def _build_execution_tree(self, plan: AbstractPlan) -> AbstractExecutor:
         """build the execution tree from plan tree
-        
+
         Arguments:
             plan {AbstractPlan} -- Input Plan tree
-        
+
         Returns:
             AbstractExecutor -- Compiled Execution tree
         """
@@ -50,7 +64,7 @@ class PlanExecutor:
 
     def _clean_execution_tree(self, tree_root: AbstractExecutor):
         """clean the execution tree from memory
-        
+
         Arguments:
             tree_root {AbstractExecutor} -- root of execution tree to delete
         """

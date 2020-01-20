@@ -1,4 +1,17 @@
-# Credits: https://github.com/spmallick/learnopencv/blob/master/PyTorch-faster-RCNN/PyTorch_faster_RCNN.ipynb # noqa
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from typing import List, Tuple
 
@@ -72,11 +85,11 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
         """
         Performs predictions on input frames
         Arguments:
-            frames (np.ndarray): Frames on which predictions need 
+            frames (np.ndarray): Frames on which predictions need
             to be performed
 
         Returns:
-            tuple containing predicted_classes (List[List[str]]), 
+            tuple containing predicted_classes (List[List[str]]),
             predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
 
@@ -111,5 +124,5 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
         (pred_classes, pred_scores, pred_boxes) = self._get_predictions(frames)
         return Prediction.predictions_from_batch_and_lists(batch,
                                                            pred_classes,
-                                                           pred_scores, 
+                                                           pred_scores,
                                                            boxes=pred_boxes)
