@@ -30,8 +30,8 @@ class ParserVisitorTests(unittest.TestCase):
     def test_should_query_specification_visitor(self):
         EvaQLParserVisitor.visit = MagicMock()
         mock_visit = EvaQLParserVisitor.visit
-        mock_visit.side_effect = ["target",
-                                  {"from": ["from"], "where": "where"}]
+        mock_visit.side_effect = ["columns",
+                                  {"from": ["tables"], "where": "predicates"}]
 
         visitor = EvaQLParserVisitor()
         ctx = MagicMock()
@@ -46,13 +46,13 @@ class ParserVisitorTests(unittest.TestCase):
 
         mock_visit.assert_has_calls([call(child_1), call(child_2)])
 
-        self.assertEqual(expected.from_table, "from")
-        self.assertEqual(expected.where_clause, "where")
-        self.assertEqual(expected.target_list, "target")
+        self.assertEqual(expected.from_table, "tables")
+        self.assertEqual(expected.where_clause, "predicates")
+        self.assertEqual(expected.target_list, "columns")
 
     @mock.patch.object(EvaQLParserVisitor, 'visit')
     def test_from_clause_visitor(self, mock_visit):
-        mock_visit.side_effect = ["from", "where"]
+        mock_visit.side_effect = ["tables", "predicates"]
 
         ctx = MagicMock()
         tableSources = MagicMock()
@@ -64,8 +64,8 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitFromClause(ctx)
         mock_visit.assert_has_calls([call(tableSources), call(whereExpr)])
 
-        self.assertEqual(expected.get('where'), 'where')
-        self.assertEqual(expected.get('from'), 'from')
+        self.assertEqual(expected.get('where'), 'predicates')
+        self.assertEqual(expected.get('from'), 'tables')
 
     def test_logical_operator(self):
         ctx = MagicMock()
