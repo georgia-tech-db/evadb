@@ -12,16 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import unittest
+
 from unittest import mock
 from unittest.mock import MagicMock, call
 
-from src.query_parser.eva_ql_parser_visitor import EvaParserVisitor
-from third_party.evaQL.parser.frameQLParser import frameQLParser
+from src.parser.eva_ql_parser_visitor import EvaParserVisitor
+from src.parser.evaql.parser.frameQLParser import frameQLParser
 from src.expression.abstract_expression import ExpressionType
 
-
-class ParserVisitorTest(unittest.TestCase):
+class ParserVisitorTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

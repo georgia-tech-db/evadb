@@ -25,10 +25,10 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.query_parser.select_statement import SelectStatement
-from third_party.evaQL.parser.frameQLParser import frameQLParser
-from third_party.evaQL.parser.frameQLParserVisitor import frameQLParserVisitor
-from src.query_parser.table_ref import TableRef, TableInfo
+from src.parser.select_statement import SelectStatement
+from src.parser.evaql.parser.frameQLParser import frameQLParser
+from src.parser.evaql.parser.frameQLParserVisitor import frameQLParserVisitor
+from src.parser.table_ref import TableRef, TableInfo
 import warnings
 
 
