@@ -25,6 +25,8 @@ from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 
 from src.parser.select_statement import SelectStatement
+from src.parser.create_statement import CreateTableStatement
+
 from src.parser.table_ref import TableRef, TableInfo
 
 from src.parser.evaql.evaql_parser import evaql_parser
@@ -49,10 +51,60 @@ class EvaQLParserVisitor(evaql_parserVisitor):
 
         return eva_statements
 
+    ##################################################################
+    # STATEMENTS
+    ##################################################################
+
+    def visitDdlStatement(self, ctx: evaql_parser.DdlStatementContext):
+        ddl_statement = self.visitChildren(ctx)
+        return ddl_statement
+
+    def visitDmlStatement(self, ctx: evaql_parser.DdlStatementContext):
+        dml_statement = self.visitChildren(ctx)
+        return dml_statement
+
+    ##################################################################
+    # CREATE STATEMENTS
+    ##################################################################
+
+    def visitColumnCreateTable(
+            self, ctx: evaql_parser.ColumnCreateTableContext):
+
+        table_ref = None
+        # first two children will be CREATE TABLE terminal token
+        for child in ctx.children[2:]:
+            try:
+                rule_idx = child.getRuleIndex()
+
+                if rule_idx == evaql_parser.RULE_tableName:
+                    table_ref = self.visit(ctx.tableName())
+
+                elif rule_idx == evaql_parser.RULE_ifNotExists:
+                    pass
+
+                elif rule_idx == evaql_parser.RULE_createDefinitions:
+                    pass
+
+            except BaseException:
+                print("Exception")
+                # stop parsing something bad happened
+                return None
+
+        create_stmt = CreateTableStatement(table_ref)
+        return create_stmt
+
+    ##################################################################
+    # SELECT STATEMENT
+    ##################################################################
+
     # Visit a parse tree produced by evaql_parser#simpleSelect.
     def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
         select_stmt = self.visitChildren(ctx)
         return select_stmt
+
+    ##################################################################
+    # TABLE SOURCES
+    ##################################################################
 
     # Visit a parse tree produced by evaql_parser#tableSources.
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
@@ -80,13 +132,17 @@ class EvaQLParserVisitor(evaql_parserVisitor):
                     clause = self.visit(child)
                     from_clause = clause.get('from', None)
                     where_clause = clause.get('where', None)
+
             except BaseException:
                 # stop parsing something bad happened
                 return None
+
         # we don't support multiple table sources
         if from_clause is not None:
             from_clause = from_clause[0]
+
         select_stmt = SelectStatement(target_list, from_clause, where_clause)
+
         return select_stmt
 
     # Visit a parse tree produced by evaql_parser#selectElements.
@@ -113,10 +169,8 @@ class EvaQLParserVisitor(evaql_parserVisitor):
 
     # Visit a parse tree produced by evaql_parser#tableName.
     def visitTableName(self, ctx: evaql_parser.TableNameContext):
+
         table_name = self.visit(ctx.fullId())
-        # assuming we get just table name
-        # todo
-        # handle database name and schema names
         if table_name is not None:
             table_info = TableInfo(table_name=table_name)
             return TableRef(table_info)
@@ -137,6 +191,10 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         # todo handle children, right now assuming TupleValueExpr
         return ctx.getText()
         # return self.visitChildren(ctx)
+
+    ##################################################################
+    # EXPRESSIONS
+    ##################################################################
 
     # Visit a parse tree produced by evaql_parser#stringLiteral.
     def visitStringLiteral(self, ctx: evaql_parser.StringLiteralContext):

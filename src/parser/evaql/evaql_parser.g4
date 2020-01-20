@@ -54,8 +54,9 @@ createIndex
     ;
 
 createTable
-    : CREATE TABLE ifNotExists?
-       tableName createDefinitions                                  #columnCreateTable
+    : CREATE TABLE 
+      ifNotExists?
+      tableName createDefinitions                                  #columnCreateTable
     ;
 
 // details
@@ -198,7 +199,8 @@ queryExpression
 //frameQL statement added 
 querySpecification
     : SELECT selectElements 
-      fromClause? orderByClause? limitClause? errorBoundsExpression? confidenceLevelExpression? 
+      fromClause? orderByClause? limitClause? 
+      errorBoundsExpression? confidenceLevelExpression? 
     ;
 
 // details
