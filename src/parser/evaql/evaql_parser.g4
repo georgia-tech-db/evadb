@@ -35,7 +35,7 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement | useStatement
+    : simpleDescribeStatement | helpStatement 
     ;
 
 // Data Definition Language
@@ -101,8 +101,8 @@ dropIndex
     ;
 
 dropTable
-    : DROP TEMPORARY? TABLE ifExists?
-      tables dropType=(RESTRICT | CASCADE)?
+    : DROP TABLE ifExists?
+      tables 
     ;
 
 // Data Manipulation Language
@@ -142,21 +142,18 @@ updatedElement
     : fullColumnName '=' (expression | DEFAULT)
     ;
 
-assignmentField
-    : uid | LOCAL_ID
-    ;
 
 //    Detailed DML Statements
 
 singleDeleteStatement
-    : DELETE priority=LOW_PRIORITY? QUICK? IGNORE?
+    : DELETE 
     FROM tableName
       (WHERE expression)?
       orderByClause? (LIMIT decimalLiteral)?
     ;
 
 singleUpdateStatement
-    : UPDATE priority=LOW_PRIORITY? IGNORE? tableName (AS? uid)?
+    : UPDATE tableName (AS? uid)?
       SET updatedElement (',' updatedElement)*
       (WHERE expression)? orderByClause? limitClause?
     ;
@@ -201,11 +198,7 @@ queryExpression
 //frameQL statement added 
 querySpecification
     : SELECT selectElements 
-      fromClause? orderByClause? limitClause?
-    | SELECT selectElements
-    fromClause? orderByClause? limitClause?  
-    | SELECT selectElements
-    fromClause?  errorTolerenceExpression? confLevelExpression?    
+      fromClause? orderByClause? limitClause? errorBoundsExpression? confidenceLevelExpression? 
     ;
 
 // details
@@ -221,32 +214,12 @@ selectElement
     | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                  #selectExpressionElement
     ;
 
-errorTolerenceExpression
-	: ERROR_BOUNDS REAL_LITERAL 
-	;
-
-confLevelExpression
-	: CONFIDENCE_LEVEL REAL_LITERAL
-	;
-
-selectFieldsInto
-    : TERMINATED BY terminationField=STRING_LITERAL
-    | OPTIONALLY? ENCLOSED BY enclosion=STRING_LITERAL
-    | ESCAPED BY escaping=STRING_LITERAL
-    ;
-
-selectLinesInto
-    : STARTING BY starting=STRING_LITERAL
-    | TERMINATED BY terminationLine=STRING_LITERAL
-    ;
-
 fromClause
     : FROM tableSources
       (WHERE whereExpr=expression)?
       (
         GROUP BY
         groupByItem (',' groupByItem)*
-        (WITH ROLLUP)?
       )?
       (HAVING havingExpr=expression)?
     ;
@@ -263,6 +236,14 @@ limitClause
     )
     ;
 
+errorBoundsExpression
+	: ERROR_BOUNDS REAL_LITERAL 
+	;
+
+confidenceLevelExpression
+	: CONFIDENCE_LEVEL REAL_LITERAL
+	;
+
 //    Other administrative statements
 
 shutdownStatement
@@ -278,10 +259,6 @@ simpleDescribeStatement
 
 helpStatement
     : HELP STRING_LITERAL
-    ;
-
-useStatement
-    : USE uid
     ;
 
 // Common Clauses
@@ -307,44 +284,16 @@ indexColumnName
 userName
     : STRING_USER_NAME | ID;
 
-collationName
-    : uid | STRING_LITERAL;
-
-engineName
-    : ARCHIVE | BLACKHOLE | CSV | FEDERATED | INNODB | MEMORY
-    | MRG_MYISAM | MYISAM | NDB | NDBCLUSTER | PERFOMANCE_SCHEMA
-    | STRING_LITERAL | REVERSE_QUOTE_ID
-    ;
-
 uuidSet
     : decimalLiteral '-' decimalLiteral '-' decimalLiteral
       '-' decimalLiteral '-' decimalLiteral
       (':' decimalLiteral '-' decimalLiteral)+
     ;
 
-xid
-    : globalTableUid=xuidStringId
-      (
-        ',' qualifier=xuidStringId
-        (',' idFormat=decimalLiteral)?
-      )?
-    ;
-
-xuidStringId
-    : STRING_LITERAL
-    | BIT_STRING
-    | HEXADECIMAL_LITERAL+
-    ;
-
-authPlugin
-    : uid | STRING_LITERAL
-    ;
-
 uid
     : simpleId
     //| DOUBLE_QUOTE_ID
     | REVERSE_QUOTE_ID
-    | CHARSET_REVERSE_QOUTE_STRING
     ;
 
 simpleId
@@ -363,25 +312,12 @@ decimalLiteral
     : DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL
     ;
 
-fileSizeLiteral
-    : FILESIZE_LITERAL | decimalLiteral;
-
 stringLiteral
-    : (
-        STRING_CHARSET_NAME? STRING_LITERAL
-        | START_NATIONAL_STRING_LITERAL
-      ) STRING_LITERAL+
-    | (
-        STRING_CHARSET_NAME? STRING_LITERAL
-        | START_NATIONAL_STRING_LITERAL
-      ) (COLLATE collationName)?
+    : STRING_LITERAL
     ;
 
 booleanLiteral
     : TRUE | FALSE;
-
-hexadecimalLiteral
-    : STRING_CHARSET_NAME? HEXADECIMAL_LITERAL;
 
 nullNotnull
     : NOT? (NULL_LITERAL | NULL_SPEC_LITERAL)
@@ -390,8 +326,8 @@ nullNotnull
 constant
     : stringLiteral | decimalLiteral
     | '-' decimalLiteral
-    | hexadecimalLiteral | booleanLiteral
-    | REAL_LITERAL | BIT_STRING
+    | booleanLiteral
+    | REAL_LITERAL
     | NOT? nullLiteral=(NULL_LITERAL | NULL_SPEC_LITERAL)
     ;
 
@@ -439,20 +375,8 @@ expressionsWithDefaults
     : expressionOrDefault (',' expressionOrDefault)*
     ;
 
-constants
-    : constant (',' constant)*
-    ;
 
-simpleStrings
-    : STRING_LITERAL (',' STRING_LITERAL)*
-    ;
-
-userVariables
-    : LOCAL_ID (',' LOCAL_ID)*
-    ;
-
-
-//    Common Expressons
+//    Common Expressions
 
 defaultValue
     : NULL_LITERAL
@@ -479,8 +403,7 @@ functionCall
 
 specificFunction
     : (
-      CURRENT_DATE | CURRENT_TIME | CURRENT_TIMESTAMP
-      | CURRENT_USER | LOCALTIME
+      OBJECT_DETECTION | ACTION_CLASSICATION
       )                                                             #simpleFunctionCall    
     ;
 
@@ -517,10 +440,10 @@ expression
 predicate
     : predicate NOT? IN '(' (selectStatement | expressions) ')'     #inPredicate
     | predicate IS nullNotnull                                      #isNullPredicate
-    | left=predicate comparisonOperator right=predicate             #binaryComparasionPredicate
+    | left=predicate comparisonOperator right=predicate             #binaryComparisonPredicate
     | predicate comparisonOperator
-      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'         #subqueryComparasionPredicate
-    | predicate NOT? LIKE predicate (ESCAPE STRING_LITERAL)?        #likePredicate
+      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'         #subqueryComparisonPredicate
+    | predicate NOT? LIKE predicate (STRING_LITERAL)?               #likePredicate
     | (LOCAL_ID VAR_ASSIGN)? expressionAtom                         #expressionAtomPredicate
     ;
 

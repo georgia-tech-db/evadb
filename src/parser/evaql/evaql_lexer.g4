@@ -16,51 +16,79 @@ LINE_COMMENT:                        (
 // Keywords
 // Common Keywords
 
+ALL:                                 'ALL';
 ALTER:                               'ALTER';
 AND:                                 'AND';
+ANY:                                 'ANY';
 AS:                                  'AS';
+ASC:                                 'ASC';
+BY:                                  'BY';
 COLUMN:                              'COLUMN';
 CREATE:                              'CREATE';
 DATABASE:                            'DATABASE';
+DEFAULT:                             'DEFAULT';
 DELETE:                              'DELETE';
+DESC:                                'DESC';
 DESCRIBE:                            'DESCRIBE';
 DISTINCT:                            'DISTINCT';
 DROP:                                'DROP';
 EXIT:                                'EXIT';
+EXISTS:                              'EXISTS';
 EXPLAIN:                             'EXPLAIN';
 FALSE:                               'FALSE';
 FROM:                                'FROM';
 GROUP:                               'GROUP';
 HAVING:                              'HAVING';
+IF:                                  'IF';
 IN:                                  'IN';
+INTO:                                'INTO';
 INDEX:                               'INDEX';
 INSERT:                              'INSERT';
+IS:                                  'IS';
 JOIN:                                'JOIN';
 KEY:                                 'KEY';
 LIKE:                                'LIKE';
 LIMIT:                               'LIMIT';
 LOAD:                                'LOAD';
+NO:                                  'NO';
+NOT:                                 'NOT';
+NULL_LITERAL:                        'NULL';
+OFFSET:                              'OFFSET';
 ON:                                  'ON';
 OR:                                  'OR';
+ORDER:                               'ORDER';
 PRIMARY:                             'PRIMARY';
 REFERENCES:                          'REFERENCES';
 SELECT:                              'SELECT';
+SET:                                 'SET';
+SHUTDOWN:                            'SHUTDOWN';
+SOME:                                'SOME';
 TABLE:                               'TABLE';
+TEXT:                                'TEXT';
 TRUE:                                'TRUE';
 UNIQUE:                              'UNIQUE';
+UNKNOWN:                             'UNKNOWN';
 UNLOCK:                              'UNLOCK';
 UNSIGNED:                            'UNSIGNED';
 UPDATE:                              'UPDATE';
+USING:                               'USING';
+VALUES:                              'VALUES';
 WHERE:                               'WHERE';
+XOR:                                 'XOR';
 
 // EVAQL keywords
 
 ERROR_BOUNDS:						 'ERROR_WITHIN';
 CONFIDENCE_LEVEL:					 'AT_CONFIDENCE';
 
-// ML models
+// Index types
 BTREE:                               'BTREE';
 HASH:                                'HASH';
+
+// Computer vision tasks
+
+OBJECT_DETECTION:                    'OBJECT_DETECTION';
+ACTION_CLASSICATION:                 'ACTION_CLASSICATION';
 
 // DATA TYPE Keywords
 
@@ -84,7 +112,6 @@ FCOUNT: 						     'FCOUNT';
 
 AUTO_INCREMENT:                      'AUTO_INCREMENT';
 BOOLEAN:                             'BOOLEAN';
-BTREE:                               'BTREE';
 COLUMNS:                             'COLUMNS';
 HELP:                                'HELP';
 TEMPTABLE:                           'TEMPTABLE';
@@ -153,9 +180,8 @@ COLON_SYMB:                          ':';
 
 // Literal Primitives
 
-
-START_NATIONAL_STRING_LITERAL:       'N' SQUOTA_STRING;
 STRING_LITERAL:                      DQUOTA_STRING | SQUOTA_STRING;
+DECIMAL_LITERAL:                     DEC_DIGIT+;
 REAL_LITERAL:                        (DEC_DIGIT+)? '.' DEC_DIGIT+
                                      | DEC_DIGIT+ '.' EXPONENT_NUM_PART
                                      | (DEC_DIGIT+)? '.' (DEC_DIGIT+ EXPONENT_NUM_PART)
