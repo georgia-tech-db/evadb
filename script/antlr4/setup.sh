@@ -11,7 +11,7 @@ alias antlr4='java -jar ./antlr-4.8-complete.jar'
 
 # Generate grammar files
 antlr4 -Dlanguage=Python3 src/parser/evaql/evaql_lexer.g4
-antlr4 -Dlanguage=Python3 src/parser/evaql/evaql_parser.g4
+antlr4 -Dlanguage=Python3 -visitor src/parser/evaql/evaql_parser.g4
 
 # Cleanup Antlr4 JAR
 rm ./antlr-4.8-complete.jar

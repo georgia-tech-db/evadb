@@ -18,8 +18,10 @@ import unittest
 from src.parser.eva_parser import EvaFrameQLParser
 from src.parser.eva_statement import EvaStatement
 from src.parser.eva_statement import StatementType
+
 from src.expression.abstract_expression import ExpressionType
 from src.parser.table_ref import TableRef
+
 
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):

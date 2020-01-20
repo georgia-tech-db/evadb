@@ -454,6 +454,7 @@ expressionAtom
     | fullColumnName                                                #fullColumnNameExpressionAtom
     | functionCall                                                  #functionCallExpressionAtom
     | unaryOperator expressionAtom                                  #unaryExpressionAtom
+    | '(' expression (',' expression)* ')'                          #nestedExpressionAtom
     | '(' selectStatement ')'                                       #subqueryExpessionAtom
     | left=expressionAtom bitOperator right=expressionAtom          #bitExpressionAtom
     | left=expressionAtom mathOperator right=expressionAtom         #mathExpressionAtom

@@ -21,6 +21,6 @@ dependencies:
   - tensorboard
   - pillow=6.1
   - pip:
-    - antlr4-python3-runtime==4.7
+    - antlr4-python3-runtime==4.8
     - petastorm
 prefix: eva
