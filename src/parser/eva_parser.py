@@ -17,16 +17,24 @@ from antlr4 import InputStream, CommonTokenStream
 
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_lexer import evaql_lexer
-from src.parser.eva_ql_parser_visitor import EvaParserVisitor
+
+from src.parser.evaql_parser_visitor import EvaQLParserVisitor
 
 
-class EvaFrameQLParser():
+class EvaQLParser(object):
     """
-    Parser for eva; based on frameQL grammar
+    Parser for eva; based on EVAQL grammar
     """
+    _instance = None
+    _visitor = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(EvaQLParser, cls).__new__(cls)
+        return cls._instance
 
     def __init__(self):
-        self._visitor = EvaParserVisitor()
+        self._visitor = EvaQLParserVisitor()
 
     def parse(self, query_string: str) -> list:
         lexer = evaql_lexer(InputStream(query_string))

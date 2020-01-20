@@ -13,21 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import warnings
+
 from antlr4 import TerminalNode
+
 from src.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
+
 from src.parser.select_statement import SelectStatement
+from src.parser.table_ref import TableRef, TableInfo
+
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from src.parser.table_ref import TableRef, TableInfo
-import warnings
 
 
-class EvaParserVisitor(evaql_parserVisitor):
+class EvaQLParserVisitor(evaql_parserVisitor):
+
     # Visit a parse tree produced by evaql_parser#root.
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
@@ -46,8 +51,8 @@ class EvaParserVisitor(evaql_parserVisitor):
 
     # Visit a parse tree produced by evaql_parser#simpleSelect.
     def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
-        select_stm = self.visitChildren(ctx)
-        return select_stm
+        select_stmt = self.visitChildren(ctx)
+        return select_stmt
 
     # Visit a parse tree produced by evaql_parser#tableSources.
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
