@@ -32,7 +32,11 @@ class ParserTests(unittest.TestCase):
         parser = EvaQLParser()
 
         single_queries = []
-        single_queries.append("CREATE TABLE Persons (PersonID INTEGER);")
+        single_queries.append(
+            """CREATE TABLE IF NOT EXISTS Persons (
+                  Frame_ID INTEGER,
+                  Frame_Data TEXT
+            );""")
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)

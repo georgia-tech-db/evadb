@@ -35,11 +35,14 @@ class CreateTableStatement(EvaStatement):
     """
 
     def __init__(self,
-                 table_name: TableRef = None,
+                 table_name: TableRef,
+                 if_not_exists: bool,
                  column_list: List[AbstractExpression] = None):
         super().__init__(StatementType.SELECT)
         self._table_name = table_name
+        self._if_not_exists = if_not_exists
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ".format(self._table_name)
+        print_str = "CREATE TABLE {} ({}) ".format(self._table_name,
+                                                   self._if_not_exists)
         return print_str

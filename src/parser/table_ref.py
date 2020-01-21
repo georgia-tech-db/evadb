@@ -37,7 +37,7 @@ class TableInfo:
         return self._database_name
 
     def __str__(self):
-        table_info_str = "TABLE INFO:: (" + self._table_name + ")\n"
+        table_info_str = "TABLE INFO:: (" + self._table_name + ")"
 
         return table_info_str
 
@@ -57,6 +57,5 @@ class TableRef:
         return self._table_info
 
     def __str__(self):
-        table_ref_str = "TABLE REF:: (" + str(self._table_info) + ")\n"
-
+        table_ref_str = "TABLE REF:: (" + str(self._table_info) + ")"
         return table_ref_str
