@@ -33,15 +33,16 @@ from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
 
+from src.catalog.schema import ColumnType, Column
+
+
 class EvaQLParserVisitor(evaql_parserVisitor):
 
-    # Visit a parse tree produced by evaql_parser#root.
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
             if child is not TerminalNode:
                 return self.visit(child)
 
-    # Visit a parse tree produced by evaql_parser#sqlStatements.
     def visitSqlStatements(self, ctx: evaql_parser.SqlStatementsContext):
         eva_statements = []
         for child in ctx.children:
@@ -71,6 +72,9 @@ class EvaQLParserVisitor(evaql_parserVisitor):
             self, ctx: evaql_parser.ColumnCreateTableContext):
 
         table_ref = None
+        if_not_exists = False
+        create_definitions = []
+
         # first two children will be CREATE TABLE terminal token
         for child in ctx.children[2:]:
             try:
@@ -80,24 +84,75 @@ class EvaQLParserVisitor(evaql_parserVisitor):
                     table_ref = self.visit(ctx.tableName())
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
-                    pass
+                    if_not_exists = True
 
                 elif rule_idx == evaql_parser.RULE_createDefinitions:
-                    pass
+                    create_definitions = self.visit(ctx.createDefinitions())
 
             except BaseException:
                 print("Exception")
                 # stop parsing something bad happened
                 return None
 
-        create_stmt = CreateTableStatement(table_ref)
+        print(create_definitions)
+        create_stmt = CreateTableStatement(table_ref,
+                                           if_not_exists,
+                                           create_definitions)
         return create_stmt
+
+    def visitCreateDefinitions(
+            self, ctx: evaql_parser.CreateDefinitionsContext):
+        column_definitions = []
+        child_index = 0
+        for child in ctx.children:
+            create_definition = ctx.createDefinition(child_index)
+            if create_definition is not None:
+                column_definition = self.visit(create_definition)
+                column_definitions.append(column_definition)
+            child_index = child_index + 1
+
+        for column_definition in column_definitions:
+            print(str(column_definition))
+
+        return column_definitions
+
+    def visitColumnDeclaration(
+            self, ctx: evaql_parser.ColumnDeclarationContext):
+        data_type = self.visit(ctx.columnDefinition())
+        column_name = self.visit(ctx.uid())
+
+        column = Column(column_name, data_type)
+        return column
+
+    def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
+        data_type = self.visit(ctx.dataType())
+        return data_type
+
+    def visitDimensionDataType(
+            self, ctx: evaql_parser.DimensionDataTypeContext):
+
+        column_type = None
+        if ctx.FLOAT() is not None:
+            column_type = ColumnType.FLOAT
+        elif ctx.INTEGER() is not None:
+            column_type = ColumnType.INTEGER
+        elif ctx.UNSIGNED() is not None:
+            column_type = ColumnType.INTEGER
+
+        return column_type
+
+    def visitStringDataType(self, ctx: evaql_parser.StringDataTypeContext):
+
+        column_type = None
+        if ctx.TEXT() is not None:
+            column_type = ColumnType.STRING
+
+        return column_type
 
     ##################################################################
     # SELECT STATEMENT
     ##################################################################
 
-    # Visit a parse tree produced by evaql_parser#simpleSelect.
     def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
         select_stmt = self.visitChildren(ctx)
         return select_stmt
@@ -106,7 +161,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
     # TABLE SOURCES
     ##################################################################
 
-    # Visit a parse tree produced by evaql_parser#tableSources.
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
         table_list = []
         for child in ctx.children:
@@ -115,7 +169,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
                 table_list.append(table)
         return table_list
 
-    # Visit a parse tree produced by evaql_parser#querySpecification.
     def visitQuerySpecification(
             self, ctx: evaql_parser.QuerySpecificationContext):
         target_list = None
@@ -145,7 +198,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
 
         return select_stmt
 
-    # Visit a parse tree produced by evaql_parser#selectElements.
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
         select_list = []
         for child in ctx.children:
@@ -155,7 +207,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
 
         return select_list
 
-    # Visit a parse tree produced by evaql_parser#fromClause.
     def visitFromClause(self, ctx: evaql_parser.FromClauseContext):
         from_table = None
         where_clause = None
@@ -167,7 +218,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
 
         return {"from": from_table, "where": where_clause}
 
-    # Visit a parse tree produced by evaql_parser#tableName.
     def visitTableName(self, ctx: evaql_parser.TableNameContext):
 
         table_name = self.visit(ctx.fullId())
@@ -177,7 +227,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         else:
             warnings.warn("Invalid from table", SyntaxWarning)
 
-    # Visit a parse tree produced by evaql_parser#fullColumnName.
     def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
         # dotted id not supported yet
         column_name = self.visit(ctx.uid())
@@ -186,7 +235,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         else:
             warnings.warn("Column Name Missing", SyntaxWarning)
 
-    # Visit a parse tree produced by evaql_parser#simpleId.
     def visitSimpleId(self, ctx: evaql_parser.SimpleIdContext):
         # todo handle children, right now assuming TupleValueExpr
         return ctx.getText()
@@ -196,21 +244,18 @@ class EvaQLParserVisitor(evaql_parserVisitor):
     # EXPRESSIONS
     ##################################################################
 
-    # Visit a parse tree produced by evaql_parser#stringLiteral.
     def visitStringLiteral(self, ctx: evaql_parser.StringLiteralContext):
         if ctx.STRING_LITERAL() is not None:
             return ConstantValueExpression(ctx.getText())
         # todo handle other types
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by evaql_parser#constant.
     def visitConstant(self, ctx: evaql_parser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
             return ConstantValueExpression(float(ctx.getText()))
 
         return self.visitChildren(ctx)
 
-    # Visit a parse tree produced by evaql_parser#logicalExpression.
     def visitLogicalExpression(
             self, ctx: evaql_parser.LogicalExpressionContext):
         if len(ctx.children) < 3:
@@ -221,7 +266,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         right = self.visit(ctx.getChild(2))
         return LogicalExpression(op, left, right)
 
-    # Visit a parse tree produced by evaql_parser#binaryComparasionPredicate.
     def visitBinaryComparasionPredicate(
             self, ctx: evaql_parser.BinaryComparisonPredicateContext):
         left = self.visit(ctx.left)
@@ -229,14 +273,12 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         op = self.visit(ctx.comparisonOperator())
         return ComparisonExpression(op, left, right)
 
-    # Visit a parse tree produced by evaql_parser#nestedExpressionAtom.
     def visitNestedExpressionAtom(
             self, ctx: evaql_parser.NestedExpressionAtomContext):
         # ToDo Can there be >1 expression in this case
         expr = ctx.expression(0)
         return self.visit(expr)
 
-    # Visit a parse tree produced by evaql_parser#comparisonOperator.
     def visitComparisonOperator(
             self, ctx: evaql_parser.ComparisonOperatorContext):
         op = ctx.getText()
@@ -249,7 +291,6 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         else:
             return ExpressionType.INVALID
 
-    # Visit a parse tree produced by evaql_parser#logicalOperator.
     def visitLogicalOperator(self, ctx: evaql_parser.LogicalOperatorContext):
         op = ctx.getText()
 
