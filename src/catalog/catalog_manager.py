@@ -15,25 +15,17 @@
 
 import os
 
-from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
-
+from src.catalog.database import init_db
+from src.catalog.df_schema import DataFrameSchema
+from src.catalog.models.df_column import DataFrameColumn
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.configuration.configuration_manager import ConfigurationManager
 from src.configuration.dictionary import CATALOG_DIR
-
-from urllib.parse import urlparse
-
-from src.catalog.catalog_dataframes import load_catalog_dataframes
-from src.catalog.catalog_dataframes import create_catalog_dataframes
-
-from src.configuration.dictionary import DATASET_DATAFRAME_NAME
-
-from src.storage.dataframe import load_dataframe, get_next_row_id
-from src.storage.dataframe import append_rows
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
 class CatalogManager(object):
-
     _instance = None
     _catalog = None
     _catalog_dictionary = {}
@@ -52,35 +44,56 @@ class CatalogManager(object):
         output_url = os.path.join(eva_dir, CATALOG_DIR)
         LoggingManager().log("Bootstrapping catalog" + str(output_url),
                              LoggingLevel.INFO)
+        init_db()
+        # # Construct output location
+        # catalog_dir_url = os.path.join(eva_dir, "catalog")
+        #
+        # # Get filesystem path
+        # catalog_os_path = urlparse(catalog_dir_url).path
+        #
+        # # Check if catalog exists
+        # if os.path.exists(catalog_os_path):
+        #     # Load catalog if it exists
+        #     load_catalog_dataframes(catalog_dir_url,
+        #     self._catalog_dictionary)
+        # else:
+        #     # Create catalog if it does not exist
+        #     create_catalog_dataframes(
+        #         catalog_dir_url, self._catalog_dictionary)
 
-        # Construct output location
-        catalog_dir_url = os.path.join(eva_dir, "catalog")
+    def get_bindings(self, database_name, table_name=None, column_name=None):
+        metadata_id = DataFrameMetadata.get_id_from_name(database_name)
+        table_id = None
+        column_id = None
+        if column_name is not None:
+            column_id = DataFrameColumn.get_id_from_metadata_id_and_name(
+                metadata_id,
+                column_name)
+        return metadata_id, table_id, column_id
 
-        # Get filesystem path
-        catalog_os_path = urlparse(catalog_dir_url).path
+    def get_metadata(self, metadata_id, col_id_list=[]):
+        metadata = DataFrameMetadata.get(metadata_id)
+        if len(col_id_list) > 0:
+            df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
+                col_id_list,
+                metadata_id)
+            metadata.set_schema(
+                DataFrameSchema(metadata.get_name(), df_columns))
+        return metadata
 
-        # Check if catalog exists
-        if os.path.exists(catalog_os_path):
-            # Load catalog if it exists
-            load_catalog_dataframes(catalog_dir_url, self._catalog_dictionary)
-        else:
-            # Create catalog if it does not exist
-            create_catalog_dataframes(
-                catalog_dir_url, self._catalog_dictionary)
-
-    def create_dataset(self, dataset_name: str):
-
-        dataset_catalog_entry = \
-            self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
-
-        dataset_df = \
-            load_dataframe(dataset_catalog_entry.get_dataframe_file_url())
-
-        dataset_df.show(10)
-
-        next_row_id = get_next_row_id(dataset_df, DATASET_DATAFRAME_NAME)
-
-        row_1 = [next_row_id, dataset_name]
-        rows = [row_1]
-
-        append_rows(dataset_catalog_entry, rows)
+    # def create_dataset(self, dataset_name: str):
+    #
+    #     dataset_catalog_entry = \
+    #         self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
+    #
+    #     dataset_df = \
+    #         load_dataframe(dataset_catalog_entry.get_dataframe_file_url())
+    #
+    #     dataset_df.show(10)
+    #
+    #     next_row_id = get_next_row_id(dataset_df, DATASET_DATAFRAME_NAME)
+    #
+    #     row_1 = [next_row_id, dataset_name]
+    #     rows = [row_1]
+    #
+    #     append_rows(dataset_catalog_entry, rows)
