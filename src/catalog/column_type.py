@@ -12,7 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from enum import Enum
 
-CATALOG_DIR = "catalog"
-DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/eva_catalog'
+
+class ColumnType(Enum):
+    INTEGER = 1
+    FLOAT = 2
+    STRING = 3
+    NDARRAY = 4
