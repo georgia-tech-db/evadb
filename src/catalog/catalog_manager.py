@@ -14,26 +14,24 @@
 # limitations under the License.
 
 import os
-
-from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
-
-from src.configuration.configuration_manager import ConfigurationManager
-from src.configuration.dictionary import CATALOG_DIR
-
 from urllib.parse import urlparse
 
-from src.catalog.catalog_dataframes import load_catalog_dataframes
 from src.catalog.catalog_dataframes import create_catalog_dataframes
-
+from src.catalog.catalog_dataframes import load_catalog_dataframes
+from src.catalog.df_column import DataframeColumn
+from src.catalog.df_metadata import DataFrameMetadata
+from src.catalog.df_schema import Schema
+from src.catalog.sql_config import sql_conn
+from src.configuration.configuration_manager import ConfigurationManager
+from src.configuration.dictionary import CATALOG_DIR
 from src.configuration.dictionary import DATASET_DATAFRAME_NAME
-
-from src.storage.dataframe import load_dataframe, get_next_row_id
 from src.storage.dataframe import append_rows
+from src.storage.dataframe import load_dataframe, get_next_row_id
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
 class CatalogManager(object):
-
     _instance = None
     _catalog = None
     _catalog_dictionary = {}
@@ -67,6 +65,31 @@ class CatalogManager(object):
             # Create catalog if it does not exist
             create_catalog_dataframes(
                 catalog_dir_url, self._catalog_dictionary)
+
+    def load_dataframe_metadata(self):
+
+        # todo: move sql queries to a separate file
+        session = sql_conn.get_session()
+        metadata_list = session.query(DataFrameMetadata).all()
+        df_ids = [df.get_id() for df in metadata_list]
+        df_columns = session.query(DataframeColumn).filter(
+            DataframeColumn._df_id.in_(df_ids))
+
+        metadata_list = self.construct_dataframe_metadata(metadata_list,
+                                                          df_columns)
+        for metadata in metadata_list:
+            self._catalog_dictionary.update({metadata.get_name(): metadata})
+
+    def construct_dataframe_metadata(self, metadata_list, df_columns):
+        col_dict = {}
+        for col in df_columns:
+            col_dict[col._df_id] = col_dict.get(col.get_df_id(), []).append(
+                col)
+        for df in metadata_list:
+            schema = Schema(df.get_name(), col_dict[df.get_id()])
+            df.set_schema(schema)
+        return metadata_list
+
 
     def create_dataset(self, dataset_name: str):
 
