@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 This file implements the dataset loading methods for UA-detrac
 If any problem occurs, please email jaeho.bang@gmail.com
@@ -16,12 +30,11 @@ import cv2
 import numpy as np
 
 from src.loaders.TaskManager import TaskManager
-from src.loaders.abstract_loader import AbstractLoader
 
 
 # Make this return a dictionary of label to data for the whole dataset
 
-class UADetracLoader(AbstractLoader):
+class UADetracLoader():
     def __init__(self, args, image_width=300, image_height=300):
         self.args = args
         self.data_dict = {}
@@ -139,7 +152,7 @@ class UADetracLoader(AbstractLoader):
                                    self.args.cache_vi_name)
         if self.images is None:
             warnings.warn("No image loaded, call load_images() first", Warning)
-        elif type(self.images) is np.ndarray:
+        elif isinstance(self.images, np.ndarray):
             np.save(save_dir, self.images)
             np.save(save_dir_vi, np.array(self.video_start_indices))
             print("saved images to", save_dir)
@@ -154,7 +167,7 @@ class UADetracLoader(AbstractLoader):
         if self.labels is None:
             warnings.warn("No labels loaded, call load_labels() first",
                           Warning)
-        elif type(self.labels) is dict:
+        elif isinstance(self.labels, dict):
             np.save(save_dir, self.labels, allow_pickle=True)
             print("saved labels to", save_dir)
         else:
@@ -166,7 +179,7 @@ class UADetracLoader(AbstractLoader):
                                 self.args.cache_box_name)
         if self.images is None:
             warnings.warn("No labels loaded, call load_boxes() first", Warning)
-        elif type(self.images) is np.ndarray:
+        elif isinstance(self.images, np.ndarray):
             np.save(save_dir, self.boxes)
             print("saved boxes to", save_dir)
         else:
@@ -200,8 +213,7 @@ class UADetracLoader(AbstractLoader):
         import xml.etree.ElementTree as ET
         original_height = 540
         original_width = 960
-        anno_files = os.listdir(anno_dir)
-        anno_files.sort()
+        anno_files = sorted(os.listdir(anno_dir))
         boxes_dataset = []
         cumu_count = 0
 
@@ -227,7 +239,7 @@ class UADetracLoader(AbstractLoader):
                                                                 height /
                                                                 original_height
                                                                 )
-                    boxes_frame.append((top, left, bottom, right))
+                    boxes_frame.append([top, left, bottom, right])
 
                 boxes_dataset.append(boxes_frame)
 
@@ -252,8 +264,6 @@ class UADetracLoader(AbstractLoader):
         :param original_speed:
         :return: converted_speed
         """
-        speed_range = [0.0, 20.0]
-        converted_range = [0.0, 100.0]
 
         return original_speed * 5
 

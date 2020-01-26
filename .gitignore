@@ -121,6 +121,23 @@ data/*
 !data/ua_detrac/README.md
 !data/ua_detrac/*.sh
 
+# Eclipse
+.pydevproject
+.project
 
 # macos data
 *.DS_Store
+
+tmp/*
+.settings/*
+
+# configuration
+
+# Grammar files and ANTLR4
+*.jar
+evaql_lexer.py
+evaql_parser.py
+evaql_parserListener.py
+evaql_parserVisitor.py
+*.tokens
+*.interp

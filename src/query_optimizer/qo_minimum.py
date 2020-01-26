@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """
 This file implements the minimum query optimizer
 TODO: Currently there seems to be a importing issue that I am not sure how to
@@ -157,7 +171,7 @@ class QOMinimum(QOTemplate):
                     return [], []
                 for operator in self.operators:
                     query_sub_list = query_sub.split(operator)
-                    if type(query_sub_list) is list and len(
+                    if isinstance(query_sub_list, list) and len(
                             query_sub_list) > 1:
                         query_parsed.append(
                             [query_sub_list[0], operator, query_sub_list[1]])
@@ -215,7 +229,6 @@ class QOMinimum(QOTemplate):
 
         query_transformed = []
         equivalences = []
-        equivalences_op = []
 
         for query_sub_list in query_parsed:
             subject = query_sub_list[0]
