@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.expression.abstract_expression import AbstractExpression
-from src.query_planner.abstract_scan_plan import AbstractScan
-from src.query_planner.types import PlanNodeType
+from src.planner.abstract_scan_plan import AbstractScan
+from src.planner.types import PlanNodeType
 
 
 class PPScanPlan(AbstractScan):

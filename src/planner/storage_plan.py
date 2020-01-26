@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.models.catalog.video_info import VideoMetaInfo
-from src.query_planner.abstract_plan import AbstractPlan
-from src.query_planner.types import PlanNodeType
+from src.planner.abstract_plan import AbstractPlan
+from src.planner.types import PlanNodeType
 
 
 class StoragePlan(AbstractPlan):
