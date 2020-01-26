@@ -15,8 +15,9 @@
 from typing import List
 
 from src.expression.abstract_expression import AbstractExpression
-from src.query_planner.abstract_scan_plan import AbstractScan
-from src.query_planner.types import PlanNodeType
+from src.planner.abstract_scan_plan import AbstractScan
+from src.planner.types import PlanNodeType
+from src.parser.table_ref import TableRef
 
 
 class SeqScanPlan(AbstractScan):
@@ -25,7 +26,7 @@ class SeqScanPlan(AbstractScan):
     operations.
 
     Arguments:
-        column_ids: List[str] 
+        column_ids: List[str]
             list of column names string in the plan
         video: TableRef
             video reference for the plan
@@ -33,8 +34,7 @@ class SeqScanPlan(AbstractScan):
             An expression used for filtering
     """
 
-    def __init__(self, column_ids: List[str], video: TableRef, predicate: AbstractExpression,
-                  ):
-        super().__init__(PlanNodeType.SEQUENTIAL_SCAN_TYPE, column_ids, video, predicate)
-
-    
+    def __init__(self, column_ids: List[str], video: TableRef,
+                 predicate: AbstractExpression):
+        super().__init__(PlanNodeType.SEQUENTIAL_SCAN_TYPE, column_ids, video,
+                         predicate)
