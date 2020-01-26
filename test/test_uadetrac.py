@@ -1,9 +1,23 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 import sys
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-image_dir = root + "/test/data/small-data"
-anno_dir = root + "/test/data/small-annotations"
+image_dir = os.path.join(root, "test", "data", "uadetrac", "small-data")
+anno_dir = os.path.join(root, "test", "data", "uadetrac", "small-annotations")
 
 try:
     from src.loaders.loader_uadetrac import UADetracLoader
@@ -48,5 +62,7 @@ def test_load_boxes():
     left = int(592.75 * width_scale)
     bottom = int((378.8 + 162.2) * height_scale)
     right = int((592.75 + 160.05) * width_scale)
-    box = (top, left, bottom, right)
+    box = [top, left, bottom, right]
+
+    print(loader.boxes[0])
     assert loader.boxes[0][0] == box
