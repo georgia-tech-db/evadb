@@ -19,8 +19,8 @@ from src.models.catalog.properties import VideoFormat
 from src.models.catalog.video_info import VideoMetaInfo
 from src.models.storage.batch import FrameBatch
 from src.query_executor.plan_executor import PlanExecutor
-from src.query_planner.seq_scan_plan import SeqScanPlan
-from src.query_planner.storage_plan import StoragePlan
+from src.planner.seq_scan_plan import SeqScanPlan
+from src.planner.storage_plan import StoragePlan
 
 
 class PlanExecutorTest(unittest.TestCase):
