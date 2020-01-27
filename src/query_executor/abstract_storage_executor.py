@@ -15,7 +15,7 @@
 from abc import ABC
 
 from src.query_executor.abstract_executor import AbstractExecutor
-from src.query_planner.storage_plan import StoragePlan
+from src.planner.storage_plan import StoragePlan
 
 
 class AbstractStorageExecutor(AbstractExecutor, ABC):
