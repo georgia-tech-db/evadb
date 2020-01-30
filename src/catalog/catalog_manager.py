@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+from typing import List, Tuple
 
 from src.catalog.database import init_db
 from src.catalog.df_schema import DataFrameSchema
@@ -61,19 +62,36 @@ class CatalogManager(object):
         #     create_catalog_dataframes(
         #         catalog_dir_url, self._catalog_dictionary)
 
-    def get_bindings(self, database_name, table_name=None, column_name=None):
-        metadata_id = DataFrameMetadata.get_id_from_name(database_name)
-        table_id = None
-        column_id = None
-        if column_name is not None:
-            column_id = DataFrameColumn.get_id_from_metadata_id_and_name(
+    def get_table_bindings(self, database_name: str, table_name: str,
+                           column_names: List[str]) -> Tuple[int, List[int]]:
+        """
+        This method fetches bindings for strings
+        :param database_name: currently not in use
+        :param table_name: the table that is being referred to
+        :param column_names: the column names of the table for which
+        bindings are required
+        :return: returns metadat_id of table and a list of column ids
+        """
+        metadata_id = DataFrameMetadata.get_id_from_name(table_name)
+        column_ids = []
+        if column_names is not None:
+            column_ids = DataFrameColumn.get_id_from_metadata_id_and_name_in(
                 metadata_id,
-                column_name)
-        return metadata_id, table_id, column_id
+                column_names)
+        return metadata_id, column_ids
 
-    def get_metadata(self, metadata_id, col_id_list=[]):
+    def get_metadata(self, metadata_id: int,
+                     col_id_list: List[int] = None) -> DataFrameMetadata:
+        """
+        This method returns the metadata object given a metadata_id,
+        when requested by the executor. It will further be used by storage
+        engine for retrieving the dataframe.
+        :param metadata_id: metadata id of the table
+        :param col_id_list: optional column ids of the table referred
+        :return:
+        """
         metadata = DataFrameMetadata.get(metadata_id)
-        if len(col_id_list) > 0:
+        if col_id_list is not None:
             df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
                 col_id_list,
                 metadata_id)
