@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-import mock
 import logging
+import unittest
+
+import mock
 
 from src.catalog.catalog_manager import CatalogManager
-from src.configuration.configuration_manager import ConfigurationManager
 from src.spark.session import Session
 
 
@@ -40,7 +40,6 @@ class CatalogManagerTests(unittest.TestCase):
     def tearDown(self):
         self.session = Session()
         self.session.stop()
-
 
     @mock.patch('src.catalog.catalog_manager.init_db')
     @mock.patch('src.catalog.catalog_manager.ConfigurationManager')

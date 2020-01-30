@@ -72,12 +72,12 @@ class DataFrameColumn(BaseModel):
         return column_str
 
     @classmethod
-    def get_id_from_metadata_id_and_name(cls, metadata_id, name):
+    def get_id_from_metadata_id_and_name_in(cls, metadata_id, column_names):
         result = DataFrameColumn.query\
             .with_entities(DataFrameColumn._id)\
             .filter(DataFrameColumn._metadata_id == metadata_id,
-                    DataFrameColumn._name == name)\
-            .one()
+                    DataFrameColumn._name.in_(column_names))\
+            .all()
         return result
 
     @classmethod
