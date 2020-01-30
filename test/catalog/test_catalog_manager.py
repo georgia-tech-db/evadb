@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import mock
 import logging
 
 from src.catalog.catalog_manager import CatalogManager
+from src.configuration.configuration_manager import ConfigurationManager
 from src.spark.session import Session
 
 
@@ -29,21 +31,29 @@ class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    # @mock.patch.object(ConfigurationManager,
+    #                    'get_value')
     def setUp(self):
         suppress_py4j_logging()
+        # mocked_cm.return_value = 'abc'
 
     def tearDown(self):
         self.session = Session()
         self.session.stop()
 
-    def test_catalog_manager_singleton_pattern(self):
+
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.ConfigurationManager')
+    def test_catalog_manager_singleton_pattern(self, mocked_cm, mocked_db):
+        mocked_cm.get_value('core', 'location').return_value = 'abc'
+        mocked_cm.get_value.assert_called_once_with('core', 'location')
         x = CatalogManager()
         y = CatalogManager()
         self.assertEqual(x, y)
 
-        x.create_dataset("foo")
-        x.create_dataset("bar")
-        x.create_dataset("baz")
+        # x.create_dataset("foo")
+        # x.create_dataset("bar")
+        # x.create_dataset("baz")
 
 
 if __name__ == '__main__':
