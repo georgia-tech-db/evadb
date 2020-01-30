@@ -17,24 +17,38 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_idx: int = None, col_name: str = None):
-        # setting return type to be invalid not sure if that is correct
-        # no child so that is okay
+    def __init__(self, col_name: str = None, table_name: str = None):
         super().__init__(ExpressionType.TUPLE_VALUE,
                          rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
-        # todo
-        self._table_name = None
-        self._col_idx = col_idx
+        self._table_name = table_name
+        self._table_metadata_id = None
+        self._col_metadata_id = None
+    
+    @property
+    def table_metadata_id(self) -> int:
+        return self._table_metadata_id
 
-    # def evaluate(AbstractTuple tuple1, AbstractTuple tuple2):
+    @property
+    def col_metadata_id(self) -> int:
+        return self._column_metadata_id
 
-    # don't know why are we getting 2 tuples
-    # comments added to abstract class,
-    # maybe we should move to *args
+    @table_metadata_id.setter
+    def table_metadata_id(self, id: int):
+        self._table_metadata_id = id
 
-    # assuming tuple1 to be valid
-
+    @col_metadata_id.setter
+    def col_metadata_id(self, id: int):
+        self._column_metadata_id = id
+    
+    @property
+    def table_name(self) -> str:
+        return self._table_name
+    
+    @property
+    def col_name(self) -> str:
+        return self._col_name
+    
     # remove this once doen with tuple class
     def evaluate(self, *args):
         tuple1 = None
@@ -44,5 +58,4 @@ class TupleValueExpression(AbstractExpression):
         tuple1 = args[0]
         return tuple1[(self._col_idx)]
 
-    # ToDo
-    # implement other boilerplate functionality
+    
