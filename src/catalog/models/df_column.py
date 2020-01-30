@@ -41,7 +41,7 @@ class DataFrameColumn(BaseModel):
         self._name = name
         self._type = type
         self._is_nullable = is_nullable
-        self._array_dimensions = array_dimensions
+        self._array_dimensions = str(array_dimensions)
 
     def get_name(self):
         return self._name
