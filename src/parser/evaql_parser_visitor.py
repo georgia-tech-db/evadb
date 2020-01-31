@@ -32,8 +32,8 @@ from src.parser.table_ref import TableRef, TableInfo
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
-
-from src.catalog.schema import ColumnType, Column
+from src.catalog.column_type import ColumnType
+from src.catalog.df_column import DataframeColumn
 
 
 class EvaQLParserVisitor(evaql_parserVisitor):
@@ -121,7 +121,7 @@ class EvaQLParserVisitor(evaql_parserVisitor):
         data_type = self.visit(ctx.columnDefinition())
         column_name = self.visit(ctx.uid())
 
-        column = Column(column_name, data_type)
+        column = DataframeColumn(column_name, data_type)
         return column
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
