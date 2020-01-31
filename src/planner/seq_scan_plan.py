@@ -15,8 +15,9 @@
 from typing import List
 
 from src.expression.abstract_expression import AbstractExpression
-from src.query_planner.abstract_scan_plan import AbstractScan
-from src.query_planner.types import PlanNodeType
+from src.planner.abstract_scan_plan import AbstractScan
+from src.planner.types import PlanNodeType
+from src.parser.table_ref import TableRef
 
 
 class SeqScanPlan(AbstractScan):
@@ -25,20 +26,15 @@ class SeqScanPlan(AbstractScan):
     operations.
 
     Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-
-        column_ids List[int]: List of columns which need to be selected
-        (Note: This attribute might be removed in future)
+        column_ids: List[str]
+            list of column names string in the plan
+        video: TableRef
+            video reference for the plan
+        predicate: AbstractExpression
+            An expression used for filtering
     """
 
-    def __init__(self, predicate: AbstractExpression,
-                 column_ids: List[int] = None):
-        if column_ids is None:
-            column_ids = []
-        super().__init__(PlanNodeType.SEQUENTIAL_SCAN_TYPE, predicate)
-        self._column_ids = column_ids
-
-    @property
-    def column_ids(self) -> List:
-        return self._column_ids
+    def __init__(self, column_ids: List[AbstractExpression], video: TableRef,
+                 predicate: AbstractExpression):
+        super().__init__(PlanNodeType.SEQUENTIAL_SCAN_TYPE, column_ids, video,
+                         predicate)

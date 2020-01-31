@@ -16,7 +16,7 @@ from typing import Iterator
 
 from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_executor import AbstractExecutor
-from src.query_planner.seq_scan_plan import SeqScanPlan
+from src.planner.seq_scan_plan import SeqScanPlan
 
 
 class SequentialScanExecutor(AbstractExecutor):
