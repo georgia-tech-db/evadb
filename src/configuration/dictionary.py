@@ -15,3 +15,4 @@
 
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:fafa@localhost/eva_catalog'
