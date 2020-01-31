@@ -19,7 +19,7 @@ from src.parser.eva_parser import EvaQLParser
 from src.parser.eva_statement import EvaStatement
 
 from src.parser.eva_statement import StatementType
- 
+
 from src.expression.abstract_expression import ExpressionType
 from src.parser.table_ref import TableRef
 

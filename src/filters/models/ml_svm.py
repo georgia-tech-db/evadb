@@ -22,7 +22,7 @@ Wrapper takes responsibility of converting the input to the corresponding types 
 import numpy as np
 import time
 from sklearn.svm import LinearSVC
-from filters.models.ml_base import MLBase
+from src.filters.models.ml_base import MLBase
 
 
 class MLSVM(MLBase):
