@@ -23,10 +23,10 @@ import numpy as np
 import pandas as pd
 
 from copy import deepcopy
-from src.filters import FilterTemplate
+from src.filters.abstract_filter import FilterTemplate
 from src.filters.models.ml_randomforest import MLRandomForest
-from src.filters import MLSVM
-from src.filters import MLMLP
+from src.filters.models.ml_svm import MLSVM
+from src.filters.models.ml_dnn import MLMLP
 
 
 # Meant to be a black box for trying all models available and returning statistics and model for
@@ -146,7 +146,7 @@ class FilterResearch(FilterTemplate):
             for pre_model_names, pre_post_instance_pair in internal_dict.items():
                 pre_model, post_model = pre_post_instance_pair
                 X_transform = pre_model.predict(X)
-                post_model.train(X_transform)
+                post_model.train(X_transform, y)
 
     def predict(self, X: np.ndarray, pre_model_name: str = None,
                 post_model_name: str = None) -> np.ndarray:
@@ -228,26 +228,3 @@ class FilterResearch(FilterTemplate):
         df = pd.DataFrame(data)
 
         return df
-
-
-if __name__ == "__main__":
-    filter = FilterResearch()
-
-    X = np.random.random([100, 30, 30, 3])
-    y = np.random.random([100])
-    y *= 10
-    y = y.astype(np.int32)
-
-    division = int(X.shape[0] * 0.8)
-    X_train = X[:division]
-    X_test = X[division:]
-    y_iscar_train = y[:division]
-    y_iscar_test = y[division:]
-
-    filter.train(X_train, y_iscar_train)
-    print("filter finished training!")
-    y_iscar_hat = filter.predict(X_test, post_model_name='rf')
-    print("filter finished prediction!")
-    stats = filter.getAllStats()
-    print(stats)
-    print("filter got all stats")

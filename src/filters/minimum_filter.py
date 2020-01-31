@@ -19,7 +19,6 @@ This file is composed of the composing preliminary and post filtering techniques
 """
 
 import numpy as np
-import pandas as pd
 
 from copy import deepcopy
 from src.filters.abstract_filter import FilterTemplate
@@ -31,7 +30,6 @@ from src.filters.models.ml_randomforest import MLRandomForest
 
 """
 Each Filter object considers 1 specific query. Either the query optimizer or the pipeline needs to manage a diction of Filters
-
 """
 
 
@@ -73,9 +71,8 @@ class FilterMinimum(FilterTemplate):
                 self.all_models[post_model_name] = {}
             for pre_model_name in pre_model_names:
                 if pre_model_name not in self.all_models[post_model_name]:
-                    self.all_models[post_model_name][pre_model_name] = (
-                        self.pre_models[pre_model_name], deepcopy(
-                            self.post_models[post_model_name]))
+                    self.all_models[post_model_name][pre_model_name] = (self.pre_models[pre_model_name],
+                                                                        deepcopy(self.post_models[post_model_name]))
 
     def addPreModel(self, model_name, model):
         """
@@ -139,7 +136,7 @@ class FilterMinimum(FilterTemplate):
             for pre_model_names, pre_post_instance_pair in internal_dict.items():
                 pre_model, post_model = pre_post_instance_pair
                 X_transform = pre_model.predict(X)
-                post_model.train(X_transform)
+                post_model.train(X_transform, y)
 
     def predict(self, X: np.ndarray, pre_model_name: str = None,
                 post_model_name: str = None) -> np.ndarray:
@@ -211,62 +208,3 @@ class FilterMinimum(FilterTemplate):
                         'C'))
                 r_col.append(getattr(post_model, 'R'))
                 a_col.append(getattr(post_model, 'A'))
-
-        assert(len(name_col) == len(c_col))
-        assert(len(name_col) == len(r_col))
-        assert(len(name_col) == len(a_col))
-
-        data = {'Name': name_col, 'C': c_col, 'R': r_col, 'A': a_col}
-        # Create DataFrame
-        df = pd.DataFrame(data)
-
-        return df
-
-
-if __name__ == "__main__":
-
-    filter = FilterMinimum()
-
-    X = np.random.random([100, 30, 30, 3])
-    y = np.random.random([100])
-    y *= 10
-    y = y.astype(np.int32)
-
-    division = int(X.shape[0] * 0.8)
-    X_train = X[:division]
-    X_test = X[division:]
-    y_iscar_train = y[:division]
-    y_iscar_test = y[division:]
-
-    filter.train(X_train, y_iscar_train)
-    print("filter finished training!")
-    y_iscar_hat = filter.predict(X_test, post_model_name='rf')
-    print("filter finished prediction!")
-    stats = filter.getAllStats()
-    print(stats)
-    print("filter got all stats")
-
-    """
-  from loaders.loader_uadetrac import LoaderUADetrac
-
-  loader = LoaderUADetrac()
-  X = loader.load_images()
-  y = loader.load_labels()
-  y_vehicle = y['vehicle']
-  y_iscar = []
-
-  vehicle_types = ["car", "van", "bus", "others"]
-  for i in range(len(y_vehicle)):
-    if "Sedan" in y_vehicle[i]:
-      y_iscar.append(1)
-    else:
-      y_iscar.append(0)
-
-  y_iscar = np.array(y_iscar, dtype=np.uint8)
-
-  division = int(X.shape[0] * 0.8)
-  X_train = X[:division]
-  X_test = X[division:]
-  y_iscar_train = y_iscar[:division]
-  y_iscar_test = y_iscar[division:]
-  """
