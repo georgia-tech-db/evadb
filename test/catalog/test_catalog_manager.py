@@ -31,11 +31,8 @@ class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    # @mock.patch.object(ConfigurationManager,
-    #                    'get_value')
     def setUp(self):
         suppress_py4j_logging()
-        # mocked_cm.return_value = 'abc'
 
     def tearDown(self):
         self.session = Session()
@@ -53,6 +50,8 @@ class CatalogManagerTests(unittest.TestCase):
         # x.create_dataset("foo")
         # x.create_dataset("bar")
         # x.create_dataset("baz")
+
+    # def test_get_bindings(self):
 
 
 if __name__ == '__main__':

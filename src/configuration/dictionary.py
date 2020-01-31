@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+EVA_DIR = ""
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:fafa@localhost/eva_catalog'
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/eva_catalog'
