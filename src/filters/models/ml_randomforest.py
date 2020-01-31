@@ -21,7 +21,7 @@ Random forest wrapper
 import numpy as np
 import time
 from sklearn.ensemble import RandomForestClassifier
-from filters.models.ml_base import MLBase
+from src.filters.models.ml_base import MLBase
 
 
 class MLRandomForest(MLBase):

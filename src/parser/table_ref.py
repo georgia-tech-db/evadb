@@ -36,6 +36,11 @@ class TableInfo:
     def database_name(self):
         return self._database_name
 
+    def __str__(self):
+        table_info_str = "TABLE INFO:: (" + self._table_name + ")"
+
+        return table_info_str
+
 
 class TableRef:
     """
@@ -50,3 +55,7 @@ class TableRef:
     @property
     def table_info(self):
         return self._table_info
+
+    def __str__(self):
+        table_ref_str = "TABLE REF:: (" + str(self._table_info) + ")"
+        return table_ref_str
