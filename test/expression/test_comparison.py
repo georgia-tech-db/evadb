@@ -17,7 +17,6 @@ import unittest
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.tuple_value_expression import TupleValueExpression
 
 
 class ComparisonExpressionsTest(unittest.TestCase):
@@ -26,90 +25,89 @@ class ComparisonExpressionsTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_comparison_compare_equal(self):
-        tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(1)
+        const_exp1 = ConstantValueExpression(1)
+        const_exp2 = ConstantValueExpression(1)
 
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_EQUAL,
-            tpl_exp,
-            const_exp
+            const_exp1,
+            const_exp2
         )
-        # ToDo implement a generic tuple class
-        # to fetch the tuple from table
-        tuple1 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        self.assertEqual([True], cmpr_exp.evaluate(None))
 
     def test_comparison_compare_greater(self):
-        tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(1)
+        const_exp1 = ConstantValueExpression(1)
+        const_exp2 = ConstantValueExpression(0)
 
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_GREATER,
-            tpl_exp,
-            const_exp
+            const_exp1,
+            const_exp2
         )
-        tuple1 = [[2], 1, 1]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        self.assertEqual([True], cmpr_exp.evaluate(None))
 
     def test_comparison_compare_lesser(self):
-        tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(2)
+        const_exp1 = ConstantValueExpression(0)
+        const_exp2 = ConstantValueExpression(2)
 
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_LESSER,
-            tpl_exp,
-            const_exp
+            const_exp1,
+            const_exp2
         )
-        tuple1 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        self.assertEqual([True], cmpr_exp.evaluate(None))
 
     def test_comparison_compare_geq(self):
-        tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(1)
-
-        cmpr_exp = ComparisonExpression(
+        const_exp1 = ConstantValueExpression(1)
+        const_exp2 = ConstantValueExpression(1)
+        const_exp3 = ConstantValueExpression(0)
+        
+        cmpr_exp1 = ComparisonExpression(
             ExpressionType.COMPARE_GEQ,
-            tpl_exp,
-            const_exp
+            const_exp1,
+            const_exp2
         )
 
-        # checking greater x>=1
-        tuple1 = [[2], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        cmpr_exp2 = ComparisonExpression(
+            ExpressionType.COMPARE_GEQ,
+            const_exp1,
+            const_exp3
+        )
         # checking equal
-        tuple2 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple2, None))
+        self.assertEqual([True], cmpr_exp1.evaluate(None))
+        # checking greater equal
+        self.assertEqual([True], cmpr_exp2.evaluate(None))
 
     def test_comparison_compare_leq(self):
-        tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(2)
+        const_exp1 = ConstantValueExpression(0)
+        const_exp2 = ConstantValueExpression(2)
+        const_exp3 = ConstantValueExpression(2)
 
-        cmpr_exp = ComparisonExpression(
+        cmpr_exp1 = ComparisonExpression(
             ExpressionType.COMPARE_LEQ,
-            tpl_exp,
-            const_exp
+            const_exp1,
+            const_exp2
         )
 
-        # checking lesser x<=1
-        tuple1 = [[1], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        cmpr_exp2 = ComparisonExpression(
+            ExpressionType.COMPARE_LEQ,
+            const_exp2,
+            const_exp3
+        )
+
+        # checking lesser 
+        self.assertEqual([True], cmpr_exp1.evaluate(None))
         # checking equal
-        tuple2 = [[2], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple2, None))
+        self.assertEqual([True], cmpr_exp2.evaluate(None))
 
     def test_comparison_compare_neq(self):
-        tpl_exp = TupleValueExpression(0)
-        const_exp = ConstantValueExpression(1)
+        const_exp1 = ConstantValueExpression(0)
+        const_exp2 = ConstantValueExpression(1)
 
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_NEQ,
-            tpl_exp,
-            const_exp
+            const_exp1,
+            const_exp2
         )
 
-        # checking not equal x!=1
-        tuple1 = [[2], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
-
-        tuple1 = [[3], 2, 3]
-        self.assertEqual([True], cmpr_exp.evaluate(tuple1, None))
+        self.assertEqual([True], cmpr_exp.evaluate(None))
