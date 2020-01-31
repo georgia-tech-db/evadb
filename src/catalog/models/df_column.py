@@ -64,8 +64,8 @@ class DataFrameColumn(BaseModel):
                                                   self._is_nullable)
 
         column_str += "["
-        column_str += ', '.join(['%d'] * len(self._array_dimensions)) \
-                      % tuple(self._array_dimensions)
+        column_str += ', '.join(['%d'] * len(self.get_array_dimensions())) \
+                      % tuple(self.get_array_dimensions())
         column_str += "] "
         column_str += ")\n"
 
@@ -78,6 +78,8 @@ class DataFrameColumn(BaseModel):
             .filter(DataFrameColumn._metadata_id == metadata_id,
                     DataFrameColumn._name.in_(column_names))\
             .all()
+        result = [res[0] for res in result]
+
         return result
 
     @classmethod

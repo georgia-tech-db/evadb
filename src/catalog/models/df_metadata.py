@@ -21,8 +21,8 @@ class DataFrameMetadata(BaseModel):
     __tablename__ = 'df_metadata'
 
     _id = Column('id', Integer, primary_key=True)
-    _name = Column('name', String)
-    _file_url = Column('file_url', String)
+    _name = Column('name', String(100))
+    _file_url = Column('file_url', String(100))
 
     def __init__(self, dataframe_file_url, dataframe_schema):
         self._file_url = dataframe_file_url
@@ -42,6 +42,9 @@ class DataFrameMetadata(BaseModel):
     def get_id(self):
         return self._id
 
+    def get_name(self):
+        return self._name
+
     def get_dataframe_file_url(self):
         return self._file_url
 
@@ -59,12 +62,12 @@ class DataFrameMetadata(BaseModel):
         result = DataFrameMetadata.query \
             .with_entities(DataFrameMetadata._id) \
             .filter(DataFrameMetadata._name == name).one()
-        return result
+        return result[0]
 
     @classmethod
     def get(cls, metadata_id):
         result = DataFrameMetadata.query \
-            .with_entities(DataFrameMetadata._id) \
             .filter(DataFrameMetadata._id == metadata_id) \
             .one()
+        print(result)
         return result
