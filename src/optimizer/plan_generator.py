@@ -16,7 +16,8 @@
 # ToDo
 # We have a logical plan tree in place held by StatementToPlanConvertor class.
 # Since we are omitting the optimizer, I am not sure how to proceed further.
-# Should we go ahead and write a dummy class that maps logical nodes to physical nodes
+# Should we go ahead and write a dummy class that maps logical
+# nodes to physical nodes
 # class PlanGenerator:
 #     """Generates the 
 #     """ 

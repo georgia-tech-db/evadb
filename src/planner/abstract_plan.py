@@ -55,7 +55,7 @@ class AbstractPlan(ABC):
         self._parent = node
 
     @property
-    def children(self) -> List[AbstractPlan]:
+    def children(self) -> List['AbstractPlan']:
         """returns children list of current node
 
         Returns:
