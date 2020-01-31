@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 import logging
+import unittest
+
+import mock
 
 from src.catalog.catalog_manager import CatalogManager
 from src.spark.session import Session
@@ -36,14 +38,15 @@ class CatalogManagerTests(unittest.TestCase):
         self.session = Session()
         self.session.stop()
 
-    def test_catalog_manager_singleton_pattern(self):
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    def test_catalog_manager_singleton_pattern(self, mocked_db):
         x = CatalogManager()
         y = CatalogManager()
         self.assertEqual(x, y)
 
-        x.create_dataset("foo")
-        x.create_dataset("bar")
-        x.create_dataset("baz")
+        # x.create_dataset("foo")
+        # x.create_dataset("bar")
+        # x.create_dataset("baz")
 
 
 if __name__ == '__main__':
