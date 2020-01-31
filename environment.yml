@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - anaconda
   - defaults
+  - pytorch
 dependencies:
   - python=3.7
   - pip
@@ -18,6 +19,7 @@ dependencies:
   - autoflake
   - torchvision
   - pytorch
+  - tensorflow
   - tensorboard
   - pillow=6.1
   - pip:

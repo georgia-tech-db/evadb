@@ -26,20 +26,14 @@ python query_optimizer/query_optimizer.py
 @Jaeho Bang
 
 """
-import os
 import socket
 # The query optimizer decide how to label the data points
 # Load the series of queries from a txt file?
-import sys
 import threading
 from itertools import product
 
 import numpy as np
-
 from src import constants
-
-eva_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(eva_dir)
 
 
 class QueryOptimizer:
