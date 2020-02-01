@@ -17,10 +17,10 @@ import sys
 
 root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 try:
-    from src.query_optimizer.query_optimizer import QueryOptimizer
+    from src.optimizer.query_optimizer import QueryOptimizer
 except ImportError:
     sys.path.append(root)
-    from src.query_optimizer.query_optimizer import QueryOptimizer
+    from src.optimizer.query_optimizer import QueryOptimizer
 
 obj = QueryOptimizer()
 

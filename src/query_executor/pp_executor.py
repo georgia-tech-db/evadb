@@ -16,7 +16,7 @@ from typing import Iterator
 
 from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_executor import AbstractExecutor
-from src.query_planner.pp_plan import PPScanPlan
+from src.planner.pp_plan import PPScanPlan
 
 
 class PPExecutor(AbstractExecutor):

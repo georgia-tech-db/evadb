@@ -12,17 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC
+import sys
 
-from src.query_executor.abstract_executor import AbstractExecutor
-from src.planner.storage_plan import StoragePlan
+print(sys.path)
 
 
-class AbstractStorageExecutor(AbstractExecutor, ABC):
-    """
-    Abstract executor for storage. This executor returns the batch frames
-    from the storage layer.
-    """
-
-    def __init__(self, node: StoragePlan):
-        super().__init__(node)
+def test():
+    print("hi")
