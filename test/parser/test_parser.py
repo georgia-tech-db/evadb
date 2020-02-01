@@ -19,6 +19,7 @@ from src.parser.eva_parser import EvaQLParser
 from src.parser.eva_statement import EvaStatement
 
 from src.parser.eva_statement import StatementType
+
 from src.parser.select_statement import SelectStatement
 
 from src.expression.abstract_expression import ExpressionType

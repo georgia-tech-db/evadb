@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 from typing import List, Tuple
 
 from src.catalog.database import init_db
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.configuration.configuration_manager import ConfigurationManager
-from src.configuration.dictionary import CATALOG_DIR
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -41,10 +38,11 @@ class CatalogManager(object):
 
     def bootstrap_catalog(self):
 
-        eva_dir = ConfigurationManager().get_value("core", "location")
-        output_url = os.path.join(eva_dir, CATALOG_DIR)
-        LoggingManager().log("Bootstrapping catalog" + str(output_url),
-                             LoggingLevel.INFO)
+        # eva_dir = ConfigurationManager().get_value("core", "location")
+        # output_url = os.path.join(eva_dir, CATALOG_DIR)
+        # LoggingManager().log("Bootstrapping catalog" + str(output_url),
+        #                      LoggingLevel.INFO)
+        LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
         # # Construct output location
         # catalog_dir_url = os.path.join(eva_dir, "catalog")
@@ -72,6 +70,7 @@ class CatalogManager(object):
         bindings are required
         :return: returns metadat_id of table and a list of column ids
         """
+
         metadata_id = DataFrameMetadata.get_id_from_name(table_name)
         column_ids = []
         if column_names is not None:
@@ -115,3 +114,12 @@ class CatalogManager(object):
     #     rows = [row_1]
     #
     #     append_rows(dataset_catalog_entry, rows)
+
+
+if __name__ == '__main__':
+    catalog = CatalogManager()
+    metadata_id, col_ids = catalog.get_table_bindings(None, 'dataset1',
+                                                      ['frame', 'color'])
+    metadata = catalog.get_metadata(1, [1])
+    print(metadata.get_dataframe_schema())
+    print(metadata_id, col_ids)
