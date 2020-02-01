@@ -37,39 +37,6 @@ conda env create -f environment.yml
 ```shell
 git config core.hooksPath .githooks
 ```
-    
-## Demos
-The following components have demos:
-
-1. EVA Analytics: A pipeline for loading a dataset, training filters, and outputting the optimal plan.
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python pipeline.py
-```
-2. EVA Query Optimizer: The optimizer shows converted queries
- (Will show converted queries for the original queries)
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python query_optimizer/query_optimizer.py
-```
-3. Eva Loader (Loads UA-DETRAC dataset)
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python loaders/load.py
-```
-
-4. NEW!!! There are new versions of the loaders and filters.
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python loaders/uadetrac_loader.py
-   python filters/minimum_filter.py
-```
-
-5. EVA storage-system (Video compression and indexing system - *currently in progress*)
 
 ## Unit Tests
 To run unit tests on the system, the following commands can be run:
@@ -117,14 +84,5 @@ All related code should be inside */udfs*
 The loaders load the dataset with the attributes specified in the *Accelerating Machine Learning Inference with Probabilistic Predicates* by Yao et al.
 
 All code related to this module is in */loaders*
-
-## Eva Storage
-Currently a work in progress. Come check back later!
-
-
-## Dataset
-__[Dataset info](data/README.md)__ explains detailed information about the  datasets
-
-
 
 
