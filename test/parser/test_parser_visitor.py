@@ -18,7 +18,7 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock, call
 
-from src.parser.evaql_parser_visitor import EvaQLParserVisitor
+from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
 
@@ -28,12 +28,12 @@ class ParserVisitorTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_should_query_specification_visitor(self):
-        EvaQLParserVisitor.visit = MagicMock()
-        mock_visit = EvaQLParserVisitor.visit
+        ParserVisitor.visit = MagicMock()
+        mock_visit = ParserVisitor.visit
         mock_visit.side_effect = ["columns",
                                   {"from": ["tables"], "where": "predicates"}]
 
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
         ctx = MagicMock()
         child_1 = MagicMock()
         child_1.getRuleIndex.return_value = evaql_parser.RULE_selectElements
@@ -50,7 +50,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(expected.where_clause, "predicates")
         self.assertEqual(expected.target_list, "columns")
 
-    @mock.patch.object(EvaQLParserVisitor, 'visit')
+    @mock.patch.object(ParserVisitor, 'visit')
     def test_from_clause_visitor(self, mock_visit):
         mock_visit.side_effect = ["tables", "predicates"]
 
@@ -60,7 +60,7 @@ class ParserVisitorTests(unittest.TestCase):
         whereExpr = MagicMock()
         ctx.whereExpr = whereExpr
 
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
         expected = visitor.visitFromClause(ctx)
         mock_visit.assert_has_calls([call(tableSources), call(whereExpr)])
 
@@ -69,7 +69,7 @@ class ParserVisitorTests(unittest.TestCase):
 
     def test_logical_operator(self):
         ctx = MagicMock()
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
 
         self.assertEqual(
             visitor.visitLogicalOperator(ctx),
@@ -87,7 +87,7 @@ class ParserVisitorTests(unittest.TestCase):
 
     def test_comparison_operator(self):
         ctx = MagicMock()
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
 
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
@@ -114,9 +114,9 @@ class ParserVisitorTests(unittest.TestCase):
     #        Function: visitFullColumnName
     #    '''
     #    ctx = MagicMock()
-    #    visitor = EvaQLParserVisitor()
-    #    EvaQLParserVisitor.visit = MagicMock()
-    #    EvaQLParserVisitor.visit.return_value = None
+    #    visitor = ParserVisitor()
+    #    ParserVisitor.visit = MagicMock()
+    #    ParserVisitor.visit.return_value = None
     #    with self.assertWarns(SyntaxWarning, msg='Column Name Missing'):
     #        visitor.visitFullColumnName(ctx)
 
@@ -125,9 +125,9 @@ class ParserVisitorTests(unittest.TestCase):
     #        Function: visitTableName
     #    '''
     #    ctx = MagicMock()
-    #    visitor = EvaQLParserVisitor()
-    #    EvaQLParserVisitor.visit = MagicMock()
-    #    EvaQLParserVisitor.visit.return_value = None
+    #    visitor = ParserVisitor()
+    #    ParserVisitor.visit = MagicMock()
+    #    ParserVisitor.visit.return_value = None
     #    with self.assertWarns(SyntaxWarning, msg='Invalid from table'):
     #        visitor.visitTableName(ctx)
 
@@ -136,7 +136,7 @@ class ParserVisitorTests(unittest.TestCase):
             Function : visitLogicalExpression
         '''
         ctx = MagicMock()
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
 
         # Test for no children
         ctx.children = []
@@ -160,12 +160,12 @@ class ParserVisitorTests(unittest.TestCase):
         ''' Testing when string literal is None
             Function: visitStringLiteral
         '''
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
         ctx = MagicMock()
         ctx.STRING_LITERAL.return_value = None
 
-        EvaQLParserVisitor.visitChildren = MagicMock()
-        mock_visit = EvaQLParserVisitor.visitChildren
+        ParserVisitor.visitChildren = MagicMock()
+        mock_visit = ParserVisitor.visitChildren
 
         visitor.visitStringLiteral(ctx)
         mock_visit.assert_has_calls([call(ctx)])
@@ -176,7 +176,7 @@ class ParserVisitorTests(unittest.TestCase):
             Function: visitConstant
         '''
         ctx = MagicMock()
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
         ctx.REAL_LITERAL.return_value = '5'
         expected = visitor.visitConstant(ctx)
         self.assertEqual(
@@ -187,10 +187,10 @@ class ParserVisitorTests(unittest.TestCase):
         ''' Testing Base Exception error handling
             Function: visitQuerySpecification
         '''
-        EvaQLParserVisitor.visit = MagicMock()
-        EvaQLParserVisitor.visit
+        ParserVisitor.visit = MagicMock()
+        ParserVisitor.visit
 
-        visitor = EvaQLParserVisitor()
+        visitor = ParserVisitor()
         ctx = MagicMock()
         child_1 = MagicMock()
         child_2 = MagicMock()

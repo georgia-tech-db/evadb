@@ -18,10 +18,10 @@ from antlr4 import InputStream, CommonTokenStream
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_lexer import evaql_lexer
 
-from src.parser.evaql_parser_visitor import EvaQLParserVisitor
+from src.parser.parser_visitor import ParserVisitor
 
 
-class EvaQLParser(object):
+class Parser(object):
     """
     Parser for eva; based on EVAQL grammar
     """
@@ -30,11 +30,11 @@ class EvaQLParser(object):
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(EvaQLParser, cls).__new__(cls)
+            cls._instance = super(Parser, cls).__new__(cls)
         return cls._instance
 
     def __init__(self):
-        self._visitor = EvaQLParserVisitor()
+        self._visitor = ParserVisitor()
 
     def parse(self, query_string: str) -> list:
         lexer = evaql_lexer(InputStream(query_string))

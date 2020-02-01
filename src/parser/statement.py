@@ -16,9 +16,9 @@
 from src.parser.types import StatementType
 
 
-class EvaStatement:
+class AbstractStatement:
     """
-    Base class for all the EvaStatement
+    Base class for all Statements
 
     Attributes
     ----------

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.optimizer.operators import LogicalGet, LogicalFilter, LogicalProject
-from src.parser.eva_statement import EvaStatement
+from src.parser.eva_statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr)
@@ -34,11 +34,11 @@ class StatementToPlanConvertor():
         get_opr = LogicalGet(video, catalog_vid_metadata_id)
         self._plan = get_opr
 
-    def visit_select(self, statement: EvaStatement):
+    def visit_select(self, statement: AbstractStatement):
         """convertor for select statement
 
         Arguments:
-            statement {EvaStatement} -- [input select statement]
+            statement {AbstractStatement} -- [input select statement]
         """
         # Create a logical get node
         video = statement.from_table
@@ -66,13 +66,13 @@ class StatementToPlanConvertor():
             projection_opr.append_child(self._plan)
             self._plan = projection_opr
 
-    def visit(self, statement: EvaStatement):
+    def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
            The logic is hidden from client.
 
         Arguments:
-            statement {EvaStatement} -- [Input statement]
+            statement {AbstractStatement} -- [Input statement]
         """
         if isinstance(statement, SelectStatement):
             self.visit_select(statement)
