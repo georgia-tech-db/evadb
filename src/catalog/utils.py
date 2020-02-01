@@ -51,7 +51,7 @@ class Utils(object):
                                               (),
                                               ScalarCodec(FloatType()),
                                               column_is_nullable)
-        elif column_type == ColumnType.STRING:
+        elif column_type == ColumnType.TEXT:
             petastorm_column = UnischemaField(column_name,
                                               np.string_,
                                               (),

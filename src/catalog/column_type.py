@@ -16,7 +16,8 @@ from enum import Enum
 
 
 class ColumnType(Enum):
-    INTEGER = 1
-    FLOAT = 2
-    STRING = 3
-    NDARRAY = 4
+    BOOLEAN = 1
+    INTEGER = 2
+    FLOAT = 3
+    TEXT = 4
+    NDARRAY = 5

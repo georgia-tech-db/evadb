@@ -337,13 +337,11 @@ constant
 //    Data Types
 
 dataType
-    : TEXT
-      lengthOneDimension?                                           #stringDataType
-    | INTEGER 
-      lengthOneDimension? UNSIGNED?                                 #dimensionDataType
-    | FLOAT
-      lengthTwoDimension? UNSIGNED?                                 #dimensionDataType
-    | BOOLEAN                                                       #simpleDataType
+    : BOOLEAN                                         #simpleDataType
+    | TEXT lengthOneDimension?                        #dimensionDataType
+    | INTEGER UNSIGNED?                               #integerDataType
+    | FLOAT lengthTwoDimension? UNSIGNED?             #dimensionDataType
+    | NDARRAY lengthDimensionList                     #dimensionDataType
     ;
 
 lengthOneDimension
@@ -354,6 +352,9 @@ lengthTwoDimension
     : '(' decimalLiteral ',' decimalLiteral ')'
     ;
 
+lengthDimensionList
+    : '(' (decimalLiteral ',')* decimalLiteral ')'
+    ;
 
 //    Common Lists
 
