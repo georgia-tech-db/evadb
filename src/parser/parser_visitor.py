@@ -36,7 +36,7 @@ from src.catalog.column_type import ColumnType
 from src.catalog.df_column import DataframeColumn
 
 
-class EvaQLParserVisitor(evaql_parserVisitor):
+class ParserVisitor(evaql_parserVisitor):
 
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
