@@ -64,7 +64,6 @@ SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
 SOME:                                'SOME';
 TABLE:                               'TABLE';
-TEXT:                                'TEXT';
 TRUE:                                'TRUE';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';
@@ -92,10 +91,11 @@ ACTION_CLASSICATION:                 'ACTION_CLASSICATION';
 
 // DATA TYPE Keywords
 
-SMALLINT:                            'SMALLINT';
+BOOLEAN:                             'BOOLEAN';
 INTEGER:                             'INTEGER';
 FLOAT:                               'FLOAT';
-VARCHAR:                             'VARCHAR';
+TEXT:                                'TEXT';
+NDARRAY:                             'NDARRAY';
 
 // Group function Keywords
 
@@ -111,7 +111,6 @@ FCOUNT: 						     'FCOUNT';
 // Common Keywords, but can be ID
 
 AUTO_INCREMENT:                      'AUTO_INCREMENT';
-BOOLEAN:                             'BOOLEAN';
 COLUMNS:                             'COLUMNS';
 HELP:                                'HELP';
 TEMPTABLE:                           'TEMPTABLE';
