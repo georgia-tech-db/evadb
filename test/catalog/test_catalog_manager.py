@@ -31,21 +31,15 @@ class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    # @mock.patch.object(ConfigurationManager,
-    #                    'get_value')
     def setUp(self):
         suppress_py4j_logging()
-        # mocked_cm.return_value = 'abc'
 
     def tearDown(self):
         self.session = Session()
         self.session.stop()
 
     @mock.patch('src.catalog.catalog_manager.init_db')
-    @mock.patch('src.catalog.catalog_manager.ConfigurationManager')
-    def test_catalog_manager_singleton_pattern(self, mocked_cm, mocked_db):
-        mocked_cm.get_value('core', 'location').return_value = 'abc'
-        mocked_cm.get_value.assert_called_once_with('core', 'location')
+    def test_catalog_manager_singleton_pattern(self, mocked_db):
         x = CatalogManager()
         y = CatalogManager()
         self.assertEqual(x, y)

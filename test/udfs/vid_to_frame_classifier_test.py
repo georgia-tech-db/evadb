@@ -12,8 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.udfs import video_action_classification
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
+import numpy as np
+import unittest
 
-EVA_DIR = ""
-CATALOG_DIR = "catalog"
-DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/eva_catalog'
+
+class VidToFrameClassifier_Test(unittest.TestCase):
+
+    def test_VidToFrameClassifier(self):
+        model = video_action_classification.VideoToFrameClassifier()
+        assert model is not None
+
+        X = np.random.random([240, 320, 3])
+        model.classify(FrameBatch([Frame(0, X, None)], None))
