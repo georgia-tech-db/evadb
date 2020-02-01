@@ -15,82 +15,72 @@ EVA is an end-to-end video analytics engine that allows users to query a databas
 
 
 ## Installation
-Installation of EVA involves setting a virtual environment using conda and configuring git hooks.
 
-1. Clone the repo
+Installation of EVA involves setting a virtual environment using [miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and configuring git hooks.
+
+1. Clone the repository
 ```shell
-git clone https://github.com/georgia-tech-db/Eva.git
+git clone https://github.com/georgia-tech-db/eva.git
 ```
 
-2. Install [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) and update path.
+2. Install [miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and update the `PATH` environment variable.
 ```shell
-export PATH=~/anaconda3/bin:$PATH
+export PATH="$HOME/miniconda/bin:$PATH" 
 ```
 
-3. Install dependencies in a virtual environment. Dependencies should install with no errors on Ubuntu 16.04 but there are known installation issues with MacOS.
+3. Install dependencies in a miniconda virtual environment. Virtual environments keep dependencies in separate sandboxes so you can switch between both `eva` and other Python applications easily and get them running.
 ```shell
-cd Eva/
+cd eva/
 conda env create -f environment.yml
 ```
 
-4. Run following command to configure git hooks.
+4. Activate the `eva` environment.
+```shell
+conda activate eva
+```
+
+5. Run following command to configure git hooks.
 ```shell
 git config core.hooksPath .githooks
 ```
-    
-## Demos
-The following components have demos:
 
-1. EVA Analytics: A pipeline for loading a dataset, training filters, and outputting the optimal plan.
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python pipeline.py
-```
-2. EVA Query Optimizer: The optimizer shows converted queries
- (Will show converted queries for the original queries)
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python query_optimizer/query_optimizer.py
-```
-3. Eva Loader (Loads UA-DETRAC dataset)
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python loaders/load.py
-```
+## Development / Contributing
 
-4. NEW!!! There are new versions of the loaders and filters.
-```commandline
-   cd <YOUR_EVA_DIRECTORY>
-   conda activate eva_35
-   python loaders/uadetrac_loader.py
-   python filters/minimum_filter.py
-```
+We invite you to help us build the future of visual data management DBMSs.
 
-5. EVA storage-system (Video compression and indexing system - *currently in progress*)
-
-## Unit Tests
-To run unit tests on the system, the following commands can be run:
+1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 
 ```shell
-   conda activate eva_35
    pycodestyle --select E test src/loaders
-   pytest test/ --cov-report= --cov=./ -s -v
 ``` 
 
-## Eva Core
-Eva core is consisted of
+2. Ensure that the coding style conventions are followed.
+
+```shell
+   pycodestyle --select E test src/loaders
+``` 
+
+3. Run the formatter script to automatically fix most of the coding style issues.
+
+```shell
+   python script/formatting/formatter.py
+```
+
+Please look up the [contributing guide](https://github.com/georgia-tech-db/eva/blob/master/CONTRIBUTING.md#development) for details.
+
+## EVA Architecture 
+
+The EVA visual data management system consists of four core components:
+
+* Query Parser
 * Query Optimizer
-* Filters
-* UDFs
-* Loaders
+* Query Execution Engine (Filters + UDFs)
+* Storage Engine (Loaders)
 
 #### Query Optimizer
 The query optimizer converts a given query to the optimal form. 
 
-All code related to this module is in */query_optimizer*
+Module location: *src/query_optimizer*
 
 #### Filters
 The filters does preliminary filtering to video frames using cheap machine learning models.
@@ -105,26 +95,28 @@ The filters below are running:
 * Random Forest
 * SVM
 
-All code related to this module is in */filters*
+Module location: *src/filters*
 
 #### UDFs
 This module contains all imported deep learning models. Currently, there is no code that performs this task. It is a work in progress.
 Information of current work is explained in detail [here](src/udfs/README.md).
 
-All related code should be inside */udfs*
+Module location: *src/udfs*
 
 #### Loaders
 The loaders load the dataset with the attributes specified in the *Accelerating Machine Learning Inference with Probabilistic Predicates* by Yao et al.
 
-All code related to this module is in */loaders*
+Module location: */loaders*
 
-## Eva Storage
-Currently a work in progress. Come check back later!
+## Status
 
+_Technology preview_: currently unsupported, possibly due to incomplete functionality or unsuitability for production use.
 
-## Dataset
-__[Dataset info](data/README.md)__ explains detailed information about the  datasets
+## Contributors
 
+See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
+## License
 
-
+Copyright (c) 2018-2020 [Georgia Tech Database Group](http://db.cc.gatech.edu/)  
+Licensed under the [Apache License](LICENSE).
