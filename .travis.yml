@@ -2,7 +2,8 @@
 # The VMs have 2 cores and 8 GB of RAM
 dist: trusty
 sudo: required
-
+services:
+  - mysql
 language: python
 python:
   - "3.6"
@@ -16,6 +17,7 @@ before_install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS eva_catalog;'
 
 install:
   - conda env create -f environment.yml

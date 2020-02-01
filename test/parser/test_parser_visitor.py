@@ -108,6 +108,99 @@ class ParserVisitorTests(unittest.TestCase):
             visitor.visitComparisonOperator(ctx),
             ExpressionType.COMPARE_GREATER)
 
+    # To be fixed
+    # def test_visit_full_column_name_none(self):
+    #    ''' Testing for getting a Warning when column name is None
+    #        Function: visitFullColumnName
+    #    '''
+    #    ctx = MagicMock()
+    #    visitor = EvaQLParserVisitor()
+    #    EvaQLParserVisitor.visit = MagicMock()
+    #    EvaQLParserVisitor.visit.return_value = None
+    #    with self.assertWarns(SyntaxWarning, msg='Column Name Missing'):
+    #        visitor.visitFullColumnName(ctx)
+
+    # def test_visit_table_name_none(self):
+    #    ''' Testing for getting a Warning when table name is None
+    #        Function: visitTableName
+    #    '''
+    #    ctx = MagicMock()
+    #    visitor = EvaQLParserVisitor()
+    #    EvaQLParserVisitor.visit = MagicMock()
+    #    EvaQLParserVisitor.visit.return_value = None
+    #    with self.assertWarns(SyntaxWarning, msg='Invalid from table'):
+    #        visitor.visitTableName(ctx)
+
+    def test_logical_expression(self):
+        ''' Testing for break in code if len(children) < 3
+            Function : visitLogicalExpression
+        '''
+        ctx = MagicMock()
+        visitor = EvaQLParserVisitor()
+
+        # Test for no children
+        ctx.children = []
+        expected = visitor.visitLogicalExpression(ctx)
+        self.assertEqual(expected, None)
+
+        # Test for one children
+        child_1 = MagicMock()
+        ctx.children = [child_1]
+        expected = visitor.visitLogicalExpression(ctx)
+        self.assertEqual(expected, None)
+
+        # Test for two children
+        child_1 = MagicMock()
+        child_2 = MagicMock()
+        ctx.children = [child_1, child_2]
+        expected = visitor.visitLogicalExpression(ctx)
+        self.assertEqual(expected, None)
+
+    def test_visit_string_literal_none(self):
+        ''' Testing when string literal is None
+            Function: visitStringLiteral
+        '''
+        visitor = EvaQLParserVisitor()
+        ctx = MagicMock()
+        ctx.STRING_LITERAL.return_value = None
+
+        EvaQLParserVisitor.visitChildren = MagicMock()
+        mock_visit = EvaQLParserVisitor.visitChildren
+
+        visitor.visitStringLiteral(ctx)
+        mock_visit.assert_has_calls([call(ctx)])
+
+    def test_visit_constant(self):
+        ''' Testing for value of returned constant
+            when real literal is not None
+            Function: visitConstant
+        '''
+        ctx = MagicMock()
+        visitor = EvaQLParserVisitor()
+        ctx.REAL_LITERAL.return_value = '5'
+        expected = visitor.visitConstant(ctx)
+        self.assertEqual(
+            expected.evaluate(),
+            float(ctx.getText()))
+
+    def test_visit_query_specification_base_exception(self):
+        ''' Testing Base Exception error handling
+            Function: visitQuerySpecification
+        '''
+        EvaQLParserVisitor.visit = MagicMock()
+        EvaQLParserVisitor.visit
+
+        visitor = EvaQLParserVisitor()
+        ctx = MagicMock()
+        child_1 = MagicMock()
+        child_2 = MagicMock()
+        ctx.children = [None, child_1, child_2]
+        child_1.getRuleIndex.side_effect = BaseException()
+
+        expected = visitor.visitQuerySpecification(ctx)
+
+        self.assertEqual(expected, None)
+
 
 if __name__ == '__main__':
     unittest.main()
