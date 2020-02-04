@@ -38,3 +38,4 @@ foreach $file (@new_file_list)
   }
 }
 python script/formatting/validator.py
+echo "Check"
