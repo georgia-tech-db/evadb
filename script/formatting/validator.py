@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import functools
 
 EXIT_SUCCESS = 0
 EXIT_FAILURE = -1
@@ -10,14 +11,19 @@ VALIDATOR_PATTERNS = [ re.compile(patterns) for patterns in [
     ]
 ]
 
-CODE_DIRECTORY = os.path.abspath(os.path.dirname(__file__))
-EVA_SRC_DIRECTORY = os.path.abspath(
-                        os.path.join(os.path.abspath(CODE_DIRECTORY),os.pardir,os.pardir,"src")
-                    )   
+CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
+EVA_DIR = functools.reduce(os.path.join,
+                           [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir])
 
-DIRS = [EVA_SRC_DIRECTORY]
+EVA_SRC_DIR = os.path.join(EVA_DIR, "src")
+EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
+EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
+
+DIRS = [EVA_SRC_DIR,EVA_TEST_DIR]
 
 def validate_file(file):
+
+    file = os.path.abspath(file)
 
     if not os.path.isfile(file):
         print ("ERROR: " + file + " isn't a file")
@@ -80,6 +86,7 @@ if __name__ == '__main__':
 
     else:
         # Scanning entire source directory
+        status = True
         status = validate_directory(DIRS)
 
         if not status:
