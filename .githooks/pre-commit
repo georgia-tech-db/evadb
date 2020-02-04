@@ -37,3 +37,4 @@ foreach $file (@new_file_list)
     exit 1;
   }
 }
+python script/formatting/validator.py
