@@ -55,6 +55,8 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         single_queries = []
+        single_queries.append(
+            "CREATE TABLE IF NOT EXISTS Persons (Frame_ID INTEGER);")
         single_queries.append("SELECT CLASS FROM TAIPAI;")
         single_queries.append("SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN';")
         single_queries.append("SELECT CLASS,REDNESS FROM TAIPAI \
@@ -66,6 +68,7 @@ class ParserTests(unittest.TestCase):
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)
+
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(

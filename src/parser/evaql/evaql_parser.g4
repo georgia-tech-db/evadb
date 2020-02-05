@@ -196,10 +196,9 @@ queryExpression
     | '(' queryExpression ')'
     ;
 
-//frameQL statement added 
 querySpecification
     : SELECT selectElements 
-      fromClause? orderByClause? limitClause? 
+      fromClause orderByClause? limitClause? 
       errorBoundsExpression? confidenceLevelExpression? 
     ;
 
