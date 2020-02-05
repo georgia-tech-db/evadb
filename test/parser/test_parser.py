@@ -55,8 +55,6 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         single_queries = []
-        single_queries.append(
-            "CREATE TABLE IF NOT EXISTS Persons (Frame_ID INTEGER);")
         single_queries.append("SELECT CLASS FROM TAIPAI;")
         single_queries.append("SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN';")
         single_queries.append("SELECT CLASS,REDNESS FROM TAIPAI \
