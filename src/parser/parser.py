@@ -25,27 +25,30 @@ from src.parser.parser_visitor import ParserVisitor
 class MyErrorListener(ErrorListener):
 
     # Reference
-    # https://stackoverflow.com/questions/33847547/
-    # antlr4-terminate-on-lexer-parser-error-python
+    # https://www.antlr.org/api/Java/org/antlr/v4/runtime/BaseErrorListener.html
 
     def __init__(self):
         super(MyErrorListener, self).__init__()
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        raise Exception("Oh no!!")
+        error_str = "ERROR: Syntax error - Line" + str(line) + ": Col " +\
+                    str(column) + " - " + str(msg)
+        raise Exception(error_str)
 
     def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
                         exact, ambigAlts, configs):
-        raise Exception("Oh no!!")
+        error_str = "ERROR: Ambiguity -" + str(configs)
+        raise Exception(error_str)
 
     def reportAttemptingFullContext(self, recognizer, dfa, startIndex,
                                     stopIndex, conflictingAlts, configs):
-        error_str = "ERROR: Attempting full context -" + str(configs)
+        error_str = "ERROR: Attempting Full Context -" + str(configs)
         raise Exception(error_str)
 
     def reportContextSensitivity(self, recognizer, dfa, startIndex,
                                  stopIndex, prediction, configs):
-        raise Exception("Oh no!!")
+        error_str = "ERROR: Context Sensitivity -" + str(configs)
+        raise Exception(error_str)
 
 
 class Parser(object):
@@ -70,7 +73,8 @@ class Parser(object):
         stream = CommonTokenStream(lexer)
 
         parser = evaql_parser(stream)
-        parser._listeners = [self._error_listener]
+        # Attach error listener for debugging parser errrors
+        # parser._listeners = [self._error_listener]
 
         tree = parser.root()
 

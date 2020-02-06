@@ -17,14 +17,15 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_id: int, col_name: str = None,
-                 table_name: str = None):
+    def __init__(self, col_name: str = None, table_name: str = None,
+                 col_idx: int = -1):
         super().__init__(ExpressionType.TUPLE_VALUE,
                          rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
         self._table_name = table_name
         self._table_metadata_id = None
-        self._col_metadata_id = col_id
+        self._col_metadata_id = None
+        self._col_idx = col_idx
 
     @property
     def table_metadata_id(self) -> int:
@@ -52,9 +53,8 @@ class TupleValueExpression(AbstractExpression):
 
     # remove this once doen with tuple class
     def evaluate(self, *args):
-        tuple1 = None
         if args is None:
             # error Handling
             pass
-        tuple1 = args[0]
-        return tuple1[(self._col_metadata_id)]
+        given_tuple = args[0]
+        return given_tuple[(self._col_idx)]
