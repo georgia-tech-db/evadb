@@ -38,7 +38,6 @@ class EVADemo(Cmd):
 
         else:
             try:
-
                 # Connect and Query from Eva
                 parser = EvaFrameQLParser()
                 eva_statement = parser.parse(query)
@@ -52,7 +51,8 @@ class EVADemo(Cmd):
                 input_video = []
                 for filename in glob.glob('data/sample_video/*.jpg'):
                     im = Image.open(filename)
-                    im_copy = im.copy()  # to handle 'too many open files' error
+                    # to handle 'too many open files' error
+                    im_copy = im.copy() 
                     input_video.append(im_copy)
                     im.close()
 
