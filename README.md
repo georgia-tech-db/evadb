@@ -46,8 +46,6 @@ git config core.hooksPath .githooks
 
 ## Development / Contributing
 
-We invite you to help us build the future of visual data management DBMSs.
-
 ```
 1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 

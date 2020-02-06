@@ -51,7 +51,7 @@ DIRS = [EVA_SRC_DIR,EVA_TEST_DIR]
 # UTILITY FUNCTION DEFINITIONS
 # ==============================================
 
-def comment_contains_code(line):
+def contains_commented_out_code(line):
     line = line.lstrip()
     
     if 'utf-8' in line:
@@ -62,6 +62,8 @@ def comment_contains_code(line):
 
     line = line.lstrip(' \t\v\n#').strip()
 
+    # Regex for checking function definition; for, with loops; 
+    # continue and break
     regex_list = [
         r"def .+\)[\s]*[->]*[\s]*[a-zA-Z_]*[a-zA-Z0-9_]*:$",
         r"with .+ as [a-zA-Z_][a-zA-Z0-9_]*:$",
@@ -111,7 +113,7 @@ def validate_file(file):
 
             #Check if the line has commented code
             if line.lstrip().startswith('#'):
-                commented_code = comment_contains_code(line)
+                commented_code = contains_commented_out_code(line)
 
                 if commented_code:
                     LOG.info ("Commented code " \
