@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC
 
-from src.query_planner.types import PlanNodeType
+
+from abc import ABC
+from src.planner.types import PlanNodeType
+from typing import List
 
 
 class AbstractPlan(ABC):
@@ -43,7 +45,7 @@ class AbstractPlan(ABC):
 
     @parent.setter
     def parent(self, node: 'AbstractPlan'):
-        """returns parent of current node
+        """sets parent of current node
 
         Arguments:
             node {AbstractPlan} -- parent node
@@ -53,8 +55,8 @@ class AbstractPlan(ABC):
         self._parent = node
 
     @property
-    def children(self):
-        """returns children list pf current node
+    def children(self) -> List['AbstractPlan']:
+        """returns children list of current node
 
         Returns:
             List[AbstractPlan] -- children list
@@ -70,3 +72,9 @@ class AbstractPlan(ABC):
             PlanNodeType: The node type corresponding to the plan
         """
         return self._node_type
+
+    def __str__(self, level=0):
+        out_string = "\t" * level + '' + "\n"
+        for child in self.children:
+            out_string += child.__str__(level + 1)
+        return out_string

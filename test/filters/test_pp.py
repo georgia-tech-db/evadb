@@ -12,23 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import numpy as np
+from src.filters.pp import PP
+import unittest
 
-from src.parser.types import StatementType
 
+class PP_Test(unittest.TestCase):
 
-class EvaStatement:
-    """
-    Base class for all the EvaStatement
+    def test_PP(self):
+        pp = PP()
 
-    Attributes
-    ----------
-    stmt_type : StatementType
-        the type of this statement - Select or Insert etc
-    """
+        x = np.random.random([2, 30, 30, 3])
 
-    def __init__(self, stmt_type: StatementType):
-        self._stmt_type = stmt_type
+        y = {
+            'vehicle': [['car', 'car'], ['car', 'car', 'car']],
+            'speed': [[6.859 * 5, 1.5055 * 5],
+                      [6.859 * 5, 1.5055 * 5, 0.5206 * 5]],
+            'color': [None, None],
+            'intersection': [None, None]
+        }
 
-    @property
-    def stmt_type(self):
-        return self._stmt_type
+        pp.train_all(x, y)

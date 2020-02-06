@@ -14,9 +14,9 @@
 # limitations under the License.
 import unittest
 
-from src.catalog.schema import ColumnType
-from src.catalog.schema import Column
-from src.catalog.schema import Schema
+from src.catalog.column_type import ColumnType
+from src.catalog.df_schema import DataFrameSchema
+from src.catalog.models.df_column import DataFrameColumn
 
 
 class SchemaTests(unittest.TestCase):
@@ -25,14 +25,14 @@ class SchemaTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_schema(self):
-
         schema_name = "foo"
-        column_1 = Column("frame_id", ColumnType.INTEGER, False)
-        column_2 = Column("frame_data", ColumnType.NDARRAY, False, [28, 28])
-        column_3 = Column("frame_label", ColumnType.INTEGER, False)
+        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
+        column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False,
+                                   [28, 28])
+        column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
 
-        schema = Schema(schema_name,
-                        [column_1, column_2, column_3])
+        schema = DataFrameSchema(schema_name,
+                                 [column_1, column_2, column_3])
 
         self.assertEqual(schema._column_list[0].get_name(), "frame_id")
 

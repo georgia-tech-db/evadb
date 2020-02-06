@@ -64,7 +64,6 @@ SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
 SOME:                                'SOME';
 TABLE:                               'TABLE';
-TEXT:                                'TEXT';
 TRUE:                                'TRUE';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';
@@ -92,10 +91,11 @@ ACTION_CLASSICATION:                 'ACTION_CLASSICATION';
 
 // DATA TYPE Keywords
 
-SMALLINT:                            'SMALLINT';
+BOOLEAN:                             'BOOLEAN';
 INTEGER:                             'INTEGER';
 FLOAT:                               'FLOAT';
-VARCHAR:                             'VARCHAR';
+TEXT:                                'TEXT';
+NDARRAY:                             'NDARRAY';
 
 // Group function Keywords
 
@@ -111,7 +111,6 @@ FCOUNT: 						     'FCOUNT';
 // Common Keywords, but can be ID
 
 AUTO_INCREMENT:                      'AUTO_INCREMENT';
-BOOLEAN:                             'BOOLEAN';
 COLUMNS:                             'COLUMNS';
 HELP:                                'HELP';
 TEMPTABLE:                           'TEMPTABLE';
@@ -227,7 +226,7 @@ GLOBAL_ID:                           '@' '@'
 // Fragments for Literal primitives
 
 fragment EXPONENT_NUM_PART:          'E' '-'? DEC_DIGIT+;
-fragment ID_LITERAL:                 [A-Z_$0-9]*?[A-Z_$]+?[A-Z_$0-9]*;
+fragment ID_LITERAL:                 [A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*;
 fragment DQUOTA_STRING:              '"' ( '\\'. | '""' | ~('"'| '\\') )* '"';
 fragment SQUOTA_STRING:              '\'' ('\\'. | '\'\'' | ~('\'' | '\\'))* '\'';
 fragment BQUOTA_STRING:              '`' ( '\\'. | '``' | ~('`'|'\\'))* '`';
