@@ -36,7 +36,7 @@ from src.catalog.column_type import ColumnType
 from src.catalog.df_column import DataframeColumn
 
 
-class EvaQLParserVisitor(evaql_parserVisitor):
+class ParserVisitor(evaql_parserVisitor):
 
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
@@ -118,36 +118,96 @@ class EvaQLParserVisitor(evaql_parserVisitor):
 
     def visitColumnDeclaration(
             self, ctx: evaql_parser.ColumnDeclarationContext):
-        data_type = self.visit(ctx.columnDefinition())
+
+        data_type, dimensions = self.visit(ctx.columnDefinition())
         column_name = self.visit(ctx.uid())
 
-        column = DataframeColumn(column_name, data_type)
+        column = DataframeColumn(column_name, data_type,
+                                 array_dimensions=dimensions)
         return column
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
-        data_type = self.visit(ctx.dataType())
-        return data_type
+
+        data_type, dimensions = self.visit(ctx.dataType())
+        return data_type, dimensions
+
+    def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
+
+        data_type = None
+        dimensions = []
+
+        if ctx.BOOLEAN() is not None:
+            data_type = ColumnType.BOOLEAN
+
+        return data_type, dimensions
+
+    def visitIntegerDataType(self, ctx: evaql_parser.IntegerDataTypeContext):
+
+        data_type = None
+        dimensions = []
+
+        if ctx.INTEGER() is not None:
+            data_type = ColumnType.INTEGER
+        elif ctx.UNSIGNED() is not None:
+            data_type = ColumnType.INTEGER
+
+        return data_type, dimensions
 
     def visitDimensionDataType(
             self, ctx: evaql_parser.DimensionDataTypeContext):
+        data_type = None
+        dimensions = []
 
-        column_type = None
         if ctx.FLOAT() is not None:
-            column_type = ColumnType.FLOAT
-        elif ctx.INTEGER() is not None:
-            column_type = ColumnType.INTEGER
-        elif ctx.UNSIGNED() is not None:
-            column_type = ColumnType.INTEGER
+            data_type = ColumnType.FLOAT
+            dimensions = self.visit(ctx.lengthTwoDimension())
+        elif ctx.TEXT() is not None:
+            data_type = ColumnType.TEXT
+            dimensions = self.visit(ctx.lengthOneDimension())
+        elif ctx.NDARRAY() is not None:
+            data_type = ColumnType.NDARRAY
+            dimensions = self.visit(ctx.lengthDimensionList())
 
-        return column_type
+        return data_type, dimensions
 
-    def visitStringDataType(self, ctx: evaql_parser.StringDataTypeContext):
+    def visitLengthOneDimension(
+            self, ctx: evaql_parser.LengthOneDimensionContext):
+        dimensions = []
 
-        column_type = None
-        if ctx.TEXT() is not None:
-            column_type = ColumnType.STRING
+        if ctx.decimalLiteral() is not None:
+            dimensions = [self.visit(ctx.decimalLiteral())]
 
-        return column_type
+        return dimensions
+
+    def visitLengthTwoDimension(
+            self, ctx: evaql_parser.LengthTwoDimensionContext):
+        first_decimal = self.visit(ctx.decimalLiteral(0))
+        second_decimal = self.visit(ctx.decimalLiteral(1))
+
+        print(first_decimal, second_decimal)
+        dimensions = [first_decimal, second_decimal]
+        return dimensions
+
+    def visitLengthDimensionList(
+            self, ctx: evaql_parser.LengthDimensionListContext):
+        dimensions = []
+        dimension_index = 0
+        for child in ctx.children:
+            decimal_literal = ctx.decimalLiteral(dimension_index)
+            if decimal_literal is not None:
+                decimal = self.visit(decimal_literal)
+                dimensions.append(decimal)
+            dimension_index = dimension_index + 1
+
+        return dimensions
+
+    def visitDecimalLiteral(self, ctx: evaql_parser.DecimalLiteralContext):
+
+        decimal = None
+        if ctx.DECIMAL_LITERAL() is not None:
+            decimal = int(str(ctx.DECIMAL_LITERAL()))
+
+        return decimal
 
     ##################################################################
     # SELECT STATEMENT

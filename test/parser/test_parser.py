@@ -15,10 +15,10 @@
 
 import unittest
 
-from src.parser.eva_parser import EvaQLParser
-from src.parser.eva_statement import EvaStatement
+from src.parser.parser import Parser
+from src.parser.statement import AbstractStatement
 
-from src.parser.eva_statement import StatementType
+from src.parser.statement import StatementType
 
 from src.parser.select_statement import SelectStatement
 
@@ -31,13 +31,15 @@ class ParserTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_create_statement(self):
-        parser = EvaQLParser()
+        parser = Parser()
 
         single_queries = []
         single_queries.append(
             """CREATE TABLE IF NOT EXISTS Persons (
                   Frame_ID INTEGER,
-                  Frame_Data TEXT
+                  Frame_Data TEXT(10),
+                  Frame_Value FLOAT(1000, 201),
+                  Frame_Array NDARRAY (5, 100, 2432, 4324, 100)
             );""")
 
         for query in single_queries:
@@ -45,12 +47,12 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(
-                eva_statement_list[0], EvaStatement)
+                eva_statement_list[0], AbstractStatement)
 
             print(eva_statement_list[0])
 
     def test_single_statement_queries(self):
-        parser = EvaQLParser()
+        parser = Parser()
 
         single_queries = []
         single_queries.append("SELECT CLASS FROM TAIPAI;")
@@ -64,13 +66,16 @@ class ParserTests(unittest.TestCase):
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)
+
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(
-                eva_statement_list[0], EvaStatement)
+                eva_statement_list[0], AbstractStatement)
+
+            print(eva_statement_list[0])
 
     def test_multiple_statement_queries(self):
-        parser = EvaQLParser()
+        parser = Parser()
 
         multiple_queries = []
         multiple_queries.append("SELECT CLASS FROM TAIPAI \
@@ -83,12 +88,12 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 2)
             self.assertIsInstance(
-                eva_statement_list[0], EvaStatement)
+                eva_statement_list[0], AbstractStatement)
             self.assertIsInstance(
-                eva_statement_list[1], EvaStatement)
+                eva_statement_list[1], AbstractStatement)
 
     def test_select_statement(self):
-        parser = EvaQLParser()
+        parser = Parser()
         select_query = "SELECT CLASS, REDNESS FROM TAIPAI \
             WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
         eva_statement_list = parser.parse(select_query)
@@ -122,7 +127,7 @@ class ParserTests(unittest.TestCase):
         Class: SelectStatement'''
 
         select_stmt_new = SelectStatement()
-        parser = EvaQLParser()
+        parser = Parser()
 
         select_query_new = "SELECT CLASS, REDNESS FROM TAIPAI \
             WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700;"
