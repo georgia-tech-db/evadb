@@ -7,12 +7,7 @@ EVA is an end-to-end video analytics engine that allows users to query a databas
 
 ## Table of Contents
 * [Installation](#installation)
-* [Demos](#demos)
-* [Unit Tests](#unit-tests)
-* [Eva Core](#eva-core)
-* [Eva Storage](#eva-storage)
-* [Dataset](#dataset) 
-
+* [Development](#development)
 
 ## Installation
 
@@ -44,7 +39,7 @@ conda activate eva
 git config core.hooksPath .githooks
 ```
 
-## Development / Contributing
+## Development
 
 We invite you to help us build the future of visual data management DBMSs.
 
@@ -106,7 +101,7 @@ Module location: *src/udfs*
 #### Loaders
 The loaders load the dataset with the attributes specified in the *Accelerating Machine Learning Inference with Probabilistic Predicates* by Yao et al.
 
-Module location: */loaders*
+Module location: *src/loaders*
 
 ## Status
 
