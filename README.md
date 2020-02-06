@@ -36,7 +36,6 @@ conda env create -f environment.yml
 
 4. Activate the `eva` environment.
 ```shell
-<<<<<<< HEAD
 conda activate eva
 ```
 
@@ -48,11 +47,8 @@ git config core.hooksPath .githooks
 ## Development / Contributing
 
 We invite you to help us build the future of visual data management DBMSs.
-=======
-git config core.hooksPath .githooks
-```
->>>>>>> e3ec6a54b2b2d8f1a4da61312252178a144d2476
 
+```
 1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 
 ```shell
@@ -111,7 +107,6 @@ Module location: *src/udfs*
 #### Loaders
 The loaders load the dataset with the attributes specified in the *Accelerating Machine Learning Inference with Probabilistic Predicates* by Yao et al.
 
-<<<<<<< HEAD
 Module location: */loaders*
 
 ## Status
@@ -123,10 +118,5 @@ _Technology preview_: currently unsupported, possibly due to incomplete function
 See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
 ## License
-=======
-All code related to this module is in */loaders*
-
->>>>>>> e3ec6a54b2b2d8f1a4da61312252178a144d2476
-
 Copyright (c) 2018-2020 [Georgia Tech Database Group](http://db.cc.gatech.edu/)  
 Licensed under the [Apache License](LICENSE).
