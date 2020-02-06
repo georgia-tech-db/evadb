@@ -8,6 +8,7 @@ EVA is an end-to-end video analytics engine that allows users to query a databas
 ## Table of Contents
 * [Installation](#installation)
 * [Development](#development)
+* [Architecture](#architecture)
 
 ## Installation
 
@@ -63,7 +64,7 @@ We invite you to help us build the future of visual data management DBMSs.
 
 Please look up the [contributing guide](https://github.com/georgia-tech-db/eva/blob/master/CONTRIBUTING.md#development) for details.
 
-## EVA Architecture 
+## Architecture 
 
 The EVA visual data management system consists of four core components:
 
