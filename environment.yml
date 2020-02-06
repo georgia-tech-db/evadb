@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - anaconda
   - defaults
+  - pytorch
 dependencies:
   - python=3.7
   - pip
@@ -18,8 +19,13 @@ dependencies:
   - autoflake
   - torchvision
   - pytorch
+  - tensorflow
   - tensorboard
   - pillow=6.1
+  - sqlalchemy
+  - pymysql
+  - sqlalchemy-utils
+  - mock
   - pip:
     - antlr4-python3-runtime==4.8
     - petastorm

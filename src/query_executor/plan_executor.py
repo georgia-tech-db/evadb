@@ -14,8 +14,8 @@
 # limitations under the License.
 from src.query_executor.abstract_executor import AbstractExecutor
 from src.query_executor.seq_scan_executor import SequentialScanExecutor
-from src.query_planner.abstract_plan import AbstractPlan
-from src.query_planner.types import PlanNodeType
+from src.planner.abstract_plan import AbstractPlan
+from src.planner.types import PlanNodeType
 from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
 from src.query_executor.pp_executor import PPExecutor
 

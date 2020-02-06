@@ -18,7 +18,7 @@ from src.loaders.video_loader import VideoLoader
 from src.models.storage.batch import FrameBatch
 from src.query_executor.abstract_storage_executor import \
     AbstractStorageExecutor
-from src.query_planner.storage_plan import StoragePlan
+from src.planner.storage_plan import StoragePlan
 
 
 class DiskStorageExecutor(AbstractStorageExecutor):

@@ -12,14 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.parser.eva_statement import EvaStatement
+
+from src.parser.statement import AbstractStatement
+
 from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
 from src.parser.table_ref import TableRef
 from typing import List
 
 
-class SelectStatement(EvaStatement):
+class SelectStatement(AbstractStatement):
     """
     Select Statement constructed after parsing the input query
 

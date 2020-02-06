@@ -33,6 +33,8 @@ class ComparisonExpression(AbstractExpression):
         right_values = self.get_child(1).evaluate(*args)
 
         # Broadcasting scalars
+        if not isinstance(left_values, list):
+            left_values = [left_values]
         if not isinstance(right_values, list):
             right_values = [right_values] * len(left_values)
         # TODO implement a better way to compare value_left and value_right
