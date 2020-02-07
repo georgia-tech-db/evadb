@@ -1,4 +1,4 @@
-#!/usr/bin/perl -xv
+#!/usr/bin/perl 
 # The hook should exit with non-zero status after issuing an appropriate 
 # message if it wants to stop the commit.
 
@@ -39,7 +39,7 @@ foreach $file (@new_file_list)
 
   # run native formatter before commiting
   # Todo: Even add header support here
-  my @ret = system("/script/formatting/formatter.py -c -f " + $file) 
-  print STDOUT @ret;
+  my $ret = system("/script/formatting/formatter.py -c -f " + $file); 
+  print STDOUT $ret;
   # exit 1;
 }
