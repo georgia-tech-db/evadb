@@ -62,3 +62,23 @@ class LoggingManager(object):
 
     def getEffectiveLevel(self):
         return logging.getLevelName(self._LOG.getEffectiveLevel())
+
+    def getLog4JLevel(self):
+
+        logger_level = self.getEffectiveLevel()
+
+        # Reference:
+        # https://logging.apache.org/log4j/1.2/apidocs/org/
+        # apache/log4j/Level.html
+
+        # for spark log level configuration
+        if logger_level == 'DEBUG':
+            return "DEBUG"
+        elif logger_level == 'INFO':
+            return "INFO"
+        elif logger_level == 'WARNING':
+            return "WARN"
+        elif logger_level == 'ERROR':
+            return "ERROR"
+        elif logger_level == 'CRITICAL':
+            return "FATAL"
