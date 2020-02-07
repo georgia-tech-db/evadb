@@ -45,7 +45,7 @@ git config core.hooksPath .githooks
 1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 
 ```shell
-   pycodestyle --select E test src/loaders
+   python -m pytest test/
 ``` 
 
 2. Ensure that the coding style conventions are followed.

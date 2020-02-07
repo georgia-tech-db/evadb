@@ -1,0 +1,3 @@
+echo "hi"
+python script/formatting/formatter.py
+python script/formatting/validator.py
