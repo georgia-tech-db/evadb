@@ -81,14 +81,19 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        video {TableRef}        --      [TableRef object copied from parsed statement]
-        video_catalog_id{int}   --      [catalog id for the video table]
-        column_list{List[AbstractExpression]}     -- [After binding annotated column_list]
-        value_list{List[AbstractExpression]}     -- [value list to insert]
+        video {TableRef}:     
+            [TableRef object copied from parsed statement]
+        video_catalog_id{int}:      
+            [catalog id for the video table]
+        column_list{List[AbstractExpression]}:
+            [After binding annotated column_list]
+        value_list{List[AbstractExpression]}:
+            [value list to insert]
     """
 
     def __init__(self, video: TableRef, video_catalog_id: int,
-                 column_list: List[AbstractExpression], value_list: List[AbstractExpression],
+                 column_list: List[AbstractExpression],
+                 value_list: List[AbstractExpression],
                  children: List = None):
         super().__init__(OperatorType.LOGICALINSERT, children)
         self._video = video
