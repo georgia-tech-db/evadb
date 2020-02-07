@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.optimizer.operators import LogicalGet, LogicalFilter, LogicalProject, LogicalInsert
+from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
+                                     LogicalInsert)
 from src.parser.eva_statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
