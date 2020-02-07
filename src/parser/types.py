@@ -21,5 +21,7 @@ class StatementType(IntEnum):
     Manages enums for all the sql-like statements supported
     """
     SELECT = 1,
+    CREATE = 2,
+    INSERT = 3,
 
     # add other types
