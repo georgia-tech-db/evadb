@@ -45,12 +45,10 @@ class LoggingManager(object):
             )
             LOG_handler.setFormatter(LOG_formatter)
             cls._LOG.addHandler(LOG_handler)
-            cls._LOG.setLevel(logging.INFO)
 
         return cls._instance
 
-    def log(self, string, level: LoggingLevel = LoggingLevel.INFO):
-
+    def log(self, string, level: LoggingLevel = LoggingLevel.DEBUG):
         if level == LoggingLevel.DEBUG:
             self._LOG.debug(string)
         elif level == LoggingLevel.INFO:
@@ -61,3 +59,6 @@ class LoggingManager(object):
             self._LOG.error(string)
         elif level == LoggingLevel.CRITICAL:
             self._LOG.critical(string)
+
+    def getEffectiveLevel(self):
+        return logging.getLevelName(self._LOG.getEffectiveLevel())

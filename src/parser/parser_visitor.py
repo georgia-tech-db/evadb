@@ -94,7 +94,6 @@ class ParserVisitor(evaql_parserVisitor):
                 # stop parsing something bad happened
                 return None
 
-        print(create_definitions)
         create_stmt = CreateTableStatement(table_ref,
                                            if_not_exists,
                                            create_definitions)
@@ -110,9 +109,6 @@ class ParserVisitor(evaql_parserVisitor):
                 column_definition = self.visit(create_definition)
                 column_definitions.append(column_definition)
             child_index = child_index + 1
-
-        for column_definition in column_definitions:
-            print(str(column_definition))
 
         return column_definitions
 
@@ -184,7 +180,6 @@ class ParserVisitor(evaql_parserVisitor):
         first_decimal = self.visit(ctx.decimalLiteral(0))
         second_decimal = self.visit(ctx.decimalLiteral(1))
 
-        print(first_decimal, second_decimal)
         dimensions = [first_decimal, second_decimal]
         return dimensions
 
