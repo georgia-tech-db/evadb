@@ -28,5 +28,8 @@ class ConstantValueExpression(AbstractExpression):
     def evaluate(self, *args):
         return self._value
 
+    @property
+    def value(self):
+        return self._value
     # ToDo implement other functinalities like maintaining hash
     # comparing two objects of this class(==)

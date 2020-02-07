@@ -26,6 +26,7 @@ from src.expression.tuple_value_expression import TupleValueExpression
 
 from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement
+from src.parser.insert_statement import InsertTableStatement
 
 from src.parser.table_ref import TableRef, TableInfo
 
@@ -63,6 +64,68 @@ class ParserVisitor(evaql_parserVisitor):
     def visitDmlStatement(self, ctx: evaql_parser.DdlStatementContext):
         dml_statement = self.visitChildren(ctx)
         return dml_statement
+
+    ##################################################################
+    # INSERT STATEMENTS
+    ##################################################################
+
+    def visitInsertStatement(self, ctx: evaql_parser.InsertStatementContext):
+        table_ref = None
+        column_list = []
+        value_list = []
+        # first two children with be INSERT INTO
+        # Then we will have terminal nodes for '(', ')'
+        for child in ctx.children[2:]:
+            if not isinstance(child, TerminalNode):
+                try:
+                    rule_idx = child.getRuleIndex()
+
+                    if rule_idx == evaql_parser.RULE_tableName:
+                        table_ref = self.visit(ctx.tableName())
+
+                    elif rule_idx == evaql_parser.RULE_uidList:
+                        column_list = self.visit(ctx.uidList())
+
+                    elif rule_idx == evaql_parser.RULE_insertStatementValue:
+                        insrt_value = self.visit(ctx.insertStatementValue())
+                        # Support only (value1, value2, .... value n)
+                        value_list = insrt_value[0]
+                except BaseException:
+                    print("Exception")
+                    # stop parsing something bad happened
+                    return None
+
+        insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
+        return insert_stmt
+
+    def visitUidList(self, ctx: evaql_parser.UidListContext):
+        uid_list = []
+        for child in ctx.children:
+            # Skippping commas
+            if not isinstance(child, TerminalNode):
+                uid = self.visit(child)
+                uid_expr = TupleValueExpression(uid)
+                uid_list.append(uid_expr)
+
+        return uid_list
+
+    def visitInsertStatementValue(
+            self, ctx: evaql_parser.InsertStatementValueContext):
+        insert_stmt_value = []
+        for child in ctx.children:
+            if not isinstance(child, TerminalNode):
+                try:
+                    rule_idx = child.getRuleIndex()
+
+                    if rule_idx == evaql_parser.RULE_expressionsWithDefaults:
+                        expr = self.visit(child)
+                        insert_stmt_value.append(expr)
+
+                except BaseException:
+                    print("Exception")
+                    # stop parsing something bad happened
+                    return None
+        return insert_stmt_value
 
     ##################################################################
     # CREATE STATEMENTS
@@ -201,6 +264,12 @@ class ParserVisitor(evaql_parserVisitor):
         decimal = None
         if ctx.DECIMAL_LITERAL() is not None:
             decimal = int(str(ctx.DECIMAL_LITERAL()))
+        elif ctx.ONE_DECIMAL() is not None:
+            decimal = int(str(ctx.ONE_DECIMAL()))
+        elif ctx.TWO_DECIMAL() is not None:
+            decimal = int(str(ctx.TWO_DECIMAL()))
+        elif ctx.ZERO_DECIMAL() is not None:
+            decimal = int(str(ctx.ZERO_DECIMAL()))
 
         return decimal
 
@@ -300,6 +369,9 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
 
     def visitStringLiteral(self, ctx: evaql_parser.StringLiteralContext):
+        # Fix a bug here; 'VAN' Literal gets converted to "'VAN'";
+        # Multiple quotes should be removed
+
         if ctx.STRING_LITERAL() is not None:
             return ConstantValueExpression(ctx.getText())
         # todo handle other types
@@ -309,6 +381,8 @@ class ParserVisitor(evaql_parserVisitor):
         if ctx.REAL_LITERAL() is not None:
             return ConstantValueExpression(float(ctx.getText()))
 
+        if ctx.decimalLiteral() is not None:
+            return ConstantValueExpression(self.visit(ctx.decimalLiteral()))
         return self.visitChildren(ctx)
 
     def visitLogicalExpression(
@@ -355,3 +429,14 @@ class ParserVisitor(evaql_parserVisitor):
             return ExpressionType.LOGICAL_AND
         else:
             return ExpressionType.INVALID
+
+    def visitExpressionsWithDefaults(
+            self, ctx: evaql_parser.ExpressionsWithDefaultsContext):
+        expr_list = []
+        for child in ctx.children:
+            # ignore COMMAs
+            if not isinstance(child, TerminalNode):
+                expr = self.visit(child)
+                expr_list.append(expr)
+
+        return expr_list
