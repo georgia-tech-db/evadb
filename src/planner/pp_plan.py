@@ -28,4 +28,4 @@ class PPScanPlan(AbstractScan):
     """
 
     def __init__(self, predicate: AbstractExpression):
-        super().__init__(PlanNodeType.PP_FILTER_TYPE, predicate)
+        super().__init__(PlanNodeType.PP_FILTER, predicate)
