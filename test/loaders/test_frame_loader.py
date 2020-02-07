@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import logging
 
 import numpy as np
 
@@ -25,11 +24,6 @@ from src.loaders.frame_loader import FrameLoader
 from src.spark.session import Session
 
 NUM_FRAMES = 10
-
-
-def suppress_py4j_logging():
-    logger = logging.getLogger('py4j')
-    logger.setLevel(logging.ERROR)
 
 
 class FrameLoaderTest(unittest.TestCase):
@@ -44,7 +38,6 @@ class FrameLoaderTest(unittest.TestCase):
                         FrameInfo(2, 2, 3, ColorSpace.BGR))
 
     def setUp(self):
-        suppress_py4j_logging()
         self.create_dummy_frames(NUM_FRAMES)
 
     def tearDown(self):

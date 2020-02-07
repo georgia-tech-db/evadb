@@ -15,6 +15,9 @@
 
 
 from pyspark.sql import SparkSession
+from pyspark.conf import SparkConf
+
+from src.utils.logging_manager import LoggingManager
 
 
 class Session(object):
@@ -43,9 +46,13 @@ class Session(object):
 
         :return: spark_session: A spark session
         """
+        eva_spark_conf = SparkConf()
+        eva_spark_conf.set('spark.logConf', 'true')
+
         session_builder = SparkSession \
             .builder \
-            .appName(application_name)
+            .appName(application_name) \
+            .config(conf=eva_spark_conf)
 
         if spark_master:
             session_builder.master(spark_master)
@@ -54,6 +61,11 @@ class Session(object):
         # if there is no existing one, creates a new one based
         # on the options set in this builder.
         self._session = session_builder.getOrCreate()
+
+        # Configure logging
+        log4j_level = LoggingManager().getLog4JLevel()
+        spark_context = self._session.sparkContext
+        spark_context.setLogLevel(log4j_level)
 
     def get_session(self):
         return self._session
