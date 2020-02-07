@@ -141,3 +141,7 @@ evaql_parserListener.py
 evaql_parserVisitor.py
 *.tokens
 *.interp
+*.antlr
+
+#VSCode
+.vscode/*
