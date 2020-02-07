@@ -42,7 +42,6 @@ git config core.hooksPath .githooks
 
 ## Development
 
-```
 1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 
 ```shell
