@@ -83,7 +83,7 @@ class DataframeColumn(sql_conn.base):
         column_str += ', '.join(['%d'] * len(self._array_dimensions)) \
                       % tuple(self._array_dimensions)
         column_str += "] "
-        column_str += ")\n"
+        column_str += ")"
 
         return column_str
 
