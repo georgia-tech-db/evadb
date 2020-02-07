@@ -164,6 +164,38 @@ class ParserTests(unittest.TestCase):
             select_stmt_new.from_table.table_info.database_name,
             'Database')
 
+    def test_insert_statement(self):
+        parser = Parser()
+        insert_query = """INSERT INTO MyVideo (Frame_ID, Frame_Path)
+                                    VALUES    (1, '/mnt/frames/1.png');
+                        """
+
+        eva_statement_list = parser.parse(insert_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.INSERT)
+
+        insert_stmt = eva_statement_list[0]
+
+        # into_table
+        self.assertIsNotNone(insert_stmt.table)
+        self.assertIsInstance(insert_stmt.table, TableRef)
+        self.assertEqual(
+            insert_stmt.table.table_info.table_name, 'MyVideo')
+
+        # Column
+        self.assertIsNotNone(insert_stmt.column_list)
+        self.assertIsInstance(insert_stmt.column_list, list)
+        self.assertEqual(len(insert_stmt.column_list), 2)
+        self.assertEqual(insert_stmt.column_list[0].col_name, 'Frame_ID')
+        self.assertEqual(insert_stmt.column_list[1].col_name, 'Frame_Path')
+
+        # Values
+        self.assertIsNotNone(insert_stmt.value_list)
+        self.assertIsInstance(insert_stmt.value_list, list)
+        self.assertEqual(len(insert_stmt.value_list), 2)
+        self.assertEqual(insert_stmt.value_list[0].value, 1)
+
 
 if __name__ == '__main__':
     unittest.main()
