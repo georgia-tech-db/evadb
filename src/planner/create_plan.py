@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum
 
+from src.planner.abstract_plan import AbstractPlan
+from src.planner.types import PlanNodeType
+from src.catalog.df_column import DataframeColumn
 
-@unique
-class PlanNodeType(IntEnum):
-    SEQUENTIAL_SCAN = 1
-    STORAGE_PLAN = 2
-    PP_FILTER = 3
-    INSERT = 4
-    CREATE = 5
-    # add other types
+from src.parser.create_statement import CreateTableStatement
+
+class CreatePlan(AbstractPlan):
+    def __init__(self, create_stmt: CreateTableStatement):
+        super().__init__(PlanNodeType.CREATE)
+        self._
