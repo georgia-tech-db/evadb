@@ -52,7 +52,7 @@ class SeqScanExecutorTest(unittest.TestCase):
 
         expected = FrameBatch(frames=[frame_3], info=None,
                               outcomes={"test": [outcome_3]})
-        filtered = list(predicate_executor.next())[0]
+        filtered = list(predicate_executor.exec())[0]
         self.assertEqual(expected, filtered)
 
     def test_should_return_all_frames_when_no_predicate_is_applied(self):
@@ -81,5 +81,5 @@ class SeqScanExecutorTest(unittest.TestCase):
         expected = FrameBatch(frames=[frame_1, frame_2, frame_3], info=None,
                               outcomes={"test": [outcome_1, outcome_2,
                                                  outcome_3]})
-        filtered = list(predicate_executor.next())[0]
+        filtered = list(predicate_executor.exec())[0]
         self.assertEqual(expected, filtered)

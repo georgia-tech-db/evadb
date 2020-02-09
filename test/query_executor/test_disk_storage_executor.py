@@ -33,7 +33,7 @@ class DiskStorageExecutorTest(unittest.TestCase):
         executor = DiskStorageExecutor(storage_plan)
 
         class_instance.load.return_value = range(5)
-        actual = list(executor.next())
+        actual = list(executor.exec())
 
         mock_class.assert_called_once_with(video_info,
                                            batch_size=storage_plan.batch_size,

@@ -41,5 +41,5 @@ class PPScanExecutorTest(unittest.TestCase):
         predicate_executor.append_child(DummyExecutor([batch]))
 
         expected = FrameBatch(frames=[frame_3], info=None)
-        filtered = list(predicate_executor.next())[0]
+        filtered = list(predicate_executor.exec())[0]
         self.assertEqual(expected, filtered)
