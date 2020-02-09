@@ -83,9 +83,26 @@ class DataFrameColumn(BaseModel):
         return result
 
     @classmethod
-    def get_by_metadata_id_and_id_in(cls, id_list, metadata_id):
-        result = DataFrameColumn.query\
-            .filter(DataFrameColumn._metadata_id == metadata_id,
-                    DataFrameColumn._id.in_(id_list))\
-            .all()
+    def get_by_metadata_id_and_id_in(cls, id_list: List[int], metadata_id: int) -> List[DataFrameColumn]:
+        """return all the columns that matches id_list and  metadata_id
+        
+        Arguments:
+            id_list {List[int]} -- [metadata ids of the required columns: If None return all the columns that matches the metadata_id]
+            metadata_id {int} -- [metadata id of the table]
+        
+        Returns:
+            List[DataFrameColumn] -- [the filtered dataframecolumns]
+        """
+        result = None
+        if id_list is not None:
+            result = DataFrameColumn.query\
+                .filter(DataFrameColumn._metadata_id == metadata_id,
+                        DataFrameColumn._id.in_(id_list))\
+                .all()
+        elif:
+            result = DataFrameColumn.query\
+                .filter(DataFrameColumn._metadata_id == metadata_id)\
+                .all()
+
         return result
+
