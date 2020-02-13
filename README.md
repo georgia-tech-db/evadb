@@ -42,12 +42,10 @@ git config core.hooksPath .githooks
 
 ## Development
 
-We invite you to help us build the future of visual data management DBMSs.
-
 1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 
 ```shell
-   pycodestyle --select E test src/loaders
+   python -m pytest test/
 ``` 
 
 2. Ensure that the coding style conventions are followed.
@@ -113,6 +111,5 @@ _Technology preview_: currently unsupported, possibly due to incomplete function
 See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
 ## License
-
 Copyright (c) 2018-2020 [Georgia Tech Database Group](http://db.cc.gatech.edu/)  
 Licensed under the [Apache License](LICENSE).

@@ -31,14 +31,13 @@ class CreateTableStatement(AbstractStatement):
         table reference in the create table statement
     ColumnList:
         list of columns
-    **kwargs : to support other functionality, Orderby, Distinct, Groupby.
     """
 
     def __init__(self,
                  table_name: TableRef,
                  if_not_exists: bool,
                  column_list: List[AbstractExpression] = None):
-        super().__init__(StatementType.SELECT)
+        super().__init__(StatementType.CREATE)
         self._table_name = table_name
         self._if_not_exists = if_not_exists
 
