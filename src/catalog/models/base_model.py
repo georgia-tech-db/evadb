@@ -12,19 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
-from src.configuration.dictionary import SQLALCHEMY_DATABASE_URI
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy import Column, Integer
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
-engine = create_engine(SQLALCHEMY_DATABASE_URI)
-db_session = scoped_session(sessionmaker(autocommit=False, autoflush=False,
-                                         bind=engine))
+from src.catalog.sql_config import SQLConfig
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
-class CustomBase(object):
+db_session = SQLConfig().db_session
+
+# todo: does not throw errors
+class CustomModel:
     """This overrides the default
     `_declarative_constructor` constructor.
     It skips the attributes that are not present
@@ -32,6 +33,8 @@ class CustomBase(object):
     unknown attributes for the model on creation,
     it won't complain for `unkwnown field`s.
     """
+    query = db_session.query_property()
+    _id = Column('id', Integer, primary_key=True)
 
     def __init__(self, **kwargs):
         cls_ = type(self)
@@ -44,6 +47,7 @@ class CustomBase(object):
     """
     Set default tablename
     """
+
     @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
@@ -86,18 +90,19 @@ class CustomBase(object):
         except DatabaseError:
             db_session.rollback()
 
-
-BaseModel = declarative_base(cls=CustomBase, constructor=None)
-BaseModel.query = db_session.query_property()
-
+BaseModel = declarative_base(cls=CustomModel, constructor=None)
 
 def init_db():
     """
     Create database if doesn't exist and
     create all tables.
     """
+    engine = SQLConfig().engine
     if not database_exists(engine.url):
+        LoggingManager().log("Database does not exist, creating database.",
+                             LoggingLevel.INFO)
         create_database(engine.url)
+    LoggingManager().log("Creating tables", LoggingLevel.INFO)
     BaseModel.metadata.create_all(bind=engine)
 
 
@@ -107,5 +112,6 @@ def drop_db():
     themselves.
     Drop the database as well.
     """
+    engine = SQLConfig().engine
     BaseModel.metadata.drop_all(bind=engine)
     drop_database(engine.url)

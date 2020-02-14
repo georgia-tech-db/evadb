@@ -13,13 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from src.parser.create_statement import CreateTableStatement
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
-from src.catalog.df_column import DataframeColumn
 
-from src.parser.create_statement import CreateTableStatement
 
 class CreatePlan(AbstractPlan):
-    def __init__(self, create_stmt: CreateTableStatement):
+    def __init__(self, table_name, schema_tuples, file_url):
         super().__init__(PlanNodeType.CREATE)
-        self._
+        self._table_name = table_name
+        self._file_url = file_url
+        self._schema_tuples = schema_tuples
+
+    @property
+    def table_name(self):
+        return self._table_name
+
+    @property
+    def file_url(self):
+        return self._file_url
+
+    @property
+    def schema_tuples(self):
+        return self._schema_tuples

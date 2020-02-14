@@ -16,7 +16,7 @@
 from typing import List
 
 from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.utils import Utils
+from src.catalog.schema_utils import Utils
 
 
 class DataFrameSchema(object):

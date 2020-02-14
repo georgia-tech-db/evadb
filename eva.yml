@@ -1,2 +1,3 @@
 core:
     location: "file:///tmp/eva_datasets"
+    sqlalchemy_database_uri: 'mysql+pymysql://root:root@localhost/eva_catalog'

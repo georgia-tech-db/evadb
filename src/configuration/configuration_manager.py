@@ -14,7 +14,8 @@
 # limitations under the License.
 
 import yaml
-
+from src.configuration.dictionary import EVA_DIR
+import os
 
 class ConfigurationManager(object):
 
@@ -25,7 +26,7 @@ class ConfigurationManager(object):
         if cls._instance is None:
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
 
-            with open("eva.yml", 'r') as ymlfile:
+            with open(os.path.join(EVA_DIR, "eva.yml"), 'r') as ymlfile:
                 cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         return cls._instance
