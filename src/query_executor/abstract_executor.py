@@ -26,7 +26,7 @@ class AbstractExecutor(ABC):
         node (AbstractPlan): Plan node corresponding to this executor
     """
 
-    def __init__(self, node: 'AbstractPlan'):
+    def __init__(self, node: AbstractPlan):
         self._node = node
         self._children = []
 
@@ -48,18 +48,20 @@ class AbstractExecutor(ABC):
         """
         return self._children
 
+    @property
+    def node(self) -> AbstractPlan:
+        return self._node
+        
     @abstractmethod
     def validate(self):
         NotImplementedError('Must be implemented in subclasses.')
 
+    
     @abstractmethod
-    def next(self) -> Iterator[FrameBatch]:
+    def exec(self):
         """
-        This method is implemented by every executor. Includes logic for
-        fetching frame batches from child nodes and emitting it to parent
+        This method is implemented by every executor. Contains logic for that executor;
+        For retrival based executor : It fetchs frame batches from child nodes and emits it to parent
         node.
-
-        Yields:
-             FrameBatch
         """
         NotImplementedError('Must be implemented in subclasses.')

@@ -98,22 +98,48 @@ class CatalogManager(object):
                 DataFrameSchema(metadata.get_name(), df_columns))
         return metadata
 
-    # def create_dataset(self, dataset_name: str):
-    #
-    #     dataset_catalog_entry = \
-    #         self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
-    #
-    #     dataset_df = \
-    #         load_dataframe(dataset_catalog_entry.get_dataframe_file_url())
-    #
-    #     dataset_df.show(10)
-    #
-    #     next_row_id = get_next_row_id(dataset_df, DATASET_DATAFRAME_NAME)
-    #
-    #     row_1 = [next_row_id, dataset_name]
-    #     rows = [row_1]
-    #
-    #     append_rows(dataset_catalog_entry, rows)
+
+    def get_column_types(self, table_metadata_id: int, col_id_list: List[int]) -> List[ColumnType]:
+        """
+        This method consumes the input table_id and the input column_id_list and
+        returns a list of ColumnType for each provided column_id.
+        
+        Arguments:
+            table_metadata_id {int} -- [metadata_id of the table]
+            col_id_list {List[int]} -- [metadata ids of the columns; If list = None, return type for all columns in the table]
+        
+        Returns:
+            List[ColumnType] -- [list of required column type for each input column]
+        """
+        metadata = DataFrameMetadata.get(table_metadata_id)
+        col_types = []
+        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
+                col_id_list,
+                metadata_id)
+        for col in df_columns:
+            col_types.append(col.get_type())
+        
+        return col_types
+            
+    def get_column_ids(self, table_metadata_id: int) -> List[int]:
+        """
+        This method returns all the column_ids associated with the given table_metadata_id
+        
+        Arguments:
+            table_metadata_id {int} -- [table metadata id for which columns are required]
+        
+        Returns:
+            List[int] -- [list of columns ids for this table]
+        """
+
+        col_ids = []
+        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
+                None,
+                table_metadata_id)
+        for col in df_columns:
+            col_ids.append(col[0])
+        
+        return col_ids
 
 
 if __name__ == '__main__':

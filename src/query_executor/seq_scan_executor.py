@@ -34,7 +34,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def next(self) -> Iterator[FrameBatch]:
+    def exec(self) -> Iterator[FrameBatch]:
 
         child_executor = self.children[0]
         for batch in child_executor.next():

@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.optimizer.operators import LogicalGet, LogicalFilter, LogicalProject
+from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
+                                     LogicalInsert)
 from src.parser.eva_statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
+from src.parser.insert_statement import InsertTableStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr)
 
@@ -35,7 +37,7 @@ class StatementToPlanConvertor():
         self._plan = get_opr
 
     def visit_select(self, statement: AbstractStatement):
-        """convertor for select statement
+        """converter for select statement
 
         Arguments:
             statement {AbstractStatement} -- [input select statement]
@@ -66,6 +68,30 @@ class StatementToPlanConvertor():
             projection_opr.append_child(self._plan)
             self._plan = projection_opr
 
+    def visit_insert(self, statement: AbstractStatement):
+        """Converter for parsed insert statement
+
+        Arguments:
+            statement {AbstractStatement} -- [input insert statement]
+        """
+        # bind the table reference
+        video = statement.table
+        catalog_table_id = bind_table_ref(video)
+
+        # bind column_list
+        col_list = statement.column_list
+        bind_columns_expr(col_list)
+
+        # nothing to be done for values
+        # as we add support for other variants of insert we will handle them
+        # here
+        value_list = statement.value_list
+
+        # ready to create LOgical node
+        insert_opr = LogicalInsert(
+            video, catalog_table_id, col_list, value_list)
+        self._plan = insert_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -76,6 +102,8 @@ class StatementToPlanConvertor():
         """
         if isinstance(statement, SelectStatement):
             self.visit_select(statement)
+        elif isinstance(statement, InsertTableStatement):
+            self.visit_insert(statement)
 
     @property
     def plan(self):

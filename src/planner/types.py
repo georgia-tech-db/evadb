@@ -17,7 +17,9 @@ from enum import unique, IntEnum
 
 @unique
 class PlanNodeType(IntEnum):
-    SEQUENTIAL_SCAN_TYPE = 1
+    SEQUENTIAL_SCAN = 1
     STORAGE_PLAN = 2
-    PP_FILTER_TYPE = 3
+    PP_FILTER = 3
+    INSERT = 4
+    CREATE = 5
     # add other types

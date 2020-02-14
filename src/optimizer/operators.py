@@ -15,6 +15,7 @@
 from enum import IntEnum, unique
 from typing import List
 from src.parser.table_ref import TableRef
+from src.expression.abstract_expression import AbstractExpression
 
 
 @unique
@@ -25,6 +26,7 @@ class OperatorType(IntEnum):
     LOGICALGET = 1,
     LOGICALFILTER = 2,
     LOGICALPROJECT = 3,
+    LOGICALINSERT = 4,
 
 
 class Operator:
@@ -55,7 +57,7 @@ class Operator:
 
 
 class LogicalGet(Operator):
-    def __init__(self, video: TableRef, catalog_entry: 'type',
+    def __init__(self, video: TableRef, catalog_entry: int,
                  children: List = None):
         super().__init__(OperatorType.LOGICALGET, children)
         self._video = video
@@ -63,13 +65,38 @@ class LogicalGet(Operator):
 
 
 class LogicalFilter(Operator):
-    def __init__(self, predicate: 'AbstractExpression', children: List = None):
+    def __init__(self, predicate: AbstractExpression, children: List = None):
         super().__init__(OperatorType.LOGICALFILTER, children)
         self._predicate = predicate
 
 
 class LogicalProject(Operator):
-    def __init__(self, target_list: List['AbstractExpression'],
+    def __init__(self, target_list: List[AbstractExpression],
                  children: List = None):
         super().__init__(OperatorType.LOGICALPROJECT, children)
         self._target_list = target_list
+
+
+class LogicalInsert(Operator):
+    """[Logical Node for Insert operation]
+
+    Arguments:
+        video {TableRef}:     
+            [TableRef object copied from parsed statement]
+        video_catalog_id{int}:      
+            [catalog id for the video table]
+        column_list{List[AbstractExpression]}:
+            [After binding annotated column_list]
+        value_list{List[AbstractExpression]}:
+            [value list to insert]
+    """
+
+    def __init__(self, video: TableRef, video_catalog_id: int,
+                 column_list: List[AbstractExpression],
+                 value_list: List[AbstractExpression],
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALINSERT, children)
+        self._video = video
+        self._video_catalog_id = video_catalog_id
+        self._column_list = column_list
+        self._value_list = value_list
