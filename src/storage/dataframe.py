@@ -15,39 +15,10 @@
 
 
 from src.spark.session import Session
-
+from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
 
 
-class DataFrameMetadata(object):
-
-    _dataframe_file_url = None
-    _dataframe_schema = None
-    _dataframe_petastorm_schema = None
-    _dataframe_pyspark_schema = None
-
-    def __init__(self,
-                 dataframe_file_url,
-                 dataframe_schema
-                 ):
-        self._dataframe_file_url = dataframe_file_url
-        self._dataframe_schema = dataframe_schema
-        self._dataframe_petastorm_schema = \
-            dataframe_schema.get_petastorm_schema()
-        self._dataframe_pyspark_schema = \
-            self._dataframe_petastorm_schema.as_spark_schema()
-
-    def get_dataframe_file_url(self):
-        return self._dataframe_file_url
-
-    def get_dataframe_schema(self):
-        return self._dataframe_schema
-
-    def get_dataframe_petastorm_schema(self):
-        return self._dataframe_petastorm_schema
-
-    def get_dataframe_pyspark_schema(self):
-        return self._dataframe_pyspark_schema
 
 
 def load_dataframe(dataframe_url: str):

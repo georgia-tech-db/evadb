@@ -12,25 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String
 
-from src.catalog.database import BaseModel
+from src.catalog.df_schema import DataFrameSchema
+from src.catalog.models.base_model import BaseModel
 
 
 class DataFrameMetadata(BaseModel):
     __tablename__ = 'df_metadata'
 
-    _id = Column('id', Integer, primary_key=True)
-    _name = Column('name', String(100))
+    _name = Column('name', String(100), unique=True)
     _file_url = Column('file_url', String(100))
 
-    def __init__(self, dataframe_file_url, dataframe_schema):
-        self._file_url = dataframe_file_url
-        self._dataframe_schema = dataframe_schema
-        self._dataframe_petastorm_schema = \
-            dataframe_schema.get_petastorm_schema()
-        self._dataframe_pyspark_schema = \
-            self._dataframe_petastorm_schema.as_spark_schema()
+    def __init__(self, name: str, file_url: str,
+                 dataframe_schema: DataFrameSchema = None):
+        self._name = name
+        self._file_url = file_url
+        if dataframe_schema is not None:
+            self._dataframe_schema = dataframe_schema
+            self._dataframe_petastorm_schema = \
+                dataframe_schema.get_petastorm_schema()
+            self._dataframe_pyspark_schema = \
+                self._dataframe_petastorm_schema.as_spark_schema()
 
     def set_schema(self, schema):
         self._dataframe_schema = schema
@@ -56,6 +59,14 @@ class DataFrameMetadata(BaseModel):
 
     def get_dataframe_pyspark_schema(self):
         return self._dataframe_pyspark_schema
+
+    @classmethod
+    def create(cls, name, file_url):
+        metadata = DataFrameMetadata(name=name, file_url=file_url)
+        metadata = metadata.save()
+        if metadata is None:
+            raise Exception('Object already created.')
+        return metadata
 
     @classmethod
     def get_id_from_name(cls, name):

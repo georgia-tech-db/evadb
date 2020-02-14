@@ -16,9 +16,9 @@ import json
 from enum import Enum
 from typing import List
 
-from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint
 
-from src.catalog.database import BaseModel
+from src.catalog.models.base_model import BaseModel
 from src.catalog.column_type import ColumnType
 from sqlalchemy.types import Enum
 
@@ -26,22 +26,29 @@ from sqlalchemy.types import Enum
 class DataFrameColumn(BaseModel):
     __tablename__ = 'df_column'
 
-    _id = Column('id', Integer, primary_key=True)
     _name = Column('name', String(100))
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
     _array_dimensions = Column('array_dimensions', String(100), default='[]')
-    _metadata_id = Column('dataframe_id', Integer)
+    _metadata_id = Column('metadata_id', Integer)
+    __table_args__ = (
+        UniqueConstraint('name', 'metadata_id'), {}
+    )
 
     def __init__(self,
                  name: str,
                  type: ColumnType,
                  is_nullable: bool = False,
-                 array_dimensions: List[int] = []):
+                 array_dimensions: List[int] = [],
+                 metadata_id: int = None):
         self._name = name
         self._type = type
         self._is_nullable = is_nullable
         self._array_dimensions = str(array_dimensions)
+        self._metadata_id = metadata_id
+
+    def get_id(self):
+        return self._id
 
     def get_name(self):
         return self._name
@@ -83,13 +90,14 @@ class DataFrameColumn(BaseModel):
         return result
 
     @classmethod
-    def get_by_metadata_id_and_id_in(cls, id_list: List[int], metadata_id: int) -> List[DataFrameColumn]:
+    def get_by_metadata_id_and_id_in(cls, id_list: List[int], metadata_id:
+    int):
         """return all the columns that matches id_list and  metadata_id
-        
+
         Arguments:
             id_list {List[int]} -- [metadata ids of the required columns: If None return all the columns that matches the metadata_id]
             metadata_id {int} -- [metadata id of the table]
-        
+
         Returns:
             List[DataFrameColumn] -- [the filtered dataframecolumns]
         """
@@ -99,10 +107,19 @@ class DataFrameColumn(BaseModel):
                 .filter(DataFrameColumn._metadata_id == metadata_id,
                         DataFrameColumn._id.in_(id_list))\
                 .all()
-        elif:
+        else:
             result = DataFrameColumn.query\
                 .filter(DataFrameColumn._metadata_id == metadata_id)\
                 .all()
 
         return result
+
+    @classmethod
+    def create(cls, name: str, type: str, metadata_id: int):
+        df_column = DataFrameColumn(name=name, type=ColumnType[type],
+                         metadata_id=metadata_id)
+        df_column =  df_column.save()
+        if df_column is None:
+            raise Exception('Object already created.')
+        return df_column
 

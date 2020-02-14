@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-
+from src.planner.abstract_plan import AbstractPlan
 from src.expression.abstract_expression import AbstractExpression
 from src.planner.types import PlanNodeType
 
