@@ -37,7 +37,7 @@ class PPExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def next(self) -> Iterator[FrameBatch]:
+    def exec(self) -> Iterator[FrameBatch]:
         child_executor = self.children[0]
         for batch in child_executor.next():
             outcomes = self.predicate.evaluate(batch)
@@ -47,3 +47,5 @@ class PPExecutor(AbstractExecutor):
                     required_frame_ids.append(i)
 
             yield batch[required_frame_ids]
+
+    

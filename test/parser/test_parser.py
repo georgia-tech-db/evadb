@@ -49,8 +49,6 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
 
-            print(eva_statement_list[0])
-
     def test_single_statement_queries(self):
         parser = Parser()
 
@@ -71,8 +69,6 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
-
-            print(eva_statement_list[0])
 
     def test_multiple_statement_queries(self):
         parser = Parser()

@@ -36,5 +36,5 @@ class SeqScanPlan(AbstractScan):
 
     def __init__(self, column_ids: List[AbstractExpression], video: TableRef,
                  predicate: AbstractExpression):
-        super().__init__(PlanNodeType.SEQUENTIAL_SCAN_TYPE, column_ids, video,
+        super().__init__(PlanNodeType.SEQUENTIAL_SCAN, column_ids, video,
                          predicate)

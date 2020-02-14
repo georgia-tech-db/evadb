@@ -12,20 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.expression.abstract_expression import AbstractExpression
-from src.planner.abstract_scan_plan import AbstractScan
+
+from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
+from src.catalog.df_column import DataframeColumn
 
+from src.parser.create_statement import CreateTableStatement
 
-class PPScanPlan(AbstractScan):
-    """
-    This plan is used for storing information required for probabilistic
-    predicate.
-
-    Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-    """
-
-    def __init__(self, predicate: AbstractExpression):
-        super().__init__(PlanNodeType.PP_FILTER, predicate)
+class CreatePlan(AbstractPlan):
+    def __init__(self, create_stmt: CreateTableStatement):
+        super().__init__(PlanNodeType.CREATE)
+        self._
