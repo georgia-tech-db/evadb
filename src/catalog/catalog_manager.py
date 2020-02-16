@@ -169,3 +169,8 @@ class CatalogManager(object):
             col_ids.append(col[0])
 
         return col_ids
+
+if __name__ == '__main__':
+    column = CatalogManager().create_column("label", "INTEGER", 1)
+    print(column.get_id(), column.get_name())
+

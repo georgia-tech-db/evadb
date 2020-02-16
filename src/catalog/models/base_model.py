@@ -21,11 +21,9 @@ from src.catalog.sql_config import SQLConfig
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
-# session object to be used by the models for database operations
-db_session = SQLConfig().db_session
+db_session = SQLConfig().session
 
 
-# todo: does not throw errors
 class CustomModel:
     """This overrides the default `_declarative_constructor` constructor.
 
@@ -45,43 +43,48 @@ class CustomModel:
             else:
                 continue
 
-    """
-    Add and try to flush.
-    """
-
     def save(self):
-        db_session.add(self)
-        self._flush()
+        """Add and commit
+
+        Returns: saved object
+
+        """
+        try:
+            db_session.add(self)
+            self._commit()
+        except Exception:
+            LoggingManager().log("Object already exists in database",
+                                 LoggingLevel.ERROR)
+            raise Exception
         return self
 
-    """
-    Update and try to flush.
-    """
-
     def update(self, **kwargs):
+        """Update and commit
+
+        Args:
+            **kwargs: attributes to update
+
+        Returns: updated object
+
+        """
         for attr, value in kwargs.items():
             if hasattr(self, attr):
                 setattr(self, attr, value)
         return self.save()
 
-    """
-    Delete and try to flush.
-    """
-
     def delete(self):
+        """Delete and commit"""
+
         db_session.delete(self)
-        self._flush()
+        self._commit()
 
-    """
-    Try to flush. If an error is raised,
-    the session is rollbacked.
-    """
-
-    def _flush(self):
+    def _commit(self):
+        """Try to commit. If an error is raised, the session is rollbacked."""
         try:
-            db_session.flush()
+            db_session.commit()
         except DatabaseError:
             db_session.rollback()
+            raise Exception("Exception occurred while committing to database.")
 
 
 # Custom Base Model to be inherited by all models
@@ -100,7 +103,7 @@ def init_db():
 
 
 def drop_db():
-    """Drop all of the record from tables and the tables themselves.Drop the
+    """Drop all of the record from tables and the tables themselves. Drop the
     database as well."""
     engine = SQLConfig().engine
     BaseModel.metadata.drop_all(bind=engine)

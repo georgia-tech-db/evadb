@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from enum import Enum
 from typing import List
 
 from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint
-
-from src.catalog.models.base_model import BaseModel
-from src.catalog.column_type import ColumnType
 from sqlalchemy.types import Enum
+
+from src.catalog.column_type import ColumnType
+from src.catalog.models.base_model import BaseModel
 
 
 class DataFrameColumn(BaseModel):
@@ -29,7 +28,7 @@ class DataFrameColumn(BaseModel):
     _name = Column('name', String(100))
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
-    _array_dimensions = Column('array_dimensions', String(100), default='[]')
+    _array_dimensions = Column('array_dimensions', String(100))
     _metadata_id = Column('metadata_id', Integer)
     __table_args__ = (
         UniqueConstraint('name', 'metadata_id'), {}
@@ -80,10 +79,10 @@ class DataFrameColumn(BaseModel):
 
     @classmethod
     def get_id_from_metadata_id_and_name_in(cls, metadata_id, column_names):
-        result = DataFrameColumn.query\
-            .with_entities(DataFrameColumn._id)\
+        result = DataFrameColumn.query \
+            .with_entities(DataFrameColumn._id) \
             .filter(DataFrameColumn._metadata_id == metadata_id,
-                    DataFrameColumn._name.in_(column_names))\
+                    DataFrameColumn._name.in_(column_names)) \
             .all()
         result = [res[0] for res in result]
 
@@ -95,7 +94,8 @@ class DataFrameColumn(BaseModel):
         """return all the columns that matches id_list and  metadata_id
 
         Arguments:
-            id_list {List[int]} -- [metadata ids of the required columns: If None return all the columns that matches the metadata_id]
+            id_list {List[int]} -- [metadata ids of the required columns: If 
+            None return all the columns that matches the metadata_id]
             metadata_id {int} -- [metadata id of the table]
 
         Returns:
@@ -103,13 +103,13 @@ class DataFrameColumn(BaseModel):
         """
         result = None
         if id_list is not None:
-            result = DataFrameColumn.query\
+            result = DataFrameColumn.query \
                 .filter(DataFrameColumn._metadata_id == metadata_id,
-                        DataFrameColumn._id.in_(id_list))\
+                        DataFrameColumn._id.in_(id_list)) \
                 .all()
         else:
-            result = DataFrameColumn.query\
-                .filter(DataFrameColumn._metadata_id == metadata_id)\
+            result = DataFrameColumn.query \
+                .filter(DataFrameColumn._metadata_id == metadata_id) \
                 .all()
 
         return result
@@ -117,9 +117,6 @@ class DataFrameColumn(BaseModel):
     @classmethod
     def create(cls, name: str, type: str, metadata_id: int):
         df_column = DataFrameColumn(name=name, type=ColumnType[type],
-                         metadata_id=metadata_id)
-        df_column =  df_column.save()
-        if df_column is None:
-            raise Exception('Object already created.')
+                                    metadata_id=metadata_id)
+        df_column = df_column.save()
         return df_column
-

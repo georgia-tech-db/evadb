@@ -64,8 +64,6 @@ class DataFrameMetadata(BaseModel):
     def create(cls, name, file_url):
         metadata = DataFrameMetadata(name=name, file_url=file_url)
         metadata = metadata.save()
-        if metadata is None:
-            raise Exception('Object already created.')
         return metadata
 
     @classmethod
