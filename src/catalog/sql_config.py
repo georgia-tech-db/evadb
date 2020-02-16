@@ -31,17 +31,7 @@ class SQLConfig:
 
         Retrieves the database uri for connection from ConfigurationManager.
         """
-        self._engine = create_engine(ConfigurationManager()
-                                     .get_value("core",
-                                                "sqlalchemy_database_uri"))
-        self._session = scoped_session(sessionmaker(autocommit=True,
-                                                    bind=self._engine))
-
-    @property
-    def engine(self):
-        return self._engine
-
-    @property
-    def session(self):
-        return self._session
-
+        uri = ConfigurationManager().get_value("core",
+                                               "sqlalchemy_database_uri")
+        self.engine = create_engine(uri)  # set echo=True to log SQL statements
+        self.session = scoped_session(sessionmaker(bind=self.engine))
