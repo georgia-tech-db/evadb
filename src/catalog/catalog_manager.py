@@ -38,28 +38,15 @@ class CatalogManager(object):
         return cls._instance
 
     def bootstrap_catalog(self):
+        """Bootstraps catalog.
 
-        # eva_dir = ConfigurationManager().get_value("core", "location")
-        # output_url = os.path.join(eva_dir, CATALOG_DIR)
-        # LoggingManager().log("Bootstrapping catalog" + str(output_url),
-        #                      LoggingLevel.INFO)
+        This method runs all tasks required for using catalog. Currently,
+        it includes only one task ie. initializing database. It creates the
+        catalog database and tables if they do not exist.
+
+        """
         LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
-        # # Construct output location
-        # catalog_dir_url = os.path.join(eva_dir, "catalog")
-        #
-        # # Get filesystem path
-        # catalog_os_path = urlparse(catalog_dir_url).path
-        #
-        # # Check if catalog exists
-        # if os.path.exists(catalog_os_path):
-        #     # Load catalog if it exists
-        #     load_catalog_dataframes(catalog_dir_url,
-        #     self._catalog_dictionary)
-        # else:
-        #     # Create catalog if it does not exist
-        #     create_catalog_dataframes(
-        #         catalog_dir_url, self._catalog_dictionary)
 
     def get_table_bindings(self, database_name: str, table_name: str,
                            column_names: List[str]) -> Tuple[int, List[int]]:
@@ -81,10 +68,38 @@ class CatalogManager(object):
         return metadata_id, column_ids
 
     def create_metadata(self, name: str, file_url: str) -> DataFrameMetadata:
+        """Creates metadata object and saves it in catalog database.
+
+        The object saved in database does not have any corresponding columns
+        in the database when this method is called. Only the name and file_url
+        parameters of the object are populated.
+
+        Args:
+            name: name of the dataset/video to which this metdata corresponds
+            file_url: #todo
+
+        Returns:
+            The persisted DataFrameMetadata object with the id field populated.
+        """
+
         metadata = DataFrameMetadata.create(name, file_url)
         return metadata
 
-    def create_column(self, name, type, metadata_id):
+    def create_column(self, name: str, type: str,
+                      metadata_id: int) -> DataFrameColumn:
+        """Creates column object and saved it in catalog database.
+
+        Creates a column corresponding to a metadata id.
+
+        Args:
+            name: column name in the corresponding dataframe
+            type: type of the column
+            metadata_id: metadata_id in the database corresponding to the
+                dataframe
+
+        Returns:
+            The persisted DataFrameColumn object with the id field populated.
+        """
         column = DataFrameColumn.create(name, type, metadata_id)
         return column
 
@@ -154,10 +169,3 @@ class CatalogManager(object):
             col_ids.append(col[0])
 
         return col_ids
-
-
-if __name__ == '__main__':
-    CatalogManager()
-    metadata_id = DataFrameMetadata.get_id_from_name('cifar10')
-    column = DataFrameColumn.create('label', 'INTEGER', metadata_id)
-    print(column.get_id())
