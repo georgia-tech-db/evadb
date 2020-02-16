@@ -24,7 +24,7 @@ from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
 
-class Utils(object):
+class SchemaUtils(object):
 
     @staticmethod
     def get_petastorm_column(df_column):
@@ -73,7 +73,7 @@ class Utils(object):
     def get_petastorm_schema(name, column_list):
         petastorm_column_list = []
         for _column in column_list:
-            petastorm_column = Utils.get_petastorm_column(_column)
+            petastorm_column = SchemaUtils.get_petastorm_column(_column)
             petastorm_column_list.append(petastorm_column)
 
         petastorm_schema = Unischema(name, petastorm_column_list)

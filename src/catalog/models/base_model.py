@@ -14,24 +14,25 @@
 # limitations under the License.
 from sqlalchemy import Column, Integer
 from sqlalchemy.exc import DatabaseError
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
 from src.catalog.sql_config import SQLConfig
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
-
+# session object to be used by the models for database operations
 db_session = SQLConfig().db_session
+
 
 # todo: does not throw errors
 class CustomModel:
-    """This overrides the default
-    `_declarative_constructor` constructor.
-    It skips the attributes that are not present
-    for the model, thus if a dict is passed with some
-    unknown attributes for the model on creation,
+    """This overrides the default `_declarative_constructor` constructor.
+
+    It skips the attributes that are not present for the model, thus if a
+    dict is passed with some unknown attributes for the model on creation,
     it won't complain for `unkwnown field`s.
+    Declares and int id field for all tables
     """
     query = db_session.query_property()
     _id = Column('id', Integer, primary_key=True)
@@ -43,14 +44,6 @@ class CustomModel:
                 setattr(self, k, kwargs[k])
             else:
                 continue
-
-    """
-    Set default tablename
-    """
-
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
 
     """
     Add and try to flush.
@@ -90,13 +83,13 @@ class CustomModel:
         except DatabaseError:
             db_session.rollback()
 
+
+# Custom Base Model to be inherited by all models
 BaseModel = declarative_base(cls=CustomModel, constructor=None)
 
+
 def init_db():
-    """
-    Create database if doesn't exist and
-    create all tables.
-    """
+    """Create database if doesn't exist and create all tables."""
     engine = SQLConfig().engine
     if not database_exists(engine.url):
         LoggingManager().log("Database does not exist, creating database.",
@@ -107,11 +100,8 @@ def init_db():
 
 
 def drop_db():
-    """
-    Drop all of the record from tables and the tables
-    themselves.
-    Drop the database as well.
-    """
+    """Drop all of the record from tables and the tables themselves.Drop the
+    database as well."""
     engine = SQLConfig().engine
     BaseModel.metadata.drop_all(bind=engine)
     drop_database(engine.url)

@@ -16,7 +16,7 @@
 from typing import List
 
 from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.schema_utils import Utils
+from src.catalog.schema_utils import SchemaUtils
 
 
 class DataFrameSchema(object):
@@ -28,8 +28,8 @@ class DataFrameSchema(object):
 
         self._name = name
         self._column_list = column_list
-        self._petastorm_schema = Utils.get_petastorm_schema(self._name,
-                                                            self._column_list)
+        self._petastorm_schema = SchemaUtils.get_petastorm_schema(self._name,
+                                                                  self._column_list)
 
     def __str__(self):
         schema_str = "SCHEMA:: (" + self._name + ")\n"
