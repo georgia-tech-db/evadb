@@ -13,17 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.parser.create_statement import CreateTableStatement
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 
 
 class CreatePlan(AbstractPlan):
-    def __init__(self, table_name, schema_tuples, file_url):
+    def __init__(self, table_name, column_list, file_url):
         super().__init__(PlanNodeType.CREATE)
         self._table_name = table_name
         self._file_url = file_url
-        self._schema_tuples = schema_tuples
+        self._columns = column_list
 
     @property
     def table_name(self):
@@ -34,5 +33,5 @@ class CreatePlan(AbstractPlan):
         return self._file_url
 
     @property
-    def schema_tuples(self):
-        return self._schema_tuples
+    def columns(self):
+        return self._columns

@@ -67,41 +67,29 @@ class CatalogManager(object):
                 column_names)
         return metadata_id, column_ids
 
-    def create_metadata(self, name: str, file_url: str) -> DataFrameMetadata:
-        """Creates metadata object and saves it in catalog database.
+    def create_metadata(self, name: str, file_url: str,
+                        column_list: List[DataFrameColumn]) -> \
+            DataFrameMetadata:
+        """Creates metadata object when called by create executor.
 
-        The object saved in database does not have any corresponding columns
-        in the database when this method is called. Only the name and file_url
-        parameters of the object are populated.
+        Creates a metadata object and column objects and persists them in
+        database. Sets the schema field of the metadata object.
 
         Args:
             name: name of the dataset/video to which this metdata corresponds
             file_url: #todo
+            column_list: list of columns
 
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
         metadata = DataFrameMetadata.create(name, file_url)
+        for column in column_list:
+            column.metadata_id = metadata.get_id()
+        column_list = DataFrameColumn.create(column_list)
+        metadata.set_schema(column_list)
         return metadata
-
-    def create_column(self, name: str, type: str,
-                      metadata_id: int) -> DataFrameColumn:
-        """Creates column object and saved it in catalog database.
-
-        Creates a column corresponding to a metadata id.
-
-        Args:
-            name: column name in the corresponding dataframe
-            type: type of the column
-            metadata_id: metadata_id in the database corresponding to the
-                dataframe
-
-        Returns:
-            The persisted DataFrameColumn object with the id field populated.
-        """
-        column = DataFrameColumn.create(name, type, metadata_id)
-        return column
 
     def get_metadata(self, metadata_id: int,
                      col_id_list: List[int] = None) -> DataFrameMetadata:
@@ -170,7 +158,7 @@ class CatalogManager(object):
 
         return col_ids
 
+
 if __name__ == '__main__':
     column = CatalogManager().create_column("label", "INTEGER", 1)
     print(column.get_id(), column.get_name())
-

@@ -35,7 +35,8 @@ class DataFrameMetadata(BaseModel):
             self._dataframe_pyspark_schema = \
                 self._dataframe_petastorm_schema.as_spark_schema()
 
-    def set_schema(self, schema):
+    def set_schema(self, column_list):
+        schema = DataFrameSchema(self._name, column_list)
         self._dataframe_schema = schema
         self._dataframe_petastorm_schema = \
             schema.get_petastorm_schema()

@@ -23,7 +23,7 @@ from numpy import ndarray
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
-
+from src.storage.dataframe import append_rows
 
 class InsertExecutor(AbstractExecutor):
 
@@ -43,7 +43,7 @@ class InsertExecutor(AbstractExecutor):
         col_id_to_val = {}
         for col_id, val in zip(self.node.column_ids, self.node.value_list):
             col_id_to_val[col_id] = val.evaluate()
-        
+
         col_types = CatalogManager.get_column_types(table_id, None)
         col_ids = CatalogManager.get_column_ids(table_id)
 
@@ -65,8 +65,8 @@ class InsertExecutor(AbstractExecutor):
                     data_tuple.append(ndarray(val))
             except Exception as e:
                 LoggingManager().log("Insert Executor failed bcz of invalid value " + e , LoggingLevel.ERROR)
-                return 
+                return
 
         append_rows(metadata, data_tuple)
 
-    
+

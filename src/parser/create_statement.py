@@ -19,28 +19,25 @@ from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
 from src.parser.table_ref import TableRef
 from typing import List
-from src.catalog.df_column import DataframeColumn
+from src.catalog.models.df_column import DataFrameColumn
 
 
 class CreateTableStatement(AbstractStatement):
-    """
-    Create Table Statement constructed after parsing the input query
+    """Create Table Statement constructed after parsing the input query
 
-    Attributes
-    ----------
-    TableRef:
-        table reference in the create table statement
-    ColumnList:
-        list of columns
+    Attributes:
+        TableRef: table reference in the create table statement
+        ColumnList: list of columns
     """
 
     def __init__(self,
                  table_name: TableRef,
                  if_not_exists: bool,
-                 column_list: List[DataframeColumn] = None):
+                 column_list: List[DataFrameColumn] = None):
         super().__init__(StatementType.CREATE)
         self._table_name = table_name
         self._if_not_exists = if_not_exists
+        self._column_list = column_list
 
     def __str__(self) -> str:
         print_str = "CREATE TABLE {} ({}) ".format(self._table_name,

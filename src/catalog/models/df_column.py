@@ -115,8 +115,8 @@ class DataFrameColumn(BaseModel):
         return result
 
     @classmethod
-    def create(cls, name: str, type: str, metadata_id: int):
-        df_column = DataFrameColumn(name=name, type=ColumnType[type],
-                                    metadata_id=metadata_id)
-        df_column = df_column.save()
-        return df_column
+    def create(cls, column_list):
+        saved_column_list = []
+        for column in column_list:
+            saved_column_list.append(column_list.save())
+        return saved_column_list
