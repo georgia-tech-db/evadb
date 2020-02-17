@@ -24,42 +24,30 @@ class DataFrameMetadata(BaseModel):
     _name = Column('name', String(100), unique=True)
     _file_url = Column('file_url', String(100))
 
-    def __init__(self, name: str, file_url: str,
-                 dataframe_schema: DataFrameSchema = None):
+    def __init__(self, name: str, file_url: str):
         self._name = name
         self._file_url = file_url
-        if dataframe_schema is not None:
-            self._dataframe_schema = dataframe_schema
-            self._dataframe_petastorm_schema = \
-                dataframe_schema.get_petastorm_schema()
-            self._dataframe_pyspark_schema = \
-                self._dataframe_petastorm_schema.as_spark_schema()
+        self._schema = None
 
-    def set_schema(self, column_list):
-        schema = DataFrameSchema(self._name, column_list)
-        self._dataframe_schema = schema
-        self._dataframe_petastorm_schema = \
-            schema.get_petastorm_schema()
-        self._dataframe_pyspark_schema = \
-            self._dataframe_petastorm_schema.as_spark_schema()
+    @property
+    def schema(self):
+        return self._schema
 
-    def get_id(self):
+    @schema.setter
+    def schema(self, column_list):
+        self._schema = DataFrameSchema(self._name, column_list)
+
+    @property
+    def id(self):
         return self._id
 
-    def get_name(self):
+    @property
+    def name(self):
         return self._name
 
-    def get_dataframe_file_url(self):
+    @property
+    def file_url(self):
         return self._file_url
-
-    def get_dataframe_schema(self):
-        return self._dataframe_schema
-
-    def get_dataframe_petastorm_schema(self):
-        return self._dataframe_petastorm_schema
-
-    def get_dataframe_pyspark_schema(self):
-        return self._dataframe_pyspark_schema
 
     @classmethod
     def create(cls, name, file_url):

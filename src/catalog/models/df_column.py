@@ -46,23 +46,37 @@ class DataFrameColumn(BaseModel):
         self._array_dimensions = str(array_dimensions)
         self._metadata_id = metadata_id
 
-    def get_id(self):
+    @property
+    def id(self):
         return self._id
 
-    def get_name(self):
+    @property
+    def name(self):
         return self._name
 
-    def get_type(self):
+    @property
+    def type(self):
         return self._type
 
+    @property
     def is_nullable(self):
         return self._is_nullable
 
-    def get_array_dimensions(self):
+    @property
+    def array_dimensions(self):
         return json.loads(self._array_dimensions)
 
-    def set_array_dimensions(self, array_dimensions):
-        self._array_dimensions = str(array_dimensions)
+    @array_dimensions.setter
+    def array_dimensions(self, value):
+        self._array_dimensions = str(value)
+
+    @property
+    def metadata_id(self):
+        return self._metadata_id
+
+    @metadata_id.setter
+    def metadata_id(self, value):
+        self._metadata_id = value
 
     def __str__(self):
         column_str = "\tColumn: (%s, %s, %s, " % (self._name,
