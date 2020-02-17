@@ -39,6 +39,10 @@ conda activate eva
 ```shell
 git config core.hooksPath .githooks
 ```
+6. Run following command to generate parser files.
+```shell
+sh ./script/antlr4/setup.sh
+```
 
 ## Development
 
@@ -59,6 +63,8 @@ git config core.hooksPath .githooks
 ```shell
    python script/formatting/formatter.py
 ```
+
+4. Refer [google codestyle guide](https://google.github.io/styleguide/pyguide.html) for documentation of code.
 
 Please look up the [contributing guide](https://github.com/georgia-tech-db/eva/blob/master/CONTRIBUTING.md#development) for details.
 
