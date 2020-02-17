@@ -13,60 +13,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.query_executor.abstract_executor import AbstractExecutor
-from src.planner.insert_plan import InsertPlan
+from numpy import ndarray
 
 from src.catalog.catalog_manager import CatalogManager
 from src.catalog.column_type import ColumnType
-
-from numpy import ndarray
-
+from src.planner.insert_plan import InsertPlan
+from src.query_executor.abstract_executor import AbstractExecutor
+from src.storage.dataframe import append_rows
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
-from src.storage.dataframe import append_rows
+
 
 class InsertExecutor(AbstractExecutor):
 
     def __init__(self, node: InsertPlan):
         super().__init__(node)
+        self._video_id = node.video_id
+        self._column_ids = node.column_ids
+        self._value_list = node.value_list
 
     def validate(self):
         pass
 
     def exec(self):
         """
-        Based on the table it constructs a valid tuple using the values provided.
+        Based on the table it constructs a valid tuple using the values
+        provided.
         Right now we assume there are no missing values
         """
-        table_id = self.node.video_id
-        metadata = CatalogManager.get_metadata(table_id)
+        table_id = self._video_id
+        metadata = CatalogManager().get_metadata(table_id)
         col_id_to_val = {}
-        for col_id, val in zip(self.node.column_ids, self.node.value_list):
+        for col_id, val in zip(self._column_ids, self._value_list):
             col_id_to_val[col_id] = val.evaluate()
 
-        col_types = CatalogManager.get_column_types(table_id, None)
-        col_ids = CatalogManager.get_column_ids(table_id)
+        column_list = metadata.schema.column_list
 
         data_tuple = []
-        for col_id, col_type in zip(col_ids, col_types):
-            val = None
+        for column in column_list:
+            col_id, col_type = column.id, column.type
             if col_id in col_id_to_val.keys():
                 val = col_id_to_val[col_id]
-            try:
-                if col_type == ColumnType.INTEGER:
-                    data_tuple.append(int(val))
-                elif col_type == ColumnType.FLOAT:
-                    data_tuple.append(float(val))
-                elif col_type == ColumnType.BOOLEAN:
-                    data_tuple.append(bool(val))
-                elif col_type == ColumnType.TEXT:
-                    data_tuple.append(str(val))
-                elif col_type == ColumnType.NDARRAY:
-                    data_tuple.append(ndarray(val))
-            except Exception as e:
-                LoggingManager().log("Insert Executor failed bcz of invalid value " + e , LoggingLevel.ERROR)
-                return
+                try:
+                    if col_type == ColumnType.INTEGER:
+                        data_tuple.append(int(val))
+                    elif col_type == ColumnType.FLOAT:
+                        data_tuple.append(float(val))
+                    elif col_type == ColumnType.BOOLEAN:
+                        data_tuple.append(bool(val))
+                    elif col_type == ColumnType.TEXT:
+                        data_tuple.append(str(val))
+                    elif col_type == ColumnType.NDARRAY:
+                        data_tuple.append(ndarray(val))
+                except Exception as e:
+                    LoggingManager().log(
+                        f'Insert Executor failed bcz of invalid value {e}',
+                        LoggingLevel.ERROR)
+                    return
 
         append_rows(metadata, data_tuple)
-
-

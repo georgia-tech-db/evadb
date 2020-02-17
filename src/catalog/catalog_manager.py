@@ -48,25 +48,6 @@ class CatalogManager(object):
         LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
 
-    def get_table_bindings(self, database_name: str, table_name: str,
-                           column_names: List[str]) -> Tuple[int, List[int]]:
-        """
-        This method fetches bindings for strings
-        :param database_name: currently not in use
-        :param table_name: the table that is being referred to
-        :param column_names: the column names of the table for which
-        bindings are required
-        :return: returns metadat_id of table and a list of column ids
-        """
-
-        metadata_id = DataFrameMetadata.get_id_from_name(table_name)
-        column_ids = []
-        if column_names is not None:
-            column_ids = DataFrameColumn.get_id_from_metadata_id_and_name_in(
-                metadata_id,
-                column_names)
-        return metadata_id, column_ids
-
     def create_metadata(self, name: str, file_url: str,
                         column_list: List[DataFrameColumn]) -> \
             DataFrameMetadata:
@@ -88,26 +69,49 @@ class CatalogManager(object):
         for column in column_list:
             column.metadata_id = metadata.get_id()
         column_list = DataFrameColumn.create(column_list)
-        metadata.set_schema(column_list)
+        metadata.schema = column_list
         return metadata
+
+    def get_table_bindings(self, database_name: str, table_name: str,
+                           column_names: List[str]) -> Tuple[int, List[int]]:
+        """This method fetches bindings for strings.
+
+        Args:
+            database_name: currently not in use
+            table_name: the table that is being referred to
+            column_names: the column names of the table for which
+           bindings are required
+
+        Returns:
+            returns metadata_id of table and a list of column ids
+        """
+
+        metadata_id = DataFrameMetadata.get_id_from_name(table_name)
+        column_ids = []
+        if column_names is not None:
+            column_ids = DataFrameColumn.get_id_from_metadata_id_and_name_in(
+                metadata_id,
+                column_names)
+        return metadata_id, column_ids
 
     def get_metadata(self, metadata_id: int,
                      col_id_list: List[int] = None) -> DataFrameMetadata:
-        """
-        This method returns the metadata object given a metadata_id,
-        when requested by the executor. It will further be used by storage
-        engine for retrieving the dataframe.
-        :param metadata_id: metadata id of the table
-        :param col_id_list: optional column ids of the table referred
-        :return:
+        """This method returns the metadata object given a metadata_id,
+        when requested by the executor.
+
+        Args:
+            metadata_id: metadata id of the table
+            col_id_list: optional column ids of the table referred
+
+        Returns:
+            metadata object with all the details of video/dataset
         """
         metadata = DataFrameMetadata.get(metadata_id)
         if col_id_list is not None:
             df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
                 col_id_list,
                 metadata_id)
-            metadata.set_schema(
-                DataFrameSchema(metadata.get_name(), df_columns))
+            metadata.schema = df_columns
         return metadata
 
     def get_column_types(self, table_metadata_id: int,
