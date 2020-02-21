@@ -44,4 +44,3 @@ class DiskStorageExecutor(AbstractStorageExecutor):
     def exec(self) -> Iterator[FrameBatch]:
         for batch in self.storage.load():
             yield batch
-    

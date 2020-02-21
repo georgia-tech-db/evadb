@@ -47,5 +47,3 @@ class PPExecutor(AbstractExecutor):
                     required_frame_ids.append(i)
 
             yield batch[required_frame_ids]
-
-    
