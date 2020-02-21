@@ -18,6 +18,7 @@ from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
 
 from src.planner.create_plan import CreatePlan
+from src.planner.insert_plan import InsertPlan
 from src.planner.types import PlanNodeType
 
 
@@ -38,6 +39,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(dummy_plan_node.columns[0].name, "id")
         self.assertEqual(dummy_plan_node.columns[1].name, "name")
 
-
+    def test_insert_plan(self):
+        video_id = 0
+        column_ids = [0, 1]
+        expression = type("AbstractExpression", (), {"evaluate": lambda : 1})
+        values = [expression, expression]    
+        dummy_plan_node = InsertPlan(video_id, column_ids, values)
+        self.assertEqual(dummy_plan_node.node_type, PlanNodeType.INSERT)
+        
 if __name__ == '__main__':
     unittest.main()
