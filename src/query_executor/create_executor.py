@@ -17,15 +17,17 @@ from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_plan import CreatePlan
 from src.query_executor.abstract_executor import AbstractExecutor
 from src.storage.dataframe import create_dataframe
+import tempfile
+import os.path
 
 
 class CreateExecutor(AbstractExecutor):
 
     def __init__(self, node: CreatePlan):
         super().__init__(node)
-        self._table_name = node.table_name
-        self._file_url = node.file_url
+        self._table = node.table
         self._columns = node.columns
+        self._if_not_exists = node.if_not_exists
 
     def validate(self):
         pass
@@ -36,9 +38,17 @@ class CreateExecutor(AbstractExecutor):
         Calls the catalog to create metadata corresponding to the table.
         Calls the storage to create a spark dataframe from the metadata object.
         """
-
-        metadata = CatalogManager().create_metadata(self._table_name,
-                                                    self._file_url,
+        if (self._if_not_exists):
+            # check catalog if we already have this table
+            return
+        # Generate a file_url to be used for table
+        # hard coding a path right now, should write a auto-generator
+        table_name = self._table.table_info.table_name
+        file_url = os.path.join(tempfile.gettempdir(), table_name)
+        file_url = 'file://' + file_url
+        metadata = CatalogManager().create_metadata(table_name,
+                                                    file_url,
                                                     self._columns)
 
         create_dataframe(metadata)
+        return file_url
