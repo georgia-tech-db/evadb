@@ -1,45 +1,11 @@
-#!/usr/bin/perl 
-# The hook should exit with non-zero status after issuing an appropriate 
-# message if it wants to stop the commit.
-
-use strict; 
-use warnings;
-
-my $file;
-my $MAX_SIZE = 100000; # Limit files to 100KB
-
-
-# Only check binary and file size when files are added otherwise users
-# get an error every time they modify they file.   This has the dissadvantage
-# of not catching if a file grows too large after the initial commit
-#
-# Get list of added files only (i.e. new files)
-my @new_file_list =  `git diff --cached --name-only --diff-filter=A`;
-foreach $file (@new_file_list)
-{
-  chomp($file);
-
-  # Check if file is binary
-  if (-B $file)
-  {
-    print STDERR "WARNING: $file is binary.\n";
-    print STDERR "Please check with repo owner before committing binary files.\n";
-    print STDERR "To bypass this warning re-run your commit with the '--no-verify' option\n";
-    exit 1;
-  }
-
-  # Check if file is very large
-  if (-s $file > $MAX_SIZE)
-  {
-    print STDERR "WARNING: $file is greater than $MAX_SIZE bytes.\n";
-    print STDERR "Please check with repo owner before committing very large files.\n";
-    print STDERR "To bypass this warning re-run your commit with the '--no-verify' option\n";
-    exit 1;
-  }
-
-  # run native formatter before commiting
-  # Todo: Even add header support here
-  my $ret = system("/script/formatting/formatter.py -c -f " + $file); 
-  print STDOUT $ret;
-  # exit 1;
-}
+echo "Running scripts under githooks"
+if [ -d .githooks/pre-commit.d ]; then
+    for i in .githooks/pre-commit.d/*; do
+      if [ -r $i ]; then
+        $i
+      fi  
+    done
+    unset i 
+else
+    echo "File not found"
+fi
