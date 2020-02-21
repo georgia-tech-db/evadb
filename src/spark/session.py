@@ -33,7 +33,7 @@ class Session(object):
 
     def __init__(self):
         config = ConfigurationManager()
-        name = config.get_value('core','application')
+        name = config.get_value('core', 'application')
         self.init_spark_session(name)
 
     def init_spark_session(self, application_name, spark_master=None):
