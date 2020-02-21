@@ -15,22 +15,35 @@
 
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
+from src.parser.table_ref import TableRef
+from src.catalog.models.df_column import DataFrameColumn
+from typing import List
 
 
 class CreatePlan(AbstractPlan):
-    def __init__(self, table_name, column_list, file_url):
+    """
+    This plan is used for storing information required for create table
+    operations.
+    Arguments:
+        table {TableRef} -- table reference to be created
+        column_list {List[DataFrameColumn]} -- Columns to be be added to the created table
+        if_not_exists {bool} -- Whether to override if there is existing table
+    """
+
+    def __init__(self, table: TableRef,
+                 column_list: List[DataFrameColumn], if_not_exists: bool = False):
         super().__init__(PlanNodeType.CREATE)
-        self._table_name = table_name
-        self._file_url = file_url
+        self._table = table
         self._columns = column_list
+        self._if_not_exists = if_not_exists
 
     @property
-    def table_name(self):
-        return self._table_name
+    def table(self):
+        return self._table
 
     @property
-    def file_url(self):
-        return self._file_url
+    def if_not_exists(self):
+        return self._if_not_exists
 
     @property
     def columns(self):
