@@ -16,7 +16,6 @@
 from typing import List, Tuple
 
 from src.catalog.column_type import ColumnType
-from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.base_model import init_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -67,7 +66,7 @@ class CatalogManager(object):
 
         metadata = DataFrameMetadata.create(name, file_url)
         for column in column_list:
-            column.metadata_id = metadata.get_id()
+            column.metadata_id = metadata.id
         column_list = DataFrameColumn.create(column_list)
         metadata.schema = column_list
         return metadata
@@ -134,9 +133,9 @@ class CatalogManager(object):
         col_types = []
         df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
             col_id_list,
-            metadata.get_id())
+            metadata.id)
         for col in df_columns:
-            col_types.append(col.get_type())
+            col_types.append(col.type)
 
         return col_types
 
@@ -161,8 +160,3 @@ class CatalogManager(object):
             col_ids.append(col[0])
 
         return col_ids
-
-
-if __name__ == '__main__':
-    column = CatalogManager().create_column("label", "INTEGER", 1)
-    print(column.get_id(), column.get_name())
