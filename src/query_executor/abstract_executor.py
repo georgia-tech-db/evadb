@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from typing import List, Iterator
+from typing import List
 
-from src.models.storage.batch import FrameBatch
 from src.planner.abstract_plan import AbstractPlan
 
 
@@ -51,12 +50,11 @@ class AbstractExecutor(ABC):
     @property
     def node(self) -> AbstractPlan:
         return self._node
-        
+
     @abstractmethod
     def validate(self):
         NotImplementedError('Must be implemented in subclasses.')
 
-    
     @abstractmethod
     def exec(self):
         """
