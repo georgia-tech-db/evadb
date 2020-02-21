@@ -19,8 +19,6 @@ from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
 
 
-
-
 def load_dataframe(dataframe_url: str):
 
     spark = Session().get_session()
@@ -33,23 +31,22 @@ def append_rows(df_metadata: DataFrameMetadata,
                 rows):
 
     spark = Session().get_session()
-
     # Convert a list of rows to RDD
     rows_df = spark.createDataFrame(rows,
-                                    df_metadata.get_dataframe_pyspark_schema())
+                                    df_metadata.schema.petastorm_schema)
     rows_rdd = rows_df.rdd
 
     # Use petastorm to appends rows
     with materialize_dataset(spark,
-                             df_metadata.get_dataframe_file_url(),
-                             df_metadata.get_dataframe_petastorm_schema()):
+                             df_metadata.file_url,
+                             df_metadata.schema.petastorm_schema):
 
         spark.createDataFrame(rows_rdd,
-                              df_metadata.get_dataframe_pyspark_schema()) \
+                              df_metadata.schema.pyspark_schema) \
             .coalesce(1) \
             .write \
             .mode('append') \
-            .parquet(df_metadata.get_dataframe_file_url())
+            .parquet(df_metadata.file_url)
 
 
 def create_dataframe(df_metadata: DataFrameMetadata):
@@ -59,18 +56,18 @@ def create_dataframe(df_metadata: DataFrameMetadata):
 
     # Create an empty RDD
     empty_rdd = spark_context.emptyRDD()
-
+    print("url", df_metadata.file_url)
     # Use petastorm to create dataframe
     with materialize_dataset(spark,
-                             df_metadata.get_dataframe_file_url(),
-                             df_metadata.get_dataframe_petastorm_schema()):
+                             df_metadata.file_url,
+                             df_metadata.schema.petastorm_schema):
 
         spark.createDataFrame(empty_rdd,
-                              df_metadata.get_dataframe_pyspark_schema()) \
+                              df_metadata.schema.pyspark_schema) \
             .coalesce(1) \
             .write \
             .mode('overwrite') \
-            .parquet(df_metadata.get_dataframe_file_url())
+            .parquet(df_metadata.file_url)
 
 
 def get_next_row_id(dataframe, dataframe_name: str):

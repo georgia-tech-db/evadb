@@ -84,8 +84,8 @@ class DataFrameColumn(BaseModel):
                                                   self._is_nullable)
 
         column_str += "["
-        column_str += ', '.join(['%d'] * len(self.get_array_dimensions())) \
-                      % tuple(self.get_array_dimensions())
+        column_str += ', '.join(['%d'] * len(self.array_dimensions)) \
+                      % tuple(self.array_dimensions)
         column_str += "] "
         column_str += ")\n"
 
@@ -104,11 +104,11 @@ class DataFrameColumn(BaseModel):
 
     @classmethod
     def get_by_metadata_id_and_id_in(cls, id_list: List[int], metadata_id:
-    int):
+                                     int):
         """return all the columns that matches id_list and  metadata_id
 
         Arguments:
-            id_list {List[int]} -- [metadata ids of the required columns: If 
+            id_list {List[int]} -- [metadata ids of the required columns: If
             None return all the columns that matches the metadata_id]
             metadata_id {int} -- [metadata id of the table]
 
@@ -132,5 +132,5 @@ class DataFrameColumn(BaseModel):
     def create(cls, column_list):
         saved_column_list = []
         for column in column_list:
-            saved_column_list.append(column_list.save())
+            saved_column_list.append(column.save())
         return saved_column_list

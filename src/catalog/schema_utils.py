@@ -29,10 +29,10 @@ class SchemaUtils(object):
     @staticmethod
     def get_petastorm_column(df_column):
 
-        column_type = df_column.get_type()
-        column_name = df_column.get_name()
-        column_is_nullable = df_column.is_nullable()
-        column_array_dimensions = df_column.get_array_dimensions()
+        column_type = df_column.type
+        column_name = df_column.name
+        column_is_nullable = df_column.is_nullable
+        column_array_dimensions = df_column.array_dimensions
 
         # Reference:
         # https://github.com/uber/petastorm/blob/master/petastorm/
