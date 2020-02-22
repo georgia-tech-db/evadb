@@ -36,7 +36,9 @@ class DiskStorageExecutor(AbstractStorageExecutor):
                                    batch_size=node.batch_size,
                                    skip_frames=node.skip_frames,
                                    limit=node.limit,
-                                   offset=node.offset)
+                                   offset=node.offset,
+                                   shard=node.curr_shard,
+                                   total_shards=node.total_shards)
 
     def validate(self):
         pass
