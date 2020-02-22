@@ -21,16 +21,28 @@ class StoragePlan(AbstractPlan):
     """
     This is the plan used for retrieving the frames from the storage and
     and returning to the higher levels.
+
+    Arguments:
+        video (VideoMetaInfo): Required meta-data for fetching data
+        batch_size (int): size of batch frame
+        skip_frames (int): skip frequency
+        offset (int): storage offset for retrieving data
+        limit (int): limit on data records to be retrieved
+        total_shards (int): number of shards of data (if sharded)
+        curr_shard (int): current shard if data is sharded
     """
 
     def __init__(self, video: VideoMetaInfo, batch_size: int = 1,
-                 skip_frames: int = 0, offset: int = None, limit: int = None):
+                 skip_frames: int = 0, offset: int = None, limit: int = None,
+                 total_shards: int = 0, curr_shard: int = 0):
         super().__init__(PlanNodeType.STORAGE_PLAN)
         self._video = video
         self._batch_size = batch_size
         self._skip_frames = skip_frames
         self._offset = offset
         self._limit = limit
+        self._total_shards = total_shards
+        self._curr_shard = curr_shard
 
     @property
     def video(self):
@@ -51,3 +63,11 @@ class StoragePlan(AbstractPlan):
     @property
     def limit(self):
         return self._limit
+
+    @property
+    def total_shards(self):
+        return self._total_shards
+
+    @property
+    def curr_shard(self):
+        return self._curr_shard
