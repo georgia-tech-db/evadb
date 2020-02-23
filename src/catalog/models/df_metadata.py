@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import Column, String
+from sqlalchemy.orm.exc import NoResultFound
 
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.base_model import BaseModel
-
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 class DataFrameMetadata(BaseModel):
     __tablename__ = 'df_metadata'
@@ -56,16 +58,28 @@ class DataFrameMetadata(BaseModel):
         return metadata
 
     @classmethod
-    def get_id_from_name(cls, name):
-        result = DataFrameMetadata.query \
-            .with_entities(DataFrameMetadata._id) \
-            .filter(DataFrameMetadata._name == name).one()
-        return result[0]
+    def get_id_from_name(cls, name: str) -> int:
+        """
+        Returns metadata id for the name queried 
+        
+        Arguments:
+            name {str} -- [name for which id is required]
+        
+        Returns:
+            [int] -- [metadata id]
+        """
+        try:
+            result = DataFrameMetadata.query \
+                .with_entities(DataFrameMetadata._id) \
+                .filter(DataFrameMetadata._name == name).one()
+            return result[0]
+        except NoResultFound:
+            LoggingManager().log("get_id_from_name failed with name {}".format(name), LoggingLevel.ERROR)
+            
 
     @classmethod
     def get(cls, metadata_id):
         result = DataFrameMetadata.query \
             .filter(DataFrameMetadata._id == metadata_id) \
             .one()
-        print(result)
         return result

@@ -41,7 +41,7 @@ class Operator:
         self._type = op_type
         self._children = children
 
-    def append_child(self, child: Operator):
+    def append_child(self, child: 'Operator'):
         if self._children is None:
             self._children = []
 
@@ -81,9 +81,9 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        video {TableRef}:     
+        video {TableRef}:
             [TableRef object copied from parsed statement]
-        video_catalog_id{int}:      
+        video_catalog_id{int}:
             [catalog id for the video table]
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
@@ -100,3 +100,20 @@ class LogicalInsert(Operator):
         self._video_catalog_id = video_catalog_id
         self._column_list = column_list
         self._value_list = value_list
+
+    @property
+    def video(self):
+        return self._video
+
+    @property
+    def video_catalog_id(self):
+        return self._video_catalog_id
+
+    @property
+    def value_list(self):
+        return self._value_list
+
+    @property
+    def column_list(self):
+        return self._column_list
+

@@ -14,7 +14,7 @@
 # limitations under the License.
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert)
-from src.parser.eva_statement import AbstractStatement
+from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
@@ -74,20 +74,23 @@ class StatementToPlanConvertor():
         Arguments:
             statement {AbstractStatement} -- [input insert statement]
         """
-        # bind the table reference
+        # Bind the table reference
         video = statement.table
-        catalog_table_id = bind_table_ref(video)
+        catalog_table_id = bind_table_ref(video.table_info)
 
-        # bind column_list
+        # Bind column_list
         col_list = statement.column_list
+        for col in col_list:
+            if col.table_name is None:
+                col.table_name = video.table_info.table_name
+            if col.table_metadata_id is None:
+                col.table_metadata_id = catalog_table_id
         bind_columns_expr(col_list)
 
-        # nothing to be done for values
-        # as we add support for other variants of insert we will handle them
-        # here
+        # Nothing to be done for values as we add support for other variants of insert we will handle them
         value_list = statement.value_list
 
-        # ready to create LOgical node
+        # Ready to create Logical node
         insert_opr = LogicalInsert(
             video, catalog_table_id, col_list, value_list)
         self._plan = insert_opr

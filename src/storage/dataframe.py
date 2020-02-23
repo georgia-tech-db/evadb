@@ -31,9 +31,11 @@ def append_rows(df_metadata: DataFrameMetadata,
                 rows):
 
     spark = Session().get_session()
+    spark_context = Session().get_context()
+
     # Convert a list of rows to RDD
     rows_df = spark.createDataFrame(rows,
-                                    df_metadata.schema.petastorm_schema)
+                                    df_metadata.schema.pyspark_schema)
     rows_rdd = rows_df.rdd
 
     # Use petastorm to appends rows

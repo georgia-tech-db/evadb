@@ -15,7 +15,12 @@
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
 from typing import List
+
+from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType
+
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
 def bind_table_ref(video_info: TableInfo) -> int:
@@ -35,7 +40,7 @@ def bind_table_ref(video_info: TableInfo) -> int:
     return catalog_entry_id
 
 
-def bind_columns_expr(target_columns: List['AbstractExpression']):
+def bind_columns_expr(target_columns: List[AbstractExpression]):
     if target_columns is None:
         return
 
@@ -48,16 +53,19 @@ def bind_columns_expr(target_columns: List['AbstractExpression']):
             bind_tuple_value_expr(column_exp)
 
 
-def bind_tuple_value_expr(expr: 'AbstractExpression'):
+def bind_tuple_value_expr(expr: AbstractExpression):
     catalog = CatalogManager()
     table_id, column_ids = catalog.get_table_bindings(None,
                                                       expr.table_name,
-                                                      expr.col_name)
+                                                      [expr.col_name])
     expr.table_metadata_id = table_id
+    if not isinstance(column_ids, list) or len(column_ids) == 0:
+        LoggingManager().log("Optimizer Utils:: bind_tuple_expr: Cannot bind column name provided", LoggingLevel.ERROR)
+    
     expr.col_metadata_id = column_ids.pop()
 
 
-def bind_predicate_expr(predicate: 'AbstractExpression'):
+def bind_predicate_expr(predicate: AbstractExpression):
     # This function will be expanded as we add support for
     # complex predicate expressions and sub select predicates
 
