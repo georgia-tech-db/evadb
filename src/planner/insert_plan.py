@@ -25,16 +25,16 @@ class InsertPlan(AbstractPlan):
 
     Arguments:
         video_id{int} -- video metadata id to insert into
-        column_list{List[int]} -- list of column metadata ids
+        column_list{List[AbstractExpression]} -- list of annotated column 
         value_list{List[AbstractExpression]} -- list of abstract expression
                                                 for the values to insert
     """
 
-    def __init__(self, video_id: int, column_ids: List[int],
+    def __init__(self, video_id: int, column_list: List[AbstractExpression],
                  value_list: List[AbstractExpression]):
         super().__init__(PlanNodeType.INSERT)
         self._video_id = video_id
-        self._columns_ids = column_ids
+        self._columns_list = column_list
         self._value_list = value_list
 
     @property
@@ -42,8 +42,8 @@ class InsertPlan(AbstractPlan):
         return self._video_id
 
     @property
-    def column_ids(self):
-        return self._columns_ids
+    def column_list(self):
+        return self._columns_list
 
     @property
     def value_list(self):

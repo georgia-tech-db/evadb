@@ -28,9 +28,6 @@ class InsertExecutor(AbstractExecutor):
 
     def __init__(self, node: InsertPlan):
         super().__init__(node)
-        self._video_id = node.video_id
-        self._column_ids = node.column_ids
-        self._value_list = node.value_list
 
     def validate(self):
         pass
@@ -41,12 +38,13 @@ class InsertExecutor(AbstractExecutor):
         provided.
         Right now we assume there are no missing values
         """
-        table_id = self._video_id
-        metadata = CatalogManager().get_metadata(table_id)
+        table_id = self.node.video_id
         col_id_to_val = {}
-        for col_id, val in zip(self._column_ids, self._value_list):
-            col_id_to_val[col_id] = val.evaluate()
+        for col, val in zip(self.node.column_list, self.node.value_list):
+            col_id_to_val[col.col_metadata_id] = val.evaluate()
 
+        metadata = CatalogManager().get_metadata(table_id)
+        
         column_list = metadata.schema.column_list
 
         data_tuple = []
@@ -71,4 +69,4 @@ class InsertExecutor(AbstractExecutor):
                         LoggingLevel.ERROR)
                     return
 
-        append_rows(metadata, data_tuple)
+        append_rows(metadata, [data_tuple])
