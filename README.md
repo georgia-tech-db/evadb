@@ -44,6 +44,8 @@ conda activate eva
 git config core.hooksPath .githooks
 ```
 
+Installation of EVA also involves downloading the MySQL database via https://dev.mysql.com/downloads/. The tables from EVA are stored in a MySQL database.
+
 ## Development / Contributing
 
 We invite you to help us build the future of visual data management DBMSs.
