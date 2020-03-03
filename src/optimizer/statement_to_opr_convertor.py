@@ -87,7 +87,8 @@ class StatementToPlanConvertor():
                 col.table_metadata_id = catalog_table_id
         bind_columns_expr(col_list)
 
-        # Nothing to be done for values as we add support for other variants of insert we will handle them
+        # Nothing to be done for values as we add support for other variants of
+        # insert we will handle them
         value_list = statement.value_list
 
         # Ready to create Logical node

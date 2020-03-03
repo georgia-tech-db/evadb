@@ -75,7 +75,7 @@ class CatalogManager(object):
                            column_names: List[str]) -> Tuple[int, List[int]]:
         """This method fetches bindings for strings.
 
-        Args:table_metadata_id 
+        Args:table_metadata_id
             database_name: currently not in use
             table_name: the table that is being referred to
             column_names: the column names of the table for which
@@ -89,7 +89,9 @@ class CatalogManager(object):
         column_ids = []
         if column_names is not None:
             if not isinstance(column_names, list):
-                LoggingManager().log("CatalogManager::get_table_binding() expected list", LoggingLevel.WARNING) 
+                LoggingManager().log(
+                    "CatalogManager::get_table_binding() expected list",
+                    LoggingLevel.WARNING)
             column_ids = DataFrameColumn.get_id_from_metadata_id_and_name_in(
                 metadata_id,
                 column_names)
@@ -102,13 +104,15 @@ class CatalogManager(object):
 
         Args:
             metadata_id: metadata id of the table
-            col_id_list: optional column ids of the table referred. If none we all the columns are required
+            col_id_list: optional column ids of the table referred. 
+                         If none we all the columns are required
 
         Returns:
             metadata object with all the details of video/dataset
         """
         metadata = DataFrameMetadata.get(metadata_id)
-        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(col_id_list, metadata_id)
+        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
+            col_id_list, metadata_id)
         metadata.schema = df_columns
         return metadata
 

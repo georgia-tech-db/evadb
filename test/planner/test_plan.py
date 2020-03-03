@@ -31,7 +31,8 @@ class PlanNodeTests(unittest.TestCase):
         dummy_table = TableRef(dummy_info)
 
         columns = [DataFrameColumn('id', ColumnType.INTEGER),
-                   DataFrameColumn('name', ColumnType.TEXT, array_dimensions=50)]
+                   DataFrameColumn('name', ColumnType.TEXT,
+                                   array_dimensions=50)]
         dummy_plan_node = CreatePlan(dummy_table, columns, False)
         self.assertEqual(dummy_plan_node.node_type, PlanNodeType.CREATE)
         self.assertEqual(dummy_plan_node.if_not_exists, False)
@@ -42,10 +43,11 @@ class PlanNodeTests(unittest.TestCase):
     def test_insert_plan(self):
         video_id = 0
         column_ids = [0, 1]
-        expression = type("AbstractExpression", (), {"evaluate": lambda : 1})
-        values = [expression, expression]    
+        expression = type("AbstractExpression", (), {"evaluate": lambda: 1})
+        values = [expression, expression]
         dummy_plan_node = InsertPlan(video_id, column_ids, values)
         self.assertEqual(dummy_plan_node.node_type, PlanNodeType.INSERT)
-        
+
+
 if __name__ == '__main__':
     unittest.main()

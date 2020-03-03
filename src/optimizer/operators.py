@@ -116,4 +116,3 @@ class LogicalInsert(Operator):
     @property
     def column_list(self):
         return self._column_list
-

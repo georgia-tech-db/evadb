@@ -20,6 +20,7 @@ from src.catalog.models.base_model import BaseModel
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
+
 class DataFrameMetadata(BaseModel):
     __tablename__ = 'df_metadata'
 
@@ -60,11 +61,11 @@ class DataFrameMetadata(BaseModel):
     @classmethod
     def get_id_from_name(cls, name: str) -> int:
         """
-        Returns metadata id for the name queried 
-        
+        Returns metadata id for the name queried
+
         Arguments:
             name {str} -- [name for which id is required]
-        
+
         Returns:
             [int] -- [metadata id]
         """
@@ -74,8 +75,9 @@ class DataFrameMetadata(BaseModel):
                 .filter(DataFrameMetadata._name == name).one()
             return result[0]
         except NoResultFound:
-            LoggingManager().log("get_id_from_name failed with name {}".format(name), LoggingLevel.ERROR)
-            
+            LoggingManager().log(
+                "get_id_from_name failed with name {}".format(name),
+                LoggingLevel.ERROR)
 
     @classmethod
     def get(cls, metadata_id):

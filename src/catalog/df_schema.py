@@ -25,8 +25,8 @@ class DataFrameSchema(object):
 
         self._name = name
         self._column_list = column_list
-        self._petastorm_schema = SchemaUtils.get_petastorm_schema(self._name,
-                                                                  self._column_list)
+        self._petastorm_schema = SchemaUtils \
+            .get_petastorm_schema(self._name, self._column_list)
         self._pyspark_schema = self._petastorm_schema.as_spark_schema()
 
     def __str__(self):

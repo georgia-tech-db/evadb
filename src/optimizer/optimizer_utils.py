@@ -60,8 +60,10 @@ def bind_tuple_value_expr(expr: AbstractExpression):
                                                       [expr.col_name])
     expr.table_metadata_id = table_id
     if not isinstance(column_ids, list) or len(column_ids) == 0:
-        LoggingManager().log("Optimizer Utils:: bind_tuple_expr: Cannot bind column name provided", LoggingLevel.ERROR)
-    
+        LoggingManager().log(
+            "Optimizer Utils:: bind_tuple_expr: \
+            Cannot bind column name provided", LoggingLevel.ERROR)
+
     expr.col_metadata_id = column_ids.pop()
 
 
