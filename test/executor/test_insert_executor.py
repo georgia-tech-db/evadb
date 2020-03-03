@@ -27,6 +27,7 @@ from src.storage.dataframe import load_dataframe
 
 class InsertExecutorTest(unittest.TestCase):
     # integration test
+    @unittest.skip("we need drop functionality before we can enable")
     def test_should_insert_row_in_table(self):
         dummy_info = TableInfo('MyVideo')
         dummy_table = TableRef(dummy_info)

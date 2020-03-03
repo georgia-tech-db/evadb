@@ -35,7 +35,7 @@ class CreateExecutor(AbstractExecutor):
         Calls the catalog to create metadata corresponding to the table.
         Calls the storage to create a spark dataframe from the metadata object.
         """
-        if (self._if_not_exists):
+        if (self.node.if_not_exists):
             # check catalog if we already have this table
             return
         # Generate a file_url to be used for table
