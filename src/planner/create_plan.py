@@ -40,7 +40,7 @@ class CreatePlan(AbstractPlan):
 
     @property
     def video_ref(self):
-        return self._video_id
+        return self._video_ref
 
     @property
     def if_not_exists(self):

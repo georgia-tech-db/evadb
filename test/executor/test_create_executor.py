@@ -24,6 +24,7 @@ from src.storage.dataframe import load_dataframe
 
 class CreateExecutorTest(unittest.TestCase):
     # integration test
+    @unittest.skip("we need drop functionality before we can enable")
     def test_create_executor_should_create_table_in_storage(self):
         dummy_info = TableInfo('dummy')
         dummy_table = TableRef(dummy_info)
