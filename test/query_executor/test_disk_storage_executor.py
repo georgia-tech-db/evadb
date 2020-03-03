@@ -39,7 +39,8 @@ class DiskStorageExecutorTest(unittest.TestCase):
                                            batch_size=storage_plan.batch_size,
                                            limit=storage_plan.limit,
                                            offset=storage_plan.offset,
-                                           skip_frames=storage_plan.skip_frames,
+                                           skip_frames=(
+                                               storage_plan.skip_frames),
                                            total_shards=0,
                                            shard=0
                                            )
