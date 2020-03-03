@@ -16,6 +16,7 @@ from enum import IntEnum, unique
 from typing import List
 from src.parser.table_ref import TableRef
 from src.expression.abstract_expression import AbstractExpression
+from src.catalog.models.df_column import DataFrameColumn
 
 
 @unique
@@ -27,6 +28,7 @@ class OperatorType(IntEnum):
     LOGICALFILTER = 2,
     LOGICALPROJECT = 3,
     LOGICALINSERT = 4,
+    LOGICALCREATE = 5,
 
 
 class Operator:
@@ -128,3 +130,34 @@ class LogicalInsert(Operator):
     @property
     def column_list(self):
         return self._column_list
+
+
+class LogicalCreate(Operator):
+    """Logical node for insert operations
+
+    Arguments:
+        video {TableRef}: [video table that is to be created]
+        column_list {List[AbstractExpression]}:
+            [After binding annotated column_list]
+        if_not_exists {bool}: [create table if exists]
+
+    """
+
+    def __init__(self, video: TableRef, column_list: List[DataFrameColumn],
+                 if_not_exists: bool = False, children=None):
+        super().__init__(OperatorType.LOGICALCREATE, children)
+        self._video = video
+        self._column_list = column_list
+        self._if_not_exists = if_not_exists
+
+    @property
+    def video(self):
+        return self._video
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists

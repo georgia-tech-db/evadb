@@ -19,6 +19,8 @@ from typing import List
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType
 
+from src.parser.create_statement import ColumnDefinition
+
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -77,3 +79,28 @@ def bind_predicate_expr(predicate: AbstractExpression):
 
     if predicate.etype == ExpressionType.TUPLE_VALE:
         bind_tuple_value_expr(predicate)
+
+
+def create_column_metadata(col_list: List[ColumnDefinition]):
+    """Create column metadata for the input parsed column list. This function
+    will not commit the provided column into catalog table. 
+    Will only return in memory list of ColumnDataframe objects
+
+    Arguments:
+        col_list {List[ColumnDefinition]} -- parsed col list to be created
+    """
+    if isinstance(col_list, ColumnDefinition):
+        col_list = [col_list]
+
+    result_list = []
+    for col in col_list:
+        if col is None:
+            LoggingManager().log(
+                "Empty column while creating column metadata",
+                LoggingLevel.ERROR)
+            result_list.append(col)
+        result_list.append(
+            CatalogManager().create_column_metadata(
+                col.name, col.type, col.dimension))
+
+    return result_list

@@ -25,9 +25,6 @@ class CreateExecutor(AbstractExecutor):
 
     def __init__(self, node: CreatePlan):
         super().__init__(node)
-        self._table = node.table
-        self._columns = node.columns
-        self._if_not_exists = node.if_not_exists
 
     def validate(self):
         pass
@@ -43,12 +40,12 @@ class CreateExecutor(AbstractExecutor):
             return
         # Generate a file_url to be used for table
         # hard coding a path right now, should write a auto-generator
-        table_name = self._table.table_info.table_name
+        table_name = self.node.video_ref.table_info.table_name
         file_url = os.path.join(tempfile.gettempdir(), table_name)
         file_url = 'file://' + file_url
         metadata = CatalogManager().create_metadata(table_name,
                                                     file_url,
-                                                    self._columns)
+                                                    self.node.column_list)
 
         create_dataframe(metadata)
         return file_url
