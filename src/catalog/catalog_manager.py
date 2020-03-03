@@ -104,7 +104,7 @@ class CatalogManager(object):
 
         Args:
             metadata_id: metadata id of the table
-            col_id_list: optional column ids of the table referred. 
+            col_id_list: optional column ids of the table referred.
                          If none we all the columns are required
 
         Returns:
@@ -163,3 +163,19 @@ class CatalogManager(object):
             col_ids.append(col[0])
 
         return col_ids
+
+    def create_column_metadata(
+            self, column_name: str, data_type: ColumnType, 
+            dimensions: List[int]):
+        """Create a dataframe column object this column. 
+        This function won't commit this object in the catalog database. 
+        If you want to commit it into catalog table call create_metadata with
+        corresponding table_id
+
+        Arguments:
+            column_name {str} -- column name to be created
+            data_type {ColumnType} -- type of column created
+            dimensions {List[int]} -- dimensions of the column created
+        """
+        return DataFrameColumn(column_name, data_type,
+                               array_dimensions=dimensions)

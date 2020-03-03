@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
-                                     LogicalInsert)
+                                     LogicalInsert, LogicalCreate)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
+from src.parser.create_statement import CreateTableStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
-                                           bind_predicate_expr)
+                                           bind_predicate_expr,
+                                           create_column_metadata)
+from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 
 class StatementToPlanConvertor():
@@ -96,6 +99,24 @@ class StatementToPlanConvertor():
             video, catalog_table_id, col_list, value_list)
         self._plan = insert_opr
 
+    def visit_create(self, statement: AbstractStatement):
+        """Convertor for parsed insert Statement
+
+        Arguments:
+            statement {AbstractStatement} -- [Create statement]
+        """
+        video_ref = statement.table_ref
+        if video_ref is None:
+            LoggingManager().log("Missing Table Name In Create Statement",
+                                 LoggingLevel.ERROR)
+
+        if_not_exists = statement.if_not_exists
+        column_metadata_list = create_column_metadata(statement.column_list)
+
+        create_opr = LogicalCreate(
+            video_ref, column_metadata_list, if_not_exists)
+        self._plan = create_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -108,6 +129,8 @@ class StatementToPlanConvertor():
             self.visit_select(statement)
         elif isinstance(statement, InsertTableStatement):
             self.visit_insert(statement)
+        elif isinstance(statement, CreateTableStatement):
+            self.visit_create(statement)
 
     @property
     def plan(self):

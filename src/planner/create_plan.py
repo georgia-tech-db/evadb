@@ -15,8 +15,6 @@
 
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
-from src.parser.table_ref import TableRef
-from src.catalog.models.df_column import DataFrameColumn
 from typing import List
 
 
@@ -25,27 +23,27 @@ class CreatePlan(AbstractPlan):
     This plan is used for storing information required for create table
     operations.
     Arguments:
-        table {TableRef} -- table reference to be created
-        column_list {List[DataFrameColumn]} -- Columns to be be added
+        video_ref {TableRef} -- video ref for table to be created in storage
+        column_list {List[DataFrameColumn]} -- Columns to be added
         if_not_exists {bool} -- Whether to override if there is existing table
     """
 
-    def __init__(self, table: TableRef,
+    def __init__(self, video_ref: TableRef,
                  column_list: List[DataFrameColumn],
                  if_not_exists: bool = False):
         super().__init__(PlanNodeType.CREATE)
-        self._table = table
-        self._columns = column_list
+        self._video_ref = video_ref
+        self._column_list = column_list
         self._if_not_exists = if_not_exists
 
     @property
-    def table(self):
-        return self._table
+    def video_ref(self):
+        return self._video_id
 
     @property
     def if_not_exists(self):
         return self._if_not_exists
 
     @property
-    def columns(self):
-        return self._columns
+    def column_list(self):
+        return self._column_list

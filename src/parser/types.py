@@ -25,3 +25,15 @@ class StatementType(IntEnum):
     INSERT = 3,
 
     # add other types
+
+
+@unique
+class ParserColumnDataType(IntEnum):
+    """
+    Manages enums for all column data types
+    """
+    BOOLEAN = 1
+    INTEGER = 2
+    FLOAT = 3
+    TEXT = 4
+    NDARRAY = 5
