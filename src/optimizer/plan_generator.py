@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.optimizer.generators.seq_scan_generator import ScanGenerator
+from src.optimizer.generators.insert_generator import InsertGenerator
 from src.optimizer.operators import Operator, OperatorType
 
 
@@ -24,7 +25,10 @@ class PlanGenerator:
     """
     _SCAN_NODE_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
                         OperatorType.LOGICALPROJECT)
+    _INSERT_NODE_TYPE = OperatorType.LOGICALINSERT
 
     def build(self, logical_plan: Operator):
         if logical_plan.type in self._SCAN_NODE_TYPES:
             return ScanGenerator().build(logical_plan)
+        if logical_plan.type is self._INSERT_NODE_TYPE:
+            return InsertGenerator().build(logical_plan)
