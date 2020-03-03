@@ -19,8 +19,8 @@ import numpy as np
 from src.models.inference.classifier_prediction import Prediction
 from src.models.storage.batch import FrameBatch
 from src.models.storage.frame import Frame
-from src.query_executor.seq_scan_executor import SequentialScanExecutor
-from ..query_executor.utils import DummyExecutor
+from src.executor.seq_scan_executor import SequentialScanExecutor
+from ..executor.utils import DummyExecutor
 
 
 class SeqScanExecutorTest(unittest.TestCase):

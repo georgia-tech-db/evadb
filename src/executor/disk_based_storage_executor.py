@@ -16,7 +16,7 @@ from typing import Iterator
 
 from src.loaders import Loader
 from src.models.storage.batch import FrameBatch
-from src.query_executor.abstract_storage_executor import \
+from src.executor.abstract_storage_executor import \
     AbstractStorageExecutor
 from src.planner.storage_plan import StoragePlan
 

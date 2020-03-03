@@ -18,7 +18,7 @@ from numpy import ndarray
 from src.catalog.catalog_manager import CatalogManager
 from src.catalog.column_type import ColumnType
 from src.planner.insert_plan import InsertPlan
-from src.query_executor.abstract_executor import AbstractExecutor
+from src.executor.abstract_executor import AbstractExecutor
 from src.storage.dataframe import append_rows
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager

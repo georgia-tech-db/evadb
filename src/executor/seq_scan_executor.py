@@ -15,7 +15,7 @@
 from typing import Iterator
 
 from src.models.storage.batch import FrameBatch
-from src.query_executor.abstract_executor import AbstractExecutor
+from src.executor.abstract_executor import AbstractExecutor
 from src.planner.seq_scan_plan import SeqScanPlan
 
 

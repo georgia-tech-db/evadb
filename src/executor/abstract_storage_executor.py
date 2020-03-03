@@ -14,7 +14,7 @@
 # limitations under the License.
 from abc import ABC
 
-from src.query_executor.abstract_executor import AbstractExecutor
+from src.executor.abstract_executor import AbstractExecutor
 from src.planner.storage_plan import StoragePlan
 
 
