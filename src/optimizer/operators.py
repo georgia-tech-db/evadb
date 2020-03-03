@@ -37,9 +37,9 @@ class Operator:
         children: {List} -- {the list of operator children for this node}
     """
 
-    def __init__(self, op_type: OperatorType, children: List):
+    def __init__(self, op_type: OperatorType, children: List = None):
         self._type = op_type
-        self._children = children
+        self._children = children if children is not None else []
 
     def append_child(self, child: 'Operator'):
         if self._children is None:
@@ -63,11 +63,19 @@ class LogicalGet(Operator):
         self._video = video
         self._catalog_entry = catalog_entry
 
+    @property
+    def video(self):
+        return self._video
+
 
 class LogicalFilter(Operator):
     def __init__(self, predicate: AbstractExpression, children: List = None):
         super().__init__(OperatorType.LOGICALFILTER, children)
         self._predicate = predicate
+
+    @property
+    def predicate(self):
+        return self._predicate
 
 
 class LogicalProject(Operator):
@@ -75,6 +83,10 @@ class LogicalProject(Operator):
                  children: List = None):
         super().__init__(OperatorType.LOGICALPROJECT, children)
         self._target_list = target_list
+
+    @property
+    def target_list(self):
+        return self._target_list
 
 
 class LogicalInsert(Operator):

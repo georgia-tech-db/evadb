@@ -12,11 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 
-import src
+import unittest
 
-EVA_DIR = os.path.dirname(os.path.dirname(src.__file__))
-CATALOG_DIR = "catalog"
-DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost/eva_catalog"
+from src.utils.generic_utils import str_to_class
+from src.loaders.video_loader import VideoLoader
+
+
+class ModulePathTest(unittest.TestCase):
+
+    def test_should_return_correct_class_for_string(self):
+        vl = str_to_class("src.loaders.video_loader.VideoLoader")
+        self.assertEqual(vl, VideoLoader)

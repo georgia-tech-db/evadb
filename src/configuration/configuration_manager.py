@@ -13,13 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import yaml
-from src.configuration.dictionary import EVA_DIR
 import os
+
+import yaml
+
+from src.configuration.dictionary import EVA_DIR
 
 
 class ConfigurationManager(object):
-
     _instance = None
     _cfg = None
 
