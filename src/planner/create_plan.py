@@ -16,6 +16,8 @@
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 from typing import List
+from src.parser.table_ref import TableRef
+from src.catalog.models.df_column import DataFrameColumn
 
 
 class CreatePlan(AbstractPlan):
