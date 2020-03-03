@@ -20,8 +20,8 @@ from src.planner.create_plan import CreatePlan
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
 from src.parser.table_ref import TableRef, TableInfo
-from src.query_executor.insert_executor import InsertExecutor
-from src.query_executor.create_executor import CreateExecutor
+from src.executor.insert_executor import InsertExecutor
+from src.executor.create_executor import CreateExecutor
 from src.storage.dataframe import load_dataframe
 
 

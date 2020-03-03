@@ -17,13 +17,13 @@ from unittest.mock import patch
 
 from src.models.catalog.properties import VideoFormat
 from src.models.catalog.video_info import VideoMetaInfo
-from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
+from src.executor.disk_based_storage_executor import DiskStorageExecutor
 from src.planner.storage_plan import StoragePlan
 
 
 class DiskStorageExecutorTest(unittest.TestCase):
 
-    @patch('src.query_executor.disk_based_storage_executor.Loader')
+    @patch('src.executor.disk_based_storage_executor.Loader')
     def test_calling_storage_executor_should_return_batches(self, mock_class):
         class_instance = mock_class.return_value
 

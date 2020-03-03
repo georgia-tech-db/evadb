@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.query_executor.abstract_executor import AbstractExecutor
-from src.query_executor.seq_scan_executor import SequentialScanExecutor
+from src.executor.abstract_executor import AbstractExecutor
+from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
-from src.query_executor.disk_based_storage_executor import DiskStorageExecutor
-from src.query_executor.pp_executor import PPExecutor
+from src.executor.disk_based_storage_executor import DiskStorageExecutor
+from src.executor.pp_executor import PPExecutor
 
 
 class PlanExecutor:

@@ -15,7 +15,7 @@
 
 from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_plan import CreatePlan
-from src.query_executor.abstract_executor import AbstractExecutor
+from src.executor.abstract_executor import AbstractExecutor
 from src.storage.dataframe import create_dataframe
 import tempfile
 import os.path
