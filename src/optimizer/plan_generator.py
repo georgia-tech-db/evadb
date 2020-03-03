@@ -12,12 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.optimizer.generators.seq_scan_generator import ScanGenerator
+from src.optimizer.operators import Operator, OperatorType
 
-# ToDo
-# We have a logical plan tree in place held by StatementToPlanConvertor class.
-# Since we are omitting the optimizer, I am not sure how to proceed further.
-# Should we go ahead and write a dummy class that maps logical
-# nodes to physical nodes
-# class PlanGenerator:
-#     """Generates the
-#     """
+
+class PlanGenerator:
+    """
+    Used for building Physical Plan from Logical Plan.
+    NOTE: This currently just does node transformation. Optimizer logic
+    needs to be incorporated.
+    """
+    _SCAN_NODE_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
+                        OperatorType.LOGICALPROJECT)
+
+    def build(self, logical_plan: Operator):
+        if logical_plan.type in self._SCAN_NODE_TYPES:
+            return ScanGenerator().build(logical_plan)

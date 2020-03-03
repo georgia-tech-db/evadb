@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib
 
 
 def validate_kwargs(kwargs, allowed_kwargs,
@@ -20,3 +21,18 @@ def validate_kwargs(kwargs, allowed_kwargs,
     for kwarg in kwargs:
         if kwarg not in allowed_kwargs:
             raise TypeError(error_message, kwarg)
+
+
+def str_to_class(class_path: str):
+    """
+    Convert string representation of a class path to Class
+
+    Arguments:
+        class_path (str): absolute path of import
+
+    Returns:
+        type: A Class for given path
+    """
+    module_path, class_name = class_path.rsplit(".", 1)
+    module = importlib.import_module(module_path)
+    return getattr(module, class_name)

@@ -12,11 +12,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
+from abc import ABC, abstractmethod
 
-import src
+from src.optimizer.operators import Operator
+from src.planner.abstract_plan import AbstractPlan
 
-EVA_DIR = os.path.dirname(os.path.dirname(src.__file__))
-CATALOG_DIR = "catalog"
-DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost/eva_catalog"
+
+class Generator(ABC):
+
+    @abstractmethod
+    def build(self, operator: Operator) -> AbstractPlan:
+        """
+        Generates the physical plan from the Logical plan (Operator tree)
+
+        Arguments:
+            operator (Operator): the logical operator tree.
+
+        Returns:
+            `AbstractPlan`: the plan constructed by traversing the Operator
+            tree.
+        """
+        pass
+
+
