@@ -26,12 +26,13 @@ class CreatePlan(AbstractPlan):
     operations.
     Arguments:
         table {TableRef} -- table reference to be created
-        column_list {List[DataFrameColumn]} -- Columns to be be added to the created table
+        column_list {List[DataFrameColumn]} -- Columns to be be added
         if_not_exists {bool} -- Whether to override if there is existing table
     """
 
     def __init__(self, table: TableRef,
-                 column_list: List[DataFrameColumn], if_not_exists: bool = False):
+                 column_list: List[DataFrameColumn],
+                 if_not_exists: bool = False):
         super().__init__(PlanNodeType.CREATE)
         self._table = table
         self._columns = column_list

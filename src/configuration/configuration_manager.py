@@ -17,6 +17,7 @@ import yaml
 from src.configuration.dictionary import EVA_DIR
 import os
 
+
 class ConfigurationManager(object):
 
     _instance = None

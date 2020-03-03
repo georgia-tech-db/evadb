@@ -31,7 +31,7 @@ def append_rows(df_metadata: DataFrameMetadata,
                 rows):
 
     spark = Session().get_session()
-    spark_context = Session().get_context()
+    Session().get_context()
 
     # Convert a list of rows to RDD
     rows_df = spark.createDataFrame(rows,

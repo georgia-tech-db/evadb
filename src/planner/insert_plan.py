@@ -25,7 +25,7 @@ class InsertPlan(AbstractPlan):
 
     Arguments:
         video_id{int} -- video metadata id to insert into
-        column_list{List[AbstractExpression]} -- list of annotated column 
+        column_list{List[AbstractExpression]} -- list of annotated column
         value_list{List[AbstractExpression]} -- list of abstract expression
                                                 for the values to insert
     """

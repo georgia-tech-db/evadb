@@ -50,7 +50,7 @@ class TupleValueExpression(AbstractExpression):
     @table_name.setter
     def table_name(self, name: str):
         self._table_name = name
-    
+
     @property
     def col_name(self) -> str:
         return self._col_name

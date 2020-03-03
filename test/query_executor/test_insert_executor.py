@@ -32,7 +32,8 @@ class InsertExecutorTest(unittest.TestCase):
         dummy_table = TableRef(dummy_info)
 
         columns = [DataFrameColumn('Frame_ID', ColumnType.INTEGER),
-                   DataFrameColumn('Frame_Path', ColumnType.TEXT, array_dimensions=50)]
+                   DataFrameColumn('Frame_Path', ColumnType.TEXT,
+                                   array_dimensions=50)]
         plan_node = CreatePlan(dummy_table, columns, False)
 
         createExec = CreateExecutor(plan_node)
@@ -49,7 +50,10 @@ class InsertExecutorTest(unittest.TestCase):
         convertor.visit(insert_stmt)
         logical_plan_node = convertor.plan
         print("logical", logical_plan_node)
-        phy_plan_node = InsertPlan(logical_plan_node.video_catalog_id, logical_plan_node.column_list, logical_plan_node.value_list)
+        phy_plan_node = InsertPlan(
+            logical_plan_node.video_catalog_id,
+            logical_plan_node.column_list,
+            logical_plan_node.value_list)
 
         insertExec = InsertExecutor(phy_plan_node)
         insertExec.exec()
@@ -61,6 +65,7 @@ class InsertExecutorTest(unittest.TestCase):
 
         # ToDo call drop this table
         # Add support in catalog and spark
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -29,7 +29,8 @@ class CreateExecutorTest(unittest.TestCase):
         dummy_table = TableRef(dummy_info)
 
         columns = [DataFrameColumn('id', ColumnType.INTEGER),
-                   DataFrameColumn('name', ColumnType.TEXT, array_dimensions=50)]
+                   DataFrameColumn('name', ColumnType.TEXT,
+                                   array_dimensions=50)]
         plan_node = CreatePlan(dummy_table, columns, False)
 
         createExec = CreateExecutor(plan_node)

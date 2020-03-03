@@ -378,7 +378,7 @@ class ParserVisitor(evaql_parserVisitor):
         # Multiple quotes should be removed
 
         if ctx.STRING_LITERAL() is not None:
-            return ConstantValueExpression(ctx.getText())
+            return ConstantValueExpression(ctx.getText()[1:-1])
         # todo handle other types
         return self.visitChildren(ctx)
 

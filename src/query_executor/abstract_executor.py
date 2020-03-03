@@ -58,8 +58,9 @@ class AbstractExecutor(ABC):
     @abstractmethod
     def exec(self):
         """
-        This method is implemented by every executor. Contains logic for that executor;
-        For retrival based executor : It fetchs frame batches from child nodes and emits it to parent
-        node.
+        This method is implemented by every executor. 
+        Contains logic for that executor;
+        For retrival based executor : It fetchs frame batches from 
+        child nodes and emits it to parent node.
         """
         NotImplementedError('Must be implemented in subclasses.')

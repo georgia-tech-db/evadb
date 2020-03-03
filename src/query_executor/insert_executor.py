@@ -44,7 +44,7 @@ class InsertExecutor(AbstractExecutor):
             col_id_to_val[col.col_metadata_id] = val.evaluate()
 
         metadata = CatalogManager().get_metadata(table_id)
-        
+
         column_list = metadata.schema.column_list
 
         data_tuple = []
