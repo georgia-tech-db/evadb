@@ -21,6 +21,6 @@ class DummyExecutor:
     def __init__(self, batch_list: List[FrameBatch]):
         self.batch_list = batch_list
 
-    def next(self):
+    def exec(self):
         for batch in self.batch_list:
             yield batch
