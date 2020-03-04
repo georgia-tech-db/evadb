@@ -39,7 +39,7 @@ class PPExecutor(AbstractExecutor):
 
     def exec(self) -> Iterator[FrameBatch]:
         child_executor = self.children[0]
-        for batch in child_executor.next():
+        for batch in child_executor.exec():
             outcomes = self.predicate.evaluate(batch)
             required_frame_ids = []
             for i, outcome in enumerate(outcomes):
