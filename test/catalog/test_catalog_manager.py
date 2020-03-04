@@ -12,31 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
 import unittest
 
 import mock
 
 from src.catalog.catalog_manager import CatalogManager
-from src.spark.session import Session
-
-
-def suppress_py4j_logging():
-    logger = logging.getLogger('py4j')
-    logger.setLevel(logging.ERROR)
 
 
 class CatalogManagerTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def setUp(self):
-        suppress_py4j_logging()
-
-    def tearDown(self):
-        self.session = Session()
-        self.session.stop()
 
     @mock.patch('src.catalog.catalog_manager.init_db')
     def test_catalog_manager_singleton_pattern(self, mocked_db):
