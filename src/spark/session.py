@@ -20,6 +20,7 @@ from pyspark.conf import SparkConf
 from src.configuration.configuration_manager import ConfigurationManager
 from src.utils.logging_manager import LoggingManager
 
+
 class Session(object):
     """
     Wrapper around Spark Session
