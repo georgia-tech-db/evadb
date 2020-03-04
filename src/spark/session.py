@@ -17,8 +17,8 @@
 from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
 
+from src.configuration.configuration_manager import ConfigurationManager
 from src.utils.logging_manager import LoggingManager
-
 
 class Session(object):
     """
@@ -34,7 +34,9 @@ class Session(object):
         return cls._instance
 
     def __init__(self):
-        self.init_spark_session("eva")
+        config = ConfigurationManager()
+        name = config.get_value('core', 'application')
+        self.init_spark_session(name)
 
     def init_spark_session(self, application_name, spark_master=None):
         """Setup a spark session.
