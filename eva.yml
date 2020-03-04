@@ -1,2 +1,3 @@
 core:
     location: "file:///tmp/eva_datasets"
+    application : "eva"
