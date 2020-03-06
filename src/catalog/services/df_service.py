@@ -49,8 +49,8 @@ class DatasetService(BaseService):
         """
         try:
             result = self.model.query \
-                .with_entities(self.model.id) \
-                .filter(self.model.name == name).one()
+                .with_entities(self.model._id) \
+                .filter(self.model._name == name).one()
             return result[0]
         except NoResultFound:
             LoggingManager().log(
@@ -66,5 +66,5 @@ class DatasetService(BaseService):
            DataFrameMetadata
         """
         return self.model.query \
-            .filter(self.model.id == metadata_id) \
+            .filter(self.model._id == metadata_id) \
             .one()
