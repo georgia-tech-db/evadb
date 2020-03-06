@@ -38,7 +38,7 @@ class DatasetServiceTest(TestCase):
         service = DatasetService()
         service.dataset_by_id(DATASET_ID)
         mocked.query.filter.assert_called_with(
-            DataFrameMetadata.id == DATASET_ID)
+            mocked._id == DATASET_ID)
         mocked.query.filter.return_value.one.assert_called_once()
 
     @patch("src.catalog.services.df_service.DataFrameMetadata")
@@ -50,8 +50,8 @@ class DatasetServiceTest(TestCase):
             .return_value = [expected_output]
 
         result = service.dataset_by_name(DATASET_NAME)
-        mocked.query.with_entities.assert_called_with(mocked.id)
+        mocked.query.with_entities.assert_called_with(mocked._id)
         mocked.query.with_entities.return_value.filter.assert_called_with(
-            DataFrameMetadata.name == DATASET_NAME)
+            mocked._name == DATASET_NAME)
 
         self.assertEqual(result, expected_output)
