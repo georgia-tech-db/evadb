@@ -51,37 +51,3 @@ class DataFrameMetadata(BaseModel):
     @property
     def file_url(self):
         return self._file_url
-
-    @classmethod
-    def create(cls, name, file_url):
-        metadata = DataFrameMetadata(name=name, file_url=file_url)
-        metadata = metadata.save()
-        return metadata
-
-    @classmethod
-    def get_id_from_name(cls, name: str) -> int:
-        """
-        Returns metadata id for the name queried
-
-        Arguments:
-            name {str} -- [name for which id is required]
-
-        Returns:
-            [int] -- [metadata id]
-        """
-        try:
-            result = DataFrameMetadata.query \
-                .with_entities(DataFrameMetadata._id) \
-                .filter(DataFrameMetadata._name == name).one()
-            return result[0]
-        except NoResultFound:
-            LoggingManager().log(
-                "get_id_from_name failed with name {}".format(name),
-                LoggingLevel.ERROR)
-
-    @classmethod
-    def get(cls, metadata_id):
-        result = DataFrameMetadata.query \
-            .filter(DataFrameMetadata._id == metadata_id) \
-            .one()
-        return result
