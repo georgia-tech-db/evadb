@@ -31,14 +31,15 @@ class DatasetColumnService(BaseService):
 
         return [res[0] for res in result]
 
-    def columns_by_id_and_dataset_id(self, id_list: List[int],
-                                     metadata_id: int):
+    def columns_by_id_and_dataset_id(self,
+                                     metadata_id: int,
+                                     id_list: List[int] = None):
         """return all the columns that matches id_list and  metadata_id
 
         Arguments:
+            metadata_id {int} -- [metadata id of the table]
             id_list {List[int]} -- [metadata ids of the required columns: If
             None return all the columns that matches the metadata_id]
-            metadata_id {int} -- [metadata id of the table]
 
         Returns:
             List[self.model] -- [the filtered self.models]
