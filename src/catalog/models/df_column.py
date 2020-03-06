@@ -103,8 +103,8 @@ class DataFrameColumn(BaseModel):
         return result
 
     @classmethod
-    def get_by_metadata_id_and_id_in(cls, id_list: List[int], metadata_id:
-                                     int):
+    def get_by_metadata_id_and_id_in(cls, id_list: List[int],
+                                     metadata_id: int):
         """return all the columns that matches id_list and  metadata_id
 
         Arguments:
