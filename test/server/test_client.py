@@ -14,25 +14,22 @@
 # limitations under the License.
 
 import unittest
-import asyncio
 
 from src.server.client import start_clients
 
 from src.utils.logging_manager import Logger
 
-
-class ServerTests(unittest.TestCase):
+class ClientTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def test_server(self):
 
         try:
-            asyncio.run(start_clients(hostname="localhost", port=5432))
+            start_clients(host="localhost", port=5432)
 
         except Exception as e:
             Logger().exception(e)
-
 
 if __name__ == '__main__':
     unittest.main()

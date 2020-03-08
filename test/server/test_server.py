@@ -14,13 +14,11 @@
 # limitations under the License.
 
 import unittest
-import asyncio
 
 from src.server.server import start_server
 
 from src.utils.logging_manager import Logger
 from src.utils.logging_manager import LoggingLevel
-
 
 class ServerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -29,7 +27,7 @@ class ServerTests(unittest.TestCase):
     def test_server(self):
 
         try:
-            asyncio.run(start_server(hostname="localhost", port=5432))
+            start_server(host="localhost", port=5432)
 
         except Exception as e:
             Logger().log(e, LoggingLevel.CRITICAL)

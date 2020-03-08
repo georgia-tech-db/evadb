@@ -31,7 +31,7 @@ MAX_RETRIES = 3
 
 
 async def wait_until_done(loop, protocol_factory, jitter,
-                          hostname: string, port: int):
+                          host: string, port: int):
     """
         Wait for the connection to open and the workload to be processed.
 
@@ -47,28 +47,17 @@ async def wait_until_done(loop, protocol_factory, jitter,
     retries = MAX_RETRIES * [1]  # non-exponential 10s
 
     with ExitStack() as stack:
-
         while True:
-
             try:
-
-                Logger().log('Creating connection ')
-
                 transport, protocol = await loop.create_connection(
-                    protocol_factory,
-                    hostname, port)
-
+                        protocol_factory, host, port)
             except Exception as e:
-
                 Logger().log('Exception ' + str(e))
-
                 if not retries:
                     raise
-
                 await asyncio.sleep(retries.pop(0) - random.random())
             else:
                 break
-
         await protocol.done
 
     return len(retries)
@@ -147,7 +136,7 @@ class EvaClientProtocol(asyncio.Protocol):
         Logger().log("[ " + str(self.id) + " ] : Sent: " + chunk)
 
 
-async def start_clients(hostname: string, port: int):
+def start_clients(host: string, port: int):
     """
         Start an eva client
 
@@ -178,7 +167,7 @@ async def start_clients(hostname: string, port: int):
             loop,
             lambda: EvaClientProtocol(data),
             jitter / connections_per_second,
-            hostname,
+            host,
             port
         )
         for jitter in range(connection_count)
@@ -194,50 +183,23 @@ async def start_clients(hostname: string, port: int):
 
     # Run co-routines
     try:
-
-        Logger().log("Starting tasks")
-
         loop.run_until_complete(asyncio.wait((load_test, monitor)))
-
     except KeyboardInterrupt:
         Logger().log("Client process interrupted")
-
     finally:
-
-        await load_test
-        await monitor
-
+        
         if load_test.done():
-
             done, _ = load_test.result()
             exceptions = sum(1 for d in done if d.exception())
-
             retries = sum(
                 MAX_RETRIES - d.result()
                 for d in done if not d.exception()
             )
-
+            
             Logger().log(str(len(tasks)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
                          str(retries) + ' retries'
                          )
 
         # Close loop
-        # loop.close()
-
-#     # Get a reference to the event loop
-#     loop = asyncio.get_running_loop()
-#
-#     on_con_lost = loop.create_future()
-#     message = 'Hello World!'
-#
-#     transport, protocol = await loop.create_connection(
-#             lambda: EvaClientProtocol(message, on_con_lost),
-#             hostname, port)
-#
-#     # Wait until the protocol signals that the connection
-#     # is lost and close the transport.
-#     try:
-#         await on_con_lost
-#     finally:
-#         transport.close()
+        loop.close()

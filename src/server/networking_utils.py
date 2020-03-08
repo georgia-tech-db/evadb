@@ -32,8 +32,6 @@ async def realtime_server_status(protocol, server_closed):
     previous_connections = 0
     previous_errors = 0
 
-    Logger().log("Realtime monitoring")
-
     while not server_closed.done() and not server_closed.cancelled():
 
         # Only report changes
