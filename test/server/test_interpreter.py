@@ -12,22 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import unittest
 
-from src.utils.logging_manager import Logger
+from src.server.interpreter import EvaCommandInterpreter
 
-
-class LoggingManagerTests(unittest.TestCase):
-
+class InterpreterTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_logging_manager_singleton_pattern(self):
-        x = Logger()
-        y = Logger()
-        self.assertEqual(x, y)
+    def test_run_event_loop(self):
+
+        # Start command interpreter
+        prompt = EvaCommandInterpreter()
+        prompt.prompt = '> '
+
+        prompt.do_greet("test")
+        # prompt.cmdloop('Starting EVA...')
 
 
 if __name__ == '__main__':
-
     unittest.main()

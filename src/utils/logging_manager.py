@@ -26,14 +26,14 @@ class LoggingLevel(Enum):
     CRITICAL = 5
 
 
-class LoggingManager(object):
+class Logger(object):
 
     _instance = None
     _LOG = None
 
     def __new__(cls):
         if cls._instance is None:
-            cls._instance = super(LoggingManager, cls).__new__(cls)
+            cls._instance = super(Logger, cls).__new__(cls)
 
             # LOGGING INITIALIZATION
             cls._LOG = logging.getLogger(__name__)
@@ -82,3 +82,6 @@ class LoggingManager(object):
             return "ERROR"
         elif logger_level == 'CRITICAL':
             return "FATAL"
+
+    def exception(self, error):
+        self._LOG.exception(error)

@@ -13,7 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
+import asyncio
 
-def start_postmaster():
+from src.server.client import start_clients
 
-    print('postmaster')
+from src.utils.logging_manager import Logger
+
+
+class ServerTests(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def test_server(self):
+
+        try:
+            asyncio.run(start_clients(hostname="localhost", port=5432))
+
+        except Exception as e:
+            Logger().exception(e)
+
+
+if __name__ == '__main__':
+    unittest.main()
