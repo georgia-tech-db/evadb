@@ -12,22 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from cmd import Cmd
-import matplotlib
+
 import random
 import glob
+
 from PIL import Image
-from src.query_parser.eva_parser import EvaFrameQLParser
+from cmd import Cmd
 
-import sys
-sys.path.append('.')
-matplotlib.use('TkAgg')
+from src.parser.parser import Parser
 
 
-class EVADemo(Cmd):
+class EvaCommandInterpreter(Cmd):
 
-    def default(self, query):
+    def do_greet(self, line):
+        print("hello")
+
+    def do_query(self, query):
         """Takes in SQL query and generates the output"""
+
+        print('hi')
 
         # Type exit to stop program
         if(query == "exit" or query == "EXIT"):
@@ -39,7 +42,7 @@ class EVADemo(Cmd):
         else:
             try:
                 # Connect and Query from Eva
-                parser = EvaFrameQLParser()
+                parser = Parser()
                 eva_statement = parser.parse(query)
                 select_stmt = eva_statement[0]
                 print("Result from the parser:")
@@ -74,10 +77,7 @@ class EVADemo(Cmd):
     def do_quit(self, args):
         """Quits the program."""
         print("Quitting.")
-        raise SystemExit
+        return True
 
-
-if __name__ == '__main__':
-    prompt = EVADemo()
-    prompt.prompt = '> '
-    prompt.cmdloop('Starting EVA...')
+    def do_EOF(self, line):
+        return True
