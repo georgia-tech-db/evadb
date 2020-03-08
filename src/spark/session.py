@@ -18,7 +18,7 @@ from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
 
 from src.configuration.configuration_manager import ConfigurationManager
-from src.utils.logging_manager import LoggingManager
+from src.utils.logging_manager import Logger
 
 
 class Session(object):
@@ -66,7 +66,7 @@ class Session(object):
         self._session = session_builder.getOrCreate()
 
         # Configure logging
-        log4j_level = LoggingManager().getLog4JLevel()
+        log4j_level = Logger().getLog4JLevel()
         spark_context = self._session.sparkContext
         spark_context.setLogLevel(log4j_level)
 

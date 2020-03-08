@@ -14,22 +14,25 @@
 # limitations under the License.
 
 import unittest
+import asyncio
 
-from src.postmaster.interpreter import EvaCommandInterpreter
+from src.server.server import start_server
+
+from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingLevel
 
 
-class InterpreterTests(unittest.TestCase):
+class ServerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_run_event_loop(self):
+    def test_server(self):
 
-        # Start command interpreter
-        prompt = EvaCommandInterpreter()
-        prompt.prompt = '> '
+        try:
+            asyncio.run(start_server(hostname="localhost", port=5432))
 
-        prompt.do_greet("test")
-        # prompt.cmdloop('Starting EVA...')
+        except Exception as e:
+            Logger().log(e, LoggingLevel.CRITICAL)
 
 
 if __name__ == '__main__':

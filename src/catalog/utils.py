@@ -21,7 +21,7 @@ from pyspark.sql.types import IntegerType, FloatType, StringType
 
 from src.catalog.column_type import ColumnType
 from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import LoggingManager
+from src.utils.logging_manager import Logger
 
 
 class Utils(object):
@@ -64,8 +64,8 @@ class Utils(object):
                                               NdarrayCodec(),
                                               column_is_nullable)
         else:
-            LoggingManager().log("Invalid column type: " + str(column_type),
-                                 LoggingLevel.ERROR)
+            Logger().log("Invalid column type: " + str(column_type),
+                         LoggingLevel.ERROR)
 
         return petastorm_column
 
