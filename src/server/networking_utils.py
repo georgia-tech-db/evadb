@@ -17,7 +17,7 @@ import socket
 import asyncio
 
 from src.utils.logging_manager import Logger
-
+from src.utils.logging_manager import LoggingLevel
 
 async def realtime_server_status(protocol, server_closed):
     """
@@ -44,11 +44,12 @@ async def realtime_server_status(protocol, server_closed):
             Logger().log("Status: " +
                          "connections: " + str(previous_connections) +
                          " " +
-                         "errors: " + str(previous_errors)
+                         "errors: " + str(previous_errors),
+                         LoggingLevel.INFO
                          )
 
-        # Report changes every 1~ms
-        await asyncio.sleep(0.001)
+        # Report changes every 1~s
+        await asyncio.sleep(1)
 
 
 def set_socket_io_timeouts(transport, seconds, useconds=0):
