@@ -33,6 +33,17 @@ class StatementToOprTest(unittest.TestCase):
         mock_lget.assert_called_with(table_ref, mock.return_value)
         self.assertEqual(mock_lget.return_value, converter._plan)
 
+    @patch('src.optimizer.statement_to_opr_convertor.LogicalGet')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    def test_visit_table_ref_populates_column_mapping(self, mock,
+                                                      mock_lget):
+        converter = StatementToPlanConvertor()
+        converter._populate_column_map = MagicMock()
+        table_ref = TableRef(TableInfo("test"))
+        converter.visit_table_ref(table_ref)
+
+        converter._populate_column_map.assert_called_with(mock.return_value)
+
     @patch('src.optimizer.statement_to_opr_convertor.LogicalFilter')
     @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_visit_select_predicate_should_add_logical_filter(self, mock,
@@ -88,3 +99,16 @@ class StatementToOprTest(unittest.TestCase):
         converter.visit_table_ref.assert_not_called()
         converter._visit_projection.assert_not_called()
         converter._visit_select_predicate.assert_not_called()
+
+    def test_populate_column_map_should_populate_correctly(self):
+        converter = StatementToPlanConvertor()
+        dataset = MagicMock()
+        dataset.columns = [MagicMock() for i in range(5)]
+        expected = {}
+        for i, column in enumerate(dataset.columns):
+            column.name = "NAME" + str(i)
+            expected[column.name.lower()] = column
+
+        converter._populate_column_map(dataset)
+
+        self.assertEqual(converter._column_map, expected)

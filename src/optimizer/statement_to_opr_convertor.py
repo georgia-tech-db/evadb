@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate)
@@ -31,6 +32,11 @@ class StatementToPlanConvertor:
     def __init__(self):
         self._plan = None
         self._dataset = None
+        self._column_map = {}  # key: column_name (str) value: DataFrameColumn
+
+    def _populate_column_map(self, dataset: DataFrameMetadata):
+        for column in dataset.columns:
+            self._column_map[column.name.lower()] = column
 
     def visit_table_ref(self, video: TableRef):
         """Bind table ref object and convert to Logical get operator
@@ -39,6 +45,8 @@ class StatementToPlanConvertor:
             video {TableRef} -- [Input table ref object created by the parser]
         """
         catalog_vid_metadata = bind_dataset(video.table_info)
+
+        self._populate_column_map(catalog_vid_metadata)
 
         self._plan = LogicalGet(video, catalog_vid_metadata)
 
