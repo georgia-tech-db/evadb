@@ -22,7 +22,6 @@ from src.server.networking_utils import realtime_server_status,\
 
 from src.utils.logging_manager import Logger
 
-
 class EvaServerProtocol(asyncio.Protocol):
 
     """
@@ -62,7 +61,7 @@ class EvaServerProtocol(asyncio.Protocol):
     def data_received(self, data):
         message = data.decode()
         #Logger().log('Data received:' + str(message))
-
+        
         if message == 'quit' or message == 'QUIT':
             #Logger().log('Close the client socket')
             self.transport.close()

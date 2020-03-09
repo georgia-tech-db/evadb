@@ -129,10 +129,16 @@ class EvaClientProtocol(asyncio.Protocol):
         self._write_one()
 
     def _write_one(self):
-        chunk = next(self.data_iter, None)
-        if chunk is None:
+        chunk = 'foo'
+        
+        if random.random() < 0.001:
             self.transport.write_eof()
             return
+        
+        #chunk = next(self.data_iter, None)
+        #if chunk is None:
+        #    self.transport.write_eof()
+        #    return
 
         line = chunk.encode()
         self.transport.write(line)
@@ -148,7 +154,7 @@ def start_clients(host: string, port: int):
         port: port where the server is running
     """
 
-    connection_count = 10000
+    connection_count = 1000
 
     data = textwrap.dedent("""foo fah""").strip()
 
@@ -170,16 +176,18 @@ def start_clients(host: string, port: int):
         wait_until_done(
             loop,
             lambda: EvaClientProtocol(data),
-            jitter / connections_per_second,
+            i / connections_per_second,
             host,
             port
         )
-        for jitter in range(connection_count)
+        for i in range(connection_count)
     ]
 
-    # Start workload
-    load_test = loop.create_task(asyncio.wait(tasks))
-
+    # Start a workload
+    load_test = loop.create_task(
+                    asyncio.wait([loop.create_task(task) for task in tasks])
+                )
+        
     # Start a realtime status monitor
     monitor = loop.create_task(
         realtime_server_status(EvaClientProtocol, load_test)
@@ -188,6 +196,7 @@ def start_clients(host: string, port: int):
     # Run co-routines
     try:
         loop.run_until_complete(asyncio.wait((load_test, monitor)))
+        
     except KeyboardInterrupt:
         Logger().log("Client process interrupted")
     finally:
@@ -199,7 +208,7 @@ def start_clients(host: string, port: int):
                 MAX_RETRIES - d.result()
                 for d in done if not d.exception()
             )
-            
+             
             Logger().log(str(len(tasks)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
                          str(retries) + ' retries',
