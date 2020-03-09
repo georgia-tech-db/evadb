@@ -15,18 +15,19 @@
 
 import unittest
 
-from src.server.client import start_clients
+from src.server.client import start_client
 
 from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingLevel
 
 class ClientTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_server(self):
+    def test_client(self):
 
         try:
-            start_clients(host="localhost", port=5432)
+            start_client(host="localhost", port=5432)
 
         except Exception as e:
             Logger().exception(e)
