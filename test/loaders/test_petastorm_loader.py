@@ -20,8 +20,7 @@ import numpy as np
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.loaders.petastorm_loader import PetastormLoader
 from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import VideoFormat, ColorSpace
-from src.models.catalog.video_info import VideoMetaInfo
+from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
 
 NUM_FRAMES = 10
