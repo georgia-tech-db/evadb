@@ -53,7 +53,7 @@ class StatementToOprTest(unittest.TestCase):
         converter._visit_select_predicate(select_predicate)
 
         mock_lfilter.assert_called_with(select_predicate)
-        mock.assert_called_with(select_predicate)
+        mock.assert_called_with(select_predicate, converter._column_map)
         mock_lfilter.return_value.append_child.assert_called()
         self.assertEqual(mock_lfilter.return_value, converter._plan)
 
@@ -67,7 +67,7 @@ class StatementToOprTest(unittest.TestCase):
         converter._visit_projection(projects)
 
         mock_lproject.assert_called_with(projects)
-        mock.assert_called_with(projects)
+        mock.assert_called_with(projects, converter._column_map)
         mock_lproject.return_value.append_child.assert_called()
         self.assertEqual(mock_lproject.return_value, converter._plan)
 

@@ -16,7 +16,8 @@ import unittest
 
 from mock import patch, MagicMock
 
-from src.optimizer.optimizer_utils import bind_dataset
+from src.expression.tuple_value_expression import TupleValueExpression
+from src.optimizer.optimizer_utils import bind_dataset, bind_tuple_value_expr
 
 
 class OptimizerUtilsTest(unittest.TestCase):
@@ -29,3 +30,9 @@ class OptimizerUtilsTest(unittest.TestCase):
         catalog.get_dataset_metadata.assert_called_with(video.database_name,
                                                         video.table_name)
         self.assertEqual(actual, catalog.get_dataset_metadata.return_value)
+
+    def test_bind_tuple_value_expr(self):
+        column_map = {'col1': object()}
+        tuple_expr = TupleValueExpression(col_name="COL1")
+        bind_tuple_value_expr(tuple_expr, column_map)
+        self.assertEqual(tuple_expr.col_object, column_map['col1'])
