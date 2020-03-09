@@ -119,18 +119,15 @@ def handle_user_input(loop, protocol):
 
         if message in ["quit", "exit"]:
             protocol.done.set_result(None)
-            #loop.stop()
             return
         
         protocol.send_message(message)            
 
-async def wait_until_done(loop, factory, 
-                          jitter: float,
-                          host: string, 
-                          port: int, 
-                          max_retry_count: int):
+async def start_client(loop, factory, jitter: float,
+                       host: string, port: int,
+                       max_retry_count : int):
     """
-        Wait for the connection to open and the workload to be processed.
+        Wait for the connection to open and the task to be processed.
 
         - There's retry logic to make sure we're connecting even in
           the face of momentary ECONNRESET on the server-side.
@@ -164,38 +161,8 @@ async def wait_until_done(loop, factory,
         await protocol.done
 
     return len(retries)
-
-def start_client(host: string, port: int):
-    """
-        Start an eva client
-
-        hostname: hostname of the server
-        port: port where the server is running
-    """
-
-    loop = asyncio.get_event_loop()
-
-    coro = loop.create_connection(EvaClient, host, port)    
-    transport, protocol = loop.run_until_complete(coro)
-
-    client = loop.create_task(handle_user_input(loop, protocol))
         
-    try:
-        loop.run_forever()
-                
-    except KeyboardInterrupt:
-        Logger().log("client process interrupted")    
-            
-    finally:
-        Logger().log("client process shutdown")        
-
-        # Stop client
-        client.cancel()
-        
-        transport.close()
-        loop.close()
-        
-def start_multiple_clients(client_count: int, host: string, port: int):
+def start_clients(client_count: int, host: string, port: int):
     """
         Start a set of eva clients
 
@@ -214,28 +181,27 @@ def start_multiple_clients(client_count: int, host: string, port: int):
  
     connections_per_second = max(min(max_files, client_count) // 5, 1)
 
-    max_retry_count = 3
+    max_retry_count = 10
  
     Logger().log('max_files: ' + str(max_files))
     Logger().log('connection_count: ' + str(client_count))
     Logger().log('connections_per_second: ' + str(connections_per_second))
  
     # Create client tasks
-    tasks = [
-        wait_until_done(
-            loop,
-            lambda: EvaClient(),
-            i / connections_per_second,
-            host,
-            port,
-            max_retry_count
+    clients = [
+        start_client(loop, lambda: EvaClient(), 
+                     i / connections_per_second,
+                     host, port,
+                     max_retry_count
         )
         for i in range(client_count)
     ]
  
-    # Start a workload
+    # Start a set of clients
     load_test = loop.create_task(
-                    asyncio.wait([loop.create_task(task) for task in tasks])
+                    asyncio.wait([loop.create_task(client) 
+                                  for client in clients]
+                    )
                 )
          
     # Start a realtime status monitor
@@ -261,7 +227,7 @@ def start_multiple_clients(client_count: int, host: string, port: int):
                 for d in done if not d.exception()
             )
              
-            Logger().log(str(len(tasks)) + ' tasks, ' +
+            Logger().log(str(len(clients)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
                          str(retries) + ' retries',
                          LoggingLevel.INFO
