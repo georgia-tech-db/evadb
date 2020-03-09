@@ -188,7 +188,7 @@ def start_clients(client_count: int, host: string, port: int):
     Logger().log('connections_per_second: ' + str(connections_per_second))
  
     # Create client tasks
-    clients = [
+    client_coros = [
         start_client(loop, lambda: EvaClient(), 
                      i / connections_per_second,
                      host, port,
@@ -198,20 +198,15 @@ def start_clients(client_count: int, host: string, port: int):
     ]
  
     # Start a set of clients
-    load_test = loop.create_task(
-                    asyncio.wait([loop.create_task(client) 
-                                  for client in clients]
+    clients = loop.create_task(
+                    asyncio.wait([loop.create_task(client_coro) 
+                                  for client_coro in client_coros]
                     )
                 )
-         
-    # Start a realtime status monitor
-    monitor = loop.create_task(
-        realtime_server_status(EvaClient, load_test)
-    )
  
     # Run co-routines
     try:
-        loop.run_until_complete(asyncio.wait((load_test, monitor)))
+        loop.run_until_complete(asyncio.wait([clients]))
                  
     except KeyboardInterrupt:
         Logger().log("client process interrupted")
@@ -219,15 +214,15 @@ def start_clients(client_count: int, host: string, port: int):
     finally:
         Logger().log("client process shutdown")        
          
-        if load_test.done():
-            done, _ = load_test.result()
+        if clients.done():
+            done, _ = clients.result()
             exceptions = sum(1 for d in done if d.exception())
             retries = sum(
                 max_retry_count - d.result()
                 for d in done if not d.exception()
             )
              
-            Logger().log(str(len(clients)) + ' tasks, ' +
+            Logger().log(str(len(client_coros)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
                          str(retries) + ' retries',
                          LoggingLevel.INFO
