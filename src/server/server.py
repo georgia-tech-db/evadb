@@ -22,7 +22,7 @@ from src.server.networking_utils import realtime_server_status,\
 
 from src.utils.logging_manager import Logger
 
-class EvaServerProtocol(asyncio.Protocol):
+class EvaServer(asyncio.Protocol):
 
     """
     Receives messages and offloads them to another task for processing them.
@@ -38,7 +38,6 @@ class EvaServerProtocol(asyncio.Protocol):
 
     def connection_made(self, transport):
         self.transport = transport
-
         # Set timeout for sockets
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
@@ -46,28 +45,35 @@ class EvaServerProtocol(asyncio.Protocol):
 
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info('peername')
-        #Logger().log('Connection from ' + str(peername))
-        EvaServerProtocol.__connections__ += 1
+        Logger().log('Connection from client: ' + str(peername))
+        EvaServer.__connections__ += 1
 
     def connection_lost(self, exc):
         # free sockets early, free sockets often
         if exc:
-            EvaServerProtocol.__errors__ += 1
+            EvaServer.__errors__ += 1
             self.transport.abort()
         else:
             self.transport.close()
-        EvaServerProtocol.__connections__ -= 1
+        EvaServer.__connections__ -= 1
 
     def data_received(self, data):
-        message = data.decode()
-        #Logger().log('Data received:' + str(message))
-        
-        if message == 'quit' or message == 'QUIT':
-            #Logger().log('Close the client socket')
+        request_message = data.decode()
+        Logger().log('Request from client: --|' +\
+                     str(request_message) +\
+                     '|--')
+
+        if request_message in ["quit", "exit"]:
+            Logger().log('Close client socket')
             self.transport.close()
         else:
-            self.transport.write(data)
-            #Logger().log('Send message to client:' + str(message))
+            response_message = request_message
+            Logger().log('Response to client: --|' +\
+                         str(response_message) +\
+                        '|--')
+           
+            data = response_message.encode('ascii')            
+            self.transport.write(data)            
 
 
 def start_server(host: string, port: int):
@@ -82,7 +88,7 @@ def start_server(host: string, port: int):
     loop = asyncio.get_event_loop()
     
     # Start the eva server
-    coro = loop.create_server(lambda: EvaServerProtocol(), host, port)
+    coro = loop.create_server(lambda: EvaServer(), host, port)
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
@@ -92,7 +98,7 @@ def start_server(host: string, port: int):
     server_closed = loop.create_task(server.wait_closed())
 
     # Start the realtime status monitor
-    monitor = loop.create_task(realtime_server_status(EvaServerProtocol,
+    monitor = loop.create_task(realtime_server_status(EvaServer,
                                                       server_closed))
 
     try:
@@ -113,4 +119,4 @@ def start_server(host: string, port: int):
         loop.run_until_complete(server.wait_closed())
         loop.close()
         
-        Logger().log("Successfully shutdown eva.")
+        Logger().log("Successfully shutdown server.")
