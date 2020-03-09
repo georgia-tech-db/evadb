@@ -19,6 +19,7 @@ import os
 import random
 import resource
 import textwrap
+import socket
 
 from contextlib import ExitStack  # For cleanly closing sockets
 
@@ -26,9 +27,9 @@ from src.server.networking_utils import realtime_server_status,\
     set_socket_io_timeouts
 
 from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingLevel
 
 MAX_RETRIES = 3
-
 
 async def wait_until_done(loop, protocol_factory, jitter,
                           host: string, port: int):
@@ -39,9 +40,7 @@ async def wait_until_done(loop, protocol_factory, jitter,
           the face of momentary ECONNRESET on the server-side.
         - Socket will be automatically closed by the exit stack.
     """
-
-    Logger().log('jitter: ' + str(jitter))
-
+    
     await asyncio.sleep(jitter)
 
     retries = MAX_RETRIES * [1]  # non-exponential 10s
@@ -49,15 +48,20 @@ async def wait_until_done(loop, protocol_factory, jitter,
     with ExitStack() as stack:
         while True:
             try:
-                transport, protocol = await loop.create_connection(
-                        protocol_factory, host, port)
+                sock = stack.enter_context(socket.socket())
+                sock.connect((host, port))
+                connection = loop.create_connection(protocol_factory, sock=sock)
+                transport, protocol = await connection
+                
             except Exception as e:
                 Logger().log('Exception ' + str(e))
                 if not retries:
                     raise
+                
                 await asyncio.sleep(retries.pop(0) - random.random())
             else:
                 break
+            
         await protocol.done
 
     return len(retries)
@@ -144,7 +148,7 @@ def start_clients(host: string, port: int):
         port: port where the server is running
     """
 
-    connection_count = 10
+    connection_count = 10000
 
     data = textwrap.dedent("""foo fah""").strip()
 
@@ -157,9 +161,9 @@ def start_clients(host: string, port: int):
 
     connections_per_second = min(max_files, connection_count) // 5
 
-    Logger().log('max_files: ' + str(max_files))
-    Logger().log('connection_count: ' + str(connection_count))
-    Logger().log('connections_per_second: ' + str(connections_per_second))
+    Logger().log('max_files: ' + str(max_files), LoggingLevel.INFO)
+    Logger().log('connection_count: ' + str(connection_count), LoggingLevel.INFO)
+    Logger().log('connections_per_second: ' + str(connections_per_second), LoggingLevel.INFO)
 
     # Create client tasks
     tasks = [
@@ -198,7 +202,8 @@ def start_clients(host: string, port: int):
             
             Logger().log(str(len(tasks)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
-                         str(retries) + ' retries'
+                         str(retries) + ' retries',
+                         LoggingLevel.INFO
                          )
 
         # Close loop

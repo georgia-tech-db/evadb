@@ -47,7 +47,7 @@ class EvaServerProtocol(asyncio.Protocol):
 
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info('peername')
-        Logger().log('Connection from ' + str(peername))
+        #Logger().log('Connection from ' + str(peername))
         EvaServerProtocol.__connections__ += 1
 
     def connection_lost(self, exc):
@@ -61,14 +61,14 @@ class EvaServerProtocol(asyncio.Protocol):
 
     def data_received(self, data):
         message = data.decode()
-        Logger().log('Data received:' + str(message))
+        #Logger().log('Data received:' + str(message))
 
         if message == 'quit' or message == 'QUIT':
-            Logger().log('Close the client socket')
+            #Logger().log('Close the client socket')
             self.transport.close()
         else:
             self.transport.write(data)
-            Logger().log('Send message to client:' + str(message))
+            #Logger().log('Send message to client:' + str(message))
 
 
 def start_server(host: string, port: int):
