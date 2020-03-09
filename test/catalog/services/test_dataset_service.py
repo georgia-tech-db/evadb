@@ -16,12 +16,12 @@ from unittest import TestCase
 
 from mock import patch
 
-from src.catalog.models.df_metadata import DataFrameMetadata
 from src.catalog.services.df_service import DatasetService
 
 DATASET_ID = 123
 DATASET_URL = 'file1'
 DATASET_NAME = 'name'
+DATABASE_NAME = "test"
 
 
 class DatasetServiceTest(TestCase):
@@ -42,7 +42,8 @@ class DatasetServiceTest(TestCase):
         mocked.query.filter.return_value.one.assert_called_once()
 
     @patch("src.catalog.services.df_service.DataFrameMetadata")
-    def test_dataset_by_name_should_query_model_with_name(self, mocked):
+    def test_dataset_by_name_queries_model_with_name_and_return_id(self,
+                                                                   mocked):
         service = DatasetService()
 
         expected_output = 1
@@ -55,3 +56,13 @@ class DatasetServiceTest(TestCase):
             mocked._name == DATASET_NAME)
 
         self.assertEqual(result, expected_output)
+
+    @patch("src.catalog.services.df_service.DataFrameMetadata")
+    def test_dataset_object_by_name_queries_with_name_returns_model_object(
+            self,
+            mocked):
+        service = DatasetService()
+        actual = service.dataset_object_by_name(DATABASE_NAME, DATASET_NAME)
+        expected = mocked.query.filter.return_value.one.return_value
+
+        self.assertEqual(actual, expected)

@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -68,3 +70,20 @@ class DatasetService(BaseService):
         return self.model.query \
             .filter(self.model._id == metadata_id) \
             .one()
+
+    def dataset_object_by_name(self, database_name, dataset_name,
+                               column_name: List[str] = None):
+        """
+        Get the metadata for the given table.
+        Arguments:
+            database_name  (str): Database to which dataset belongs # TODO:
+            use this field
+            dataset_name (str): name of the dataset
+            column_name (List[str]): list of columns for the  dataset which
+            need be listed. If not specified, all columns will be retrieved
+            # TODO:  perform column filtering when column_name not None
+        Returns:
+            DataFrameMetadata - metadata for given dataset_name
+        """
+        return self.model.query.filter(
+            self.model._name == dataset_name).one()
