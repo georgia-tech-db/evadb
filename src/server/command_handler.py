@@ -13,32 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-
-
-from src.server.client import start_clients
+import asyncio
 
 from src.utils.logging_manager import Logger
 
 
-class ClientTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+@asyncio.coroutine
+def handle_request(transport, request_message):
+    """
+        Reads a request from a client and processes it
 
-    def test_multiple_clients(self):
+        If user inputs 'quit' stops the event loop
+        otherwise just echoes user input
+    """
 
-        client_count = 3
-        host = "localhost"
-        port = 5432
+    response_message = "foo"
 
-        try:
-            start_clients(client_count=client_count,
-                          host=host,
-                          port=port)
+    Logger().log('Response to client: --|' +
+                 str(response_message) +
+                 '|--')
 
-        except Exception as e:
-            Logger().exception(e)
-
-
-if __name__ == '__main__':
-    unittest.main()
+    data = response_message.encode('ascii')
+    transport.write(data)

@@ -22,6 +22,8 @@ from src.server.networking_utils import realtime_server_status,\
 
 from src.utils.logging_manager import Logger
 
+from src.server.command_handler import handle_request
+
 class EvaServer(asyncio.Protocol):
 
     """
@@ -59,21 +61,17 @@ class EvaServer(asyncio.Protocol):
 
     def data_received(self, data):
         request_message = data.decode()
-        Logger().log('Request from client: --|' +\
-                     str(request_message) +\
+        Logger().log('Request from client: --|' +
+                     str(request_message) +
                      '|--')
 
         if request_message in ["quit", "exit"]:
             Logger().log('Close client socket')
             self.transport.close()
         else:
-            response_message = request_message
-            Logger().log('Response to client: --|' +\
-                         str(response_message) +\
-                        '|--')
-           
-            data = response_message.encode('ascii')            
-            self.transport.write(data)            
+            asyncio.create_task(
+                handle_request(self.transport, request_message)
+            )
 
 
 def start_server(host: string, port: int):
@@ -86,7 +84,7 @@ def start_server(host: string, port: int):
 
     # Get a reference to the event loop
     loop = asyncio.get_event_loop()
-    
+
     # Start the eva server
     coro = loop.create_server(lambda: EvaServer(), host, port)
     server = loop.run_until_complete(coro)
@@ -107,7 +105,7 @@ def start_server(host: string, port: int):
     except KeyboardInterrupt:
 
         Logger().log("Server process interrupted")
-        
+
     finally:
         # Stop monitor
         monitor.cancel()
@@ -118,5 +116,5 @@ def start_server(host: string, port: int):
         # Stop event loop
         loop.run_until_complete(server.wait_closed())
         loop.close()
-        
+
         Logger().log("Successfully shutdown server.")

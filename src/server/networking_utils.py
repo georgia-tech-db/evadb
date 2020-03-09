@@ -19,6 +19,7 @@ import asyncio
 from src.utils.logging_manager import Logger
 from src.utils.logging_manager import LoggingLevel
 
+
 async def realtime_server_status(protocol, server_closed):
     """
         Report status changes.

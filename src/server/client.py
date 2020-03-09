@@ -17,18 +17,16 @@ import asyncio
 import string
 import socket
 import random
-
 import resource
 import os
-import asyncio
 
 from contextlib import ExitStack  # For cleanly closing sockets
 
 from src.server.networking_utils import set_socket_io_timeouts
-from src.server.networking_utils import realtime_server_status
 
 from src.utils.logging_manager import Logger
 from src.utils.logging_manager import LoggingLevel
+
 
 class EvaClient(asyncio.Protocol):
     """
@@ -37,7 +35,7 @@ class EvaClient(asyncio.Protocol):
         - It never creates any asynchronous tasks itself
         - So it does not know anything about any event loops
         - It tracks completion of workload with the `done` future
-        - It tracks its progress via the class-level counters        
+        - It tracks its progress via the class-level counters
     """
 
     # These counters are used for realtime server monitoring
@@ -51,29 +49,29 @@ class EvaClient(asyncio.Protocol):
 
         EvaClient.__connections__ += 1
 
-        Logger().log("[ " + str(self.id) + " ]" +\
-             " Init Client"
-        )
+        Logger().log("[ " + str(self.id) + " ]" +
+                     " Init Client"
+                     )
 
     def connection_made(self, transport):
         self.transport = transport
-        
+
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
-            Logger().log("[ " + str(self.id) + " ]" +\
-                 " Could not set timeout"
-            )
+            Logger().log("[ " + str(self.id) + " ]" +
+                         " Could not set timeout"
+                         )
             return
 
-        Logger().log("[ " + str(self.id) + " ]" +\
-             " Connected to server"
-        )
-        
+        Logger().log("[ " + str(self.id) + " ]" +
+                     " Connected to server"
+                     )
+
     def connection_lost(self, exc, exc2=None):
 
-        Logger().log("[ " + str(self.id) + " ]" +\
-             " Disconnected from server"
-        )
+        Logger().log("[ " + str(self.id) + " ]" +
+                     " Disconnected from server"
+                     )
 
         try:
             self.transport.abort()  # free sockets early, free sockets often
@@ -88,22 +86,23 @@ class EvaClient(asyncio.Protocol):
                 self.done.exception()  # remove _tb_logger
             else:
                 self.done.set_result(None)
-            
+
     def data_received(self, data):
-                
+
         response_chunk = data.decode()
-        Logger().log("[ " + str(self.id) + " ]" +\
-             " Response from server: --|" + str(response_chunk) + "|--"
-        )
-    
+        Logger().log("[ " + str(self.id) + " ]" +
+                     " Response from server: --|" + str(response_chunk) + "|--"
+                     )
+
     def send_message(self, message):
 
-        Logger().log("[ " + str(self.id) + " ]" +\
-             " Request to server: --|" + str(message) + "|--"
-        )
-                        
+        Logger().log("[ " + str(self.id) + " ]" +
+                     " Request to server: --|" + str(message) + "|--"
+                     )
+
         request_chunk = message.encode('ascii')
-        self.transport.write(request_chunk)    
+        self.transport.write(request_chunk)
+
 
 @asyncio.coroutine
 def handle_user_input(loop, protocol):
@@ -114,18 +113,19 @@ def handle_user_input(loop, protocol):
         otherwise just echoes user input
     """
     while True:
-        
+
         message = yield from loop.run_in_executor(None, input, "> ")
 
         if message in ["quit", "exit"]:
             protocol.done.set_result(None)
             return
-        
-        protocol.send_message(message)            
+
+        protocol.send_message(message)
+
 
 async def start_client(loop, factory, jitter: float,
                        host: string, port: int,
-                       max_retry_count : int):
+                       max_retry_count: int):
     """
         Wait for the connection to open and the task to be processed.
 
@@ -133,35 +133,36 @@ async def start_client(loop, factory, jitter: float,
           the face of momentary ECONNRESET on the server-side.
         - Socket will be automatically closed by the exit stack.
     """
-    
+
     await asyncio.sleep(jitter)
-     
+
     retries = max_retry_count * [1]  # non-exponential 10s
 
     with ExitStack() as stack:
         while True:
             try:
                 sock = stack.enter_context(socket.socket())
-                sock.connect((host, port))                
+                sock.connect((host, port))
                 connection = loop.create_connection(factory, sock=sock)
                 transport, protocol = await connection
-                
+
             except Exception as e:
                 Logger().exception(e)
                 if not retries:
                     raise
-                
+
                 await asyncio.sleep(retries.pop(0) - random.random())
             else:
                 break
-            
+
         # Launch task to handle user inputs
         loop.create_task(handle_user_input(loop, protocol))
-            
+
         await protocol.done
 
     return len(retries)
-        
+
+
 def start_clients(client_count: int, host: string, port: int):
     """
         Start a set of eva clients
@@ -172,48 +173,48 @@ def start_clients(client_count: int, host: string, port: int):
     """
 
     Logger().log('PID(' + str(os.getpid()) + ') attempting '
-                     + str(client_count) + ' connections')
-     
+                 + str(client_count) + ' connections')
+
     loop = asyncio.get_event_loop()
- 
+
     # ulimit -n
-    max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0] 
- 
+    max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0]
+
     connections_per_second = max(min(max_files, client_count) // 5, 1)
 
     max_retry_count = 10
- 
+
     Logger().log('max_files: ' + str(max_files))
     Logger().log('connection_count: ' + str(client_count))
     Logger().log('connections_per_second: ' + str(connections_per_second))
- 
+
     # Create client tasks
     client_coros = [
-        start_client(loop, lambda: EvaClient(), 
+        start_client(loop, lambda: EvaClient(),
                      i / connections_per_second,
                      host, port,
                      max_retry_count
-        )
+                     )
         for i in range(client_count)
     ]
- 
+
     # Start a set of clients
     clients = loop.create_task(
-                    asyncio.wait([loop.create_task(client_coro) 
-                                  for client_coro in client_coros]
-                    )
-                )
- 
+        asyncio.wait([loop.create_task(client_coro)
+                      for client_coro in client_coros]
+                     )
+    )
+
     # Run co-routines
     try:
         loop.run_until_complete(asyncio.wait([clients]))
-                 
+
     except KeyboardInterrupt:
         Logger().log("client process interrupted")
-         
+
     finally:
-        Logger().log("client process shutdown")        
-         
+        Logger().log("client process shutdown")
+
         if clients.done():
             done, _ = clients.result()
             exceptions = sum(1 for d in done if d.exception())
@@ -221,13 +222,12 @@ def start_clients(client_count: int, host: string, port: int):
                 max_retry_count - d.result()
                 for d in done if not d.exception()
             )
-             
+
             Logger().log(str(len(client_coros)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
                          str(retries) + ' retries',
                          LoggingLevel.INFO
                          )
- 
+
         # Close loop
         loop.close()
-

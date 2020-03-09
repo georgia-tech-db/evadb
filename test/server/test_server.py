@@ -20,6 +20,7 @@ from src.server.server import start_server
 from src.utils.logging_manager import Logger
 from src.utils.logging_manager import LoggingLevel
 
+
 class ServerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
