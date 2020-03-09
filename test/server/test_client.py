@@ -26,30 +26,30 @@ class ClientTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
         
     def test_single_client(self):
- 
+  
         host = "localhost"
         port = 5432
-        
+         
         #monkeypatch.setattr('sys.stdin', io.StringIO('foo\nfah\nexit'))
-        
+         
         try:
             start_client(host = host, 
                          port = port)
-        
+         
         except Exception as e:
             Logger().exception(e)
 
     def test_multiple_clients(self):
- 
-        client_count = 10
+  
+        client_count = 2
         host = "localhost"
         port = 5432
-        
+         
         try:
             start_multiple_clients(client_count= client_count, 
                                    host = host, 
                                    port = port)
-        
+         
         except Exception as e:
             Logger().exception(e)
 
