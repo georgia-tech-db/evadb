@@ -14,6 +14,8 @@
 # limitations under the License.
 from enum import IntEnum, unique
 from typing import List
+
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.parser.table_ref import TableRef
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
@@ -59,7 +61,7 @@ class Operator:
 
 
 class LogicalGet(Operator):
-    def __init__(self, video: TableRef, catalog_entry: int,
+    def __init__(self, video: TableRef, catalog_entry: DataFrameMetadata,
                  children: List = None):
         super().__init__(OperatorType.LOGICALGET, children)
         self._video = video
