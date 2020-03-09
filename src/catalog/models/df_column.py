@@ -15,7 +15,9 @@
 import json
 from typing import List
 
-from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint, \
+    ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
 from src.catalog.column_type import ColumnType
@@ -29,7 +31,11 @@ class DataFrameColumn(BaseModel):
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
     _array_dimensions = Column('array_dimensions', String(100))
-    _metadata_id = Column('metadata_id', Integer)
+    _metadata_id = Column('metadata_id', Integer,
+                          ForeignKey('df_metadata.id'))
+
+    _dataset = relationship("DataFrameMetadata", back_populates="_columns")
+
     __table_args__ = (
         UniqueConstraint('name', 'metadata_id'), {}
     )
