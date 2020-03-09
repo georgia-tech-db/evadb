@@ -19,7 +19,7 @@ class PetastormLoader(AbstractVideoLoader):
         info = None
         with make_reader(self.video_metadata.file_url,
                          shard_count=self.total_shards,
-                         cur_shard=self.shard) \
+                         cur_shard=self.curr_shard) \
                 as reader:
             for frame_ind, row in enumerate(reader):
                 if info is None:

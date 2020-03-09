@@ -30,7 +30,7 @@ class StoragePlan(AbstractPlan):
         offset (int): storage offset for retrieving data
         limit (int): limit on data records to be retrieved
         total_shards (int): number of shards of data (if sharded)
-        curr_shard (int): current shard if data is sharded
+        curr_shard (int): current curr_shard if data is sharded
     """
 
     def __init__(self, video: DataFrameMetadata, batch_size: int = 1,

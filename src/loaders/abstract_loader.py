@@ -19,20 +19,20 @@ class AbstractVideoLoader(metaclass=ABCMeta):
                                      while fetching the video
         offset (int, optional): Start frame location in video
         limit (int, optional): Number of frames needed from the video
-        shard (int, optional): Shard number to load from if sharded
+        curr_shard (int, optional): Shard number to load from if sharded
         total_shards (int, optional): Specify total number of shards if
                                       applicable
     """
 
     def __init__(self, video_metadata: DataFrameMetadata, batch_size=1,
-                 skip_frames=0, offset=None, limit=None, shard=0,
+                 skip_frames=0, offset=None, limit=None, curr_shard=0,
                  total_shards=0):
         self.video_metadata = video_metadata
         self.batch_size = batch_size
         self.skip_frames = skip_frames
         self.offset = offset
         self.limit = limit
-        self.shard = shard
+        self.curr_shard = curr_shard
         self.total_shards = total_shards
 
     def load(self) -> Iterator[FrameBatch]:
