@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Iterator
 
-from src.models.catalog.video_info import VideoMetaInfo
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.models.storage.batch import FrameBatch
 from src.models.storage.frame import Frame
 
@@ -13,7 +13,7 @@ class AbstractVideoLoader(metaclass=ABCMeta):
     and return the frames in an iterative manner.
 
     Attributes:
-        video_metadata (VideoMetaInfo): Object containing metadata of the video
+        video_metadata (DataFrameMetadata): Object containing metadata of video
         batch_size (int, optional): No. of frames to fetch in batch from video
         skip_frames (int, optional): Number of frames to be skipped
                                      while fetching the video
@@ -24,7 +24,7 @@ class AbstractVideoLoader(metaclass=ABCMeta):
                                       applicable
     """
 
-    def __init__(self, video_metadata: VideoMetaInfo, batch_size=1,
+    def __init__(self, video_metadata: DataFrameMetadata, batch_size=1,
                  skip_frames=0, offset=None, limit=None, shard=0,
                  total_shards=0):
         self.video_metadata = video_metadata
