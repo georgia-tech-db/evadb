@@ -61,22 +61,23 @@ class EvaClient(asyncio.Protocol):
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
             Logger().log("[ " + str(self.id) + " ]" +\
-                 " Could not set timeout: --|" + str(self.transport) + "|--"
+                 " Could not set timeout"
             )
             return
 
         Logger().log("[ " + str(self.id) + " ]" +\
-             " Connected to server: --|" + str(self.host) + "|--"
+             " Connected to server"
         )
         
     def connection_lost(self, exc, exc2=None):
 
         Logger().log("[ " + str(self.id) + " ]" +\
-             " Disconnected from server: --|" + str(exc) + "|--"
+             " Disconnected from server"
         )
 
         try:
             self.transport.abort()  # free sockets early, free sockets often
+            self.transport = None
         except Exception as e:
             Logger().exception(e)
             exc2 = e
@@ -103,9 +104,28 @@ class EvaClient(asyncio.Protocol):
                         
         request_chunk = message.encode('ascii')
         self.transport.write(request_chunk)    
-           
 
-async def wait_until_done(loop, factory, jitter: int,
+@asyncio.coroutine
+def handle_user_input(loop, protocol):
+    """
+        Reads from stdin in separate thread
+
+        If user inputs 'quit' stops the event loop
+        otherwise just echoes user input
+    """
+    while True:
+        
+        message = yield from loop.run_in_executor(None, input, "> ")
+
+        if message in ["quit", "exit"]:
+            protocol.done.set_result(None)
+            #loop.stop()
+            return
+        
+        protocol.send_message(message)            
+
+async def wait_until_done(loop, factory, 
+                          jitter: float,
                           host: string, 
                           port: int, 
                           max_retry_count: int):
@@ -138,27 +158,12 @@ async def wait_until_done(loop, factory, jitter: int,
             else:
                 break
             
+        # Launch task to handle user inputs
+        loop.create_task(handle_user_input(loop, protocol))
+            
         await protocol.done
 
     return len(retries)
-
-@asyncio.coroutine
-def handle_user_input(loop, protocol):
-    """
-        Reads from stdin in separate thread
-
-        If user inputs 'quit' stops the event loop
-        otherwise just echoes user input
-    """
-    while True:
-        
-        message = yield from loop.run_in_executor(None, input, "> ")
-
-        if message in ["quit", "exit"]:
-            loop.stop()
-            return
-        
-        protocol.send_message(message) 
 
 def start_client(host: string, port: int):
     """
@@ -207,7 +212,7 @@ def start_multiple_clients(client_count: int, host: string, port: int):
     # ulimit -n
     max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0] 
  
-    connections_per_second = min(max_files, client_count) // 5
+    connections_per_second = max(min(max_files, client_count) // 5, 1)
 
     max_retry_count = 3
  
@@ -241,7 +246,7 @@ def start_multiple_clients(client_count: int, host: string, port: int):
     # Run co-routines
     try:
         loop.run_until_complete(asyncio.wait((load_test, monitor)))
-         
+                 
     except KeyboardInterrupt:
         Logger().log("client process interrupted")
          
