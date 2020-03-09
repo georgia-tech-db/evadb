@@ -14,12 +14,9 @@
 # limitations under the License.
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm.exc import NoResultFound
 
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.base_model import BaseModel
-from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import LoggingManager
 
 
 class DataFrameMetadata(BaseModel):
