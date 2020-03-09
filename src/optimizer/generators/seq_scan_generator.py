@@ -26,7 +26,7 @@ class ScanGenerator(Generator):
         self._plan = None
 
     def _visit_logical_get(self, operator: LogicalGet):
-        self._plan = StoragePlan(operator._video)
+        self._plan = StoragePlan(operator.dataset_metadata)
 
     def _visit_logical_filter(self, operator: LogicalFilter):
         self._predicate = operator.predicate

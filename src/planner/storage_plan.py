@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.models.catalog.video_info import VideoMetaInfo
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
@@ -23,7 +24,7 @@ class StoragePlan(AbstractPlan):
     and returning to the higher levels.
 
     Arguments:
-        video (VideoMetaInfo): Required meta-data for fetching data
+        video (DataFrameMetadata): Required meta-data for fetching data
         batch_size (int): size of batch frame
         skip_frames (int): skip frequency
         offset (int): storage offset for retrieving data
@@ -32,7 +33,7 @@ class StoragePlan(AbstractPlan):
         curr_shard (int): current shard if data is sharded
     """
 
-    def __init__(self, video: VideoMetaInfo, batch_size: int = 1,
+    def __init__(self, video: DataFrameMetadata, batch_size: int = 1,
                  skip_frames: int = 0, offset: int = None, limit: int = None,
                  total_shards: int = 0, curr_shard: int = 0):
         super().__init__(PlanNodeType.STORAGE_PLAN)

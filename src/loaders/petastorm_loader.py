@@ -17,7 +17,7 @@ class PetastormLoader(AbstractVideoLoader):
 
     def _load_frames(self) -> Iterator[Frame]:
         info = None
-        with make_reader(self.video_metadata.file,
+        with make_reader(self.video_metadata.file_url,
                          shard_count=self.total_shards,
                          cur_shard=self.shard) \
                 as reader:
