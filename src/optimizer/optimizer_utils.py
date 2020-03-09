@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
 from typing import List
@@ -23,6 +24,21 @@ from src.parser.create_statement import ColumnDefinition
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
+
+
+def bind_dataset(video_info: TableInfo) -> DataFrameMetadata:
+    """
+    Uses catalog to bind the dataset information for given video string.
+
+    Arguments:
+         video_info (TableInfo): video information obtained in SQL query
+
+    Returns:
+        DataFrameMetadata  -  corresponding metadata for the input table info
+    """
+    catalog = CatalogManager()
+    return catalog.get_dataset_metadata(video_info.database_name,
+                                        video_info.table_name)
 
 
 def bind_table_ref(video_info: TableInfo) -> int:
