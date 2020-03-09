@@ -106,6 +106,26 @@ class CatalogManagerTests(unittest.TestCase):
 
         self.assertEqual(actual, (ds_dataset_name_mock.return_value, []))
 
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_table_binding_without_columns_returns_no_column_ids(self,
+                                                                 dcs_mock,
+                                                                 ds_mock,
+                                                                 initdb_mock):
+        catalog = CatalogManager()
+        dataset_name = "name"
+
+        database_name = "database"
+
+        actual = catalog.get_dataset_metadata(database_name, dataset_name)
+        ds_mock.return_value.dataset_object_by_name.assert_called_with(
+            database_name, dataset_name)
+
+        self.assertEqual(actual,
+                         ds_mock.return_value.dataset_object_by_name
+                         .return_value)
+
 
 if __name__ == '__main__':
     unittest.main()

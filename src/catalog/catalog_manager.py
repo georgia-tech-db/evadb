@@ -185,3 +185,18 @@ class CatalogManager(object):
         """
         return DataFrameColumn(column_name, data_type,
                                array_dimensions=dimensions)
+
+    def get_dataset_metadata(self, database_name: str, dataset_name: str,
+                             column_names: List[str] = None) -> \
+            DataFrameMetadata:
+        """
+        Returns the Dataset metadata for the given dataset name
+        Arguments:
+            dataset_name (str): name of the dataset
+
+        Returns:
+            DataFrameMetadata
+        """
+
+        return self._dataset_service.dataset_object_by_name(
+            database_name, dataset_name)
