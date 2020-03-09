@@ -17,7 +17,7 @@ import unittest
 
 import io
 
-from src.server.client import start_client, start_multiple_clients
+from src.server.client import start_clients
 
 from src.utils.logging_manager import Logger
 
@@ -25,20 +25,6 @@ class ClientTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-    def test_single_client(self):
-  
-        host = "localhost"
-        port = 5432
-         
-        #monkeypatch.setattr('sys.stdin', io.StringIO('foo\nfah\nexit'))
-         
-        try:
-            start_client(host = host, 
-                         port = port)
-         
-        except Exception as e:
-            Logger().exception(e)
-
     def test_multiple_clients(self):
   
         client_count = 2
@@ -46,7 +32,7 @@ class ClientTests(unittest.TestCase):
         port = 5432
          
         try:
-            start_multiple_clients(client_count= client_count, 
+            start_clients(client_count= client_count, 
                                    host = host, 
                                    port = port)
          
