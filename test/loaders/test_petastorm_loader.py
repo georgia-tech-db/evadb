@@ -50,7 +50,8 @@ class PetastormLoaderTest(unittest.TestCase):
     def test_should_call_petastorm_make_reader_with_correct_params(self,
                                                                    mock):
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
-        video_loader = PetastormLoader(video_info, shard=3, total_shards=3)
+        video_loader = PetastormLoader(video_info, curr_shard=3,
+                                       total_shards=3)
         list(video_loader._load_frames())
         mock.assert_called_once_with('dummy.avi', shard_count=3, cur_shard=3)
 
@@ -61,7 +62,8 @@ class PetastormLoaderTest(unittest.TestCase):
 
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
 
-        video_loader = PetastormLoader(video_info, shard=3, total_shards=3)
+        video_loader = PetastormLoader(video_info, curr_shard=3,
+                                       total_shards=3)
         actual = list(video_loader._load_frames())
         expected = [Frame(i, np.ones((2, 2, 3)) * i, FrameInfo(2, 2, 3,
                                                                ColorSpace.BGR))
