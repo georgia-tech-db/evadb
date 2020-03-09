@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 from sqlalchemy.orm.exc import NoResultFound
 
 from src.catalog.df_schema import DataFrameSchema
@@ -26,6 +27,9 @@ class DataFrameMetadata(BaseModel):
 
     _name = Column('name', String(100), unique=True)
     _file_url = Column('file_url', String(100))
+
+    _columns = relationship('DataFrameColumn',
+                            back_populates="_dataset")
 
     def __init__(self, name: str, file_url: str):
         self._name = name
@@ -51,3 +55,7 @@ class DataFrameMetadata(BaseModel):
     @property
     def file_url(self):
         return self._file_url
+
+    @property
+    def columns(self):
+        return self._columns
