@@ -76,14 +76,14 @@ class StatementToPlanConvertor:
 
     def _visit_projection(self, select_columns):
         # Bind the columns using catalog
-        bind_columns_expr(select_columns)
+        bind_columns_expr(select_columns, self._column_map)
         projection_opr = LogicalProject(select_columns)
         projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):
         # Binding the expression
-        bind_predicate_expr(predicate)
+        bind_predicate_expr(predicate, self._column_map)
         filter_opr = LogicalFilter(predicate)
         filter_opr.append_child(self._plan)
         self._plan = filter_opr
@@ -105,7 +105,7 @@ class StatementToPlanConvertor:
                 col.table_name = video.table_info.table_name
             if col.table_metadata_id is None:
                 col.table_metadata_id = catalog_table_id
-        bind_columns_expr(col_list)
+        bind_columns_expr(col_list, {})
 
         # Nothing to be done for values as we add support for other variants of
         # insert we will handle them
