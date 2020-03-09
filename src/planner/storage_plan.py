@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.models.catalog.video_info import VideoMetaInfo
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 

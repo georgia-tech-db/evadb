@@ -15,10 +15,9 @@
 import unittest
 from unittest.mock import patch
 
-from src.models.catalog.properties import VideoFormat
-from src.models.catalog.video_info import VideoMetaInfo
-from src.models.storage.batch import FrameBatch
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.executor.plan_executor import PlanExecutor
+from src.models.storage.batch import FrameBatch
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 
@@ -76,7 +75,7 @@ class PlanExecutorTest(unittest.TestCase):
                                                        True]})
 
         # Build plan tree
-        video = VideoMetaInfo("dummy.avi", 10, VideoFormat.AVI)
+        video = DataFrameMetadata("dataset", "dummy.avi")
         class_instatnce.load.return_value = map(lambda x: x, [
             FrameBatch([1, 2, 3], None),
             FrameBatch([4, 5, 6], None)])

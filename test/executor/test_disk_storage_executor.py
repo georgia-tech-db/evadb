@@ -15,8 +15,7 @@
 import unittest
 from unittest.mock import patch
 
-from src.models.catalog.properties import VideoFormat
-from src.models.catalog.video_info import VideoMetaInfo
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.executor.disk_based_storage_executor import DiskStorageExecutor
 from src.planner.storage_plan import StoragePlan
 
@@ -27,7 +26,7 @@ class DiskStorageExecutorTest(unittest.TestCase):
     def test_calling_storage_executor_should_return_batches(self, mock_class):
         class_instance = mock_class.return_value
 
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
+        video_info = DataFrameMetadata('dataset', 'dummy.avi')
         storage_plan = StoragePlan(video_info)
 
         executor = DiskStorageExecutor(storage_plan)
