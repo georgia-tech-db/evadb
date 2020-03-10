@@ -27,6 +27,8 @@ from src.server.networking_utils import set_socket_io_timeouts
 from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
+from src.server.interpreter import EvaCommandInterpreter
+
 
 class EvaClient(asyncio.Protocol):
     """
@@ -42,6 +44,9 @@ class EvaClient(asyncio.Protocol):
     __connections__ = 0
     __errors__ = 0
 
+    # Store response from server
+    _response_chunk = None
+
     def __init__(self):
         self.done = asyncio.Future()
         self.transport = None
@@ -50,8 +55,8 @@ class EvaClient(asyncio.Protocol):
         EvaClient.__connections__ += 1
 
         LoggingManager().log("[ " + str(self.id) + " ]" +
-                     " Init Client"
-                     )
+                             " Init Client"
+                             )
 
     def connection_made(self, transport):
         self.transport = transport
@@ -59,19 +64,19 @@ class EvaClient(asyncio.Protocol):
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
             LoggingManager().log("[ " + str(self.id) + " ]" +
-                         " Could not set timeout"
-                         )
+                                 " Could not set timeout"
+                                 )
             return
 
         LoggingManager().log("[ " + str(self.id) + " ]" +
-                     " Connected to server"
-                     )
+                             " Connected to server"
+                             )
 
     def connection_lost(self, exc, exc2=None):
 
         LoggingManager().log("[ " + str(self.id) + " ]" +
-                     " Disconnected from server"
-                     )
+                             " Disconnected from server"
+                             )
 
         try:
             self.transport.abort()  # free sockets early, free sockets often
@@ -91,17 +96,25 @@ class EvaClient(asyncio.Protocol):
 
         response_chunk = data.decode()
         LoggingManager().log("[ " + str(self.id) + " ]" +
-                     " Response from server: --|" + str(response_chunk) + "|--"
-                     )
+                             " Response from server: --|" +
+                             str(response_chunk) + "|--"
+                             )
+
+        self._response_chunk = response_chunk
 
     def send_message(self, message):
 
         LoggingManager().log("[ " + str(self.id) + " ]" +
-                     " Request to server: --|" + str(message) + "|--"
-                     )
+                             " Request to server: --|" + str(message) + "|--"
+                             )
 
         request_chunk = message.encode('ascii')
         self.transport.write(request_chunk)
+
+
+def process_cmd(prompt):
+
+    prompt.cmdloop('Foo')
 
 
 @asyncio.coroutine
@@ -112,15 +125,16 @@ def handle_user_input(loop, protocol):
         If user inputs 'quit' stops the event loop
         otherwise just echoes user input
     """
-    while True:
 
-        message = yield from loop.run_in_executor(None, input, "> ")
+    # Start command interpreter
+    prompt = EvaCommandInterpreter()
+    prompt.prompt = '$ '
 
-        if message in ["quit", "exit"]:
-            protocol.done.set_result(None)
-            return
+    prompt.set_protocol(protocol)
 
-        protocol.send_message(message)
+    yield from loop.run_in_executor(None, process_cmd, prompt)
+
+    protocol.done.set_result(None)
 
 
 async def start_client(loop, factory, jitter: float,
@@ -173,25 +187,25 @@ def start_clients(client_count: int, host: string, port: int):
     """
 
     LoggingManager().log('PID(' + str(os.getpid()) + ') attempting '
-                 + str(client_count) + ' connections')
+                         + str(client_count) + ' connections')
 
     loop = asyncio.get_event_loop()
 
     # ulimit -n
     max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0]
 
-    connections_per_second = max(min(max_files, client_count) // 5, 1)
+    connections_per_sec = max(min(max_files, client_count) // 5, 1)
 
     max_retry_count = 10
 
     LoggingManager().log('max_files: ' + str(max_files))
     LoggingManager().log('connection_count: ' + str(client_count))
-    LoggingManager().log('connections_per_second: ' + str(connections_per_second))
+    LoggingManager().log('connections_per_second: ' + str(connections_per_sec))
 
     # Create client tasks
     client_coros = [
         start_client(loop, lambda: EvaClient(),
-                     i / connections_per_second,
+                     i / connections_per_sec,
                      host, port,
                      max_retry_count
                      )
@@ -224,10 +238,10 @@ def start_clients(client_count: int, host: string, port: int):
             )
 
             LoggingManager().log(str(len(client_coros)) + ' tasks, ' +
-                         str(exceptions) + ' exceptions, ' +
-                         str(retries) + ' retries',
-                         LoggingLevel.INFO
-                         )
+                                 str(exceptions) + ' exceptions, ' +
+                                 str(retries) + ' retries',
+                                 LoggingLevel.INFO
+                                 )
 
         # Close loop
         loop.close()

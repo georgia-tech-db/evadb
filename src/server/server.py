@@ -24,6 +24,7 @@ from src.utils.logging_manager import LoggingManager
 
 from src.server.command_handler import handle_request
 
+
 class EvaServer(asyncio.Protocol):
 
     """
@@ -62,8 +63,8 @@ class EvaServer(asyncio.Protocol):
     def data_received(self, data):
         request_message = data.decode()
         LoggingManager().log('Request from client: --|' +
-                     str(request_message) +
-                     '|--')
+                             str(request_message) +
+                             '|--')
 
         if request_message in ["quit", "exit"]:
             LoggingManager().log('Close client socket')
@@ -91,7 +92,7 @@ def start_server(host: string, port: int):
 
     for socket in server.sockets:
         LoggingManager().log('PID(' + str(os.getpid()) + ') serving on '
-                     + str(socket.getsockname()))
+                             + str(socket.getsockname()))
 
     server_closed = loop.create_task(server.wait_closed())
 

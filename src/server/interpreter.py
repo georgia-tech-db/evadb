@@ -24,13 +24,28 @@ from src.parser.parser import Parser
 
 class EvaCommandInterpreter(Cmd):
 
+    # Store results from server
+    _server_result = None
+
+    def set_protocol(self, protocol):
+        self.protocol = protocol
+
     def do_greet(self, line):
-        print("hello")
+        print("greeting")
+
+    def onecmd(self, s):
+
+        cmd_result = Cmd.onecmd(self, s)
+
+        # Send request to server
+        self.protocol.send_message(s)
+        _server_result = self.protocol._response_chunk
+
+        print(_server_result)
+        return cmd_result
 
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
-
-        print('hi')
 
         # Type exit to stop program
         if(query == "exit" or query == "EXIT"):
@@ -76,7 +91,10 @@ class EvaCommandInterpreter(Cmd):
 
     def do_quit(self, args):
         """Quits the program."""
-        print("Quitting.")
+        return True
+
+    def do_exit(self, args):
+        """Quits the program."""
         return True
 
     def do_EOF(self, line):
