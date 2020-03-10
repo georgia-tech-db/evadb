@@ -26,7 +26,7 @@ from petastorm.unischema import dict_to_spark_row, Unischema, UnischemaField
 from src.models.catalog.frame_info import FrameInfo
 from src.spark.session import Session
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 from src.configuration.configuration_manager import ConfigurationManager
 
 
@@ -85,4 +85,4 @@ class FrameLoader():
 
     def load_images(self):
 
-        Logger().log("Load Images")
+        LoggingManager().log("Load Images")

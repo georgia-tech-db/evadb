@@ -20,7 +20,7 @@ import os
 from src.server.networking_utils import realtime_server_status,\
     set_socket_io_timeouts
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 from src.server.command_handler import handle_request
 
@@ -47,7 +47,7 @@ class EvaServer(asyncio.Protocol):
 
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info('peername')
-        Logger().log('Connection from client: ' + str(peername))
+        LoggingManager().log('Connection from client: ' + str(peername))
         EvaServer.__connections__ += 1
 
     def connection_lost(self, exc):
@@ -61,12 +61,12 @@ class EvaServer(asyncio.Protocol):
 
     def data_received(self, data):
         request_message = data.decode()
-        Logger().log('Request from client: --|' +
+        LoggingManager().log('Request from client: --|' +
                      str(request_message) +
                      '|--')
 
         if request_message in ["quit", "exit"]:
-            Logger().log('Close client socket')
+            LoggingManager().log('Close client socket')
             self.transport.close()
         else:
             asyncio.create_task(
@@ -90,7 +90,7 @@ def start_server(host: string, port: int):
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        Logger().log('PID(' + str(os.getpid()) + ') serving on '
+        LoggingManager().log('PID(' + str(os.getpid()) + ') serving on '
                      + str(socket.getsockname()))
 
     server_closed = loop.create_task(server.wait_closed())
@@ -104,7 +104,7 @@ def start_server(host: string, port: int):
 
     except KeyboardInterrupt:
 
-        Logger().log("Server process interrupted")
+        LoggingManager().log("Server process interrupted")
 
     finally:
         # Stop monitor
@@ -117,4 +117,4 @@ def start_server(host: string, port: int):
         loop.run_until_complete(server.wait_closed())
         loop.close()
 
-        Logger().log("Successfully shutdown server.")
+        LoggingManager().log("Successfully shutdown server.")

@@ -17,7 +17,7 @@ import unittest
 
 from src.server.server import start_server
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
 
@@ -31,7 +31,7 @@ class ServerTests(unittest.TestCase):
             start_server(host="localhost", port=5432)
 
         except Exception as e:
-            Logger().log(e, LoggingLevel.CRITICAL)
+            LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
 if __name__ == '__main__':

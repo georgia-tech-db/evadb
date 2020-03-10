@@ -19,7 +19,7 @@ from src.catalog.database import init_db
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 
 class CatalogManager(object):
@@ -39,10 +39,10 @@ class CatalogManager(object):
 
         # eva_dir = ConfigurationManager().get_value("core", "location")
         # output_url = os.path.join(eva_dir, CATALOG_DIR)
-        # Logger().log("Bootstrapping catalog" + str(output_url),
+        # LoggingManager().log("Bootstrapping catalog" + str(output_url),
         #                      LoggingLevel.INFO)
 
-        Logger().log("Bootstrapping catalog")
+        LoggingManager().log("Bootstrapping catalog")
 
         init_db()
 

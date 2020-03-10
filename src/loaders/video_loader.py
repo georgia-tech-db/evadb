@@ -21,7 +21,7 @@ from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
 from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 
 class VideoLoader(AbstractVideoLoader):
@@ -37,7 +37,7 @@ class VideoLoader(AbstractVideoLoader):
         video_start = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
 
-        Logger().log("Loading frames", LoggingLevel.INFO)
+        LoggingManager().log("Loading frames", LoggingLevel.INFO)
 
         _, frame = video.read()
         frame_ind = video_start - 1

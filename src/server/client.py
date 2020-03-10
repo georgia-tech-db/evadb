@@ -24,7 +24,7 @@ from contextlib import ExitStack  # For cleanly closing sockets
 
 from src.server.networking_utils import set_socket_io_timeouts
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
 
@@ -49,7 +49,7 @@ class EvaClient(asyncio.Protocol):
 
         EvaClient.__connections__ += 1
 
-        Logger().log("[ " + str(self.id) + " ]" +
+        LoggingManager().log("[ " + str(self.id) + " ]" +
                      " Init Client"
                      )
 
@@ -58,18 +58,18 @@ class EvaClient(asyncio.Protocol):
 
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
-            Logger().log("[ " + str(self.id) + " ]" +
+            LoggingManager().log("[ " + str(self.id) + " ]" +
                          " Could not set timeout"
                          )
             return
 
-        Logger().log("[ " + str(self.id) + " ]" +
+        LoggingManager().log("[ " + str(self.id) + " ]" +
                      " Connected to server"
                      )
 
     def connection_lost(self, exc, exc2=None):
 
-        Logger().log("[ " + str(self.id) + " ]" +
+        LoggingManager().log("[ " + str(self.id) + " ]" +
                      " Disconnected from server"
                      )
 
@@ -77,7 +77,7 @@ class EvaClient(asyncio.Protocol):
             self.transport.abort()  # free sockets early, free sockets often
             self.transport = None
         except Exception as e:
-            Logger().exception(e)
+            LoggingManager().exception(e)
             exc2 = e
         finally:
             if exc or exc2:
@@ -90,13 +90,13 @@ class EvaClient(asyncio.Protocol):
     def data_received(self, data):
 
         response_chunk = data.decode()
-        Logger().log("[ " + str(self.id) + " ]" +
+        LoggingManager().log("[ " + str(self.id) + " ]" +
                      " Response from server: --|" + str(response_chunk) + "|--"
                      )
 
     def send_message(self, message):
 
-        Logger().log("[ " + str(self.id) + " ]" +
+        LoggingManager().log("[ " + str(self.id) + " ]" +
                      " Request to server: --|" + str(message) + "|--"
                      )
 
@@ -147,7 +147,7 @@ async def start_client(loop, factory, jitter: float,
                 transport, protocol = await connection
 
             except Exception as e:
-                Logger().exception(e)
+                LoggingManager().exception(e)
                 if not retries:
                     raise
 
@@ -172,7 +172,7 @@ def start_clients(client_count: int, host: string, port: int):
         port: port where the server is running
     """
 
-    Logger().log('PID(' + str(os.getpid()) + ') attempting '
+    LoggingManager().log('PID(' + str(os.getpid()) + ') attempting '
                  + str(client_count) + ' connections')
 
     loop = asyncio.get_event_loop()
@@ -184,9 +184,9 @@ def start_clients(client_count: int, host: string, port: int):
 
     max_retry_count = 10
 
-    Logger().log('max_files: ' + str(max_files))
-    Logger().log('connection_count: ' + str(client_count))
-    Logger().log('connections_per_second: ' + str(connections_per_second))
+    LoggingManager().log('max_files: ' + str(max_files))
+    LoggingManager().log('connection_count: ' + str(client_count))
+    LoggingManager().log('connections_per_second: ' + str(connections_per_second))
 
     # Create client tasks
     client_coros = [
@@ -210,10 +210,10 @@ def start_clients(client_count: int, host: string, port: int):
         loop.run_until_complete(asyncio.wait([clients]))
 
     except KeyboardInterrupt:
-        Logger().log("client process interrupted")
+        LoggingManager().log("client process interrupted")
 
     finally:
-        Logger().log("client process shutdown")
+        LoggingManager().log("client process shutdown")
 
         if clients.done():
             done, _ = clients.result()
@@ -223,7 +223,7 @@ def start_clients(client_count: int, host: string, port: int):
                 for d in done if not d.exception()
             )
 
-            Logger().log(str(len(client_coros)) + ' tasks, ' +
+            LoggingManager().log(str(len(client_coros)) + ' tasks, ' +
                          str(exceptions) + ' exceptions, ' +
                          str(retries) + ' retries',
                          LoggingLevel.INFO

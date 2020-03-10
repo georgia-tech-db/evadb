@@ -18,7 +18,7 @@ import unittest
 
 from src.server.client import start_clients
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 
 class ClientTests(unittest.TestCase):
@@ -27,7 +27,7 @@ class ClientTests(unittest.TestCase):
 
     def test_multiple_clients(self):
 
-        client_count = 3
+        client_count = 1
         host = "localhost"
         port = 5432
 
@@ -37,7 +37,7 @@ class ClientTests(unittest.TestCase):
                           port=port)
 
         except Exception as e:
-            Logger().exception(e)
+            LoggingManager().exception(e)
 
 
 if __name__ == '__main__':

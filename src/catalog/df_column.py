@@ -28,7 +28,7 @@ from sqlalchemy import Column, String, Integer, Boolean, Enum
 
 from src.catalog.sql_config import sql_conn
 from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 
 class DataframeColumnType(enum.Enum):
@@ -124,7 +124,7 @@ class DataframeColumn(sql_conn.base):
                                               NdarrayCodec(),
                                               column_is_nullable)
         else:
-            Logger().log("Invalid column type: " + str(column_type),
+            LoggingManager().log("Invalid column type: " + str(column_type),
                          LoggingLevel.ERROR)
 
         return petastorm_column
