@@ -15,7 +15,7 @@
 
 import asyncio
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 
 @asyncio.coroutine
@@ -29,7 +29,7 @@ def handle_request(transport, request_message):
 
     response_message = "foo"
 
-    Logger().log('Response to client: --|' +
+    LoggingManager().log('Response to client: --|' +
                  str(response_message) +
                  '|--')
 

@@ -16,7 +16,7 @@
 import socket
 import asyncio
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
 
@@ -42,7 +42,7 @@ async def realtime_server_status(protocol, server_closed):
             previous_connections = protocol.__connections__
             previous_errors = protocol.__errors__
 
-            Logger().log("Status: " +
+            LoggingManager().log("Status: " +
                          "connections: " + str(previous_connections) +
                          " " +
                          "errors: " + str(previous_errors),

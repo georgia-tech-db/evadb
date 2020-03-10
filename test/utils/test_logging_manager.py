@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 
 
 class LoggingManagerTests(unittest.TestCase):
@@ -23,8 +23,8 @@ class LoggingManagerTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_logging_manager_singleton_pattern(self):
-        x = Logger()
-        y = Logger()
+        x = LoggingManager()
+        y = LoggingManager()
         self.assertEqual(x, y)
 
 

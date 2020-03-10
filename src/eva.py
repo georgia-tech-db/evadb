@@ -19,7 +19,7 @@ from src.postmaster.postmaster import start_server
 
 from src.configuration.configuration_manager import ConfigurationManager
 
-from src.utils.logging_manager import Logger
+from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
 
@@ -40,4 +40,4 @@ def eva():
                     )
 
     except Exception as e:
-        Logger().log(e, LoggingLevel.CRITICAL)
+        LoggingManager().log(e, LoggingLevel.CRITICAL)
