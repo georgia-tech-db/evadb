@@ -41,7 +41,10 @@ class EvaCommandInterpreter(Cmd):
         self.protocol.send_message(s)
         _server_result = self.protocol._response_chunk
 
-        print(_server_result)
+        if _server_result != None:
+            print(_server_result)
+        _server_result = None
+            
         return cmd_result
 
     def do_query(self, query):

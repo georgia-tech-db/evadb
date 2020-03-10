@@ -108,6 +108,10 @@ class EvaClient(asyncio.Protocol):
                              " Request to server: --|" + str(message) + "|--"
                              )
 
+        # Reset response for next reqeuest
+        # self._response_chunk = None
+
+        # Send request
         request_chunk = message.encode('ascii')
         self.transport.write(request_chunk)
 
@@ -137,7 +141,7 @@ def handle_user_input(loop, protocol):
     protocol.done.set_result(None)
 
 
-async def start_client(loop, factory, jitter: float,
+async def start_client(loop, factory,
                        host: string, port: int,
                        max_retry_count: int):
     """
@@ -147,8 +151,6 @@ async def start_client(loop, factory, jitter: float,
           the face of momentary ECONNRESET on the server-side.
         - Socket will be automatically closed by the exit stack.
     """
-
-    await asyncio.sleep(jitter)
 
     retries = max_retry_count * [1]  # non-exponential 10s
 
@@ -191,21 +193,11 @@ def start_clients(client_count: int, host: string, port: int):
 
     loop = asyncio.get_event_loop()
 
-    # ulimit -n
-    max_files = resource.getrlimit(resource.RLIMIT_NOFILE)[0]
-
-    connections_per_sec = max(min(max_files, client_count) // 5, 1)
-
-    max_retry_count = 10
-
-    LoggingManager().log('max_files: ' + str(max_files))
-    LoggingManager().log('connection_count: ' + str(client_count))
-    LoggingManager().log('connections_per_second: ' + str(connections_per_sec))
-
+    max_retry_count = 3
+    
     # Create client tasks
     client_coros = [
         start_client(loop, lambda: EvaClient(),
-                     i / connections_per_sec,
                      host, port,
                      max_retry_count
                      )
@@ -219,7 +211,6 @@ def start_clients(client_count: int, host: string, port: int):
                      )
     )
 
-    # Run co-routines
     try:
         loop.run_until_complete(asyncio.wait([clients]))
 
@@ -239,8 +230,7 @@ def start_clients(client_count: int, host: string, port: int):
 
             LoggingManager().log(str(len(client_coros)) + ' tasks, ' +
                                  str(exceptions) + ' exceptions, ' +
-                                 str(retries) + ' retries',
-                                 LoggingLevel.INFO
+                                 str(retries) + ' retries'
                                  )
 
         # Close loop
