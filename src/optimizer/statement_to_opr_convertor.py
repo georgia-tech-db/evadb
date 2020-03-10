@@ -148,6 +148,7 @@ class StatementToPlanConvertor:
             self.visit_insert(statement)
         elif isinstance(statement, CreateTableStatement):
             self.visit_create(statement)
+        return self._plan
 
     @property
     def plan(self):

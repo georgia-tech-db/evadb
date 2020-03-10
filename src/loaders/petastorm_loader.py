@@ -14,6 +14,11 @@ class PetastormLoader(AbstractVideoLoader):
         Loads parquet data frames using petastorm
         """
         super().__init__(*args, **kwargs)
+        if self.curr_shard is not None and self.curr_shard <= 0:
+            self.curr_shard = None
+
+        if self.total_shards is not None and self.total_shards <= 0:
+            self.total_shards = None
 
     def _load_frames(self) -> Iterator[Frame]:
         info = None
