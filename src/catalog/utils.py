@@ -65,7 +65,7 @@ class Utils(object):
                                               column_is_nullable)
         else:
             LoggingManager().log("Invalid column type: " + str(column_type),
-                         LoggingLevel.ERROR)
+                                 LoggingLevel.ERROR)
 
         return petastorm_column
 

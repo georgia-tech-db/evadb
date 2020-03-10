@@ -43,11 +43,11 @@ async def realtime_server_status(protocol, server_closed):
             previous_errors = protocol.__errors__
 
             LoggingManager().log("Status: " +
-                         "connections: " + str(previous_connections) +
-                         " " +
-                         "errors: " + str(previous_errors),
-                         LoggingLevel.INFO
-                         )
+                                 "connections: " + str(previous_connections) +
+                                 " " +
+                                 "errors: " + str(previous_errors),
+                                 LoggingLevel.INFO
+                                 )
 
         # Report changes every 1~s
         await asyncio.sleep(1)
