@@ -70,7 +70,7 @@ To run the unit tests in a particular file (e.g., `test_parser.py`:
    python script/formatting/formatter.py
 ```
 
-4. Refer [google codestyle guide](https://google.github.io/styleguide/pyguide.html) for documentation of code.
+4. Refer [google style guide](https://google.github.io/styleguide/pyguide.html) for documentation of code.
 
 Please look up the [contributing guide](https://github.com/georgia-tech-db/eva/blob/master/CONTRIBUTING.md#development) for details.
 

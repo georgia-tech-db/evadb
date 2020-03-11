@@ -32,6 +32,16 @@ class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def test_avisit_udf_function_call(self):
+        parser = Parser()
+        select_query = "SELECT FastRCNN(TAIPAI.data, data2) FROM TAIPAI \
+            WHERE FastRCNN(data).label = 'car';"
+        select_query = "SELECT TAIPAI.data FROM TAIPAI \
+            WHERE TAIPAI.label = 'car';"
+
+        eva_statement_list = parser.parse(select_query)
+
+
     def test_create_statement(self):
         parser = Parser()
 
@@ -198,6 +208,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(len(insert_stmt.value_list), 2)
         self.assertEqual(insert_stmt.value_list[0].value, 1)
 
+    def test_udf_function(self):
+        parser = Parser()
+        select_query = "SELECT FastRCNN(data) FROM TAIPAI \
+            WHERE FastRCNN(data).label = 'car';"
+        eva_statement_list = parser.parse(select_query)
 
 if __name__ == '__main__':
     unittest.main()

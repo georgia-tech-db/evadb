@@ -399,12 +399,12 @@ ifNotExists
 //    Functions
 
 functionCall
-    : specificFunction                                              #specificFunctionCall
-    | aggregateWindowedFunction                                     #aggregateFunctionCall
+    : udfFunction                                              #udfFunctionCall
+    | aggregateWindowedFunction                                #aggregateFunctionCall
     ;
 
-specificFunction
-    : simpleId '(' functionArgs ')'                                                             #simpleFunctionCall    
+udfFunction
+    : simpleId '(' functionArgs ')'                                    
     ;
 
 
