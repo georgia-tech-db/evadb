@@ -241,7 +241,6 @@ class ParserVisitor(evaql_parserVisitor):
         first_decimal = self.visit(ctx.decimalLiteral(0))
         second_decimal = self.visit(ctx.decimalLiteral(1))
 
-        print(first_decimal, second_decimal)
         dimensions = [first_decimal, second_decimal]
         return dimensions
 
