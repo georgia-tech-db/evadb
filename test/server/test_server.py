@@ -29,10 +29,10 @@ from src.server.server import EvaServer
 
 
 class ServerTests(unittest.TestCase):
-            
+
     def setUp(self):
         self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(None)        
+        asyncio.set_event_loop(None)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,7 +51,7 @@ class ServerTests(unittest.TestCase):
         thread.start()
 
         with self.assertRaises(SystemExit):
-            start_server(host="localhost", port=5432, loop=self.loop)
+            start_server(host="0.0.0.0", port=5432, loop=self.loop)
 
     def test_server_protocol(self):
 

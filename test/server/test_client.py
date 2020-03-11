@@ -26,7 +26,7 @@ class ClientTests(unittest.TestCase):
 
     def test_multiple_clients(self):
 
-        host = "localhost"
+        host = "0.0.0.0"
         port = 5432
         client_count = 1
 
@@ -34,12 +34,12 @@ class ClientTests(unittest.TestCase):
             summary = start_clients(client_count=client_count,
                                     host=host,
                                     port=port)
-    
+
             # client cannot connect to server
             self.assertEqual(summary[1], 1, "one exception")
 
         except Exception as e:
-            LoggingManager().exception(e)        
+            LoggingManager().exception(e)
 
 
 if __name__ == '__main__':
