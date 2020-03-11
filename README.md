@@ -49,13 +49,19 @@ sh ./script/antlr4/setup.sh
 1. Ensure that all the unit test cases (including the ones you have added) run succesfully.
 
 ```shell
-   python -m pytest test/
-``` 
+   python -m pytest --cov-report= --cov=src/ -s --log-level=INFO 
+```
+
+To run the unit tests in a particular file (e.g., `test_parser.py`:
+
+```shell
+   python -m pytest --cov-report= --cov=src/ -s --log-level=INFO test/parser/test_parser.py
+```
 
 2. Ensure that the coding style conventions are followed.
 
 ```shell
-   pycodestyle --select E test src/loaders
+   pycodestyle  --select E src/ test/ --exclude src/filters,src/parser/evaql
 ``` 
 
 3. Run the formatter script to automatically fix most of the coding style issues.

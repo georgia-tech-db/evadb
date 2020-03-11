@@ -19,6 +19,8 @@ from src.catalog.column_type import ColumnType
 from src.catalog.models.base_model import init_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
+from src.catalog.services.df_column_service import DatasetColumnService
+from src.catalog.services.df_service import DatasetService
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -35,6 +37,10 @@ class CatalogManager(object):
             cls._instance.bootstrap_catalog()
 
         return cls._instance
+
+    def __init__(self):
+        self._dataset_service = DatasetService()
+        self._column_service = DatasetColumnService()
 
     def bootstrap_catalog(self):
         """Bootstraps catalog.
@@ -64,15 +70,16 @@ class CatalogManager(object):
             The persisted DataFrameMetadata object with the id field populated.
         """
 
-        metadata = DataFrameMetadata.create(name, file_url)
+        metadata = self._dataset_service.create_dataset(name, file_url)
         for column in column_list:
             column.metadata_id = metadata.id
-        column_list = DataFrameColumn.create(column_list)
+        column_list = self._column_service.create_column(column_list)
         metadata.schema = column_list
         return metadata
 
     def get_table_bindings(self, database_name: str, table_name: str,
-                           column_names: List[str]) -> Tuple[int, List[int]]:
+                           column_names: List[str] = None) -> Tuple[int,
+                                                                    List[int]]:
         """This method fetches bindings for strings.
 
         Args:table_metadata_id
@@ -85,14 +92,14 @@ class CatalogManager(object):
             returns metadata_id of table and a list of column ids
         """
 
-        metadata_id = DataFrameMetadata.get_id_from_name(table_name)
+        metadata_id = self._dataset_service.dataset_by_name(table_name)
         column_ids = []
         if column_names is not None:
             if not isinstance(column_names, list):
                 LoggingManager().log(
                     "CatalogManager::get_table_binding() expected list",
                     LoggingLevel.WARNING)
-            column_ids = DataFrameColumn.get_id_from_metadata_id_and_name_in(
+            column_ids = self._column_service.columns_by_dataset_id_and_names(
                 metadata_id,
                 column_names)
         return metadata_id, column_ids
@@ -110,9 +117,9 @@ class CatalogManager(object):
         Returns:
             metadata object with all the details of video/dataset
         """
-        metadata = DataFrameMetadata.get(metadata_id)
-        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
-            col_id_list, metadata_id)
+        metadata = self._dataset_service.dataset_by_id(metadata_id)
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
+            metadata_id, col_id_list)
         metadata.schema = df_columns
         return metadata
 
@@ -132,11 +139,11 @@ class CatalogManager(object):
             List[ColumnType] -- [list of required column type for each input
             column]
         """
-        metadata = DataFrameMetadata.get(table_metadata_id)
+        metadata = self._dataset_service.dataset_by_id(table_metadata_id)
         col_types = []
-        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
-            col_id_list,
-            metadata.id)
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
+            metadata.id, col_id_list
+        )
         for col in df_columns:
             col_types.append(col.type)
 
@@ -156,8 +163,7 @@ class CatalogManager(object):
         """
 
         col_ids = []
-        df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
-            None,
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
             table_metadata_id)
         for col in df_columns:
             col_ids.append(col[0])
@@ -165,7 +171,7 @@ class CatalogManager(object):
         return col_ids
 
     def create_column_metadata(
-            self, column_name: str, data_type: ColumnType, 
+            self, column_name: str, data_type: ColumnType,
             dimensions: List[int]):
         """Create a dataframe column object this column. 
         This function won't commit this object in the catalog database. 
@@ -179,3 +185,18 @@ class CatalogManager(object):
         """
         return DataFrameColumn(column_name, data_type,
                                array_dimensions=dimensions)
+
+    def get_dataset_metadata(self, database_name: str, dataset_name: str,
+                             column_names: List[str] = None) -> \
+            DataFrameMetadata:
+        """
+        Returns the Dataset metadata for the given dataset name
+        Arguments:
+            dataset_name (str): name of the dataset
+
+        Returns:
+            DataFrameMetadata
+        """
+
+        return self._dataset_service.dataset_object_by_name(
+            database_name, dataset_name)

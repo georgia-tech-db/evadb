@@ -19,4 +19,3 @@ import src
 EVA_DIR = os.path.dirname(os.path.dirname(src.__file__))
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@localhost/eva_catalog"

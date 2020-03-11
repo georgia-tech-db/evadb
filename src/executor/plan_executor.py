@@ -81,7 +81,7 @@ class PlanExecutor:
 
         output_batches = []
 
-        for batch in execution_tree.next():
+        for batch in execution_tree.exec():
             output_batches.append(batch)
 
         self._clean_execution_tree(execution_tree)

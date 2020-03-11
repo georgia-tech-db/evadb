@@ -37,7 +37,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def exec(self) -> Iterator[FrameBatch]:
 
         child_executor = self.children[0]
-        for batch in child_executor.next():
+        for batch in child_executor.exec():
             if self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch)
                 required_frame_ids = []

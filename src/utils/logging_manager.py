@@ -45,12 +45,10 @@ class LoggingManager(object):
             )
             LOG_handler.setFormatter(LOG_formatter)
             cls._LOG.addHandler(LOG_handler)
-            cls._LOG.setLevel(logging.INFO)
 
         return cls._instance
 
-    def log(self, string, level: LoggingLevel = LoggingLevel.INFO):
-
+    def log(self, string, level: LoggingLevel = LoggingLevel.DEBUG):
         if level == LoggingLevel.DEBUG:
             self._LOG.debug(string)
         elif level == LoggingLevel.INFO:
@@ -61,3 +59,26 @@ class LoggingManager(object):
             self._LOG.error(string)
         elif level == LoggingLevel.CRITICAL:
             self._LOG.critical(string)
+
+    def getEffectiveLevel(self):
+        return logging.getLevelName(self._LOG.getEffectiveLevel())
+
+    def getLog4JLevel(self):
+
+        logger_level = self.getEffectiveLevel()
+
+        # Reference:
+        # https://logging.apache.org/log4j/1.2/apidocs/org/
+        # apache/log4j/Level.html
+
+        # for spark log level configuration
+        if logger_level == 'DEBUG':
+            return "DEBUG"
+        elif logger_level == 'INFO':
+            return "INFO"
+        elif logger_level == 'WARNING':
+            return "WARN"
+        elif logger_level == 'ERROR':
+            return "ERROR"
+        elif logger_level == 'CRITICAL':
+            return "FATAL"
