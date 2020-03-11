@@ -94,7 +94,6 @@ BaseModel = declarative_base(cls=CustomModel, constructor=None)
 def init_db():
     """Create database if doesn't exist and create all tables."""
     engine = SQLConfig().engine
-    print("hi")
     if not database_exists(engine.url):
         LoggingManager().log("Database does not exist, creating database.",
                              LoggingLevel.INFO)
