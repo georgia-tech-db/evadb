@@ -12,13 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.catalog.models.df_column import DataFrameColumn
 from .abstract_expression import AbstractExpression, ExpressionType, \
     ExpressionReturnType
 
 
 class TupleValueExpression(AbstractExpression):
     def __init__(self, col_name: str = None, table_name: str = None,
-                 col_idx: int = -1):
+                 col_idx: int = -1, col_object: DataFrameColumn = None):
         super().__init__(ExpressionType.TUPLE_VALUE,
                          rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
@@ -26,6 +27,7 @@ class TupleValueExpression(AbstractExpression):
         self._table_metadata_id = None
         self._col_metadata_id = None
         self._col_idx = col_idx
+        self._col_object = col_object
 
     @property
     def table_metadata_id(self) -> int:
@@ -47,9 +49,21 @@ class TupleValueExpression(AbstractExpression):
     def table_name(self) -> str:
         return self._table_name
 
+    @table_name.setter
+    def table_name(self, name: str):
+        self._table_name = name
+
     @property
     def col_name(self) -> str:
         return self._col_name
+
+    @property
+    def col_object(self) -> DataFrameColumn:
+        return self._col_object
+
+    @col_object.setter
+    def col_object(self, value: DataFrameColumn):
+        self._col_object = value
 
     # remove this once doen with tuple class
     def evaluate(self, *args):

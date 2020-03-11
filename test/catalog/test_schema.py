@@ -34,7 +34,7 @@ class SchemaTests(unittest.TestCase):
         schema = DataFrameSchema(schema_name,
                                  [column_1, column_2, column_3])
 
-        self.assertEqual(schema._column_list[0].get_name(), "frame_id")
+        self.assertEqual(schema.column_list[0].name, "frame_id")
 
 
 if __name__ == '__main__':

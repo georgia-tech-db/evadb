@@ -15,39 +15,8 @@
 
 
 from src.spark.session import Session
-
+from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
-
-
-class DataFrameMetadata(object):
-
-    _dataframe_file_url = None
-    _dataframe_schema = None
-    _dataframe_petastorm_schema = None
-    _dataframe_pyspark_schema = None
-
-    def __init__(self,
-                 dataframe_file_url,
-                 dataframe_schema
-                 ):
-        self._dataframe_file_url = dataframe_file_url
-        self._dataframe_schema = dataframe_schema
-        self._dataframe_petastorm_schema = \
-            dataframe_schema.get_petastorm_schema()
-        self._dataframe_pyspark_schema = \
-            self._dataframe_petastorm_schema.as_spark_schema()
-
-    def get_dataframe_file_url(self):
-        return self._dataframe_file_url
-
-    def get_dataframe_schema(self):
-        return self._dataframe_schema
-
-    def get_dataframe_petastorm_schema(self):
-        return self._dataframe_petastorm_schema
-
-    def get_dataframe_pyspark_schema(self):
-        return self._dataframe_pyspark_schema
 
 
 def load_dataframe(dataframe_url: str):
@@ -62,23 +31,24 @@ def append_rows(df_metadata: DataFrameMetadata,
                 rows):
 
     spark = Session().get_session()
+    Session().get_context()
 
     # Convert a list of rows to RDD
     rows_df = spark.createDataFrame(rows,
-                                    df_metadata.get_dataframe_pyspark_schema())
+                                    df_metadata.schema.pyspark_schema)
     rows_rdd = rows_df.rdd
 
     # Use petastorm to appends rows
     with materialize_dataset(spark,
-                             df_metadata.get_dataframe_file_url(),
-                             df_metadata.get_dataframe_petastorm_schema()):
+                             df_metadata.file_url,
+                             df_metadata.schema.petastorm_schema):
 
         spark.createDataFrame(rows_rdd,
-                              df_metadata.get_dataframe_pyspark_schema()) \
+                              df_metadata.schema.pyspark_schema) \
             .coalesce(1) \
             .write \
             .mode('append') \
-            .parquet(df_metadata.get_dataframe_file_url())
+            .parquet(df_metadata.file_url)
 
 
 def create_dataframe(df_metadata: DataFrameMetadata):
@@ -88,18 +58,18 @@ def create_dataframe(df_metadata: DataFrameMetadata):
 
     # Create an empty RDD
     empty_rdd = spark_context.emptyRDD()
-
+    print("url", df_metadata.file_url)
     # Use petastorm to create dataframe
     with materialize_dataset(spark,
-                             df_metadata.get_dataframe_file_url(),
-                             df_metadata.get_dataframe_petastorm_schema()):
+                             df_metadata.file_url,
+                             df_metadata.schema.petastorm_schema):
 
         spark.createDataFrame(empty_rdd,
-                              df_metadata.get_dataframe_pyspark_schema()) \
+                              df_metadata.schema.pyspark_schema) \
             .coalesce(1) \
             .write \
             .mode('overwrite') \
-            .parquet(df_metadata.get_dataframe_file_url())
+            .parquet(df_metadata.file_url)
 
 
 def get_next_row_id(dataframe, dataframe_name: str):
