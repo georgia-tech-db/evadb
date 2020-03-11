@@ -15,7 +15,7 @@
 import unittest
 
 from src.utils.logging_manager import LoggingManager
-
+from src.utils.logging_manager import LoggingLevel
 
 class LoggingManagerTests(unittest.TestCase):
 
@@ -27,6 +27,14 @@ class LoggingManagerTests(unittest.TestCase):
         y = LoggingManager()
         self.assertEqual(x, y)
 
+    def test_log_levels(self):
+        
+        LoggingManager().log("debug", LoggingLevel.DEBUG)
+        LoggingManager().log("info", LoggingLevel.INFO)
+        LoggingManager().log("warn", LoggingLevel.WARNING)
+        LoggingManager().log("error", LoggingLevel.ERROR)
+        LoggingManager().log("critical", LoggingLevel.CRITICAL)
+        
 
 if __name__ == '__main__':
 
