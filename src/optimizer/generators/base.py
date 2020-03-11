@@ -32,6 +32,3 @@ class Generator(ABC):
             `AbstractPlan`: the plan constructed by traversing the Operator
             tree.
         """
-        pass
-
-
