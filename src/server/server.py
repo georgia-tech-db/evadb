@@ -79,7 +79,7 @@ class EvaServer(asyncio.Protocol):
             )
 
 
-def start_server(host: string, port: int):
+def start_server(host: string, port: int, loop):
     """
         Start the server.
         Server objects are asynchronous context managers.
@@ -97,7 +97,7 @@ def start_server(host: string, port: int):
         signal(handled_signal, raiseSystemExit)
 
     # Get a reference to the event loop
-    loop = asyncio.get_event_loop()
+    # loop = asyncio.get_event_loop()
 
     # Start the eva server
     coro = loop.create_server(lambda: EvaServer(), host, port)
