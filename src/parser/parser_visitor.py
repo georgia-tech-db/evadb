@@ -23,6 +23,7 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
+from src.expression.function_expression import FunctionExpression
 
 from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
@@ -34,6 +35,7 @@ from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
 from src.parser.types import ParserColumnDataType
+from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 
 class ParserVisitor(evaql_parserVisitor):
@@ -438,3 +440,38 @@ class ParserVisitor(evaql_parserVisitor):
                 expr_list.append(expr)
 
         return expr_list
+
+
+    ##################################################################
+    # Functions - UDFs, Aggregate Windowed functions 
+    ##################################################################
+    def visitUdfFunctionCall(self, ctx:evaql_parser.UdfFunctionCallContext):
+        return self.visitChildren(ctx)
+
+    def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
+        udf_name = None
+        udf_args = None
+        if ctx.simpleId():
+            udf_name = self.visit(ctx.simpleId())
+        else:
+            LoggingManager().log('UDF function name missing.', LoggingLevel.ERROR)
+        
+        udf_args = self.visit(ctx.functionArgs())
+        func_expr = FunctionExpression(None, name=udf_name)
+        for arg in udf_args:
+            func_expr.append_child(arg)
+        return func_expr        
+            
+    def visitFunctionArgs(self, ctx: evaql_parser.FunctionArgsContext):
+        args = []
+        for child in ctx.children:
+            # ignore COMMAs
+            if not isinstance(child, TerminalNode):
+                args.append(self.visit(child))
+        return args
+
+    def visitPredicateExpression(self, ctx:evaql_parser.PredicateExpressionContext):
+        return self.visitChildren(ctx)
+
+    def visitExpressionAtomPredicate(self, ctx:evaql_parser.ExpressionAtomPredicateContext):
+        return self.visitChildren(ctx)

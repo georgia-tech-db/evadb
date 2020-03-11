@@ -201,6 +201,16 @@ class ParserVisitorTests(unittest.TestCase):
 
         self.assertEqual(expected, None)
 
+    ##################################################################
+    # UDFs
+    ##################################################################
+
+    def test_visit_udf_function_call(self):
+        parser = Parser()
+        select_query = "SELECT FastRCNN(data) From TAIPAI \
+            WHERE FastRCNN(data).label = 'car';"
+        eva_statement_list = parser.parse(select_query)
+        
 
 if __name__ == '__main__':
     unittest.main()
