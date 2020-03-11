@@ -15,7 +15,9 @@
 import json
 from typing import List
 
-from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint
+from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint, \
+    ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
 from src.catalog.column_type import ColumnType
@@ -29,7 +31,11 @@ class DataFrameColumn(BaseModel):
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
     _array_dimensions = Column('array_dimensions', String(100))
-    _metadata_id = Column('metadata_id', Integer)
+    _metadata_id = Column('metadata_id', Integer,
+                          ForeignKey('df_metadata.id'))
+
+    _dataset = relationship("DataFrameMetadata", back_populates="_columns")
+
     __table_args__ = (
         UniqueConstraint('name', 'metadata_id'), {}
     )
@@ -90,47 +96,3 @@ class DataFrameColumn(BaseModel):
         column_str += ")\n"
 
         return column_str
-
-    @classmethod
-    def get_id_from_metadata_id_and_name_in(cls, metadata_id, column_names):
-        result = DataFrameColumn.query \
-            .with_entities(DataFrameColumn._id) \
-            .filter(DataFrameColumn._metadata_id == metadata_id,
-                    DataFrameColumn._name.in_(column_names)) \
-            .all()
-        result = [res[0] for res in result]
-
-        return result
-
-    @classmethod
-    def get_by_metadata_id_and_id_in(cls, id_list: List[int], metadata_id:
-                                     int):
-        """return all the columns that matches id_list and  metadata_id
-
-        Arguments:
-            id_list {List[int]} -- [metadata ids of the required columns: If
-            None return all the columns that matches the metadata_id]
-            metadata_id {int} -- [metadata id of the table]
-
-        Returns:
-            List[DataFrameColumn] -- [the filtered dataframecolumns]
-        """
-        result = None
-        if id_list is not None:
-            result = DataFrameColumn.query \
-                .filter(DataFrameColumn._metadata_id == metadata_id,
-                        DataFrameColumn._id.in_(id_list)) \
-                .all()
-        else:
-            result = DataFrameColumn.query \
-                .filter(DataFrameColumn._metadata_id == metadata_id) \
-                .all()
-
-        return result
-
-    @classmethod
-    def create(cls, column_list):
-        saved_column_list = []
-        for column in column_list:
-            saved_column_list.append(column.save())
-        return saved_column_list

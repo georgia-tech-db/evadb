@@ -12,15 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
-from typing import List
+from src.catalog.models.base_model import BaseModel
 
 
-class AbstractPP(ABC):
+class BaseService:
     """
-    An abstract class for PPs
+    Base service for all the models. Implemented by all other services.
+    The services perform business logic using the model provided
     """
 
-    @abstractmethod
-    def predict(self, batch) -> List[bool]:
-        pass
+    def __init__(self, model: BaseModel):
+        self.model = model

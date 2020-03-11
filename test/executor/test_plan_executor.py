@@ -15,17 +15,15 @@
 import unittest
 from unittest.mock import patch
 
-from src.models.catalog.properties import VideoFormat
-from src.models.catalog.video_info import VideoMetaInfo
-from src.models.storage.batch import FrameBatch
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.executor.plan_executor import PlanExecutor
+from src.models.storage.batch import FrameBatch
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 
 
 class PlanExecutorTest(unittest.TestCase):
 
-    @unittest.skip("SeqScan Node is updated; Will fix once that is finalized")
     def test_tree_structure_for_build_execution_tree(self):
         """
             Build an Abastract Plan with nodes:
@@ -38,11 +36,11 @@ class PlanExecutorTest(unittest.TestCase):
 
         predicate = None
 
-        root_abs_plan = SeqScanPlan(predicate=predicate)
-        child_1_abs_plan = SeqScanPlan(predicate=predicate)
-        child_2_abs_plan = SeqScanPlan(predicate=predicate)
-        child_3_abs_plan = SeqScanPlan(predicate=predicate)
-        child_1_1_abs_plan = SeqScanPlan(predicate=predicate)
+        root_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
+        child_1_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
+        child_2_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
+        child_3_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
+        child_1_1_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
 
         root_abs_plan.append_child(child_1_abs_plan)
         root_abs_plan.append_child(child_2_abs_plan)
@@ -68,9 +66,7 @@ class PlanExecutorTest(unittest.TestCase):
                                        child_exec.children):
                 self.assertEqual(gc_abs.node_type, gc_exec._node.node_type)
 
-    @patch(
-        'src.executor.disk_based_storage_executor.VideoLoader')
-    @unittest.skip("SeqScan Node is updated; Will fix once that is finalized")
+    @patch('src.executor.disk_based_storage_executor.Loader')
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value
 
@@ -79,13 +75,13 @@ class PlanExecutorTest(unittest.TestCase):
                                                        True]})
 
         # Build plan tree
-        video = VideoMetaInfo("dummy.avi", 10, VideoFormat.AVI)
+        video = DataFrameMetadata("dataset", "dummy.avi")
         class_instatnce.load.return_value = map(lambda x: x, [
             FrameBatch([1, 2, 3], None),
             FrameBatch([4, 5, 6], None)])
 
         storage_plan = StoragePlan(video)
-        seq_scan = SeqScanPlan(predicate=dummy_expr)
+        seq_scan = SeqScanPlan(predicate=dummy_expr, column_ids=[])
         seq_scan.append_child(storage_plan)
 
         # Execute the plan

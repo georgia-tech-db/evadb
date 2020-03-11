@@ -53,7 +53,7 @@ class InsertTableStatement(AbstractStatement):
     @property
     def table(self) -> TableRef:
         return self._table
-    
+
     @property
     def column_list(self) -> List[AbstractExpression]:
         return self._column_list
