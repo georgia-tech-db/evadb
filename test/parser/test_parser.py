@@ -25,6 +25,8 @@ from src.parser.select_statement import SelectStatement
 from src.expression.abstract_expression import ExpressionType
 from src.parser.table_ref import TableRef, TableInfo
 
+from src.utils.logging_manager import LoggingManager
+
 
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -49,6 +51,8 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
 
+            LoggingManager().log(eva_statement_list[0])
+
     def test_single_statement_queries(self):
         parser = Parser()
 
@@ -70,14 +74,16 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
 
+            LoggingManager().log(eva_statement_list[0])
+
     def test_multiple_statement_queries(self):
         parser = Parser()
 
         multiple_queries = []
         multiple_queries.append("SELECT CLASS FROM TAIPAI \
-            WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
-            SELECT REDNESS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS = 300)")
+                WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
+                SELECT REDNESS FROM TAIPAI \
+                WHERE (CLASS = 'VAN' AND REDNESS = 300)")
 
         for query in multiple_queries:
             eva_statement_list = parser.parse(query)
@@ -91,7 +97,7 @@ class ParserTests(unittest.TestCase):
     def test_select_statement(self):
         parser = Parser()
         select_query = "SELECT CLASS, REDNESS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
+                WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

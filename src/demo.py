@@ -52,7 +52,7 @@ class EVADemo(Cmd):
                 for filename in glob.glob('data/sample_video/*.jpg'):
                     im = Image.open(filename)
                     # to handle 'too many open files' error
-                    im_copy = im.copy() 
+                    im_copy = im.copy()
                     input_video.append(im_copy)
                     im.close()
 
