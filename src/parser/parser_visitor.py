@@ -25,7 +25,7 @@ from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 
 from src.parser.select_statement import SelectStatement
-from src.parser.create_statement import CreateTableStatement
+from src.parser.create_statement import CreateTableStatement, ColumnDefinition
 from src.parser.insert_statement import InsertTableStatement
 
 from src.parser.table_ref import TableRef, TableInfo
@@ -33,8 +33,7 @@ from src.parser.table_ref import TableRef, TableInfo
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
-from src.catalog.column_type import ColumnType
-from src.catalog.df_column import DataframeColumn
+from src.parser.types import ParserColumnDataType
 
 
 class ParserVisitor(evaql_parserVisitor):
@@ -181,9 +180,8 @@ class ParserVisitor(evaql_parserVisitor):
         data_type, dimensions = self.visit(ctx.columnDefinition())
         column_name = self.visit(ctx.uid())
 
-        column = DataframeColumn(column_name, data_type,
-                                 array_dimensions=dimensions)
-        return column
+        if column_name is not None:
+            return ColumnDefinition(column_name, data_type, dimensions)
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
@@ -196,7 +194,7 @@ class ParserVisitor(evaql_parserVisitor):
         dimensions = []
 
         if ctx.BOOLEAN() is not None:
-            data_type = ColumnType.BOOLEAN
+            data_type = ParserColumnDataType.BOOLEAN
 
         return data_type, dimensions
 
@@ -206,9 +204,9 @@ class ParserVisitor(evaql_parserVisitor):
         dimensions = []
 
         if ctx.INTEGER() is not None:
-            data_type = ColumnType.INTEGER
+            data_type = ParserColumnDataType.INTEGER
         elif ctx.UNSIGNED() is not None:
-            data_type = ColumnType.INTEGER
+            data_type = ParserColumnDataType.INTEGER
 
         return data_type, dimensions
 
@@ -218,13 +216,13 @@ class ParserVisitor(evaql_parserVisitor):
         dimensions = []
 
         if ctx.FLOAT() is not None:
-            data_type = ColumnType.FLOAT
+            data_type = ParserColumnDataType.FLOAT
             dimensions = self.visit(ctx.lengthTwoDimension())
         elif ctx.TEXT() is not None:
-            data_type = ColumnType.TEXT
+            data_type = ParserColumnDataType.TEXT
             dimensions = self.visit(ctx.lengthOneDimension())
         elif ctx.NDARRAY() is not None:
-            data_type = ColumnType.NDARRAY
+            data_type = ParserColumnDataType.NDARRAY
             dimensions = self.visit(ctx.lengthDimensionList())
 
         return data_type, dimensions
@@ -373,7 +371,7 @@ class ParserVisitor(evaql_parserVisitor):
         # Multiple quotes should be removed
 
         if ctx.STRING_LITERAL() is not None:
-            return ConstantValueExpression(ctx.getText())
+            return ConstantValueExpression(ctx.getText()[1:-1])
         # todo handle other types
         return self.visitChildren(ctx)
 

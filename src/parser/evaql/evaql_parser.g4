@@ -404,9 +404,7 @@ functionCall
     ;
 
 specificFunction
-    : (
-      OBJECT_DETECTION | ACTION_CLASSICATION
-      )                                                             #simpleFunctionCall    
+    : simpleId '(' functionArgs ')'                                                             #simpleFunctionCall    
     ;
 
 

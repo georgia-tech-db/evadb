@@ -33,7 +33,7 @@ class VideoLoader(AbstractVideoLoader):
         super().__init__(*args, **kwargs)
 
     def _load_frames(self) -> Iterator[Frame]:
-        video = cv2.VideoCapture(self.video_metadata.file)
+        video = cv2.VideoCapture(self.video_metadata.file_url)
         video_start = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
 

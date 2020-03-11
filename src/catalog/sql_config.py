@@ -13,31 +13,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
+from src.configuration.configuration_manager import ConfigurationManager
 
 
-class SQLConfig(object):
-    base = declarative_base()
+class SQLConfig:
+    """Singleton class for configuring connection to the database.
+
+    Attributes:
+        _instance: stores the singleton instance of the class.
+    """
+
     _instance = None
 
     def __new__(cls):
+        """Overrides the default __new__ method.
+
+        Returns the existing instance or creates a new one if an instance
+        does not exist.
+
+        Returns:
+            An instance of the class.
+        """
         if cls._instance is None:
             cls._instance = super(SQLConfig, cls).__new__(cls)
         return cls._instance
 
     def __init__(self):
-        # blank password for travis ci
-        self.engine = create_engine(
-            'mysql+pymysql://root:@localhost/eva_catalog')
-        self.session_factory = sessionmaker(bind=self.engine)
-        self.session = self.session_factory()
-        self.base.metadata.create_all(self.engine)
+        """Initializes the engine and session for database operations
 
-    def get_session(self):
-        if self.session is None:
-            self.session = self.session_factory()
-        return self.session
-
-
-sql_conn = SQLConfig()
+        Retrieves the database uri for connection from ConfigurationManager.
+        """
+        uri = ConfigurationManager().get_value("core",
+                                               "sqlalchemy_database_uri")
+        # set echo=True to log SQL
+        self.engine = create_engine(uri)
+        # statements
+        self.session = scoped_session(sessionmaker(bind=self.engine))

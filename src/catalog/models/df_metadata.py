@@ -12,62 +12,47 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
-from src.catalog.database import BaseModel
+from src.catalog.df_schema import DataFrameSchema
+from src.catalog.models.base_model import BaseModel
 
 
 class DataFrameMetadata(BaseModel):
     __tablename__ = 'df_metadata'
 
-    _id = Column('id', Integer, primary_key=True)
-    _name = Column('name', String(100))
+    _name = Column('name', String(100), unique=True)
     _file_url = Column('file_url', String(100))
 
-    def __init__(self, dataframe_file_url, dataframe_schema):
-        self._file_url = dataframe_file_url
-        self._dataframe_schema = dataframe_schema
-        self._dataframe_petastorm_schema = \
-            dataframe_schema.get_petastorm_schema()
-        self._dataframe_pyspark_schema = \
-            self._dataframe_petastorm_schema.as_spark_schema()
+    _columns = relationship('DataFrameColumn',
+                            back_populates="_dataset")
 
-    def set_schema(self, schema):
-        self._dataframe_schema = schema
-        self._dataframe_petastorm_schema = \
-            schema.get_petastorm_schema()
-        self._dataframe_pyspark_schema = \
-            self._dataframe_petastorm_schema.as_spark_schema()
+    def __init__(self, name: str, file_url: str):
+        self._name = name
+        self._file_url = file_url
+        self._schema = None
 
-    def get_id(self):
+    @property
+    def schema(self):
+        return self._schema
+
+    @schema.setter
+    def schema(self, column_list):
+        self._schema = DataFrameSchema(self._name, column_list)
+
+    @property
+    def id(self):
         return self._id
 
-    def get_name(self):
+    @property
+    def name(self):
         return self._name
 
-    def get_dataframe_file_url(self):
+    @property
+    def file_url(self):
         return self._file_url
 
-    def get_dataframe_schema(self):
-        return self._dataframe_schema
-
-    def get_dataframe_petastorm_schema(self):
-        return self._dataframe_petastorm_schema
-
-    def get_dataframe_pyspark_schema(self):
-        return self._dataframe_pyspark_schema
-
-    @classmethod
-    def get_id_from_name(cls, name):
-        result = DataFrameMetadata.query \
-            .with_entities(DataFrameMetadata._id) \
-            .filter(DataFrameMetadata._name == name).one()
-        return result[0]
-
-    @classmethod
-    def get(cls, metadata_id):
-        result = DataFrameMetadata.query \
-            .filter(DataFrameMetadata._id == metadata_id) \
-            .one()
-        print(result)
-        return result
+    @property
+    def columns(self):
+        return self._columns
