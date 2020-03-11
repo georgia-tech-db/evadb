@@ -22,36 +22,36 @@ class DatasetColumnService(BaseService):
     def __init__(self):
         super().__init__(DataFrameColumn)
 
-    def columns_by_dataset_id_and_names(self, metadata_id, column_names):
+    def columns_by_dataset_id_and_names(self, dataset_id, column_names):
         result = self.model.query \
             .with_entities(self.model._id) \
-            .filter(self.model._metadata_id == metadata_id,
+            .filter(self.model._metadata_id == dataset_id,
                     self.model._name.in_(column_names)) \
             .all()
 
         return [res[0] for res in result]
 
     def columns_by_id_and_dataset_id(self,
-                                     metadata_id: int,
+                                     dataset_id: int,
                                      id_list: List[int] = None):
-        """return all the columns that matches id_list and  metadata_id
+        """return all the columns that matches id_list and  dataset_id
 
         Arguments:
-            metadata_id {int} -- [metadata id of the table]
+            dataset_id {int} -- [metadata id of the table]
             id_list {List[int]} -- [metadata ids of the required columns: If
-            None return all the columns that matches the metadata_id]
+            None return all the columns that matches the dataset_id]
 
         Returns:
             List[self.model] -- [the filtered self.models]
         """
         if id_list is not None:
             return self.model.query \
-                .filter(self.model._metadata_id == metadata_id,
+                .filter(self.model._metadata_id == dataset_id,
                         self.model._id.in_(id_list)) \
                 .all()
 
         return self.model.query \
-            .filter(self.model._metadata_id == metadata_id) \
+            .filter(self.model._metadata_id == dataset_id) \
             .all()
 
     def create_column(self, column_list):

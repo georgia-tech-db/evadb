@@ -59,16 +59,16 @@ class DatasetService(BaseService):
                 "get_id_from_name failed with name {}".format(name),
                 LoggingLevel.ERROR)
 
-    def dataset_by_id(self, metadata_id) -> DataFrameMetadata:
+    def dataset_by_id(self, dataset_id) -> DataFrameMetadata:
         """
         Returns the dataset by ID
         Arguments:
-            metadata_id (int)
+            dataset_id (int)
         Returns:
            DataFrameMetadata
         """
         return self.model.query \
-            .filter(self.model._id == metadata_id) \
+            .filter(self.model._id == dataset_id) \
             .one()
 
     def dataset_object_by_name(self, database_name, dataset_name,
