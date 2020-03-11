@@ -17,7 +17,6 @@ import logging
 
 from enum import Enum
 
-
 class LoggingLevel(Enum):
     NOTSET = 0
     DEBUG = 10
