@@ -17,6 +17,8 @@ import unittest
 
 from src.server.client import start_clients
 
+from src.utils.logging_manager import LoggingManager
+
 
 class ClientTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
@@ -28,11 +30,16 @@ class ClientTests(unittest.TestCase):
         port = 5432
         client_count = 1
 
-        results = start_clients(client_count=client_count,
-                                host=host,
-                                port=port)
+        try:
+            summary = start_clients(client_count=client_count,
+                                    host=host,
+                                    port=port)
+    
+            # client cannot connect to server
+            self.assertEqual(summary[1], 1, "one exception")
 
-        self.assertNotEqual(results, None, "client task results are empty")
+        except Exception as e:
+            LoggingManager().exception(e)        
 
 
 if __name__ == '__main__':
