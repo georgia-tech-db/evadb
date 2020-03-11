@@ -17,6 +17,9 @@ import asyncio
 import string
 import os
 
+from signal import signal
+from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1
+
 from src.server.networking_utils import realtime_server_status,\
     set_socket_io_timeouts
 
@@ -41,6 +44,7 @@ class EvaServer(asyncio.Protocol):
 
     def connection_made(self, transport):
         self.transport = transport
+
         # Set timeout for sockets
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
@@ -68,7 +72,7 @@ class EvaServer(asyncio.Protocol):
 
         if request_message in ["quit", "exit"]:
             LoggingManager().log('Close client socket')
-            self.transport.close()
+            return self.transport.close()
         else:
             asyncio.create_task(
                 handle_request(self.transport, request_message)
@@ -82,6 +86,15 @@ def start_server(host: string, port: int):
 
         hostname: hostname of the server
     """
+
+    # Register signal handler
+    def raiseSystemExit(_, __):
+        raise SystemExit
+
+    signals = [SIGINT, SIGTERM, SIGHUP, SIGUSR1]
+
+    for handled_signal in signals:
+        signal(handled_signal, raiseSystemExit)
 
     # Get a reference to the event loop
     loop = asyncio.get_event_loop()

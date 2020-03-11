@@ -15,10 +15,7 @@
 
 import unittest
 
-
 from src.server.client import start_clients
-
-from src.utils.logging_manager import LoggingManager
 
 
 class ClientTests(unittest.TestCase):
@@ -27,17 +24,15 @@ class ClientTests(unittest.TestCase):
 
     def test_multiple_clients(self):
 
-        client_count = 1
         host = "localhost"
         port = 5432
+        client_count = 1
 
-        try:
-            start_clients(client_count=client_count,
-                          host=host,
-                          port=port)
+        results = start_clients(client_count=client_count,
+                                host=host,
+                                port=port)
 
-        except Exception as e:
-            LoggingManager().exception(e)
+        self.assertNotEqual(results, None, "client task results are empty")
 
 
 if __name__ == '__main__':

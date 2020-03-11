@@ -17,7 +17,6 @@ import asyncio
 import string
 import socket
 import random
-import resource
 import os
 
 from contextlib import ExitStack  # For cleanly closing sockets
@@ -25,7 +24,6 @@ from contextlib import ExitStack  # For cleanly closing sockets
 from src.server.networking_utils import set_socket_io_timeouts
 
 from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
 
 from src.server.interpreter import EvaCommandInterpreter
 
@@ -194,7 +192,7 @@ def start_clients(client_count: int, host: string, port: int):
     loop = asyncio.get_event_loop()
 
     max_retry_count = 3
-    
+
     # Create client tasks
     client_coros = [
         start_client(loop, lambda: EvaClient(),
@@ -235,3 +233,5 @@ def start_clients(client_count: int, host: string, port: int):
 
         # Close loop
         loop.close()
+
+        return clients.result()
