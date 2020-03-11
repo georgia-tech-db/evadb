@@ -17,6 +17,7 @@ import logging
 
 from enum import Enum
 
+
 class LoggingLevel(Enum):
     NOTSET = 0
     DEBUG = 10
@@ -24,6 +25,7 @@ class LoggingLevel(Enum):
     WARNING = 30
     ERROR = 40
     CRITICAL = 50
+
 
 class LoggingManager(object):
 
@@ -38,8 +40,8 @@ class LoggingManager(object):
             cls._LOG = logging.getLogger(__name__)
             LOG_handler = logging.StreamHandler()
             LOG_formatter = logging.Formatter(
-                    fmt='%(asctime)-15s [%(funcName)s():%(lineno)03d] '\
-                     '%(levelname)-5s: %(message)s',
+                fmt='%(asctime)-15s [%(funcName)s():%(lineno)03d] '
+                '%(levelname)-5s: %(message)s',
                 datefmt='%m-%d-%Y %H:%M:%S'
             )
             LOG_handler.setFormatter(LOG_formatter)

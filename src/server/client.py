@@ -165,7 +165,7 @@ async def start_client(loop, factory,
                     raise RuntimeError('Client unable to connect to server')
 
                 await asyncio.sleep(retries.pop(0) - random.random())
-                
+
             else:
                 break
 
@@ -217,24 +217,24 @@ def start_clients(client_count: int, host: string, port: int):
 
     finally:
         LoggingManager().log("client process shutdown")
-        
+
         # tasks, exceptions, retries
         summary = [0, 0, 0]
 
         if clients.done():
             done, _ = clients.result()
-            exceptions = sum(1 for d in done if d.exception())            
+            exceptions = sum(1 for d in done if d.exception())
             retries = sum(
                 max_retry_count - d.result()
                 for d in done if not d.exception()
-            )            
+            )
             tasks = len(client_coros)
-            
+
             LoggingManager().log(str(tasks) + ' tasks, ' +
                                  str(exceptions) + ' exceptions, ' +
                                  str(retries) + ' retries'
                                  )
-            
+
             summary = [tasks, exceptions, retries]
 
         # Close loop
