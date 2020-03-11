@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 
-EVA_DIR = ""
+import src
+
+EVA_DIR = os.path.dirname(os.path.dirname(src.__file__))
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/eva_catalog'

@@ -15,10 +15,13 @@
 
 from typing import List, Tuple
 
-from src.catalog.database import init_db
-from src.catalog.df_schema import DataFrameSchema
+from src.catalog.column_type import ColumnType
+from src.catalog.models.base_model import init_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
+from src.catalog.services.df_column_service import DatasetColumnService
+from src.catalog.services.df_service import DatasetService
+from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
 
@@ -35,93 +38,165 @@ class CatalogManager(object):
 
         return cls._instance
 
+    def __init__(self):
+        self._dataset_service = DatasetService()
+        self._column_service = DatasetColumnService()
+
     def bootstrap_catalog(self):
+        """Bootstraps catalog.
 
-        # eva_dir = ConfigurationManager().get_value("core", "location")
-        # output_url = os.path.join(eva_dir, CATALOG_DIR)
-        # LoggingManager().log("Bootstrapping catalog" + str(output_url),
-        #                      LoggingLevel.INFO)
+        This method runs all tasks required for using catalog. Currently,
+        it includes only one task ie. initializing database. It creates the
+        catalog database and tables if they do not exist.
 
-        LoggingManager().log("Bootstrapping catalog")
-
+        """
+        LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
 
-        # # Construct output location
-        # catalog_dir_url = os.path.join(eva_dir, "catalog")
-        #
-        # # Get filesystem path
-        # catalog_os_path = urlparse(catalog_dir_url).path
-        #
-        # # Check if catalog exists
-        # if os.path.exists(catalog_os_path):
-        #     # Load catalog if it exists
-        #     load_catalog_dataframes(catalog_dir_url,
-        #     self._catalog_dictionary)
-        # else:
-        #     # Create catalog if it does not exist
-        #     create_catalog_dataframes(
-        #         catalog_dir_url, self._catalog_dictionary)
+    def create_metadata(self, name: str, file_url: str,
+                        column_list: List[DataFrameColumn]) -> \
+            DataFrameMetadata:
+        """Creates metadata object when called by create executor.
+
+        Creates a metadata object and column objects and persists them in
+        database. Sets the schema field of the metadata object.
+
+        Args:
+            name: name of the dataset/video to which this metdata corresponds
+            file_url: #todo
+            column_list: list of columns
+
+        Returns:
+            The persisted DataFrameMetadata object with the id field populated.
+        """
+
+        metadata = self._dataset_service.create_dataset(name, file_url)
+        for column in column_list:
+            column.metadata_id = metadata.id
+        column_list = self._column_service.create_column(column_list)
+        metadata.schema = column_list
+        return metadata
 
     def get_table_bindings(self, database_name: str, table_name: str,
-                           column_names: List[str]) -> Tuple[int, List[int]]:
-        """
-        This method fetches bindings for strings
-        :param database_name: currently not in use
-        :param table_name: the table that is being referred to
-        :param column_names: the column names of the table for which
-        bindings are required
-        :return: returns metadat_id of table and a list of column ids
+                           column_names: List[str] = None) -> Tuple[int,
+                                                                    List[int]]:
+        """This method fetches bindings for strings.
+
+        Args:table_metadata_id
+            database_name: currently not in use
+            table_name: the table that is being referred to
+            column_names: the column names of the table for which
+           bindings are required
+
+        Returns:
+            returns metadata_id of table and a list of column ids
         """
 
-        metadata_id = DataFrameMetadata.get_id_from_name(table_name)
+        metadata_id = self._dataset_service.dataset_by_name(table_name)
         column_ids = []
         if column_names is not None:
-            column_ids = DataFrameColumn.get_id_from_metadata_id_and_name_in(
+            if not isinstance(column_names, list):
+                LoggingManager().log(
+                    "CatalogManager::get_table_binding() expected list",
+                    LoggingLevel.WARNING)
+            column_ids = self._column_service.columns_by_dataset_id_and_names(
                 metadata_id,
                 column_names)
         return metadata_id, column_ids
 
     def get_metadata(self, metadata_id: int,
                      col_id_list: List[int] = None) -> DataFrameMetadata:
+        """This method returns the metadata object given a metadata_id,
+        when requested by the executor.
+
+        Args:
+            metadata_id: metadata id of the table
+            col_id_list: optional column ids of the table referred.
+                         If none we all the columns are required
+
+        Returns:
+            metadata object with all the details of video/dataset
         """
-        This method returns the metadata object given a metadata_id,
-        when requested by the executor. It will further be used by storage
-        engine for retrieving the dataframe.
-        :param metadata_id: metadata id of the table
-        :param col_id_list: optional column ids of the table referred
-        :return:
-        """
-        metadata = DataFrameMetadata.get(metadata_id)
-        if col_id_list is not None:
-            df_columns = DataFrameColumn.get_by_metadata_id_and_id_in(
-                col_id_list,
-                metadata_id)
-            metadata.set_schema(
-                DataFrameSchema(metadata.get_name(), df_columns))
+        metadata = self._dataset_service.dataset_by_id(metadata_id)
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
+            metadata_id, col_id_list)
+        metadata.schema = df_columns
         return metadata
 
-    # def create_dataset(self, dataset_name: str):
-    #
-    #     dataset_catalog_entry = \
-    #         self._catalog_dictionary.get(DATASET_DATAFRAME_NAME)
-    #
-    #     dataset_df = \
-    #         load_dataframe(dataset_catalog_entry.get_dataframe_file_url())
-    #
-    #     dataset_df.show(10)
-    #
-    #     next_row_id = get_next_row_id(dataset_df, DATASET_DATAFRAME_NAME)
-    #
-    #     row_1 = [next_row_id, dataset_name]
-    #     rows = [row_1]
-    #
-    #     append_rows(dataset_catalog_entry, rows)
+    def get_column_types(self, table_metadata_id: int,
+                         col_id_list: List[int]) -> List[ColumnType]:
+        """
+        This method consumes the input table_id and the input column_id_list
+        and
+        returns a list of ColumnType for each provided column_id.
 
+        Arguments:
+            table_metadata_id {int} -- [metadata_id of the table]
+            col_id_list {List[int]} -- [metadata ids of the columns; If list
+            = None, return type for all columns in the table]
 
-if __name__ == '__main__':
-    catalog = CatalogManager()
-    metadata_id, col_ids = catalog.get_table_bindings(None, 'dataset1',
-                                                      ['frame', 'color'])
-    metadata = catalog.get_metadata(1, [1])
-    print(metadata.get_dataframe_schema())
-    print(metadata_id, col_ids)
+        Returns:
+            List[ColumnType] -- [list of required column type for each input
+            column]
+        """
+        metadata = self._dataset_service.dataset_by_id(table_metadata_id)
+        col_types = []
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
+            metadata.id, col_id_list
+        )
+        for col in df_columns:
+            col_types.append(col.type)
+
+        return col_types
+
+    def get_column_ids(self, table_metadata_id: int) -> List[int]:
+        """
+        This method returns all the column_ids associated with the given
+        table_metadata_id
+
+        Arguments:
+            table_metadata_id {int} -- [table metadata id for which columns
+            are required]
+
+        Returns:
+            List[int] -- [list of columns ids for this table]
+        """
+
+        col_ids = []
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
+            table_metadata_id)
+        for col in df_columns:
+            col_ids.append(col[0])
+
+        return col_ids
+
+    def create_column_metadata(
+            self, column_name: str, data_type: ColumnType,
+            dimensions: List[int]):
+        """Create a dataframe column object this column. 
+        This function won't commit this object in the catalog database. 
+        If you want to commit it into catalog table call create_metadata with
+        corresponding table_id
+
+        Arguments:
+            column_name {str} -- column name to be created
+            data_type {ColumnType} -- type of column created
+            dimensions {List[int]} -- dimensions of the column created
+        """
+        return DataFrameColumn(column_name, data_type,
+                               array_dimensions=dimensions)
+
+    def get_dataset_metadata(self, database_name: str, dataset_name: str,
+                             column_names: List[str] = None) -> \
+            DataFrameMetadata:
+        """
+        Returns the Dataset metadata for the given dataset name
+        Arguments:
+            dataset_name (str): name of the dataset
+
+        Returns:
+            DataFrameMetadata
+        """
+
+        return self._dataset_service.dataset_object_by_name(
+            database_name, dataset_name)

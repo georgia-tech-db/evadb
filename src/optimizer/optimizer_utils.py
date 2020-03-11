@@ -12,10 +12,34 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
 from typing import List
-from src.expression.tuple_value_expression import ExpressionType
+
+from src.expression.abstract_expression import AbstractExpression
+from src.expression.tuple_value_expression import ExpressionType, \
+    TupleValueExpression
+
+from src.parser.create_statement import ColumnDefinition
+
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
+
+
+def bind_dataset(video_info: TableInfo) -> DataFrameMetadata:
+    """
+    Uses catalog to bind the dataset information for given video string.
+
+    Arguments:
+         video_info (TableInfo): video information obtained in SQL query
+
+    Returns:
+        DataFrameMetadata  -  corresponding metadata for the input table info
+    """
+    catalog = CatalogManager()
+    return catalog.get_dataset_metadata(video_info.database_name,
+                                        video_info.table_name)
 
 
 def bind_table_ref(video_info: TableInfo) -> int:
@@ -35,35 +59,77 @@ def bind_table_ref(video_info: TableInfo) -> int:
     return catalog_entry_id
 
 
-def bind_columns_expr(target_columns: List['AbstractExpression']):
+def bind_columns_expr(target_columns: List[AbstractExpression],
+                      column_mapping):
     if target_columns is None:
         return
 
     for column_exp in target_columns:
         child_count = column_exp.get_children_count()
         for i in range(child_count):
-            bind_columns_expr([column_exp.get_child(i)])
+            bind_columns_expr([column_exp.get_child(i)], column_mapping)
 
         if column_exp.etype == ExpressionType.TUPLE_VALUE:
-            bind_tuple_value_expr(column_exp)
+            bind_tuple_value_expr(column_exp, column_mapping)
 
 
-def bind_tuple_value_expr(expr: 'AbstractExpression'):
+def bind_tuple_value_expr(expr: TupleValueExpression, column_mapping):
+    if not column_mapping:
+        # TODO: Remove this and bring uniform interface throughout the system.
+        _old_bind_tuple_value_expr(expr)
+        return
+
+    expr.col_object = column_mapping.get(expr.col_name.lower(), None)
+
+
+def _old_bind_tuple_value_expr(expr):
+    """
+    NOTE: No tests for this  should be combined with latest interface
+    """
     catalog = CatalogManager()
     table_id, column_ids = catalog.get_table_bindings(None,
                                                       expr.table_name,
-                                                      expr.col_name)
+                                                      [expr.col_name])
     expr.table_metadata_id = table_id
+    if not isinstance(column_ids, list) or len(column_ids) == 0:
+        LoggingManager().log(
+            "Optimizer Utils:: bind_tuple_expr: \
+            Cannot bind column name provided", LoggingLevel.ERROR)
     expr.col_metadata_id = column_ids.pop()
 
 
-def bind_predicate_expr(predicate: 'AbstractExpression'):
+def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
     # This function will be expanded as we add support for
     # complex predicate expressions and sub select predicates
 
     child_count = predicate.get_children_count()
     for i in range(child_count):
-        bind_predicate_expr(predicate.get_child(i))
+        bind_predicate_expr(predicate.get_child(i), column_mapping)
 
     if predicate.etype == ExpressionType.TUPLE_VALE:
-        bind_tuple_value_expr(predicate)
+        bind_tuple_value_expr(predicate, column_mapping)
+
+
+def create_column_metadata(col_list: List[ColumnDefinition]):
+    """Create column metadata for the input parsed column list. This function
+    will not commit the provided column into catalog table. 
+    Will only return in memory list of ColumnDataframe objects
+
+    Arguments:
+        col_list {List[ColumnDefinition]} -- parsed col list to be created
+    """
+    if isinstance(col_list, ColumnDefinition):
+        col_list = [col_list]
+
+    result_list = []
+    for col in col_list:
+        if col is None:
+            LoggingManager().log(
+                "Empty column while creating column metadata",
+                LoggingLevel.ERROR)
+            result_list.append(col)
+        result_list.append(
+            CatalogManager().create_column_metadata(
+                col.name, col.type, col.dimension))
+
+    return result_list

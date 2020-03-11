@@ -17,10 +17,10 @@ from unittest.mock import patch
 
 import numpy as np
 
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.loaders.petastorm_loader import PetastormLoader
 from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import VideoFormat, ColorSpace
-from src.models.catalog.video_info import VideoMetaInfo
+from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
 
 NUM_FRAMES = 10
@@ -48,8 +48,9 @@ class PetastormLoaderTest(unittest.TestCase):
     @patch("src.loaders.petastorm_loader.make_reader")
     def test_should_call_petastorm_make_reader_with_correct_params(self,
                                                                    mock):
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
-        video_loader = PetastormLoader(video_info, shard=3, total_shards=3)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
+        video_loader = PetastormLoader(video_info, curr_shard=3,
+                                       total_shards=3)
         list(video_loader._load_frames())
         mock.assert_called_once_with('dummy.avi', shard_count=3, cur_shard=3)
 
@@ -58,8 +59,10 @@ class PetastormLoaderTest(unittest.TestCase):
         mock.return_value = self.DummyReader(
             map(lambda i: self.DummyRow(i, np.ones((2, 2, 3)) * i), range(3)))
 
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
-        video_loader = PetastormLoader(video_info, shard=3, total_shards=3)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
+
+        video_loader = PetastormLoader(video_info, curr_shard=3,
+                                       total_shards=3)
         actual = list(video_loader._load_frames())
         expected = [Frame(i, np.ones((2, 2, 3)) * i, FrameInfo(2, 2, 3,
                                                                ColorSpace.BGR))

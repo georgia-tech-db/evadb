@@ -81,9 +81,9 @@ class ParserTests(unittest.TestCase):
 
         multiple_queries = []
         multiple_queries.append("SELECT CLASS FROM TAIPAI \
-            WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
-            SELECT REDNESS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS = 300)")
+                WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
+                SELECT REDNESS FROM TAIPAI \
+                WHERE (CLASS = 'VAN' AND REDNESS = 300)")
 
         for query in multiple_queries:
             eva_statement_list = parser.parse(query)
@@ -97,7 +97,7 @@ class ParserTests(unittest.TestCase):
     def test_select_statement(self):
         parser = Parser()
         select_query = "SELECT CLASS, REDNESS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
+                WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

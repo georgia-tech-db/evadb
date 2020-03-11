@@ -17,6 +17,8 @@ import unittest
 import mock
 
 from src.catalog.catalog_manager import CatalogManager
+from src.catalog.column_type import ColumnType
+from src.catalog.models.df_column import DataFrameColumn
 
 
 class CatalogManagerTests(unittest.TestCase):
@@ -30,11 +32,100 @@ class CatalogManagerTests(unittest.TestCase):
         y = CatalogManager()
         self.assertEqual(x, y)
 
-        # x.create_dataset("foo")
-        # x.create_dataset("bar")
-        # x.create_dataset("baz")
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_create_metadata_should_create_dataset_and_columns(self, dcs_mock,
+                                                               ds_mock,
+                                                               initdb_mock):
+        catalog = CatalogManager()
+        file_url = "file1"
+        dataset_name = "name"
+
+        columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
+        actual = catalog.create_metadata(dataset_name, file_url, columns)
+        ds_mock.return_value.create_dataset.assert_called_with(dataset_name,
+                                                               file_url)
+        for column in columns:
+            column.metadata_id = \
+                ds_mock.return_value.create_dataset.return_value.id
+
+        dcs_mock.return_value.create_column.assert_called_with(columns)
+
+        expected = ds_mock.return_value.create_dataset.return_value
+        expected.schema = \
+            dcs_mock.return_value.create_column.return_value
+
+        self.assertEqual(actual, expected)
+
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_table_binding_returns_metadata_and_column_ids(self,
+                                                           dcs_mock,
+                                                           ds_mock,
+                                                           initdb_mock):
+        catalog = CatalogManager()
+        dataset_name = "name"
+
+        columns = ["column1", "column2"]
+        database_name = "database"
+        actual = catalog.get_table_bindings(database_name, dataset_name,
+                                            columns)
+        ds_dataset_name_mock = ds_mock.return_value.dataset_by_name
+        ds_dataset_name_mock.assert_called_with(dataset_name)
+
+        column_values_mock = \
+            dcs_mock.return_value.columns_by_dataset_id_and_names
+        column_values_mock.assert_called_with(
+            ds_dataset_name_mock.return_value,
+            columns
+        )
+
+        self.assertEqual(actual, (ds_dataset_name_mock.return_value,
+                                  column_values_mock.return_value))
+
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_table_binding_without_columns_returns_no_column_ids(self,
+                                                                 dcs_mock,
+                                                                 ds_mock,
+                                                                 initdb_mock):
+        catalog = CatalogManager()
+        dataset_name = "name"
+
+        database_name = "database"
+        actual = catalog.get_table_bindings(database_name, dataset_name)
+        ds_dataset_name_mock = ds_mock.return_value.dataset_by_name
+        ds_dataset_name_mock.assert_called_with(dataset_name)
+
+        column_values_mock = \
+            dcs_mock.return_value.columns_by_dataset_id_and_names
+        column_values_mock.assert_not_called()
+
+        self.assertEqual(actual, (ds_dataset_name_mock.return_value, []))
+
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_table_binding_without_columns_returns_no_column_ids(self,
+                                                                 dcs_mock,
+                                                                 ds_mock,
+                                                                 initdb_mock):
+        catalog = CatalogManager()
+        dataset_name = "name"
+
+        database_name = "database"
+
+        actual = catalog.get_dataset_metadata(database_name, dataset_name)
+        ds_mock.return_value.dataset_object_by_name.assert_called_with(
+            database_name, dataset_name)
+
+        self.assertEqual(actual,
+                         ds_mock.return_value.dataset_object_by_name
+                         .return_value)
 
 
 if __name__ == '__main__':
-
     unittest.main()
