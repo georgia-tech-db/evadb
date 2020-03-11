@@ -47,7 +47,6 @@ class SQLConfig:
         uri = ConfigurationManager().get_value("core",
                                                "sqlalchemy_database_uri")
         # set echo=True to log SQL
-        self.engine = create_engine(
-            'mysql+pymysql://root:@localhost/eva_catalog')
+        self.engine = create_engine(uri)
         # statements
         self.session = scoped_session(sessionmaker(bind=self.engine))
