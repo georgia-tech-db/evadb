@@ -41,7 +41,7 @@ class DiskStorageExecutorTest(unittest.TestCase):
                                            skip_frames=(
                                                storage_plan.skip_frames),
                                            total_shards=0,
-                                           shard=0
+                                           curr_shard=0
                                            )
         class_instance.load.assert_called_once()
         self.assertEqual(list(range(5)), actual)
