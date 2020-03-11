@@ -18,10 +18,10 @@ import unittest
 import cv2
 import numpy as np
 
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.loaders.video_loader import VideoLoader
 from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import ColorSpace, VideoFormat
-from src.models.catalog.video_info import VideoMetaInfo
+from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
 
 NUM_FRAMES = 10
@@ -59,7 +59,7 @@ class VideoLoaderTest(unittest.TestCase):
         os.remove('dummy.avi')
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
         video_loader = VideoLoader(video_info)
         batches = list(video_loader.load())
         dummy_frames = list(self.create_dummy_frames())
@@ -67,7 +67,7 @@ class VideoLoaderTest(unittest.TestCase):
         self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
 
     def test_should_return_half_then_number_of_batches_with_skip_of_two(self):
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
         video_loader = VideoLoader(video_info, skip_frames=2)
         batches = list(video_loader.load())
         dummy_frames = list(
@@ -77,7 +77,7 @@ class VideoLoaderTest(unittest.TestCase):
         self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
 
     def test_should_skip_first_two_frames_with_offset_two(self):
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
         video_loader = VideoLoader(video_info, offset=2)
         dummy_frames = list(
             self.create_dummy_frames(
@@ -87,7 +87,7 @@ class VideoLoaderTest(unittest.TestCase):
         self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
 
     def test_should_return_only_few_frames_when_limit_is_specified(self):
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
         limit = 4
         video_loader = VideoLoader(video_info, limit=limit)
         dummy_frames = list(
@@ -98,7 +98,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_return_single_batch_if_batch_size_equal_to_no_of_frames(
             self):
-        video_info = VideoMetaInfo('dummy.avi', 10, VideoFormat.MPEG)
+        video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
         video_loader = VideoLoader(video_info, batch_size=NUM_FRAMES)
         dummy_frames = list(
             self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))
