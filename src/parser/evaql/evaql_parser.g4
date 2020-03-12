@@ -404,7 +404,7 @@ functionCall
     ;
 
 udfFunction
-    : simpleId '(' functionArgs ')'                                    
+    : simpleId '(' functionArgs ')' dottedId?                                  
     ;
 
 
