@@ -41,12 +41,17 @@ cd eva/
 conda env create -f environment.yml
 ```
 
+Run the following command to update an existing environment after updating the `environment.yml` file:
+```shell
+conda env update --name eva --file environment.yml
+```
+
 4. Activate the `eva` environment.
 ```shell
 conda activate eva
 ```
 
-5. Run following command to configure git hooks.
+5. Run the following command to configure the git hooks.
 ```shell
 git config core.hooksPath .githooks
 ```
