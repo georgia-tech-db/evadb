@@ -177,19 +177,23 @@ async def start_client(loop, factory,
     return len(retries)
 
 
-def start_clients(client_count: int, host: string, port: int):
+def start_clients(client_count: int, host: string, port: int,
+                  loop,
+                  stop_clients_future):
     """
         Start a set of eva clients
 
         client_count: number of clients (= connections)
         hostname: hostname of the server
         port: port where the server is running
+        stop_clients_future: future for externally stopping the clients
     """
 
     LoggingManager().log('PID(' + str(os.getpid()) + ') attempting '
                          + str(client_count) + ' connections')
 
-    loop = asyncio.get_event_loop()
+    # Get a reference to the event loop
+    # loop = asyncio.get_event_loop()
 
     max_retry_count = 3
 
@@ -210,7 +214,8 @@ def start_clients(client_count: int, host: string, port: int):
     )
 
     try:
-        loop.run_until_complete(asyncio.wait([clients]))
+        stop_clients_future = asyncio.wait([clients])
+        loop.run_until_complete(stop_clients_future)
 
     except KeyboardInterrupt:
         LoggingManager().log("client process interrupted")
