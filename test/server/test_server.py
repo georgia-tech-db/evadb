@@ -14,9 +14,7 @@
 # limitations under the License.
 
 import unittest
-import os
 import time
-import signal
 import threading
 import mock
 
@@ -27,11 +25,14 @@ from unittest.mock import MagicMock
 from src.server.server import start_server
 from src.server.server import EvaServer
 
+from concurrent.futures import CancelledError
+
 
 class ServerTests(unittest.TestCase):
 
     def setUp(self):
         self.loop = asyncio.new_event_loop()
+        self.stop_server_future = self.loop.create_future()
         asyncio.set_event_loop(None)
 
     def __init__(self, *args, **kwargs):
@@ -39,19 +40,22 @@ class ServerTests(unittest.TestCase):
 
     def test_server(self):
 
-        pid = os.getpid()
+        host = "0.0.0.0"
+        port = 5432
 
-        def trigger_signal():
-            # need a more robust mechanism for when to send the signal
-            time.sleep(1)
-            os.kill(pid, signal.SIGINT)
+        def timeout_server():
+            # need a more robust mechanism for when to cancel the future
+            time.sleep(2)
+            self.stop_server_future.cancel()
 
-        thread = threading.Thread(target=trigger_signal)
+        thread = threading.Thread(target=timeout_server)
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(SystemExit):
-            start_server(host="0.0.0.0", port=5432, loop=self.loop)
+        with self.assertRaises(CancelledError):
+            start_server(host=host, port=port,
+                         loop=self.loop,
+                         stop_server_future=self.stop_server_future)
 
     def test_server_protocol(self):
 

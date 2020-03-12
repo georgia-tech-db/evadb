@@ -79,12 +79,13 @@ class EvaServer(asyncio.Protocol):
             )
 
 
-def start_server(host: string, port: int, loop):
+def start_server(host: string, port: int, loop, stop_server_future):
     """
         Start the server.
         Server objects are asynchronous context managers.
 
         hostname: hostname of the server
+        stop_server_future: future for externally stopping the server
     """
 
     # Register signal handler
@@ -114,7 +115,7 @@ def start_server(host: string, port: int, loop):
                                                       server_closed))
 
     try:
-        loop.run_forever()
+        loop.run_until_complete(stop_server_future)
 
     except KeyboardInterrupt:
 

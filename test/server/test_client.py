@@ -14,32 +14,46 @@
 # limitations under the License.
 
 import unittest
+import time
+
+import asyncio
+import threading
 
 from src.server.client import start_clients
 
-from src.utils.logging_manager import LoggingManager
-
 
 class ClientTests(unittest.TestCase):
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        self.stop_clients_future = self.loop.create_future()
+        asyncio.set_event_loop(None)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_multiple_clients(self):
+    def test_clients(self):
 
         host = "0.0.0.0"
         port = 5432
-        client_count = 1
+        client_count = 3
 
-        try:
-            summary = start_clients(client_count=client_count,
-                                    host=host,
-                                    port=port)
+        def timeout_server():
+            # need a more robust mechanism for when to cancel the future
+            time.sleep(2)
+            self.stop_clients_future.cancel()
 
-            # client cannot connect to server
-            self.assertEqual(summary[1], 1, "one exception")
+        thread = threading.Thread(target=timeout_server)
+        thread.daemon = True
+        thread.start()
 
-        except Exception as e:
-            LoggingManager().exception(e)
+        summary = start_clients(client_count=client_count,
+                                host=host,
+                                port=port,
+                                loop=self.loop,
+                                stop_clients_future=self.stop_clients_future)
+
+        self.assertEqual(summary[1], client_count, "task count mismatch")
 
 
 if __name__ == '__main__':
