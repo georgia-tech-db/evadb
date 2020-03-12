@@ -41,7 +41,7 @@ class ServerTests(unittest.TestCase):
     def test_server(self):
 
         host = "0.0.0.0"
-        port = 5432
+        port = 5489
 
         def timeout_server():
             # need a more robust mechanism for when to cancel the future
