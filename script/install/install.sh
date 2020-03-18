@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # Install conda packages for eva
-export PATH="$HOME/miniconda/bin:$PATH"
 conda env create -f script/install/conda_eva_environment.yml
 . activate eva
 conda list
