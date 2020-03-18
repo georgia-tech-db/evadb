@@ -27,8 +27,6 @@ def handle_request(transport, request_message):
         otherwise just echoes user input
     """
 
-    print("handle_request")
-
     response_message = "foo"
 
     LoggingManager().log('Response to client: --|' +
@@ -37,3 +35,5 @@ def handle_request(transport, request_message):
 
     data = response_message.encode('ascii')
     transport.write(data)
+
+    return response_message

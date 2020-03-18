@@ -74,6 +74,7 @@ class EvaServer(asyncio.Protocol):
             LoggingManager().log('Close client socket')
             return self.transport.close()
         else:
+            LoggingManager().log('Handle request')
             asyncio.create_task(
                 handle_request(self.transport, request_message)
             )
