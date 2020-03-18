@@ -10,22 +10,9 @@ python:
 cache: pip
 
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-  - bash miniconda.sh -b -p $HOME/miniconda
-  - export PATH="$HOME/miniconda/bin:$PATH"
-  - hash -r
-  - conda config --set always_yes yes --set changeps1 no
-  - conda update -q conda
-  - conda info -a
-  - mysql -e 'CREATE DATABASE IF NOT EXISTS eva_catalog;'
-
-install:
-  - conda env create -f environment.yml
-  - source activate eva
-  - conda list
+  - sh script/installation/install.sh
 
 script:
-  - ./script/antlr4/setup.sh
   - pycodestyle  --select E src/ test/ --exclude src/filters,src/parser/evaql
   - PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=10
 
