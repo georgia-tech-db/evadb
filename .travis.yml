@@ -10,6 +10,9 @@ python:
 cache: pip
 
 before_install:
+  - sh script/installation/before_install.sh
+
+install:
   - sh script/installation/install.sh
 
 script:
