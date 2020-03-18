@@ -38,7 +38,6 @@ class ServerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @unittest.skip("skip server test on travis")
     def test_server(self):
 
         host = "0.0.0.0"
