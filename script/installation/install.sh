@@ -18,7 +18,7 @@ conda update -q conda
 conda info -a
 
 # Install conda packages
-conda env create -f environment.yml
+conda env create -f script/installation/conda_eva_environment.yml
 source activate eva
 conda list
 
@@ -26,7 +26,5 @@ conda list
 mysql -e 'CREATE DATABASE IF NOT EXISTS eva_catalog;'
 
 # Generate eva-ql parser using antlr4
-sh ./script/antlr4/setup.sh
+sh script/antlr4/generate_parser.sh
 
-
- 
