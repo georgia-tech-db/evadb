@@ -32,6 +32,7 @@ class ClientTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @unittest.skip("skip client test on travis")
     def test_clients(self):
 
         host = "0.0.0.0"
