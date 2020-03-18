@@ -23,7 +23,7 @@ from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1
 from src.server.networking_utils import realtime_server_status,\
     set_socket_io_timeouts
 
-from src.utils.logging_manager import LoggingManager
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 from src.server.command_handler import handle_request
 
@@ -106,7 +106,8 @@ def start_server(host: string, port: int, loop, stop_server_future):
 
     for socket in server.sockets:
         LoggingManager().log('PID(' + str(os.getpid()) + ') serving on '
-                             + str(socket.getsockname()))
+                             + str(socket.getsockname()),
+                             LoggingLevel.CRITICAL)
 
     server_closed = loop.create_task(server.wait_closed())
 

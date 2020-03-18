@@ -15,7 +15,7 @@
 
 import asyncio
 
-from src.postmaster.postmaster import start_server
+from src.server.server import start_server
 
 from src.configuration.configuration_manager import ConfigurationManager
 
@@ -32,12 +32,21 @@ def eva():
     config = ConfigurationManager()
     hostname = config.get_value('core', 'hostname')
     port = config.get_value('core', 'port')
+    loop = asyncio.new_event_loop()
+    stop_server_future = loop.create_future()
 
-    # Launch postmaster
+    # Launch server
     try:
-        asyncio.run(start_server(hostname=hostname,
-                                 port=port)
+        asyncio.run(start_server(host=hostname,
+                                 port=port,
+                                 loop=loop,
+                                 stop_server_future=stop_server_future)
                     )
 
     except Exception as e:
         LoggingManager().log(e, LoggingLevel.CRITICAL)
+
+
+if __name__ == '__main__':
+    # execute only if run as the entry point into the program
+    eva()

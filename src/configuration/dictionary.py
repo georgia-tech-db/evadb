@@ -16,6 +16,6 @@ import os
 
 import src
 
-EVA_DIR = os.path.dirname(os.path.dirname(src.__file__))
+EVA_DIR = os.path.join(os.path.dirname(src.__file__), os.path.pardir)
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"
