@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Activa eva environment
-. activate eva
-
 # Run linter (checks code style)
 pycodestyle  --select E src/ test/ --exclude src/filters,src/parser/evaql
 
