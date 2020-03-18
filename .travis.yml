@@ -17,6 +17,7 @@ install:
   - sh script/install/install.sh
 
 script:
+  - conda init
   - conda activate eva
   - sh script/test/test.sh
 
