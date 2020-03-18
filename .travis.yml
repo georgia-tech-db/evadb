@@ -12,12 +12,15 @@ cache: pip
 before_install:
   - sh script/install/before_install.sh
   - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
 
 install:
   - sh script/install/install.sh
 
 script:
-  - conda init
   - conda activate eva
   - sh script/test/test.sh
 
