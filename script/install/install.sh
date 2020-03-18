@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Install conda packages for eva
-conda env create -f script/install/conda_eva_environment.yml
+conda env create -f script/install/conda_dummy_environment.yml
 . activate eva
 conda list
 
