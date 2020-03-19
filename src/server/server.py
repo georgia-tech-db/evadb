@@ -41,18 +41,25 @@ class EvaServer(asyncio.Protocol):
     # These counters are used for realtime server monitoring
     __connections__ = 0
     __errors__ = 0
+    _socket_timeout = 0
+
+    def __init__(self, socket_timeout):
+        self.transport = None
+        self._socket_timeout = socket_timeout
 
     def connection_made(self, transport):
         self.transport = transport
 
         # Set timeout for sockets
-        if not set_socket_io_timeouts(self.transport, 60, 0):
+        if not set_socket_io_timeouts(self.transport,
+                                      self._socket_timeout, 0):
             self.transport.abort()
             return
 
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info('peername')
-        LoggingManager().log('Connection from client: ' + str(peername))
+        LoggingManager().log('Connection from client: ' + str(peername) +
+                             str(self._socket_timeout))
         EvaServer.__connections__ += 1
 
     def connection_lost(self, exc):
@@ -80,7 +87,11 @@ class EvaServer(asyncio.Protocol):
             )
 
 
-def start_server(host: string, port: int, loop, stop_server_future):
+def start_server(host: string,
+                 port: int,
+                 loop,
+                 socket_timeout: int,
+                 stop_server_future):
     """
         Start the server.
         Server objects are asynchronous context managers.
@@ -104,7 +115,7 @@ def start_server(host: string, port: int, loop, stop_server_future):
     # loop = asyncio.get_event_loop()
 
     # Start the eva server
-    coro = loop.create_server(lambda: EvaServer(), host, port)
+    coro = loop.create_server(lambda: EvaServer(socket_timeout), host, port)
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:

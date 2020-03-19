@@ -30,6 +30,8 @@ class LoggingManagerTests(unittest.TestCase):
 
     def test_log_levels(self):
 
+        LoggingManager().setEffectiveLevel(LoggingLevel.DEBUG)
+
         LoggingManager().log("debug", LoggingLevel.DEBUG)
         LoggingManager().log("info", LoggingLevel.INFO)
         LoggingManager().log("warn", LoggingLevel.WARNING)

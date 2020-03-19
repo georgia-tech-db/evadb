@@ -29,7 +29,6 @@ class InterpreterTests(unittest.TestCase):
         prompt.prompt = '> '
 
         prompt.do_greet("test")
-        # prompt.cmdloop('Starting EVA...')
 
 
 if __name__ == '__main__':

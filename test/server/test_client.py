@@ -53,6 +53,12 @@ class ClientTests(unittest.TestCase):
                                 loop=self.loop,
                                 stop_clients_future=self.stop_clients_future)
 
+        self.assertEqual(summary[0], client_count)
+
+        # none of the connections will work due to server not running
+        exception_count = client_count
+        self.assertEqual(summary[1], exception_count)
+
 
 if __name__ == '__main__':
     unittest.main()

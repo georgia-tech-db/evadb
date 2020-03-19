@@ -42,6 +42,7 @@ class ServerTests(unittest.TestCase):
 
         host = "0.0.0.0"
         port = 5489
+        socket_timeout = 60
 
         def timeout_server():
             # need a more robust mechanism for when to cancel the future
@@ -55,11 +56,14 @@ class ServerTests(unittest.TestCase):
         with self.assertRaises(CancelledError):
             start_server(host=host, port=port,
                          loop=self.loop,
+                         socket_timeout=socket_timeout,
                          stop_server_future=self.stop_server_future)
 
-    def test_server_protocol(self):
+    def test_server_protocol_connection_lost(self):
 
-        eva_server = EvaServer()
+        socket_timeout = 65
+
+        eva_server = EvaServer(socket_timeout)
         eva_server.transport = mock.Mock()
         eva_server.transport.close = MagicMock(return_value="closed")
         eva_server.transport.abort = MagicMock(return_value="aborted")
@@ -70,7 +74,7 @@ class ServerTests(unittest.TestCase):
                          "connection not made")
 
         # connection lost
-        eva_server.connection_lost(exc=None)
+        eva_server.connection_lost(None)
         self.assertEqual(EvaServer.__connections__, 0,
                          "connection not lost")
         self.assertEqual(EvaServer.__errors__, 0,
@@ -82,11 +86,20 @@ class ServerTests(unittest.TestCase):
                          "connection not made")
 
         # connection lost with error
-        eva_server.connection_lost(exc=mock.Mock())
+        eva_server.connection_lost(mock.Mock())
         self.assertEqual(EvaServer.__connections__, 0,
                          "connection not lost")
         self.assertEqual(EvaServer.__errors__, 1,
                          "connection not errored out")
+
+    def test_server_protocol_data_received(self):
+
+        socket_timeout = 60
+
+        eva_server = EvaServer(socket_timeout)
+        eva_server.transport = mock.Mock()
+        eva_server.transport.close = MagicMock(return_value="closed")
+        eva_server.transport.abort = MagicMock(return_value="aborted")
 
         # data received
         data = mock.Mock()
