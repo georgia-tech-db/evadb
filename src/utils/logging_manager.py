@@ -66,17 +66,7 @@ class LoggingManager(object):
         # Note: pytest logging level cannot be higher than WARNING
         # https://github.com/segevfiner/pytest/blob/master/
         # _pytest/logging.py#L246
-
-        if level == LoggingLevel.DEBUG:
-            self._LOG.setLevel(10)
-        elif level == LoggingLevel.INFO:
-            self._LOG.setLevel(20)
-        elif level == LoggingLevel.WARNING:
-            self._LOG.setLevel(30)
-        elif level == LoggingLevel.ERROR:
-            self._LOG.setLevel(40)
-        elif level == LoggingLevel.CRITICAL:
-            self._LOG.setLevel(50)
+        self._LOG.setLevel(level.value)
 
     def getEffectiveLevel(self):
         return logging.getLevelName(self._LOG.getEffectiveLevel())

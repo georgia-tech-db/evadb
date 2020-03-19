@@ -30,8 +30,9 @@ def eva():
 
     # Get the hostname and port information from the configuration file
     config = ConfigurationManager()
-    hostname = config.get_value('core', 'hostname')
-    port = config.get_value('core', 'port')
+    hostname = config.get_value('server', 'hostname')
+    port = config.get_value('server', 'port')
+    socket_timeout = config.get_value('server', 'socket_timeout')    
     loop = asyncio.new_event_loop()
     stop_server_future = loop.create_future()
 
@@ -40,6 +41,7 @@ def eva():
         asyncio.run(start_server(host=hostname,
                                  port=port,
                                  loop=loop,
+                                 socket_timeout=socket_timeout,
                                  stop_server_future=stop_server_future)
                     )
 
