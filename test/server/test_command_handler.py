@@ -16,6 +16,7 @@
 import unittest
 import mock
 import asyncio
+import threading
 
 from unittest.mock import MagicMock
 
@@ -23,6 +24,11 @@ from src.server.command_handler import handle_request
 
 
 class CommandHandlerTests(unittest.TestCase):
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        self.stop_server_future = self.loop.create_future()
+        asyncio.set_event_loop(None)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,12 +38,7 @@ class CommandHandlerTests(unittest.TestCase):
         transport.write = MagicMock(return_value="response_message")
         request_message = "query"
 
-        coro = handle_request(transport, request_message)
-
-        loop = asyncio.get_event_loop()
-        task = loop.create_task(coro)
-
-        loop.run_until_complete(task)
+        asyncio.run(handle_request(transport, request_message))
 
 
 if __name__ == '__main__':
