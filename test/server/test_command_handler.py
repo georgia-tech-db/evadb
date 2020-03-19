@@ -24,20 +24,20 @@ from src.server.command_handler import handle_request
 
 class CommandHandlerTests(unittest.TestCase):
 
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        # asyncio.set_event_loop(None)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def test_command_handler(self):
-
         transport = mock.Mock()
         transport.write = MagicMock(return_value="response_message")
         request_message = "query"
 
-        handle_request(transport, request_message)
+        coro = handle_request(transport, request_message)
+
+        loop = asyncio.get_event_loop()
+        task = loop.create_task(coro)
+
+        loop.run_until_complete(task)
 
 
 if __name__ == '__main__':

@@ -89,6 +89,8 @@ def start_server(host: string, port: int, loop, stop_server_future):
         stop_server_future: future for externally stopping the server
     """
 
+    LoggingManager().log('Start Server', LoggingLevel.CRITICAL)
+
     # Register signal handler
     def raiseSystemExit(_, __):
         raise SystemExit
