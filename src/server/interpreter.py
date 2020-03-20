@@ -12,21 +12,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from cmd import Cmd
-import matplotlib
+
 import random
 import glob
+
 from PIL import Image
-from src.query_parser.eva_parser import EvaFrameQLParser
+from cmd import Cmd
 
-import sys
-sys.path.append('.')
-matplotlib.use('TkAgg')
+from src.parser.parser import Parser
 
 
-class EVADemo(Cmd):
+class EvaCommandInterpreter(Cmd):
 
-    def default(self, query):
+    # Store results from server
+    _server_result = None
+
+    def set_protocol(self, protocol):
+        self.protocol = protocol
+
+    def do_greet(self, line):
+        print("greeting")
+
+    def onecmd(self, s):
+
+        cmd_result = Cmd.onecmd(self, s)
+
+        # Send request to server
+        self.protocol.send_message(s)
+        _server_result = self.protocol._response_chunk
+
+        if _server_result is not None:
+            print(_server_result)
+        _server_result = None
+
+        return cmd_result
+
+    def do_query(self, query):
         """Takes in SQL query and generates the output"""
 
         # Type exit to stop program
@@ -39,7 +60,7 @@ class EVADemo(Cmd):
         else:
             try:
                 # Connect and Query from Eva
-                parser = EvaFrameQLParser()
+                parser = Parser()
                 eva_statement = parser.parse(query)
                 select_stmt = eva_statement[0]
                 print("Result from the parser:")
@@ -73,11 +94,11 @@ class EVADemo(Cmd):
 
     def do_quit(self, args):
         """Quits the program."""
-        print("Quitting.")
-        raise SystemExit
+        return True
 
+    def do_exit(self, args):
+        """Quits the program."""
+        return True
 
-if __name__ == '__main__':
-    prompt = EVADemo()
-    prompt.prompt = '> '
-    prompt.cmdloop('Starting EVA...')
+    def do_EOF(self, line):
+        return True
