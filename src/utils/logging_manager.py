@@ -19,11 +19,12 @@ from enum import Enum
 
 
 class LoggingLevel(Enum):
-    DEBUG = 1
-    INFO = 2
-    WARNING = 3
-    ERROR = 4
-    CRITICAL = 5
+    NOTSET = 0
+    DEBUG = 10
+    INFO = 20
+    WARNING = 30
+    ERROR = 40
+    CRITICAL = 50
 
 
 class LoggingManager(object):
@@ -39,7 +40,7 @@ class LoggingManager(object):
             cls._LOG = logging.getLogger(__name__)
             LOG_handler = logging.StreamHandler()
             LOG_formatter = logging.Formatter(
-                fmt='%(asctime)s [%(funcName)s:%(lineno)03d]'
+                fmt='%(asctime)-15s [%(funcName)s():%(lineno)03d] '
                 '%(levelname)-5s: %(message)s',
                 datefmt='%m-%d-%Y %H:%M:%S'
             )
@@ -59,6 +60,13 @@ class LoggingManager(object):
             self._LOG.error(string)
         elif level == LoggingLevel.CRITICAL:
             self._LOG.critical(string)
+
+    def setEffectiveLevel(self, level: LoggingLevel):
+
+        # Note: pytest logging level cannot be higher than WARNING
+        # https://github.com/segevfiner/pytest/blob/master/
+        # _pytest/logging.py#L246
+        self._LOG.setLevel(level.value)
 
     def getEffectiveLevel(self):
         return logging.getLevelName(self._LOG.getEffectiveLevel())
@@ -82,3 +90,6 @@ class LoggingManager(object):
             return "ERROR"
         elif logger_level == 'CRITICAL':
             return "FATAL"
+
+    def exception(self, error):
+        self._LOG.exception(error)

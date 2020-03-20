@@ -2,8 +2,19 @@
 
 [![Build Status](https://travis-ci.org/georgia-tech-db/eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-EVA is an end-to-end video analytics engine that allows users to query a database of videos and return results based on machine learning analysis. 
+## What is EVA?
+
+EVA is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
+
+## What does EVA do?
+
+* EVA **enables querying of visual data** in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models. 
+
+* EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
+
+* EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
 
 ## Table of Contents
 * [Installation](#installation)
@@ -30,12 +41,17 @@ cd eva/
 conda env create -f environment.yml
 ```
 
+Run the following command to update an existing environment after updating the `environment.yml` file:
+```shell
+conda env update --name eva --file environment.yml
+```
+
 4. Activate the `eva` environment.
 ```shell
 conda activate eva
 ```
 
-5. Run following command to configure git hooks.
+5. Run the following command to configure the git hooks.
 ```shell
 git config core.hooksPath .githooks
 ```
@@ -70,53 +86,20 @@ To run the unit tests in a particular file (e.g., `test_parser.py`:
    python script/formatting/formatter.py
 ```
 
-4. Refer [google codestyle guide](https://google.github.io/styleguide/pyguide.html) for documentation of code.
-
-Please look up the [contributing guide](https://github.com/georgia-tech-db/eva/blob/master/CONTRIBUTING.md#development) for details.
+4. Follow the [Google Python style guide](https://google.github.io/styleguide/pyguide.html).
 
 ## Architecture 
 
-The EVA visual data management system consists of four core components:
+EVA consists of four core components:
 
 * Query Parser
 * Query Optimizer
-* Query Execution Engine (Filters + UDFs)
-* Storage Engine (Loaders)
+* Query Execution Engine (Filters + Deep Learning Models)
+* Distributed Storage Engine
 
-#### Query Optimizer
-The query optimizer converts a given query to the optimal form. 
+## Contributing
 
-Module location: *src/query_optimizer*
-
-#### Filters
-The filters does preliminary filtering to video frames using cheap machine learning models.
-The filters module also outputs statistics such as reduction rate and cost that is used by Query Optimizer module.
-
-The preprocessing method below is running:
-* PCA
-
-The filters below are running:
-* KDE
-* DNN
-* Random Forest
-* SVM
-
-Module location: *src/filters*
-
-#### UDFs
-This module contains all imported deep learning models. Currently, there is no code that performs this task. It is a work in progress.
-Information of current work is explained in detail [here](src/udfs/README.md).
-
-Module location: *src/udfs*
-
-#### Loaders
-The loaders load the dataset with the attributes specified in the *Accelerating Machine Learning Inference with Probabilistic Predicates* by Yao et al.
-
-Module location: *src/loaders*
-
-## Status
-
-_Technology preview_: currently unsupported, possibly due to incomplete functionality or unsuitability for production use.
+To file a bug or request a feature, please file a GitHub issue. Pull requests are welcome.
 
 ## Contributors
 

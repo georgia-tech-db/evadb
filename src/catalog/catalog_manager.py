@@ -173,8 +173,8 @@ class CatalogManager(object):
     def create_column_metadata(
             self, column_name: str, data_type: ColumnType,
             dimensions: List[int]):
-        """Create a dataframe column object this column. 
-        This function won't commit this object in the catalog database. 
+        """Create a dataframe column object this column.
+        This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
         corresponding table_id
 

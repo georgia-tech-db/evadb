@@ -112,7 +112,7 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 
 def create_column_metadata(col_list: List[ColumnDefinition]):
     """Create column metadata for the input parsed column list. This function
-    will not commit the provided column into catalog table. 
+    will not commit the provided column into catalog table.
     Will only return in memory list of ColumnDataframe objects
 
     Arguments:
