@@ -481,3 +481,25 @@ mathOperator
     : '*' | '/' | '%' | DIV | MOD | '+' | '-' | '--'
     ;
 
+// Create UDFs
+createUdf
+    : CREATE UDF 
+      ifNotExists?
+      udfName   
+      INPUT  createDefinitions      
+      OUTPUT createDefinitions
+      TYPE   udfType
+      IMPL   udfImpl                
+    ;
+
+udfName
+    : uid
+    ;
+
+udfType
+    : uid
+    ;
+
+udfImpl
+    : stringLiteral
+    ;
