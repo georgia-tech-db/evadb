@@ -38,7 +38,10 @@ class ColumnDefinition:
 
     @property
     def dimension(self):
-        return self._type
+        return self._dimension
+
+    def __str__(self):
+        return '{} {} {}'.format(self._name, self._type, self._dimension)
 
 
 class CreateTableStatement(AbstractStatement):
