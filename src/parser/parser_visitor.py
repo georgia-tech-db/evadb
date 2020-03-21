@@ -28,6 +28,7 @@ from src.expression.function_expression import FunctionExpression
 from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
 from src.parser.insert_statement import InsertTableStatement
+from src.parser.create_UDF_statement import CreateUDFStatement
 
 from src.parser.table_ref import TableRef, TableInfo
 
@@ -492,8 +493,45 @@ class ParserVisitor(evaql_parserVisitor):
                 args.append(self.visit(child))
         return args
 
-    def visitPredicateExpression(self, ctx:evaql_parser.PredicateExpressionContext):
-        return self.visitChildren(ctx)
+    # Create UDF
+    def visitCreateUdf(self, ctx: evaql_parser.CreateUdfContext):
+        udf_name = None
+        if_not_exists = False
+        input_definitions = []
+        output_definitions = []
+        impl_path = None
+        udf_type = None
+        
+        for child in ctx.children:
+            try:
+                rule_idx = child.getRuleIndex()
 
-    def visitExpressionAtomPredicate(self, ctx:evaql_parser.ExpressionAtomPredicateContext):
-        return self.visitChildren(ctx)
+                if rule_idx == evaql_parser.RULE_udfName:
+                    table_ref = self.visit(ctx.udfName())
+
+                elif rule_idx == evaql_parser.RULE_ifNotExists:
+                    if_not_exists = True
+
+                elif rule_idx == evaql_parser.RULE_createDefinitions:
+                    # There should be 2 createDefinition
+                    # idx 0 describing udf INPUT
+                    # idx 1 describing udf OUTPUT
+                    if len(ctx.createDefinition().children) != 2:
+                        LoggingManager().log('UDF Input or Output Missing', LoggingLevel.ERROR) 
+                    input_definitions = self.visit(ctx.createDefinitions(0))
+                    output_definitions = self.visit(ctx.createDefinitions(1))
+
+                elif rule_idx == evaql_parser.RULE_udfType:
+                    udf_type = self.visit(ctx.udfType())
+                
+                elif rule_idx == evaql_parser.RULE_udfImpl:
+                    impl_path = self.visit(ctx.udfImpl())
+
+            except BaseException:
+                LoggingManager().log('CREATE UDF Failed', LoggingLevel.ERROR)
+                # stop parsing something bad happened
+                return None
+        stmt = CreateUDFStatement(udf_name, if_not_exists, input_definitions, output_definitions, impl_path, udf_type)
+        return stmt
+
+    
