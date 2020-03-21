@@ -223,6 +223,13 @@ GLOBAL_ID:                           '@' '@'
                                   | BQUOTA_STRING
                                 );
 
+// UDF
+UDF:						                'UDF';
+INPUT:                          'INPUT';
+OUTPUT:                         'OUTPUT';
+TYPE:                           'TYPE';
+IMPL:                           'IMPL';
+
 // Fragments for Literal primitives
 
 fragment EXPONENT_NUM_PART:          'E' '-'? DEC_DIGIT+;
