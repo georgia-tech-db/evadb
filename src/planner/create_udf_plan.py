@@ -1,0 +1,83 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from src.planner.abstract_plan import AbstractPlan
+from src.planner.types import PlanNodeType
+from typing import List
+from src.catalog.models.df_column import DataFrameColumn
+from pathlib import Path
+
+
+class CreateUDFPlan(AbstractPlan):
+    """
+    This plan is used for storing information required to create udf operators
+    Arguments:
+        video_ref {TableRef} -- video ref for table to be created in storage
+        column_list {List[DataFrameColumn]} -- Columns to be added
+        if_not_exists {bool} -- Whether to override if there is existing table
+    Attributes:
+        name: str
+            udf_name provided by the user required
+        if_not_exists: bool
+            if true should throw an error if udf with same name exists else will replace the existing
+        inputs: List[DataFrameColumn]
+            udf inputs, annotated list similar to table columns
+        outputs: List[DataFrameColumn]
+            udf outputs, annotated list similar to table columns
+        impl_file_path: Path 
+            file path which holds the implementation of the udf. This file should be placed in the UDF directory and 
+            the path provided should be relative to the UDF dir.  
+        type: str
+            udf type. it ca be object detection, classification etc.
+    """
+
+    def __init__(self, name: str,
+                 if_not_exists: bool,
+                 inputs: List[DataFrameColumn],
+                 outputs: List[DataFrameColumn],
+                 impl_file_path: Path,
+                 type: str = None):
+        super().__init__(PlanNodeType.CREATE_UDF)
+        self._name = name
+        self._if_not_exists = if_not_exists
+        self._inputs = inputs
+        self._outputs = outputs
+        self._impl_path = impl_file_path
+        self._type = type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def outputs(self):
+        return self._outputs
+
+    @property
+    def impl_path(self):
+        return self._impl_path
+
+    @property
+    def type(self):
+        return self._type
+
