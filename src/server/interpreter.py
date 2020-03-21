@@ -20,19 +20,46 @@ from PIL import Image
 from cmd import Cmd
 
 from src.parser.parser import Parser
-
+from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from src.planner.insert_plan import InsertPlan
+from src.parser.table_ref import TableRef, TableInfo
+from src.catalog.models.df_column import DataFrameColumn
+from src.storage.dataframe import load_dataframe
+from src.catalog.column_type import ColumnType
+from src.planner.create_plan import CreatePlan
+from src.executor.create_executor import CreateExecutor
+from src.executor.insert_executor import InsertExecutor
 
 class EvaCommandInterpreter(Cmd):
 
     # Store results from server
     _server_result = None
+    url = None
+
+    def __init__(self):
+        super().__init__()
+
+        # Create table on connecting to server
+
+        dummy_info = TableInfo('MyVideo')
+        dummy_table = TableRef(dummy_info)
+
+        columns = [DataFrameColumn('Frame_ID', ColumnType.INTEGER),
+                DataFrameColumn('Frame_Path', ColumnType.TEXT, array_dimensions=50)]
+        plan_node = CreatePlan(dummy_table, columns, False)
+
+        createExec = CreateExecutor(plan_node)
+        self.url = createExec.exec()
 
     def set_protocol(self, protocol):
         self.protocol = protocol
 
     def do_greet(self, line):
         print("greeting")
-
+    
+    def emptyline(self):
+        print ("Enter a valid query.")
+    
     def onecmd(self, s):
 
         cmd_result = Cmd.onecmd(self, s)
@@ -62,10 +89,26 @@ class EvaCommandInterpreter(Cmd):
                 # Connect and Query from Eva
                 parser = Parser()
                 eva_statement = parser.parse(query)
-                select_stmt = eva_statement[0]
+                insert_statement = eva_statement[0]
                 print("Result from the parser:")
-                print(select_stmt)
+                print(insert_statement)
                 print('\n')
+
+                convertor = StatementToPlanConvertor()
+                convertor.visit(insert_statement)
+                
+                logical_plan_node = convertor.plan
+
+                phy_plan_node = InsertPlan(
+                    logical_plan_node.video_catalog_id,
+                    logical_plan_node.column_list,
+                    logical_plan_node.value_list)
+
+                insertExec = InsertExecutor(phy_plan_node)
+                insertExec.exec()
+
+                df = load_dataframe(self.url)
+                print (df.collect())
 
                 # Read Input Videos
                 # Replace with Input Pipeline once finished
@@ -94,10 +137,12 @@ class EvaCommandInterpreter(Cmd):
 
     def do_quit(self, args):
         """Quits the program."""
+        raise SystemExit
         return True
 
     def do_exit(self, args):
         """Quits the program."""
+        raise SystemExit
         return True
 
     def do_EOF(self, line):
