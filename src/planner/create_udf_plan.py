@@ -23,10 +23,7 @@ from pathlib import Path
 class CreateUDFPlan(AbstractPlan):
     """
     This plan is used for storing information required to create udf operators
-    Arguments:
-        video_ref {TableRef} -- video ref for table to be created in storage
-        column_list {List[DataFrameColumn]} -- Columns to be added
-        if_not_exists {bool} -- Whether to override if there is existing table
+    
     Attributes:
         name: str
             udf_name provided by the user required
