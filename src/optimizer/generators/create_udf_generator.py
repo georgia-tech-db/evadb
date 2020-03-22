@@ -13,33 +13,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.optimizer.generators.base import Generator
-from src.optimizer.operators import LogicalCreate, Operator
-from src.planner.create_plan import CreatePlan
+from src.optimizer.operators import LogicalCreateUDF, Operator
+from src.planner.create_udf_plan import CreateUDFPlan
 
 
-class CreateGenerator(Generator):
+class CreateUDFGenerator(Generator):
     def __init__(self):
-        self._video_ref = None
-        self._col_list = None
+        self._name = None
+        self._inputs = None
+        self._outputs = None
         self._if_not_exists = None
+        self._impl_path = None
+        self._type = None
 
-    def _visit_logical_create(self, operator: LogicalCreate):
-        self._video_ref = operator.video_ref
-        self._col_list = operator.column_list
+    def _visit_logical_create_udf(self, operator: LogicalCreate):
+        self._name = operator.name
+        self._inputs = operator.inputs
+        self._outputs = operator.outputs
         self._if_not_exists = operator.if_not_exists
-
+        self._impl_path = operator.impl_path
+        self._type = operator.type
+    
     def _visit(self, operator: Operator):
-        for child in operator.children:
-            self._visit(child)
-
-        if isinstance(operator, LogicalCreate):
-            self._visit_logical_create(operator)
+        if isinstance(operator, LogicalCreateUDF):
+            self._visit_logical_create_udf(operator)
 
     def build(self, operator: Operator):
         self.__init__()
         self._visit(operator)
-        create_plan = CreatePlan(
-            self._video_ref,
-            self._col_list,
-            self._if_not_exists)
-        return create_plan
+        create_udf_plan = CreateUDFPlan(
+            self._name,
+            self._if_not_exists,
+            self._inputs, self._outputs, self._impl_path, self._type)
+        return create_udf_plan
