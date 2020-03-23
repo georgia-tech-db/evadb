@@ -200,3 +200,50 @@ class CatalogManager(object):
 
         return self._dataset_service.dataset_object_by_name(
             database_name, dataset_name)
+
+    def delete_column_metadata(self, table_name: str,
+                           column_names: List[str]) -> DataFrameMetadata:
+        """
+        This method deletes the columns associated with the given
+        metadata
+
+        Arguments:
+           table_name-[str] table for which we will delete the columns
+           column_names - [List of columns that needs to deleted]
+
+        Retuns:
+           The updated DataFrameMetadata object for which the respective columns are deleted
+
+        """
+        metadata_id = self._dataset_service.dataset_by_name(table_name)
+
+        column_ids = self._column_service.columns_by_dataset_id_and_names(metadata_id, column_names)
+
+        columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, column_ids)
+
+        self._column_service.delete_column(columns_to_be_deleted)
+
+        metadata = self._dataset_service.dataset_by_id(metadata_id)
+       # df_columns = self._column_service.columns_by_id_and_dataset_id(
+            #metadata_id, None)
+        #metadata.schema = df_columns
+        return metadata
+
+    def delete_metadata(self, table_name: str) -> int:
+        """
+        This method deletes the table along with its columns from df_metadata
+        and df_columns respectively
+
+        Arguments:
+           table_name = table name of  to be deleted.
+
+        Returns:
+           Returns the metadata id that will be deleted
+        """
+        metadata_id = self._dataset_service.dataset_by_name(table_name)
+        columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, None)
+
+        self._column_service.delete_column(columns_to_be_deleted)
+        self._dataset_service.delete_dataset(metadata_id)
+
+        return metadata_id

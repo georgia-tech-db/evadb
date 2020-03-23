@@ -59,3 +59,7 @@ class DatasetColumnService(BaseService):
         for column in column_list:
             saved_column_list.append(column.save())
         return saved_column_list
+
+    def delete_column(cls, column_list):
+        for column in column_list:
+            column.delete()

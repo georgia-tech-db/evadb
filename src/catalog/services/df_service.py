@@ -87,3 +87,10 @@ class DatasetService(BaseService):
         """
         return self.model.query.filter(
             self.model._name == dataset_name).one()
+        
+    def delete_dataset(self, metadata_id):
+        result = self.model.query \
+            .filter(self.model._id == metadata_id) \
+            .one()
+
+        result.delete()
