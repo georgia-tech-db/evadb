@@ -74,9 +74,12 @@ class CustomModel:
 
     def delete(self):
         """Delete and commit"""
-
-        db_session.delete(self)
-        self._commit()
+        try:
+            db_session.delete(self)
+            self._commit()
+        except Exception:
+            LoggingManager().log("Object couldn't be deleted", LoggingLevel.ERROR)
+            raise Exception
 
     def _commit(self):
         """Try to commit. If an error is raised, the session is rollbacked."""
