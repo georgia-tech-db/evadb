@@ -343,7 +343,6 @@ class ParserVisitor(evaql_parserVisitor):
 
         return {"from": from_table, "where": where_clause}
 
-
     ##################################################################
     # COMMON CLAUSES Ids, Column_names, Table_names
     ##################################################################
@@ -357,18 +356,18 @@ class ParserVisitor(evaql_parserVisitor):
         else:
             warnings.warn("Invalid from table", SyntaxWarning)
 
-
     def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
         # Adding support for a.b
-        # Will restrict implementation to raise error for a.b.c  
+        # Will restrict implementation to raise error for a.b.c
         dottedIds = []
         if ctx.dottedId():
             if len(ctx.dottedId()) is not 1:
-                LoggingManager().log("Only tablename.colname syntax supported", LoggingLevel.ERROR)
+                LoggingManager().log("Only tablename.colname syntax supported",
+                                     LoggingLevel.ERROR)
                 return
             for id in ctx.dottedId():
                 dottedIds.append(self.visit(id))
-                
+
         uid = self.visit(ctx.uid())
 
         if len(dottedIds):
@@ -464,11 +463,10 @@ class ParserVisitor(evaql_parserVisitor):
 
         return expr_list
 
-
     ##################################################################
-    # Functions - UDFs, Aggregate Windowed functions 
+    # Functions - UDFs, Aggregate Windowed functions
     ##################################################################
-    def visitUdfFunctionCall(self, ctx:evaql_parser.UdfFunctionCallContext):
+    def visitUdfFunctionCall(self, ctx: evaql_parser.UdfFunctionCallContext):
         return self.visitChildren(ctx)
 
     def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
@@ -477,14 +475,15 @@ class ParserVisitor(evaql_parserVisitor):
         if ctx.simpleId():
             udf_name = self.visit(ctx.simpleId())
         else:
-            LoggingManager().log('UDF function name missing.', LoggingLevel.ERROR)
-        
+            LoggingManager().log('UDF function name missing.',
+                                 LoggingLevel.ERROR)
+
         udf_args = self.visit(ctx.functionArgs())
         func_expr = FunctionExpression(None, name=udf_name)
         for arg in udf_args:
             func_expr.append_child(arg)
-        return func_expr        
-            
+        return func_expr
+
     def visitFunctionArgs(self, ctx: evaql_parser.FunctionArgsContext):
         args = []
         for child in ctx.children:
@@ -501,7 +500,7 @@ class ParserVisitor(evaql_parserVisitor):
         output_definitions = []
         impl_path = None
         udf_type = None
-        
+
         for child in ctx.children:
             try:
                 rule_idx = child.getRuleIndex()
@@ -517,13 +516,14 @@ class ParserVisitor(evaql_parserVisitor):
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
                     if len(ctx.createDefinition().children) != 2:
-                        LoggingManager().log('UDF Input or Output Missing', LoggingLevel.ERROR) 
+                        LoggingManager().log('UDF Input or Output Missing',
+                                             LoggingLevel.ERROR)
                     input_definitions = self.visit(ctx.createDefinitions(0))
                     output_definitions = self.visit(ctx.createDefinitions(1))
 
                 elif rule_idx == evaql_parser.RULE_udfType:
                     udf_type = self.visit(ctx.udfType())
-                
+
                 elif rule_idx == evaql_parser.RULE_udfImpl:
                     impl_path = self.visit(ctx.udfImpl())
 
@@ -531,7 +531,11 @@ class ParserVisitor(evaql_parserVisitor):
                 LoggingManager().log('CREATE UDF Failed', LoggingLevel.ERROR)
                 # stop parsing something bad happened
                 return None
-        stmt = CreateUDFStatement(udf_name, if_not_exists, input_definitions, output_definitions, impl_path, udf_type)
+        stmt = CreateUDFStatement(
+            udf_name,
+            if_not_exists,
+            input_definitions,
+            output_definitions,
+            impl_path,
+            udf_type)
         return stmt
-
-    

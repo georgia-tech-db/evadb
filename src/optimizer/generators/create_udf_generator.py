@@ -26,7 +26,7 @@ class CreateUDFGenerator(Generator):
         self._impl_path = None
         self._type = None
 
-    def _visit_logical_create_udf(self, operator: LogicalCreate):
+    def _visit_logical_create_udf(self, operator: LogicalCreateUDF):
         self._name = operator.name
         self._inputs = operator.inputs
         self._outputs = operator.outputs

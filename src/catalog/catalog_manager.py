@@ -19,7 +19,7 @@ from src.catalog.column_type import ColumnType
 from src.catalog.models.base_model import init_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.catalog.models.df_udf import UdfMetadata
+from src.catalog.models.udf import UdfMetadata
 from src.catalog.models.udf_io import UdfIO
 from src.catalog.services.df_column_service import DatasetColumnService
 from src.catalog.services.df_service import DatasetService
@@ -179,8 +179,8 @@ class CatalogManager(object):
     def create_column_metadata(
             self, column_name: str, data_type: ColumnType,
             dimensions: List[int]):
-        """Create a dataframe column object this column. 
-        This function won't commit this object in the catalog database. 
+        """Create a dataframe column object this column.
+        This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
         corresponding table_id
 
@@ -207,11 +207,11 @@ class CatalogManager(object):
         return self._dataset_service.dataset_object_by_name(
             database_name, dataset_name)
 
-    def init_udf_io(
+    def udf_io(
             self, io_name: str, data_type: ColumnType,
             dimensions: List[int], is_input: bool):
-        """Constructs an in memory udf_io object with given info. 
-        This function won't commit this object in the catalog database. 
+        """Constructs an in memory udf_io object with given info.
+        This function won't commit this object in the catalog database.
         If you want to commit it into catalog call create_udf with
         corresponding udf_id and io list
 
@@ -221,18 +221,21 @@ class CatalogManager(object):
             dimensions(List[int]):dimensions of the io created
             is_input(bool): whether a input or output, if true it is an input
         """
-        return UdfIO(io_name, data_type, array_dimensions=dimensions, is_input=is_input)
+        return UdfIO(io_name, data_type,
+                     array_dimensions=dimensions, is_input=is_input)
 
     def create_udf(self, name: str, impl_file_path: str,
                    type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
-        """Creates an udf metadata object and udf_io objects and persists them in
-        database.
+        """Creates an udf metadata object and udf_io objects and persists them 
+        in database.
 
         Arguments:
             name(str): name of the udf to which this metdata corresponds
-            impl_file_path(str): implementation path of the udf, relative to src/udf 
-            type(str): what kind of udf operator like classification, detection etc
-            udf_io_list(List[UdfIO]): input/output info corresponding to this udf
+            impl_file_path(str): implementation path of the udf, 
+                                 relative to src/udf
+            type(str): what kind of udf operator like classification, 
+                                                        detection etc
+            udf_io_list(List[UdfIO]): input/output info of this udf
 
         Returns:
             The persisted UdfMetadata object with the id field populated.

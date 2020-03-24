@@ -31,7 +31,7 @@ class UdfIO(BaseModel):
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
     _array_dimensions = Column('array_dimensions', String(100))
-    _is_input = Column('is_input', Boolean, default= True)
+    _is_input = Column('is_input', Boolean, default=True)
     _udf_id = Column('udf_id', Integer,
                      ForeignKey('udf.id'))
     _udf = relationship("UdfMetadata", back_populates="_cols")
