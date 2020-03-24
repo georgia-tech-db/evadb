@@ -25,7 +25,8 @@ from src.parser.create_udf_statement import CreateUDFStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
-                                           bind_dataset)
+                                           bind_dataset,
+                                           column_definition_to_udf_io)
 from src.parser.table_ref import TableRef
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
@@ -138,12 +139,13 @@ class StatementToPlanConvertor:
 
     def visit_create_udf(self, statement: CreateUDFStatement):
         """Convertor for parsed create udf statement
-        
+
         Arguments:
             statement {CreateUDFStatement} -- Create UDF Statement
         """
-        annotated_inputs = create_column_metadata(statement.inputs)
-        annotated_outputs = create_column_metadata(statement.outputs)
+        annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
+        annotated_outputs = column_definition_to_udf_io(
+            statement.outputs, False)
 
         create_udf_opr = LogicalCreateUDF(statement.name,
                                           statement.if_not_exists,

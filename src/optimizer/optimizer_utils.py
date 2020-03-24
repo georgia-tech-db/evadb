@@ -112,7 +112,7 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 
 def create_column_metadata(col_list: List[ColumnDefinition]):
     """Create column metadata for the input parsed column list. This function
-    will not commit the provided column into catalog table. 
+    will not commit the provided column into catalog table.
     Will only return in memory list of ColumnDataframe objects
 
     Arguments:
@@ -132,4 +132,29 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
             CatalogManager().create_column_metadata(
                 col.name, col.type, col.dimension))
 
+    return result_list
+
+
+def column_definition_to_udf_io(
+        col_list: List[ColumnDefinition], is_input: bool):
+    """Create the UdfIO object fro each column definition provided
+
+    Arguments:
+        col_list(List[ColumnDefinition]): parsed input/output definitions
+        is_input(bool): true if input else false
+    """
+    if isinstance(col_list, ColumnDefinition):
+        col_list = [col_list]
+
+    result_list = []
+    for col in col_list:
+        if col is None:
+            LoggingManager().log(
+                "Empty column definition while creating udf io",
+                LoggingLevel.ERROR)
+            result_list.append(col)
+        result_list.append(
+            CatalogManager().udf_io(col.name, col.type,
+                                    col.dimension, is_input)
+        )
     return result_list

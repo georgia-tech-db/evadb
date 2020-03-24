@@ -50,5 +50,6 @@ class UdfMetadata(BaseModel):
         return self._type
 
     def __str__(self):
-        udf_str = 'udf: ({}, {}, {})\n'.format(self.name, self.impl_file_path, self.type)
+        udf_str = 'udf: ({}, {}, {})\n'.format(
+            self.name, self.impl_file_path, self.type)
         return udf_str

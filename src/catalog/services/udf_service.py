@@ -26,27 +26,27 @@ class UdfService(BaseService):
 
     def create_udf(self, name: str, impl_path: str, type: str) -> UdfMetadata:
         """Creates a new udf entry
-        
+
         Arguments:
             name (str): name of the udf
             impl_path (str): path to the udf implementation relative to src/udf
             type (str): udf operator kind, classification or detection or etc
-        
+
         Returns:
             UdfMetadata: Returns the new entry created
         """
         metadata = self.model(name, impl_path, type)
         metadata = metadata.save()
         return metadata
-    
+
     def udf_by_name(self, name: str):
         """return the udf entry that matches the name provided.
            None if no such entry found.
-        
+
         Arguments:
             name (str): name to be searched
         """
-        
+
         try:
             return self.model.query.filter(self.model._name == name).one()
         except NoResultFound:
@@ -55,11 +55,11 @@ class UdfService(BaseService):
     def udf_by_id(self, id: int):
         """return the udf entry that matches the id provided.
            None if no such entry found.
-        
+
         Arguments:
             id (int): id to be searched
         """
-        
+
         try:
             return self.model.query.filter(self.model._id == id).one()
         except NoResultFound:

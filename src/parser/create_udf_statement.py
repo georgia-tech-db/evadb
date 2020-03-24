@@ -29,14 +29,16 @@ class CreateUDFStatement(AbstractStatement):
         name: str
             udf_name provided by the user required
         if_not_exists: bool
-            if true should throw an error if udf with same name exists else will replace the existing
+            if true should throw an error if udf with same name exists 
+            else will replace the existing
         inputs: List[ColumnDefinition]
             udf inputs, represented similar to a table column definition
         outputs: List[ColumnDefinition]
             udf outputs, represented similar to a table column definition
-        impl_file_path: str 
-            file path which holds the implementation of the udf. This file should be placed in the UDF directory and 
-            the path provided should be relative to the UDF dir.  
+        impl_file_path: str
+            file path which holds the implementation of the udf. 
+            This file should be placed in the UDF directory and
+            the path provided should be relative to the UDF dir.
         type: str
             udf type. it ca be object detection, classification etc.
     """
@@ -57,8 +59,9 @@ class CreateUDFStatement(AbstractStatement):
         self._type = type
 
     def __str__(self) -> str:
-        print_str = "CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}".format(self._name,
-                                                   self._inputs, self._outputs, self._type, self._impl_path.name)
+        print_str = 'CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}'. \
+                    format(self._name, self._inputs, self._outputs, self._type,
+                           self._impl_path.name)
         return print_str
 
     @property
@@ -84,4 +87,3 @@ class CreateUDFStatement(AbstractStatement):
     @property
     def type(self):
         return self._type
-
