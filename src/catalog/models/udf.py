@@ -13,37 +13,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import Column, String
+from sqlalchemy.orm import relationship
 
 from src.catalog.models.base_model import BaseModel
 
 
 class UdfMetadata(BaseModel):
-    __tablename__ = 'df_udf'
+    __tablename__ = 'udf'
 
     _name = Column('name', String(100), unique=True)
-    _input = Column('input', String(100))
-    _output = Column('output', String(100))
     _impl_file_path = Column('impl_file_path', String(128))
     _type = Column('type', String(100))
-    
-    def __init__(self, name: str, input: str, output: str, impl_file_path: str, type: str):
+
+    _cols = relationship('UdfIO',
+                         back_populates="_udf")
+
+    def __init__(self, name: str, impl_file_path: str, type: str):
         self._name = name
-        self._input = input
-        self._output = output
         self._impl_file_path = impl_file_path
         self._type = type
 
     @property
-    def name(self):
-        return self._name
+    def id(self):
+        return self._id
 
     @property
-    def input(self):
-        return self._input
-    
-    @property
-    def output(self):
-        return self._output
+    def name(self):
+        return self._name
 
     @property
     def impl_file_path(self):
@@ -54,5 +50,5 @@ class UdfMetadata(BaseModel):
         return self._type
 
     def __str__(self):
-        udf_str = 'udf: ({}, {}, {}, {}, {})\n'.format(self.name, self.input, self.output, self.impl_file_path, self.type)
+        udf_str = 'udf: ({}, {}, {})\n'.format(self.name, self.impl_file_path, self.type)
         return udf_str
