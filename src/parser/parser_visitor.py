@@ -28,7 +28,7 @@ from src.expression.function_expression import FunctionExpression
 from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
 from src.parser.insert_statement import InsertTableStatement
-from src.parser.create_UDF_statement import CreateUDFStatement
+from src.parser.create_udf_statement import CreateUDFStatement
 
 from src.parser.table_ref import TableRef, TableInfo
 
@@ -466,9 +466,6 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
     # Functions - UDFs, Aggregate Windowed functions
     ##################################################################
-    def visitUdfFunctionCall(self, ctx: evaql_parser.UdfFunctionCallContext):
-        return self.visitChildren(ctx)
-
     def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
         udf_name = None
         udf_args = None
