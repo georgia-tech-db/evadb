@@ -22,7 +22,7 @@ class UdfIOService(BaseService):
     def __init__(self):
         super().__init__(UdfIO)
 
-    def inputs_by_udf_id(self, udf_id: int):
+    def get_inputs_by_udf_id(self, udf_id: int):
         result = self.model.query \
             .with_entities(self.model._id) \
             .filter(self.model._udf_id == udf_id,
@@ -30,7 +30,7 @@ class UdfIOService(BaseService):
         
         return result
 
-    def outputs_by_udf_id(self, udf_id: int):
+    def get_outputs_by_udf_id(self, udf_id: int):
         result = self.model.query \
             .with_entities(self.model._id) \
             .filter(self.model._udf_id == udf_id,
@@ -38,7 +38,7 @@ class UdfIOService(BaseService):
         
         return result
 
-    def create_udf_io(self, io_list: List[UdfIO]):
+    def add_udf_io(self, io_list: List[UdfIO]):
         """Commit an entry in the udf_io table
         
         Arguments:

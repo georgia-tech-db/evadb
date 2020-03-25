@@ -126,6 +126,24 @@ class CatalogManagerTests(unittest.TestCase):
                          ds_mock.return_value.dataset_object_by_name
                          .return_value)
 
+    @mock.patch('src.catalog.catalog_manager.UdfIO')
+    def test_create_udf_io_object(self, udfio_mock):
+        catalog = CatalogManager()
+        actual = catalog.udf_io('name', ColumnType.TEXT, [100], True)
+        udfio_mock.assert_called_with(
+            'name',
+            ColumnType.TEXT,
+            array_dimensions=[100],
+            is_input=True)
+        self.assertEqual(actual, udfio_mock.return_value)
+
+    @mock.patch('src.catalog.catalog_manager.UdfService')
+    @mock.patch('src.catalog.catalog_manager.UdfIOService')
+    def test_create_udf(self, udfio_mock, udf_mock):
+        catalog = CatalogManager()
+        actual = catalog.create_udf('udf', 'sample.py', 'classification', ['input','output'])
+        udfio_mock
+
 
 if __name__ == '__main__':
     unittest.main()
