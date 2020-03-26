@@ -23,10 +23,12 @@ from src.parser.types import ParserColumnDataType
 
 class ColumnDefinition:
     def __init__(self, col_name: str,
-                 col_type: ParserColumnDataType, col_dim: List[int]):
+                 col_type: ParserColumnDataType, col_dim: List[int],
+                 col_unique_column_constarint=False):
         self._name = col_name
         self._type = col_type
         self._dimension = col_dim
+        self._unique_column_constraint = col_unique_column_constarint
 
     @property
     def name(self):
