@@ -1,23 +1,18 @@
-.. EVA documentation master file, created by
-   sphinx-quickstart on Thu Mar 26 22:01:07 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+API Documentation
+==================
+.. raw:: html
 
-Welcome to EVA's documentation!
-===============================
+This is the API Documentation for EVA.
+
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents
+   :caption: Python API Documentation
 
    catalog
 
 
+.. toctree::
+   :caption: R Clipper Documentation
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   rclipper
