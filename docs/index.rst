@@ -10,6 +10,9 @@ This is the API Documentation for EVA.
    :caption: Python API Documentation
 
    catalog
+   parser
+   planner
+   storage
 
 
 .. toctree::
