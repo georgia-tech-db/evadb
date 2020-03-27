@@ -1,3 +1,4 @@
-.. autoclass:: src.catalog.catalog_manager.CatalogManager
-    :members:
-    :show-inheritance:
+Clipper Connection
+==================
+
+``ClipperConnection`` is the primary way of starting and managing a Clipper cluster.
