@@ -1,7 +1,5 @@
 API Documentation
 ==================
-.. raw:: html
-
 This is the API Documentation for EVA.
 
 
@@ -13,9 +11,3 @@ This is the API Documentation for EVA.
    parser
    planner
    storage
-
-
-.. toctree::
-   :caption: R Clipper Documentation
-
-   rclipper

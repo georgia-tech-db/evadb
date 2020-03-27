@@ -1,5 +1,6 @@
 Catalog
 ==================
-.. autoclass:: src.catalog.catalog_manager.CatalogManager
+.. automodule:: src.catalog.catalog_manager
     :members:
+    :undoc-members:
 
