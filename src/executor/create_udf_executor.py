@@ -40,4 +40,4 @@ class CreateUDFExecutor(AbstractExecutor):
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         udf_metadata = CatalogManager().create_udf(
-            self.node.name, self.node.impl_path, self.node.type, io_list)
+            self.node.name, self.node.impl_path, self.node.udf_type, io_list)
