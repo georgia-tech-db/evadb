@@ -500,10 +500,12 @@ class ParserVisitor(evaql_parserVisitor):
 
         for child in ctx.children:
             try:
+                if isinstance(child, TerminalNode):
+                    continue
                 rule_idx = child.getRuleIndex()
 
                 if rule_idx == evaql_parser.RULE_udfName:
-                    table_ref = self.visit(ctx.udfName())
+                    udf_name = self.visit(ctx.udfName())
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
                     if_not_exists = True
@@ -512,7 +514,7 @@ class ParserVisitor(evaql_parserVisitor):
                     # There should be 2 createDefinition
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
-                    if len(ctx.createDefinition().children) != 2:
+                    if len(ctx.createDefinitions()) != 2:
                         LoggingManager().log('UDF Input or Output Missing',
                                              LoggingLevel.ERROR)
                     input_definitions = self.visit(ctx.createDefinitions(0))
@@ -522,7 +524,7 @@ class ParserVisitor(evaql_parserVisitor):
                     udf_type = self.visit(ctx.udfType())
 
                 elif rule_idx == evaql_parser.RULE_udfImpl:
-                    impl_path = self.visit(ctx.udfImpl())
+                    impl_path = self.visit(ctx.udfImpl()).value
 
             except BaseException:
                 LoggingManager().log('CREATE UDF Failed', LoggingLevel.ERROR)

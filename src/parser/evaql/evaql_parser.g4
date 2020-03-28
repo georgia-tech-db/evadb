@@ -25,8 +25,8 @@ emptyStatement
     ;
 
 ddlStatement
-    : createDatabase | createTable | createIndex
-    | dropDatabase | dropTable | dropIndex
+    : createDatabase | createTable | createIndex | createUdf
+    | dropDatabase | dropTable | dropIndex 
     ;
 
 dmlStatement
@@ -43,7 +43,7 @@ utilityStatement
 //    Create statements
 
 createDatabase
-    : CREATE DATABASE
+    : CREATE DATABASE 
       ifNotExists? uid 
     ;
 
@@ -59,7 +59,29 @@ createTable
       tableName createDefinitions                                  #columnCreateTable
     ;
 
+// Create UDFs
+createUdf
+    : CREATE UDF 
+      ifNotExists?
+      udfName   
+      INPUT  createDefinitions      
+      OUTPUT createDefinitions
+      TYPE   udfType
+      IMPL   udfImpl                
+    ;
+
 // details
+udfName
+    : uid
+    ;
+
+udfType
+    : uid
+    ;
+
+udfImpl
+    : stringLiteral
+    ;
 
 indexType
     : USING (BTREE | HASH)
@@ -481,25 +503,3 @@ mathOperator
     : '*' | '/' | '%' | DIV | MOD | '+' | '-' | '--'
     ;
 
-// Create UDFs
-createUdf
-    : CREATE UDF 
-      ifNotExists?
-      udfName   
-      INPUT  createDefinitions      
-      OUTPUT createDefinitions
-      TYPE   udfType
-      IMPL   udfImpl                
-    ;
-
-udfName
-    : uid
-    ;
-
-udfType
-    : uid
-    ;
-
-udfImpl
-    : stringLiteral
-    ;
