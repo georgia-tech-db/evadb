@@ -24,7 +24,7 @@ class CreateUDFGenerator(Generator):
         self._outputs = None
         self._if_not_exists = None
         self._impl_path = None
-        self._type = None
+        self._udf_type = None
 
     def _visit_logical_create_udf(self, operator: LogicalCreateUDF):
         self._name = operator.name
@@ -32,7 +32,7 @@ class CreateUDFGenerator(Generator):
         self._outputs = operator.outputs
         self._if_not_exists = operator.if_not_exists
         self._impl_path = operator.impl_path
-        self._type = operator.type
+        self._udf_type = operator.udf_type
     
     def _visit(self, operator: Operator):
         if isinstance(operator, LogicalCreateUDF):
@@ -44,5 +44,5 @@ class CreateUDFGenerator(Generator):
         create_udf_plan = CreateUDFPlan(
             self._name,
             self._if_not_exists,
-            self._inputs, self._outputs, self._impl_path, self._type)
+            self._inputs, self._outputs, self._impl_path, self._udf_type)
         return create_udf_plan

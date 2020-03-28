@@ -20,7 +20,7 @@ from src.parser.table_ref import TableRef
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.udf_io import UdfIO
-
+from pathlib import Path
 
 @unique
 class OperatorType(IntEnum):
@@ -185,11 +185,11 @@ class LogicalCreateUDF(Operator):
             udf inputs, annotated list similar to table columns
         outputs: List[UdfIO]
             udf outputs, annotated list similar to table columns
-        impl_file_path: Path
+        impl_path: Path
             file path which holds the implementation of the udf. 
             This file should be placed in the UDF directory and 
             the path provided should be relative to the UDF dir.
-        type: str
+        udf_type: str
             udf type. it ca be object detection, classification etc.
     """
 
@@ -198,7 +198,7 @@ class LogicalCreateUDF(Operator):
                  inputs: List[UdfIO],
                  outputs: List[UdfIO],
                  impl_path: Path,
-                 type: str = None,
+                 udf_type: str = None,
                  children=None):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
         self._name = name
@@ -206,7 +206,7 @@ class LogicalCreateUDF(Operator):
         self._inputs = inputs
         self._outputs = outputs
         self._impl_path = impl_path
-        self._type = type
+        self._udf_type = udf_type
 
     @property
     def name(self):
@@ -229,5 +229,5 @@ class LogicalCreateUDF(Operator):
         return self._impl_path
 
     @property
-    def type(self):
-        return self._type
+    def udf_type(self):
+        return self._udf_type
