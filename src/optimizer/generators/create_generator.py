@@ -24,7 +24,7 @@ class CreateGenerator(Generator):
         self._if_not_exists = None
 
     def _visit_logical_create(self, operator: LogicalCreate):
-        self._video_ref = operator.video_ref
+        self._video_ref = operator.video
         self._col_list = operator.column_list
         self._if_not_exists = operator.if_not_exists
 
