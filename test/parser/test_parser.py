@@ -21,26 +21,19 @@ from src.parser.statement import AbstractStatement
 from src.parser.statement import StatementType
 
 from src.parser.select_statement import SelectStatement
+from src.parser.types import ParserColumnDataType
+from src.parser.create_statement import ColumnDefinition
 
 from src.expression.abstract_expression import ExpressionType
 from src.parser.table_ref import TableRef, TableInfo
 
+from pathlib import Path
 from src.utils.logging_manager import LoggingManager
 
 
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def test_avisit_udf_function_call(self):
-        parser = Parser()
-        select_query = "SELECT FastRCNN(TAIPAI.data, data2) FROM TAIPAI \
-            WHERE FastRCNN(data).label = 'car';"
-        select_query = "SELECT TAIPAI.data FROM TAIPAI \
-            WHERE TAIPAI.label = 'car';"
-
-        eva_statement_list = parser.parse(select_query)
-
 
     def test_create_statement(self):
         parser = Parser()
@@ -208,11 +201,41 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(len(insert_stmt.value_list), 2)
         self.assertEqual(insert_stmt.value_list[0].value, 1)
 
-    def test_udf_function(self):
+    def test_create_udf_statement(self):
         parser = Parser()
-        select_query = "SELECT FastRCNN(data) FROM TAIPAI \
-            WHERE FastRCNN(data).label = 'car';"
-        eva_statement_list = parser.parse(select_query)
+        create_udf_query = """CREATE UDF FastRCNN
+                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  OUTPUT (Labels NDARRAY (10), Bbox NDARRAY (10, 4))
+                  TYPE  Classification
+                  IMPL  'data/fastrcnn.py';
+        """
+
+        eva_statement_list = parser.parse(create_udf_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.CREATE_UDF)
+
+        create_udf_stmt = eva_statement_list[0]
+
+        self.assertEqual(create_udf_stmt.name, 'FastRCNN')
+        self.assertEqual(create_udf_stmt.if_not_exists, False)
+        self.assertEqual(
+            create_udf_stmt.inputs[0],
+            ColumnDefinition('Frame_Array',
+                             ParserColumnDataType.NDARRAY, [3, 256, 256]))
+        self.assertEqual(
+            create_udf_stmt.outputs[0],
+            ColumnDefinition('Labels',
+                             ParserColumnDataType.NDARRAY, [10]))
+        self.assertEqual(
+            create_udf_stmt.outputs[1],
+            ColumnDefinition('Bbox',
+                             ParserColumnDataType.NDARRAY, [10, 4]))
+        self.assertEqual(create_udf_stmt.impl_path, Path('data/fastrcnn.py'))
+        self.assertEqual(create_udf_stmt.udf_type, 'Classification')
+
 
 if __name__ == '__main__':
     unittest.main()

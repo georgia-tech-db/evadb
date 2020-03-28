@@ -21,6 +21,8 @@ from unittest.mock import MagicMock, call
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
+from src.expression.function_expression import FunctionExpression
+from antlr4 import TerminalNode
 
 
 class ParserVisitorTests(unittest.TestCase):
@@ -204,13 +206,90 @@ class ParserVisitorTests(unittest.TestCase):
     ##################################################################
     # UDFs
     ##################################################################
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch('src.parser.parser_visitor.FunctionExpression')
+    def test_visit_udf_function_call(self, func_mock, visit_mock):
 
-    def test_visit_udf_function_call(self):
-        parser = Parser()
-        select_query = "SELECT FastRCNN(data) From TAIPAI \
-            WHERE FastRCNN(data).label = 'car';"
-        eva_statement_list = parser.parse(select_query)
+        ctx = MagicMock()
+        udf_name = 'name'
+        func_args = [MagicMock(), MagicMock()]
+        values = {ctx.simpleId.return_value: udf_name,
+                  ctx.functionArgs.return_value: func_args}
+
+        def side_effect(arg):
+            return values[arg]
+        visit_mock.side_effect = side_effect
+
+        visitor = ParserVisitor()
+        actual = visitor.visitUdfFunction(ctx)
+        visit_mock.assert_has_calls(
+            [call(ctx.simpleId()), call(ctx.functionArgs())])
+
+        func_mock.assert_called_with(None, name='name')
+
+        for arg in func_args:
+            func_mock.return_value.append_child.assert_any_call(arg)
+        self.assertEqual(actual, func_mock.return_value)
+
+    @mock.patch.object(ParserVisitor, 'visit')
+    def test_visit_function_args(self, visit_mock):
+        ctx = MagicMock()
+        obj = MagicMock(spec=TerminalNode())
+        ctx.children = ['arg1', obj, 'arg2']
+        visit_mock.side_effect = [1, 2]
+
+        visitor = ParserVisitor()
+        actual = visitor.visitFunctionArgs(ctx)
+
+        visit_mock.assert_has_calls([call('arg1'), call('arg2')])
+        self.assertEqual(actual, [1, 2])
+
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch('src.parser.parser_visitor.CreateUDFStatement')
+    def test_visit_create_udf(self, create_udf_mock, visit_mock):
+        ctx = MagicMock()
+        ctx.children = children = [MagicMock() for i in range(5)]
+        ctx.children[0].getRuleIndex.return_value = evaql_parser.RULE_udfName
+        ctx.children[1].getRuleIndex.return_value = evaql_parser. \
+            RULE_ifNotExists
+        ctx.children[2].getRuleIndex.return_value = evaql_parser. \
+            RULE_createDefinitions
+        ctx.children[3].getRuleIndex.return_value = evaql_parser.RULE_udfType
+        ctx.children[4].getRuleIndex.return_value = evaql_parser.RULE_udfImpl
         
+        ctx.createDefinitions.return_value.__len__.return_value = 2
+        
+        udf_name = 'name'
+        udf_type = 'classification'
+        udf_impl = MagicMock()
+        udf_impl.value = 'udf_impl'
+        values = {
+            ctx.udfName.return_value: udf_name,
+            ctx.udfType.return_value: udf_type,
+            ctx.udfImpl.return_value: udf_impl,
+            ctx.createDefinitions.return_value: 'col'}
+
+        def side_effect(arg):
+            return values[arg]
+        
+        visit_mock.side_effect = side_effect
+        
+        visitor = ParserVisitor()
+        actual = visitor.visitCreateUdf(ctx)
+
+        visit_mock.assert_has_calls(
+            [call(ctx.udfName()),
+             call(ctx.createDefinitions(0)),
+             call(ctx.createDefinitions(1)),
+             call(ctx.udfType()),
+             call(ctx.udfImpl())])
+
+        create_udf_mock.assert_called_once()
+        create_udf_mock.assert_called_with(
+            udf_name, True, 'col', 'col', 'udf_impl', udf_type)
+
+        self.assertEqual(actual, create_udf_mock.return_value)
+
 
 if __name__ == '__main__':
     unittest.main()
