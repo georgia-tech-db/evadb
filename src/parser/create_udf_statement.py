@@ -29,17 +29,17 @@ class CreateUDFStatement(AbstractStatement):
         name: str
             udf_name provided by the user required
         if_not_exists: bool
-            if true should throw an error if udf with same name exists 
+            if true should throw an error if udf with same name exists
             else will replace the existing
         inputs: List[ColumnDefinition]
             udf inputs, represented similar to a table column definition
         outputs: List[ColumnDefinition]
             udf outputs, represented similar to a table column definition
         impl_file_path: str
-            file path which holds the implementation of the udf. 
+            file path which holds the implementation of the udf.
             This file should be placed in the UDF directory and
             the path provided should be relative to the UDF dir.
-        type: str
+        udf_type: str
             udf type. it ca be object detection, classification etc.
     """
 
@@ -48,20 +48,20 @@ class CreateUDFStatement(AbstractStatement):
                  if_not_exists: bool,
                  inputs: List[ColumnDefinition],
                  outputs: List[ColumnDefinition],
-                 impl_file_path: str,
-                 type: str = None):
+                 impl_path: str,
+                 udf_type: str = None):
         super().__init__(StatementType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
-        self._impl_file_path = Path(impl_file_path)
-        self._type = type
+        self._impl_path = Path(impl_path)
+        self._udf_type = udf_type
 
     def __str__(self) -> str:
         print_str = 'CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}'. \
-                    format(self._name, self._inputs, self._outputs, self._type,
-                           self._impl_path.name)
+                    format(self._name, self._inputs, self._outputs,
+                           self._udf_type, self._impl_path.name)
         return print_str
 
     @property
@@ -85,5 +85,5 @@ class CreateUDFStatement(AbstractStatement):
         return self._impl_path
 
     @property
-    def type(self):
-        return self._type
+    def udf_type(self):
+        return self._udf_type

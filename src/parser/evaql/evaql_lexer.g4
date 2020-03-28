@@ -116,6 +116,14 @@ HELP:                                'HELP';
 TEMPTABLE:                           'TEMPTABLE';
 VALUE:                               'VALUE';
 
+// UDF
+UDF:						                'UDF';
+INPUT:                          'INPUT';
+OUTPUT:                         'OUTPUT';
+TYPE:                           'TYPE';
+IMPL:                           'IMPL';
+
+
 // Common function names
 
 ABS:                                 'ABS';
@@ -222,13 +230,6 @@ GLOBAL_ID:                           '@' '@'
                                   [A-Z0-9._$]+ 
                                   | BQUOTA_STRING
                                 );
-
-// UDF
-UDF:						                'UDF';
-INPUT:                          'INPUT';
-OUTPUT:                         'OUTPUT';
-TYPE:                           'TYPE';
-IMPL:                           'IMPL';
 
 // Fragments for Literal primitives
 
