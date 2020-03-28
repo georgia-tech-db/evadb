@@ -22,6 +22,7 @@ from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.udf_io import UdfIO
 from pathlib import Path
 
+
 @unique
 class OperatorType(IntEnum):
     """

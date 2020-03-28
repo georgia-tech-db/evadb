@@ -150,7 +150,8 @@ class StatementToPlanConvertor:
         create_udf_opr = LogicalCreateUDF(statement.name,
                                           statement.if_not_exists,
                                           annotated_inputs, annotated_outputs,
-                                          statement.impl_path, statement.type)
+                                          statement.impl_path,
+                                          statement.udf_type)
         self._plan = create_udf_opr
 
     def visit(self, statement: AbstractStatement):
