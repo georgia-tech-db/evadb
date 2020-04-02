@@ -18,9 +18,10 @@ from src.executor.create_udf_executor import CreateUDFExecutor
 
 
 class CreateUdfExecutorTest(unittest.TestCase):
-
-    @patch('src.catalog.catalog_manager.CatalogManager')
+    @patch('src.executor.create_udf_executor.CatalogManager')
     def test_should_create_udf(self, mock):
+        catalog_instance = mock.return_value
+        catalog_instance.create_udf.return_value = 'udf'
         plan = type("CreateUDFPlan",
                     (),
                     {'name': 'udf',
@@ -29,5 +30,8 @@ class CreateUdfExecutorTest(unittest.TestCase):
                      'outputs': ['out'],
                      'impl_path': 'test.py',
                      'udf_type': 'classification'})
+
         create_udf_executor = CreateUDFExecutor(plan)
-        mock.return_value.create_udf.assert_called_with('udf', 'test.py', 'classification', ['inp', 'out'])
+        create_udf_executor.exec()
+        catalog_instance.create_udf.assert_called_with(
+            'udf', 'test.py', 'classification', ['inp', 'out'])
