@@ -38,7 +38,7 @@ class CreateUDFPlan(AbstractPlan):
             file path which holds the implementation of the udf. 
             This file should be placed in the UDF directory and 
             the path provided should be relative to the UDF dir.  
-        type: str
+        udf_type: str
             udf type. it ca be object detection, classification etc.
     """
 
@@ -47,14 +47,14 @@ class CreateUDFPlan(AbstractPlan):
                  inputs: List[UdfIO],
                  outputs: List[UdfIO],
                  impl_file_path: Path,
-                 type: str = None):
+                 udf_type: str = None):
         super().__init__(PlanNodeType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
         self._inputs = inputs
         self._outputs = outputs
         self._impl_path = impl_file_path
-        self._type = type
+        self._udf_type = udf_type
 
     @property
     def name(self):
@@ -77,6 +77,6 @@ class CreateUDFPlan(AbstractPlan):
         return self._impl_path
 
     @property
-    def type(self):
-        return self._type
+    def udf_type(self):
+        return self._udf_type
 
