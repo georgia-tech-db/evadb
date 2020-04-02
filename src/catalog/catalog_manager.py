@@ -244,5 +244,5 @@ class CatalogManager(object):
         metadata = self._udf_service.create_udf(name, impl_file_path, type)
         for udf_io in udf_io_list:
             udf_io.udf_id = metadata.id
-        self._udf_io_service.create_udf_io(udf_io_list)
+        self._udf_io_service.add_udf_io(udf_io_list)
         return metadata

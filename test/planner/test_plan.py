@@ -70,7 +70,7 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.inputs, [udfIO, udfIO])
         self.assertEqual(node.outputs, [udfIO])
         self.assertEqual(node.impl_path, impl_path)
-        self.assertEqual(node.type, ty)
+        self.assertEqual(node.udf_type, ty)
 
 
 if __name__ == '__main__':

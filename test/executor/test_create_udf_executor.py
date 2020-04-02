@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from mock import patch
+from mock import patch, MagicMock
 from src.executor.create_udf_executor import CreateUDFExecutor
 
 
@@ -22,13 +22,16 @@ class CreateUdfExecutorTest(unittest.TestCase):
     def test_should_create_udf(self, mock):
         catalog_instance = mock.return_value
         catalog_instance.create_udf.return_value = 'udf'
+        impl_path = MagicMock()
+        abs_path = impl_path.absolute.return_value = MagicMock()
+        abs_path.as_posix.return_value = 'test.py'
         plan = type("CreateUDFPlan",
                     (),
                     {'name': 'udf',
                      'if_not_exists': False,
                      'inputs': ['inp'],
                      'outputs': ['out'],
-                     'impl_path': 'test.py',
+                     'impl_path': impl_path,
                      'udf_type': 'classification'})
 
         create_udf_executor = CreateUDFExecutor(plan)

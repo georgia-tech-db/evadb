@@ -15,6 +15,7 @@
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
+from src.catalog.column_type import ColumnType
 from typing import List
 
 from src.expression.abstract_expression import AbstractExpression
@@ -22,6 +23,7 @@ from src.expression.tuple_value_expression import ExpressionType, \
     TupleValueExpression
 
 from src.parser.create_statement import ColumnDefinition
+from src.parser.types import ParserColumnDataType
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -153,8 +155,31 @@ def column_definition_to_udf_io(
                 "Empty column definition while creating udf io",
                 LoggingLevel.ERROR)
             result_list.append(col)
+        col_type = xform_parser_column_type_to_catalog_type(col.type)
         result_list.append(
-            CatalogManager().udf_io(col.name, col.type,
+            CatalogManager().udf_io(col.name, col_type,
                                     col.dimension, is_input)
         )
     return result_list
+
+
+def xform_parser_column_type_to_catalog_type(
+        col_type: ParserColumnDataType) -> ColumnType:
+    """translate parser defined column type to the catalog type
+
+    Arguments:
+        col_type {ParserColumnDataType} -- input parser column type
+
+    Returns:
+        ColumnType -- catalog column type
+    """
+    if col_type == ParserColumnDataType.BOOLEAN:
+        return ColumnType.BOOLEAN
+    elif col_type == ParserColumnDataType.FLOAT:
+        return ColumnType.FLOAT
+    elif col_type == ParserColumnDataType.INTEGER:
+        return ColumnType.INTEGER
+    elif col_type == ParserColumnDataType.TEXT:
+        return ColumnType.TEXT
+    elif col_type == ParserColumnDataType.NDARRAY:
+        return ColumnType.NDARRAY
