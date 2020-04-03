@@ -417,7 +417,7 @@ class ParserVisitor(evaql_parserVisitor):
         right = self.visit(ctx.getChild(2))
         return LogicalExpression(op, left, right)
 
-    def visitBinaryComparasionPredicate(
+    def visitBinaryComparisonPredicate(
             self, ctx: evaql_parser.BinaryComparisonPredicateContext):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)

@@ -108,7 +108,7 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
     for i in range(child_count):
         bind_predicate_expr(predicate.get_child(i), column_mapping)
 
-    if predicate.etype == ExpressionType.TUPLE_VALE:
+    if predicate.etype == ExpressionType.TUPLE_VALUE:
         bind_tuple_value_expr(predicate, column_mapping)
 
 
@@ -130,9 +130,10 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
                 "Empty column while creating column metadata",
                 LoggingLevel.ERROR)
             result_list.append(col)
+        col_type = xform_parser_column_type_to_catalog_type(col.type)
         result_list.append(
             CatalogManager().create_column_metadata(
-                col.name, col.type, col.dimension))
+                col.name, col_type, col.dimension))
 
     return result_list
 
