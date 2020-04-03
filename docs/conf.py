@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.abspath('..'))
 sys.path.insert(0, os.path.abspath('../src/'))
 print(sys.path)
 import sphinx_rtd_theme
+import mock
 
 # -- Project information -----------------------------------------------------
 
@@ -52,18 +53,12 @@ pygments_style = 'sphinx'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-from mock import Mock as MagicMock
+# MOCK_MODULES = ['numpy', 'sqlalchemy', 'petastorm', 'sqlalchemy.orm']
+# for mod_name in MOCK_MODULES:
+#     sys.modules[mod_name] = mock.Mock()
 
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return MagicMock()
-
-
-MOCK_MODULES = ['numpy']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
+autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
+                        "petastorm", "yaml", "pyspark"]
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
