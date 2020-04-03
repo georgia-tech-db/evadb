@@ -144,7 +144,7 @@ class CatalogManagerTests(unittest.TestCase):
         udf_io_list = [MagicMock()]
         actual = catalog.create_udf(
             'udf', 'sample.py', 'classification', udf_io_list)
-        udfio_mock.return_value.create_udf_io.assert_called_with(udf_io_list)
+        udfio_mock.return_value.add_udf_io.assert_called_with(udf_io_list)
         udf_mock.return_value.create_udf.assert_called_with(
             'udf', 'sample.py', 'classification')
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
