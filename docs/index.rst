@@ -10,7 +10,7 @@ Welcome to EVA's documentation!
    :maxdepth: 2
    :caption: Modules:
 
-   clipper_connection
+   catalog
    container_managers
    model_deployers
    exceptions
