@@ -11,6 +11,9 @@ Welcome to EVA's documentation!
    :caption: Modules:
 
    catalog
-   container_managers
-   model_deployers
-   exceptions
+   executor
+   parser
+   planner
+   server
+   storage
+   udfs
