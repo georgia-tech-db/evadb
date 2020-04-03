@@ -10,10 +10,5 @@ Welcome to EVA's documentation!
    :maxdepth: 2
    :caption: Modules:
 
-   catalog
+   catalog/catalog
    executor
-   parser
-   planner
-   server
-   storage
-   udfs
