@@ -19,8 +19,8 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = 'EVA'
-copyright = '2020, Joy Arulraj'
-author = 'Joy Arulraj'
+copyright = '2018-2020 EVA'
+author = 'Database Lab'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
