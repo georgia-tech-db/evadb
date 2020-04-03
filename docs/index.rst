@@ -8,13 +8,9 @@ Welcome to EVA's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Modules:
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   clipper_connection
+   container_managers
+   model_deployers
+   exceptions
