@@ -149,9 +149,6 @@ class CatalogManagerTests(unittest.TestCase):
         column_del_mock = dcs_mock.return_value.delete_column
         column_del_mock.assert_called_with(column_objects_mock.return_value)
 
-        expected = ds_mock.return_value.dataset_by_id
-
-        self.assertEqual(actual, expected.return_value)
 
     @mock.patch('src.catalog.catalog_manager.init_db')
     @mock.patch('src.catalog.catalog_manager.DatasetService')
@@ -165,17 +162,11 @@ class CatalogManagerTests(unittest.TestCase):
         ds_id_mock = ds_mock.return_value.dataset_by_name
         ds_id_mock.assert_called_with(dataset_name)
 
-        column_objects_mock = dcs_mock.return_value.columns_by_id_and_dataset_id
-        column_objects_mock.assert_called_with(ds_id_mock.return_value,
-                                               None)
 
-        column_del_mock = dcs_mock.return_value.delete_column
-        column_del_mock.assert_called_with(column_objects_mock.return_value)
+        id_mock = ds_mock.return_value.delete_dataset
+        id_mock.assert_called_with(ds_id_mock.return_value)
 
-        metadata_mock = ds_mock.return_value.delete_dataset
-        metadata_mock.assert_called_with(ds_id_mock.return_value)
-
-        self.assertEqual(actual, ds_id_mock.return_value)
+       
 
 if __name__ == '__main__':
     unittest.main()

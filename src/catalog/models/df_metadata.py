@@ -26,7 +26,8 @@ class DataFrameMetadata(BaseModel):
     _file_url = Column('file_url', String(100))
 
     _columns = relationship('DataFrameColumn',
-                            back_populates="_dataset")
+                            back_populates="_dataset",
+                            cascade = 'all, delete, delete-orphan')
 
     def __init__(self, name: str, file_url: str):
         self._name = name
