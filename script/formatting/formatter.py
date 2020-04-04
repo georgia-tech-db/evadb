@@ -40,6 +40,9 @@ EVA_SRC_DIR = os.path.join(EVA_DIR, "src")
 EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 
+FORMATTING_DIR = os.path.join(EVA_SCRIPT_DIR, "formatting")
+PYLINTRC = os.path.join(FORMATTING_DIR, "pylintrc")
+
 # DEFAULT DIRS
 DEFAULT_DIRS = []
 DEFAULT_DIRS.append(EVA_SRC_DIR)
@@ -54,6 +57,7 @@ IGNORE_FILES = [
 
 AUTOPEP_BINARY = "autopep8"
 AUTOFLAKE_BINARY = "autoflake"
+PYLINT_BINARY = "pylint"
 
 # ==============================================
 # HEADER CONFIGURATION
@@ -142,6 +146,12 @@ def format_file(file_path, add_header, strip_header, format_code):
                 " --remove-unused-variables " + file_path
             #LOG.info(autoflake_command)
             os.system(autoflake_command)
+            
+            #PYLINT
+            pylint_command = PYLINT_BINARY + \
+                " --rcfile=" + PYLINTRC + " " + file_path
+            #LOG.info(pylint_command)
+            #os.system(pylint_command)
 
     # END WITH
 
