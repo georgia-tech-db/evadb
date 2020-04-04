@@ -202,7 +202,7 @@ class CatalogManager(object):
             database_name, dataset_name)
 
     def delete_column_metadata(self, table_name: str,
-                           column_names: List[str]) -> DataFrameMetadata:
+                           column_names: List[str]):
         """
         This method deletes the columns associated with the given
         metadata
@@ -210,9 +210,6 @@ class CatalogManager(object):
         Arguments:
            table_name-[str] table for which we will delete the columns
            column_names - [List of columns that needs to deleted]
-
-        Retuns:
-           The updated DataFrameMetadata object for which the respective columns are deleted
 
         """
         metadata_id = self._dataset_service.dataset_by_name(table_name)
@@ -223,11 +220,6 @@ class CatalogManager(object):
 
         self._column_service.delete_column(columns_to_be_deleted)
 
-        metadata = self._dataset_service.dataset_by_id(metadata_id)
-       # df_columns = self._column_service.columns_by_id_and_dataset_id(
-            #metadata_id, None)
-        #metadata.schema = df_columns
-        return metadata
 
     def delete_metadata(self, table_name: str) -> int:
         """
@@ -241,9 +233,9 @@ class CatalogManager(object):
            Returns the metadata id that will be deleted
         """
         metadata_id = self._dataset_service.dataset_by_name(table_name)
-        columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, None)
+        #columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, None)
 
-        self._column_service.delete_column(columns_to_be_deleted)
+        #self._column_service.delete_column(columns_to_be_deleted)
         self._dataset_service.delete_dataset(metadata_id)
 
         return metadata_id
