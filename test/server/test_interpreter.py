@@ -12,33 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import unittest
 
-from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
+from src.server.interpreter import EvaCommandInterpreter
 
 
-class LoggingManagerTests(unittest.TestCase):
-
+class InterpreterTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_logging_manager_singleton_pattern(self):
-        x = LoggingManager()
-        y = LoggingManager()
-        self.assertEqual(x, y)
+    def test_run_event_loop(self):
 
-    def test_log_levels(self):
+        # Start command interpreter
+        prompt = EvaCommandInterpreter()
+        prompt.prompt = '> '
 
-        LoggingManager().setEffectiveLevel(LoggingLevel.DEBUG)
-
-        LoggingManager().log("debug", LoggingLevel.DEBUG)
-        LoggingManager().log("info", LoggingLevel.INFO)
-        LoggingManager().log("warn", LoggingLevel.WARNING)
-        LoggingManager().log("error", LoggingLevel.ERROR)
-        LoggingManager().log("critical", LoggingLevel.CRITICAL)
+        prompt.do_greet("test")
 
 
 if __name__ == '__main__':
-
     unittest.main()
