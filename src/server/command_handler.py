@@ -12,23 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
 
-from src.optimizer.operators import Operator
-from src.planner.abstract_plan import AbstractPlan
+import asyncio
+
+from src.utils.logging_manager import LoggingManager
 
 
-class Generator(ABC):
+@asyncio.coroutine
+def handle_request(transport, request_message):
+    """
+        Reads a request from a client and processes it
 
-    @abstractmethod
-    def build(self, operator: Operator) -> AbstractPlan:
-        """
-        Generates the physical plan from the Logical plan (Operator tree)
+        If user inputs 'quit' stops the event loop
+        otherwise just echoes user input
+    """
 
-        Arguments:
-            operator (Operator): the logical operator tree.
+    response_message = "foo"
 
-        Returns:
-            `AbstractPlan`: the plan constructed by traversing the Operator
-            tree.
-        """
+    LoggingManager().log('Response to client: --|' +
+                         str(response_message) +
+                         '|--')
+
+    data = response_message.encode('ascii')
+    transport.write(data)
+
+    return response_message
