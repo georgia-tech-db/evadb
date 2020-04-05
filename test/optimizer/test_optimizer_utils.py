@@ -22,8 +22,6 @@ from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
 from src.optimizer.optimizer_utils import \
     xform_parser_column_type_to_catalog_type
 from src.parser.create_statement import ColumnDefinition
-from src.parser.types import ParserColumnDataType
-from src.catalog.column_type import ColumnType
 
 
 class OptimizerUtilsTest(unittest.TestCase):
@@ -67,25 +65,3 @@ xform_parser_column_type_to_catalog_type')
         mock.return_value.udf_io.assert_called_with(
             'name', 'type', 'dimension', True)
         self.assertEqual(actual2, ['udf_io'])
-
-    def test_xform_parser_column_type_to_catalog_type(self):
-        col_type = ParserColumnDataType.BOOLEAN
-        self.assertEqual(
-            xform_parser_column_type_to_catalog_type(col_type),
-            ColumnType.BOOLEAN)
-        col_type = ParserColumnDataType.FLOAT
-        self.assertEqual(
-            xform_parser_column_type_to_catalog_type(col_type),
-            ColumnType.FLOAT)
-        col_type = ParserColumnDataType.INTEGER
-        self.assertEqual(
-            xform_parser_column_type_to_catalog_type(col_type),
-            ColumnType.INTEGER)
-        col_type = ParserColumnDataType.TEXT
-        self.assertEqual(
-            xform_parser_column_type_to_catalog_type(col_type),
-            ColumnType.TEXT)
-        col_type = ParserColumnDataType.NDARRAY
-        self.assertEqual(
-            xform_parser_column_type_to_catalog_type(col_type),
-            ColumnType.NDARRAY)
