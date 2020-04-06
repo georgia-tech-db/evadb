@@ -15,6 +15,7 @@
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 from pathlib import Path
+from src.catalog.models.df_metadata import DataFrameMetadata
 
 
 class LoadDataPlan(AbstractPlan):
@@ -23,18 +24,18 @@ class LoadDataPlan(AbstractPlan):
     operations.
 
     Arguments:
-        table_id(int): table metadata id to load into
+        table_metainfo(DataFrameMetadata): table metadata info to load into
         file_path(Path): file path from where we will load the data
         """
 
-    def __init__(self, table_id: int, file_path: Path):
+    def __init__(self, table_metainfo: DataFrameMetadata, file_path: Path):
         super().__init__(PlanNodeType.LOAD_DATA)
-        self._table_id = table_id
+        self._table_metainfo = table_metainfo
         self._file_path = file_path
 
     @property
-    def table_id(self):
-        return self._table_id
+    def table_metainfo(self):
+        return self._table_metainfo
 
     @property
     def file_path(self):
@@ -42,5 +43,5 @@ class LoadDataPlan(AbstractPlan):
 
     def __str__(self):
         print_str = 'LoadDataPlan(table_id={},file_path={})'.format(
-            self.table_id, self.file_path)
+            self.table_metainfo, self.file_path)
         return print_str

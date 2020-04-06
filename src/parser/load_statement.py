@@ -18,6 +18,7 @@ from src.parser.statement import AbstractStatement
 from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
 from src.parser.table_ref import TableRef
+from pathlib import Path
 
 
 class LoadDataStatement(AbstractStatement):
@@ -32,11 +33,11 @@ class LoadDataStatement(AbstractStatement):
     def __init__(self, table: TableRef, path: str):
         super().__init__(StatementType.LOAD_DATA)
         self._table = table
-        self._path = path
+        self._path = Path(path)
 
     def __str__(self) -> str:
         print_str = "LOAD DATA INFILE {} INTO {}".format(
-            self._path, self._table)
+            self._path.name, self._table)
         return print_str
 
     @property
@@ -44,5 +45,5 @@ class LoadDataStatement(AbstractStatement):
         return self._table
 
     @property
-    def path(self) -> str:
+    def path(self) -> Path:
         return self._path
