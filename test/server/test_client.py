@@ -19,8 +19,8 @@ import time
 import asyncio
 import threading
 
-from src.server.client import start_clients
-
+from src.server.client import EvaClient, start_clients
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 class ClientTests(unittest.TestCase):
 
@@ -45,6 +45,7 @@ class ClientTests(unittest.TestCase):
 
         thread = threading.Thread(target=timeout_server)
         thread.daemon = True
+
         thread.start()
 
         summary = start_clients(client_count=client_count,
@@ -53,11 +54,48 @@ class ClientTests(unittest.TestCase):
                                 loop=self.loop,
                                 stop_clients_future=self.stop_clients_future)
 
+        
+        print(summary)
+        
         self.assertEqual(summary[0], client_count)
 
         # none of the connections will work due to server not running
         exception_count = client_count
         self.assertEqual(summary[1], exception_count)
+
+    
+    def test_interaction(self):
+
+        host = "0.0.0.0"
+        port = 5432
+        client_count = 1
+
+        LoggingManager().setEffectiveLevel(LoggingLevel.DEBUG)
+
+        def timeout_server():
+            # need a more robust mechanism for when to cancel the future
+            time.sleep(2)
+            self.stop_clients_future.cancel()
+
+        thread = threading.Thread(target=timeout_server)
+        thread.daemon = True
+
+        thread.start()
+
+        summary = start_clients(client_count=client_count,
+                                host=host,
+                                port=port,
+                                loop=self.loop,
+                                stop_clients_future=self.stop_clients_future)
+
+        
+        self.assertEqual(summary[0], client_count)
+
+        exception_count = 0
+        self.assertEqual(summary[1], exception_count)
+        
+        
+
 
 
 if __name__ == '__main__':
