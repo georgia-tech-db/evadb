@@ -23,4 +23,5 @@ class PlanNodeType(IntEnum):
     INSERT = 4
     CREATE = 5
     CREATE_UDF = 6
+    LOAD_DATA = 7
     # add other types

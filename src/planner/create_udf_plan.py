@@ -36,8 +36,8 @@ class CreateUDFPlan(AbstractPlan):
             udf outputs, annotated list similar to table columns
         impl_file_path: Path 
             file path which holds the implementation of the udf. 
-            This file should be placed in the UDF directory and 
-            the path provided should be relative to the UDF dir.  
+            This file should be placed in the data directory and 
+            the path provided should be relative to the eva dir.  
         udf_type: str
             udf type. it ca be object detection, classification etc.
     """
