@@ -15,7 +15,7 @@
 import unittest
 
 import mock
-
+from mock import MagicMock
 from src.catalog.catalog_manager import CatalogManager
 from src.catalog.column_type import ColumnType
 from src.catalog.models.df_column import DataFrameColumn
@@ -125,6 +125,29 @@ class CatalogManagerTests(unittest.TestCase):
         self.assertEqual(actual,
                          ds_mock.return_value.dataset_object_by_name
                          .return_value)
+
+    @mock.patch('src.catalog.catalog_manager.UdfIO')
+    def test_create_udf_io_object(self, udfio_mock):
+        catalog = CatalogManager()
+        actual = catalog.udf_io('name', ColumnType.TEXT, [100], True)
+        udfio_mock.assert_called_with(
+            'name',
+            ColumnType.TEXT,
+            array_dimensions=[100],
+            is_input=True)
+        self.assertEqual(actual, udfio_mock.return_value)
+
+    @mock.patch('src.catalog.catalog_manager.UdfService')
+    @mock.patch('src.catalog.catalog_manager.UdfIOService')
+    def test_create_udf(self, udfio_mock, udf_mock):
+        catalog = CatalogManager()
+        udf_io_list = [MagicMock()]
+        actual = catalog.create_udf(
+            'udf', 'sample.py', 'classification', udf_io_list)
+        udfio_mock.return_value.add_udf_io.assert_called_with(udf_io_list)
+        udf_mock.return_value.create_udf.assert_called_with(
+            'udf', 'sample.py', 'classification')
+        self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
 
 
 if __name__ == '__main__':

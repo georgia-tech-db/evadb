@@ -116,6 +116,14 @@ HELP:                                'HELP';
 TEMPTABLE:                           'TEMPTABLE';
 VALUE:                               'VALUE';
 
+// UDF
+UDF:						                'UDF';
+INPUT:                          'INPUT';
+OUTPUT:                         'OUTPUT';
+TYPE:                           'TYPE';
+IMPL:                           'IMPL';
+
+
 // Common function names
 
 ABS:                                 'ABS';
