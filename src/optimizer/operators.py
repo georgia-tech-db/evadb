@@ -34,6 +34,7 @@ class OperatorType(IntEnum):
     LOGICALINSERT = 4,
     LOGICALCREATE = 5,
     LOGICALCREATEUDF = 6,
+    LOGICALLOADDATA = 7,
 
 
 class Operator:
@@ -180,15 +181,15 @@ class LogicalCreateUDF(Operator):
         name: str
             udf_name provided by the user required
         if_not_exists: bool
-            if true should throw an error if udf with same name exists 
+            if true should throw an error if udf with same name exists
             else will replace the existing
         inputs: List[UdfIO]
             udf inputs, annotated list similar to table columns
         outputs: List[UdfIO]
             udf outputs, annotated list similar to table columns
         impl_path: Path
-            file path which holds the implementation of the udf. 
-            This file should be placed in the UDF directory and 
+            file path which holds the implementation of the udf.
+            This file should be placed in the UDF directory and
             the path provided should be relative to the UDF dir.
         udf_type: str
             udf type. it ca be object detection, classification etc.
@@ -232,3 +233,30 @@ class LogicalCreateUDF(Operator):
     @property
     def udf_type(self):
         return self._udf_type
+
+
+class LogicalLoadData(Operator):
+    """Logical node for load data operation
+
+    Arguments:
+        table_metainfo(DataFrameMetadata): table to load data into
+        path(Path): file path from where we are loading data
+    """
+
+    def __init__(self, table_metainfo: DataFrameMetadata,
+                 path: Path, children=None):
+        super().__init__(OperatorType.LOGICALLOADDATA, children=children)
+        self._table_metainfo = table_metainfo
+        self._path = path
+
+    @property
+    def table_metainfo(self):
+        return self._table_metainfo
+
+    @property
+    def path(self):
+        return self._path
+
+    def __str__(self):
+        return 'LogicalLoadData(table: {}, path: {})'.format(
+            self.table_metainfo, self.path)
