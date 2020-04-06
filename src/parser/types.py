@@ -23,7 +23,7 @@ class StatementType(IntEnum):
     SELECT = 1,
     CREATE = 2,
     INSERT = 3,
-
+    CREATE_UDF = 4,
     # add other types
 
 
