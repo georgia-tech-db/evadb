@@ -236,6 +236,25 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(create_udf_stmt.impl_path, Path('data/fastrcnn.py'))
         self.assertEqual(create_udf_stmt.udf_type, 'Classification')
 
+    def test_load_data_statement(self):
+        parser = Parser()
+        load_data_query = """LOAD DATA INFILE 'data/video.mp4' INTO MyVideo;"""
+
+        eva_statement_list = parser.parse(load_data_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.LOAD_DATA)
+
+        load_data_stmt = eva_statement_list[0]
+        # into table
+        self.assertIsNotNone(load_data_stmt.table)
+        self.assertIsInstance(load_data_stmt.table, TableRef)
+        self.assertEqual(
+            load_data_stmt.table.table_info.table_name, 'MyVideo')
+        self.assertEqual(load_data_stmt.path, 'data/video.mp4')
+
 
 if __name__ == '__main__':
     unittest.main()

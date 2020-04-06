@@ -24,6 +24,7 @@ class StatementType(IntEnum):
     CREATE = 2,
     INSERT = 3,
     CREATE_UDF = 4,
+    LOAD_DATA = 5,
     # add other types
 
 
