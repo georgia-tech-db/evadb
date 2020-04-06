@@ -253,7 +253,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsInstance(load_data_stmt.table, TableRef)
         self.assertEqual(
             load_data_stmt.table.table_info.table_name, 'MyVideo')
-        self.assertEqual(load_data_stmt.path, 'data/video.mp4')
+        self.assertEqual(load_data_stmt.path, Path('data/video.mp4'))
 
 
 if __name__ == '__main__':

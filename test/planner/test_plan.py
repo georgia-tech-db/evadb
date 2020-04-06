@@ -74,13 +74,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.udf_type, ty)
 
     def test_load_data_plan(self):
-        table_id = 0
+        table_metainfo = 'meta_info'
         file_path = 'test.mp4'
         plan_str = 'LoadDataPlan(table_id={},file_path={})'.format(
-            table_id, file_path)
-        plan = LoadDataPlan(table_id, file_path)
+            table_metainfo, file_path)
+        plan = LoadDataPlan(table_metainfo, file_path)
         self.assertEqual(plan.node_type, PlanNodeType.LOAD_DATA)
-        self.assertEqual(plan.table_id, table_id)
+        self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(str(plan), plan_str)
 
