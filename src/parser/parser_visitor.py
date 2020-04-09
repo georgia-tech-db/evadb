@@ -34,14 +34,7 @@ from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
 from src.parser.types import ParserColumnDataType
-
-import enum
-
-class ColumnConstraintEnum(enum.Enum):
-    NULLNOTNULL = 1
-    DEFAULT = 2
-    PRIMARY = 3
-    UNIQUE = 4
+from src.parser.types import ColumnConstraintEnum
 
 class ParserVisitor(evaql_parserVisitor):
 
