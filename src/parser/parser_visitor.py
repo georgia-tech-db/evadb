@@ -45,11 +45,10 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitSqlStatements(self, ctx: evaql_parser.SqlStatementsContext):
         eva_statements = []
-        for child in ctx.children:
-            stmt = self.visit(child)
-            if stmt is not None:
-                eva_statements.append(stmt)
-
+        sql_statement_count = len(ctx.sqlStatement())
+        for child_index in range(sql_statement_count):
+            statement = self.visit(ctx.sqlStatement(child_index))
+            eva_statements.append(statement)
         return eva_statements
 
     ##################################################################
@@ -99,10 +98,9 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitUidList(self, ctx: evaql_parser.UidListContext):
         uid_list = []
-        for child in ctx.children:
-            # Skippping commas
-            if not isinstance(child, TerminalNode):
-                uid = self.visit(child)
+        uid_list_length = len(ctx.uid())
+        for uid_index in range(uid_list_length):
+                uid = self.visit(ctx.uid(uid_index))
                 uid_expr = TupleValueExpression(uid)
                 uid_list.append(uid_expr)
 
@@ -257,13 +255,11 @@ class ParserVisitor(evaql_parserVisitor):
     def visitLengthDimensionList(
             self, ctx: evaql_parser.LengthDimensionListContext):
         dimensions = []
-        dimension_index = 0
-        for child in ctx.children:
-            decimal_literal = ctx.decimalLiteral(dimension_index)
-            if decimal_literal is not None:
-                decimal = self.visit(decimal_literal)
-                dimensions.append(decimal)
-            dimension_index = dimension_index + 1
+        dimension_list_length = len(ctx.decimalLiteral());
+        for dimension_list_index in range(dimension_list_length):
+            decimal_literal = ctx.decimalLiteral(dimension_list_index)
+            decimal = self.visit(decimal_literal);
+            dimensions.append(decimal)
 
         return dimensions
 
@@ -294,11 +290,13 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
 
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
+
         table_list = []
-        for child in ctx.children:
-            table = self.visit(child)
-            if table is not None:
-                table_list.append(table)
+        table_sources_count = len(ctx.tableSource())
+        for table_sources_index in range(table_sources_count):
+            table = self.visit(ctx.tableSource(table_sources_index))
+            table_list.append(table)
+
         return table_list
 
     def visitQuerySpecification(
@@ -332,10 +330,10 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
         select_list = []
-        for child in ctx.children:
-            element = self.visit(child)
-            if element is not None:
-                select_list.append(element)
+        select_elements_count = len(ctx.selectElement())
+        for select_element_index in range(select_elements_count):
+            element = self.visit(ctx.selectElement(select_element_index))
+            select_list.append(element)
 
         return select_list
 
@@ -441,10 +439,9 @@ class ParserVisitor(evaql_parserVisitor):
     def visitExpressionsWithDefaults(
             self, ctx: evaql_parser.ExpressionsWithDefaultsContext):
         expr_list = []
-        for child in ctx.children:
-            # ignore COMMAs
-            if not isinstance(child, TerminalNode):
-                expr = self.visit(child)
-                expr_list.append(expr)
+        expressions_with_defaults_count = len(ctx.expressionOrDefault())
+        for i in range(expressions_with_defaults_count):
+            expression = self.visit(ctx.expressionOrDefault(i))
+            expr_list.append(expression)
 
         return expr_list
