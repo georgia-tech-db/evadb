@@ -23,10 +23,12 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
+from src.expression.function_expression import FunctionExpression
 
 from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
 from src.parser.insert_statement import InsertTableStatement
+from src.parser.create_udf_statement import CreateUDFStatement
 
 from src.parser.table_ref import TableRef, TableInfo
 
@@ -34,6 +36,7 @@ from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
 from src.parser.types import ParserColumnDataType
+from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 
 class ParserVisitor(evaql_parserVisitor):
@@ -340,6 +343,10 @@ class ParserVisitor(evaql_parserVisitor):
 
         return {"from": from_table, "where": where_clause}
 
+    ##################################################################
+    # COMMON CLAUSES Ids, Column_names, Table_names
+    ##################################################################
+
     def visitTableName(self, ctx: evaql_parser.TableNameContext):
 
         table_name = self.visit(ctx.fullId())
@@ -350,17 +357,34 @@ class ParserVisitor(evaql_parserVisitor):
             warnings.warn("Invalid from table", SyntaxWarning)
 
     def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
-        # dotted id not supported yet
-        column_name = self.visit(ctx.uid())
-        if column_name is not None:
-            return TupleValueExpression(col_name=column_name)
+        # Adding support for a.b
+        # Will restrict implementation to raise error for a.b.c
+        dottedIds = []
+        if ctx.dottedId():
+            if len(ctx.dottedId()) is not 1:
+                LoggingManager().log("Only tablename.colname syntax supported",
+                                     LoggingLevel.ERROR)
+                return
+            for id in ctx.dottedId():
+                dottedIds.append(self.visit(id))
+
+        uid = self.visit(ctx.uid())
+
+        if len(dottedIds):
+            return TupleValueExpression(table_name=uid, col_name=dottedIds[0])
         else:
-            warnings.warn("Column Name Missing", SyntaxWarning)
+            return TupleValueExpression(col_name=uid)
 
     def visitSimpleId(self, ctx: evaql_parser.SimpleIdContext):
         # todo handle children, right now assuming TupleValueExpr
         return ctx.getText()
         # return self.visitChildren(ctx)
+
+    def visitDottedId(self, ctx: evaql_parser.DOT_ID):
+        if ctx.DOT_ID():
+            return ctx.getText()[1:]
+        if ctx.uid():
+            return self.visit(ctx.uid())
 
     ##################################################################
     # EXPRESSIONS
@@ -393,7 +417,7 @@ class ParserVisitor(evaql_parserVisitor):
         right = self.visit(ctx.getChild(2))
         return LogicalExpression(op, left, right)
 
-    def visitBinaryComparasionPredicate(
+    def visitBinaryComparisonPredicate(
             self, ctx: evaql_parser.BinaryComparisonPredicateContext):
         left = self.visit(ctx.left)
         right = self.visit(ctx.right)
@@ -438,3 +462,79 @@ class ParserVisitor(evaql_parserVisitor):
                 expr_list.append(expr)
 
         return expr_list
+
+    ##################################################################
+    # Functions - UDFs, Aggregate Windowed functions
+    ##################################################################
+    def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
+        udf_name = None
+        udf_args = None
+        if ctx.simpleId():
+            udf_name = self.visit(ctx.simpleId())
+        else:
+            LoggingManager().log('UDF function name missing.',
+                                 LoggingLevel.ERROR)
+
+        udf_args = self.visit(ctx.functionArgs())
+        func_expr = FunctionExpression(None, name=udf_name)
+        for arg in udf_args:
+            func_expr.append_child(arg)
+        return func_expr
+
+    def visitFunctionArgs(self, ctx: evaql_parser.FunctionArgsContext):
+        args = []
+        for child in ctx.children:
+            # ignore COMMAs
+            if not isinstance(child, TerminalNode):
+                args.append(self.visit(child))
+        return args
+
+    # Create UDF
+    def visitCreateUdf(self, ctx: evaql_parser.CreateUdfContext):
+        udf_name = None
+        if_not_exists = False
+        input_definitions = []
+        output_definitions = []
+        impl_path = None
+        udf_type = None
+
+        for child in ctx.children:
+            try:
+                if isinstance(child, TerminalNode):
+                    continue
+                rule_idx = child.getRuleIndex()
+
+                if rule_idx == evaql_parser.RULE_udfName:
+                    udf_name = self.visit(ctx.udfName())
+
+                elif rule_idx == evaql_parser.RULE_ifNotExists:
+                    if_not_exists = True
+
+                elif rule_idx == evaql_parser.RULE_createDefinitions:
+                    # There should be 2 createDefinition
+                    # idx 0 describing udf INPUT
+                    # idx 1 describing udf OUTPUT
+                    if len(ctx.createDefinitions()) != 2:
+                        LoggingManager().log('UDF Input or Output Missing',
+                                             LoggingLevel.ERROR)
+                    input_definitions = self.visit(ctx.createDefinitions(0))
+                    output_definitions = self.visit(ctx.createDefinitions(1))
+
+                elif rule_idx == evaql_parser.RULE_udfType:
+                    udf_type = self.visit(ctx.udfType())
+
+                elif rule_idx == evaql_parser.RULE_udfImpl:
+                    impl_path = self.visit(ctx.udfImpl()).value
+
+            except BaseException:
+                LoggingManager().log('CREATE UDF Failed', LoggingLevel.ERROR)
+                # stop parsing something bad happened
+                return None
+        stmt = CreateUDFStatement(
+            udf_name,
+            if_not_exists,
+            input_definitions,
+            output_definitions,
+            impl_path,
+            udf_type)
+        return stmt
