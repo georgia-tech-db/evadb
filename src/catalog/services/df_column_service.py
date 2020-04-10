@@ -68,3 +68,4 @@ class DatasetColumnService(BaseService):
               LoggingManager().log(
                 "detele column failed", LoggingLevel.ERROR)
               raise Exception
+              return None

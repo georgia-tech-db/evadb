@@ -87,3 +87,13 @@ class DatasetColumnServiceTest(TestCase):
         service.delete_column(mocks)
         for mock in mocks:
             mock.delete.assert_called_once()
+
+    
+    def test_failure_delete_columns(self):
+         mocks = [MagicMock() for i in range(1)]
+         mocks[0].side_effect = Exception()
+         service = DatasetColumnService()
+         actual = service.delete_column(mocks)
+         self.assertEqual(actual, None)
+
+
