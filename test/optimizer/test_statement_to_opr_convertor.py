@@ -19,6 +19,9 @@ from mock import patch, MagicMock
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
+from src.parser.create_udf_statement import CreateUDFStatement
+from src.parser.insert_statement import InsertTableStatement
+from src.parser.create_statement import CreateTableStatement
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -112,3 +115,58 @@ class StatementToOprTest(unittest.TestCase):
         converter._populate_column_map(dataset)
 
         self.assertEqual(converter._column_map, expected)
+
+    @patch('src.optimizer.statement_to_opr_convertor.LogicalCreateUDF')
+    @patch('src.optimizer.\
+statement_to_opr_convertor.column_definition_to_udf_io')
+    def test_visit_create_udf(self, mock, l_create_udf_mock):
+        convertor = StatementToPlanConvertor()
+        stmt = MagicMock()
+        stmt.name = 'name'
+        stmt.if_not_exists = True
+        stmt.inputs = ['inp']
+        stmt.outputs = ['out']
+        stmt.impl_path = 'tmp.py'
+        stmt.udf_type = 'classification'
+        mock.side_effect = ['inp', 'out']
+        actual = convertor.visit_create_udf(stmt)
+        mock.assert_any_call(stmt.inputs, True)
+        mock.assert_any_call(stmt.outputs, False)
+        l_create_udf_mock.assert_called_once()
+        l_create_udf_mock.assert_called_with(
+            stmt.name,
+            stmt.if_not_exists,
+            'inp',
+            'out',
+            stmt.impl_path,
+            stmt.udf_type)
+
+    def test_visit_should_call_create_udf(self):
+        stmt = MagicMock(spec=CreateUDFStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_create_udf = mock
+
+        actual = convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_insert(self):
+        stmt = MagicMock(spec=InsertTableStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_insert = mock
+
+        actual = convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_insert(self):
+        stmt = MagicMock(spec=CreateTableStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_create = mock
+
+        actual = convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)

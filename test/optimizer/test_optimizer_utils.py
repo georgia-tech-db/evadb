@@ -17,7 +17,11 @@ import unittest
 from mock import patch, MagicMock
 
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.optimizer.optimizer_utils import bind_dataset, bind_tuple_value_expr
+from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
+                                           column_definition_to_udf_io)
+from src.optimizer.optimizer_utils import \
+    xform_parser_column_type_to_catalog_type
+from src.parser.create_statement import ColumnDefinition
 
 
 class OptimizerUtilsTest(unittest.TestCase):
@@ -36,3 +40,28 @@ class OptimizerUtilsTest(unittest.TestCase):
         tuple_expr = TupleValueExpression(col_name="COL1")
         bind_tuple_value_expr(tuple_expr, column_map)
         self.assertEqual(tuple_expr.col_object, column_map['col1'])
+
+    @patch('src.optimizer.optimizer_utils.CatalogManager')
+    @patch('src.optimizer.optimizer_utils.\
+xform_parser_column_type_to_catalog_type')
+    def test_column_definition_to_udf_io(self, mock_func, mock):
+        mock.return_value.udf_io.return_value = 'udf_io'
+        col = MagicMock(spec=ColumnDefinition)
+        col.name = 'name'
+        col.type = 'type'
+        col.dimension = 'dimension'
+        col_list = [col, col]
+        mock_func.return_value = col.type
+        actual = column_definition_to_udf_io(col_list, True)
+        for col in col_list:
+            mock_func.assert_called_with('type')
+            mock.return_value.udf_io.assert_called_with(
+                'name', 'type', 'dimension', True)
+
+        self.assertEqual(actual, ['udf_io', 'udf_io'])
+
+        # input not list
+        actual2 = column_definition_to_udf_io(col, True)
+        mock.return_value.udf_io.assert_called_with(
+            'name', 'type', 'dimension', True)
+        self.assertEqual(actual2, ['udf_io'])
