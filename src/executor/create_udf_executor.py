@@ -16,8 +16,6 @@
 from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.executor.abstract_executor import AbstractExecutor
-import tempfile
-import os.path
 
 
 class CreateUDFExecutor(AbstractExecutor):

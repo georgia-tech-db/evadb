@@ -13,11 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-import glob
 
-from PIL import Image
 from cmd import Cmd
+
 
 class EvaCommandInterpreter(Cmd):
 
@@ -35,34 +33,32 @@ class EvaCommandInterpreter(Cmd):
 
     def do_greet(self, line):
         print("greeting")
-    
+
     def emptyline(self):
-        print ("Enter a valid query.")
+        print("Enter a valid query.")
         return False
-    
+
     def onecmd(self, s):
 
         # Send request to server
-        if s=="":
+        if s == "":
             return self.emptyline()
         elif(s == "exit" or s == "EXIT"):
             raise SystemExit
         else:
             return self.do_query(s)
-    
 
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
 
         # Type exit to stop program
-        
-        self.protocol.send_message(query)
-        while self.protocol._response_chunk == None:
-                _ = 1
-            
-        _server_result = self.protocol._response_chunk
-        self.protocol._response_chunk = None
 
+        self.protocol.send_message(query)
+        while self.protocol._response_chunk is None:
+            _ = 1
+
+        self.protocol._response_chunk
+        self.protocol._response_chunk = None
 
     def do_quit(self, args):
         """Quits the program."""

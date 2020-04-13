@@ -20,7 +20,6 @@ import asyncio
 from unittest.mock import MagicMock
 
 from src.server.command_handler import handle_request
-from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class CommandHandlerTests(unittest.TestCase):
@@ -41,11 +40,12 @@ class CommandHandlerTests(unittest.TestCase):
                            VALUES (2, '/mnt/frames/2.png');
                            """
 
-        task1 = self.loop.run_until_complete(handle_request(transport, 
+        task1 = self.loop.run_until_complete(handle_request(transport,
                                                             request_message))
 
         output = task1.split('Row')[-1]
-        self.assertEqual(output,"(Frame_ID=2, Frame_Path='/mnt/frames/2.png')")
+        self.assertEqual(
+            output, "(Frame_ID=2, Frame_Path='/mnt/frames/2.png')")
 
 
 if __name__ == '__main__':

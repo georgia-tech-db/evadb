@@ -40,4 +40,3 @@ class PlanGenerator:
             return CreateGenerator().build(logical_plan)
         if logical_plan.type is self._CREATE_UDF_NODE_TYPE:
             return CreateUDFGenerator().build(logical_plan)
-            

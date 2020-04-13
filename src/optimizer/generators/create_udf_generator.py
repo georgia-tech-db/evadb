@@ -33,7 +33,7 @@ class CreateUDFGenerator(Generator):
         self._if_not_exists = operator.if_not_exists
         self._impl_path = operator.impl_path
         self._udf_type = operator.udf_type
-    
+
     def _visit(self, operator: Operator):
         if isinstance(operator, LogicalCreateUDF):
             self._visit_logical_create_udf(operator)

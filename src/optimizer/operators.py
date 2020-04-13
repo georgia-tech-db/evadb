@@ -180,15 +180,15 @@ class LogicalCreateUDF(Operator):
         name: str
             udf_name provided by the user required
         if_not_exists: bool
-            if true should throw an error if udf with same name exists 
+            if true should throw an error if udf with same name exists
             else will replace the existing
         inputs: List[UdfIO]
             udf inputs, annotated list similar to table columns
         outputs: List[UdfIO]
             udf outputs, annotated list similar to table columns
         impl_path: Path
-            file path which holds the implementation of the udf. 
-            This file should be placed in the UDF directory and 
+            file path which holds the implementation of the udf.
+            This file should be placed in the UDF directory and
             the path provided should be relative to the UDF dir.
         udf_type: str
             udf type. it ca be object detection, classification etc.

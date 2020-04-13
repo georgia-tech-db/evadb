@@ -226,14 +226,14 @@ class CatalogManager(object):
 
     def create_udf(self, name: str, impl_file_path: str,
                    type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
-        """Creates an udf metadata object and udf_io objects and persists them 
+        """Creates an udf metadata object and udf_io objects and persists them
         in database.
 
         Arguments:
             name(str): name of the udf to which this metdata corresponds
-            impl_file_path(str): implementation path of the udf, 
+            impl_file_path(str): implementation path of the udf,
                                  relative to src/udf
-            type(str): what kind of udf operator like classification, 
+            type(str): what kind of udf operator like classification,
                                                         detection etc
             udf_io_list(List[UdfIO]): input/output info of this udf
 

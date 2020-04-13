@@ -21,7 +21,6 @@ from unittest.mock import MagicMock, call
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
-from src.expression.function_expression import FunctionExpression
 from antlr4 import TerminalNode
 
 
@@ -256,9 +255,9 @@ class ParserVisitorTests(unittest.TestCase):
             RULE_createDefinitions
         ctx.children[3].getRuleIndex.return_value = evaql_parser.RULE_udfType
         ctx.children[4].getRuleIndex.return_value = evaql_parser.RULE_udfImpl
-        
+
         ctx.createDefinitions.return_value.__len__.return_value = 2
-        
+
         udf_name = 'name'
         udf_type = 'classification'
         udf_impl = MagicMock()
@@ -271,9 +270,9 @@ class ParserVisitorTests(unittest.TestCase):
 
         def side_effect(arg):
             return values[arg]
-        
+
         visit_mock.side_effect = side_effect
-        
+
         visitor = ParserVisitor()
         actual = visitor.visitCreateUdf(ctx)
 

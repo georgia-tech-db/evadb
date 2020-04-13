@@ -44,4 +44,3 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(
             xform_parser_column_type_to_catalog_type(col_type),
             ColumnType.NDARRAY)
-  

@@ -19,8 +19,9 @@ import time
 import asyncio
 import threading
 
-from src.server.client import EvaClient, start_clients
+from src.server.client import start_clients
 from src.utils.logging_manager import LoggingManager, LoggingLevel
+
 
 class ClientTests(unittest.TestCase):
 
@@ -54,16 +55,14 @@ class ClientTests(unittest.TestCase):
                                 loop=self.loop,
                                 stop_clients_future=self.stop_clients_future)
 
-        
         print(summary)
-        
+
         self.assertEqual(summary[0], client_count)
 
         # none of the connections will work due to server not running
         exception_count = client_count
         self.assertEqual(summary[1], exception_count)
 
-    
     def test_interaction(self):
 
         host = "0.0.0.0"
@@ -88,14 +87,10 @@ class ClientTests(unittest.TestCase):
                                 loop=self.loop,
                                 stop_clients_future=self.stop_clients_future)
 
-        
         self.assertEqual(summary[0], client_count)
 
         exception_count = 0
         self.assertEqual(summary[1], exception_count)
-        
-        
-
 
 
 if __name__ == '__main__':

@@ -22,17 +22,11 @@ from src.utils.logging_manager import LoggingManager
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.planner.insert_plan import InsertPlan
-from src.parser.table_ref import TableRef, TableInfo
-from src.catalog.models.df_column import DataFrameColumn
 from src.storage.dataframe import load_dataframe
-from src.catalog.column_type import ColumnType
-from src.planner.create_plan import CreatePlan
-from src.executor.plan_executor import PlanExecutor
 
-from src.executor.create_executor import CreateExecutor
 from src.executor.insert_executor import InsertExecutor
 
-from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
 @asyncio.coroutine
@@ -47,11 +41,11 @@ def handle_request(transport, query):
     eva_statement = parser.parse(query)
     insert_statement = eva_statement[0]
 
-    LoggingManager().log("Result from the parser: "+str(insert_statement))
-    
+    LoggingManager().log("Result from the parser: " + str(insert_statement))
+
     convertor = StatementToPlanConvertor()
     convertor.visit(insert_statement)
-    
+
     logical_plan_node = convertor.plan
 
     phy_plan_node = InsertPlan(
@@ -65,12 +59,12 @@ def handle_request(transport, query):
     table_name = 'MyVideo'
     file_url = os.path.join(tempfile.gettempdir(), table_name)
     file_url = 'file://' + file_url
-        
-    df = load_dataframe(file_url)
-    
-    response_message = ','.join(map(str,df.collect()))
 
-    LoggingManager().log("Response received" +str(response_message))
+    df = load_dataframe(file_url)
+
+    response_message = ','.join(map(str, df.collect()))
+
+    LoggingManager().log("Response received" + str(response_message))
 
     LoggingManager().log('Response to client: --|' +
                          str(response_message) +
@@ -83,4 +77,5 @@ def handle_request(transport, query):
 
 
 # INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES (2, '/mnt/frames/2.png');
-# INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES    (1, '/mnt/frames/1.png');
+# INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES    (1,
+# '/mnt/frames/1.png');
