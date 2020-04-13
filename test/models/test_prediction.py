@@ -27,7 +27,7 @@ class PredictionTest(unittest.TestCase):
 
     def test_should_check_if_batch_frames_equivalent_to_number_of_predictions(
             self):
-        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)])
         predictions = []
         scores = []
         self.assertRaises(AssertionError,
@@ -36,7 +36,7 @@ class PredictionTest(unittest.TestCase):
                               batch, predictions, scores))
 
     def test_should_check_if_batch_frames_equivalent_to_number_of_scores(self):
-        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)])
         predictions = [['A', 'B']]
         scores = []
         self.assertRaises(AssertionError,
@@ -46,7 +46,7 @@ class PredictionTest(unittest.TestCase):
 
     def test_should_check_if_batch_frames_equivalent_to_no_of_boxes_if_given(
             self):
-        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)])
         predictions = [['A', 'B']]
         scores = [[1, 1]]
         boxes = []
@@ -57,7 +57,7 @@ class PredictionTest(unittest.TestCase):
                               boxes=boxes))
 
     def test_should_return_list_of_predictions_for_each_frame_in_batch(self):
-        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)], info=None)
+        batch = FrameBatch(frames=[Frame(1, np.ones((1, 1)), None)])
         predictions = [['A', 'B']]
         scores = [[1, 1]]
         expected = [Prediction(batch.frames[0], predictions[0], scores[0])]

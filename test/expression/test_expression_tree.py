@@ -40,6 +40,6 @@ class ExpressionEvaluationTest(unittest.TestCase):
 
         batch = FrameBatch(frames=[
             frame_1, frame_2
-        ], info=None)
+        ])
 
         self.assertEqual([True, False], expression_tree.evaluate(batch))
