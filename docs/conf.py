@@ -21,8 +21,8 @@ import mock
 # -- Project information -----------------------------------------------------
 
 project = 'EVA'
-copyright = '2020, Database Lab'
-author = 'Database Lab'
+copyright = 'Copyright (c) 2018-2020 Georgia Tech Database Group'
+author = 'Georgia Tech Database Group'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
@@ -36,7 +36,7 @@ master_doc = 'index'
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx',
     'sphinx.ext.todo', 'sphinx.ext.mathjax', 'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon', 'sphinx.ext.graphviz'
+    'sphinx.ext.napoleon', 'sphinx.ext.graphviz', 'sphinx_autodoc_typehints'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
