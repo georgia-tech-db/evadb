@@ -88,7 +88,7 @@ class CatalogManager(object):
                                                                     List[int]]:
         """This method fetches bindings for strings.
 
-        Args:table_metadata_id
+        Args:
             database_name: currently not in use
             table_name: the table that is being referred to
             column_names: the column names of the table for which
