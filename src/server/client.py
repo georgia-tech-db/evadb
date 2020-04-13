@@ -99,6 +99,7 @@ class EvaClient(asyncio.Protocol):
                              )
 
         self._response_chunk = response_chunk
+        print(response_chunk)
 
     def send_message(self, message):
 
@@ -116,7 +117,7 @@ class EvaClient(asyncio.Protocol):
 
 def process_cmd(prompt):
 
-    prompt.cmdloop('Foo')
+    prompt.cmdloop('Welcome to EVA Server')
 
 
 @asyncio.coroutine
