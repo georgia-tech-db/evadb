@@ -19,85 +19,59 @@ import glob
 from PIL import Image
 from cmd import Cmd
 
-from src.parser.parser import Parser
-
-
 class EvaCommandInterpreter(Cmd):
 
     # Store results from server
     _server_result = None
+    url = None
+
+    def __init__(self):
+        super().__init__()
+
+        # Create table on connecting to server
 
     def set_protocol(self, protocol):
         self.protocol = protocol
 
     def do_greet(self, line):
         print("greeting")
-
+    
+    def emptyline(self):
+        print ("Enter a valid query.")
+        return False
+    
     def onecmd(self, s):
 
-        cmd_result = Cmd.onecmd(self, s)
-
         # Send request to server
-        self.protocol.send_message(s)
-        _server_result = self.protocol._response_chunk
-
-        if _server_result is not None:
-            print(_server_result)
-        _server_result = None
-
-        return cmd_result
+        if s=="":
+            return self.emptyline()
+        elif(s == "exit" or s == "EXIT"):
+            raise SystemExit
+        else:
+            return self.do_query(s)
+    
 
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
 
         # Type exit to stop program
-        if(query == "exit" or query == "EXIT"):
-            raise SystemExit
+        
+        self.protocol.send_message(query)
+        while self.protocol._response_chunk == None:
+                _ = 1
+            
+        _server_result = self.protocol._response_chunk
+        self.protocol._response_chunk = None
 
-        if len(query) == 0:
-            print("Empty query")
-
-        else:
-            try:
-                # Connect and Query from Eva
-                parser = Parser()
-                eva_statement = parser.parse(query)
-                select_stmt = eva_statement[0]
-                print("Result from the parser:")
-                print(select_stmt)
-                print('\n')
-
-                # Read Input Videos
-                # Replace with Input Pipeline once finished
-                input_video = []
-                for filename in glob.glob('data/sample_video/*.jpg'):
-                    im = Image.open(filename)
-                    # to handle 'too many open files' error
-                    im_copy = im.copy()
-                    input_video.append(im_copy)
-                    im.close()
-
-                # Write Output to final folder
-                # Replace with output pipeline once finished
-                ouput_frames = random.sample(input_video, 50)
-                output_folder = "data/sample_output/"
-
-                for i in range(len(ouput_frames)):
-                    frame_name = output_folder + "output" + str(i) + ".jpg"
-                    ouput_frames[i].save(frame_name)
-
-                print("Refer pop-up for a sample of the output")
-                ouput_frames[0].show()
-
-            except TypeError:
-                print("SQL Statement improperly formatted. Try again.")
 
     def do_quit(self, args):
         """Quits the program."""
+        # raise SystemExit
         return True
 
     def do_exit(self, args):
         """Quits the program."""
+        # raise SystemExit
         return True
 
     def do_EOF(self, line):
