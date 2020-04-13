@@ -19,6 +19,8 @@ from src.catalog.models.df_metadata import DataFrameMetadata
 from src.parser.table_ref import TableRef
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
+from src.catalog.models.udf_io import UdfIO
+from pathlib import Path
 
 
 @unique
@@ -31,6 +33,7 @@ class OperatorType(IntEnum):
     LOGICALPROJECT = 3,
     LOGICALINSERT = 4,
     LOGICALCREATE = 5,
+    LOGICALCREATEUDF = 6,
 
 
 class Operator:
@@ -139,11 +142,11 @@ class LogicalInsert(Operator):
 
 
 class LogicalCreate(Operator):
-    """Logical node for insert operations
+    """Logical node for create table operations
 
     Arguments:
         video {TableRef}: [video table that is to be created]
-        column_list {List[AbstractExpression]}:
+        column_list {List[DataFrameColumn]}:
             [After binding annotated column_list]
         if_not_exists {bool}: [create table if exists]
 
@@ -167,3 +170,65 @@ class LogicalCreate(Operator):
     @property
     def if_not_exists(self):
         return self._if_not_exists
+
+
+class LogicalCreateUDF(Operator):
+    """
+    Logical node for create udf operations
+
+    Attributes:
+        name: str
+            udf_name provided by the user required
+        if_not_exists: bool
+            if true should throw an error if udf with same name exists 
+            else will replace the existing
+        inputs: List[UdfIO]
+            udf inputs, annotated list similar to table columns
+        outputs: List[UdfIO]
+            udf outputs, annotated list similar to table columns
+        impl_path: Path
+            file path which holds the implementation of the udf. 
+            This file should be placed in the UDF directory and 
+            the path provided should be relative to the UDF dir.
+        udf_type: str
+            udf type. it ca be object detection, classification etc.
+    """
+
+    def __init__(self, name: str,
+                 if_not_exists: bool,
+                 inputs: List[UdfIO],
+                 outputs: List[UdfIO],
+                 impl_path: Path,
+                 udf_type: str = None,
+                 children=None):
+        super().__init__(OperatorType.LOGICALCREATEUDF, children)
+        self._name = name
+        self._if_not_exists = if_not_exists
+        self._inputs = inputs
+        self._outputs = outputs
+        self._impl_path = impl_path
+        self._udf_type = udf_type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def outputs(self):
+        return self._outputs
+
+    @property
+    def impl_path(self):
+        return self._impl_path
+
+    @property
+    def udf_type(self):
+        return self._udf_type

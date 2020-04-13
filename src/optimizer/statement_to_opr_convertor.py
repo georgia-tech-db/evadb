@@ -15,15 +15,18 @@
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
-                                     LogicalInsert, LogicalCreate)
+                                     LogicalInsert, LogicalCreate,
+                                     LogicalCreateUDF)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
+from src.parser.create_udf_statement import CreateUDFStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
-                                           bind_dataset)
+                                           bind_dataset,
+                                           column_definition_to_udf_io)
 from src.parser.table_ref import TableRef
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
@@ -134,6 +137,23 @@ class StatementToPlanConvertor:
             video_ref, column_metadata_list, if_not_exists)
         self._plan = create_opr
 
+    def visit_create_udf(self, statement: CreateUDFStatement):
+        """Convertor for parsed create udf statement
+
+        Arguments:
+            statement {CreateUDFStatement} -- Create UDF Statement
+        """
+        annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
+        annotated_outputs = column_definition_to_udf_io(
+            statement.outputs, False)
+
+        create_udf_opr = LogicalCreateUDF(statement.name,
+                                          statement.if_not_exists,
+                                          annotated_inputs, annotated_outputs,
+                                          statement.impl_path,
+                                          statement.udf_type)
+        self._plan = create_udf_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -148,6 +168,8 @@ class StatementToPlanConvertor:
             self.visit_insert(statement)
         elif isinstance(statement, CreateTableStatement):
             self.visit_create(statement)
+        elif isinstance(statement, CreateUDFStatement):
+            self.visit_create_udf(statement)
         return self._plan
 
     @property

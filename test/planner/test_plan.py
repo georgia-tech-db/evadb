@@ -19,6 +19,7 @@ from src.catalog.column_type import ColumnType
 
 from src.planner.create_plan import CreatePlan
 from src.planner.insert_plan import InsertPlan
+from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.types import PlanNodeType
 
 
@@ -48,6 +49,28 @@ class PlanNodeTests(unittest.TestCase):
         values = [expression, expression]
         dummy_plan_node = InsertPlan(video_id, column_ids, values)
         self.assertEqual(dummy_plan_node.node_type, PlanNodeType.INSERT)
+
+    def test_create_udf_plan(self):
+        udf_name = 'udf'
+        if_not_exists = True
+        udfIO = 'udfIO'
+        inputs = [udfIO, udfIO]
+        outputs = [udfIO]
+        impl_path = 'test'
+        ty = 'classification'
+        node = CreateUDFPlan(
+            udf_name,
+            if_not_exists,
+            inputs,
+            outputs,
+            impl_path,
+            ty)
+        self.assertEqual(node.node_type, PlanNodeType.CREATE_UDF)
+        self.assertEqual(node.if_not_exists, True)
+        self.assertEqual(node.inputs, [udfIO, udfIO])
+        self.assertEqual(node.outputs, [udfIO])
+        self.assertEqual(node.impl_path, impl_path)
+        self.assertEqual(node.udf_type, ty)
 
 
 if __name__ == '__main__':
