@@ -31,14 +31,13 @@ class FrameBatch:
 
     """
 
-    def __init__(self, frames: DataFrame, info, outcomes=None, temp_outcomes=None):
+    def __init__(self, frames: DataFrame, outcomes=None, temp_outcomes=None):
         super().__init__()
         if outcomes is None:
             outcomes = dict()
         if temp_outcomes is None:
             temp_outcomes = dict()
 
-        self._info = info
         self._frames = frames
         self._batch_size = len(frames)
         self._outcomes = outcomes
@@ -49,10 +48,6 @@ class FrameBatch:
         return self._frames
 
     @property
-    def info(self):
-        return self._info
-
-    @property
     def batch_size(self):
         return self._batch_size
 
@@ -60,8 +55,7 @@ class FrameBatch:
         return np.array(self._frames[column_name])
 
     def __eq__(self, other: 'FrameBatch'):
-        return self.info == other.info and \
-               self.frames.equals(other.frames) and \
+        return self.frames.equals(other.frames) and \
                self._outcomes == other._outcomes and \
                self._temp_outcomes == other._temp_outcomes
 
@@ -113,7 +107,7 @@ class FrameBatch:
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
-        new_batch = FrameBatch(new_frames, self.info)
+        new_batch = FrameBatch(new_frames)
         for key in self._outcomes:
             new_batch._outcomes[key] = [self._outcomes[key][i]
                                         for i in required_frame_ids]

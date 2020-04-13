@@ -29,3 +29,18 @@ def create_dataframe_same(times=1):
         base_df = base_df.append(create_dataframe())
 
     return base_df
+
+def custom_list_of_dicts_equal(one, two):
+    for v1, v2 in zip(one, two):
+        if v1.keys() != v2.keys():
+            return False
+        for key in v1.keys():
+            if isinstance(v1[key], np.ndarray):
+                if not np.array_equal(v1[key], v2[key]):
+                    return False
+
+            else:
+                if v1[key] != v2[key]:
+                    return False
+
+    return True

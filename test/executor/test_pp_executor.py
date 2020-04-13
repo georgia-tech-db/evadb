@@ -24,7 +24,7 @@ class PPScanExecutorTest(unittest.TestCase):
 
     def test_should_return_only_frames_satisfy_predicate(self):
         dataframe = create_dataframe(3)
-        batch = FrameBatch(frames=dataframe, info=None)
+        batch = FrameBatch(frames=dataframe)
         expression = type("AbstractExpression", (), {"evaluate": lambda x: [
             False, False, True]})
 

@@ -32,9 +32,8 @@ class FunctionExpressionTest(unittest.TestCase):
         values = [1, 2, 3]
         expression = FunctionExpression(lambda x: values,
                                         mode=ExecutionMode.EXEC, name="test")
-        expected_batch = FrameBatch(frames=pd.DataFrame(), info=None,
-                                    outcomes={"test": [1, 2, 3]})
-        input_batch = FrameBatch(frames=pd.DataFrame(), info=None)
+        expected_batch = FrameBatch(frames=pd.DataFrame(), outcomes={"test": [1, 2, 3]})
+        input_batch = FrameBatch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
         self.assertEqual(expected_batch, input_batch)
 
@@ -59,8 +58,7 @@ class FunctionExpressionTest(unittest.TestCase):
         expression = FunctionExpression(lambda x: values,
                                         mode=ExecutionMode.EXEC,
                                         name="test", is_temp=True)
-        expected_batch = FrameBatch(frames=pd.DataFrame(), info=None,
-                                    temp_outcomes={"test": [1, 2, 3]})
-        input_batch = FrameBatch(frames=pd.DataFrame(), info=None)
+        expected_batch = FrameBatch(frames=pd.DataFrame(), temp_outcomes={"test": [1, 2, 3]})
+        input_batch = FrameBatch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
         self.assertEqual(expected_batch, input_batch)

@@ -29,7 +29,7 @@ class SeqScanExecutorTest(unittest.TestCase):
         outcome_1 = Prediction(dataframe.iloc[0], ["car", "bus"], [0.5, 0.6])
         outcome_2 = Prediction(dataframe.iloc[1], ["bus"], [0.5, 0.6])
         outcome_3 = Prediction(dataframe.iloc[2], ["car", "train"], [0.5, 0.6])
-        batch = FrameBatch(frames=dataframe, info=None, outcomes={
+        batch = FrameBatch(frames=dataframe, outcomes={
             "test": [
                 outcome_1,
                 outcome_2,
@@ -53,7 +53,7 @@ class SeqScanExecutorTest(unittest.TestCase):
         outcome_1 = Prediction(dataframe.iloc[0], ["car", "bus"], [0.5, 0.6])
         outcome_2 = Prediction(dataframe.iloc[1], ["bus"], [0.5, 0.6])
         outcome_3 = Prediction(dataframe.iloc[2], ["car", "train"], [0.5, 0.6])
-        batch = FrameBatch(frames=dataframe, info=None, outcomes={
+        batch = FrameBatch(frames=dataframe, outcomes={
             "test": [
                 outcome_1,
                 outcome_2,
