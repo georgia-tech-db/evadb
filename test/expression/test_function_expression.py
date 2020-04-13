@@ -14,6 +14,8 @@
 # limitations under the License.
 import unittest
 
+import pandas as pd
+
 from src.expression.function_expression import FunctionExpression, \
     ExecutionMode
 from src.models.storage.batch import FrameBatch
@@ -30,9 +32,9 @@ class FunctionExpressionTest(unittest.TestCase):
         values = [1, 2, 3]
         expression = FunctionExpression(lambda x: values,
                                         mode=ExecutionMode.EXEC, name="test")
-        expected_batch = FrameBatch(frames=[], info=None,
+        expected_batch = FrameBatch(frames=pd.DataFrame(), info=None,
                                     outcomes={"test": [1, 2, 3]})
-        input_batch = FrameBatch(frames=[], info=None)
+        input_batch = FrameBatch(frames=pd.DataFrame(), info=None)
         expression.evaluate(input_batch)
         self.assertEqual(expected_batch, input_batch)
 
@@ -57,8 +59,8 @@ class FunctionExpressionTest(unittest.TestCase):
         expression = FunctionExpression(lambda x: values,
                                         mode=ExecutionMode.EXEC,
                                         name="test", is_temp=True)
-        expected_batch = FrameBatch(frames=[], info=None,
+        expected_batch = FrameBatch(frames=pd.DataFrame(), info=None,
                                     temp_outcomes={"test": [1, 2, 3]})
-        input_batch = FrameBatch(frames=[], info=None)
+        input_batch = FrameBatch(frames=pd.DataFrame(), info=None)
         expression.evaluate(input_batch)
         self.assertEqual(expected_batch, input_batch)
