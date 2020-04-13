@@ -15,6 +15,7 @@
 from typing import List
 
 import numpy as np
+from pandas import DataFrame
 
 
 class FrameBatch:
@@ -22,7 +23,7 @@ class FrameBatch:
     Data model used for storing a batch of frames
 
     Arguments:
-        frames (List[Frame]): List of video frames
+        frames (DataFrame): List of video frames
         info (FrameInfo): Information about the frames in the batch
         outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
         with name 'x' as key
@@ -30,7 +31,7 @@ class FrameBatch:
 
     """
 
-    def __init__(self, frames, info, outcomes=None, temp_outcomes=None):
+    def __init__(self, frames: DataFrame, info, outcomes=None, temp_outcomes=None):
         super().__init__()
         if outcomes is None:
             outcomes = dict()
@@ -38,7 +39,7 @@ class FrameBatch:
             temp_outcomes = dict()
 
         self._info = info
-        self._frames = tuple(frames)
+        self._frames = frames
         self._batch_size = len(frames)
         self._outcomes = outcomes
         self._temp_outcomes = temp_outcomes
@@ -55,14 +56,14 @@ class FrameBatch:
     def batch_size(self):
         return self._batch_size
 
-    def frames_as_numpy_array(self):
-        return np.array([frame.data for frame in self.frames])
+    def frames_as_numpy_array(self, column_name='data'):
+        return np.array(self._frames[column_name])
 
     def __eq__(self, other: 'FrameBatch'):
         return self.info == other.info and \
-            self.frames == other.frames and \
-            self._outcomes == other._outcomes and \
-            self._temp_outcomes == other._temp_outcomes
+               self.frames.equals(other.frames) and \
+               self._outcomes == other._outcomes and \
+               self._temp_outcomes == other._temp_outcomes
 
     def set_outcomes(self, name, predictions: 'BasePrediction',
                      is_temp: bool = False):
@@ -111,7 +112,7 @@ class FrameBatch:
         return name in self._outcomes or name in self._temp_outcomes
 
     def _get_frames_from_indices(self, required_frame_ids):
-        new_frames = [self.frames[i] for i in required_frame_ids]
+        new_frames = self.frames.iloc[required_frame_ids, :]
         new_batch = FrameBatch(new_frames, self.info)
         for key in self._outcomes:
             new_batch._outcomes[key] = [self._outcomes[key][i]
