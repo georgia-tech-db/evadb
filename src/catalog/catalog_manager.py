@@ -19,8 +19,12 @@ from src.catalog.column_type import ColumnType
 from src.catalog.models.base_model import init_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
+from src.catalog.models.udf import UdfMetadata
+from src.catalog.models.udf_io import UdfIO
 from src.catalog.services.df_column_service import DatasetColumnService
 from src.catalog.services.df_service import DatasetService
+from src.catalog.services.udf_service import UdfService
+from src.catalog.services.udf_io_service import UdfIOService
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -41,6 +45,8 @@ class CatalogManager(object):
     def __init__(self):
         self._dataset_service = DatasetService()
         self._column_service = DatasetColumnService()
+        self._udf_service = UdfService()
+        self._udf_io_service = UdfIOService()
 
     def bootstrap_catalog(self):
         """Bootstraps catalog.
@@ -82,7 +88,7 @@ class CatalogManager(object):
                                                                     List[int]]:
         """This method fetches bindings for strings.
 
-        Args:table_metadata_id
+        Args:
             database_name: currently not in use
             table_name: the table that is being referred to
             column_names: the column names of the table for which
@@ -201,41 +207,42 @@ class CatalogManager(object):
         return self._dataset_service.dataset_object_by_name(
             database_name, dataset_name)
 
-    def delete_column_metadata(self, table_name: str,
-                           column_names: List[str]):
-        """
-        This method deletes the columns associated with the given
-        metadata
+    def udf_io(
+            self, io_name: str, data_type: ColumnType,
+            dimensions: List[int], is_input: bool):
+        """Constructs an in memory udf_io object with given info.
+        This function won't commit this object in the catalog database.
+        If you want to commit it into catalog call create_udf with
+        corresponding udf_id and io list
 
         Arguments:
-           table_name-[str] table for which we will delete the columns
-           column_names - [List of columns that needs to deleted]
-
+            name(str): io name to be created
+            data_type(ColumnType): type of io created
+            dimensions(List[int]):dimensions of the io created
+            is_input(bool): whether a input or output, if true it is an input
         """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
+        return UdfIO(io_name, data_type,
+                     array_dimensions=dimensions, is_input=is_input)
 
-        column_ids = self._column_service.columns_by_dataset_id_and_names(metadata_id, column_names)
-
-        columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, column_ids)
-
-        self._column_service.delete_column(columns_to_be_deleted)
-
-
-    def delete_metadata(self, table_name: str) -> int:
-        """
-        This method deletes the table along with its columns from df_metadata
-        and df_columns respectively
+    def create_udf(self, name: str, impl_file_path: str,
+                   type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
+        """Creates an udf metadata object and udf_io objects and persists them 
+        in database.
 
         Arguments:
-           table_name = table name of  to be deleted.
+            name(str): name of the udf to which this metdata corresponds
+            impl_file_path(str): implementation path of the udf, 
+                                 relative to src/udf
+            type(str): what kind of udf operator like classification, 
+                                                        detection etc
+            udf_io_list(List[UdfIO]): input/output info of this udf
 
         Returns:
-           Returns the metadata id that will be deleted
+            The persisted UdfMetadata object with the id field populated.
         """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        #columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, None)
 
-        #self._column_service.delete_column(columns_to_be_deleted)
-        self._dataset_service.delete_dataset(metadata_id)
-
-        return metadata_id
+        metadata = self._udf_service.create_udf(name, impl_file_path, type)
+        for udf_io in udf_io_list:
+            udf_io.udf_id = metadata.id
+        self._udf_io_service.add_udf_io(udf_io_list)
+        return metadata
