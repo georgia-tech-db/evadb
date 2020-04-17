@@ -3,20 +3,17 @@ Sphinx extensions for the MPS documentation.
 See <http://sphinx-doc.org/extensions.html>
 '''
 
-from collections import defaultdict
-from inspect import isabstract, isclass
 import re
-import warnings
+from collections import defaultdict
+from inspect import isclass
 
 from docutils import nodes, transforms
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst.directives.admonitions import BaseAdmonition
 from sphinx import addnodes
-from sphinx.directives.other import VersionChange
 from sphinx.domains import Domain
-from sphinx.roles import XRefRole
-from sphinx.util.nodes import set_source_info, process_index_entry
-from sphinx.locale import admonitionlabels, versionlabels
+from sphinx.domains.changeset import versionlabels
+from sphinx.locale import admonitionlabels
 
 from . import designs
 
@@ -41,9 +38,11 @@ admonitionlabels.update(
     topics="Topic",
     topicss="Topics"),
 
+
 class MpsDomain(Domain):
     label = 'MPS'
     name = 'mps'
+
 
 class MpsDirective(Directive):
     @classmethod
@@ -62,6 +61,7 @@ class MpsDirective(Directive):
         else:
             app.add_directive(name, cls)
 
+
 class MpsPrefixDirective(MpsDirective):
     domain = 'mps'
     name = 'prefix'
@@ -73,21 +73,22 @@ class MpsPrefixDirective(MpsDirective):
         targetnode = nodes.target('', '', ids=[targetid])
         return [targetnode]
 
-def mps_tag_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
+def mps_tag_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     try:
         targetid = '.'.join([inliner.document.mps_tag_prefix, text])
     except AttributeError:
         return [], [inliner.document.reporter.warning
-                ('mps:tag without mps:prefix', line=lineno)]
+                    ('mps:tag without mps:prefix', line=lineno)]
     if len(text) == 0:
         return [], [inliner.document.reporter.error
-                ('missing argument for mps:tag', line=lineno)]
+                    ('missing argument for mps:tag', line=lineno)]
     targetnode = nodes.target('', '', ids=[targetid])
     tag = '.{}:'.format(text)
     refnode = nodes.reference('', '', refid=targetid, classes=['mpstag'],
                               *[nodes.Text(tag)])
     return [targetnode, refnode], []
+
 
 def mps_ref_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     textnode = nodes.Text(text)
@@ -107,19 +108,24 @@ def mps_ref_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         refnode += textnode
     return [refnode], []
 
+
 class Admonition(nodes.Admonition, nodes.Element):
     plural = False
+
 
 def visit_admonition_node(self, node):
     name = type(node).__name__ + ('s' if node.plural else '')
     self.visit_admonition(node, name=name)
 
+
 def depart_admonition_node(self, node):
     self.depart_admonition(node)
+
 
 class AdmonitionDirective(MpsDirective, BaseAdmonition):
     has_content = True
     visit = visit_admonition_node, depart_admonition_node
+
 
 class PluralDirective(AdmonitionDirective):
     def run(self):
@@ -131,38 +137,50 @@ class PluralDirective(AdmonitionDirective):
             ad[0].plural = True
         return ad
 
+
 class aka(Admonition):
     pass
+
 
 class AkaDirective(AdmonitionDirective):
     node_class = aka
 
+
 class bibref(Admonition):
     pass
+
 
 class BibrefDirective(PluralDirective):
     node_class = bibref
 
+
 class deprecated(Admonition):
     pass
+
 
 class DeprecatedDirective(AdmonitionDirective):
     node_class = deprecated
 
+
 class historical(Admonition):
     pass
+
 
 class HistoricalDirective(AdmonitionDirective):
     node_class = historical
 
+
 class link(Admonition):
     pass
+
 
 class LinkDirective(PluralDirective):
     node_class = link
 
+
 class note(Admonition):
     pass
+
 
 class NoteDirective(AdmonitionDirective):
     node_class = note
@@ -170,48 +188,61 @@ class NoteDirective(AdmonitionDirective):
     def run(self):
         ad = super(NoteDirective, self).run()
         if (isinstance(ad[0][0], nodes.enumerated_list)
-            and sum(1 for _ in ad[0][0].traverse(nodes.list_item)) > 1
-            or isinstance(ad[0][0], nodes.footnote)
-            and sum(1 for _ in ad[0].traverse(nodes.footnote)) > 1):
+                and sum(1 for _ in ad[0][0].traverse(nodes.list_item)) > 1
+                or isinstance(ad[0][0], nodes.footnote)
+                and sum(1 for _ in ad[0].traverse(nodes.footnote)) > 1):
             ad[0].plural = True
         return ad
+
 
 class opposite(Admonition):
     pass
 
+
 class OppositeDirective(PluralDirective):
     node_class = opposite
+
 
 class relevance(Admonition):
     pass
 
+
 class RelevanceDirective(AdmonitionDirective):
     node_class = relevance
+
 
 class see(Admonition):
     pass
 
+
 class SeeDirective(AdmonitionDirective):
     node_class = see
+
 
 class similar(Admonition):
     pass
 
+
 class SimilarDirective(PluralDirective):
     node_class = similar
 
+
 class specific(Admonition):
     pass
+
 
 class SpecificDirective(AdmonitionDirective):
     domain = 'mps'
     node_class = specific
 
+
 class topics(Admonition):
     pass
 
+
 class TopicsDirective(PluralDirective):
     node_class = topics
+
 
 class GlossaryTransform(transforms.Transform):
     """
@@ -250,7 +281,7 @@ class GlossaryTransform(transforms.Transform):
                 yield e
                 continue
             yield nodes.Text(m.group(1))
-            yield nodes.superscript(text = m.group(2))
+            yield nodes.superscript(text=m.group(2))
 
     def apply(self):
         # Change parenthesized sense numbers to superscripts in
@@ -274,8 +305,8 @@ class GlossaryTransform(transforms.Transform):
                 if isinstance(c, nodes.term):
                     ids = set(c['ids'])
                 if (isinstance(c, nodes.definition)
-                    and len(c) == 1
-                    and isinstance(c[0], see)):
+                        and len(c) == 1
+                        and isinstance(c[0], see)):
                     self.see_only_ids |= ids
 
         # Add cross-reference targets for plurals.
@@ -287,7 +318,7 @@ class GlossaryTransform(transforms.Transform):
             ('y', 'ies'),
             ('e', 'ed'),
             ('', 'ed'),
-            ])
+        ])
         for (name, fullname), value in list(objects.items()):
             if name != 'term':
                 continue
@@ -303,7 +334,9 @@ class GlossaryTransform(transforms.Transform):
             for old_ending, new_ending in endings:
                 if not old_fullname.endswith(old_ending):
                     continue
-                new_fullname = '{}{}{}'.format(old_fullname[:len(old_fullname) - len(old_ending)], new_ending, sense)
+                new_fullname = '{}{}{}'.format(
+                    old_fullname[:len(old_fullname) - len(old_ending)],
+                    new_ending, sense)
                 new_key = name, new_fullname
                 if new_key not in objects:
                     objects[new_key] = value
@@ -321,6 +354,7 @@ class GlossaryTransform(transforms.Transform):
                 for doc, line in cls.xref_ids[i]:
                     print('{}:{}: WARNING: cross-reference to {}.'
                           .format(doc, line, i))
+
 
 def setup(app):
     designs.convert_updated(app)

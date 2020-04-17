@@ -4,14 +4,12 @@
    contain the root `toctree` directive.
 
 Exploratory Video Analytics
-===============================
+############################
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Modules:
+   :maxdepth: 2
 
-   catalog/catalog
-   parser
-   optimizer
-   executor
-   storage
+   guide/index
+   documentation/index
+
+
