@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
 from typing import List
 
 import numpy as np
@@ -31,7 +32,8 @@ class FrameBatch:
 
     """
 
-    def __init__(self, frames: DataFrame, outcomes=None, temp_outcomes=None):
+    def __init__(self, frames: DataFrame, outcomes=None, temp_outcomes=None,
+                 identifier_column='id'):
         super().__init__()
         if outcomes is None:
             outcomes = dict()
@@ -42,6 +44,7 @@ class FrameBatch:
         self._batch_size = len(frames)
         self._outcomes = outcomes
         self._temp_outcomes = temp_outcomes
+        self._identifier_column = identifier_column
 
     @property
     def frames(self):
@@ -51,6 +54,10 @@ class FrameBatch:
     def batch_size(self):
         return self._batch_size
 
+    @property
+    def identifier_column(self):
+        return self._identifier_column
+
     def frames_as_numpy_array(self, column_name='data'):
         return np.array(self._frames[column_name])
 
@@ -59,7 +66,7 @@ class FrameBatch:
                self._outcomes == other._outcomes and \
                self._temp_outcomes == other._temp_outcomes
 
-    def set_outcomes(self, name, predictions: 'BasePrediction',
+    def set_outcomes(self, name, predictions: List[pd.DataFrame],
                      is_temp: bool = False):
         """
         Used for storing outcomes of the UDF predictions
@@ -67,18 +74,25 @@ class FrameBatch:
         Arguments:
             name (str): name of the UDF to which the predictions belong to
 
-            predictions (BasePrediction): Predictions/Outcome after executing
+            predictions (pd.DataFrame): Predictions/Outcome after executing
             the UDF on prediction
 
             is_temp (bool, default: False): Check if the outcomes are temporary
 
         """
-        if is_temp:
-            self._temp_outcomes[name] = predictions
-        else:
-            self._outcomes[name] = predictions
+        outcomes_pd = pd.DataFrame()
+        unique_ids = self.frames[self.identifier_column].unique().tolist()
+        for i in range(len(predictions)):
+            df = predictions[i]
+            df[self.identifier_column] = unique_ids[i]
+            outcomes_pd = outcomes_pd.append(df)
 
-    def get_outcomes_for(self, name: str) -> List['BasePrediction']:
+        if is_temp:
+            self._temp_outcomes[name] = outcomes_pd
+        else:
+            self._outcomes[name] = outcomes_pd
+
+    def get_outcomes_for(self, name: str) -> List[pd.DataFrame]:
         """
         Returns names corresponding to a name
         Arguments:
