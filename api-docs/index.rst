@@ -3,12 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to EVA's documentation!
-===============================
+Exploratory Video Analytics
+############################
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Modules:
+   :maxdepth: 2
 
-   catalog/catalog
-   executor
+   guide/index
+   documentation/index
+
+
