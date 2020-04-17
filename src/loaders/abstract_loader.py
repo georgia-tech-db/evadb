@@ -66,13 +66,13 @@ class AbstractVideoLoader(metaclass=ABCMeta):
             if self.skip_frames > 0 and record.get(self.identifier_column, 0) % self.skip_frames != 0:
                 continue
             if self.limit and record.get(self.identifier_column, 0) >= self.limit:
-                return FrameBatch(pd.DataFrame(frames))
+                return FrameBatch(pd.DataFrame(frames), identifier_column=self.identifier_column)
             frames.append(record)
             if len(frames) % self.batch_size == 0:
-                yield FrameBatch(pd.DataFrame(frames))
+                yield FrameBatch(pd.DataFrame(frames), identifier_column=self.identifier_column)
                 frames = []
         if frames:
-            return FrameBatch(pd.DataFrame(frames))
+            return FrameBatch(pd.DataFrame(frames), identifier_column=self.identifier_column)
 
     @abstractmethod
     def _load_frames(self) -> Iterator[Dict]:
