@@ -22,8 +22,8 @@ import sphinx_rtd_theme
 # -- Project information -----------------------------------------------------
 
 project = 'EVA'
-copyright = '2020, Database Lab'
-author = 'Database Lab'
+copyright = '2018-2020, Georgia Tech Database Group'
+author = 'Georgia Tech Database Group'
 
 # The full version, including alpha/beta/rc tags
 release = '0.0.1'
