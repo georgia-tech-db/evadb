@@ -18,6 +18,8 @@ from typing import List
 import numpy as np
 from pandas import DataFrame
 
+from src.models.inference.outcome import Outcome
+
 
 class FrameBatch:
     """
@@ -66,7 +68,7 @@ class FrameBatch:
                self._outcomes == other._outcomes and \
                self._temp_outcomes == other._temp_outcomes
 
-    def set_outcomes(self, name, predictions: List[pd.DataFrame],
+    def set_outcomes(self, name, predictions: List[Outcome],
                      is_temp: bool = False):
         """
         Used for storing outcomes of the UDF predictions
@@ -80,19 +82,12 @@ class FrameBatch:
             is_temp (bool, default: False): Check if the outcomes are temporary
 
         """
-        outcomes_pd = pd.DataFrame()
-        unique_ids = self.frames[self.identifier_column].unique().tolist()
-        for i in range(len(predictions)):
-            df = predictions[i]
-            df[self.identifier_column] = unique_ids[i]
-            outcomes_pd = outcomes_pd.append(df)
-
         if is_temp:
-            self._temp_outcomes[name] = outcomes_pd
+            self._temp_outcomes[name] = predictions
         else:
-            self._outcomes[name] = outcomes_pd
+            self._outcomes[name] = predictions
 
-    def get_outcomes_for(self, name: str) -> List[pd.DataFrame]:
+    def get_outcomes_for(self, name: str) -> List[Outcome]:
         """
         Returns names corresponding to a name
         Arguments:
