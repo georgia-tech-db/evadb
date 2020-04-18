@@ -30,7 +30,9 @@ class Prediction(BasePrediction):
 
     """
 
-    def __init__(self, frame: Frame, labels: List[str], scores: List[float],
+    def __init__(self, frame: Frame,
+                 labels: List[str],
+                 scores: List[float],
                  boxes: List[BoundingBox] = None):
         self._boxes = boxes
         self._labels = labels
@@ -95,9 +97,9 @@ class Prediction(BasePrediction):
     def __eq__(self, other):
         if isinstance(self, type(other)):
             return self.boxes == other.boxes and \
-                self.frame == other.frame and \
-                self.scores == other.scores and \
-                self.labels == other.labels
+                   self.frame == other.frame and \
+                   self.scores == other.scores and \
+                   self.labels == other.labels
         return other in self
 
     def __contains__(self, item):

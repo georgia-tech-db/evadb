@@ -21,6 +21,7 @@ from torchvision import transforms
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
+from src.models.inference.outcome import Outcome
 from src.udfs.abstract_udfs import AbstractClassifierUDF
 
 
@@ -75,7 +76,7 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
             'toothbrush'
         ]
 
-    def _get_predictions(self, frames: np.ndarray) -> List[pd.DataFrame]:
+    def _get_predictions(self, frames: np.ndarray) -> List[Outcome]:
         """
         Performs predictions on input frames
         Arguments:
@@ -108,8 +109,9 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
             pred_class = list(pred_class[:pred_t + 1])
             pred_score = list(pred_score[:pred_t + 1])
             prediction_df_list.append(
-                pd.DataFrame({"label": pred_class, "pred_score": pred_score, "pred_boxes": pred_boxes}))
+                Outcome(pd.DataFrame({"label": pred_class, "pred_score": pred_score, "pred_boxes": pred_boxes}),
+                        'label'))
         return prediction_df_list
 
-    def classify(self, frames: np.ndarray) -> List[pd.DataFrame]:
+    def classify(self, frames: np.ndarray) -> List[Outcome]:
         return self._get_predictions(frames)
