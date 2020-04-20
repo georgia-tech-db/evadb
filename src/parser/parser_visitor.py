@@ -38,6 +38,7 @@ from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.types import ParserColumnDataType
 
 from src.parser.types import ColumnConstraintEnum
+from src.parser.types import ColumnConstraintInformation
 
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
@@ -181,23 +182,30 @@ class ParserVisitor(evaql_parserVisitor):
     def visitColumnDeclaration(
             self, ctx: evaql_parser.ColumnDeclarationContext):
 
-        data_type, dimensions, unique = self.visit(ctx.columnDefinition())
+        #data_type, dimensions, unique = self.visit(ctx.columnDefinition())
+        data_type, dimensions, column_constraint_information = self.visit(ctx.columnDefinition())
+
         column_name = self.visit(ctx.uid())
 
         if column_name is not None:
-            return ColumnDefinition(column_name, data_type, dimensions, unique)
+            return ColumnDefinition(column_name, data_type, dimensions, column_constraint_information)
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
         data_type, dimensions = self.visit(ctx.dataType())
 
         constraint_count = len(ctx.columnConstraint())
-        unique = False
+
+        #unique = False
+        column_constraint_information = ColumnConstraintInformation()
+
         for i in range(constraint_count):
             return_type = self.visit(ctx.columnConstraint(i))
             if return_type == ColumnConstraintEnum.UNIQUE:
-                unique = True
-        return data_type, dimensions, unique
+                #unique = True
+                column_constraint_information.unique = True
+        #return data_type, dimensions, unique
+        return data_type, dimensions, column_constraint_information
 
     def visitUniqueKeyColumnConstraint(self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
         return ColumnConstraintEnum.UNIQUE

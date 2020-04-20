@@ -19,16 +19,23 @@ from src.parser.types import StatementType
 from src.parser.table_ref import TableRef
 from typing import List
 from src.parser.types import ParserColumnDataType
+from src.parser.types import ColumnConstraintInformation
 
 
 class ColumnDefinition:
     def __init__(self, col_name: str,
                  col_type: ParserColumnDataType, col_dim: List[int],
-                 col_unique_column_constarint=False):
+                 cci: ColumnConstraintInformation = None):
         self._name = col_name
         self._type = col_type
         self._dimension = col_dim
-        self._unique_column_constraint = col_unique_column_constarint
+
+        #column constarint info
+        if cci is not None:
+            self._unique_column_constraint = cci.unique
+            self._nullable = cci.nullable
+            self._primary = cci.primary
+            self._default_value = cci.default_value
 
     @property
     def name(self):
