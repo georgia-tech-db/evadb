@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.catalog.models.df_column import DataFrameColumn
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from .abstract_expression import AbstractExpression, ExpressionType, \
     ExpressionReturnType
 
@@ -67,9 +67,9 @@ class TupleValueExpression(AbstractExpression):
         self._col_object = value
 
     # remove this once doen with tuple class
-    def evaluate(self, batch: FrameBatch, *args):
+    def evaluate(self, batch: Batch, *args):
         if args is None:
             # error Handling
             pass
 
-        return batch.frames_as_numpy_array(self.col_name)
+        return batch.column_as_numpy_array(self.col_name)

@@ -17,7 +17,7 @@ import unittest
 
 import cv2
 
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.models.storage.frame import Frame
 from src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
@@ -40,7 +40,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
             os.path.join(self.base_path, 'data', 'dog.jpeg')), None)
         frame_dog_cat = Frame(1, self._load_image(
             os.path.join(self.base_path, 'data', 'dog_cat.jpg')), None)
-        frame_batch = FrameBatch([frame_dog, frame_dog_cat])
+        frame_batch = Batch([frame_dog, frame_dog_cat])
         detector = FastRCNNObjectDetector()
         result = detector.classify(frame_batch)
 

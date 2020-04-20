@@ -17,7 +17,7 @@ from typing import Callable
 
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 
 
 @unique
@@ -58,7 +58,7 @@ class FunctionExpression(AbstractExpression):
         self.function = func
         self.is_temp = is_temp
 
-    def evaluate(self, batch: FrameBatch):
+    def evaluate(self, batch: Batch):
         args = []
         if self.get_children_count() > 0:
             child = self.get_child(0)

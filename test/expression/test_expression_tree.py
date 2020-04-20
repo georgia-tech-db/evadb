@@ -21,7 +21,7 @@ from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.function_expression import FunctionExpression
 from src.models.inference.classifier_prediction import Prediction
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.models.storage.frame import Frame
 
 
@@ -38,7 +38,7 @@ class ExpressionEvaluationTest(unittest.TestCase):
                                                func,
                                                value_expr)
 
-        batch = FrameBatch(frames=[
+        batch = Batch(frames=[
             frame_1, frame_2
         ])
 

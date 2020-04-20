@@ -18,7 +18,7 @@ from typing import Iterator, Dict
 import pandas as pd
 
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 
 
 class AbstractVideoLoader(metaclass=ABCMeta):
@@ -51,7 +51,7 @@ class AbstractVideoLoader(metaclass=ABCMeta):
         self.total_shards = total_shards
         self.identifier_column = video_metadata.identifier_column if video_metadata.identifier_column else 'id'
 
-    def load(self) -> Iterator[FrameBatch]:
+    def load(self) -> Iterator[Batch]:
         """
         This is a generator for loading the frames of a video.
          Uses the video metadata and other class arguments
@@ -66,13 +66,13 @@ class AbstractVideoLoader(metaclass=ABCMeta):
             if self.skip_frames > 0 and record.get(self.identifier_column, 0) % self.skip_frames != 0:
                 continue
             if self.limit and record.get(self.identifier_column, 0) >= self.limit:
-                return FrameBatch(pd.DataFrame(frames), identifier_column=self.identifier_column)
+                return Batch(pd.DataFrame(frames), identifier_column=self.identifier_column)
             frames.append(record)
             if len(frames) % self.batch_size == 0:
-                yield FrameBatch(pd.DataFrame(frames), identifier_column=self.identifier_column)
+                yield Batch(pd.DataFrame(frames), identifier_column=self.identifier_column)
                 frames = []
         if frames:
-            return FrameBatch(pd.DataFrame(frames), identifier_column=self.identifier_column)
+            return Batch(pd.DataFrame(frames), identifier_column=self.identifier_column)
 
     @abstractmethod
     def _load_frames(self) -> Iterator[Dict]:
