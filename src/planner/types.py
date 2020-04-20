@@ -22,4 +22,5 @@ class PlanNodeType(IntEnum):
     PP_FILTER = 3
     INSERT = 4
     CREATE = 5
+    CREATE_UDF = 6
     # add other types

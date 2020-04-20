@@ -40,7 +40,18 @@ class ColumnDefinition:
 
     @property
     def dimension(self):
-        return self._type
+        return self._dimension
+
+    def __str__(self):
+        return '{} {} {}'.format(self._name, self._type, self._dimension)
+
+    def __eq__(self, other):
+        if not isinstance(other, ColumnDefinition):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+
+        return self.name == other.name and \
+            self.type == other.type and self.dimension == other.dimension
 
 
 class CreateTableStatement(AbstractStatement):

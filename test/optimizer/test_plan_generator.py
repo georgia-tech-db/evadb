@@ -17,7 +17,7 @@ import unittest
 from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
-    LogicalFilter, LogicalInsert, Operator
+    LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF
 from src.optimizer.plan_generator import PlanGenerator
 
 
@@ -70,3 +70,11 @@ class PlanGeneratorTest(unittest.TestCase):
         PlanGenerator().build(Operator(LogicalGet(None, 1)))
         PlanGenerator().build(Operator(LogicalProject([])))
         mock_class.assert_not_called()
+
+    @patch('src.optimizer.plan_generator.CreateUDFGenerator')
+    def test_should_call_create_udf_generator_for_logical_create_udf(
+            self, mock):
+        mock_instance = mock.return_value
+        l_create_udf = LogicalCreateUDF('udf', True, [], [], 'tmp')
+        PlanGenerator().build(l_create_udf)
+        mock_instance.build.assert_called_with(l_create_udf)
