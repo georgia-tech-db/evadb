@@ -38,7 +38,7 @@ from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.types import ParserColumnDataType
 
 from src.parser.types import ColumnConstraintEnum
-from src.parser.types import ColumnConstraintInformation
+from src.parser.create_statement import ColumnConstraintInformation
 
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
