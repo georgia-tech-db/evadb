@@ -109,8 +109,10 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
             pred_class = list(pred_class[:pred_t + 1])
             pred_score = list(pred_score[:pred_t + 1])
             prediction_df_list.append(
-                Outcome(pd.DataFrame({"label": pred_class, "pred_score": pred_score, "pred_boxes": pred_boxes}),
-                        'label'))
+                Outcome(pd.DataFrame(
+                    {"label": pred_class, "pred_score": pred_score,
+                     "pred_boxes": pred_boxes}),
+                    'label'))
         return prediction_df_list
 
     def classify(self, frames: np.ndarray) -> List[Outcome]:
