@@ -70,5 +70,4 @@ class FunctionExpression(AbstractExpression):
 
         if self.mode == ExecutionMode.EXEC:
             batch.set_outcomes(self.name, outcome, is_temp=self.is_temp)
-
         return outcome
