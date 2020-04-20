@@ -90,9 +90,7 @@ class PlanExecutorTest(unittest.TestCase):
         # Execute the plan
         executor = PlanExecutor(seq_scan)
         actual = executor.execute_plan()
-        expected = [
-            batch_1[::2],
-            batch_2[::2]]
+        expected = batch_1[::2] + batch_2[::2]
 
         mock_class.assert_called_once()
 
