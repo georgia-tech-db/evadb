@@ -64,6 +64,7 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         Returns:
             List[DataFrame]: The predictions made by the classifier
         """
+        pass
 
     def __call__(self, *args, **kwargs):
-        self.classify(*args, **kwargs)
+        return self.classify(*args, **kwargs)
