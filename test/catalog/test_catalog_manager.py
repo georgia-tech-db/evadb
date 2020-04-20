@@ -45,7 +45,8 @@ class CatalogManagerTests(unittest.TestCase):
         columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
         actual = catalog.create_metadata(dataset_name, file_url, columns)
         ds_mock.return_value.create_dataset.assert_called_with(dataset_name,
-                                                               file_url, identifier_id='id')
+                                                               file_url,
+                                                               identifier_id='id')
         for column in columns:
             column.metadata_id = \
                 ds_mock.return_value.create_dataset.return_value.id
@@ -148,6 +149,14 @@ class CatalogManagerTests(unittest.TestCase):
         udf_mock.return_value.create_udf.assert_called_with(
             'udf', 'sample.py', 'classification')
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
+
+    @mock.patch('src.catalog.catalog_manager.UdfService')
+    def test_get_udf_by_name(self, udf_mock):
+        catalog = CatalogManager()
+        actual = catalog.get_udf_by_name('name')
+        udf_mock.return_value.udf_by_name.assert_called_with('name')
+        self.assertEqual(actual,
+                         udf_mock.return_value.udf_by_name.return_value)
 
 
 if __name__ == '__main__':
