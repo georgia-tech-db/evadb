@@ -19,8 +19,14 @@ from src.parser.types import StatementType
 from src.parser.table_ref import TableRef
 from typing import List
 from src.parser.types import ParserColumnDataType
-from src.parser.types import ColumnConstraintInformation
 
+
+class ColumnConstraintInformation:
+    def __init__(self):
+        self.nullable = False
+        self.default_value = None
+        self.primary = False
+        self.unique = False
 
 class ColumnDefinition:
     def __init__(self, col_name: str,

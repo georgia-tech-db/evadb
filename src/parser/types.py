@@ -15,14 +15,6 @@
 from enum import IntEnum, unique
 
 
-class ColumnConstraintInformation:
-    def __init__(self):
-        self.nullable = False
-        self.default_value = None
-        self.primary = False
-        self.unique = False
-
-
 class ColumnConstraintEnum(IntEnum):
     NULLNOTNULL = 1
     DEFAULT = 2
