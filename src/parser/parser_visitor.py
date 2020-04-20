@@ -182,7 +182,6 @@ class ParserVisitor(evaql_parserVisitor):
     def visitColumnDeclaration(
             self, ctx: evaql_parser.ColumnDeclarationContext):
 
-        #data_type, dimensions, unique = self.visit(ctx.columnDefinition())
         data_type, dimensions, column_constraint_information = self.visit(ctx.columnDefinition())
 
         column_name = self.visit(ctx.uid())
@@ -196,15 +195,14 @@ class ParserVisitor(evaql_parserVisitor):
 
         constraint_count = len(ctx.columnConstraint())
 
-        #unique = False
         column_constraint_information = ColumnConstraintInformation()
 
         for i in range(constraint_count):
             return_type = self.visit(ctx.columnConstraint(i))
             if return_type == ColumnConstraintEnum.UNIQUE:
-                #unique = True
+
                 column_constraint_information.unique = True
-        #return data_type, dimensions, unique
+
         return data_type, dimensions, column_constraint_information
 
     def visitUniqueKeyColumnConstraint(self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
