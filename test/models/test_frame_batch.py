@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
 import unittest
 
 import numpy as np
@@ -75,7 +76,8 @@ class FrameBatchTest(unittest.TestCase):
 
     def test_slicing_should_work_with_skip_value(self):
         batch = FrameBatch(
-            frames=create_dataframe(3), outcomes={'test': [[None], [None], [None]]})
+            frames=create_dataframe(3),
+            outcomes={'test': [[None], [None], [None]]})
         expected = FrameBatch(
             frames=create_dataframe(3).iloc[[0, 2], :],
             outcomes={'test': [[None], [None]]})
@@ -113,3 +115,32 @@ class FrameBatchTest(unittest.TestCase):
 
         self.assertTrue(batch.has_outcome('test'))
         self.assertTrue(batch.has_outcome('test_temp'))
+
+    def test_add_should_raise_error_for_incompatible_type(self):
+        batch = FrameBatch(frames=create_dataframe())
+        with self.assertRaises(TypeError):
+            batch + 1
+
+    def test_add_should_get_new_batch_frame_with_addition_no_outcomes(self):
+        batch_1 = FrameBatch(frames=create_dataframe())
+        batch_2 = FrameBatch(frames=create_dataframe())
+        batch_3 = FrameBatch(frames=create_dataframe_same(2))
+        self.assertEqual(batch_3, batch_1 + batch_2)
+
+    def test_adding_to_empty_frame_batch_returns_itself(self):
+        batch_1 = FrameBatch(frames=pd.DataFrame())
+        batch_2 = FrameBatch(frames=create_dataframe(), outcomes={'1': [1]})
+
+        self.assertEqual(batch_2, batch_1 + batch_2)
+
+    def test_adding_batch_frame_with_outcomes_returns_new_batch_frame(self):
+        batch_1 = FrameBatch(frames=create_dataframe(), outcomes={'1': [1]},
+                             temp_outcomes={'2': [1]})
+        batch_2 = FrameBatch(frames=create_dataframe(), outcomes={'1': [2]},
+                             temp_outcomes={'2': [2]})
+
+        batch_3 = FrameBatch(frames=create_dataframe_same(2),
+                             outcomes={'1': [1, 2]},
+                             temp_outcomes={'2': [1, 2]})
+
+        self.assertEqual(batch_3, batch_1 + batch_2)

@@ -142,3 +142,33 @@ class FrameBatch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
+
+    def __add__(self, other: 'FrameBatch'):
+        """
+        Adds two batch frames and return a new batch frame
+        Arguments:
+            other (FrameBatch): other framebatch to add
+
+        Returns:
+            FrameBatch
+        """
+
+        def _unique_keys(dict1, dict2):
+            return set(list(dict1.keys()) + list(dict2.keys()))
+
+        if not isinstance(other, FrameBatch):
+            raise TypeError("Input should be of type -  FrameBatch")
+
+        new_frames = self.frames.append(other.frames)
+        new_outcomes = {}
+        temp_new_outcomes = {}
+
+        for key in _unique_keys(self._outcomes, other._outcomes):
+            new_outcomes[key] = self._outcomes.get(key, []) + \
+                                other._outcomes.get(key, [])
+        for key in _unique_keys(self._temp_outcomes, other._temp_outcomes):
+            temp_new_outcomes[key] = self._temp_outcomes.get(key, []) + \
+                                     other._temp_outcomes.get(key, [])
+
+        return FrameBatch(new_frames, outcomes=new_outcomes,
+                          temp_outcomes=temp_new_outcomes)
