@@ -21,7 +21,7 @@ from pandas import DataFrame
 from src.models.inference.outcome import Outcome
 
 
-class FrameBatch:
+class Batch:
     """
     Data model used for storing a batch of frames
 
@@ -60,10 +60,10 @@ class FrameBatch:
     def identifier_column(self):
         return self._identifier_column
 
-    def frames_as_numpy_array(self, column_name='data'):
+    def column_as_numpy_array(self, column_name='data'):
         return np.array(self._frames[column_name])
 
-    def __eq__(self, other: 'FrameBatch'):
+    def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \
                self._outcomes == other._outcomes and \
                self._temp_outcomes == other._temp_outcomes
@@ -116,7 +116,7 @@ class FrameBatch:
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
-        new_batch = FrameBatch(new_frames)
+        new_batch = Batch(new_frames)
         for key in self._outcomes:
             new_batch._outcomes[key] = [self._outcomes[key][i]
                                         for i in required_frame_ids]
@@ -125,7 +125,7 @@ class FrameBatch:
                                              for i in required_frame_ids]
         return new_batch
 
-    def __getitem__(self, indices) -> 'FrameBatch':
+    def __getitem__(self, indices) -> 'Batch':
         """
         Takes as input the slice for the list
         Arguments:
@@ -143,20 +143,20 @@ class FrameBatch:
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
 
-    def __add__(self, other: 'FrameBatch'):
+    def __add__(self, other: 'Batch'):
         """
         Adds two batch frames and return a new batch frame
         Arguments:
-            other (FrameBatch): other framebatch to add
+            other (Batch): other framebatch to add
 
         Returns:
-            FrameBatch
+            Batch
         """
 
         def _unique_keys(dict1, dict2):
             return set(list(dict1.keys()) + list(dict2.keys()))
 
-        if not isinstance(other, FrameBatch):
+        if not isinstance(other, Batch):
             raise TypeError("Input should be of type -  FrameBatch")
 
         new_frames = self.frames.append(other.frames)
@@ -170,5 +170,5 @@ class FrameBatch:
             temp_new_outcomes[key] = self._temp_outcomes.get(key, []) + \
                                      other._temp_outcomes.get(key, [])
 
-        return FrameBatch(new_frames, outcomes=new_outcomes,
-                          temp_outcomes=temp_new_outcomes)
+        return Batch(new_frames, outcomes=new_outcomes,
+                     temp_outcomes=temp_new_outcomes)

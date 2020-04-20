@@ -15,7 +15,7 @@
 import unittest
 
 from src.executor.pp_executor import PPExecutor
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from test.util import create_dataframe
 from ..executor.utils import DummyExecutor
 
@@ -24,7 +24,7 @@ class PPScanExecutorTest(unittest.TestCase):
 
     def test_should_return_only_frames_satisfy_predicate(self):
         dataframe = create_dataframe(3)
-        batch = FrameBatch(frames=dataframe)
+        batch = Batch(frames=dataframe)
         expression = type("AbstractExpression", (), {"evaluate": lambda x: [
             False, False, True]})
 

@@ -16,7 +16,7 @@ import pandas as pd
 
 from src.executor.abstract_executor import AbstractExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 from src.executor.disk_based_storage_executor import DiskStorageExecutor
@@ -91,7 +91,7 @@ class PlanExecutor:
         # a stitched output
         execution_tree = self._build_execution_tree(self._plan)
 
-        output_batches = FrameBatch(pd.DataFrame())
+        output_batches = Batch(pd.DataFrame())
 
         # ToDo generalize this logic
         _INSERT_CREATE_ = (

@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.executor.plan_executor import PlanExecutor
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 
@@ -77,8 +77,8 @@ class PlanExecutorTest(unittest.TestCase):
 
         # Build plan tree
         video = DataFrameMetadata("dataset", "dummy.avi")
-        batch_1 = FrameBatch(pd.DataFrame({'data': [1, 2, 3]}))
-        batch_2 = FrameBatch(pd.DataFrame({'data': [4, 5, 6]}))
+        batch_1 = Batch(pd.DataFrame({'data': [1, 2, 3]}))
+        batch_2 = Batch(pd.DataFrame({'data': [4, 5, 6]}))
         class_instatnce.load.return_value = map(lambda x: x, [
             batch_1,
             batch_2])
