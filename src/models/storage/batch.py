@@ -30,6 +30,7 @@ class Batch:
         info (FrameInfo): Information about the frames in the batch
         outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
         with name 'x' as key
+        identifier_column (str): A column used to uniquely a row
 
 
     """
