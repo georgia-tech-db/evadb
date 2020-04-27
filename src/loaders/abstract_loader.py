@@ -57,22 +57,27 @@ class AbstractVideoLoader(metaclass=ABCMeta):
          Uses the video metadata and other class arguments
 
         Yields:
-        :obj: `eva.models.FrameBatch`: An object containing a batch of frames
+        :obj: `Batch`: An object containing a batch of frames
                                        and record specific metadata
         """
 
         frames = []
         for record in self._load_frames():
-            if self.skip_frames > 0 and record.get(self.identifier_column, 0) % self.skip_frames != 0:
+            if self.skip_frames > 0 and record.get(self.identifier_column,
+                                                   0) % self.skip_frames != 0:
                 continue
-            if self.limit and record.get(self.identifier_column, 0) >= self.limit:
-                return Batch(pd.DataFrame(frames), identifier_column=self.identifier_column)
+            if self.limit and record.get(self.identifier_column,
+                                         0) >= self.limit:
+                return Batch(pd.DataFrame(frames),
+                             identifier_column=self.identifier_column)
             frames.append(record)
             if len(frames) % self.batch_size == 0:
-                yield Batch(pd.DataFrame(frames), identifier_column=self.identifier_column)
+                yield Batch(pd.DataFrame(frames),
+                            identifier_column=self.identifier_column)
                 frames = []
         if frames:
-            return Batch(pd.DataFrame(frames), identifier_column=self.identifier_column)
+            return Batch(pd.DataFrame(frames),
+                         identifier_column=self.identifier_column)
 
     @abstractmethod
     def _load_frames(self) -> Iterator[Dict]:
