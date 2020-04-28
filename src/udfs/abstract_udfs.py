@@ -15,9 +15,10 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
+import numpy as np
+import pandas as pd
+
 from src.models.catalog.frame_info import FrameInfo
-from src.models.inference.base_prediction import BasePrediction
-from src.models.storage.batch import FrameBatch
 
 
 class AbstractClassifierUDF(metaclass=ABCMeta):
@@ -51,18 +52,19 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def classify(self, batch: FrameBatch) -> List[BasePrediction]:
+    def classify(self, frames: np.ndarray) -> List[pd.DataFrame]:
         """
         Takes as input a batch of frames and returns the predictions by
         applying the classification model.
 
         Arguments:
-            batch (FrameBatch): Input batch of frames on which prediction
+            frames (np.ndarray): Input batch of frames on which prediction
             needs to be made
 
         Returns:
-            List[BasePrediction]: The predictions made by the classifier
+            List[DataFrame]: The predictions made by the classifier
         """
+        pass
 
     def __call__(self, *args, **kwargs):
-        self.classify(*args, **kwargs)
+        return self.classify(*args, **kwargs)

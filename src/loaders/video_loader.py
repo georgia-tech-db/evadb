@@ -17,8 +17,6 @@ from typing import Iterator
 import cv2
 
 from src.loaders.abstract_loader import AbstractVideoLoader
-from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -42,12 +40,7 @@ class VideoLoader(AbstractVideoLoader):
         _, frame = video.read()
         frame_ind = video_start - 1
 
-        info = None
-        if frame is not None:
-            (height, width, num_channels) = frame.shape
-            info = FrameInfo(height, width, num_channels, ColorSpace.BGR)
-
         while frame is not None:
             frame_ind += 1
-            yield Frame(frame_ind, frame, info)
+            yield {'id': frame_ind, 'frame_data': frame}
             _, frame = video.read()

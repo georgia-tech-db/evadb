@@ -16,7 +16,7 @@ from typing import List
 
 from src.models.inference.base_prediction import BasePrediction
 from src.models.inference.representation import BoundingBox
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.models.storage.frame import Frame
 
 
@@ -30,7 +30,9 @@ class Prediction(BasePrediction):
 
     """
 
-    def __init__(self, frame: Frame, labels: List[str], scores: List[float],
+    def __init__(self, frame: Frame,
+                 labels: List[str],
+                 scores: List[float],
                  boxes: List[BoundingBox] = None):
         self._boxes = boxes
         self._labels = labels
@@ -54,7 +56,7 @@ class Prediction(BasePrediction):
         return self._scores
 
     @staticmethod
-    def predictions_from_batch_and_lists(batch: FrameBatch,
+    def predictions_from_batch_and_lists(batch: Batch,
                                          predictions: List[List[str]],
                                          scores: List[List[float]],
                                          boxes: List[
@@ -64,7 +66,7 @@ class Prediction(BasePrediction):
         from identified values
 
         Arguments:
-            batch (FrameBatch): frame batch for which the predictions belong to
+            batch (Batch): frame batch for which the predictions belong to
 
             predictions (List[List[str]]): List of prediction labels per
             frame in batch
@@ -95,9 +97,9 @@ class Prediction(BasePrediction):
     def __eq__(self, other):
         if isinstance(self, type(other)):
             return self.boxes == other.boxes and \
-                self.frame == other.frame and \
-                self.scores == other.scores and \
-                self.labels == other.labels
+                   self.frame == other.frame and \
+                   self.scores == other.scores and \
+                   self.labels == other.labels
         return other in self
 
     def __contains__(self, item):
