@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
 import unittest
 from unittest.mock import patch
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.executor.plan_executor import PlanExecutor
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 
@@ -76,9 +77,11 @@ class PlanExecutorTest(unittest.TestCase):
 
         # Build plan tree
         video = DataFrameMetadata("dataset", "dummy.avi")
+        batch_1 = Batch(pd.DataFrame({'data': [1, 2, 3]}))
+        batch_2 = Batch(pd.DataFrame({'data': [4, 5, 6]}))
         class_instatnce.load.return_value = map(lambda x: x, [
-            FrameBatch([1, 2, 3], None),
-            FrameBatch([4, 5, 6], None)])
+            batch_1,
+            batch_2])
 
         storage_plan = StoragePlan(video)
         seq_scan = SeqScanPlan(predicate=dummy_expr, column_ids=[])
@@ -87,9 +90,7 @@ class PlanExecutorTest(unittest.TestCase):
         # Execute the plan
         executor = PlanExecutor(seq_scan)
         actual = executor.execute_plan()
-        expected = [
-            FrameBatch([1, 3], None),
-            FrameBatch([4, 6], None)]
+        expected = batch_1[::2] + batch_2[::2]
 
         mock_class.assert_called_once()
 

@@ -17,24 +17,20 @@ import warnings
 
 from antlr4 import TerminalNode
 
-from src.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionType)
+from src.expression.abstract_expression import (ExpressionType)
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.function_expression import FunctionExpression, \
+    ExecutionMode
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.function_expression import FunctionExpression
-
-from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
-from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_udf_statement import CreateUDFStatement
-
-from src.parser.table_ref import TableRef, TableInfo
-
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-
+from src.parser.insert_statement import InsertTableStatement
+from src.parser.select_statement import SelectStatement
+from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType
 
 from src.parser.types import ColumnConstraintEnum
@@ -484,7 +480,6 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
     def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
         udf_name = None
-        udf_args = None
         if ctx.simpleId():
             udf_name = self.visit(ctx.simpleId())
         else:
@@ -492,7 +487,8 @@ class ParserVisitor(evaql_parserVisitor):
                                  LoggingLevel.ERROR)
 
         udf_args = self.visit(ctx.functionArgs())
-        func_expr = FunctionExpression(None, name=udf_name)
+        func_expr = FunctionExpression(None, name=udf_name,
+                                       mode=ExecutionMode.EXEC)
         for arg in udf_args:
             func_expr.append_child(arg)
         return func_expr

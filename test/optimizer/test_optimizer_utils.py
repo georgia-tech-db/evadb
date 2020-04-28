@@ -16,9 +16,13 @@ import unittest
 
 from mock import patch, MagicMock
 
+from src.expression.function_expression import FunctionExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
-                                           column_definition_to_udf_io)
+                                           column_definition_to_udf_io,
+                                           bind_function_expr,
+                                           bind_predicate_expr,
+                                           bind_columns_expr)
 from src.optimizer.optimizer_utils import \
     xform_parser_column_type_to_catalog_type
 from src.parser.create_statement import ColumnDefinition
@@ -40,6 +44,21 @@ class OptimizerUtilsTest(unittest.TestCase):
         tuple_expr = TupleValueExpression(col_name="COL1")
         bind_tuple_value_expr(tuple_expr, column_map)
         self.assertEqual(tuple_expr.col_object, column_map['col1'])
+
+    @patch('src.optimizer.optimizer_utils.CatalogManager')
+    @patch('src.optimizer.optimizer_utils.str_to_class')
+    def test_bind_function_value_expr(self, mock_str_path, mock_catalog):
+        func_expr = FunctionExpression(None, name='temp')
+        mock_output = MagicMock()
+        mock_output.name = 'name'
+        mock_output.impl_file_path = 'path'
+        mock_catalog.return_value.get_udf_by_name.return_value = mock_output
+        bind_function_expr(func_expr, None)
+
+        mock_catalog.return_value.get_udf_by_name.assert_called_with('temp')
+        mock_str_path.assert_called_with('path.name')
+        self.assertEqual(func_expr.function,
+                         mock_str_path.return_value.return_value)
 
     @patch('src.optimizer.optimizer_utils.CatalogManager')
     @patch('src.optimizer.optimizer_utils.\
@@ -65,3 +84,17 @@ xform_parser_column_type_to_catalog_type')
         mock.return_value.udf_io.assert_called_with(
             'name', 'type', 'dimension', True)
         self.assertEqual(actual2, ['udf_io'])
+
+    @patch('src.optimizer.optimizer_utils.bind_function_expr')
+    def test_bind_predicate_calls_bind_func_expr_if_type_functional(self,
+                                                                    mock_bind):
+        func_expr = FunctionExpression(None, name='temp')
+        bind_predicate_expr(func_expr, {})
+        mock_bind.assert_called_with(func_expr, {})
+
+    @patch('src.optimizer.optimizer_utils.bind_function_expr')
+    def test_bind_columns_calls_bind_func_expr_if_type_functional(self,
+                                                                  mock_bind):
+        func_expr = FunctionExpression(None, name='temp')
+        bind_columns_expr([func_expr], {})
+        mock_bind.assert_called_with(func_expr, {})

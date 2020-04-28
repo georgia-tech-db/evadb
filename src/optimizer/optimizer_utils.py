@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
+from src.expression.function_expression import FunctionExpression
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
 from src.catalog.column_type import ColumnType
@@ -24,6 +25,7 @@ from src.expression.tuple_value_expression import ExpressionType, \
 
 from src.parser.create_statement import ColumnDefinition
 from src.parser.types import ParserColumnDataType
+from src.utils.generic_utils import str_to_class
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -73,6 +75,8 @@ def bind_columns_expr(target_columns: List[AbstractExpression],
 
         if column_exp.etype == ExpressionType.TUPLE_VALUE:
             bind_tuple_value_expr(column_exp, column_mapping)
+        if column_exp.etype == ExpressionType.FUNCTION_EXPRESSION:
+            bind_function_expr(column_exp, column_mapping)
 
 
 def bind_tuple_value_expr(expr: TupleValueExpression, column_mapping):
@@ -110,6 +114,16 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 
     if predicate.etype == ExpressionType.TUPLE_VALUE:
         bind_tuple_value_expr(predicate, column_mapping)
+
+    if predicate.etype == ExpressionType.FUNCTION_EXPRESSION:
+        bind_function_expr(predicate, column_mapping)
+
+
+def bind_function_expr(expr: FunctionExpression, column_mapping):
+    catalog = CatalogManager()
+    udf_obj = catalog.get_udf_by_name(expr.name)
+    class_path = '.'.join([udf_obj.impl_file_path, udf_obj.name])
+    expr.function = str_to_class(class_path)()
 
 
 def create_column_metadata(col_list: List[ColumnDefinition]):
