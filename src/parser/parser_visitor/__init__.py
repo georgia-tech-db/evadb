@@ -22,7 +22,7 @@ class ParserVisitor(evaql_parserVisitor):
     from ._expressions import visitStringLiteral, visitConstant, visitLogicalExpression, visitBinaryComparisonPredicate
     from ._expressions import visitNestedExpressionAtom, visitComparisonOperator, visitLogicalOperator, visitExpressionsWithDefaults
 
-    from ._fuctions import visitUdfFunction, visitFunctionArgs, visitCreateUdf
+    from ._functions import visitUdfFunction, visitFunctionArgs, visitCreateUdf
 
 
     def visitRoot(self, ctx: evaql_parser.RootContext):

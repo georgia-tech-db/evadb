@@ -207,7 +207,7 @@ class ParserVisitorTests(unittest.TestCase):
     # UDFs
     ##################################################################
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor.FunctionExpression')
+    @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):
 
         ctx = MagicMock()
@@ -245,7 +245,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(actual, [1, 2])
 
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor.CreateUDFStatement')
+    @mock.patch('src.parser.parser_visitor._functions.CreateUDFStatement')
     def test_visit_create_udf(self, create_udf_mock, visit_mock):
         ctx = MagicMock()
         ctx.children = children = [MagicMock() for i in range(5)]
