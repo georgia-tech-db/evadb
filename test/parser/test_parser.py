@@ -41,7 +41,7 @@ class ParserTests(unittest.TestCase):
         single_queries = []
         single_queries.append(
             """CREATE TABLE IF NOT EXISTS Persons (
-                  Frame_ID INTEGER,
+                  Frame_ID INTEGER UNIQUE,
                   Frame_Data TEXT(10),
                   Frame_Value FLOAT(1000, 201),
                   Frame_Array NDARRAY (5, 100, 2432, 4324, 100)

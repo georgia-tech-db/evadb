@@ -15,6 +15,13 @@
 from enum import IntEnum, unique
 
 
+class ColumnConstraintEnum(IntEnum):
+    NULLNOTNULL = 1
+    DEFAULT = 2
+    PRIMARY = 3
+    UNIQUE = 4
+
+
 @unique
 class StatementType(IntEnum):
     """
