@@ -26,12 +26,8 @@ from src.parser.table_ref import TableRef, TableInfo
 from src.catalog.models.df_column import DataFrameColumn
 from src.storage.dataframe import load_dataframe
 from src.catalog.column_type import ColumnType
-from src.planner.create_plan import CreatePlan
 from src.executor.plan_executor import PlanExecutor
-
-from src.executor.create_executor import CreateExecutor
-from src.executor.insert_executor import InsertExecutor
-
+from src.optimizer.plan_generator import PlanGenerator
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
@@ -44,23 +40,17 @@ def handle_request(transport, query):
         otherwise just echoes user input
     """
     parser = Parser()
+
     eva_statement = parser.parse(query)
-    insert_statement = eva_statement[0]
+    for i in range(len(eva_statement)):
+        
 
-    LoggingManager().log("Result from the parser: "+str(insert_statement))
-    
-    convertor = StatementToPlanConvertor()
-    convertor.visit(insert_statement)
-    
-    logical_plan_node = convertor.plan
-
-    phy_plan_node = InsertPlan(
-        logical_plan_node.video_catalog_id,
-        logical_plan_node.column_list,
-        logical_plan_node.value_list)
-
-    insertExec = InsertExecutor(phy_plan_node)
-    insertExec.exec()
+        LoggingManager().log("Result from the parser: "+str(eva_statement[i]))
+        
+        logical_plan = StatementToPlanConvertor().visit(eva_statement[i])
+        physical_plan = PlanGenerator().build(logical_plan)
+        
+        PlanExecutor(physical_plan).execute_plan()
 
     table_name = 'MyVideo'
     file_url = os.path.join(tempfile.gettempdir(), table_name)
@@ -80,7 +70,3 @@ def handle_request(transport, query):
     transport.write(data)
 
     return response_message
-
-
-# INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES (2, '/mnt/frames/2.png');
-# INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES    (1, '/mnt/frames/1.png');

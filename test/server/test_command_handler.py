@@ -42,7 +42,7 @@ class CommandHandlerTests(unittest.TestCase):
 
         output = task1.split('Row')[-1]
         self.assertEqual(output,"(Frame_ID=2, Frame_Path='/mnt/frames/2.png')")
-
+    
 
 
 if __name__ == '__main__':
