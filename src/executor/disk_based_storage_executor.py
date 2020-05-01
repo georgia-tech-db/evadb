@@ -15,7 +15,7 @@
 from typing import Iterator
 
 from src.loaders import Loader
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.executor.abstract_storage_executor import \
     AbstractStorageExecutor
 from src.planner.storage_plan import StoragePlan
@@ -43,6 +43,6 @@ class DiskStorageExecutor(AbstractStorageExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[FrameBatch]:
+    def exec(self) -> Iterator[Batch]:
         for batch in self.storage.load():
             yield batch

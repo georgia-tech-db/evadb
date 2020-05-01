@@ -22,6 +22,7 @@ from src.loaders.petastorm_loader import PetastormLoader
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
+from test.util import custom_list_of_dicts_equal
 
 NUM_FRAMES = 10
 
@@ -31,6 +32,9 @@ class PetastormLoaderTest(unittest.TestCase):
         def __init__(self, frame_id, frame_data):
             self.frame_id = frame_id
             self.frame_data = frame_data
+
+        def _asdict(self):
+            return {'frame_id': self.frame_id, 'frame_data': self.frame_data}
 
     class DummyReader:
         def __init__(self, data):
@@ -56,16 +60,14 @@ class PetastormLoaderTest(unittest.TestCase):
 
     @patch("src.loaders.petastorm_loader.make_reader")
     def test_load_frame_load_frames_using_petastorm(self, mock):
-        mock.return_value = self.DummyReader(
-            map(lambda i: self.DummyRow(i, np.ones((2, 2, 3)) * i), range(3)))
+        dummy_values = map(lambda i: self.DummyRow(i, np.ones((2, 2, 3)) * i), range(3))
+        mock.return_value = self.DummyReader(dummy_values)
 
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
 
         video_loader = PetastormLoader(video_info, curr_shard=3,
                                        total_shards=3)
         actual = list(video_loader._load_frames())
-        expected = [Frame(i, np.ones((2, 2, 3)) * i, FrameInfo(2, 2, 3,
-                                                               ColorSpace.BGR))
-                    for i in range(3)]
+        expected = [value._asdict() for value in dummy_values]
 
-        self.assertEqual(expected, actual)
+        self.assertTrue(custom_list_of_dicts_equal(expected, actual))

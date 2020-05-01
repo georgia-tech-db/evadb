@@ -21,12 +21,27 @@ from typing import List
 from src.parser.types import ParserColumnDataType
 
 
+class ColumnConstraintInformation:
+    def __init__(self):
+        self.nullable = False
+        self.default_value = None
+        self.primary = False
+        self.unique = False
+
 class ColumnDefinition:
     def __init__(self, col_name: str,
-                 col_type: ParserColumnDataType, col_dim: List[int]):
+                 col_type: ParserColumnDataType, col_dim: List[int],
+                 cci: ColumnConstraintInformation = None):
         self._name = col_name
         self._type = col_type
         self._dimension = col_dim
+
+        #column constarint info
+        if cci is not None:
+            self._unique_column_constraint = cci.unique
+            self._nullable = cci.nullable
+            self._primary = cci.primary
+            self._default_value = cci.default_value
 
     @property
     def name(self):

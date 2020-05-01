@@ -21,7 +21,8 @@ from unittest.mock import MagicMock, call
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
-from src.expression.function_expression import FunctionExpression
+from src.expression.function_expression import FunctionExpression, \
+    ExecutionMode
 from antlr4 import TerminalNode
 
 
@@ -209,7 +210,6 @@ class ParserVisitorTests(unittest.TestCase):
     @mock.patch.object(ParserVisitor, 'visit')
     @mock.patch('src.parser.parser_visitor.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):
-
         ctx = MagicMock()
         udf_name = 'name'
         func_args = [MagicMock(), MagicMock()]
@@ -218,6 +218,7 @@ class ParserVisitorTests(unittest.TestCase):
 
         def side_effect(arg):
             return values[arg]
+
         visit_mock.side_effect = side_effect
 
         visitor = ParserVisitor()
@@ -225,7 +226,8 @@ class ParserVisitorTests(unittest.TestCase):
         visit_mock.assert_has_calls(
             [call(ctx.simpleId()), call(ctx.functionArgs())])
 
-        func_mock.assert_called_with(None, name='name')
+        func_mock.assert_called_with(None, mode=ExecutionMode.EXEC,
+                                     name='name')
 
         for arg in func_args:
             func_mock.return_value.append_child.assert_any_call(arg)

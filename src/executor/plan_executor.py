@@ -12,8 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
+
 from src.executor.abstract_executor import AbstractExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
+from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 from src.executor.disk_based_storage_executor import DiskStorageExecutor
@@ -88,7 +91,7 @@ class PlanExecutor:
         # a stitched output
         execution_tree = self._build_execution_tree(self._plan)
 
-        output_batches = []
+        output_batches = Batch(pd.DataFrame())
 
         # ToDo generalize this logic
         _INSERT_CREATE_ = (
@@ -99,7 +102,7 @@ class PlanExecutor:
             execution_tree.exec()
         else:
             for batch in execution_tree.exec():
-                output_batches.append(batch)
+                output_batches += batch
 
         self._clean_execution_tree(execution_tree)
         return output_batches
