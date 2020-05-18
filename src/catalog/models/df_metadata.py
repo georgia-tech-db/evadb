@@ -27,7 +27,8 @@ class DataFrameMetadata(BaseModel):
     _unique_identifier_column = Column('identifier_column', String(100))
 
     _columns = relationship('DataFrameColumn',
-                            back_populates="_dataset")
+                            back_populates="_dataset",
+                            cascade = 'all, delete, delete-orphan')
 
     def __init__(self, name: str, file_url: str, identifier_id='id'):
         self._name = name

@@ -14,9 +14,11 @@
 # limitations under the License.
 from unittest import TestCase
 
-from mock import patch
+from mock import patch, MagicMock
 
 from src.catalog.services.df_service import DatasetService
+
+
 
 DATASET_ID = 123
 DATASET_URL = 'file1'
@@ -67,3 +69,26 @@ class DatasetServiceTest(TestCase):
         expected = mocked.query.filter.return_value.one.return_value
 
         self.assertEqual(actual, expected)
+
+
+
+    @patch("src.catalog.services.df_service.DataFrameMetadata")
+    def test_delete_dataset_object_by_id(self, mocked):
+        service = DatasetService()
+        actual = service.delete_dataset(DATASET_ID)
+        
+        mocked.query.filter.assert_called_with(mocked._id == DATASET_ID)
+
+        expected = mocked.query.filter.return_value.one.return_value.delete.assert_called_once()
+        
+        
+        self.assertEqual(actual, expected)
+
+
+        
+
+
+        
+       
+
+    

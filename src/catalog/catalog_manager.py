@@ -60,8 +60,7 @@ class CatalogManager(object):
         init_db()
 
     def create_metadata(self, name: str, file_url: str,
-                        column_list: List[DataFrameColumn],
-                        identifier_column='id') -> \
+                        column_list: List[DataFrameColumn]) -> \
             DataFrameMetadata:
         """Creates metadata object when called by create executor.
 
@@ -72,14 +71,12 @@ class CatalogManager(object):
             name: name of the dataset/video to which this metdata corresponds
             file_url: #todo
             column_list: list of columns
-            identifier_column (str):  A unique identifier column for each row
 
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
-        metadata = self._dataset_service.create_dataset(name, file_url,
-                                                        identifier_id=identifier_column)
+        metadata = self._dataset_service.create_dataset(name, file_url)
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
@@ -249,15 +246,42 @@ class CatalogManager(object):
             udf_io.udf_id = metadata.id
         self._udf_io_service.add_udf_io(udf_io_list)
         return metadata
-
-    def get_udf_by_name(self, name: str) -> UdfMetadata:
+        
+    def delete_column_metadata(self, table_name: str,
+                           column_names: List[str]):
         """
-        Get the UDF information based on name.
+        This method deletes the columns associated with the given
+        metadata
 
         Arguments:
-             name (str): name of the UDF
+           table_name-[str] table for which we will delete the columns
+           column_names - [List of columns that needs to deleted]
+
+        """
+        metadata_id = self._dataset_service.dataset_by_name(table_name)
+
+        column_ids = self._column_service.columns_by_dataset_id_and_names(metadata_id, column_names)
+
+        columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, column_ids)
+
+        self._column_service.delete_column(columns_to_be_deleted)
+
+
+    def delete_metadata(self, table_name: str) -> int:
+        """
+        This method deletes the table along with its columns from df_metadata
+        and df_columns respectively
+
+        Arguments:
+           table_name = table name of  to be deleted.
 
         Returns:
-            UdfMetadata object
+           Returns the metadata id that will be deleted
         """
-        return self._udf_service.udf_by_name(name)
+        metadata_id = self._dataset_service.dataset_by_name(table_name)
+        #columns_to_be_deleted = self._column_service.columns_by_id_and_dataset_id(metadata_id, None)
+
+        #self._column_service.delete_column(columns_to_be_deleted)
+        self._dataset_service.delete_dataset(metadata_id)
+
+        return metadata_id
