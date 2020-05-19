@@ -57,6 +57,31 @@ class CatalogManagerTests(unittest.TestCase):
             dcs_mock.return_value.create_column.return_value
 
         self.assertEqual(actual, expected)
+        
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')  
+    def test_dataset_by_name_should_return_name_of_model(self, dcs_mock, ds_mock, initdb_mock):
+        #tests for dataset_by_name in df_service.py
+        catalog = CatalogManager()
+        file_url = "file1"
+        set_name = "test_name"
+
+        columns = [(DataFrameColumn("column", ColumnType.INTEGER))]
+        catalog.create_metadata(set_name, file_url, columns)
+
+
+        for column in columns:
+            column.metadata_id = \
+                ds_mock.return_value.create_dataset.return_value.id
+
+        real = catalog._dataset_service.dataset_by_name(set_name)
+        ds_mock.return_value.dataset_by_name.assert_called_with(set_name)
+
+
+        test = ds_mock.return_value.dataset_by_name.return_value
+
+        self.assertEqual(test, real)
 
     @mock.patch('src.catalog.catalog_manager.init_db')
     @mock.patch('src.catalog.catalog_manager.DatasetService')
@@ -188,6 +213,9 @@ class CatalogManagerTests(unittest.TestCase):
 
         id_mock = ds_mock.return_value.delete_dataset
         id_mock.assert_called_with(ds_id_mock.return_value)
+       
+        
+    
 
 
 if __name__ == '__main__':
