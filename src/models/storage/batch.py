@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 from typing import List
 
 import numpy as np
@@ -66,8 +65,8 @@ class Batch:
 
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \
-               self._outcomes == other._outcomes and \
-               self._temp_outcomes == other._temp_outcomes
+            self._outcomes == other._outcomes and \
+            self._temp_outcomes == other._temp_outcomes
 
     def set_outcomes(self, name, predictions: List[Outcome],
                      is_temp: bool = False):
@@ -166,10 +165,10 @@ class Batch:
 
         for key in _unique_keys(self._outcomes, other._outcomes):
             new_outcomes[key] = self._outcomes.get(key, []) + \
-                                other._outcomes.get(key, [])
+                other._outcomes.get(key, [])
         for key in _unique_keys(self._temp_outcomes, other._temp_outcomes):
             temp_new_outcomes[key] = self._temp_outcomes.get(key, []) + \
-                                     other._temp_outcomes.get(key, [])
+                other._temp_outcomes.get(key, [])
 
         return Batch(new_frames, outcomes=new_outcomes,
                      temp_outcomes=temp_new_outcomes)

@@ -87,4 +87,3 @@ class AbstractVideoLoader(metaclass=ABCMeta):
         Yields:
             Frame:  A frame object of the video, used for processing.
         """
-        pass

@@ -14,20 +14,15 @@
 # limitations under the License.
 
 import asyncio
-import os
-import tempfile
 
 from src.utils.logging_manager import LoggingManager
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.planner.insert_plan import InsertPlan
-from src.storage.dataframe import load_dataframe
 
-from src.catalog.column_type import ColumnType
 from src.executor.plan_executor import PlanExecutor
 from src.optimizer.plan_generator import PlanGenerator
-from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
 @asyncio.coroutine
@@ -47,7 +42,7 @@ def handle_request(transport, query):
     convertor = StatementToPlanConvertor()
     convertor.visit(insert_statement)
 
-    logical_plan_node = convertor.plan
+    convertor.plan
 
     eva_statement = parser.parse(query)
     response_message = ""

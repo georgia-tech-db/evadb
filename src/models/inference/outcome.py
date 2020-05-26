@@ -39,7 +39,7 @@ class Outcome:
     def __eq__(self, other):
         if isinstance(other, Outcome):
             return self._identifier == other._identifier and \
-                   self._data.equals(other._data)
+                self._data.equals(other._data)
 
         return len(self._data[self._data[self._identifier] == other]) > 0
 

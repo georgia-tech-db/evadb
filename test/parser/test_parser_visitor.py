@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from antlr4 import TerminalNode
+from src.expression.function_expression import FunctionExpression, \
+    ExecutionMode
 import unittest
 
 from unittest import mock
@@ -21,12 +24,6 @@ from unittest.mock import MagicMock, call
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
-<<<<<<< HEAD
-=======
-from src.expression.function_expression import FunctionExpression, \
-    ExecutionMode
->>>>>>> 8116641f655c135821f05d7e23ca6e66feb417ed
-from antlr4 import TerminalNode
 
 
 class ParserVisitorTests(unittest.TestCase):

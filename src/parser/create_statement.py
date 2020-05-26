@@ -28,6 +28,7 @@ class ColumnConstraintInformation:
         self.primary = False
         self.unique = False
 
+
 class ColumnDefinition:
     def __init__(self, col_name: str,
                  col_type: ParserColumnDataType, col_dim: List[int],
@@ -36,7 +37,7 @@ class ColumnDefinition:
         self._type = col_type
         self._dimension = col_dim
 
-        #column constarint info
+        # column constarint info
         if cci is not None:
             self._unique_column_constraint = cci.unique
             self._nullable = cci.nullable

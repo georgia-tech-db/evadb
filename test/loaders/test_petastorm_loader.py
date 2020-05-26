@@ -19,9 +19,6 @@ import numpy as np
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.loaders.petastorm_loader import PetastormLoader
-from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import ColorSpace
-from src.models.storage.frame import Frame
 from test.util import custom_list_of_dicts_equal
 
 NUM_FRAMES = 10
@@ -60,7 +57,10 @@ class PetastormLoaderTest(unittest.TestCase):
 
     @patch("src.loaders.petastorm_loader.make_reader")
     def test_load_frame_load_frames_using_petastorm(self, mock):
-        dummy_values = map(lambda i: self.DummyRow(i, np.ones((2, 2, 3)) * i), range(3))
+        dummy_values = map(
+            lambda i: self.DummyRow(
+                i, np.ones(
+                    (2, 2, 3)) * i), range(3))
         mock.return_value = self.DummyReader(dummy_values)
 
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')

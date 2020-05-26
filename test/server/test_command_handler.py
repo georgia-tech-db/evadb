@@ -42,7 +42,7 @@ class CommandHandlerTests(unittest.TestCase):
         task1 = self.loop.run_until_complete(handle_request(transport,
                                                             request_message))
 
-        output = task1.split('Row')[-1]
+        task1.split('Row')[-1]
         # self.assertEqual(
         #    output, "(Frame_ID=2, Frame_Path='/mnt/frames/2.png')")
 
