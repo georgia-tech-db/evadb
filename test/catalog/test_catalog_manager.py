@@ -44,9 +44,11 @@ class CatalogManagerTests(unittest.TestCase):
 
         columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
         actual = catalog.create_metadata(dataset_name, file_url, columns)
-        ds_mock.return_value.create_dataset.assert_called_with(dataset_name,
-                                                               file_url,
-                                                               identifier_id='id')
+        ds_mock.return_value.create_dataset.assert_called_with(
+            dataset_name,
+            file_url,
+            identifier_id='id'
+        )
         for column in columns:
             column.metadata_id = \
                 ds_mock.return_value.create_dataset.return_value.id

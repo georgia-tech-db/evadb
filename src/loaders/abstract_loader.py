@@ -49,7 +49,8 @@ class AbstractVideoLoader(metaclass=ABCMeta):
         self.limit = limit
         self.curr_shard = curr_shard
         self.total_shards = total_shards
-        self.identifier_column = video_metadata.identifier_column if video_metadata.identifier_column else 'id'
+        self.identifier_column = video_metadata.identifier_column\
+            if video_metadata.identifier_column else 'id'
 
     def load(self) -> Iterator[Batch]:
         """

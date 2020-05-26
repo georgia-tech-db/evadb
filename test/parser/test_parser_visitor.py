@@ -226,7 +226,7 @@ class ParserVisitorTests(unittest.TestCase):
         visit_mock.assert_has_calls(
             [call(ctx.simpleId()), call(ctx.functionArgs())])
 
-        func_mock.assert_called_with(None, mode=ExecutionMode.EXEC,
+        func_mock.assert_called_with(None,
                                      name='name')
 
         for arg in func_args:

@@ -78,8 +78,11 @@ class CatalogManager(object):
             The persisted DataFrameMetadata object with the id field populated.
         """
 
-        metadata = self._dataset_service.create_dataset(name, file_url,
-                                                        identifier_id=identifier_column)
+        metadata = self._dataset_service.create_dataset(
+            name,
+            file_url,
+            identifier_id=identifier_column
+        )
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)

@@ -1,36 +1,29 @@
-
-
-
-
-import warnings
-
-from antlr4 import TerminalNode
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 from src.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
-from src.expression.comparison_expression import ComparisonExpression
-from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.logical_expression import LogicalExpression
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.function_expression import FunctionExpression
 
-from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
-from src.parser.insert_statement import InsertTableStatement
-from src.parser.create_udf_statement import CreateUDFStatement
-
-from src.parser.table_ref import TableRef, TableInfo
 
 from src.parser.evaql.evaql_parser import evaql_parser
-from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
 from src.parser.types import ParserColumnDataType
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColumnConstraintInformation
-
-from src.utils.logging_manager import LoggingLevel, LoggingManager
-
 
 
 ##################################################################
@@ -68,6 +61,7 @@ def visitColumnCreateTable(
                                        create_definitions)
     return create_stmt
 
+
 def visitCreateDefinitions(
         self, ctx: evaql_parser.CreateDefinitionsContext):
     column_definitions = []
@@ -81,16 +75,19 @@ def visitCreateDefinitions(
 
     return column_definitions
 
+
 def visitColumnDeclaration(
         self, ctx: evaql_parser.ColumnDeclarationContext):
 
-    data_type, dimensions, column_constraint_information = self.visit \
-        (ctx.columnDefinition())
+    data_type, dimensions, column_constraint_information = self.visit(
+        ctx.columnDefinition())
 
     column_name = self.visit(ctx.uid())
 
     if column_name is not None:
-        return ColumnDefinition(column_name, data_type, dimensions, column_constraint_information)
+        return ColumnDefinition(column_name, data_type,
+                                dimensions, column_constraint_information)
+
 
 def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
@@ -108,8 +105,11 @@ def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
     return data_type, dimensions, column_constraint_information
 
-def visitUniqueKeyColumnConstraint(self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
+
+def visitUniqueKeyColumnConstraint(
+        self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
     return ColumnConstraintEnum.UNIQUE
+
 
 def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
 
@@ -120,6 +120,7 @@ def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
         data_type = ParserColumnDataType.BOOLEAN
 
     return data_type, dimensions
+
 
 def visitIntegerDataType(self, ctx: evaql_parser.IntegerDataTypeContext):
 
@@ -132,6 +133,7 @@ def visitIntegerDataType(self, ctx: evaql_parser.IntegerDataTypeContext):
         data_type = ParserColumnDataType.INTEGER
 
     return data_type, dimensions
+
 
 def visitDimensionDataType(
         self, ctx: evaql_parser.DimensionDataTypeContext):
@@ -150,6 +152,7 @@ def visitDimensionDataType(
 
     return data_type, dimensions
 
+
 def visitLengthOneDimension(
         self, ctx: evaql_parser.LengthOneDimensionContext):
     dimensions = []
@@ -159,6 +162,7 @@ def visitLengthOneDimension(
 
     return dimensions
 
+
 def visitLengthTwoDimension(
         self, ctx: evaql_parser.LengthTwoDimensionContext):
     first_decimal = self.visit(ctx.decimalLiteral(0))
@@ -167,16 +171,18 @@ def visitLengthTwoDimension(
     dimensions = [first_decimal, second_decimal]
     return dimensions
 
+
 def visitLengthDimensionList(
         self, ctx: evaql_parser.LengthDimensionListContext):
     dimensions = []
-    dimension_list_length = len(ctx.decimalLiteral());
+    dimension_list_length = len(ctx.decimalLiteral())
     for dimension_list_index in range(dimension_list_length):
         decimal_literal = ctx.decimalLiteral(dimension_list_index)
-        decimal = self.visit(decimal_literal);
+        decimal = self.visit(decimal_literal)
         dimensions.append(decimal)
 
     return dimensions
+
 
 def visitDecimalLiteral(self, ctx: evaql_parser.DecimalLiteralContext):
 
