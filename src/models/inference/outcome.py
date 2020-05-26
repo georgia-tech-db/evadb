@@ -21,7 +21,8 @@ class Outcome:
 
     Arguments:
         data (pd.DataFrame): actual pandas dataframe containing the information
-        identifier (str): the identifier string for the outcomes. Default comparisons will be performed on this field.
+        identifier (str): the identifier string for the outcomes.
+        Default comparisons will be performed on this field.
     """
 
     def __init__(self, data: pd.DataFrame, identifier: str):
