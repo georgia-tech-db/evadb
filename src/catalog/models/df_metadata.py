@@ -24,14 +24,16 @@ class DataFrameMetadata(BaseModel):
 
     _name = Column('name', String(100), unique=True)
     _file_url = Column('file_url', String(100))
+    _unique_identifier_column = Column('identifier_column', String(100))
 
     _columns = relationship('DataFrameColumn',
                             back_populates="_dataset")
 
-    def __init__(self, name: str, file_url: str):
+    def __init__(self, name: str, file_url: str, identifier_id='id'):
         self._name = name
         self._file_url = file_url
         self._schema = None
+        self._unique_identifier_column = identifier_id
 
     @property
     def schema(self):
@@ -56,3 +58,7 @@ class DataFrameMetadata(BaseModel):
     @property
     def columns(self):
         return self._columns
+
+    @property
+    def identifier_column(self):
+        return self._unique_identifier_column

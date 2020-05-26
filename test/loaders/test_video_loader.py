@@ -20,9 +20,7 @@ import numpy as np
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.loaders.video_loader import VideoLoader
-from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import ColorSpace
-from src.models.storage.frame import Frame
+from test.util import custom_list_of_dicts_equal
 
 NUM_FRAMES = 10
 
@@ -33,10 +31,9 @@ class VideoLoaderTest(unittest.TestCase):
         if not filters:
             filters = range(num_frames)
         for i in filters:
-            yield Frame(i,
-                        np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
-                                 dtype=np.uint8),
-                        FrameInfo(2, 2, 3, ColorSpace.BGR))
+            yield {'id': i,
+                   'frame_data': np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                                          dtype=np.uint8)}
 
     def create_sample_video(self):
         try:
@@ -64,7 +61,8 @@ class VideoLoaderTest(unittest.TestCase):
         batches = list(video_loader.load())
         dummy_frames = list(self.create_dummy_frames())
         self.assertEqual(len(batches), NUM_FRAMES)
-        self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
+        expected = [batch.frames.to_dict('records')[0] for batch in batches]
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected))
 
     def test_should_return_half_then_number_of_batches_with_skip_of_two(self):
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
@@ -74,7 +72,8 @@ class VideoLoaderTest(unittest.TestCase):
             self.create_dummy_frames(
                 filters=[i * 2 for i in range(NUM_FRAMES // 2)]))
         self.assertEqual(len(batches), NUM_FRAMES / 2)
-        self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
+        expected = [batch.frames.to_dict('records')[0] for batch in batches]
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected))
 
     def test_should_skip_first_two_frames_with_offset_two(self):
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
@@ -84,7 +83,8 @@ class VideoLoaderTest(unittest.TestCase):
                 filters=[i for i in range(2, NUM_FRAMES)]))
         batches = list(video_loader.load())
         self.assertEqual(NUM_FRAMES - 2, len(batches))
-        self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
+        expected = [batch.frames.to_dict('records')[0] for batch in batches]
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected))
 
     def test_should_return_only_few_frames_when_limit_is_specified(self):
         video_info = DataFrameMetadata("dataset_1", 'dummy.avi')
@@ -94,7 +94,8 @@ class VideoLoaderTest(unittest.TestCase):
             self.create_dummy_frames(filters=[i for i in range(limit)]))
         batches = list(video_loader.load())
         self.assertEqual(limit, len(batches))
-        self.assertEqual(dummy_frames, [batch.frames[0] for batch in batches])
+        expected = [batch.frames.to_dict('records')[0] for batch in batches]
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected))
 
     def test_should_return_single_batch_if_batch_size_equal_to_no_of_frames(
             self):
@@ -104,4 +105,5 @@ class VideoLoaderTest(unittest.TestCase):
             self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))
         batches = list(video_loader.load())
         self.assertEqual(1, len(batches))
-        self.assertEqual(dummy_frames, list(batches[0].frames))
+        expected = batches[0].frames.to_dict('records')
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected))

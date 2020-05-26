@@ -17,25 +17,25 @@ import warnings
 
 from antlr4 import TerminalNode
 
-from src.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionType)
+from src.expression.abstract_expression import (ExpressionType)
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.function_expression import FunctionExpression, \
+    ExecutionMode
 from src.expression.logical_expression import LogicalExpression
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.function_expression import FunctionExpression
-
-from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
-from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_udf_statement import CreateUDFStatement
-
-from src.parser.table_ref import TableRef, TableInfo
-
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-
+from src.parser.insert_statement import InsertTableStatement
+from src.parser.select_statement import SelectStatement
+from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType
+
+from src.parser.types import ColumnConstraintEnum
+from src.parser.create_statement import ColumnConstraintInformation
+
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 
@@ -48,11 +48,10 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitSqlStatements(self, ctx: evaql_parser.SqlStatementsContext):
         eva_statements = []
-        for child in ctx.children:
-            stmt = self.visit(child)
-            if stmt is not None:
-                eva_statements.append(stmt)
-
+        sql_statement_count = len(ctx.sqlStatement())
+        for child_index in range(sql_statement_count):
+            statement = self.visit(ctx.sqlStatement(child_index))
+            eva_statements.append(statement)
         return eva_statements
 
     ##################################################################
@@ -102,10 +101,9 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitUidList(self, ctx: evaql_parser.UidListContext):
         uid_list = []
-        for child in ctx.children:
-            # Skippping commas
-            if not isinstance(child, TerminalNode):
-                uid = self.visit(child)
+        uid_list_length = len(ctx.uid())
+        for uid_index in range(uid_list_length):
+                uid = self.visit(ctx.uid(uid_index))
                 uid_expr = TupleValueExpression(uid)
                 uid_list.append(uid_expr)
 
@@ -180,16 +178,31 @@ class ParserVisitor(evaql_parserVisitor):
     def visitColumnDeclaration(
             self, ctx: evaql_parser.ColumnDeclarationContext):
 
-        data_type, dimensions = self.visit(ctx.columnDefinition())
+        data_type, dimensions, column_constraint_information = self.visit(ctx.columnDefinition())
+
         column_name = self.visit(ctx.uid())
 
         if column_name is not None:
-            return ColumnDefinition(column_name, data_type, dimensions)
+            return ColumnDefinition(column_name, data_type, dimensions, column_constraint_information)
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
         data_type, dimensions = self.visit(ctx.dataType())
-        return data_type, dimensions
+
+        constraint_count = len(ctx.columnConstraint())
+
+        column_constraint_information = ColumnConstraintInformation()
+
+        for i in range(constraint_count):
+            return_type = self.visit(ctx.columnConstraint(i))
+            if return_type == ColumnConstraintEnum.UNIQUE:
+
+                column_constraint_information.unique = True
+
+        return data_type, dimensions, column_constraint_information
+
+    def visitUniqueKeyColumnConstraint(self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
+        return ColumnConstraintEnum.UNIQUE
 
     def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
 
@@ -250,13 +263,11 @@ class ParserVisitor(evaql_parserVisitor):
     def visitLengthDimensionList(
             self, ctx: evaql_parser.LengthDimensionListContext):
         dimensions = []
-        dimension_index = 0
-        for child in ctx.children:
-            decimal_literal = ctx.decimalLiteral(dimension_index)
-            if decimal_literal is not None:
-                decimal = self.visit(decimal_literal)
-                dimensions.append(decimal)
-            dimension_index = dimension_index + 1
+        dimension_list_length = len(ctx.decimalLiteral());
+        for dimension_list_index in range(dimension_list_length):
+            decimal_literal = ctx.decimalLiteral(dimension_list_index)
+            decimal = self.visit(decimal_literal);
+            dimensions.append(decimal)
 
         return dimensions
 
@@ -287,11 +298,13 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
 
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
+
         table_list = []
-        for child in ctx.children:
-            table = self.visit(child)
-            if table is not None:
-                table_list.append(table)
+        table_sources_count = len(ctx.tableSource())
+        for table_sources_index in range(table_sources_count):
+            table = self.visit(ctx.tableSource(table_sources_index))
+            table_list.append(table)
+
         return table_list
 
     def visitQuerySpecification(
@@ -325,10 +338,10 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
         select_list = []
-        for child in ctx.children:
-            element = self.visit(child)
-            if element is not None:
-                select_list.append(element)
+        select_elements_count = len(ctx.selectElement())
+        for select_element_index in range(select_elements_count):
+            element = self.visit(ctx.selectElement(select_element_index))
+            select_list.append(element)
 
         return select_list
 
@@ -455,11 +468,10 @@ class ParserVisitor(evaql_parserVisitor):
     def visitExpressionsWithDefaults(
             self, ctx: evaql_parser.ExpressionsWithDefaultsContext):
         expr_list = []
-        for child in ctx.children:
-            # ignore COMMAs
-            if not isinstance(child, TerminalNode):
-                expr = self.visit(child)
-                expr_list.append(expr)
+        expressions_with_defaults_count = len(ctx.expressionOrDefault())
+        for i in range(expressions_with_defaults_count):
+            expression = self.visit(ctx.expressionOrDefault(i))
+            expr_list.append(expression)
 
         return expr_list
 
@@ -468,7 +480,6 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
     def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
         udf_name = None
-        udf_args = None
         if ctx.simpleId():
             udf_name = self.visit(ctx.simpleId())
         else:
@@ -476,7 +487,8 @@ class ParserVisitor(evaql_parserVisitor):
                                  LoggingLevel.ERROR)
 
         udf_args = self.visit(ctx.functionArgs())
-        func_expr = FunctionExpression(None, name=udf_name)
+        func_expr = FunctionExpression(None, name=udf_name,
+                                       mode=ExecutionMode.EXEC)
         for arg in udf_args:
             func_expr.append_child(arg)
         return func_expr

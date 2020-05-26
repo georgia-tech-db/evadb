@@ -14,8 +14,11 @@
 # limitations under the License.
 
 from src.catalog.catalog_manager import CatalogManager
-from src.planner.create_udf_plan import CreateUDFPlan
 from src.executor.abstract_executor import AbstractExecutor
+<<<<<<< HEAD
+=======
+from src.planner.create_udf_plan import CreateUDFPlan
+>>>>>>> 8116641f655c135821f05d7e23ca6e66feb417ed
 
 
 class CreateUDFExecutor(AbstractExecutor):

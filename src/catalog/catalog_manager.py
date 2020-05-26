@@ -60,7 +60,8 @@ class CatalogManager(object):
         init_db()
 
     def create_metadata(self, name: str, file_url: str,
-                        column_list: List[DataFrameColumn]) -> \
+                        column_list: List[DataFrameColumn],
+                        identifier_column='id') -> \
             DataFrameMetadata:
         """Creates metadata object when called by create executor.
 
@@ -71,12 +72,14 @@ class CatalogManager(object):
             name: name of the dataset/video to which this metdata corresponds
             file_url: #todo
             column_list: list of columns
+            identifier_column (str):  A unique identifier column for each row
 
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
-        metadata = self._dataset_service.create_dataset(name, file_url)
+        metadata = self._dataset_service.create_dataset(name, file_url,
+                                                        identifier_id=identifier_column)
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
@@ -246,3 +249,15 @@ class CatalogManager(object):
             udf_io.udf_id = metadata.id
         self._udf_io_service.add_udf_io(udf_io_list)
         return metadata
+
+    def get_udf_by_name(self, name: str) -> UdfMetadata:
+        """
+        Get the UDF information based on name.
+
+        Arguments:
+             name (str): name of the UDF
+
+        Returns:
+            UdfMetadata object
+        """
+        return self._udf_service.udf_by_name(name)
