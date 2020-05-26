@@ -24,9 +24,10 @@ from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.planner.insert_plan import InsertPlan
 from src.storage.dataframe import load_dataframe
 
-from src.executor.insert_executor import InsertExecutor
-
-from src.utils.logging_manager import LoggingManager
+from src.catalog.column_type import ColumnType
+from src.executor.plan_executor import PlanExecutor
+from src.optimizer.plan_generator import PlanGenerator
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 @asyncio.coroutine
@@ -48,23 +49,17 @@ def handle_request(transport, query):
 
     logical_plan_node = convertor.plan
 
-    phy_plan_node = InsertPlan(
-        logical_plan_node.video_catalog_id,
-        logical_plan_node.column_list,
-        logical_plan_node.value_list)
+    eva_statement = parser.parse(query)
+    response_message = ""
 
-    insertExec = InsertExecutor(phy_plan_node)
-    insertExec.exec()
+    for i in range(len(eva_statement)):
 
-    table_name = 'MyVideo'
-    file_url = os.path.join(tempfile.gettempdir(), table_name)
-    file_url = 'file://' + file_url
-
-    df = load_dataframe(file_url)
-
-    response_message = ','.join(map(str, df.collect()))
-
-    LoggingManager().log("Response received" + str(response_message))
+        LoggingManager().log("Parse Tree: " + str(eva_statement[i]))
+        logical_plan = StatementToPlanConvertor().visit(eva_statement[i])
+        physical_plan = PlanGenerator().build(logical_plan)
+        df = PlanExecutor(physical_plan).execute_plan()
+        statement_response_message = ','.join(map(str, df.collect()))
+        response_message += statement_response_message
 
     LoggingManager().log('Response to client: --|' +
                          str(response_message) +
@@ -74,8 +69,3 @@ def handle_request(transport, query):
     transport.write(data)
 
     return response_message
-
-
-# INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES (2, '/mnt/frames/2.png');
-# INSERT INTO MyVideo (Frame_ID, Frame_Path) VALUES    (1,
-# '/mnt/frames/1.png');
