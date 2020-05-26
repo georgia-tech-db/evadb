@@ -1,0 +1,56 @@
+
+import warnings
+
+from src.expression.tuple_value_expression import TupleValueExpression
+
+from src.parser.table_ref import TableRef, TableInfo
+
+from src.parser.evaql.evaql_parser import evaql_parser
+
+from src.utils.logging_manager import LoggingLevel, LoggingManager
+
+
+##################################################################
+# COMMON CLAUSES Ids, Column_names, Table_names
+##################################################################
+
+def visitTableName(self, ctx: evaql_parser.TableNameContext):
+    table_name = self.visit(ctx.fullId())
+    if table_name is not None:
+        table_info = TableInfo(table_name=table_name)
+        return TableRef(table_info)
+    else:
+        warnings.warn("Invalid from table", SyntaxWarning)
+
+
+def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
+    # Adding support for a.b
+    # Will restrict implementation to raise error for a.b.c
+    dottedIds = []
+    if ctx.dottedId():
+        if len(ctx.dottedId()) is not 1:
+            LoggingManager().log("Only tablename.colname syntax supported",
+                                 LoggingLevel.ERROR)
+            return
+        for id in ctx.dottedId():
+            dottedIds.append(self.visit(id))
+
+    uid = self.visit(ctx.uid())
+
+    if len(dottedIds):
+        return TupleValueExpression(table_name=uid, col_name=dottedIds[0])
+    else:
+        return TupleValueExpression(col_name=uid)
+
+
+def visitSimpleId(self, ctx: evaql_parser.SimpleIdContext):
+    # todo handle children, right now assuming TupleValueExpr
+    return ctx.getText()
+    # return self.visitChildren(ctx)
+
+
+def visitDottedId(self, ctx: evaql_parser.DOT_ID):
+    if ctx.DOT_ID():
+        return ctx.getText()[1:]
+    if ctx.uid():
+        return self.visit(ctx.uid())
