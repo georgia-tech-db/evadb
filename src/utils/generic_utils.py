@@ -14,6 +14,8 @@
 # limitations under the License.
 import importlib
 
+import torch
+
 
 def validate_kwargs(kwargs, allowed_kwargs,
                     error_message='Keyword argument not understood:'):
@@ -36,3 +38,12 @@ def str_to_class(class_path: str):
     module_path, class_name = class_path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     return getattr(module, class_name)
+
+
+def is_gpu_available() -> bool:
+    """
+    Checks if the system has GPUS available to execute tasks
+    Returns:
+        [bool] True if system has GPUs, else False
+    """
+    return torch.cuda.is_available()
