@@ -14,3 +14,4 @@
 # limitations under the License.
 DISCRETE = 0
 CONTINUOUS = 1
+NO_GPU = -1
