@@ -54,6 +54,7 @@ class Context:
 
     def _populate_gpu_from_config(self) -> List:
         gpu_conf = self._config_manager.get_value('executor', 'gpus')
+        gpu_conf = gpu_conf if gpu_conf else {}
         this_address = self._possible_addresses()
         intersection_addresses = this_address.intersection(gpu_conf.keys())
         if len(intersection_addresses) != 0:

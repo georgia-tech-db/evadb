@@ -107,7 +107,7 @@ class ExecutionContextTest(unittest.TestCase):
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
                                                 'address2']
-        cfm.return_value.get_value.return_value = {'address3': ['0', '1', '2']}
+        cfm.return_value.get_value.return_value = None
         os.environ.get.return_value = ''
         context = Context()
         os.environ.get.assert_called_with('GPU_DEVICES', '')
