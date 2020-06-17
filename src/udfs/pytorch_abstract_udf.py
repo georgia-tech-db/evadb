@@ -69,7 +69,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         Returns:
             np.ndarray: numpy array representation
         """
-        return val.detach().numpy()
+        return val.detach().cpu().numpy()
 
     def to_device(self, device: str):
         """
