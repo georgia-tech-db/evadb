@@ -17,52 +17,22 @@ from antlr4 import TerminalNode
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 
+from src.parser.parser_visitor._common_clauses_ids import CommonClauses
+from src.parser.parser_visitor._create_statements import CreateTable
+from src.parser.parser_visitor._expressions import Expressions
+from src.parser.parser_visitor._functions import Functions
+from src.parser.parser_visitor._insert_statements import Insert
+from src.parser.parser_visitor._select_statement import Select
+from src.parser.parser_visitor._table_sources import TableSources
 
-class ParserVisitor(evaql_parserVisitor):
-    from ._insert_statements import visitInsertStatement,\
-        visitUidList,\
-        visitInsertStatementValue
+# To add new functionality to the parser, create a new file under
+# the parser_visitor directory, and implement a new class which
+# overloads the required visitors' functions.
+# Then make the new class as a parent class for ParserVisitor.
 
-    from ._create_statements import visitColumnCreateTable,\
-        visitCreateDefinitions,\
-        visitColumnDeclaration,\
-        visitColumnDefinition,\
-        visitUniqueKeyColumnConstraint,\
-        visitSimpleDataType
 
-    from ._create_statements import visitIntegerDataType,\
-        visitDimensionDataType,\
-        visitLengthOneDimension,\
-        visitLengthTwoDimension,\
-        visitLengthDimensionList,\
-        visitDecimalLiteral
-
-    from ._select_statement import visitSimpleSelect
-
-    from ._common_clauses_ids import visitTableName,\
-        visitFullColumnName,\
-        visitSimpleId,\
-        visitDottedId
-
-    from ._table_sources import visitTableSources,\
-        visitQuerySpecification,\
-        visitSelectElements,\
-        visitFromClause
-
-    from ._expressions import visitStringLiteral,\
-        visitConstant,\
-        visitLogicalExpression,\
-        visitBinaryComparisonPredicate
-
-    from ._expressions import visitNestedExpressionAtom,\
-        visitComparisonOperator,\
-        visitLogicalOperator,\
-        visitExpressionsWithDefaults
-
-    from ._functions import visitUdfFunction,\
-        visitFunctionArgs,\
-        visitCreateUdf
-
+class ParserVisitor(CommonClauses, CreateTable, Expressions,
+                    Functions, Insert, Select, TableSources):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
             if child is not TerminalNode:

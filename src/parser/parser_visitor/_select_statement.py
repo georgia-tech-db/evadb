@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 
 
 ##################################################################
 # SELECT STATEMENT
 ##################################################################
-
-def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
-    select_stmt = self.visitChildren(ctx)
-    return select_stmt
+class Select(evaql_parserVisitor):
+    def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
+        select_stmt = self.visitChildren(ctx)
+        return select_stmt

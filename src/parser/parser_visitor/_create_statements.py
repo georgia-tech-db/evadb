@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
 
@@ -29,171 +30,154 @@ from src.parser.create_statement import ColumnConstraintInformation
 ##################################################################
 # CREATE STATEMENTS
 ##################################################################
+class CreateTable(evaql_parserVisitor):
+    def visitColumnCreateTable(
+            self, ctx: evaql_parser.ColumnCreateTableContext):
+        table_ref = None
+        if_not_exists = False
+        create_definitions = []
 
-def visitColumnCreateTable(
-        self, ctx: evaql_parser.ColumnCreateTableContext):
+        # first two children will be CREATE TABLE terminal token
+        for child in ctx.children[2:]:
+            try:
+                rule_idx = child.getRuleIndex()
 
-    table_ref = None
-    if_not_exists = False
-    create_definitions = []
+                if rule_idx == evaql_parser.RULE_tableName:
+                    table_ref = self.visit(ctx.tableName())
 
-    # first two children will be CREATE TABLE terminal token
-    for child in ctx.children[2:]:
-        try:
-            rule_idx = child.getRuleIndex()
+                elif rule_idx == evaql_parser.RULE_ifNotExists:
+                    if_not_exists = True
 
-            if rule_idx == evaql_parser.RULE_tableName:
-                table_ref = self.visit(ctx.tableName())
+                elif rule_idx == evaql_parser.RULE_createDefinitions:
+                    create_definitions = self.visit(ctx.createDefinitions())
 
-            elif rule_idx == evaql_parser.RULE_ifNotExists:
-                if_not_exists = True
+            except BaseException:
+                print("Exception")
+                # stop parsing something bad happened
+                return None
 
-            elif rule_idx == evaql_parser.RULE_createDefinitions:
-                create_definitions = self.visit(ctx.createDefinitions())
+        create_stmt = CreateTableStatement(table_ref,
+                                           if_not_exists,
+                                           create_definitions)
+        return create_stmt
 
-        except BaseException:
-            print("Exception")
-            # stop parsing something bad happened
-            return None
+    def visitCreateDefinitions(
+            self, ctx: evaql_parser.CreateDefinitionsContext):
+        column_definitions = []
+        child_index = 0
+        for child in ctx.children:
+            create_definition = ctx.createDefinition(child_index)
+            if create_definition is not None:
+                column_definition = self.visit(create_definition)
+                column_definitions.append(column_definition)
+            child_index = child_index + 1
 
-    create_stmt = CreateTableStatement(table_ref,
-                                       if_not_exists,
-                                       create_definitions)
-    return create_stmt
+        return column_definitions
 
+    def visitColumnDeclaration(
+            self, ctx: evaql_parser.ColumnDeclarationContext):
+        data_type, dimensions, column_constraint_information = self.visit(
+            ctx.columnDefinition())
 
-def visitCreateDefinitions(
-        self, ctx: evaql_parser.CreateDefinitionsContext):
-    column_definitions = []
-    child_index = 0
-    for child in ctx.children:
-        create_definition = ctx.createDefinition(child_index)
-        if create_definition is not None:
-            column_definition = self.visit(create_definition)
-            column_definitions.append(column_definition)
-        child_index = child_index + 1
+        column_name = self.visit(ctx.uid())
 
-    return column_definitions
+        if column_name is not None:
+            return ColumnDefinition(column_name, data_type,
+                                    dimensions, column_constraint_information)
 
+    def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
+        data_type, dimensions = self.visit(ctx.dataType())
 
-def visitColumnDeclaration(
-        self, ctx: evaql_parser.ColumnDeclarationContext):
+        constraint_count = len(ctx.columnConstraint())
 
-    data_type, dimensions, column_constraint_information = self.visit(
-        ctx.columnDefinition())
+        column_constraint_information = ColumnConstraintInformation()
 
-    column_name = self.visit(ctx.uid())
+        for i in range(constraint_count):
+            return_type = self.visit(ctx.columnConstraint(i))
+            if return_type == ColumnConstraintEnum.UNIQUE:
 
-    if column_name is not None:
-        return ColumnDefinition(column_name, data_type,
-                                dimensions, column_constraint_information)
+                column_constraint_information.unique = True
 
+        return data_type, dimensions, column_constraint_information
 
-def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
+    def visitUniqueKeyColumnConstraint(
+            self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
+        return ColumnConstraintEnum.UNIQUE
 
-    data_type, dimensions = self.visit(ctx.dataType())
+    def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
+        data_type = None
+        dimensions = []
 
-    constraint_count = len(ctx.columnConstraint())
+        if ctx.BOOLEAN() is not None:
+            data_type = ParserColumnDataType.BOOLEAN
 
-    column_constraint_information = ColumnConstraintInformation()
+        return data_type, dimensions
 
-    for i in range(constraint_count):
-        return_type = self.visit(ctx.columnConstraint(i))
-        if return_type == ColumnConstraintEnum.UNIQUE:
+    def visitIntegerDataType(self, ctx: evaql_parser.IntegerDataTypeContext):
+        data_type = None
+        dimensions = []
 
-            column_constraint_information.unique = True
+        if ctx.INTEGER() is not None:
+            data_type = ParserColumnDataType.INTEGER
+        elif ctx.UNSIGNED() is not None:
+            data_type = ParserColumnDataType.INTEGER
 
-    return data_type, dimensions, column_constraint_information
+        return data_type, dimensions
 
+    def visitDimensionDataType(
+            self, ctx: evaql_parser.DimensionDataTypeContext):
+        data_type = None
+        dimensions = []
 
-def visitUniqueKeyColumnConstraint(
-        self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
-    return ColumnConstraintEnum.UNIQUE
+        if ctx.FLOAT() is not None:
+            data_type = ParserColumnDataType.FLOAT
+            dimensions = self.visit(ctx.lengthTwoDimension())
+        elif ctx.TEXT() is not None:
+            data_type = ParserColumnDataType.TEXT
+            dimensions = self.visit(ctx.lengthOneDimension())
+        elif ctx.NDARRAY() is not None:
+            data_type = ParserColumnDataType.NDARRAY
+            dimensions = self.visit(ctx.lengthDimensionList())
 
+        return data_type, dimensions
 
-def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
+    def visitLengthOneDimension(
+            self, ctx: evaql_parser.LengthOneDimensionContext):
+        dimensions = []
 
-    data_type = None
-    dimensions = []
+        if ctx.decimalLiteral() is not None:
+            dimensions = [self.visit(ctx.decimalLiteral())]
 
-    if ctx.BOOLEAN() is not None:
-        data_type = ParserColumnDataType.BOOLEAN
+        return dimensions
 
-    return data_type, dimensions
+    def visitLengthTwoDimension(
+            self, ctx: evaql_parser.LengthTwoDimensionContext):
+        first_decimal = self.visit(ctx.decimalLiteral(0))
+        second_decimal = self.visit(ctx.decimalLiteral(1))
 
+        dimensions = [first_decimal, second_decimal]
+        return dimensions
 
-def visitIntegerDataType(self, ctx: evaql_parser.IntegerDataTypeContext):
+    def visitLengthDimensionList(
+            self, ctx: evaql_parser.LengthDimensionListContext):
+        dimensions = []
+        dimension_list_length = len(ctx.decimalLiteral())
+        for dimension_list_index in range(dimension_list_length):
+            decimal_literal = ctx.decimalLiteral(dimension_list_index)
+            decimal = self.visit(decimal_literal)
+            dimensions.append(decimal)
 
-    data_type = None
-    dimensions = []
+        return dimensions
 
-    if ctx.INTEGER() is not None:
-        data_type = ParserColumnDataType.INTEGER
-    elif ctx.UNSIGNED() is not None:
-        data_type = ParserColumnDataType.INTEGER
+    def visitDecimalLiteral(self, ctx: evaql_parser.DecimalLiteralContext):
+        decimal = None
+        if ctx.DECIMAL_LITERAL() is not None:
+            decimal = int(str(ctx.DECIMAL_LITERAL()))
+        elif ctx.ONE_DECIMAL() is not None:
+            decimal = int(str(ctx.ONE_DECIMAL()))
+        elif ctx.TWO_DECIMAL() is not None:
+            decimal = int(str(ctx.TWO_DECIMAL()))
+        elif ctx.ZERO_DECIMAL() is not None:
+            decimal = int(str(ctx.ZERO_DECIMAL()))
 
-    return data_type, dimensions
-
-
-def visitDimensionDataType(
-        self, ctx: evaql_parser.DimensionDataTypeContext):
-    data_type = None
-    dimensions = []
-
-    if ctx.FLOAT() is not None:
-        data_type = ParserColumnDataType.FLOAT
-        dimensions = self.visit(ctx.lengthTwoDimension())
-    elif ctx.TEXT() is not None:
-        data_type = ParserColumnDataType.TEXT
-        dimensions = self.visit(ctx.lengthOneDimension())
-    elif ctx.NDARRAY() is not None:
-        data_type = ParserColumnDataType.NDARRAY
-        dimensions = self.visit(ctx.lengthDimensionList())
-
-    return data_type, dimensions
-
-
-def visitLengthOneDimension(
-        self, ctx: evaql_parser.LengthOneDimensionContext):
-    dimensions = []
-
-    if ctx.decimalLiteral() is not None:
-        dimensions = [self.visit(ctx.decimalLiteral())]
-
-    return dimensions
-
-
-def visitLengthTwoDimension(
-        self, ctx: evaql_parser.LengthTwoDimensionContext):
-    first_decimal = self.visit(ctx.decimalLiteral(0))
-    second_decimal = self.visit(ctx.decimalLiteral(1))
-
-    dimensions = [first_decimal, second_decimal]
-    return dimensions
-
-
-def visitLengthDimensionList(
-        self, ctx: evaql_parser.LengthDimensionListContext):
-    dimensions = []
-    dimension_list_length = len(ctx.decimalLiteral())
-    for dimension_list_index in range(dimension_list_length):
-        decimal_literal = ctx.decimalLiteral(dimension_list_index)
-        decimal = self.visit(decimal_literal)
-        dimensions.append(decimal)
-
-    return dimensions
-
-
-def visitDecimalLiteral(self, ctx: evaql_parser.DecimalLiteralContext):
-
-    decimal = None
-    if ctx.DECIMAL_LITERAL() is not None:
-        decimal = int(str(ctx.DECIMAL_LITERAL()))
-    elif ctx.ONE_DECIMAL() is not None:
-        decimal = int(str(ctx.ONE_DECIMAL()))
-    elif ctx.TWO_DECIMAL() is not None:
-        decimal = int(str(ctx.TWO_DECIMAL()))
-    elif ctx.ZERO_DECIMAL() is not None:
-        decimal = int(str(ctx.ZERO_DECIMAL()))
-
-    return decimal
+        return decimal
