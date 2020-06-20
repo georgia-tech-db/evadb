@@ -28,34 +28,30 @@ from src.utils.logging_manager import LoggingManager
 @asyncio.coroutine
 def handle_request(transport, query):
     """
-        Reads a request from a client and processes it
-
-        If user inputs 'quit' stops the event loop
-        otherwise just echoes user input
+       Handles the request from the client.
+       It calls the eva backend to serve the query
+       and returns the response back.
+       `ToDo`: Handle input query errors and expections returned by eva backend
     """
     parser = Parser()
-    eva_statement = parser.parse(query)
-    insert_statement = eva_statement[0]
+    eva_statements = parser.parse(query)
+    eva_response_messages = []
 
-    LoggingManager().log("Result from the parser: " + str(insert_statement))
-
-    convertor = StatementToPlanConvertor()
-    convertor.visit(insert_statement)
-
-    convertor.plan
-
-    eva_statement = parser.parse(query)
-    response_message = ""
-
-    for i in range(len(eva_statement)):
-
-        LoggingManager().log("Parse Tree: " + str(eva_statement[i]))
-        logical_plan = StatementToPlanConvertor().visit(eva_statement[i])
+    # ToDo: In case of multiple queries,
+    # We should be able to serve query asap and not wait for all the queries
+    # to execute.Handle cases where we encounter errors in intermediate query.
+    # I think we should stop serving as soon as we find an erroneous query
+    for statement in eva_statements:
+        LoggingManager().log("Parse Tree: " + str(statement))
+        logical_plan = StatementToPlanConvertor().visit(statement)
         physical_plan = PlanGenerator().build(logical_plan)
         df = PlanExecutor(physical_plan).execute_plan()
         statement_response_message = ','.join(map(str, df.collect()))
-        response_message += statement_response_message
+        eva_response_messages.append(statement_response_message)
 
+    # ToDo: Investigate if asyncio supports list based message passing?
+    # Else we have to reduce the list of responses to a single response
+    response_message = '\n'.join(eva_response_messages)
     LoggingManager().log('Response to client: --|' +
                          str(response_message) +
                          '|--')

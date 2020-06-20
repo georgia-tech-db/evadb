@@ -99,8 +99,7 @@ class EvaClient(asyncio.Protocol):
                              )
 
         self._response_chunk = response_chunk
-        print(response_chunk)
-
+    
     def send_message(self, message):
 
         LoggingManager().log("[ " + str(self.id) + " ]" +
