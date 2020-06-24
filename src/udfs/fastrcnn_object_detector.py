@@ -17,15 +17,15 @@ from typing import List
 import numpy as np
 import pandas as pd
 import torchvision
-from torchvision import transforms
+from torch import Tensor
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.models.inference.outcome import Outcome
-from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 
-class FastRCNNObjectDetector(AbstractClassifierUDF):
+class FastRCNNObjectDetector(PytorchAbstractUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -76,7 +76,7 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
             'toothbrush'
         ]
 
-    def _get_predictions(self, frames: np.ndarray) -> List[Outcome]:
+    def _get_predictions(self, frames: Tensor) -> List[Outcome]:
         """
         Performs predictions on input frames
         Arguments:
@@ -90,18 +90,16 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
 
         """
 
-        transform = transforms.Compose([transforms.ToTensor()])
-        images = [transform(frame) for frame in frames]
-        predictions = self.model(images)
+        predictions = self.model(frames)
         prediction_df_list = []
         for prediction in predictions:
             pred_class = [str(self.labels[i]) for i in
-                          list(prediction['labels'].detach().numpy())]
+                          list(self.as_numpy(prediction['labels']))]
             pred_boxes = [[[i[0], i[1]],
                            [i[2], i[3]]]
                           for i in
-                          list(prediction['boxes'].detach().numpy())]
-            pred_score = list(prediction['scores'].detach().numpy())
+                          list(self.as_numpy(prediction['boxes']))]
+            pred_score = list(self.as_numpy(prediction['scores']))
             pred_t = \
                 [pred_score.index(x) for x in pred_score if
                  x > self.threshold][-1]
@@ -115,5 +113,5 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
                     'label'))
         return prediction_df_list
 
-    def classify(self, frames: np.ndarray) -> List[Outcome]:
+    def classify(self, frames: Tensor) -> List[Outcome]:
         return self._get_predictions(frames)
