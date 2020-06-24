@@ -73,9 +73,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
 
     def to_device(self, device: str):
         """
-
-        :param device:
-        :return:
+        See gpu_compatible.py
         """
         return self.to(torch.device("cuda:{}".format(device)))
 
