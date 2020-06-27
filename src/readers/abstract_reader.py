@@ -23,7 +23,8 @@ from src.models.storage.frame import Frame
 class AbstractReader(metaclass=ABCMeta):
     """
     Abstract class for defining data reader. All other video readers use this
-    abstract class. Video readers are expected to read data and return the frames in an iterative manner.
+    abstract class. Video readers are expected to read data and
+    return the frames in an iterative manner.
 
     Attributes:
         file_path (str): path to read data from
@@ -36,14 +37,14 @@ class AbstractReader(metaclass=ABCMeta):
         self.file_path = file_path
         self.batch_size = batch_size
         self.offset = offset
-        
-    def load(self) -> Iterator[FrameBatch]:
+
+    def read(self) -> Iterator[FrameBatch]:
         """
-        This is a generator for loading the frames of a video.
+        This is a generator for reading the frames of a video.
          Uses the video metadata and other class arguments
 
         Yields:
-        :obj: `Batch`: An object containing a batch of frames
+        FrameBatch: An object containing a batch of frames
                                        and frame specific metadata
         """
 

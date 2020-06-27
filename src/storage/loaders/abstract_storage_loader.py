@@ -20,10 +20,10 @@ from src.models.storage.batch import FrameBatch
 from src.models.storage.frame import Frame
 
 
-class AbstractVideoLoader(metaclass=ABCMeta):
+class AbstractStorageLoader(metaclass=ABCMeta):
     """
-    Abstract class for defining video loader. All other video loaders use this
-    abstract class. Video loaders are expected fetch videos from the storage
+    Abstract class for defining storage loader. All other loaders use this
+    abstract class. Video loaders are expected to fetch videos from the storage
     and return the frames in an iterative manner.
 
     Attributes:
@@ -55,7 +55,7 @@ class AbstractVideoLoader(metaclass=ABCMeta):
          Uses the video metadata and other class arguments
 
         Yields:
-        :obj: `eva.models.FrameBatch`: An object containing a batch of frames
+        FrameBatch: An object containing a batch of frames
                                        and frame specific metadata
         """
 
