@@ -22,7 +22,7 @@ from src.models.storage.frame import Frame
 from src.readers.petastorm_reader import PetastormReader
 
 
-class PetastormLoader(AbstractVideoLoader):
+class PetastormStorageLoader(AbstractVideoLoader):
     def __init__(self, *args, **kwargs):
         """
         Loads parquet data frames using petastorm
