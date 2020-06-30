@@ -25,12 +25,12 @@ class OpenCVReader:
 
     def __init__(self, *args, **kwargs):
         """
-            Reader which reads video frames using OpenCV.
+            Reads video using OpenCV and yields frame data 
          """
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Frame]:
-        video = cv2.VideoCapture(self.video_metadata.file_url)
+        video = cv2.VideoCapture(self.file_url)
         video_start = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
 
@@ -41,5 +41,5 @@ class OpenCVReader:
 
         while frame is not None:
             frame_ind += 1
-            yield {'id': frame_ind, 'frame_data': frame}
+            yield frame
             _, frame = video.read()
