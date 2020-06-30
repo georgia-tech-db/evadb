@@ -14,33 +14,30 @@
 # limitations under the License.
 from typing import Iterator
 
-import cv2
+from petastorm import make_reader
 
-from src.loaders.abstract_loader import AbstractVideoLoader
+from src.storage.loaders.abstract_loader import AbstractVideoLoader
 from src.models.storage.frame import Frame
-from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import LoggingManager
+
+from src.readers.petastorm_reader import PetastormReader
 
 
-class VideoLoader(AbstractVideoLoader):
-
+class PetastormStorageLoader(AbstractVideoLoader):
     def __init__(self, *args, **kwargs):
         """
-            Loader which loads video frames using OpenCV.
-         """
+        Loads data frames from petastorm parquet stores. 
+        Internally it calls the Petastorm Reader to read frames
+        """
         super().__init__(*args, **kwargs)
+        if self.curr_shard is not None and self.curr_shard <= 0:
+            self.curr_shard = None
+
+        if self.total_shards is not None and self.total_shards <= 0:
+            self.total_shards = None
 
     def _load_frames(self) -> Iterator[Frame]:
-        video = cv2.VideoCapture(self.video_metadata.file_url)
-        video_start = self.offset if self.offset else 0
-        video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
-
-        LoggingManager().log("Loading frames", LoggingLevel.INFO)
-
-        _, frame = video.read()
-        frame_ind = video_start - 1
-
-        while frame is not None:
-            frame_ind += 1
-            yield {'id': frame_ind, 'frame_data': frame}
-            _, frame = video.read()
+        reader = PetastormReader(self.video_metadata.file_url,
+                                 shard_count=self.total_shards,
+                                 cur_shard=self.curr_shard)
+        for row in reader.read():
+            yield row

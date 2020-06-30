@@ -357,6 +357,17 @@ class ParserVisitor(evaql_parserVisitor):
         return {"from": from_table, "where": where_clause}
 
     ##################################################################
+    # LOAD STATEMENT
+    ##################################################################
+
+    def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):     
+        file_path = self.visit(ctx.fileName()).value
+        table = self.visit(ctx.tableName())
+        stmt = LoadDataStatement(table, file_path)
+        return stmt
+
+
+    ##################################################################
     # COMMON CLAUSES Ids, Column_names, Table_names
     ##################################################################
 
