@@ -13,19 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
-from typing import Iterator, Dict
-
-import pandas as pd
+from typing import Iterator
 
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.models.storage.batch import Batch
+from src.models.storage.batch import FrameBatch
+from src.models.storage.frame import Frame
 
 
-class AbstractVideoLoader(metaclass=ABCMeta):
+class AbstractStorageLoader(metaclass=ABCMeta):
     """
-    Abstract class for defining video loader. All other video loaders use this
-    abstract class. Video loader are expected fetch the videos from storage
-    and return the frames in an iterative manner.
+    Abstract class for defining storage loader. All other loaders use this
+    abstract class. Video loaders are expected to fetch videos from the storage
+    and return the frames in an iterative manner. 
+    Right now we internally store videos in petastorm parquet stores. 
+    But moving forward we will add support for other parquet stores. 
+    
 
     Attributes:
         video_metadata (DataFrameMetadata): Object containing metadata of video
@@ -49,42 +51,35 @@ class AbstractVideoLoader(metaclass=ABCMeta):
         self.limit = limit
         self.curr_shard = curr_shard
         self.total_shards = total_shards
-        self.identifier_column = video_metadata.identifier_column if video_metadata.identifier_column else 'id'
 
-    def load(self) -> Iterator[Batch]:
+    def load(self) -> Iterator[FrameBatch]:
         """
         This is a generator for loading the frames of a video.
          Uses the video metadata and other class arguments
 
         Yields:
-        :obj: `Batch`: An object containing a batch of frames
-                                       and record specific metadata
+        FrameBatch: An object containing a batch of frames
+                                       and frame specific metadata
         """
 
         frames = []
-        for record in self._load_frames():
-            if self.skip_frames > 0 and record.get(self.identifier_column,
-                                                   0) % self.skip_frames != 0:
+        for frame in self._load_frames():
+            if self.skip_frames > 0 and frame.index % self.skip_frames != 0:
                 continue
-            if self.limit and record.get(self.identifier_column,
-                                         0) >= self.limit:
-                return Batch(pd.DataFrame(frames),
-                             identifier_column=self.identifier_column)
-            frames.append(record)
+            if self.limit and frame.index >= self.limit:
+                return FrameBatch(frames, frame.info)
+            frames.append(frame)
             if len(frames) % self.batch_size == 0:
-                yield Batch(pd.DataFrame(frames),
-                            identifier_column=self.identifier_column)
+                yield FrameBatch(frames, frame.info)
                 frames = []
         if frames:
-            return Batch(pd.DataFrame(frames),
-                         identifier_column=self.identifier_column)
+            return FrameBatch(frames, frames[0].info)
 
     @abstractmethod
-    def _load_frames(self) -> Iterator[Dict]:
+    def _load_frames(self) -> Iterator[Frame]:
         """
         Loads video frames from storage and returns the Frame type.
 
         Yields:
             Frame:  A frame object of the video, used for processing.
         """
-        pass

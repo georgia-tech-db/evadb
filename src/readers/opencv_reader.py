@@ -14,28 +14,32 @@
 # limitations under the License.
 from typing import Iterator
 
-from petastorm import make_reader
+import cv2
 
-from src.loaders.abstract_loader import AbstractVideoLoader
 from src.models.storage.frame import Frame
+from src.utils.logging_manager import LoggingLevel
+from src.utils.logging_manager import LoggingManager
 
 
-class PetastormLoader(AbstractVideoLoader):
+class OpenCVReader:
+
     def __init__(self, *args, **kwargs):
         """
-        Loads parquet data frames using petastorm
-        """
+            Reads video using OpenCV and yields frame data 
+         """
         super().__init__(*args, **kwargs)
-        if self.curr_shard is not None and self.curr_shard <= 0:
-            self.curr_shard = None
 
-        if self.total_shards is not None and self.total_shards <= 0:
-            self.total_shards = None
+    def _read(self) -> Iterator[Frame]:
+        video = cv2.VideoCapture(self.file_url)
+        video_start = self.offset if self.offset else 0
+        video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
 
-    def _load_frames(self) -> Iterator[Frame]:
-        with make_reader(self.video_metadata.file_url,
-                         shard_count=self.total_shards,
-                         cur_shard=self.curr_shard) \
-                as reader:
-            for frame_ind, row in enumerate(reader):
-                yield row._asdict()
+        LoggingManager().log("Loading frames", LoggingLevel.INFO)
+
+        _, frame = video.read()
+        frame_ind = video_start - 1
+
+        while frame is not None:
+            frame_ind += 1
+            yield frame
+            _, frame = video.read()
