@@ -25,7 +25,8 @@ from src.readers.petastorm_reader import PetastormReader
 class PetastormStorageLoader(AbstractVideoLoader):
     def __init__(self, *args, **kwargs):
         """
-        Loads parquet data frames using petastorm
+        Loads data frames from petastorm parquet stores. 
+        Internally it calls the Petastorm Reader to read frames
         """
         super().__init__(*args, **kwargs)
         if self.curr_shard is not None and self.curr_shard <= 0:
