@@ -24,7 +24,10 @@ class AbstractStorageLoader(metaclass=ABCMeta):
     """
     Abstract class for defining storage loader. All other loaders use this
     abstract class. Video loaders are expected to fetch videos from the storage
-    and return the frames in an iterative manner.
+    and return the frames in an iterative manner. 
+    Right now we internally store videos in petastorm parquet stores. 
+    But moving forward we will add support for other parquet stores. 
+    
 
     Attributes:
         video_metadata (DataFrameMetadata): Object containing metadata of video
