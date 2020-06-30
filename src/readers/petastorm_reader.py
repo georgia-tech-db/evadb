@@ -22,12 +22,15 @@ from src.models.storage.frame import Frame
 class PetastormReader(AbstractReader):
     def __init__(self, curr_shard, total_shards, *args, **kwargs):
         """
-        Loads parquet data frames using petastorm
+        Reads data from the petastorm parquet stores. Note this won't
+        work for any arbitary parquet store apart from one materialized
+        using petastorm. In order to generalize, we might have to replace
+        `make_reader` with `make_batch_reader`
         Attributes:
             curr_shard (int, optional): Shard number to load from if sharded
             total_shards (int, optional): Specify total number of shards if
                                       applicable
-    
+
         """
         super().__init__(*args, **kwargs)
         if self.curr_shard is not None and self.curr_shard <= 0:
@@ -42,5 +45,5 @@ class PetastormReader(AbstractReader):
                          shard_count=self.total_shards,
                          cur_shard=self.curr_shard) \
                 as reader:
-            for frame_ind, row in enumerate(reader):
-                yield row._asdict()
+            for row in reader:
+                yield row
