@@ -16,6 +16,7 @@ from typing import Iterator
 
 from petastorm import make_reader
 
+from src.readers.abstract_reader import AbstractReader
 from src.models.storage.frame import Frame
 
 

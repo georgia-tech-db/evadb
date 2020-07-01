@@ -16,7 +16,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Iterator
 
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.models.storage.frame import Frame
 
 
@@ -24,10 +24,10 @@ class AbstractStorageLoader(metaclass=ABCMeta):
     """
     Abstract class for defining storage loader. All other loaders use this
     abstract class. Video loaders are expected to fetch videos from the storage
-    and return the frames in an iterative manner. 
-    Right now we internally store videos in petastorm parquet stores. 
-    But moving forward we will add support for other parquet stores. 
-    
+    and return the frames in an iterative manner.
+    Right now we internally store videos in petastorm parquet stores.
+    But moving forward we will add support for other parquet stores.
+
 
     Attributes:
         video_metadata (DataFrameMetadata): Object containing metadata of video
@@ -52,7 +52,7 @@ class AbstractStorageLoader(metaclass=ABCMeta):
         self.curr_shard = curr_shard
         self.total_shards = total_shards
 
-    def load(self) -> Iterator[FrameBatch]:
+    def load(self) -> Iterator[Batch]:
         """
         This is a generator for loading the frames of a video.
          Uses the video metadata and other class arguments
@@ -67,13 +67,13 @@ class AbstractStorageLoader(metaclass=ABCMeta):
             if self.skip_frames > 0 and frame.index % self.skip_frames != 0:
                 continue
             if self.limit and frame.index >= self.limit:
-                return FrameBatch(frames, frame.info)
+                return Batch(frames)
             frames.append(frame)
             if len(frames) % self.batch_size == 0:
-                yield FrameBatch(frames, frame.info)
+                yield Batch(frames)
                 frames = []
         if frames:
-            return FrameBatch(frames, frames[0].info)
+            return Batch(frames)
 
     @abstractmethod
     def _load_frames(self) -> Iterator[Frame]:
