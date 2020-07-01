@@ -18,14 +18,14 @@ import unittest
 from mock import patch
 
 from src.utils.generic_utils import str_to_class, is_gpu_available
-from src.loaders.video_loader import VideoLoader
+from src.storage.loaders.video_storage_loader import VideoStorageLoader
 
 
 class ModulePathTest(unittest.TestCase):
 
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class("src.loaders.video_loader.VideoLoader")
-        self.assertEqual(vl, VideoLoader)
+        vl = str_to_class("src.storage.loaders.video_storage_loader.VideoStorageLoader")
+        self.assertEqual(vl, VideoStorageLoader)
 
     @patch('src.utils.generic_utils.torch')
     def test_should_use_torch_to_check_if_gpu_is_available(self,
