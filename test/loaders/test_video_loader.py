@@ -19,7 +19,7 @@ import cv2
 import numpy as np
 
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.loaders.video_loader import VideoLoader
+from src.storage.loaders.video_storage_loader import VideoStorageLoader
 from test.util import custom_list_of_dicts_equal
 
 NUM_FRAMES = 10
