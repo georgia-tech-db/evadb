@@ -4,7 +4,7 @@ core:
   application: "eva"
 
 storage:
-  loader: "src.loaders.petastorm_loader.PetastormLoader"
+  loader: "src.storage.loaders.petastorm_storage_loader.PetastormStorageLoader"
   
 server:
   host: "0.0.0.0"

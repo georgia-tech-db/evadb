@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from src.loaders import Loader
+from src.storage.loaders import Loader
 from src.models.storage.batch import Batch
 from src.executor.abstract_storage_executor import \
     AbstractStorageExecutor

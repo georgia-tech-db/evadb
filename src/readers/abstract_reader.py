@@ -13,12 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
-from typing import Iterator
-
-from src.catalog.models.df_metadata import DataFrameMetadata
-from src.models.storage.batch import FrameBatch
-from src.models.storage.frame import Frame
-
 
 class AbstractReader(metaclass=ABCMeta):
     """

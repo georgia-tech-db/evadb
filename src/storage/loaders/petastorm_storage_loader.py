@@ -16,16 +16,16 @@ from typing import Iterator
 
 from petastorm import make_reader
 
-from src.storage.loaders.abstract_loader import AbstractVideoLoader
+from src.storage.loaders.abstract_storage_loader import AbstractStorageLoader
 from src.models.storage.frame import Frame
 
 from src.readers.petastorm_reader import PetastormReader
 
 
-class PetastormStorageLoader(AbstractVideoLoader):
+class PetastormStorageLoader(AbstractStorageLoader):
     def __init__(self, *args, **kwargs):
         """
-        Loads data frames from petastorm parquet stores. 
+        Loads data frames from petastorm parquet stores.
         Internally it calls the Petastorm Reader to read frames
         """
         super().__init__(*args, **kwargs)
