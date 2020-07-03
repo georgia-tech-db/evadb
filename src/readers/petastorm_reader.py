@@ -16,34 +16,36 @@ from typing import Iterator
 
 from petastorm import make_reader
 
-from src.models.storage.frame import Frame
+from src.readers.abstract_reader import AbstractReader
 
 
 class PetastormReader(AbstractReader):
-    def __init__(self, curr_shard, total_shards, *args, **kwargs):
+    def __init__(self, cur_shard=None, shard_count=None, **kwargs):
         """
         Reads data from the petastorm parquet stores. Note this won't
         work for any arbitary parquet store apart from one materialized
         using petastorm. In order to generalize, we might have to replace
         `make_reader` with `make_batch_reader`
         Attributes:
-            curr_shard (int, optional): Shard number to load from if sharded
-            total_shards (int, optional): Specify total number of shards if
+            cur_shard (int, optional): Shard number to load from if sharded
+            shard_count (int, optional): Specify total number of shards if
                                       applicable
 
         """
-        super().__init__(*args, **kwargs)
-        if self.curr_shard is not None and self.curr_shard <= 0:
-            self.curr_shard = None
+        self.cur_shard = cur_shard
+        self.shard_count = shard_count
+        super().__init__(**kwargs)
+        if self.cur_shard is not None and self.cur_shard <= 0:
+            self.cur_shard = None
 
-        if self.total_shards is not None and self.total_shards <= 0:
-            self.total_shards = None
+        if self.shard_count is not None and self.shard_count <= 0:
+            self.shard_count = None
 
-    def _read(self) -> Iterator[Frame]:
+    def _read(self):
         # `Todo`: Generalize this reader
-        with make_reader(self.video_metadata.file_url,
-                         shard_count=self.total_shards,
-                         cur_shard=self.curr_shard) \
+        with make_reader(self.file_url,
+                         shard_count=self.shard_count,
+                         cur_shard=self.cur_shard) \
                 as reader:
             for row in reader:
                 yield row
