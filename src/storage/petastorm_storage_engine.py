@@ -24,88 +24,85 @@ from src.configuration.configuration_manager import ConfigurationManager
 
 from petastorm.unischema import dict_to_spark_row
 from petastorm import make_reader
-from typing import Iterator
+from typing import Iterator, Dict
+
 
 class PetastormStorageEngine(AbstractStorageEngine):
 
-    def create(self, table: DataFrameMetadata):
-        spark = Session().get_session()
-        spark_context = Session().get_context()
+    def __init__(self):
+        """
+        Maintain a long live spark session and context.
+        """
+        self._spark = Session()
+        self.spark_session = self._spark.get_session()
+        self.spark_context = self._spark.get_context()
 
-        # Construct output location
+    def _spark_url(self, table: DataFrameMetadata) -> str:
+        """
+        Generate a spark/petastorm url given a table
+        """
         eva_dir = ConfigurationManager().get_value("core", "location")
         output_url = os.path.join(eva_dir, table.name)
 
-        # Create an empty RDD
-        empty_rdd = spark_context.emptyRDD()
-        # Use petastorm to create dataframe
-        with materialize_dataset(spark,
-                                 output_url,
+        return output_url
+
+    def create(self, table: DataFrameMetadata):
+        """
+        Create an empty dataframe in petastorm.
+        """
+        empty_rdd = self.spark_context.emptyRDD()
+
+        with materialize_dataset(self.spark_session,
+                                 self._spark_url(table),
                                  table.schema.petastorm_schema):
 
-            spark.createDataFrame(empty_rdd,
-                                  table.schema.pyspark_schema) \
+            self.spark_session.createDataFrame(empty_rdd,
+                                               table.schema.pyspark_schema) \
                 .coalesce(1) \
                 .write \
                 .mode('overwrite') \
-                .parquet(output_url)
+                .parquet(self._spark_url(table))
 
-    def _open(self, table):
+
+    def write_row(self, table: DataFrameMetadata, rows: []):
         """
-        uncertain about the functionality. Long live session for performance?
+        rows is a list of dictionary. We should formally define a dataType Row.
+        Keys of the dictionary should be consistent with the table.schema.
         """
-        pass
-
-
-    def write_row(self, table: DataFrameMetadata, row: []):
-        """
-        row is a list of dictionary. we should formally define a dataType Row.
-        """
-        spark = Session().get_session()
-        spark_context = Session().get_context()
-
-        # Construct output location
-        eva_dir = ConfigurationManager().get_value("core", "location")
-        eva_url = os.path.join(eva_dir, table.name)
-
-        # row generator
         def row_generator(x):
-            return row[x]
+            return rows[x]
 
-        # Use petastorm to appends rows
-        with materialize_dataset(spark,
-                                 eva_url,
+        with materialize_dataset(self.spark_session,
+                                 self._spark_url(table),
                                  table.schema.petastorm_schema):
 
-            rows_rdd = spark_context.parallelize(range(len(row)))\
+            rows_rdd = self.spark_context.parallelize(range(len(rows)))\
                 .map(row_generator)\
                 .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema, x))
 
-            spark.createDataFrame(rows_rdd,
-                                  table.schema.pyspark_schema) \
+            self.spark_session.createDataFrame(rows_rdd,
+                                               table.schema.pyspark_schema) \
                 .coalesce(1) \
                 .write \
                 .mode('append') \
-                .parquet(eva_url)
+                .parquet(self._spark_url(table))
 
-    def _close(self, table):
-        """
-        same as _open funcition
-        """
-        pass
-
-    def _read_init(self, table):
-        """
-        same as _open function
-        """
-
-    def read(self, table: DataFrameMetadata) -> Iterator:
-        # Construct output location
-        eva_dir = ConfigurationManager().get_value("core", "location")
-        eva_url = os.path.join(eva_dir, table.name)
-        with make_reader(eva_url) as reader:
-            for frame_ind, row in enumerate(reader):
+    def read(self, table: DataFrameMetadata) -> Iterator[Dict]:
+        with make_reader(self._spark_url(table)) as reader:
+            for row in reader:
                 yield row._asdict()
 
     def read_pos(self, table: DataFrameMetadata, pos: str):
         return None
+
+
+    def _open(self, table):
+        pass
+
+    def _close(self, table):
+        pass
+
+    def _read_init(self, table):
+        pass
+
+
