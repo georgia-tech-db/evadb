@@ -12,17 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Iterator, Dict
 
 import cv2
 
-from src.storage.loaders.abstract_storage_loader import AbstractStorageLoader
-from src.models.storage.frame import Frame
+from src.storage.loaders.abstract_loader import AbstractLoader
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
 
-class VideoStorageLoader(AbstractStorageLoader):
+class VideoLoader(AbstractLoader):
 
     def __init__(self, *args, **kwargs):
         """
@@ -30,7 +29,7 @@ class VideoStorageLoader(AbstractStorageLoader):
          """
         super().__init__(*args, **kwargs)
 
-    def _load_frames(self) -> Iterator[Frame]:
+    def _load_frames(self) -> Iterator[Dict]:
         video = cv2.VideoCapture(self.video_metadata.file_url)
         video_start = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
@@ -44,3 +43,4 @@ class VideoStorageLoader(AbstractStorageLoader):
             frame_ind += 1
             yield {'id': frame_ind, 'frame_data': frame}
             _, frame = video.read()
+

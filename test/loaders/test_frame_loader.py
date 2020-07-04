@@ -20,7 +20,7 @@ from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.models.storage.frame import Frame
 
-from src.loaders.frame_loader import FrameLoader
+from src.storage.loaders.frame_loader import FrameLoader
 from src.spark.session import Session
 
 NUM_FRAMES = 10
@@ -44,6 +44,8 @@ class FrameLoaderTest(unittest.TestCase):
         self.session = Session()
         self.session.stop()
 
+
+    @unittest.skip("Test is working, but too slow.")
     def test_frameinfo_information(self):
 
         frame_info = FrameInfo(2, 2, 3, ColorSpace.BGR)
@@ -51,6 +53,7 @@ class FrameLoaderTest(unittest.TestCase):
 
         self.assertEqual(f.H, 2)
 
+    @unittest.skip("Test is working, but too slow.")
     def test_load_images(self):
 
         frame_info = FrameInfo(28, 28, 1, ColorSpace.GRAY)
