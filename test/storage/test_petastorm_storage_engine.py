@@ -38,6 +38,13 @@ class PetastormStorageEngineTest(unittest.TestCase):
                    'frame_data': np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
                                           dtype=np.uint8)}
 
+    def create_sample_table(self):
+        table_info = DataFrameMetadata("dataset_1", 'dummy.avi')
+        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
+        column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False, [2, 2, 3])
+        table_info.schema = [column_1, column_2]
+        return table_info
+
     def create_sample_video(self):
         try:
             os.remove('dummy.avi')
@@ -60,24 +67,15 @@ class PetastormStorageEngineTest(unittest.TestCase):
 
 
     def test_should_create_empty_table(self):
+        table_info = self.create_sample_table()
         petastorm = PetastormStorageEngine()
-
-        table_info = DataFrameMetadata("dataset_1", 'dummy.avi')
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False, [2, 2, 3])
-        table_info.schema = [column_1, column_2]
-
         petastorm.create(table_info)
         row_iter = petastorm.read(table_info)
         self.assertFalse(any(True for _ in row_iter))
 
 
     def test_should_return_equivalent_frames(self):
-        table_info = DataFrameMetadata("dataset_1", 'dummy.avi')
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False, [2, 2, 3])
-        table_info.schema = [column_1, column_2]
-
+        table_info = self.create_sample_table()
         dummy_frames = list(self.create_dummy_frames())
 
         petastorm = PetastormStorageEngine()
