@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Iterator
 from abc import ABCMeta, abstractmethod
 
 
@@ -35,7 +36,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     @abstractmethod
     def _open(self, table):
         """Internal function responsible for opening table to serve data
-        update, delete, insert or scan. 
+        update, delete, insert or scan.
 
         Attributes:
             table: storage unit to be opened
@@ -55,20 +56,20 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     @abstractmethod
     def _close(self, table):
         """Internal function responsible for closing table to free any resouces.
-         
+
         Attributes:
             table: storage unit to be closed
         """
-    
+
     @abstractmethod
     def _read_init(self, table):
         """Internal function responsible for doing tasks required before
         we begin scaaning/reading a table
-        
+
         Attributes:
             table: storage unit to be read
-        """ 
-    
+        """
+
     @abstractmethod
     def read(self, table) -> Iterator:
         """Interface responsible for yielding row/rows to the client.

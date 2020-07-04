@@ -25,7 +25,7 @@ class OpenCVReader:
 
     def __init__(self, *args, **kwargs):
         """
-            Reads video using OpenCV and yields frame data 
+            Reads video using OpenCV and yields frame data
          """
         super().__init__(*args, **kwargs)
 

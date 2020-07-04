@@ -12,17 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Iterator, Dict
 
 from petastorm import make_reader
 
-from src.storage.loaders.abstract_storage_loader import AbstractStorageLoader
+from src.storage.loaders.abstract_loader import AbstractLoader
 from src.models.storage.frame import Frame
 
-from src.readers.petastorm_reader import PetastormReader
 
-
-class PetastormStorageLoader(AbstractStorageLoader):
+class PetastormLoader(AbstractLoader):
     def __init__(self, *args, **kwargs):
         """
         Loads data frames from petastorm parquet stores.
@@ -35,9 +33,10 @@ class PetastormStorageLoader(AbstractStorageLoader):
         if self.total_shards is not None and self.total_shards <= 0:
             self.total_shards = None
 
-    def _load_frames(self) -> Iterator[Frame]:
-        reader = PetastormReader(self.video_metadata.file_url,
-                                 shard_count=self.total_shards,
-                                 cur_shard=self.curr_shard)
-        for row in reader.read():
-            yield row
+    def _load_frames(self) -> Iterator[Dict]:
+        with make_reader(self.video_metadata.file_url,
+                         shard_count=self.total_shards,
+                         cur_shard=self.curr_shard) \
+                as reader:
+            for row in reader:
+                yield row._asdict()
