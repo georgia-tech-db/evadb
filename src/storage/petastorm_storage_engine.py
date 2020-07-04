@@ -22,6 +22,7 @@ from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 from src.configuration.configuration_manager import ConfigurationManager
 
+from petastorm.unischema import dict_to_spark_row
 from petastorm import make_reader
 from typing import Iterator
 
@@ -57,24 +58,35 @@ class PetastormStorageEngine(AbstractStorageEngine):
 
 
     def write_row(self, table: DataFrameMetadata, row: []):
+        """
+        row is a list of dictionary. we should formally define a dataType Row.
+        """
         spark = Session().get_session()
+        spark_context = Session().get_context()
 
-        # Convert a list of rows to RDD
-        row_df = spark.createDataFrame(row,
-                                       table.schema.pyspark_schema)
-        row_rdd = rows_df.rdd
+        # Construct output location
+        eva_dir = ConfigurationManager().get_value("core", "location")
+        eva_url = os.path.join(eva_dir, table.name)
+
+        # row generator
+        def row_generator(x):
+            return row[x]
 
         # Use petastorm to appends rows
         with materialize_dataset(spark,
-                                 table.file_url,
+                                 eva_url,
                                  table.schema.petastorm_schema):
 
-            spark.createDataFrame(row_rdd,
+            rows_rdd = spark_context.parallelize(range(len(row)))\
+                .map(row_generator)\
+                .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema, x))
+
+            spark.createDataFrame(rows_rdd,
                                   table.schema.pyspark_schema) \
                 .coalesce(1) \
                 .write \
                 .mode('append') \
-                .parquet(df_metadata.file_url)
+                .parquet(eva_url)
 
     def _close(self, table):
         """

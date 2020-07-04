@@ -34,7 +34,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
         if not filters:
             filters = range(num_frames)
         for i in filters:
-            yield {'id': i,
+            yield {'frame_id': i,
                    'frame_data': np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
                                           dtype=np.uint8)}
 
@@ -72,22 +72,19 @@ class PetastormStorageEngineTest(unittest.TestCase):
         self.assertFalse(any(True for _ in row_iter))
 
 
-    @unittest.skip("Petastorm storage engine under development")
     def test_should_return_equivalent_frames(self):
-        """
-        This is an integration test.
-        """
         table_info = DataFrameMetadata("dataset_1", 'dummy.avi')
-        video_loader = VideoStorageLoader(table_info)
-        batches = list(video_loader.load())
+        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
+        column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False, [2, 2, 3])
+        table_info.schema = [column_1, column_2]
 
-        petastorm = PetaStormStorageEngine()
-        petastorm.create(table_info)
-        petastorm.write_row(table_info, batches)
-
-        rows = list(petastorm.read(table_info))
         dummy_frames = list(self.create_dummy_frames())
-        self.assertEqual(len(rows), NUM_FRAMES)
 
-        expected = [batch.frames.to_dict('records')[0] for batch in rows]
-        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected))
+        petastorm = PetastormStorageEngine()
+        petastorm.create(table_info)
+        petastorm.write_row(table_info, dummy_frames)
+
+        expected_rows = list(petastorm.read(table_info))
+        self.assertEqual(len(expected_rows), NUM_FRAMES)
+
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected_rows))
