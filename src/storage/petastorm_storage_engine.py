@@ -12,12 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+
 from src.spark.session import Session
 from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
 from src.storage.abstract_storage_engine import AbstractStorageEngine
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
+from src.configuration.configuration_manager import ConfigurationManager
 
 from petastorm import make_reader
 from typing import Iterator
@@ -28,12 +31,15 @@ class PetastormStorageEngine(AbstractStorageEngine):
         spark = Session().get_session()
         spark_context = Session().get_context()
 
+        # Construct output location
+        eva_dir = ConfigurationManager().get_value("core", "location")
+        output_url = os.path.join(eva_dir, table.name)
+
         # Create an empty RDD
         empty_rdd = spark_context.emptyRDD()
-        LoggingManager().log("URL %s" % (table.file_url), LoggingLevel.INFO)
         # Use petastorm to create dataframe
         with materialize_dataset(spark,
-                                 table.file_url,
+                                 output_url,
                                  table.schema.petastorm_schema):
 
             spark.createDataFrame(empty_rdd,
@@ -41,7 +47,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .coalesce(1) \
                 .write \
                 .mode('overwrite') \
-                .parquet(table.file_url)
+                .parquet(output_url)
 
     def _open(self, table):
         """
@@ -82,7 +88,10 @@ class PetastormStorageEngine(AbstractStorageEngine):
         """
 
     def read(self, table: DataFrameMetadata) -> Iterator:
-        with make_reader(table.file_url) as reader:
+        # Construct output location
+        eva_dir = ConfigurationManager().get_value("core", "location")
+        eva_url = os.path.join(eva_dir, table.name)
+        with make_reader(eva_url) as reader:
             for frame_ind, row in enumerate(reader):
                 yield row._asdict()
 
