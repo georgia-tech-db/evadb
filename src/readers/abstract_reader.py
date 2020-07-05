@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
+from typing import Iterator
 
 class AbstractReader(metaclass=ABCMeta):
     """
@@ -36,15 +37,18 @@ class AbstractReader(metaclass=ABCMeta):
         This calls the sub class read implementation and
         yields the data to the caller
         """
-
         data_batch = []
+        # Incase we receive negative batch_size set it to 1
+        if self.batch_size <= 0:
+            self.batch_size = 1
+        print(self.batch_size)
         for data in self._read():
             data_batch.append(data)
-            if len(data) % self.batch_size == 0:
+            if len(data_batch) % self.batch_size == 0:
                 yield data_batch
                 data_batch = []
         if data_batch:
-            return data_batch
+            yield data_batch
 
     @abstractmethod
     def _read(self):

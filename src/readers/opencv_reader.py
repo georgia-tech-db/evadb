@@ -12,29 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
 
 import cv2
 
-from src.models.storage.frame import Frame
+from src.readers.abstract_reader import AbstractReader
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
 
-class OpenCVReader:
+class OpenCVReader(AbstractReader):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """
             Reads video using OpenCV and yields frame data
          """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
-    def _read(self) -> Iterator[Frame]:
+    def _read(self):
         video = cv2.VideoCapture(self.file_url)
         video_start = self.offset if self.offset else 0
-        video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
-
-        LoggingManager().log("Loading frames", LoggingLevel.INFO)
+        video.set(cv2.CAP_PROP_POS_FRAMES, video_start)    
+        
+        LoggingManager().log("Reading frames", LoggingLevel.INFO)
 
         _, frame = video.read()
         frame_ind = video_start - 1
