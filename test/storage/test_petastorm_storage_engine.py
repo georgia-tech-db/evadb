@@ -65,14 +65,12 @@ class PetastormStorageEngineTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
-
     def test_should_create_empty_table(self):
         table_info = self.create_sample_table()
         petastorm = PetastormStorageEngine()
         petastorm.create(table_info)
         row_iter = petastorm.read(table_info)
         self.assertFalse(any(True for _ in row_iter))
-
 
     def test_should_return_equivalent_frames(self):
         table_info = self.create_sample_table()
@@ -84,8 +82,33 @@ class PetastormStorageEngineTest(unittest.TestCase):
 
         expected_rows = list(petastorm.read(table_info))
         self.assertEqual(len(expected_rows), NUM_FRAMES)
-
         self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected_rows))
+
+    def test_should_return_spefic_frame(self):
+        table_info = self.create_sample_table()
+        dummy_frames = list(self.create_dummy_frames())
+
+        petastorm = PetastormStorageEngine()
+        petastorm.create(table_info)
+        petastorm.write_row(table_info, dummy_frames)
+
+        return_rows = list(petastorm.read_pos(table_info, "id", [NUM_FRAMES / 2]))
+        expected_rows = list(self.create_dummy_frames(filters=[NUM_FRAMES / 2]))
+        self.assertEqual(len(return_rows), 1)
+        self.assertTrue(custom_list_of_dicts_equal(return_rows, expected_rows))
+
+    def test_should_return_even_frames(self):
+        table_info = self.create_sample_table()
+        dummy_frames = list(self.create_dummy_frames())
+
+        petastorm = PetastormStorageEngine()
+        petastorm.create(table_info)
+        petastorm.write_row(table_info, dummy_frames)
+
+        return_rows = list(petastorm.read_lambda(table_info, ["id"], lambda id: id % 2 == 0))
+        expected_rows = list(self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES) if i % 2 == 0]))
+        self.assertEqual(len(return_rows), len(expected_rows))
+        self.assertTrue(custom_list_of_dicts_equal(return_rows, expected_rows))
 
     def test_should_return_equivalent_frames_by_videoloader(self):
         """
