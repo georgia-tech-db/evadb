@@ -23,6 +23,7 @@ from src.utils.logging_manager import LoggingManager
 from src.configuration.configuration_manager import ConfigurationManager
 
 from petastorm.unischema import dict_to_spark_row
+from petastorm.predicates import in_set, in_lambda
 from petastorm import make_reader
 from typing import Iterator, Dict
 
@@ -101,8 +102,31 @@ class PetastormStorageEngine(AbstractStorageEngine):
             for row in reader:
                 yield row._asdict()
 
-    def read_pos(self, table: DataFrameMetadata, pos: str):
-        return None
+    def read_lambda(self, table: DataFrameMetadata, fields: [str], predicate_func) -> Iterator[Dict]:
+        """
+        Read the rows that the predicate_func returns true on the given fields.
+
+        Argument:
+            fields List[str]: A list of fields (column names) to be considered.
+            predicate_func: customized function return bool
+        """
+        predicate = in_lambda(fields, predicate_func)
+        with make_reader(self._spark_url(table), predicate = predicate) as reader:
+            for row in reader:
+                yield row._asdict()
+
+    def read_pos(self, table: DataFrameMetadata, field: str, values: []) -> Iterator[Dict]:
+        """
+        Read the rows that matches the field's given values.
+
+        Argument:
+            field str: name of the field (column name). E.g., "id".
+            values List[]: A list of values to be included.
+        """
+        predicate = in_set(values, field)
+        with make_reader(self._spark_url(table), predicate = predicate) as reader:
+            for row in reader:
+                yield row._asdict()
 
 
     def _open(self, table):
