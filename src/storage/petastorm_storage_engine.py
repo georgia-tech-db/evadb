@@ -73,15 +73,11 @@ class PetastormStorageEngine(AbstractStorageEngine):
             rows List[Dict{key, value}]: We can formally define a dataType Row.
             keys within the Dict should be consistent with the table.schema.
         """
-        def row_generator(x):
-            return rows[x]
-
         with materialize_dataset(self.spark_session,
                                  self._spark_url(table),
                                  table.schema.petastorm_schema):
 
-            rows_rdd = self.spark_context.parallelize(range(len(rows)))\
-                .map(row_generator)\
+            rows_rdd = self.spark_context.parallelize(rows)\
                 .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema, x))
 
             self.spark_session.createDataFrame(rows_rdd,
