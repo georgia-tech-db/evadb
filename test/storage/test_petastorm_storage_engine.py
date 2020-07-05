@@ -34,13 +34,13 @@ class PetastormStorageEngineTest(unittest.TestCase):
         if not filters:
             filters = range(num_frames)
         for i in filters:
-            yield {'frame_id': i,
+            yield {'id': i,
                    'frame_data': np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
                                           dtype=np.uint8)}
 
     def create_sample_table(self):
         table_info = DataFrameMetadata("dataset_1", 'dummy.avi')
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
+        column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False, [2, 2, 3])
         table_info.schema = [column_1, column_2]
         return table_info
@@ -86,3 +86,26 @@ class PetastormStorageEngineTest(unittest.TestCase):
         self.assertEqual(len(expected_rows), NUM_FRAMES)
 
         self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected_rows))
+
+    def test_should_return_equivalent_frames_by_videoloader(self):
+        """
+        This is an integration test with videoloader.
+        """
+        table_info = self.create_sample_table()
+
+        video_loader = VideoLoader(table_info)
+        batches = list(video_loader.load())
+        # Create a function to convert bacth to row
+        # The Dict yielded from the videoloader should have the same schema
+        # TODO: Type the Row object. Maybe?
+        rows = [batch.frames.to_dict('records')[0] for batch in batches]
+
+        petastorm = PetastormStorageEngine()
+        petastorm.create(table_info)
+        petastorm.write_row(table_info, rows)
+
+        dummy_frames = list(self.create_dummy_frames())
+        return_rows = list(petastorm.read(table_info))
+
+        self.assertEqual(len(return_rows), NUM_FRAMES)
+        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
