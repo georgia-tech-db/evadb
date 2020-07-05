@@ -66,8 +66,11 @@ class PetastormStorageEngine(AbstractStorageEngine):
 
     def write_row(self, table: DataFrameMetadata, rows: []):
         """
-        rows is a list of dictionary. We should formally define a dataType Row.
-        Keys of the dictionary should be consistent with the table.schema.
+        Write rows into the dataframe.
+
+        Arguments:
+            rows List[Dict{key, value}]: We can formally define a dataType Row.
+            keys within the Dict should be consistent with the table.schema.
         """
         def row_generator(x):
             return rows[x]
@@ -88,6 +91,12 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .parquet(self._spark_url(table))
 
     def read(self, table: DataFrameMetadata) -> Iterator[Dict]:
+        """
+        Read the dataframe.
+
+        Return:
+            Iterator of Dict. Each Dict represents a Row.
+        """
         with make_reader(self._spark_url(table)) as reader:
             for row in reader:
                 yield row._asdict()
