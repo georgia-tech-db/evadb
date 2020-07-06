@@ -85,7 +85,7 @@ class VideoLoaderTest(unittest.TestCase):
             file_url='dummy.avi', batch_size=NUM_FRAMES)
         batches = list(video_loader.read())
         expected = list(
-            self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))   
+            self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))
         self.assertEqual(1, len(batches))
         self.assertTrue(all([np.allclose(i, j)
                              for i, j in zip(batches[0], expected)]))
@@ -95,7 +95,6 @@ class VideoLoaderTest(unittest.TestCase):
         video_loader = OpenCVReader(
             file_url='dummy.avi', batch_size=NUM_FRAMES, offset=2)
         batches = list(video_loader.read())
-        print(batches)
         expected = list(self.create_dummy_frames(
             filters=[i for i in range(2, NUM_FRAMES)]))
         self.assertEqual(1, len(batches))

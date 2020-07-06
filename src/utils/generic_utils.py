@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import importlib
-
 import torch
-
+import pathlib
 
 def validate_kwargs(kwargs, allowed_kwargs,
                     error_message='Keyword argument not understood:'):
@@ -23,6 +22,14 @@ def validate_kwargs(kwargs, allowed_kwargs,
     for kwarg in kwargs:
         if kwarg not in allowed_kwargs:
             raise TypeError(error_message, kwarg)
+
+
+def get_uri_from_sys_path(sys_path: str) -> str:
+    """
+    Convert a sys path to uri
+    """
+    p = pathlib.Path(sys_path)
+    return p.resolve().as_uri()
 
 
 def str_to_class(class_path: str):

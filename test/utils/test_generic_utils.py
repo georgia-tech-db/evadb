@@ -17,7 +17,7 @@ import unittest
 
 from mock import patch
 
-from src.utils.generic_utils import str_to_class, is_gpu_available
+from src.utils.generic_utils import str_to_class, is_gpu_available, get_uri_from_sys_path
 from src.storage.loaders.video_loader import VideoLoader
 
 
@@ -26,6 +26,10 @@ class ModulePathTest(unittest.TestCase):
     def test_should_return_correct_class_for_string(self):
         vl = str_to_class("src.storage.loaders.video_loader.VideoLoader")
         self.assertEqual(vl, VideoLoader)
+
+    def test_should_return_correct_uri_path(self):
+        path_uri = get_uri_from_sys_path("/tmp/eva")
+        self.assertEqual(path_uri, "file:///tmp/eva")
 
     @patch('src.utils.generic_utils.torch')
     def test_should_use_torch_to_check_if_gpu_is_available(self,
