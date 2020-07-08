@@ -14,13 +14,29 @@
 # limitations under the License.
 
 import unittest
+from mock import patch, MagicMock
+from pathlib import Path
 
-from src.utils.generic_utils import str_to_class
-from src.loaders.video_loader import VideoLoader
+from src.utils.generic_utils import str_to_class, generate_file_path
+from src.readers.opencv_reader import OpenCVReader
 
 
 class ModulePathTest(unittest.TestCase):
 
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class("src.loaders.video_loader.VideoLoader")
-        self.assertEqual(vl, VideoLoader)
+        vl = str_to_class("src.readers.opencv_reader.OpenCVReader")
+        self.assertEqual(vl, OpenCVReader)
+
+    @patch('src.utils.generic_utils.ConfigurationManager')
+    def test_should_return_a_randon_full_path(self, mock_conf):
+        mock_conf_inst = MagicMock()
+        mock_conf.return_value = mock_conf_inst
+        mock_conf_inst.get_value.return_value = 'eva_datasets'
+        expected = Path('eva_datasets').resolve()
+        actual = generate_file_path('test')
+        self.assertTrue(actual.is_absolute())
+        # Root directory must be the same, filename is random
+        self.assertTrue(expected.match(str(actual.parent)))
+
+        mock_conf_inst.get_value.return_value = None
+        self.assertRaises(KeyError, generate_file_path)
