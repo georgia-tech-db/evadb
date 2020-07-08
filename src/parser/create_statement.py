@@ -22,11 +22,13 @@ from src.parser.types import ParserColumnDataType
 
 
 class ColumnConstraintInformation:
-    def __init__(self):
-        self.nullable = False
-        self.default_value = None
-        self.primary = False
-        self.unique = False
+    def __init__(self, nullable=False, default_value=None,
+                 primary=False, unique=False):
+        self.nullable = nullable
+        self.default_value = default_value
+        self.primary = primary
+        self.unique = unique
+
 
 class ColumnDefinition:
     def __init__(self, col_name: str,
@@ -36,7 +38,7 @@ class ColumnDefinition:
         self._type = col_type
         self._dimension = col_dim
 
-        #column constarint info
+        # column constarint info
         if cci is not None:
             self._unique_column_constraint = cci.unique
             self._nullable = cci.nullable
