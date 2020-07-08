@@ -86,4 +86,4 @@ class DatasetService(BaseService):
             DataFrameMetadata - metadata for given dataset_name
         """
         return self.model.query.filter(
-            self.model._name == dataset_name).one()
+            self.model._name == dataset_name).one_or_none()
