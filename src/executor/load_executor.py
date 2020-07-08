@@ -13,16 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from numpy import ndarray
-
-from src.catalog.catalog_manager import CatalogManager
-from src.catalog.column_type import ColumnType
 from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.storage.dataframe import append_rows
-from src.loaders.video_loader import VideoLoader
-from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import LoggingManager
+from src.readers.opencv_reader import OpenCVReader
 
 
 class LoadDataExecutor(AbstractExecutor):
@@ -35,11 +29,22 @@ class LoadDataExecutor(AbstractExecutor):
 
     def exec(self):
         """
-        Call the video loader to construct data frames (frame_id, frame_Data) 
-        which are stored in the database 
+        Read the input video using opencv and persist data
+        using storage engine
         """
-        # trying arbitrary batch size
-        video_loader = VideoLoader(self.node.file_path, batch_size=50)
-        for batch in video_loader:
-            append_rows(self.node.table_metainfo, batch)
-        
+        # Arbitrary batch size
+        batch_size = 50
+        video_reader = OpenCVReader(self.node.file_path, batch_size=batch_size)
+        # videos are persisted using (id, data) schema where id = frame_id
+        # and data = frame_data. Current logic supports loading a video into
+        # storage with the assumption that frame_id starts from 0. In case
+        # we want to append to the existing store we have to figure out the
+        # correct frame_id. It can also be a parameter based by the user.
+        id = 0
+        data = []
+        for batch in video_reader.read():
+            for frame in batch:
+                data.append({'id': id, 'data': frame})
+                id += 1
+        # Hook for the storage engine
+        append_rows(self.node.table_metainfo, data)
