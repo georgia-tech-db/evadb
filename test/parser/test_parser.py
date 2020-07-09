@@ -237,7 +237,6 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(create_udf_stmt.udf_type, 'Classification')
 
 
-    @unittest.skip("load_data is not implemented")
     def test_load_data_statement(self):
         parser = Parser()
         load_data_query = """LOAD DATA INFILE 'data/video.mp4' INTO MyVideo;"""
