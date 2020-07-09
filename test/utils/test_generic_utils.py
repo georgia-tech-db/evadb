@@ -29,10 +29,6 @@ class ModulePathTest(unittest.TestCase):
         vl = str_to_class("src.readers.opencv_reader.OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    def test_should_return_correct_uri_path(self):
-        path_uri = get_uri_from_sys_path("/tmp/eva")
-        self.assertEqual(path_uri, "file:///tmp/eva")
-
     @patch('src.utils.generic_utils.torch')
     def test_should_use_torch_to_check_if_gpu_is_available(self,
                                                            torch):
