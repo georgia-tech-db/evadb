@@ -22,11 +22,11 @@ from src.utils.logging_manager import LoggingManager
 
 class OpenCVReader(AbstractReader):
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
             Reads video using OpenCV and yields frame data
          """
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def _read(self):
         video = cv2.VideoCapture(self.file_url)
