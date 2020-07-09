@@ -295,7 +295,6 @@ class ParserVisitorTests(unittest.TestCase):
     ##################################################################
     # LOAD DATA Statement
     ##################################################################
-    @unittest.skip("load_statement is not implemented")
     @mock.patch.object(ParserVisitor, 'visit')
     @mock.patch('src.parser.parser_visitor.LoadDataStatement')
     def test_visit_load_statement(self, mock_load, mock_visit):
