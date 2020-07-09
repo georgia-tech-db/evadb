@@ -27,7 +27,8 @@ from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
                                            bind_dataset,
-                                           column_definition_to_udf_io)
+                                           column_definition_to_udf_io,
+                                           create_video_metadata)
 from src.parser.table_ref import TableRef
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
@@ -156,13 +157,19 @@ class StatementToPlanConvertor:
         self._plan = create_udf_opr
 
     def visit_load_data(self, statement: LoadDataStatement):
-        """Covertor for parsed load data statement
-        
+        """Convertor for parsed load data statement
+            If the input table already exists we return its
+            metadata. Else we will create a new metadata object for this 
+            table name.
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
         table = statement.table
         table_metainfo = bind_dataset(table.table_info)
+        if table_metainfo is None:
+            # Create a new metadata object
+            table_metainfo = create_video_metadata(table.table_info.table_name)
+            
         load_data_opr = LogicalLoadData(table_metainfo, statement.path)
         self._plan = load_data_opr
         

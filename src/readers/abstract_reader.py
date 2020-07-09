@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
-from typing import Iterator
+from pathlib import Path
 
 class AbstractReader(metaclass=ABCMeta):
     """
@@ -28,6 +28,10 @@ class AbstractReader(metaclass=ABCMeta):
 
     def __init__(self, file_url: str, batch_size=1,
                  offset=None):
+        # Opencv doesn't support pathlib.Path so convert to raw str
+        if isinstance(file_url, Path):
+            file_url = str(file_url)
+
         self.file_url = file_url
         self.batch_size = batch_size
         self.offset = offset
@@ -41,7 +45,6 @@ class AbstractReader(metaclass=ABCMeta):
         # Incase we receive negative batch_size set it to 1
         if self.batch_size <= 0:
             self.batch_size = 1
-        print(self.batch_size)
         for data in self._read():
             data_batch.append(data)
             if len(data_batch) % self.batch_size == 0:

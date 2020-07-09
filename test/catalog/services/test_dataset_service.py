@@ -64,6 +64,6 @@ class DatasetServiceTest(TestCase):
             mocked):
         service = DatasetService()
         actual = service.dataset_object_by_name(DATABASE_NAME, DATASET_NAME)
-        expected = mocked.query.filter.return_value.one.return_value
+        expected = mocked.query.filter.return_value.one_or_none.return_value
 
         self.assertEqual(actual, expected)

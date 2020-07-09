@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from mock import patch, MagicMock
+from mock import patch, MagicMock, call
 
 from src.expression.function_expression import FunctionExpression
 from src.expression.tuple_value_expression import TupleValueExpression
@@ -22,10 +22,13 @@ from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
                                            column_definition_to_udf_io,
                                            bind_function_expr,
                                            bind_predicate_expr,
-                                           bind_columns_expr)
+                                           bind_columns_expr,
+                                           create_video_metadata)
 from src.optimizer.optimizer_utils import \
     xform_parser_column_type_to_catalog_type
-from src.parser.create_statement import ColumnDefinition
+from src.parser.create_statement import ColumnDefinition, \
+    ColumnConstraintInformation
+from src.parser.types import ParserColumnDataType
 
 
 class OptimizerUtilsTest(unittest.TestCase):
@@ -98,3 +101,34 @@ xform_parser_column_type_to_catalog_type')
         func_expr = FunctionExpression(None, name='temp')
         bind_columns_expr([func_expr], {})
         mock_bind.assert_called_with(func_expr, {})
+
+    @patch('src.optimizer.optimizer_utils.CatalogManager')
+    @patch('src.optimizer.optimizer_utils.ColumnDefinition')
+    @patch('src.optimizer.optimizer_utils.ColumnConstraintInformation')
+    @patch('src.optimizer.optimizer_utils.create_column_metadata')
+    @patch('src.optimizer.optimizer_utils.generate_file_path')
+    def test_create_video_metadata(self, m_gfp, m_ccm, m_cci, m_cd, m_cm):
+        catalog_ins = MagicMock()
+        expected = 'video_metadata'
+        name = 'eva'
+        uri = 'tmp'
+        m_gfp.return_value = uri
+        m_ccm.return_value = 'col_metadata'
+        m_cci.return_value = 'cci'
+        m_cd.return_value = 1
+        m_cm.return_value = catalog_ins
+        catalog_ins.create_metadata.return_value = expected
+        
+        calls = [call('id', ParserColumnDataType.INTEGER, [],
+                      'cci'),
+                 call('data', ParserColumnDataType.NDARRAY,
+                      [None, None, None])]
+
+        actual = create_video_metadata(name)
+        m_gfp.assert_called_once_with(name)
+        m_ccm.assert_called_once_with([1, 1])
+        m_cci.assert_called_once_with(unique=True)
+        m_cd.assert_has_calls(calls)
+        catalog_ins.create_metadata.assert_called_with(
+            name, uri, 'col_metadata', identifier_column='id')
+        self.assertEqual(actual, expected)

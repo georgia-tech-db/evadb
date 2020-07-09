@@ -14,7 +14,12 @@
 # limitations under the License.
 import importlib
 import torch
-import pathlib
+import uuid
+import hashlib
+from pathlib import Path
+
+from src.configuration.configuration_manager import ConfigurationManager
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 def validate_kwargs(kwargs, allowed_kwargs,
                     error_message='Keyword argument not understood:'):
@@ -22,14 +27,6 @@ def validate_kwargs(kwargs, allowed_kwargs,
     for kwarg in kwargs:
         if kwarg not in allowed_kwargs:
             raise TypeError(error_message, kwarg)
-
-
-def get_uri_from_sys_path(sys_path: str) -> str:
-    """
-    Convert a sys path to uri
-    """
-    p = pathlib.Path(sys_path)
-    return p.resolve().as_uri()
 
 
 def str_to_class(class_path: str):
@@ -54,3 +51,26 @@ def is_gpu_available() -> bool:
         [bool] True if system has GPUs, else False
     """
     return torch.cuda.is_available()
+
+def generate_file_path(name: str = '') -> Path:
+    """Generates a arbitrary file_path(md5 hash) based on the a random salt
+    and name
+
+    Arguments:
+        name (str): Input file_name.
+
+    Returns:
+        Path: pathlib.Path object
+
+    """
+    dataset_location = ConfigurationManager().get_value("core", "location")
+    if dataset_location is None:
+        LoggingManager().log(
+            'Missing location key in eva.yml', LoggingLevel.ERROR)
+        raise KeyError('Missing location key in eva.yml')
+
+    dataset_location = Path(dataset_location)
+    salt = uuid.uuid4().hex
+    file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
+    path = dataset_location / file_name
+    return path.resolve()
