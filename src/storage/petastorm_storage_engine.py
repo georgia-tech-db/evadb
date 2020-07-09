@@ -26,6 +26,7 @@ from petastorm.unischema import dict_to_spark_row
 from petastorm.predicates import in_set, in_lambda
 from petastorm import make_reader
 from typing import Iterator, Dict
+from pathlib import Path
 
 
 class PetastormStorageEngine(AbstractStorageEngine):
@@ -45,7 +46,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         eva_dir = ConfigurationManager().get_value("core", "location")
         output_url = os.path.join(eva_dir, table.name)
 
-        return output_url
+        return Path(output_url).resolve().as_uri()
 
     def create(self, table: DataFrameMetadata):
         """
