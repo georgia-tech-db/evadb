@@ -16,7 +16,7 @@
 from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_plan import CreatePlan
 from src.executor.abstract_executor import AbstractExecutor
-from src.storage.dataframe import create_dataframe
+from src.storage import StorageEngine
 import tempfile
 import os.path
 
@@ -47,5 +47,5 @@ class CreateExecutor(AbstractExecutor):
                                                     file_url,
                                                     self.node.column_list)
 
-        create_dataframe(metadata)
+        StorageEgine.create(metadata)
         return file_url
