@@ -5,6 +5,7 @@ core:
 
 storage:
   loader: "src.storage.loaders.petastorm_loader.PetastormLoader"
+  engine: "src.storage.petastorm_storage_engine.PetastormStorageEngine"
   
 server:
   host: "0.0.0.0"

@@ -31,8 +31,8 @@ class OpenCVReader(AbstractReader):
     def _read(self):
         video = cv2.VideoCapture(self.file_url)
         video_start = self.offset if self.offset else 0
-        video.set(cv2.CAP_PROP_POS_FRAMES, video_start)    
-        
+        video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
+
         LoggingManager().log("Reading frames", LoggingLevel.INFO)
 
         _, frame = video.read()

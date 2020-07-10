@@ -15,9 +15,8 @@
 
 from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
-from src.storage.dataframe import append_rows
 from src.readers.opencv_reader import OpenCVReader
-
+from src.storage import StorageEngine
 
 class LoadDataExecutor(AbstractExecutor):
 
@@ -47,4 +46,4 @@ class LoadDataExecutor(AbstractExecutor):
                 data.append({'id': id, 'data': frame})
                 id += 1
         # Hook for the storage engine
-        append_rows(self.node.table_metainfo, data)
+        StorageEngine.write_row(self.node.table_metainfo, data)
