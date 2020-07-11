@@ -12,16 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum
+import unittest
+from src.optimizer.operators import LogicalLoadData
+from src.optimizer.plan_generator import PlanGenerator
+from src.planner.load_data_plan import LoadDataPlan
 
 
-@unique
-class PlanNodeType(IntEnum):
-    SEQUENTIAL_SCAN = 1
-    STORAGE_PLAN = 2
-    PP_FILTER = 3
-    INSERT = 4
-    CREATE = 5
-    CREATE_UDF = 6
-    LOAD_DATA = 7
-    # add other types
+class LoadDataGeneratorTest(unittest.TestCase):
+    def test_should_return_correct_plan_tree_for_input_logical_tree(self):
+        logical_plan = LogicalLoadData('metainfo', 'path')
+        plan = PlanGenerator().build(logical_plan)
+        self.assertIsInstance(plan, LoadDataPlan)
+        self.assertEqual(plan.table_metainfo, 'metainfo')
+        self.assertEqual(plan.file_path, 'path')
+        

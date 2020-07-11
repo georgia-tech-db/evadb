@@ -110,22 +110,49 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch('src.catalog.catalog_manager.init_db')
     @mock.patch('src.catalog.catalog_manager.DatasetService')
     @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
-    def test_table_binding_without_columns_returns_no_column_ids(self,
-                                                                 dcs_mock,
-                                                                 ds_mock,
-                                                                 initdb_mock):
+    def test_get_dataset_metadata_when_table_exists(self,
+                                                    dcs_mock,
+                                                    ds_mock,
+                                                    initdb_mock):
         catalog = CatalogManager()
         dataset_name = "name"
 
         database_name = "database"
+        schema = [1, 2, 3]
+        id = 1
+        metadata_obj = MagicMock(id=id, schema=None)
+        ds_mock.return_value.dataset_object_by_name.return_value = metadata_obj
+        dcs_mock.return_value. \
+            columns_by_id_and_dataset_id.return_value = schema
 
         actual = catalog.get_dataset_metadata(database_name, dataset_name)
         ds_mock.return_value.dataset_object_by_name.assert_called_with(
             database_name, dataset_name)
+        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_called_with(
+            id, None)
+        self.assertEqual(actual.id, id)
+        self.assertEqual(actual.schema, schema)
 
-        self.assertEqual(actual,
-                         ds_mock.return_value.dataset_object_by_name
-                         .return_value)
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_get_dataset_metadata_when_table_doesnot_exists(self,
+                                                            dcs_mock,
+                                                            ds_mock,
+                                                            initdb_mock):
+        catalog = CatalogManager()
+        dataset_name = "name"
+
+        database_name = "database"
+        metadata_obj = None
+
+        ds_mock.return_value.dataset_object_by_name.return_value = metadata_obj
+
+        actual = catalog.get_dataset_metadata(database_name, dataset_name)
+        ds_mock.return_value.dataset_object_by_name.assert_called_with(
+            database_name, dataset_name)
+        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_not_called()
+        self.assertEqual(actual, metadata_obj)
 
     @mock.patch('src.catalog.catalog_manager.UdfIO')
     def test_create_udf_io_object(self, udfio_mock):
@@ -157,7 +184,3 @@ class CatalogManagerTests(unittest.TestCase):
         udf_mock.return_value.udf_by_name.assert_called_with('name')
         self.assertEqual(actual,
                          udf_mock.return_value.udf_by_name.return_value)
-
-
-if __name__ == '__main__':
-    unittest.main()

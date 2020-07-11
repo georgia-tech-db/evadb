@@ -16,12 +16,13 @@ import unittest
 from unittest.mock import patch
 
 from src.catalog.models.df_metadata import DataFrameMetadata
-from src.executor.disk_based_storage_executor import DiskStorageExecutor
+# from src.executor.disk_based_storage_executor import DiskStorageExecutor
 from src.planner.storage_plan import StoragePlan
 
 
 class DiskStorageExecutorTest(unittest.TestCase):
 
+    @unittest.skip("disable test due to deprication")
     @patch('src.executor.disk_based_storage_executor.Loader')
     def test_calling_storage_executor_should_return_batches(self, mock_class):
         class_instance = mock_class.return_value

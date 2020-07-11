@@ -32,6 +32,7 @@ from src.parser.insert_statement import InsertTableStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType
+from src.parser.load_statement import LoadDataStatement
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColumnConstraintInformation
@@ -355,6 +356,17 @@ class ParserVisitor(evaql_parserVisitor):
             where_clause = self.visit(ctx.whereExpr)
 
         return {"from": from_table, "where": where_clause}
+
+    ##################################################################
+    # LOAD STATEMENT
+    ##################################################################
+
+    def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):     
+        file_path = self.visit(ctx.fileName()).value
+        table = self.visit(ctx.tableName())
+        stmt = LoadDataStatement(table, file_path)
+        return stmt
+
 
     ##################################################################
     # COMMON CLAUSES Ids, Column_names, Table_names
