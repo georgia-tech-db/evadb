@@ -19,6 +19,7 @@ from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint, \
     ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
+from ast import literal_eval
 
 from src.catalog.column_type import ColumnType
 from src.catalog.models.base_model import BaseModel
@@ -70,7 +71,7 @@ class DataFrameColumn(BaseModel):
 
     @property
     def array_dimensions(self):
-        return json.loads(self._array_dimensions)
+        return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
     def array_dimensions(self, value):

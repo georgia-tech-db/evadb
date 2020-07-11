@@ -17,7 +17,7 @@ import unittest
 from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
-    LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF
+    LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, LogicalLoadData
 from src.optimizer.plan_generator import PlanGenerator
 
 
@@ -78,3 +78,10 @@ class PlanGeneratorTest(unittest.TestCase):
         l_create_udf = LogicalCreateUDF('udf', True, [], [], 'tmp')
         PlanGenerator().build(l_create_udf)
         mock_instance.build.assert_called_with(l_create_udf)
+
+    @patch('src.optimizer.plan_generator.LoadDataGenerator')
+    def test_should_Call_load_data_generator(self, mock):
+        mock_instance = mock.return_value
+        l_load_Data = LogicalLoadData('meta_info', 'path')
+        PlanGenerator().build(l_load_Data)
+        mock_instance.build.assert_called_with(l_load_Data)

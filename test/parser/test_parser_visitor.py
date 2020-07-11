@@ -292,6 +292,29 @@ class ParserVisitorTests(unittest.TestCase):
 
         self.assertEqual(actual, create_udf_mock.return_value)
 
+    ##################################################################
+    # LOAD DATA Statement
+    ##################################################################
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch('src.parser.parser_visitor.LoadDataStatement')
+    def test_visit_load_statement(self, mock_load, mock_visit):
+        ctx = MagicMock()
+        table = 'myVideo'
+        path = MagicMock()
+        path.value = 'video.mp4'
+        params = {ctx.fileName.return_value: path,
+                  ctx.tableName.return_value: table}
+
+        def side_effect(arg):
+            return params[arg]
+
+        mock_visit.side_effect = side_effect
+        visitor = ParserVisitor()
+        visitor.visitLoadStatement(ctx)
+        mock_visit.assert_has_calls([call(ctx.fileName()), call(ctx.tableName())])
+        mock_load.assert_called_once()
+        mock_load.assert_called_with('myVideo', 'video.mp4')
+
 
 if __name__ == '__main__':
     unittest.main()
