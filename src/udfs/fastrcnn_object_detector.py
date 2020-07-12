@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import List
 
-import numpy as np
 import pandas as pd
 import torchvision
 from torch import Tensor

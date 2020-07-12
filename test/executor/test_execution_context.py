@@ -30,7 +30,7 @@ class ExecutionContextTest(unittest.TestCase):
         socket.gethostname.return_value = 'host'
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
-                                                'address2']
+            'address2']
         cfm.return_value.get_value.return_value = {'address2': ['0', '1', '2']}
         context = Context()
 
@@ -41,15 +41,15 @@ class ExecutionContextTest(unittest.TestCase):
     @patch('src.executor.execution_context.socket')
     @patch('src.executor.execution_context.is_gpu_available')
     def test_gpu_devices_gets_populated_from_environment_if_no_config(self,
-                                                                      gpu_check,
+                                                                      is_gpu,
                                                                       socket,
                                                                       os, cfm):
-        gpu_check.return_value = True
+        is_gpu.return_value = True
 
         socket.gethostname.return_value = 'host'
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
-                                                'address2']
+            'address2']
         cfm.return_value.get_value.return_value = {'address3': ['0', '1', '2']}
         os.environ.get.return_value = "0,1,2"
         context = Context()
@@ -68,7 +68,7 @@ class ExecutionContextTest(unittest.TestCase):
         socket.gethostname.return_value = 'host'
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
-                                                'address2']
+            'address2']
         cfm.return_value.get_value.return_value = {'address3': ['0', '1', '2']}
         os.environ.get.return_value = ''
         context = Context()
@@ -87,7 +87,7 @@ class ExecutionContextTest(unittest.TestCase):
         socket.gethostname.return_value = 'host'
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
-                                                'address2']
+            'address2']
         cfm.return_value.get_value.return_value = {'address3': ['0', '1', '2']}
         os.environ.get.return_value = "0,1,2"
         context = Context()
@@ -106,7 +106,7 @@ class ExecutionContextTest(unittest.TestCase):
         socket.gethostname.return_value = 'host'
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
-                                                'address2']
+            'address2']
         cfm.return_value.get_value.return_value = None
         os.environ.get.return_value = ''
         context = Context()
@@ -127,7 +127,7 @@ class ExecutionContextTest(unittest.TestCase):
         socket.gethostname.return_value = 'host'
         socket.gethostbyaddr.return_value = 'local', ['another-hostname',
                                                       'other-possible'], [
-                                                'address2']
+            'address2']
         cfm.return_value.get_value.return_value = {'address2': ['0', '1', '2']}
         context = Context()
 

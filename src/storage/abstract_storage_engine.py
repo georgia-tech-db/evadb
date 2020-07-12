@@ -14,13 +14,14 @@
 # limitations under the License.
 
 from abc import ABCMeta, abstractmethod
+from typing import Iterator
 
 
 class AbstractStorageEngine(metaclass=ABCMeta):
     """
     Abstract class for defining storage engine. Storage engine is responsible
-    for handling data storage and retrieval tasks. This contains a minimal set of APIs
-    that each engine should implement
+    for handling data storage and retrieval tasks. 
+    This contains a minimal set of APIs that each engine should implement
 
     """
     @abstractmethod
@@ -35,7 +36,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     @abstractmethod
     def _open(self, table):
         """Internal function responsible for opening table to serve data
-        update, delete, insert or scan. 
+        update, delete, insert or scan.
 
         Attributes:
             table: storage unit to be opened
@@ -54,21 +55,21 @@ class AbstractStorageEngine(metaclass=ABCMeta):
 
     @abstractmethod
     def _close(self, table):
-        """Internal function responsible for closing table to free any resouces.
-         
+        """Internal function responsible for closing table to free resouces.
+
         Attributes:
             table: storage unit to be closed
         """
-    
+
     @abstractmethod
     def _read_init(self, table):
         """Internal function responsible for doing tasks required before
         we begin scaaning/reading a table
-        
+
         Attributes:
             table: storage unit to be read
-        """ 
-    
+        """
+
     @abstractmethod
     def read(self, table) -> Iterator:
         """Interface responsible for yielding row/rows to the client.
@@ -87,4 +88,3 @@ class AbstractStorageEngine(metaclass=ABCMeta):
             table : storage unit to be read
             pos : row position to be returned
         """
-
