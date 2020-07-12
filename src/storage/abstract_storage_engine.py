@@ -15,13 +15,14 @@
 
 from typing import Iterator
 from abc import ABCMeta, abstractmethod
+from typing import Iterator
 
 
 class AbstractStorageEngine(metaclass=ABCMeta):
     """
     Abstract class for defining storage engine. Storage engine is responsible
-    for handling data storage and retrieval tasks. This contains a minimal set of APIs
-    that each engine should implement
+    for handling data storage and retrieval tasks.
+    This contains a minimal set of APIs that each engine should implement
 
     """
     @abstractmethod
@@ -55,7 +56,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
 
     @abstractmethod
     def _close(self, table):
-        """Internal function responsible for closing table to free any resouces.
+        """Internal function responsible for closing table to free resouces.
 
         Attributes:
             table: storage unit to be closed
@@ -88,4 +89,3 @@ class AbstractStorageEngine(metaclass=ABCMeta):
             table : storage unit to be read
             pos : row position to be returned
         """
-

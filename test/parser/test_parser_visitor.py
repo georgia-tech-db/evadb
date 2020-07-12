@@ -21,8 +21,7 @@ from unittest.mock import MagicMock, call
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
-from src.expression.function_expression import FunctionExpression, \
-    ExecutionMode
+from src.expression.function_expression import ExecutionMode
 from antlr4 import TerminalNode
 
 
@@ -250,7 +249,7 @@ class ParserVisitorTests(unittest.TestCase):
     @mock.patch('src.parser.parser_visitor.CreateUDFStatement')
     def test_visit_create_udf(self, create_udf_mock, visit_mock):
         ctx = MagicMock()
-        ctx.children = children = [MagicMock() for i in range(5)]
+        ctx.children = [MagicMock() for i in range(5)]
         ctx.children[0].getRuleIndex.return_value = evaql_parser.RULE_udfName
         ctx.children[1].getRuleIndex.return_value = evaql_parser. \
             RULE_ifNotExists
@@ -311,10 +310,7 @@ class ParserVisitorTests(unittest.TestCase):
         mock_visit.side_effect = side_effect
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
-        mock_visit.assert_has_calls([call(ctx.fileName()), call(ctx.tableName())])
+        mock_visit.assert_has_calls(
+            [call(ctx.fileName()), call(ctx.tableName())])
         mock_load.assert_called_once()
         mock_load.assert_called_with('myVideo', 'video.mp4')
-
-
-if __name__ == '__main__':
-    unittest.main()
