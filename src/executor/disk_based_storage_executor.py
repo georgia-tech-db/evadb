@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from src.storage.loaders import Loader
+from src.readers.opencv_reader import OpenCVReader
 from src.models.storage.batch import Batch
 from src.executor.abstract_storage_executor import \
     AbstractStorageExecutor
@@ -32,6 +32,7 @@ class DiskStorageExecutor(AbstractStorageExecutor):
 
     def __init__(self, node: StoragePlan):
         super().__init__(node)
+        """
         self.storage = Loader(node.video,
                               batch_size=node.batch_size,
                               skip_frames=node.skip_frames,
@@ -39,10 +40,14 @@ class DiskStorageExecutor(AbstractStorageExecutor):
                               offset=node.offset,
                               curr_shard=node.curr_shard,
                               total_shards=node.total_shards)
+        """
+        self.storage = OpenCVReader(node.video,
+                                    batch_size=node.batch_size,
+                                    offset=node.offset)
 
     def validate(self):
         pass
 
     def exec(self) -> Iterator[Batch]:
-        for batch in self.storage.load():
+        for batch in self.storage.read():
             yield batch
