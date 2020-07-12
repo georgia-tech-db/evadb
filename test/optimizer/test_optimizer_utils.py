@@ -24,10 +24,7 @@ from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
                                            bind_predicate_expr,
                                            bind_columns_expr,
                                            create_video_metadata)
-from src.optimizer.optimizer_utils import \
-    xform_parser_column_type_to_catalog_type
-from src.parser.create_statement import ColumnDefinition, \
-    ColumnConstraintInformation
+from src.parser.create_statement import ColumnDefinition
 from src.parser.types import ParserColumnDataType
 
 
@@ -118,7 +115,7 @@ xform_parser_column_type_to_catalog_type')
         m_cd.return_value = 1
         m_cm.return_value = catalog_ins
         catalog_ins.create_metadata.return_value = expected
-        
+
         calls = [call('id', ParserColumnDataType.INTEGER, [],
                       'cci'),
                  call('data', ParserColumnDataType.NDARRAY,

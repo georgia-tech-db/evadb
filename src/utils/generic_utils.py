@@ -52,6 +52,7 @@ def is_gpu_available() -> bool:
     """
     return torch.cuda.is_available()
 
+
 def generate_file_path(name: str = '') -> Path:
     """Generates a arbitrary file_path(md5 hash) based on the a random salt
     and name

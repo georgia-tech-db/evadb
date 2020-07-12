@@ -16,7 +16,6 @@
 from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
-from src.expression.abstract_expression import AbstractExpression
 from src.parser.table_ref import TableRef
 from pathlib import Path
 

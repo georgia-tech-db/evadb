@@ -16,7 +16,7 @@ import unittest
 from unittest.mock import patch
 
 from src.catalog.models.df_metadata import DataFrameMetadata
-# from src.executor.disk_based_storage_executor import DiskStorageExecutor
+from src.executor.disk_based_storage_executor import DiskStorageExecutor
 from src.planner.storage_plan import StoragePlan
 
 

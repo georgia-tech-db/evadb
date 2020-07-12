@@ -19,7 +19,8 @@ from pathlib import Path
 
 from mock import patch
 
-from src.utils.generic_utils import str_to_class, is_gpu_available, generate_file_path
+from src.utils.generic_utils import (str_to_class, is_gpu_available,
+                                     generate_file_path)
 from src.readers.opencv_reader import OpenCVReader
 
 
