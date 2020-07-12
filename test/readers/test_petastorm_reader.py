@@ -43,6 +43,15 @@ class PetastormLoaderTest(unittest.TestCase):
         mock.assert_called_once_with('dummy.avi', shard_count=3, cur_shard=2)
 
     @patch("src.readers.petastorm_reader.make_reader")
+    def test_should_call_petastorm_make_reader_with_negative_shards(self,
+                                                                    mock):
+        petastorm_reader = PetastormReader(file_url='dummy.avi', cur_shard=-1,
+                                           shard_count=-2)
+        print(list(petastorm_reader._read()))
+        mock.assert_called_once_with(
+            'dummy.avi', shard_count=None, cur_shard=None)
+
+    @patch("src.readers.petastorm_reader.make_reader")
     def test_should_read_data_using_petastorm_reader(self, mock):
         petastorm_reader = PetastormReader(file_url='dummy.avi')
         dummy_values = map(lambda i: np.ones((2, 2, 3)) * i, range(3))
