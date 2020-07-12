@@ -20,7 +20,7 @@ import numpy as np
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.storage.petastorm_storage_engine import PetastormStorageEngine
-from src.storage.loaders.video_loader import VideoLoader
+from src.readers.opencv_reader import OpenCVReader
 from test.util import custom_list_of_dicts_equal
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
@@ -116,12 +116,13 @@ class PetastormStorageEngineTest(unittest.TestCase):
         """
         table_info = self.create_sample_table()
 
-        video_loader = VideoLoader(table_info)
-        batches = list(video_loader.load())
-        # Create a function to convert bacth to row
-        # The Dict yielded from the videoloader should have the same schema
-        # TODO: Type the Row object. Maybe?
-        rows = [batch.frames.to_dict('records')[0] for batch in batches]
+        video_loader = OpenCVReader(table_info.file_url)
+        id = 0
+        rows = []
+        for batch in video_loader.read():
+            for frame in batch:
+                rows.append({"id": id, "frame_data": frame})
+                id += 1
 
         petastorm = PetastormStorageEngine()
         petastorm.create(table_info)
