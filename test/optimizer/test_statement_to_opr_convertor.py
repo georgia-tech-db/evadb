@@ -130,7 +130,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         stmt.impl_path = 'tmp.py'
         stmt.udf_type = 'classification'
         mock.side_effect = ['inp', 'out']
-        actual = convertor.visit_create_udf(stmt)
+        convertor.visit_create_udf(stmt)
         mock.assert_any_call(stmt.inputs, True)
         mock.assert_any_call(stmt.outputs, False)
         l_create_udf_mock.assert_called_once()
@@ -148,7 +148,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock = MagicMock()
         convertor.visit_create_udf = mock
 
-        actual = convertor.visit(stmt)
+        convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
@@ -158,7 +158,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock = MagicMock()
         convertor.visit_insert = mock
 
-        actual = convertor.visit(stmt)
+        convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
@@ -168,7 +168,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock = MagicMock()
         convertor.visit_create = mock
 
-        actual = convertor.visit(stmt)
+        convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
@@ -178,7 +178,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock = MagicMock()
         convertor.visit_load_data = mock
 
-        actual = convertor.visit(stmt)
+        convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 

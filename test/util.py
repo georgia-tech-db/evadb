@@ -30,6 +30,7 @@ def create_dataframe_same(times=1):
 
     return base_df
 
+
 def custom_list_of_dicts_equal(one, two):
     for v1, v2 in zip(one, two):
         if v1.keys() != v2.keys():

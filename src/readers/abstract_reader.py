@@ -19,7 +19,8 @@ from pathlib import Path
 class AbstractReader(metaclass=ABCMeta):
     """
     Abstract class for defining data reader. All other video readers use this
-    abstract class. Video readers are expected to return data in an iterative manner.
+    abstract class. Video readers are expected to return data
+    in an iterative manner.
 
     Attributes:
         file_url (str): path to read data from

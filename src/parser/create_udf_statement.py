@@ -17,7 +17,6 @@ from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from typing import List
-from src.parser.types import ParserColumnDataType
 from src.parser.create_statement import ColumnDefinition
 from pathlib import Path
 

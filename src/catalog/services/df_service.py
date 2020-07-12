@@ -25,7 +25,8 @@ class DatasetService(BaseService):
     def __init__(self):
         super().__init__(DataFrameMetadata)
 
-    def create_dataset(self, name, file_url, identifier_id='id') -> DataFrameMetadata:
+    def create_dataset(self, name, file_url,
+                       identifier_id='id') -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
@@ -35,7 +36,10 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata object
         """
-        metadata = self.model(name=name, file_url=file_url, identifier_id=identifier_id)
+        metadata = self.model(
+            name=name,
+            file_url=file_url,
+            identifier_id=identifier_id)
         metadata = metadata.save()
         return metadata
 
