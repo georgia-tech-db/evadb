@@ -28,6 +28,7 @@ dependencies:
   - mock
   - pylint
   - pytest-asyncio
+  - flake8
   - pip:
     - antlr4-python3-runtime==4.8
     - petastorm
