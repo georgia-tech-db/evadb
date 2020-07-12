@@ -47,5 +47,5 @@ class CreateExecutor(AbstractExecutor):
                                                     file_url,
                                                     self.node.column_list)
 
-        StorageEgine.create(metadata)
-        return file_url
+        StorageEngine.create(table=metadata)
+        return metadata

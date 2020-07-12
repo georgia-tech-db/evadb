@@ -16,14 +16,19 @@ import unittest
 from src.planner.create_plan import CreatePlan
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
+from src.catalog.models.base_model import drop_db
 from src.parser.table_ref import TableRef, TableInfo
 from src.executor.create_executor import CreateExecutor
-
+from src.storage import StorageEngine
 
 class CreateExecutorTest(unittest.TestCase):
     # integration test
-    @unittest.skip("we need drop functionality before we can enable")
     def test_create_executor_should_create_table_in_storage(self):
+        try:
+            drop_db()
+        except Exception as e:
+            pass
+
         dummy_info = TableInfo('dummy')
         dummy_table = TableRef(dummy_info)
 
@@ -33,13 +38,10 @@ class CreateExecutorTest(unittest.TestCase):
         plan_node = CreatePlan(dummy_table, columns, False)
 
         createExec = CreateExecutor(plan_node)
-        url = createExec.exec()
+        metadata = createExec.exec()
 
-        # test if we have a table created in our storage
-        df = None # will fix later
-        #df = load_dataframe(url)
-        self.assertEqual(2, len(df.columns))
-        self.assertEqual(df.columns, ['id', 'name'])
+        row_iter = StorageEngine.read(metadata)
+        self.assertFalse(any(True for _ in row_iter))
 
         # ToDo call drop this table
         # Add support in catalog and spark
