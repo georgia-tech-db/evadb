@@ -46,4 +46,6 @@ class LoadDataExecutor(AbstractExecutor):
                 data.append({'id': id, 'data': frame})
                 id += 1
         # Hook for the storage engine
+        # We currently use create to empty exsiting table.
+        StorageEngine.create(self.node.table_metainfo)
         StorageEngine.write_row(self.node.table_metainfo, data)

@@ -22,13 +22,13 @@ from src.executor.create_executor import CreateExecutor
 from src.storage import StorageEngine
 
 class CreateExecutorTest(unittest.TestCase):
-    # integration test
-    def test_create_executor_should_create_table_in_storage(self):
-        try:
-            drop_db()
-        except Exception as e:
-            pass
 
+    def setUp(self):
+        pass
+
+    # integration test
+    @unittest.skip("we need drop functionality before we can enable")
+    def test_create_executor_should_create_table_in_storage(self):
         dummy_info = TableInfo('dummy')
         dummy_table = TableRef(dummy_info)
 
