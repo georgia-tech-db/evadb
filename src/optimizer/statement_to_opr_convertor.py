@@ -159,7 +159,7 @@ class StatementToPlanConvertor:
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement
             If the input table already exists we return its
-            metadata. Else we will create a new metadata object for this 
+            metadata. Else we will create a new metadata object for this
             table name.
         Arguments:
             statement(LoadDataStatement): [Load data statement]
@@ -169,10 +169,10 @@ class StatementToPlanConvertor:
         if table_metainfo is None:
             # Create a new metadata object
             table_metainfo = create_video_metadata(table.table_info.table_name)
-            
+
         load_data_opr = LogicalLoadData(table_metainfo, statement.path)
         self._plan = load_data_opr
-        
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.

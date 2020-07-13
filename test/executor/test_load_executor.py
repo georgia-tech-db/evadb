@@ -19,9 +19,10 @@ from src.executor.load_executor import LoadDataExecutor
 
 class LoadExecutorTest(unittest.TestCase):
     @patch('src.executor.load_executor.OpenCVReader')
+    @patch('src.executor.load_executor.StorageEngine.create')
     @patch('src.executor.load_executor.StorageEngine.write_row')
     def test_should_call_opencv_reader_and_storage_engine(
-            self, append_mock, cv_mock):
+            self, append_mock, create_mock, cv_mock):
         batch_frames = [list(range(5))] * 5
         frames = [frame for batch in batch_frames for frame in batch]
         data = [{'id': i, 'data': d} for i, d in enumerate(frames)]
