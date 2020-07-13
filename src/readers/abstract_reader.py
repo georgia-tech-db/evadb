@@ -15,6 +15,7 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 
+
 class AbstractReader(metaclass=ABCMeta):
     """
     Abstract class for defining data reader. All other video readers use this

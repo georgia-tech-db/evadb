@@ -35,13 +35,16 @@ class PetastormStorageEngineTest(unittest.TestCase):
             filters = range(num_frames)
         for i in filters:
             yield {'id': i,
-                   'frame_data': np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                   'frame_data': np.array(np.ones((2, 2, 3))
+                                          * 0.1 * float(i + 1) * 255,
                                           dtype=np.uint8)}
 
     def create_sample_table(self):
         table_info = DataFrameMetadata("dataset_1", 'dummy.avi')
         column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False, [2, 2, 3])
+        column_2 = DataFrameColumn(
+            "frame_data", ColumnType.NDARRAY, False, [
+                2, 2, 3])
         table_info.schema = [column_1, column_2]
         return table_info
 
@@ -82,7 +85,10 @@ class PetastormStorageEngineTest(unittest.TestCase):
 
         expected_rows = list(petastorm.read(table_info))
         self.assertEqual(len(expected_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, expected_rows))
+        self.assertTrue(
+            custom_list_of_dicts_equal(
+                dummy_frames,
+                expected_rows))
 
     def test_should_return_spefic_frame(self):
         table_info = self.create_sample_table()
@@ -92,8 +98,14 @@ class PetastormStorageEngineTest(unittest.TestCase):
         petastorm.create(table_info)
         petastorm.write_row(table_info, dummy_frames)
 
-        return_rows = list(petastorm.read_pos(table_info, "id", [NUM_FRAMES / 2]))
-        expected_rows = list(self.create_dummy_frames(filters=[NUM_FRAMES / 2]))
+        return_rows = list(
+            petastorm.read_pos(
+                table_info, "id", [
+                    NUM_FRAMES / 2]))
+        expected_rows = list(
+            self.create_dummy_frames(
+                filters=[
+                    NUM_FRAMES / 2]))
         self.assertEqual(len(return_rows), 1)
         self.assertTrue(custom_list_of_dicts_equal(return_rows, expected_rows))
 
@@ -105,8 +117,17 @@ class PetastormStorageEngineTest(unittest.TestCase):
         petastorm.create(table_info)
         petastorm.write_row(table_info, dummy_frames)
 
-        return_rows = list(petastorm.read_lambda(table_info, ["id"], lambda id: id % 2 == 0))
-        expected_rows = list(self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES) if i % 2 == 0]))
+        return_rows = list(
+            petastorm.read_lambda(
+                table_info,
+                ["id"],
+                lambda id: id %
+                2 == 0))
+        expected_rows = list(
+            self.create_dummy_frames(
+                filters=[
+                    i for i in range(NUM_FRAMES) if i %
+                    2 == 0]))
         self.assertEqual(len(return_rows), len(expected_rows))
         self.assertTrue(custom_list_of_dicts_equal(return_rows, expected_rows))
 

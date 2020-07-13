@@ -59,7 +59,6 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         Returns:
             List[Outcome]: outcome after prediction
         """
-        pass
 
     def as_numpy(self, val: Tensor) -> np.ndarray:
         """

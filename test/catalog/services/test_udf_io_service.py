@@ -60,4 +60,3 @@ class UdfServiceTest(TestCase):
         service.add_udf_io(io_list)
         for mock in io_list:
             mock.save.assert_called_once()
-        

@@ -37,7 +37,7 @@ class InsertExecutorTest(unittest.TestCase):
         plan_node = CreatePlan(dummy_table, columns, False)
 
         createExec = CreateExecutor(plan_node)
-        url = createExec.exec()
+        createExec.exec()
 
         parser = Parser()
         insert_query = """INSERT INTO MyVideo (Frame_ID, Frame_Path)
@@ -59,8 +59,8 @@ class InsertExecutorTest(unittest.TestCase):
         insertExec.exec()
 
         # test if we have a added the in our storage
-        df = None # will fix later
-        #df = load_dataframe(url)
+        df = None  # will fix later
+        # df = load_dataframe(url)
         self.assertEqual(df.collect()[0][0], 1)
         self.assertEqual(df.collect()[0][1], "'/mnt/frames/1.png'")
 
