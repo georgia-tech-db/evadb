@@ -25,4 +25,3 @@ class LoadDataGeneratorTest(unittest.TestCase):
         self.assertIsInstance(plan, LoadDataPlan)
         self.assertEqual(plan.table_metainfo, 'metainfo')
         self.assertEqual(plan.file_path, 'path')
-        

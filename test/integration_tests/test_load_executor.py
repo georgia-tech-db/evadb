@@ -20,16 +20,13 @@ import numpy as np
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.planner.load_data_plan import LoadDataPlan
-from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.column_type import ColumnType
-from src.parser.table_ref import TableRef, TableInfo
-from src.executor.create_executor import CreateExecutor
 from src.executor.load_executor import LoadDataExecutor
 
 from src.storage import StorageEngine
 from test.util import custom_list_of_dicts_equal
 
 NUM_FRAMES = 10
+
 
 class LoadExecutorTest(unittest.TestCase):
 
@@ -52,8 +49,9 @@ class LoadExecutorTest(unittest.TestCase):
             filters = range(num_frames)
         for i in filters:
             yield {'id': i,
-                   'data': np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
-                                          dtype=np.uint8)}
+                   'data': np.array(np.ones((2, 2, 3))
+                                    * 0.1 * float(i + 1) * 255,
+                                    dtype=np.uint8)}
 
     def setUp(self):
         self.create_sample_video()
@@ -80,13 +78,13 @@ class LoadExecutorTest(unittest.TestCase):
 
         # Do we have select command now?
 
-        return_rows = list(StorageEngine.read(logical_plan_node.table_metainfo))
+        return_rows = list(
+            StorageEngine.read(
+                logical_plan_node.table_metainfo))
         dummy_frames = list(self.create_dummy_frames())
 
         self.assertEqual(len(return_rows), NUM_FRAMES)
         self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
-
-
 
 
 if __name__ == "__main__":

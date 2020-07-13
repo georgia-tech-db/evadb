@@ -16,10 +16,10 @@ import unittest
 from src.planner.create_plan import CreatePlan
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
-from src.catalog.models.base_model import drop_db
 from src.parser.table_ref import TableRef, TableInfo
 from src.executor.create_executor import CreateExecutor
 from src.storage import StorageEngine
+
 
 class CreateExecutorTest(unittest.TestCase):
 

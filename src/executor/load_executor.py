@@ -18,6 +18,7 @@ from src.executor.abstract_executor import AbstractExecutor
 from src.readers.opencv_reader import OpenCVReader
 from src.storage import StorageEngine
 
+
 class LoadDataExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):

@@ -45,4 +45,3 @@ def custom_list_of_dicts_equal(one, two):
                     return False
 
     return True
-

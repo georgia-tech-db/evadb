@@ -18,8 +18,6 @@ from src.spark.session import Session
 from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
 from src.storage.abstract_storage_engine import AbstractStorageEngine
-from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import LoggingManager
 from src.configuration.configuration_manager import ConfigurationManager
 
 from petastorm.unischema import dict_to_spark_row
@@ -65,7 +63,6 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .mode('overwrite') \
                 .parquet(self._spark_url(table))
 
-
     def write_row(self, table: DataFrameMetadata, rows: []):
         """
         Write rows into the dataframe.
@@ -78,8 +75,9 @@ class PetastormStorageEngine(AbstractStorageEngine):
                                  self._spark_url(table),
                                  table.schema.petastorm_schema):
 
-            rows_rdd = self.spark_context.parallelize(rows)\
-                .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema, x))
+            rows_rdd = self.spark_context.parallelize(rows) \
+                .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema,
+                                                 x))
 
             self.spark_session.createDataFrame(rows_rdd,
                                                table.schema.pyspark_schema) \
@@ -99,7 +97,8 @@ class PetastormStorageEngine(AbstractStorageEngine):
             for row in reader:
                 yield row._asdict()
 
-    def read_lambda(self, table: DataFrameMetadata, fields: [str], predicate_func) -> Iterator[Dict]:
+    def read_lambda(self, table: DataFrameMetadata, fields: [
+                    str], predicate_func) -> Iterator[Dict]:
         """
         Read the rows that the predicate_func returns true on the given fields.
 
@@ -108,11 +107,13 @@ class PetastormStorageEngine(AbstractStorageEngine):
             predicate_func: customized function return bool
         """
         predicate = in_lambda(fields, predicate_func)
-        with make_reader(self._spark_url(table), predicate = predicate) as reader:
+        with make_reader(self._spark_url(table),
+                         predicate=predicate) as reader:
             for row in reader:
                 yield row._asdict()
 
-    def read_pos(self, table: DataFrameMetadata, field: str, values: []) -> Iterator[Dict]:
+    def read_pos(self, table: DataFrameMetadata, field: str,
+                 values: []) -> Iterator[Dict]:
         """
         Read the rows that matches the field's given values.
 
@@ -121,10 +122,10 @@ class PetastormStorageEngine(AbstractStorageEngine):
             values List[]: A list of values to be included.
         """
         predicate = in_set(values, field)
-        with make_reader(self._spark_url(table), predicate = predicate) as reader:
+        with make_reader(self._spark_url(table),
+                         predicate=predicate) as reader:
             for row in reader:
                 yield row._asdict()
-
 
     def _open(self, table):
         pass
@@ -134,5 +135,3 @@ class PetastormStorageEngine(AbstractStorageEngine):
 
     def _read_init(self, table):
         pass
-
-

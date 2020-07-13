@@ -26,4 +26,3 @@ class GPUCompatible(ABC):
         Returns:
             A GPU compatible object
         """
-        pass

@@ -21,6 +21,7 @@ from pathlib import Path
 from src.configuration.configuration_manager import ConfigurationManager
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
+
 def validate_kwargs(kwargs, allowed_kwargs,
                     error_message='Keyword argument not understood:'):
     """Checks that all keyword arguments are in the set of allowed keys."""
