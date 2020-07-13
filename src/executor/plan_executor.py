@@ -58,8 +58,6 @@ class PlanExecutor:
 
         if plan_node_type == PlanNodeType.SEQUENTIAL_SCAN:
             executor_node = SequentialScanExecutor(node=plan)
-#        elif plan_node_type == PlanNodeType.STORAGE_PLAN:
-#            executor_node = DiskStorageExecutor(node=plan)
         elif plan_node_type == PlanNodeType.PP_FILTER:
             executor_node = PPExecutor(node=plan)
         elif plan_node_type == PlanNodeType.CREATE:
