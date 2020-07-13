@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Iterator
+from typing import Iterator, Dict
 from abc import ABCMeta, abstractmethod
-from typing import Iterator
 
 
 class AbstractStorageEngine(metaclass=ABCMeta):
@@ -72,7 +71,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def read(self, table) -> Iterator:
+    def read(self, table) -> Iterator[Dict]:
         """Interface responsible for yielding row/rows to the client.
         This should be implemeneted as an interator over of table. Helpful
         while doing full table scan.
