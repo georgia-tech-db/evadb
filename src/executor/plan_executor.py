@@ -19,7 +19,6 @@ from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
-# from src.executor.disk_based_storage_executor import DiskStorageExecutor
 from src.executor.pp_executor import PPExecutor
 from src.executor.create_executor import CreateExecutor
 from src.executor.insert_executor import InsertExecutor
