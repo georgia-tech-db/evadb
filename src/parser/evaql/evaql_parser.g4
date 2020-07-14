@@ -31,7 +31,7 @@ ddlStatement
 
 dmlStatement
     : selectStatement | insertStatement | updateStatement
-    | deleteStatement 
+    | deleteStatement | loadStatement
     ;
 
 utilityStatement
@@ -152,6 +152,15 @@ updateStatement
     : singleUpdateStatement
     ;
 
+loadStatement
+    : LOAD DATA 
+      INFILE fileName
+      INTO tableName
+    ;
+
+fileName
+    : stringLiteral
+    ;
 // details
 
 insertStatementValue

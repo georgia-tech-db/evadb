@@ -32,6 +32,7 @@ from src.parser.insert_statement import InsertTableStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType
+from src.parser.load_statement import LoadDataStatement
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColumnConstraintInformation
@@ -103,9 +104,9 @@ class ParserVisitor(evaql_parserVisitor):
         uid_list = []
         uid_list_length = len(ctx.uid())
         for uid_index in range(uid_list_length):
-                uid = self.visit(ctx.uid(uid_index))
-                uid_expr = TupleValueExpression(uid)
-                uid_list.append(uid_expr)
+            uid = self.visit(ctx.uid(uid_index))
+            uid_expr = TupleValueExpression(uid)
+            uid_list.append(uid_expr)
 
         return uid_list
 
@@ -178,12 +179,15 @@ class ParserVisitor(evaql_parserVisitor):
     def visitColumnDeclaration(
             self, ctx: evaql_parser.ColumnDeclarationContext):
 
-        data_type, dimensions, column_constraint_information = self.visit(ctx.columnDefinition())
+        data_type, dimensions, column_constraint_information = self.visit(
+            ctx.columnDefinition())
 
         column_name = self.visit(ctx.uid())
 
         if column_name is not None:
-            return ColumnDefinition(column_name, data_type, dimensions, column_constraint_information)
+            return ColumnDefinition(
+                column_name, data_type, dimensions,
+                column_constraint_information)
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
@@ -201,7 +205,8 @@ class ParserVisitor(evaql_parserVisitor):
 
         return data_type, dimensions, column_constraint_information
 
-    def visitUniqueKeyColumnConstraint(self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
+    def visitUniqueKeyColumnConstraint(
+            self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
         return ColumnConstraintEnum.UNIQUE
 
     def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
@@ -263,10 +268,10 @@ class ParserVisitor(evaql_parserVisitor):
     def visitLengthDimensionList(
             self, ctx: evaql_parser.LengthDimensionListContext):
         dimensions = []
-        dimension_list_length = len(ctx.decimalLiteral());
+        dimension_list_length = len(ctx.decimalLiteral())
         for dimension_list_index in range(dimension_list_length):
             decimal_literal = ctx.decimalLiteral(dimension_list_index)
-            decimal = self.visit(decimal_literal);
+            decimal = self.visit(decimal_literal)
             dimensions.append(decimal)
 
         return dimensions
@@ -357,6 +362,16 @@ class ParserVisitor(evaql_parserVisitor):
         return {"from": from_table, "where": where_clause}
 
     ##################################################################
+    # LOAD STATEMENT
+    ##################################################################
+
+    def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):
+        file_path = self.visit(ctx.fileName()).value
+        table = self.visit(ctx.tableName())
+        stmt = LoadDataStatement(table, file_path)
+        return stmt
+
+    ##################################################################
     # COMMON CLAUSES Ids, Column_names, Table_names
     ##################################################################
 
@@ -374,7 +389,7 @@ class ParserVisitor(evaql_parserVisitor):
         # Will restrict implementation to raise error for a.b.c
         dottedIds = []
         if ctx.dottedId():
-            if len(ctx.dottedId()) is not 1:
+            if len(ctx.dottedId()) != 1:
                 LoggingManager().log("Only tablename.colname syntax supported",
                                      LoggingLevel.ERROR)
                 return
