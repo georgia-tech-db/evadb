@@ -17,6 +17,7 @@
 from src.spark.session import Session
 from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
+from petastorm.unischema import dict_to_spark_row
 
 
 def load_dataframe(dataframe_url: str):
@@ -31,17 +32,16 @@ def append_rows(df_metadata: DataFrameMetadata,
                 rows):
 
     spark = Session().get_session()
-    Session().get_context()
-
-    # Convert a list of rows to RDD
-    rows_df = spark.createDataFrame(rows,
-                                    df_metadata.schema.pyspark_schema)
-    rows_rdd = rows_df.rdd
+    spark_context = Session().get_context()
 
     # Use petastorm to appends rows
     with materialize_dataset(spark,
                              df_metadata.file_url,
                              df_metadata.schema.petastorm_schema):
+        # Convert a list of rows to RDD
+        rows_rdd = spark_context.parallelize(rows).map(
+            lambda x: dict_to_spark_row(
+                df_metadata.schema.petastorm_schema, x))
 
         spark.createDataFrame(rows_rdd,
                               df_metadata.schema.pyspark_schema) \

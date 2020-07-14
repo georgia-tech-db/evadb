@@ -23,9 +23,10 @@ from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType, \
     TupleValueExpression
 
-from src.parser.create_statement import ColumnDefinition
+from src.parser.create_statement import ColumnDefinition, \
+    ColumnConstraintInformation
 from src.parser.types import ParserColumnDataType
-from src.utils.generic_utils import str_to_class
+from src.utils.generic_utils import str_to_class, generate_file_path
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -176,6 +177,35 @@ def column_definition_to_udf_io(
                                     col.dimension, is_input)
         )
     return result_list
+
+
+def create_video_metadata(name: str) -> DataFrameMetadata:
+    """Create video metadata object.
+        We have predefined columns for such a object
+        id:  the frame id
+        data: the frame data
+
+    Arguments:
+        name (str): name of the metadata to be added to the catalog
+
+    Returns:
+        DataFrameMetadata:  corresponding metadata for the input table info
+    """
+    catalog = CatalogManager()
+    columns = [ColumnDefinition('id', ParserColumnDataType.INTEGER, [],
+                                ColumnConstraintInformation(unique=True))]
+    # the ndarray dimensions are set as None. We need to fix this as we
+    # cannot assume. Either ask the user to provide this with load or
+    # we infer this from the provided video.
+    columns.append(
+        ColumnDefinition(
+            'data', ParserColumnDataType.NDARRAY, [
+                None, None, None]))
+    col_metadata = create_column_metadata(columns)
+    uri = str(generate_file_path(name))
+    metadata = catalog.create_metadata(
+        name, uri, col_metadata, identifier_column='id')
+    return metadata
 
 
 def xform_parser_column_type_to_catalog_type(

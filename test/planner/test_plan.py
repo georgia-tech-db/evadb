@@ -20,6 +20,7 @@ from src.catalog.column_type import ColumnType
 from src.planner.create_plan import CreatePlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
+from src.planner.load_data_plan import LoadDataPlan
 from src.planner.types import PlanNodeType
 
 
@@ -71,6 +72,17 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.outputs, [udfIO])
         self.assertEqual(node.impl_path, impl_path)
         self.assertEqual(node.udf_type, ty)
+
+    def test_load_data_plan(self):
+        table_metainfo = 'meta_info'
+        file_path = 'test.mp4'
+        plan_str = 'LoadDataPlan(table_id={},file_path={})'.format(
+            table_metainfo, file_path)
+        plan = LoadDataPlan(table_metainfo, file_path)
+        self.assertEqual(plan.node_type, PlanNodeType.LOAD_DATA)
+        self.assertEqual(plan.table_metainfo, table_metainfo)
+        self.assertEqual(plan.file_path, file_path)
+        self.assertEqual(str(plan), plan_str)
 
 
 if __name__ == '__main__':

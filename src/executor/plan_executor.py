@@ -19,11 +19,11 @@ from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
-from src.executor.disk_based_storage_executor import DiskStorageExecutor
 from src.executor.pp_executor import PPExecutor
 from src.executor.create_executor import CreateExecutor
 from src.executor.insert_executor import InsertExecutor
 from src.executor.create_udf_executor import CreateUDFExecutor
+from src.executor.load_executor import LoadDataExecutor
 
 
 class PlanExecutor:
@@ -57,8 +57,6 @@ class PlanExecutor:
 
         if plan_node_type == PlanNodeType.SEQUENTIAL_SCAN:
             executor_node = SequentialScanExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.STORAGE_PLAN:
-            executor_node = DiskStorageExecutor(node=plan)
         elif plan_node_type == PlanNodeType.PP_FILTER:
             executor_node = PPExecutor(node=plan)
         elif plan_node_type == PlanNodeType.CREATE:
@@ -67,6 +65,8 @@ class PlanExecutor:
             executor_node = InsertExecutor(node=plan)
         elif plan_node_type == PlanNodeType.CREATE_UDF:
             executor_node = CreateUDFExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.LOAD_DATA:
+            executor_node = LoadDataExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:
@@ -94,11 +94,12 @@ class PlanExecutor:
         output_batches = Batch(pd.DataFrame())
 
         # ToDo generalize this logic
-        _INSERT_CREATE_ = (
+        _INSERT_CREATE_LOAD = (
             PlanNodeType.CREATE,
             PlanNodeType.INSERT,
-            PlanNodeType.CREATE_UDF)
-        if execution_tree.node.node_type in _INSERT_CREATE_:
+            PlanNodeType.CREATE_UDF,
+            PlanNodeType.LOAD_DATA)
+        if execution_tree.node.node_type in _INSERT_CREATE_LOAD:
             execution_tree.exec()
         else:
             for batch in execution_tree.exec():
