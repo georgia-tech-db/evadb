@@ -40,6 +40,7 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor.exec()
         get_val_mock.assert_called_once_with("executor", "batch_size")
         cv_mock.assert_called_once_with(file_path, batch_size=40)
+        create_mock.assert_called_once_with(table_metainfo)
         append_mock.assert_called_once_with(table_metainfo, data)
 
     @patch('src.executor.load_executor.OpenCVReader')
@@ -64,4 +65,5 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor.exec()
         get_val_mock.assert_called_once_with("executor", "batch_size")
         cv_mock.assert_called_once_with(file_path, batch_size=50)
+        create_mock.assert_called_once_with(table_metainfo)
         append_mock.assert_called_once_with(table_metainfo, data)
