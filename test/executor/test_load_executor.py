@@ -21,13 +21,15 @@ class LoadExecutorTest(unittest.TestCase):
     @patch('src.executor.load_executor.OpenCVReader')
     @patch('src.executor.load_executor.StorageEngine.create')
     @patch('src.executor.load_executor.StorageEngine.write_row')
-    def test_should_call_opencv_reader_and_storage_engine(
-            self, append_mock, create_mock, cv_mock):
+    @patch('src.executor.load_executor.ConfigurationManager.get_value')
+    def test_should_call_opencv_reader_and_storage_engine_and_config(
+            self, get_val_mock, append_mock, create_mock, cv_mock):
         batch_frames = [list(range(5))] * 5
         frames = [frame for batch in batch_frames for frame in batch]
         data = [{'id': i, 'data': d} for i, d in enumerate(frames)]
         attrs = {'read.return_value': batch_frames}
         cv_mock.return_value = MagicMock(**attrs)
+        get_val_mock.return_value = 40
         file_path = 'video'
         table_metainfo = 'info'
         plan = type(
@@ -36,5 +38,30 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         load_executor.exec()
+        get_val_mock.assert_called_once_with("executor", "batch_size")
+        cv_mock.assert_called_once_with(file_path, batch_size=40)
+        append_mock.assert_called_once_with(table_metainfo, data)
+
+    @patch('src.executor.load_executor.OpenCVReader')
+    @patch('src.executor.load_executor.StorageEngine.create')
+    @patch('src.executor.load_executor.StorageEngine.write_row')
+    @patch('src.executor.load_executor.ConfigurationManager.get_value')
+    def test_exec_config_returns_None(
+            self, get_val_mock, append_mock, create_mock, cv_mock):
+        batch_frames = [list(range(5))] * 5
+        frames = [frame for batch in batch_frames for frame in batch]
+        data = [{'id': i, 'data': d} for i, d in enumerate(frames)]
+        attrs = {'read.return_value': batch_frames}
+        cv_mock.return_value = MagicMock(**attrs)
+        get_val_mock.return_value = None
+        file_path = 'video'
+        table_metainfo = 'info'
+        plan = type(
+            "LoadDataPlan", (), {
+                'file_path': file_path, 'table_metainfo': table_metainfo})
+
+        load_executor = LoadDataExecutor(plan)
+        load_executor.exec()
+        get_val_mock.assert_called_once_with("executor", "batch_size")
         cv_mock.assert_called_once_with(file_path, batch_size=50)
         append_mock.assert_called_once_with(table_metainfo, data)

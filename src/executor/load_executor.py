@@ -17,6 +17,7 @@ from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.readers.opencv_reader import OpenCVReader
 from src.storage import StorageEngine
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 class LoadDataExecutor(AbstractExecutor):
@@ -32,8 +33,10 @@ class LoadDataExecutor(AbstractExecutor):
         Read the input video using opencv and persist data
         using storage engine
         """
-        # Arbitrary batch size
-        batch_size = 50
+        # Fetch batch_size from Config
+        batch_size = ConfigurationManager().get_value("executor", "batch_size")
+        if batch_size is None:
+            batch_size = 50
         video_reader = OpenCVReader(self.node.file_path, batch_size=batch_size)
         # videos are persisted using (id, data) schema where id = frame_id
         # and data = frame_data. Current logic supports loading a video into
