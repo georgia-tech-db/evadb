@@ -13,5 +13,5 @@ if [ $exit_code -ne 0 ];
 then
     exit $exit_code
 else
-    exit 0
+    exit $?
 fi
