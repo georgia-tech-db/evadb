@@ -19,9 +19,9 @@ import numpy as np
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.planner.load_data_plan import LoadDataPlan
-from src.executor.load_executor import LoadDataExecutor
-
+from src.optimizer.plan_generator import PlanGenerator
+from src.executor.plan_executor import PlanExecutor
+from src.catalog.catalog_manager import CatalogManager
 from src.storage import StorageEngine
 from test.util import custom_list_of_dicts_equal
 
@@ -62,25 +62,17 @@ class LoadExecutorTest(unittest.TestCase):
     # integration test
     def test_should_load_video_in_table(self):
         parser = Parser()
-        load_data_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
-        eva_statement_list = parser.parse(load_data_query)
-        load_stmt = eva_statement_list[0]
-        convertor = StatementToPlanConvertor()
-        convertor.visit(load_stmt)
-        logical_plan_node = convertor.plan
-        phy_plan_node = LoadDataPlan(
-            logical_plan_node.table_metainfo,
-            logical_plan_node.path)
-
-        loadExec = LoadDataExecutor(phy_plan_node)
-        loadExec.exec()
+        stmt = Parser().parse(query)[0]
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        PlanExecutor(p_plan).execute_plan()
 
         # Do we have select command now?
+        metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
 
-        return_rows = list(
-            StorageEngine.read(
-                logical_plan_node.table_metainfo))
+        return_rows = list(StorageEngine.read(metadata))
         dummy_frames = list(self.create_dummy_frames())
 
         self.assertEqual(len(return_rows), NUM_FRAMES)
