@@ -187,8 +187,8 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
 
     Arguments:
         name (str): name of the metadata to be added to the catalog
-    
-    Returns: 
+
+    Returns:
         DataFrameMetadata:  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
@@ -202,7 +202,7 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
             'data', ParserColumnDataType.NDARRAY, [
                 None, None, None]))
     col_metadata = create_column_metadata(columns)
-    uri = generate_file_path(name)
+    uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
         name, uri, col_metadata, identifier_column='id')
     return metadata
