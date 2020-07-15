@@ -144,3 +144,12 @@ class FrameBatchTest(unittest.TestCase):
                         temp_outcomes={'2': [1, 2]})
 
         self.assertEqual(batch_3, batch_1 + batch_2)
+
+    def test_should_construct_object_from_list(self):
+        frames = [{'id': 0, 'data': [1, 2]}, {'id': 1, 'data': [1, 2]}]
+        batch = Batch(frames)
+        self.assertEqual(batch, Batch(pd.DataFrame(frames)))
+
+    def test_should_fail_for_dict(self):
+        frames = {'id': 0, 'data': [1, 2]}
+        self.assertRaises(ValueError, Batch, frames)
