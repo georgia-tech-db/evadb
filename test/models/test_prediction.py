@@ -56,6 +56,7 @@ class PredictionTest(unittest.TestCase):
                               batch, predictions, scores,
                               boxes=boxes))
 
+    @unittest.skip('Depricated should remove')
     def test_should_return_list_of_predictions_for_each_frame_in_batch(self):
         batch = Batch(frames=[Frame(1, np.ones((1, 1)), None).asdict()])
         predictions = [['A', 'B']]
