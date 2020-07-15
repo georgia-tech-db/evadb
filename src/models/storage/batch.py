@@ -18,6 +18,7 @@ import numpy as np
 from pandas import DataFrame
 
 from src.models.inference.outcome import Outcome
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class Batch:
@@ -25,8 +26,7 @@ class Batch:
     Data model used for storing a batch of frames
 
     Arguments:
-        frames (DataFrame): List of video frames
-        info (FrameInfo): Information about the frames in the batch
+        frames (List[Dict], DataFrame): List of frames
         outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
         with name 'x' as key
         identifier_column (str): A column used to uniquely a row
@@ -34,15 +34,21 @@ class Batch:
 
     """
 
-    def __init__(self, frames: DataFrame, outcomes=None, temp_outcomes=None,
+    def __init__(self, frames, outcomes=None, temp_outcomes=None,
                  identifier_column='id'):
         super().__init__()
         if outcomes is None:
             outcomes = dict()
         if temp_outcomes is None:
             temp_outcomes = dict()
-
-        self._frames = frames
+        if isinstance(frames, DataFrame):
+            self._frames = frames
+        elif isinstance(frames, list):
+            self._frames = DataFrame(frames)
+        else:
+            LoggingManager().log('Batch constructor not properly called!',
+                                 LoggingLevel.DEBUG)
+            raise ValueError('Batch constructor not properly called!')
         self._batch_size = len(frames)
         self._outcomes = outcomes
         self._temp_outcomes = temp_outcomes
@@ -157,7 +163,7 @@ class Batch:
             return set(list(dict1.keys()) + list(dict2.keys()))
 
         if not isinstance(other, Batch):
-            raise TypeError("Input should be of type -  FrameBatch")
+            raise TypeError("Input should be of type Batch")
 
         new_frames = self.frames.append(other.frames)
         new_outcomes = {}

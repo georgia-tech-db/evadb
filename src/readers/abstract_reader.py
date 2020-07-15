@@ -14,12 +14,15 @@
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
+from typing import Iterator, Dict
+
+from src.models.storage.batch import Batch
 
 
 class AbstractReader(metaclass=ABCMeta):
     """
     Abstract class for defining data reader. All other video readers use this
-    abstract class. Video readers are expected to return data
+    abstract class. Video readers are expected to return Batch
     in an iterative manner.
 
     Attributes:
@@ -38,7 +41,7 @@ class AbstractReader(metaclass=ABCMeta):
         self.batch_size = batch_size
         self.offset = offset
 
-    def read(self):
+    def read(self) -> Iterator[Batch]:
         """
         This calls the sub class read implementation and
         yields the data to the caller
@@ -50,14 +53,14 @@ class AbstractReader(metaclass=ABCMeta):
         for data in self._read():
             data_batch.append(data)
             if len(data_batch) % self.batch_size == 0:
-                yield data_batch
+                yield Batch(data_batch)
                 data_batch = []
         if data_batch:
-            yield data_batch
+            yield Batch(data_batch)
 
     @abstractmethod
-    def _read(self):
+    def _read(self) -> Iterator[Dict]:
         """
         Every sub class implements it's own logic
-        to read the file and yield the data
+        to read the file and yields an object iterator.
         """

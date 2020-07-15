@@ -20,15 +20,15 @@ class Frame:
     Data model used for storing video frame related information
 
     Arguments:
-        index (int): The index of the frame in video
+        id (int): The index of the frame in video(Frame number)
         data (numpy.ndarray): Frame object from video
         info (FrameInfo): Contains properties of the frame
 
     """
 
-    def __init__(self, index, data, info):
+    def __init__(self, id, data, info):
         self._data = data
-        self._index = index
+        self._id = id
         self._info = info
 
     @property
@@ -36,8 +36,8 @@ class Frame:
         return self._data
 
     @property
-    def index(self):
-        return self._index
+    def id(self):
+        return self._id
 
     @property
     def info(self):
@@ -47,3 +47,6 @@ class Frame:
         return self.index == other.index and \
             np.array_equal(self.data, other.data) and \
             self.info == other.info
+
+    def asdict(self):
+        return {'id': self._id, 'data': self._data, 'info': self._info}
