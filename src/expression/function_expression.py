@@ -63,13 +63,16 @@ class FunctionExpression(AbstractExpression):
         self.function = func
         self.is_temp = is_temp
 
+    def _batch_to_args(self, batch: Batch):
+        return batch.frames.iloc[0].tolist()
+
     def evaluate(self, batch: Batch):
         args = []
         if self.get_children_count() > 0:
             child = self.get_child(0)
-            args.append(child.evaluate(batch))
+            args += self._batch_to_args(child.evaluate(batch))
         else:
-            args.append(batch)
+            args += self._batch_to_args(batch)
         func = self._gpu_enabled_function()
 
         outcomes = func(*args)
