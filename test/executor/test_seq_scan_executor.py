@@ -39,7 +39,8 @@ class SeqScanExecutorTest(unittest.TestCase):
         expression = type("AbstractExpression", (), {"evaluate": lambda x: [
             False, False, True]})
 
-        plan = type("ScanPlan", (), {"predicate": expression})
+        plan = type("ScanPlan", (), {"predicate": expression,
+                                     "columns": None})
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
@@ -61,7 +62,8 @@ class SeqScanExecutorTest(unittest.TestCase):
             ]
         })
 
-        plan = type("ScanPlan", (), {"predicate": None})
+        plan = type("ScanPlan", (), {"predicate": None,
+                                     "columns": None})
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 

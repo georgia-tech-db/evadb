@@ -67,6 +67,7 @@ class TupleValueExpression(AbstractExpression):
         self._col_object = value
 
     # remove this once doen with tuple class
+    # Any reason not doing in-place modification?
     def evaluate(self, batch: Batch, *args):
         if args is None:
             # error Handling

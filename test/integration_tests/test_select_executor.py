@@ -28,7 +28,7 @@ from test.util import custom_list_of_dicts_equal
 NUM_FRAMES = 10
 
 
-class LoadSelectExecutorTest(unittest.TestCase):
+class SelectExecutorTest(unittest.TestCase):
 
     def create_sample_video(self):
         try:
@@ -59,8 +59,7 @@ class LoadSelectExecutorTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
-    # integration test
-    def test_should_load_and_select_video_in_table(self):
+    def test_should_load_and_select_in_table(self):
         parser = Parser()
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
@@ -69,20 +68,41 @@ class LoadSelectExecutorTest(unittest.TestCase):
         p_plan = PlanGenerator().build(l_plan)
         PlanExecutor(p_plan).execute_plan()
 
-        metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-
-        select_query = "SELECT * FROM MyVideo;"
+        select_query = "SELECT id FROM MyVideo;"
         stmt = Parser().parse(select_query)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
         batch = PlanExecutor(p_plan).execute_plan()
         return_rows = batch.frames.to_dict('records')
-        print(return_rows)
-        dummy_frames = list(self.create_dummy_frames())
+        dummy_rows = [{"id": i} for i in range(NUM_FRAMES)]
 
         self.assertEqual(len(return_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
+        self.assertTrue(custom_list_of_dicts_equal(dummy_rows, return_rows))
 
+        select_query = "SELECT data FROM MyVideo;"
+        stmt = Parser().parse(select_query)[0]
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        batch = PlanExecutor(p_plan).execute_plan()
+        return_rows = batch.frames.to_dict('records')
+        dummy_rows = [{"data": np.array(np.ones((2, 2, 3))
+                                    * 0.1 * float(i + 1) * 255,
+                                    dtype=np.uint8)} for i in range(NUM_FRAMES)]
+
+        self.assertEqual(len(return_rows), NUM_FRAMES)
+        self.assertTrue(custom_list_of_dicts_equal(dummy_rows, return_rows))
+
+        # select * is not supported
+        select_query = "SELECT id,data FROM MyVideo;"
+        stmt = Parser().parse(select_query)[0]
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        batch = PlanExecutor(p_plan).execute_plan()
+        return_rows = batch.frames.to_dict('records')
+        dummy_rows = self.create_dummy_frames()
+
+        self.assertEqual(len(return_rows), NUM_FRAMES)
+        self.assertTrue(custom_list_of_dicts_equal(dummy_rows, return_rows))
 
 if __name__ == "__main__":
     unittest.main()

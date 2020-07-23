@@ -105,7 +105,6 @@ class PlanExecutor:
             execution_tree.exec()
         else:
             for batch in execution_tree.exec():
-                print(batch)
                 output_batches += batch
 
         self._clean_execution_tree(execution_tree)

@@ -19,6 +19,8 @@ from pandas import DataFrame
 
 from src.models.inference.outcome import Outcome
 
+from src.utils.logging_manager import LoggingManager
+from src.utils.logging_manager import LoggingLevel
 
 class Batch:
     """
@@ -62,6 +64,19 @@ class Batch:
 
     def column_as_numpy_array(self, column_name='data'):
         return np.array(self._frames[column_name])
+
+    def __str__(self):
+        """
+        For debug propose
+        """
+        return 'Batch Object:\n' \
+               '@dataframe: %s\n' \
+               '@batch_size: %d\n' \
+               '@outcome: %s\n' \
+               '@temp_outcome: %s\n' \
+               '@identifier_column: %s\n' \
+               % (self._frames, self._batch_size, self._outcomes,
+                  self._temp_outcomes, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \
@@ -142,6 +157,20 @@ class Batch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
+
+    def project(self, cols: []) -> 'Batch':
+        """
+        Takes as input the column list, returns the projection.
+        Keep the outcomes and temp_outcomes unchanged.
+        We do a copy for now.
+        """
+        verfied_cols = [c for c in cols if c in self._frames]
+        unknown_cols = list(set(cols) - set(verfied_cols))
+        if len(unknown_cols):
+            LoggingManager().log("Unexpected columns %s" % unknown_cols,
+                                 LoggingLevel.WARNING)
+        return Batch(self._frames[verfied_cols], self._outcomes.copy(),
+                     self._temp_outcomes.copy(), self._identifier_column)
 
     def __add__(self, other: 'Batch'):
         """
