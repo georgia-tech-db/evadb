@@ -40,16 +40,13 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.exec():
-            # Consider merge the below manipulation into the tuple_expression.
-            if self.project_expr is not None:
-                # A hack to make it work.
-                if isinstance(self.project_expr[0], FunctionExpression):
-                    self.project_expr[0].evaluate(batch)
-                else:
-                    col_names = [expr.col_name for expr in self.project_expr]
-                    batch = batch.project(col_names)
+            if len(self.project_expr) > 0:
+                new_batch = self.project_expr[0].evaluate(batch)
+            for expr in self.project_expr[1:]:
+                temp_batch = expr.evaluate(batch)
+                new_batch = new_batch.merge_column_wise(temp_batch)
 
-            # Be careful, does the order of predicate and projection matter?
+            # Be careful, when handling the batch and new_batch
             if self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch)
                 required_frame_ids = []
@@ -57,7 +54,7 @@ class SequentialScanExecutor(AbstractExecutor):
                     if outcome:
                         required_frame_ids.append(i)
 
-                yield batch[required_frame_ids]
+                yield new_batch[required_frame_ids]
 
             else:
-                yield batch
+                yield new_batch

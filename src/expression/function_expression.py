@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
 from enum import Enum, unique
 from typing import Callable
 
@@ -71,11 +72,15 @@ class FunctionExpression(AbstractExpression):
             args.append(batch)
         func = self._gpu_enabled_function()
 
-        outcome = func(*args)
+        outcomes = func(*args)
+        frames = pd.DataFrame()
+        for outcome in outcomes:
+            frames = frames.append(outcome.data)
+        new_batch = Batch(frames = frames)
 
         if self.mode == ExecutionMode.EXEC:
-            batch.set_outcomes(self.name, outcome, is_temp=self.is_temp)
-        return outcome
+            batch.set_outcomes(self.name, outcomes, is_temp=self.is_temp)
+        return new_batch
 
     def _gpu_enabled_function(self):
         if isinstance(self.function, GPUCompatible):

@@ -66,11 +66,9 @@ class TupleValueExpression(AbstractExpression):
     def col_object(self, value: DataFrameColumn):
         self._col_object = value
 
-    # remove this once doen with tuple class
-    # Any reason not doing in-place modification?
     def evaluate(self, batch: Batch, *args):
         if args is None:
             # error Handling
             pass
 
-        return batch.column_as_numpy_array(self.col_name)
+        return batch.project([self.col_name])
