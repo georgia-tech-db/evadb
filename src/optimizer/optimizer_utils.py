@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib.util
+
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.function_expression import FunctionExpression
 from src.parser.table_ref import TableInfo
@@ -123,8 +125,10 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 def bind_function_expr(expr: FunctionExpression, column_mapping):
     catalog = CatalogManager()
     udf_obj = catalog.get_udf_by_name(expr.name)
-    class_path = '.'.join([udf_obj.impl_file_path, udf_obj.name])
-    expr.function = str_to_class(class_path)()
+    spec = importlib.util.spec_from_file_location(udf_obj.name, udf_obj.impl_file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    expr.function = getattr(module, udf_obj.name)()
 
 
 def create_column_metadata(col_list: List[ColumnDefinition]):

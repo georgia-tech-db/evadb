@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+import pandas as pd
 
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
@@ -30,6 +31,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def __init__(self, node: SeqScanPlan):
         super().__init__(node)
         self.predicate = node.predicate
+        self.project = node.columns
 
     def validate(self):
         pass
@@ -38,6 +40,12 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.exec():
+            # Consider merge the below manipulation into the tuple_expression.
+            if self.project is not None:
+                col_names = [expr.col_name for expr in self.project]
+                batch = batch.project(col_names)
+
+            # Be careful, does the order of predicate and projection matter?
             if self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch)
                 required_frame_ids = []
