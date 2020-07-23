@@ -144,3 +144,21 @@ class FrameBatchTest(unittest.TestCase):
                         temp_outcomes={'2': [1, 2]})
 
         self.assertEqual(batch_3, batch_1 + batch_2)
+
+    def test_project_batch_frame(self):
+        batch_1 = Batch(frames = pd.DataFrame([{'id' : 1,
+                                                'data' : 2,
+                                                'info' : 3}]))
+        batch_2 = batch_1.project(['id', 'info'])
+        batch_3 = Batch(frames = pd.DataFrame([{'id' : 1,
+                                                'info' : 3}]))
+        self.assertEqual(batch_2, batch_3)
+
+    def test_merge_column_wise_batch_frame(self):
+        batch_1 = Batch(frames = pd.DataFrame([{'id' : 0}]))
+        batch_2 = Batch(frames = pd.DataFrame([{'data' : 1}]))
+
+        batch_3 = batch_1.merge_column_wise(batch_2)
+        batch_4 = Batch(frames = pd.DataFrame([{'id' : 0,
+                                                'data': 1}]))
+
