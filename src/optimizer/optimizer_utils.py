@@ -28,7 +28,7 @@ from src.expression.tuple_value_expression import ExpressionType, \
 from src.parser.create_statement import ColumnDefinition, \
     ColumnConstraintInformation
 from src.parser.types import ParserColumnDataType
-from src.utils.generic_utils import str_to_class, generate_file_path
+from src.utils.generic_utils import path_to_class, generate_file_path
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -125,10 +125,8 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 def bind_function_expr(expr: FunctionExpression, column_mapping):
     catalog = CatalogManager()
     udf_obj = catalog.get_udf_by_name(expr.name)
-    spec = importlib.util.spec_from_file_location(udf_obj.name, udf_obj.impl_file_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    expr.function = getattr(module, udf_obj.name)()
+    expr.function = path_to_class(udf_obj.impl_file_path,
+                                  udf_obj.name)()
 
 
 def create_column_metadata(col_list: List[ColumnDefinition]):

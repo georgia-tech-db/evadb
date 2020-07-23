@@ -46,8 +46,7 @@ class OptimizerUtilsTest(unittest.TestCase):
         self.assertEqual(tuple_expr.col_object, column_map['col1'])
 
     @patch('src.optimizer.optimizer_utils.CatalogManager')
-    @patch('src.optimizer.optimizer_utils.str_to_class')
-    @unittest.skip("This testcase needs rework")
+    @patch('src.optimizer.optimizer_utils.path_to_class')
     def test_bind_function_value_expr(self, mock_str_path, mock_catalog):
         func_expr = FunctionExpression(None, name='temp')
         mock_output = MagicMock()
@@ -57,7 +56,7 @@ class OptimizerUtilsTest(unittest.TestCase):
         bind_function_expr(func_expr, None)
 
         mock_catalog.return_value.get_udf_by_name.assert_called_with('temp')
-        mock_str_path.assert_called_with('path.name')
+        mock_str_path.assert_called_with('path', 'name')
         self.assertEqual(func_expr.function,
                          mock_str_path.return_value.return_value)
 
