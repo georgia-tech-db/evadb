@@ -18,7 +18,7 @@ import pandas as pd
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.seq_scan_plan import SeqScanPlan
-
+from src.expression.function_expression import FunctionExpression
 
 class SequentialScanExecutor(AbstractExecutor):
     """
@@ -31,7 +31,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def __init__(self, node: SeqScanPlan):
         super().__init__(node)
         self.predicate = node.predicate
-        self.project = node.columns
+        self.project_expr = node.columns
 
     def validate(self):
         pass
@@ -41,9 +41,13 @@ class SequentialScanExecutor(AbstractExecutor):
         child_executor = self.children[0]
         for batch in child_executor.exec():
             # Consider merge the below manipulation into the tuple_expression.
-            if self.project is not None:
-                col_names = [expr.col_name for expr in self.project]
-                batch = batch.project(col_names)
+            if self.project_expr is not None:
+                # A hack to make it work.
+                if isinstance(self.project_expr[0], FunctionExpression):
+                    self.project_expr[0].evaluate(batch)
+                else:
+                    col_names = [expr.col_name for expr in self.project_expr]
+                    batch = batch.project(col_names)
 
             # Be careful, does the order of predicate and projection matter?
             if self.predicate is not None:
