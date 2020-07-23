@@ -67,9 +67,14 @@ class DummyObjectDetector(AbstractClassifierUDF):
 
 
     def classify(self, frames: np.ndarray) -> List[Outcome]:
+        if (frames == np.array(np.ones((2,2,3)) * 0.1 * float (5+1) * 255,
+                              dtype=np.uint8)).all():
+            label = self.labels[1]
+        else:
+            label = self.labels[2]
         prediction_df_list = []
         prediction_df_list.append(
                 Outcome(pd.DataFrame(
-                    [{'label': np.asarray(self.labels[1])}]),
+                    [{'label': np.asarray(label)}]),
                     'label'))
         return prediction_df_list
