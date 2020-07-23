@@ -84,12 +84,11 @@ class UDFExecutorTest(unittest.TestCase):
         """
         self.perform_query(create_udf_query)
 
-        select_query = "SELECT DummyObjectDetector(data) FROM MyVideo;"
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         batch = self.perform_query(select_query)
-        print(batch)
 
         return_rows = batch.frames.to_dict('records')
-        dummy_frames = list(self.create_dummy_frames())
+        dummy_frames = [{'id' : i, 'label' : 'person'} for i in range(NUM_FRAMES)]
 
         self.assertEqual(len(return_rows), NUM_FRAMES)
         self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
