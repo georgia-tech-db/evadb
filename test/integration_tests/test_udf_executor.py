@@ -88,8 +88,8 @@ class UDFExecutorTest(unittest.TestCase):
         batch = self.perform_query(select_query)
 
         return_rows = batch.frames.to_dict('records')
-        dummy_frames = [{'id' : i, 'label' : 'bicycle'} for i in range(NUM_FRAMES)]
-        dummy_frames[5]['label'] = 'person'
+        dummy_frames = [{'id' : i, 'label' : ['bicycle', 'apple']} for i in range(NUM_FRAMES)]
+        dummy_frames[5]['label'][0] = 'person'
 
         self.assertEqual(len(return_rows), NUM_FRAMES)
         self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
