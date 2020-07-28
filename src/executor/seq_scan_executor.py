@@ -40,13 +40,7 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.exec():
-            if len(self.project_expr) > 0:
-                new_batch = self.project_expr[0].evaluate(batch)
-            for expr in self.project_expr[1:]:
-                temp_batch = expr.evaluate(batch)
-                new_batch = new_batch.merge_column_wise(temp_batch)
-
-            # Be careful, when handling the batch and new_batch
+            # We do the predicate first
             if self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch)
                 required_frame_ids = []
@@ -54,7 +48,13 @@ class SequentialScanExecutor(AbstractExecutor):
                     if outcome:
                         required_frame_ids.append(i)
 
-                yield new_batch[required_frame_ids]
+                batch = batch[required_frame_ids]
 
-            else:
-                yield new_batch
+            # Then do project
+            if len(self.project_expr) > 0:
+                new_batch = self.project_expr[0].evaluate(batch)
+            for expr in self.project_expr[1:]:
+                temp_batch = expr.evaluate(batch)
+                new_batch = new_batch.merge_column_wise(temp_batch)
+
+            yield new_batch

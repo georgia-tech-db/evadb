@@ -75,6 +75,6 @@ class DummyObjectDetector(AbstractClassifierUDF):
         prediction_df_list = []
         prediction_df_list.append(
                 Outcome(pd.DataFrame(
-                    [{'label': np.asarray(label)}]),
+                    [{'label': [label, 'apple']}]),
                     'label'))
         return prediction_df_list
