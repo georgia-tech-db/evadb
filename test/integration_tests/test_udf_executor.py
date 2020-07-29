@@ -71,6 +71,8 @@ class UDFExecutorTest(unittest.TestCase):
         return PlanExecutor(p_plan).execute_plan()
 
     # integration test
+    @unittest.skip("we need drop functionality before we can enable.\
+                   This test cases can be run separately")
     def test_should_load_and_select_and_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 

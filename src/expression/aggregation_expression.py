@@ -16,7 +16,8 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
 import statistics
-
+import pandas as pd
+from src.models.storage.batch import Batch
 
 class AggregationExpression(AbstractExpression):
 
@@ -31,14 +32,14 @@ class AggregationExpression(AbstractExpression):
                          children=children)  # can also be a float
 
     def evaluate(self, *args):
-        values = self.get_child(0).evaluate(*args)
+        batch = self.get_child(0).evaluate(*args)
         if self.etype == ExpressionType.AGGREGATION_SUM:
-            return sum(values)
+            return Batch(frames=batch.frames.agg(['sum']))
         elif self.etype == ExpressionType.AGGREGATION_COUNT:
-            return len(values)
+            return Batch(frames=batch.frames.agg(['count']))
         elif self.etype == ExpressionType.AGGREGATION_AVG:
-            return statistics.mean(values)
+            return Batch(frames=batch.frames.agg(['mean']))
         elif self.etype == ExpressionType.AGGREGATION_MIN:
-            return min(values)
+            return Batch(frames=batch.frames.agg(['min']))
         elif self.etype == ExpressionType.AGGREGATION_MAX:
-            return max(values)
+            return Batch(frames=batch.frames.agg(['max']))
