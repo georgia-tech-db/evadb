@@ -51,10 +51,13 @@ class SequentialScanExecutor(AbstractExecutor):
                 batch = batch[required_frame_ids]
 
             # Then do project
-            if len(self.project_expr) > 0:
-                new_batch = self.project_expr[0].evaluate(batch)
-            for expr in self.project_expr[1:]:
-                temp_batch = expr.evaluate(batch)
-                new_batch = new_batch.merge_column_wise(temp_batch)
-
-            yield new_batch
+            if self.project_expr is not None:
+                if len(self.project_expr) > 0:
+                    new_batch = self.project_expr[0].evaluate(batch)
+                for expr in self.project_expr[1:]:
+                    temp_batch = expr.evaluate(batch)
+                    new_batch = new_batch.merge_column_wise(temp_batch)
+                yield new_batch
+            else:
+                # Should return nothing when there is no projection.
+                yield batch

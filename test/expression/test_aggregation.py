@@ -35,7 +35,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame(
             {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
-        self.assertEqual(6, aggr_expr.evaluate(tuples, None))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(6, batch.frames.iloc[0][0])
 
     def test_aggregation_count(self):
         columnName = TupleValueExpression(col_name=0)
@@ -46,7 +47,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame(
             {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
-        self.assertEqual(3, aggr_expr.evaluate(tuples, None))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(3, batch.frames.iloc[0][0])
 
     def test_aggregation_avg(self):
         columnName = TupleValueExpression(col_name=0)
@@ -57,7 +59,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame(
             {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
-        self.assertEqual(2, aggr_expr.evaluate(tuples, None))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(2, batch.frames.iloc[0][0])
 
     def test_aggregation_min(self):
         columnName = TupleValueExpression(col_name=0)
@@ -68,7 +71,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame(
             {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
-        self.assertEqual(1, aggr_expr.evaluate(tuples, None))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(1, batch.frames.iloc[0][0])
 
     def test_aggregation_max(self):
         columnName = TupleValueExpression(col_name=0)
@@ -79,4 +83,5 @@ class AggregationExpressionsTest(unittest.TestCase):
         )
         tuples = Batch(pd.DataFrame(
             {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
-        self.assertEqual(3, aggr_expr.evaluate(tuples, None))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(3, batch.frames.iloc[0][0])
