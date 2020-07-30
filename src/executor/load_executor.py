@@ -15,8 +15,8 @@
 
 from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
+from src.storage.dataframe import append_rows
 from src.readers.opencv_reader import OpenCVReader
-from src.storage import StorageEngine
 from src.configuration.configuration_manager import ConfigurationManager
 
 
@@ -37,19 +37,13 @@ class LoadDataExecutor(AbstractExecutor):
         batch_size = ConfigurationManager().get_value("executor", "batch_size")
         if batch_size is None:
             batch_size = 50
-        video_reader = OpenCVReader(self.node.file_path, batch_size=batch_size)
+
         # videos are persisted using (id, data) schema where id = frame_id
         # and data = frame_data. Current logic supports loading a video into
         # storage with the assumption that frame_id starts from 0. In case
         # we want to append to the existing store we have to figure out the
         # correct frame_id. It can also be a parameter based by the user.
-        id = 0
-        data = []
+        video_reader = OpenCVReader(self.node.file_path, batch_size=batch_size)
         for batch in video_reader.read():
-            for frame in batch:
-                data.append({'id': id, 'data': frame})
-                id += 1
-        # Hook for the storage engine
-        # We currently use create to empty exsiting table.
-        StorageEngine.create(self.node.table_metainfo)
-        StorageEngine.write_row(self.node.table_metainfo, data)
+            # Hook for the storage engine
+            append_rows(self.node.table_metainfo, batch)

@@ -23,7 +23,7 @@ from test.util import create_dataframe_same, create_dataframe
 NUM_FRAMES = 10
 
 
-class FrameBatchTest(unittest.TestCase):
+class BatchTest(unittest.TestCase):
 
     def test_set_outcomes_method_should_set_the_predictions_with_udf_name(
             self):
@@ -144,3 +144,11 @@ class FrameBatchTest(unittest.TestCase):
                         temp_outcomes={'2': [1, 2]})
 
         self.assertEqual(batch_3, batch_1 + batch_2)
+
+    def test_should_fail_for_list(self):
+        frames = [{'id': 0, 'data': [1, 2]}, {'id': 1, 'data': [1, 2]}]
+        self.assertRaises(ValueError, Batch, frames)
+
+    def test_should_fail_for_dict(self):
+        frames = {'id': 0, 'data': [1, 2]}
+        self.assertRaises(ValueError, Batch, frames)
