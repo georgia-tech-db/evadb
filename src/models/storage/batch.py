@@ -43,12 +43,11 @@ class Batch:
             temp_outcomes = dict()
         if isinstance(frames, DataFrame):
             self._frames = frames
-        elif isinstance(frames, list):
-            self._frames = DataFrame(frames)
         else:
             LoggingManager().log('Batch constructor not properly called!',
                                  LoggingLevel.DEBUG)
-            raise ValueError('Batch constructor not properly called!')
+            raise ValueError('Batch constructor not properly called. \
+                Expected pandas.DataFrame')
         self._batch_size = len(frames)
         self._outcomes = outcomes
         self._temp_outcomes = temp_outcomes
