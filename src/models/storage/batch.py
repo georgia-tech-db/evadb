@@ -26,7 +26,7 @@ class Batch:
     Data model used for storing a batch of frames
 
     Arguments:
-        frames (List[Dict], DataFrame): List of frames
+        frames (DataFrame): pandas Dataframe holding frames data
         outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
         with name 'x' as key
         identifier_column (str): A column used to uniquely a row
