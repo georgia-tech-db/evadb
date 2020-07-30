@@ -12,12 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Iterator, Dict
 
 import cv2
 
 from src.loaders.abstract_loader import AbstractVideoLoader
-from src.models.storage.frame import Frame
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -30,7 +29,7 @@ class VideoLoader(AbstractVideoLoader):
          """
         super().__init__(*args, **kwargs)
 
-    def _load_frames(self) -> Iterator[Frame]:
+    def _load_frames(self) -> Iterator[Dict]:
         video = cv2.VideoCapture(self.video_metadata.file_url)
         video_start = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_start)
