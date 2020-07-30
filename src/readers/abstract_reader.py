@@ -15,6 +15,7 @@
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Iterator, Dict
+import pandas as pd
 
 from src.models.storage.batch import Batch
 
@@ -53,10 +54,10 @@ class AbstractReader(metaclass=ABCMeta):
         for data in self._read():
             data_batch.append(data)
             if len(data_batch) % self.batch_size == 0:
-                yield Batch(data_batch)
+                yield Batch(pd.DataFrame(data_batch))
                 data_batch = []
         if data_batch:
-            yield Batch(data_batch)
+            yield Batch(pd.DataFrame(data_batch))
 
     @abstractmethod
     def _read(self) -> Iterator[Dict]:

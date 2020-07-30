@@ -19,7 +19,6 @@ from typing import Iterator, Dict
 from src.readers.abstract_reader import AbstractReader
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
-from src.models.storage.frame import Frame
 
 
 class OpenCVReader(AbstractReader):
@@ -51,6 +50,6 @@ class OpenCVReader(AbstractReader):
         frame_id = self._start_frame_id
 
         while frame is not None:
-            yield Frame(frame_id, frame, None).asdict()
+            yield {'id': frame_id, 'data': frame}
             _, frame = video.read()
             frame_id += 1
