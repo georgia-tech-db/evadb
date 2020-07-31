@@ -41,8 +41,9 @@ class Batch:
             outcomes = dict()
         if temp_outcomes is None:
             temp_outcomes = dict()
+        # store the batch with columns sorted
         if isinstance(frames, DataFrame):
-            self._frames = frames
+            self._frames = frames[sorted(frames.columns)]
         else:
             LoggingManager().log('Batch constructor not properly called!',
                                  LoggingLevel.DEBUG)
@@ -177,3 +178,10 @@ class Batch:
 
         return Batch(new_frames, outcomes=new_outcomes,
                      temp_outcomes=temp_new_outcomes)
+
+    def empty(self):
+        """Checks if the batch is empty
+        Returns:
+            True if the batch_size == 0
+        """
+        return self.batch_size == 0
