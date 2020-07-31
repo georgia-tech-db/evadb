@@ -12,18 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 
 from src.spark.session import Session
 from src.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
 from src.storage.abstract_storage_engine import AbstractStorageEngine
-from src.configuration.configuration_manager import ConfigurationManager
+from src.readers.petastorm_reader import PetastormReader
+from src.models.storage.batch import Batch
 
 from petastorm.unischema import dict_to_spark_row
-from petastorm.predicates import in_set, in_lambda
-from petastorm import make_reader
-from typing import Iterator, Dict
+from petastorm.predicates import in_lambda
+from typing import Iterator, List
 from pathlib import Path
 
 
@@ -41,10 +40,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         """
         Generate a spark/petastorm url given a table
         """
-        eva_dir = ConfigurationManager().get_value("core", "location")
-        output_url = os.path.join(eva_dir, table.name)
-
-        return Path(output_url).resolve().as_uri()
+        return Path(table.file_url).resolve().as_uri()
 
     def create(self, table: DataFrameMetadata):
         """
@@ -63,22 +59,30 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .mode('overwrite') \
                 .parquet(self._spark_url(table))
 
-    def write_row(self, table: DataFrameMetadata, rows: []):
+    def write(self, table: DataFrameMetadata, rows: Batch):
         """
         Write rows into the dataframe.
 
         Arguments:
-            rows List[Dict{key, value}]: We can formally define a dataType Row.
-            keys within the Dict should be consistent with the table.schema.
+            table: table metadata object to write into
+            rows : batch to be persisted in the storage.
         """
+
+        if rows.empty():
+            return
+        # ToDo
+        # Throw an error if the row schema doesn't match the table schema
+
         with materialize_dataset(self.spark_session,
                                  self._spark_url(table),
                                  table.schema.petastorm_schema):
 
-            rows_rdd = self.spark_context.parallelize(rows) \
+            records = rows.frames
+            columns = records.keys()
+            rows_rdd = self.spark_context.parallelize(records.values) \
+                .map(lambda x: dict(zip(columns, x))) \
                 .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema,
                                                  x))
-
             self.spark_session.createDataFrame(rows_rdd,
                                                table.schema.pyspark_schema) \
                 .coalesce(1) \
@@ -86,46 +90,31 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .mode('append') \
                 .parquet(self._spark_url(table))
 
-    def read(self, table: DataFrameMetadata) -> Iterator[Dict]:
+    def read(self, table: DataFrameMetadata, columns: List[
+            str] = None, predicate_func=None) -> Iterator[Batch]:
         """
-        Read the dataframe.
+        Reads the table and return a batch iterator for the
+        tuples that passes the predicate func.
+
+        Argument:
+            table: table metadata object to write into
+            columns List[str]: A list of column names to be
+                considered in predicate_func
+            predicate_func: customized predicate function returns bool
 
         Return:
-            Iterator of Dict. Each Dict represents a Row.
+            Iterator of Batch read.
         """
-        with make_reader(self._spark_url(table)) as reader:
-            for row in reader:
-                yield row._asdict()
+        predicate = None
+        if predicate_func and columns:
+            predicate = in_lambda(columns, predicate_func)
 
-    def read_lambda(self, table: DataFrameMetadata, fields: [
-                    str], predicate_func) -> Iterator[Dict]:
-        """
-        Read the rows that the predicate_func returns true on the given fields.
-
-        Argument:
-            fields List[str]: A list of fields (column names) to be considered.
-            predicate_func: customized function return bool
-        """
-        predicate = in_lambda(fields, predicate_func)
-        with make_reader(self._spark_url(table),
-                         predicate=predicate) as reader:
-            for row in reader:
-                yield row._asdict()
-
-    def read_pos(self, table: DataFrameMetadata, field: str,
-                 values: []) -> Iterator[Dict]:
-        """
-        Read the rows that matches the field's given values.
-
-        Argument:
-            field str: name of the field (column name). E.g., "id".
-            values List[]: A list of values to be included.
-        """
-        predicate = in_set(values, field)
-        with make_reader(self._spark_url(table),
-                         predicate=predicate) as reader:
-            for row in reader:
-                yield row._asdict()
+        # ToDo: Handle the sharding logic. We might have to maintain a
+        # context for deciding which shard to read
+        petastorm_reader = PetastormReader(
+            self._spark_url(table), predicate=predicate)
+        for batch in petastorm_reader.read():
+            yield batch
 
     def _open(self, table):
         pass

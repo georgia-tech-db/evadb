@@ -16,6 +16,7 @@ import unittest
 import os
 import cv2
 import numpy as np
+import pandas as pd
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
@@ -23,7 +24,8 @@ from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
 from src.storage import StorageEngine
-from test.util import custom_list_of_dicts_equal
+from src.models.storage.batch import Batch
+
 
 NUM_FRAMES = 10
 
@@ -61,7 +63,6 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test
     def test_should_load_video_in_table(self):
-        parser = Parser()
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
         stmt = Parser().parse(query)[0]
@@ -71,13 +72,6 @@ class LoadExecutorTest(unittest.TestCase):
 
         # Do we have select command now?
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-
-        return_rows = list(StorageEngine.read(metadata))
-        dummy_frames = list(self.create_dummy_frames())
-
-        self.assertEqual(len(return_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
-
-
-if __name__ == "__main__":
-    unittest.main()
+        actual_batch = list(StorageEngine.read(metadata))[0]
+        expected_batch = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(actual_batch, expected_batch)
