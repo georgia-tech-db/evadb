@@ -16,9 +16,8 @@
 from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_plan import CreatePlan
 from src.executor.abstract_executor import AbstractExecutor
-from src.storage.dataframe import create_dataframe
-import tempfile
-import os.path
+from src.utils.generic_utils import generate_file_path
+from src.storage import StorageEngine
 
 
 class CreateExecutor(AbstractExecutor):
@@ -38,14 +37,12 @@ class CreateExecutor(AbstractExecutor):
         if (self.node.if_not_exists):
             # check catalog if we already have this table
             return
-        # Generate a file_url to be used for table
-        # hard coding a path right now, should write a auto-generator
+
         table_name = self.node.video_ref.table_info.table_name
-        file_url = os.path.join(tempfile.gettempdir(), table_name)
-        file_url = 'file://' + file_url
+        file_url = str(generate_file_path(table_name))
         metadata = CatalogManager().create_metadata(table_name,
                                                     file_url,
                                                     self.node.column_list)
 
-        create_dataframe(metadata)
-        return file_url
+        StorageEngine.create(table=metadata)
+        return metadata

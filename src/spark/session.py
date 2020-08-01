@@ -51,6 +51,11 @@ class Session(object):
         """
         eva_spark_conf = SparkConf()
         eva_spark_conf.set('spark.logConf', 'true')
+        # enable Arrow optimization for spark Session
+        # This is added to help with to and fro conversion
+        # between pandas and spark dataframe
+        # https://docs.databricks.com/spark/latest/spark-sql/spark-pandas.html
+        eva_spark_conf.set('spark.sql.execution.arrow.enabled', 'true')
 
         session_builder = SparkSession \
             .builder \
