@@ -14,12 +14,14 @@
 # limitations under the License.
 import os
 import unittest
+from unittest.mock import patch
 
 import cv2
 import numpy as np
+import pandas as pd
 
 from src.readers.opencv_reader import OpenCVReader
-from test.util import custom_list_of_dicts_equal
+from src.models.storage.batch import Batch
 
 NUM_FRAMES = 10
 
@@ -56,66 +58,65 @@ class VideoLoaderTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
-    def test_should_return_batches_equivalent_to_number_of_frames(self):
+    def test_should_return_one_batch(self):
         video_loader = OpenCVReader(file_url='dummy.avi')
         batches = list(video_loader.read())
-        expected = list(self.create_dummy_frames())
-        self.assertEqual(len(batches), NUM_FRAMES)
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        print(actual)
-        print(expected)
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
 
-    def test_should_return_batches_equivalent_to_number_of_frames_2(self):
+    def test_should_return_batches_equivalent_to_number_of_frames(self):
+        video_loader = OpenCVReader(file_url='dummy.avi', batch_size=1)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), NUM_FRAMES)
+        self.assertTrue(batches[0], expected)
+
+    def test_should_return_one_batches_for_negative_size(self):
         video_loader = OpenCVReader(file_url='dummy.avi', batch_size=-1)
         batches = list(video_loader.read())
-        expected = list(self.create_dummy_frames())
-        self.assertEqual(len(batches), NUM_FRAMES)
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
 
     def test_should_skip_first_two_frames_with_offset_two(self):
         video_loader = OpenCVReader(file_url='dummy.avi', offset=2)
         batches = list(video_loader.read())
-        expected = list(
+        expected = Batch(pd.DataFrame(list(
             self.create_dummy_frames(
-                filters=[i for i in range(2, NUM_FRAMES)]))
+                filters=[i for i in range(2, NUM_FRAMES)]))))
 
-        self.assertEqual(NUM_FRAMES - 2, len(batches))
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
 
     def test_should_return_single_batch_if_batch_size_equal_to_no_of_frames(
             self):
         video_loader = OpenCVReader(
             file_url='dummy.avi', batch_size=NUM_FRAMES)
         batches = list(video_loader.read())
-        expected = list(
-            self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))
+        expected = Batch(pd.DataFrame(list(
+            self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))))
         self.assertEqual(1, len(batches))
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        self.assertTrue(batches[0], expected)
 
     def test_should_skip_first_two_frames_and_batch_size_equal_to_no_of_frames(
             self):
         video_loader = OpenCVReader(
             file_url='dummy.avi', batch_size=NUM_FRAMES, offset=2)
         batches = list(video_loader.read())
-        expected = list(self.create_dummy_frames(
-            filters=[i for i in range(2, NUM_FRAMES)]))
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames(
+            filters=[i for i in range(2, NUM_FRAMES)]))))
         self.assertEqual(1, len(batches))
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        self.assertTrue(batches[0], expected)
 
     def test_should_start_frame_number_from_two(self):
         video_loader = OpenCVReader(
             file_url='dummy.avi', batch_size=NUM_FRAMES, start_frame_id=2)
         batches = list(video_loader.read())
-        expected = list(self.create_dummy_frames(
-            filters=[i for i in range(0, NUM_FRAMES)], start_id=2))
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames(
+            filters=[i for i in range(0, NUM_FRAMES)], start_id=2))))
         self.assertEqual(1, len(batches))
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        self.assertTrue(batches[0], expected)
 
     def test_should_start_frame_number_from_two_and_offset_from_one(self):
         video_loader = OpenCVReader(
@@ -124,8 +125,17 @@ class VideoLoaderTest(unittest.TestCase):
             offset=1,
             start_frame_id=2)
         batches = list(video_loader.read())
-        expected = list(self.create_dummy_frames(
-            filters=[i for i in range(1, NUM_FRAMES)], start_id=2))
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames(
+            filters=[i for i in range(1, NUM_FRAMES)], start_id=2))))
         self.assertEqual(1, len(batches))
-        actual = [batch.frames.to_dict('records')[0] for batch in batches]
-        self.assertTrue(custom_list_of_dicts_equal(actual, expected))
+        self.assertTrue(batches[0], expected)
+
+    @patch('src.readers.abstract_reader.ConfigurationManager.get_value')
+    def test_should_work_if_batch_size_not_in_config(self, get_val_mock):
+        video_loader = OpenCVReader('dummy.avi')
+        get_val_mock.return_value = None
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
+        get_val_mock.assert_called_once_with("executor", "batch_size")
