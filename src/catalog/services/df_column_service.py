@@ -18,6 +18,7 @@ from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.services.base_service import BaseService
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
+
 class DatasetColumnService(BaseService):
     def __init__(self):
         super().__init__(DataFrameColumn)
@@ -60,12 +61,20 @@ class DatasetColumnService(BaseService):
             saved_column_list.append(column.save())
         return saved_column_list
 
-    def delete_column(cls, column_list):
+    def delete_columns(self, column_list: List) -> bool:
+        """ Delete all the columns
+            Arguments:
+                column_list(List): columns to be removed
+            Returns:
+                True if successfully removed else False
+
+        """
         try:
             for column in column_list:
                 column.delete()
         except Exception:
-              LoggingManager().log(
-                "detele column failed", LoggingLevel.ERROR)
-              raise Exception
-              return None
+            LoggingManager().log(
+                "delete columns failed, col: {}".format(column_list),
+                LoggingLevel.ERROR)
+            return False
+        return True

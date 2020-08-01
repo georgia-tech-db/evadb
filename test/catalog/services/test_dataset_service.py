@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unittest import TestCase
+import unittest
 
 from mock import patch
 
@@ -26,7 +26,7 @@ DATABASE_NAME = "test"
 IDENTIFIER = 'data_id'
 
 
-class DatasetServiceTest(TestCase):
+class DatasetServiceTest(unittest.TestCase):
 
     @patch("src.catalog.services.df_service.DataFrameMetadata")
     def test_create_dataset_should_create_model(self, mocked):
@@ -75,12 +75,17 @@ class DatasetServiceTest(TestCase):
 
         self.assertEqual(actual, expected)
 
-    @patch("src.catalog.services.df_service.DataFrameMetadata")
-    def test_delete_dataset_object_by_id(self, mocked):
+    @patch('src.catalog.services.df_service.DatasetService.dataset_by_id')
+    def test_delete_dataset_object_by_id(self, mock_id):
         service = DatasetService()
-        service.delete_dataset(DATASET_ID)
+        self.assertTrue(service.delete_dataset_by_id(DATASET_ID))
+        mock_id.assert_called_once_with(DATASET_ID)
+        mock_id.return_value.delete.assert_called_once()
 
-        mocked.query.filter.assert_called_with(mocked._id == DATASET_ID)
-
-        mocked.query.filter.return_value.one.return_value.delete. \
-            assert_called_once()
+    @patch('src.catalog.services.df_service.DatasetService.dataset_by_id')
+    def test_delete_dataset_object_by_id_should_raise_exception(self, mock_id):
+        service = DatasetService()
+        mock_id.return_value.delete.side_effect = Exception()
+        self.assertFalse(service.delete_dataset_by_id(DATASET_ID))
+        mock_id.assert_called_once_with(DATASET_ID)
+        mock_id.return_value.delete.assert_called_once()

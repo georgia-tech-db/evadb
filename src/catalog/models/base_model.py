@@ -88,6 +88,9 @@ class CustomModel:
             db_session.commit()
         except DatabaseError:
             db_session.rollback()
+            LoggingManager().log(
+                "Exception occurred while committing to database.",
+                LoggingLevel.ERROR)
             raise Exception("Exception occurred while committing to database.")
 
 

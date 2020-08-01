@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unittest import TestCase
+import unittest
 
 from mock import patch, MagicMock
 
 from src.catalog.services.df_column_service import DatasetColumnService
 
 
-class DatasetColumnServiceTest(TestCase):
+class DatasetColumnServiceTest(unittest.TestCase):
 
     def test_create_should_create_all_columns(self):
         mocks = [MagicMock() for i in range(5)]
@@ -81,19 +81,15 @@ class DatasetColumnServiceTest(TestCase):
         )
         self.assertEqual(actual, return_val)
 
-    def test_delete_all_columns(self):
+    def test_should_delete_all_columns(self):
         mocks = [MagicMock() for i in range(5)]
         service = DatasetColumnService()
-        service.delete_column(mocks)
+        self.assertTrue(service.delete_columns(mocks))
         for mock in mocks:
             mock.delete.assert_called_once()
 
-    
-    def test_failure_delete_columns(self):
-         mocks = [MagicMock() for i in range(1)]
-         mocks[0].side_effect = Exception()
-         service = DatasetColumnService()
-         actual = service.delete_column(mocks)
-         self.assertEqual(actual, None)
-
-
+    def test_delete_columns_should_raise_exception(self):
+        mocks = MagicMock()
+        mocks.delete.side_effect = Exception()
+        service = DatasetColumnService()
+        self.assertFalse(service.delete_columns([mocks]))

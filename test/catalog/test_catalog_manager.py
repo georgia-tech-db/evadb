@@ -183,22 +183,13 @@ class CatalogManagerTests(unittest.TestCase):
         dataset_name = "name"
         columns = ["column1", "column2"]
         catalog = CatalogManager()
-
         catalog.delete_column_metadata(dataset_name, columns)
-
         ds_id_mock = ds_mock.return_value.dataset_by_name
         ds_id_mock.assert_called_with(dataset_name)
-
         column_ids_mock = dcs_mock.return_value.columns_by_dataset_id_and_names
         column_ids_mock.assert_called_with(ds_id_mock.return_value, columns)
-
-        column_objects_mock = \
-            dcs_mock.return_value.columns_by_id_and_dataset_id
-        column_objects_mock.assert_called_with(ds_id_mock.return_value,
-                                               column_ids_mock.return_value)
-
-        column_del_mock = dcs_mock.return_value.delete_column
-        column_del_mock.assert_called_with(column_objects_mock.return_value)
+        dcs_mock.return_value.delete_columns.assert_called_with(
+            column_ids_mock.return_value)
 
     @mock.patch('src.catalog.catalog_manager.init_db')
     @mock.patch('src.catalog.catalog_manager.DatasetService')
@@ -206,14 +197,11 @@ class CatalogManagerTests(unittest.TestCase):
     def test_delete_metadata(self, dcs_mock, ds_mock, initdb_mock):
         dataset_name = "name"
         catalog = CatalogManager()
-
         catalog.delete_metadata(dataset_name)
-
         ds_id_mock = ds_mock.return_value.dataset_by_name
         ds_id_mock.assert_called_with(dataset_name)
-
-        id_mock = ds_mock.return_value.delete_dataset
-        id_mock.assert_called_with(ds_id_mock.return_value)
+        ds_mock.return_value.delete_dataset.assert_called_with(
+            ds_id_mock.return_value)
 
     @mock.patch('src.catalog.catalog_manager.UdfService')
     def test_get_udf_by_name(self, udf_mock):
