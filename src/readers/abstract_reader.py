@@ -46,7 +46,7 @@ class AbstractReader(metaclass=ABCMeta):
     def read(self) -> Iterator[Batch]:
         """
         This calls the sub class read implementation and
-        yields the data to the caller
+        yields the batch to the caller
         """
 
         data_batch = []
