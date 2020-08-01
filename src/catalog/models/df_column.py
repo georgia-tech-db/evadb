@@ -12,13 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
 from typing import List
 
 from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint, \
     ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
+from ast import literal_eval
 
 from src.catalog.column_type import ColumnType
 from src.catalog.models.base_model import BaseModel
@@ -70,7 +70,7 @@ class DataFrameColumn(BaseModel):
 
     @property
     def array_dimensions(self):
-        return json.loads(self._array_dimensions)
+        return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
     def array_dimensions(self, value):

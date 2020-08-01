@@ -14,14 +14,18 @@
 # limitations under the License.
 import unittest
 
-from mock import patch, MagicMock
+from mock import patch, MagicMock, call
 
+from src.expression.function_expression import FunctionExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
-                                           column_definition_to_udf_io)
-from src.optimizer.optimizer_utils import \
-    xform_parser_column_type_to_catalog_type
+                                           column_definition_to_udf_io,
+                                           bind_function_expr,
+                                           bind_predicate_expr,
+                                           bind_columns_expr,
+                                           create_video_metadata)
 from src.parser.create_statement import ColumnDefinition
+from src.parser.types import ParserColumnDataType
 
 
 class OptimizerUtilsTest(unittest.TestCase):
@@ -40,6 +44,21 @@ class OptimizerUtilsTest(unittest.TestCase):
         tuple_expr = TupleValueExpression(col_name="COL1")
         bind_tuple_value_expr(tuple_expr, column_map)
         self.assertEqual(tuple_expr.col_object, column_map['col1'])
+
+    @patch('src.optimizer.optimizer_utils.CatalogManager')
+    @patch('src.optimizer.optimizer_utils.str_to_class')
+    def test_bind_function_value_expr(self, mock_str_path, mock_catalog):
+        func_expr = FunctionExpression(None, name='temp')
+        mock_output = MagicMock()
+        mock_output.name = 'name'
+        mock_output.impl_file_path = 'path'
+        mock_catalog.return_value.get_udf_by_name.return_value = mock_output
+        bind_function_expr(func_expr, None)
+
+        mock_catalog.return_value.get_udf_by_name.assert_called_with('temp')
+        mock_str_path.assert_called_with('path.name')
+        self.assertEqual(func_expr.function,
+                         mock_str_path.return_value.return_value)
 
     @patch('src.optimizer.optimizer_utils.CatalogManager')
     @patch('src.optimizer.optimizer_utils.\
@@ -65,3 +84,48 @@ xform_parser_column_type_to_catalog_type')
         mock.return_value.udf_io.assert_called_with(
             'name', 'type', 'dimension', True)
         self.assertEqual(actual2, ['udf_io'])
+
+    @patch('src.optimizer.optimizer_utils.bind_function_expr')
+    def test_bind_predicate_calls_bind_func_expr_if_type_functional(self,
+                                                                    mock_bind):
+        func_expr = FunctionExpression(None, name='temp')
+        bind_predicate_expr(func_expr, {})
+        mock_bind.assert_called_with(func_expr, {})
+
+    @patch('src.optimizer.optimizer_utils.bind_function_expr')
+    def test_bind_columns_calls_bind_func_expr_if_type_functional(self,
+                                                                  mock_bind):
+        func_expr = FunctionExpression(None, name='temp')
+        bind_columns_expr([func_expr], {})
+        mock_bind.assert_called_with(func_expr, {})
+
+    @patch('src.optimizer.optimizer_utils.CatalogManager')
+    @patch('src.optimizer.optimizer_utils.ColumnDefinition')
+    @patch('src.optimizer.optimizer_utils.ColumnConstraintInformation')
+    @patch('src.optimizer.optimizer_utils.create_column_metadata')
+    @patch('src.optimizer.optimizer_utils.generate_file_path')
+    def test_create_video_metadata(self, m_gfp, m_ccm, m_cci, m_cd, m_cm):
+        catalog_ins = MagicMock()
+        expected = 'video_metadata'
+        name = 'eva'
+        uri = 'tmp'
+        m_gfp.return_value = uri
+        m_ccm.return_value = 'col_metadata'
+        m_cci.return_value = 'cci'
+        m_cd.return_value = 1
+        m_cm.return_value = catalog_ins
+        catalog_ins.create_metadata.return_value = expected
+
+        calls = [call('id', ParserColumnDataType.INTEGER, [],
+                      'cci'),
+                 call('data', ParserColumnDataType.NDARRAY,
+                      [None, None, None])]
+
+        actual = create_video_metadata(name)
+        m_gfp.assert_called_once_with(name)
+        m_ccm.assert_called_once_with([1, 1])
+        m_cci.assert_called_once_with(unique=True)
+        m_cd.assert_has_calls(calls)
+        catalog_ins.create_metadata.assert_called_with(
+            name, uri, 'col_metadata', identifier_column='id')
+        self.assertEqual(actual, expected)

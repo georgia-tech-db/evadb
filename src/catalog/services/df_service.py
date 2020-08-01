@@ -25,7 +25,8 @@ class DatasetService(BaseService):
     def __init__(self):
         super().__init__(DataFrameMetadata)
 
-    def create_dataset(self, name, file_url) -> DataFrameMetadata:
+    def create_dataset(self, name, file_url,
+                       identifier_id='id') -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
@@ -35,7 +36,10 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata object
         """
-        metadata = self.model(name=name, file_url=file_url)
+        metadata = self.model(
+            name=name,
+            file_url=file_url,
+            identifier_id=identifier_id)
         metadata = metadata.save()
         return metadata
 
@@ -86,13 +90,13 @@ class DatasetService(BaseService):
             DataFrameMetadata - metadata for given dataset_name
         """
         return self.model.query.filter(
-            self.model._name == dataset_name).one()
-        
+            self.model._name == dataset_name).one_or_none()
+
     def delete_dataset(self, metadata_id):
         try:
             result = self.model.query \
-            .filter(self.model._id == metadata_id) \
-            .one()
+                .filter(self.model._id == metadata_id) \
+                .one()
 
             result.delete()
 
@@ -101,5 +105,3 @@ class DatasetService(BaseService):
                 "detele datset failed with id {}".format(metadata_id),
                 LoggingLevel.ERROR)
             raise Exception
-
-

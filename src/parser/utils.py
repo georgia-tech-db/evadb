@@ -37,4 +37,3 @@ def xform_parser_column_type_to_catalog_type(
         return ColumnType.TEXT
     elif col_type == ParserColumnDataType.NDARRAY:
         return ColumnType.NDARRAY
-        

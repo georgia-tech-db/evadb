@@ -1,0 +1,141 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import os
+import unittest
+from unittest.mock import patch
+
+import cv2
+import numpy as np
+import pandas as pd
+
+from src.readers.opencv_reader import OpenCVReader
+from src.models.storage.batch import Batch
+
+NUM_FRAMES = 10
+
+
+class VideoLoaderTest(unittest.TestCase):
+
+    def create_dummy_frames(self, num_frames=NUM_FRAMES,
+                            filters=[], start_id=0):
+        if not filters:
+            filters = range(num_frames)
+        for idx, i in enumerate(filters):
+            yield {'id': start_id + idx,
+                   'data': np.array(
+                       np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                       dtype=np.uint8)}
+
+    def create_sample_video(self):
+        try:
+            os.remove('dummy.avi')
+        except FileNotFoundError:
+            pass
+
+        out = cv2.VideoWriter('dummy.avi',
+                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
+                              (2, 2))
+        for i in range(NUM_FRAMES):
+            frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                             dtype=np.uint8)
+            out.write(frame)
+
+    def setUp(self):
+        self.create_sample_video()
+
+    def tearDown(self):
+        os.remove('dummy.avi')
+
+    def test_should_return_one_batch(self):
+        video_loader = OpenCVReader(file_url='dummy.avi')
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
+
+    def test_should_return_batches_equivalent_to_number_of_frames(self):
+        video_loader = OpenCVReader(file_url='dummy.avi', batch_size=1)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), NUM_FRAMES)
+        self.assertTrue(batches[0], expected)
+
+    def test_should_return_one_batches_for_negative_size(self):
+        video_loader = OpenCVReader(file_url='dummy.avi', batch_size=-1)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
+
+    def test_should_skip_first_two_frames_with_offset_two(self):
+        video_loader = OpenCVReader(file_url='dummy.avi', offset=2)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(
+            self.create_dummy_frames(
+                filters=[i for i in range(2, NUM_FRAMES)]))))
+
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
+
+    def test_should_return_single_batch_if_batch_size_equal_to_no_of_frames(
+            self):
+        video_loader = OpenCVReader(
+            file_url='dummy.avi', batch_size=NUM_FRAMES)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(
+            self.create_dummy_frames(filters=[i for i in range(NUM_FRAMES)]))))
+        self.assertEqual(1, len(batches))
+        self.assertTrue(batches[0], expected)
+
+    def test_should_skip_first_two_frames_and_batch_size_equal_to_no_of_frames(
+            self):
+        video_loader = OpenCVReader(
+            file_url='dummy.avi', batch_size=NUM_FRAMES, offset=2)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames(
+            filters=[i for i in range(2, NUM_FRAMES)]))))
+        self.assertEqual(1, len(batches))
+        self.assertTrue(batches[0], expected)
+
+    def test_should_start_frame_number_from_two(self):
+        video_loader = OpenCVReader(
+            file_url='dummy.avi', batch_size=NUM_FRAMES, start_frame_id=2)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames(
+            filters=[i for i in range(0, NUM_FRAMES)], start_id=2))))
+        self.assertEqual(1, len(batches))
+        self.assertTrue(batches[0], expected)
+
+    def test_should_start_frame_number_from_two_and_offset_from_one(self):
+        video_loader = OpenCVReader(
+            file_url='dummy.avi',
+            batch_size=NUM_FRAMES,
+            offset=1,
+            start_frame_id=2)
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames(
+            filters=[i for i in range(1, NUM_FRAMES)], start_id=2))))
+        self.assertEqual(1, len(batches))
+        self.assertTrue(batches[0], expected)
+
+    @patch('src.readers.abstract_reader.ConfigurationManager.get_value')
+    def test_should_work_if_batch_size_not_in_config(self, get_val_mock):
+        video_loader = OpenCVReader('dummy.avi')
+        get_val_mock.return_value = None
+        batches = list(video_loader.read())
+        expected = Batch(pd.DataFrame(list(self.create_dummy_frames())))
+        self.assertEqual(len(batches), 1)
+        self.assertTrue(batches[0], expected)
+        get_val_mock.assert_called_once_with("executor", "batch_size")

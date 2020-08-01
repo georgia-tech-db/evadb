@@ -15,9 +15,12 @@
 from enum import Enum, unique
 from typing import Callable
 
+from src.constants import NO_GPU
+from src.executor.execution_context import Context
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
+from src.udfs.gpu_compatible import GPUCompatible
 
 
 @unique
@@ -53,22 +56,30 @@ class FunctionExpression(AbstractExpression):
             assert name is not None
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
+        self._context = Context()
         self.mode = mode
         self.name = name
         self.function = func
         self.is_temp = is_temp
 
-    def evaluate(self, batch: FrameBatch):
+    def evaluate(self, batch: Batch):
         args = []
         if self.get_children_count() > 0:
             child = self.get_child(0)
             args.append(child.evaluate(batch))
         else:
             args.append(batch)
+        func = self._gpu_enabled_function()
 
-        outcome = self.function(*args)
+        outcome = func(*args)
 
         if self.mode == ExecutionMode.EXEC:
             batch.set_outcomes(self.name, outcome, is_temp=self.is_temp)
-
         return outcome
+
+    def _gpu_enabled_function(self):
+        if isinstance(self.function, GPUCompatible):
+            device = self._context.gpu_device()
+            if device != NO_GPU:
+                return self.function.to_device(device)
+        return self.function

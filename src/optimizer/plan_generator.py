@@ -16,6 +16,7 @@ from src.optimizer.generators.seq_scan_generator import ScanGenerator
 from src.optimizer.generators.insert_generator import InsertGenerator
 from src.optimizer.generators.create_generator import CreateGenerator
 from src.optimizer.generators.create_udf_generator import CreateUDFGenerator
+from src.optimizer.generators.load_generator import LoadDataGenerator
 from src.optimizer.operators import Operator, OperatorType
 
 
@@ -30,6 +31,7 @@ class PlanGenerator:
     _INSERT_NODE_TYPE = OperatorType.LOGICALINSERT
     _CREATE_NODE_TYPE = OperatorType.LOGICALCREATE
     _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
+    _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
 
     def build(self, logical_plan: Operator):
         if logical_plan.type in self._SCAN_NODE_TYPES:
@@ -40,4 +42,5 @@ class PlanGenerator:
             return CreateGenerator().build(logical_plan)
         if logical_plan.type is self._CREATE_UDF_NODE_TYPE:
             return CreateUDFGenerator().build(logical_plan)
-            
+        if logical_plan.type is self._LOAD_NODE_TYPE:
+            return LoadDataGenerator().build(logical_plan)

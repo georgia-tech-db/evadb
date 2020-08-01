@@ -32,11 +32,11 @@ class ArithmeticExpression(AbstractExpression):
         vl = self.get_child(0).evaluate(*args)
         vr = self.get_child(1).evaluate(*args)
 
-        if (self.etype == ExpressionType.ARITHMETIC_ADD):
+        if self.etype == ExpressionType.ARITHMETIC_ADD:
             return vl + vr
-        elif(self.etype == ExpressionType.ARITHMETIC_SUBTRACT):
+        elif self.etype == ExpressionType.ARITHMETIC_SUBTRACT:
             return vl - vr
-        elif(self.etype == ExpressionType.ARITHMETIC_MULTIPLY):
+        elif self.etype == ExpressionType.ARITHMETIC_MULTIPLY:
             return vl * vr
-        elif(self.etype == ExpressionType.ARITHMETIC_DIVIDE):
+        elif self.etype == ExpressionType.ARITHMETIC_DIVIDE:
             return vl / vr

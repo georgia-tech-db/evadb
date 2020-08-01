@@ -16,9 +16,9 @@ import os
 import unittest
 
 import cv2
+import pandas as pd
 
-from src.models.storage.batch import FrameBatch
-from src.models.storage.frame import Frame
+from src.models.storage.batch import Batch
 from src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
 NUM_FRAMES = 10
@@ -36,11 +36,11 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
-        frame_dog = Frame(1, self._load_image(
-            os.path.join(self.base_path, 'data', 'dog.jpeg')), None)
-        frame_dog_cat = Frame(1, self._load_image(
-            os.path.join(self.base_path, 'data', 'dog_cat.jpg')), None)
-        frame_batch = FrameBatch([frame_dog, frame_dog_cat], None)
+        frame_dog = {'id': 1, 'data': self._load_image(
+            os.path.join(self.base_path, 'data', 'dog.jpeg'))}
+        frame_dog_cat = {'id': 2, 'data': self._load_image(
+            os.path.join(self.base_path, 'data', 'dog_cat.jpg'))}
+        frame_batch = Batch(pd.DataFrame([frame_dog, frame_dog_cat]))
         detector = FastRCNNObjectDetector()
         result = detector.classify(frame_batch)
 

@@ -12,22 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
-from typing import List, Tuple
-
-import numpy as np
+import pandas as pd
 import torchvision
-from torchvision import transforms
+from torch import Tensor
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.models.inference.classifier_prediction import Prediction
-from src.models.inference.representation import BoundingBox, Point
-from src.models.storage.batch import FrameBatch
-from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.models.inference.outcome import Outcome
+from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 
-class FastRCNNObjectDetector(AbstractClassifierUDF):
+class FastRCNNObjectDetector(PytorchAbstractUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -78,10 +75,7 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
             'toothbrush'
         ]
 
-    def _get_predictions(self, frames: np.ndarray) -> Tuple[List[List[str]],
-                                                            List[List[float]],
-                                                            List[List[
-                                                                BoundingBox]]]:
+    def _get_predictions(self, frames: Tensor) -> List[Outcome]:
         """
         Performs predictions on input frames
         Arguments:
@@ -95,34 +89,28 @@ class FastRCNNObjectDetector(AbstractClassifierUDF):
 
         """
 
-        transform = transforms.Compose([transforms.ToTensor()])
-        images = [transform(frame) for frame in frames]
-        predictions = self.model(images)
-        prediction_boxes = []
-        prediction_classes = []
-        prediction_scores = []
+        predictions = self.model(frames)
+        prediction_df_list = []
         for prediction in predictions:
             pred_class = [str(self.labels[i]) for i in
-                          list(prediction['labels'].numpy())]
-            pred_boxes = [BoundingBox(Point(i[0], i[1]), Point(i[2], i[3]))
+                          list(self.as_numpy(prediction['labels']))]
+            pred_boxes = [[[i[0], i[1]],
+                           [i[2], i[3]]]
                           for i in
-                          list(prediction['boxes'].detach().numpy())]
-            pred_score = list(prediction['scores'].detach().numpy())
+                          list(self.as_numpy(prediction['boxes']))]
+            pred_score = list(self.as_numpy(prediction['scores']))
             pred_t = \
                 [pred_score.index(x) for x in pred_score if
                  x > self.threshold][-1]
             pred_boxes = list(pred_boxes[:pred_t + 1])
             pred_class = list(pred_class[:pred_t + 1])
             pred_score = list(pred_score[:pred_t + 1])
-            prediction_boxes.append(pred_boxes)
-            prediction_classes.append(pred_class)
-            prediction_scores.append(pred_score)
-        return prediction_classes, prediction_scores, prediction_boxes
+            prediction_df_list.append(
+                Outcome(pd.DataFrame(
+                    {"label": pred_class, "pred_score": pred_score,
+                     "pred_boxes": pred_boxes}),
+                    'label'))
+        return prediction_df_list
 
-    def classify(self, batch: FrameBatch) -> List[Prediction]:
-        frames = batch.frames_as_numpy_array()
-        (pred_classes, pred_scores, pred_boxes) = self._get_predictions(frames)
-        return Prediction.predictions_from_batch_and_lists(batch,
-                                                           pred_classes,
-                                                           pred_scores,
-                                                           boxes=pred_boxes)
+    def classify(self, frames: Tensor) -> List[Outcome]:
+        return self._get_predictions(frames)
