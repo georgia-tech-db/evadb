@@ -20,8 +20,6 @@ import numpy as np
 from src.models.storage.batch import Batch
 from test.util import create_dataframe_same, create_dataframe
 
-NUM_FRAMES = 10
-
 
 class BatchTest(unittest.TestCase):
 
