@@ -14,10 +14,8 @@
 # limitations under the License.
 
 from src.catalog.catalog_manager import CatalogManager
-from src.planner.create_udf_plan import CreateUDFPlan
 from src.executor.abstract_executor import AbstractExecutor
-import tempfile
-import os.path
+from src.planner.create_udf_plan import CreateUDFPlan
 
 
 class CreateUDFExecutor(AbstractExecutor):
@@ -40,6 +38,6 @@ class CreateUDFExecutor(AbstractExecutor):
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         impl_path = self.node.impl_path.absolute().as_posix()
-        udf_metadata = CatalogManager().create_udf(
+        CatalogManager().create_udf(
             self.node.name, impl_path, self.node.udf_type,
             io_list)

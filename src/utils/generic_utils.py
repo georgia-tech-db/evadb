@@ -13,6 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import importlib
+import torch
+import uuid
+import hashlib
+from pathlib import Path
+
+from src.configuration.configuration_manager import ConfigurationManager
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 def validate_kwargs(kwargs, allowed_kwargs,
@@ -36,3 +43,36 @@ def str_to_class(class_path: str):
     module_path, class_name = class_path.rsplit(".", 1)
     module = importlib.import_module(module_path)
     return getattr(module, class_name)
+
+
+def is_gpu_available() -> bool:
+    """
+    Checks if the system has GPUS available to execute tasks
+    Returns:
+        [bool] True if system has GPUs, else False
+    """
+    return torch.cuda.is_available()
+
+
+def generate_file_path(name: str = '') -> Path:
+    """Generates a arbitrary file_path(md5 hash) based on the a random salt
+    and name
+
+    Arguments:
+        name (str): Input file_name.
+
+    Returns:
+        Path: pathlib.Path object
+
+    """
+    dataset_location = ConfigurationManager().get_value("core", "location")
+    if dataset_location is None:
+        LoggingManager().log(
+            'Missing location key in eva.yml', LoggingLevel.ERROR)
+        raise KeyError('Missing location key in eva.yml')
+
+    dataset_location = Path(dataset_location)
+    salt = uuid.uuid4().hex
+    file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
+    path = dataset_location / file_name
+    return path.resolve()

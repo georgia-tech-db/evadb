@@ -52,10 +52,10 @@ class CustomModel:
         try:
             db_session.add(self)
             self._commit()
-        except Exception:
+        except Exception as e:
             LoggingManager().log("Object already exists in database",
                                  LoggingLevel.ERROR)
-            raise Exception
+            raise e
         return self
 
     def update(self, **kwargs):
@@ -78,7 +78,8 @@ class CustomModel:
             db_session.delete(self)
             self._commit()
         except Exception:
-            LoggingManager().log("Object couldn't be deleted", LoggingLevel.ERROR)
+            LoggingManager().log("Object couldn't be deleted",
+                                 LoggingLevel.ERROR)
             raise Exception
 
     def _commit(self):

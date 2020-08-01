@@ -1,11 +1,13 @@
 core:
-  location: "file:///tmp/eva_datasets"
+  location: "eva_datasets"
   sqlalchemy_database_uri: 'mysql+pymysql://root:root@localhost/eva_catalog'
   application: "eva"
 
+executor:
+  batch_size: 50
 storage:
-  loader: "src.loaders.petastorm_loader.PetastormLoader"
-  
+  engine: "src.storage.petastorm_storage_engine.PetastormStorageEngine"
+
 server:
   host: "0.0.0.0"
   port: 5432

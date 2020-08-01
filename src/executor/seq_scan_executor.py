@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.seq_scan_plan import SeqScanPlan
 
@@ -34,7 +34,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[FrameBatch]:
+    def exec(self) -> Iterator[Batch]:
 
         child_executor = self.children[0]
         for batch in child_executor.exec():

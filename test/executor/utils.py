@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import List
 
-from src.models.storage.batch import FrameBatch
+from src.models.storage.batch import Batch
 
 
 class DummyExecutor:
-    def __init__(self, batch_list: List[FrameBatch]):
+    def __init__(self, batch_list: List[Batch]):
         self.batch_list = batch_list
 
     def exec(self):

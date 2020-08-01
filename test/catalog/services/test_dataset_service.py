@@ -14,16 +14,16 @@
 # limitations under the License.
 from unittest import TestCase
 
-from mock import patch, MagicMock
+from mock import patch
 
 from src.catalog.services.df_service import DatasetService
-
 
 
 DATASET_ID = 123
 DATASET_URL = 'file1'
 DATASET_NAME = 'name'
 DATABASE_NAME = "test"
+IDENTIFIER = 'data_id'
 
 
 class DatasetServiceTest(TestCase):
@@ -31,8 +31,14 @@ class DatasetServiceTest(TestCase):
     @patch("src.catalog.services.df_service.DataFrameMetadata")
     def test_create_dataset_should_create_model(self, mocked):
         service = DatasetService()
-        service.create_dataset(DATASET_NAME, DATASET_URL)
-        mocked.assert_called_with(name=DATASET_NAME, file_url=DATASET_URL)
+        service.create_dataset(
+            DATASET_NAME,
+            DATASET_URL,
+            identifier_id=IDENTIFIER)
+        mocked.assert_called_with(
+            name=DATASET_NAME,
+            file_url=DATASET_URL,
+            identifier_id=IDENTIFIER)
         mocked.return_value.save.assert_called_once()
 
     @patch("src.catalog.services.df_service.DataFrameMetadata")
@@ -65,29 +71,16 @@ class DatasetServiceTest(TestCase):
             mocked):
         service = DatasetService()
         actual = service.dataset_object_by_name(DATABASE_NAME, DATASET_NAME)
-        expected = mocked.query.filter.return_value.one.return_value
+        expected = mocked.query.filter.return_value.one_or_none.return_value
 
         self.assertEqual(actual, expected)
-
-
 
     @patch("src.catalog.services.df_service.DataFrameMetadata")
     def test_delete_dataset_object_by_id(self, mocked):
         service = DatasetService()
-        actual = service.delete_dataset(DATASET_ID)
-        
+        service.delete_dataset(DATASET_ID)
+
         mocked.query.filter.assert_called_with(mocked._id == DATASET_ID)
 
-        expected = mocked.query.filter.return_value.one.return_value.delete.assert_called_once()
-        
-        
-        self.assertEqual(actual, expected)
-
-
-        
-
-
-        
-       
-
-    
+        mocked.query.filter.return_value.one.return_value.delete. \
+            assert_called_once()

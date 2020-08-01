@@ -41,7 +41,7 @@ class ParserTests(unittest.TestCase):
         single_queries = []
         single_queries.append(
             """CREATE TABLE IF NOT EXISTS Persons (
-                  Frame_ID INTEGER,
+                  Frame_ID INTEGER UNIQUE,
                   Frame_Data TEXT(10),
                   Frame_Value FLOAT(1000, 201),
                   Frame_Array NDARRAY (5, 100, 2432, 4324, 100)
@@ -235,6 +235,25 @@ class ParserTests(unittest.TestCase):
                              ParserColumnDataType.NDARRAY, [10, 4]))
         self.assertEqual(create_udf_stmt.impl_path, Path('data/fastrcnn.py'))
         self.assertEqual(create_udf_stmt.udf_type, 'Classification')
+
+    def test_load_data_statement(self):
+        parser = Parser()
+        load_data_query = """LOAD DATA INFILE 'data/video.mp4' INTO MyVideo;"""
+
+        eva_statement_list = parser.parse(load_data_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.LOAD_DATA)
+
+        load_data_stmt = eva_statement_list[0]
+        # into table
+        self.assertIsNotNone(load_data_stmt.table)
+        self.assertIsInstance(load_data_stmt.table, TableRef)
+        self.assertEqual(
+            load_data_stmt.table.table_info.table_name, 'MyVideo')
+        self.assertEqual(load_data_stmt.path, Path('data/video.mp4'))
 
 
 if __name__ == '__main__':
