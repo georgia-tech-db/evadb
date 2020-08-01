@@ -257,46 +257,38 @@ class CatalogManager(object):
         return metadata
 
     def delete_column_metadata(self, table_name: str,
-                               column_names: List[str]):
+                               column_names: List[str]) -> bool:
         """
         This method deletes the columns associated with the given
         metadata
 
         Arguments:
-           table_name-[str] table for which we will delete the columns
-           column_names - [List of columns that needs to deleted]
-
+           table_name(str): table for which we will delete the columns
+           column_names(List[str]): List of columns that needs to deleted
+        Returns:
+            True if successfully deleted else false
         """
         metadata_id = self._dataset_service.dataset_by_name(table_name)
 
-        column_ids = self._column_service.columns_by_dataset_id_and_names(
-            metadata_id, column_names)
-
         columns_to_be_deleted = \
-            self._column_service.columns_by_id_and_dataset_id(
-                metadata_id, column_ids)
+            self._column_service.columns_by_dataset_id_and_names(
+                metadata_id, column_names)
 
-        self._column_service.delete_column(columns_to_be_deleted)
+        return self._column_service.delete_columns(columns_to_be_deleted)
 
-    def delete_metadata(self, table_name: str) -> int:
+    def delete_metadata(self, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
 
         Arguments:
-           table_name = table name of  to be deleted.
+           table_name: table name to be deleted.
 
         Returns:
-           Returns the metadata id that will be deleted
+           True if successfully deleted else False
         """
         metadata_id = self._dataset_service.dataset_by_name(table_name)
-        # columns_to_be_deleted =
-        # self._column_service.columns_by_id_and_dataset_id(metadata_id, None)
-
-        # self._column_service.delete_column(columns_to_be_deleted)
-        self._dataset_service.delete_dataset(metadata_id)
-
-        return metadata_id
+        return self._dataset_service.delete_dataset(metadata_id)
 
     def get_udf_by_name(self, name: str) -> UdfMetadata:
         """
