@@ -15,16 +15,13 @@
 import shutil
 import unittest
 
-import numpy as np
-import pandas as pd
-
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.storage.petastorm_storage_engine import PetastormStorageEngine
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
-from src.models.storage.batch import Batch
 
-NUM_FRAMES = 10
+from test.util import create_dummy_batches
+from test.util import NUM_FRAMES
 
 
 class PetastormStorageEngineTest(unittest.TestCase):
@@ -32,17 +29,6 @@ class PetastormStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.table = None
-
-    def create_dummy_batch(self, num_frames=NUM_FRAMES, filters=[]):
-        if not filters:
-            filters = range(num_frames)
-        data = []
-        for i in filters:
-            data.append({'id': i,
-                         'data': np.array(np.ones((2, 2, 3))
-                                          * 0.1 * float(i + 1) * 255,
-                                          dtype=np.uint8)})
-        return Batch(pd.DataFrame(data))
 
     def create_sample_table(self):
         table_info = DataFrameMetadata("dataset", 'dataset')
@@ -69,22 +55,23 @@ class PetastormStorageEngineTest(unittest.TestCase):
         self.assertEqual(records, [])
 
     def test_should_write_rows_to_table(self):
-        dummy_batch = self.create_dummy_batch()
+        dummy_batches = list(create_dummy_batches())
 
         petastorm = PetastormStorageEngine()
         petastorm.create(self.table)
-        petastorm.write(self.table, dummy_batch)
+        for batch in dummy_batches:
+            petastorm.write(self.table, batch)
 
         read_batch = list(petastorm.read(self.table))
-        self.assertEqual(len(read_batch), 1)
-        self.assertTrue(read_batch, dummy_batch)
+        self.assertTrue(read_batch, dummy_batches)
 
     def test_should_return_even_frames(self):
-        dummy_batch = self.create_dummy_batch()
+        dummy_batches = list(create_dummy_batches())
 
         petastorm = PetastormStorageEngine()
         petastorm.create(self.table)
-        petastorm.write(self.table, dummy_batch)
+        for batch in dummy_batches:
+            petastorm.write(self.table, batch)
 
         read_batch = list(
             petastorm.read(
@@ -92,9 +79,8 @@ class PetastormStorageEngineTest(unittest.TestCase):
                 ["id"],
                 lambda id: id %
                 2 == 0))
-        expected_batch = self.create_dummy_batch(
+        expected_batch = list(create_dummy_batches(
             filters=[
                 i for i in range(NUM_FRAMES) if i %
-                2 == 0])
-        self.assertEqual(len(read_batch), 1)
+                2 == 0]))
         self.assertTrue(read_batch, expected_batch)

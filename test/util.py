@@ -14,6 +14,12 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
+import cv2
+import os
+
+from src.models.storage.batch import Batch
+
+NUM_FRAMES = 10
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
@@ -45,3 +51,35 @@ def custom_list_of_dicts_equal(one, two):
                     return False
 
     return True
+
+
+def create_sample_video():
+    try:
+        os.remove('dummy.avi')
+    except FileNotFoundError:
+        pass
+
+    out = cv2.VideoWriter('dummy.avi',
+                          cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
+                          (2, 2))
+    for i in range(NUM_FRAMES):
+        frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                         dtype=np.uint8)
+        out.write(frame)
+
+
+def create_dummy_batches(num_frames=NUM_FRAMES,
+                         filters=[], batch_size=NUM_FRAMES, start_id=0):
+    if not filters:
+        filters = range(num_frames)
+    data = []
+    for i in filters:
+        if i % batch_size == 0:
+            yield Batch(pd.DataFrame(data))
+            data = []
+        data.append({'id': i + start_id,
+                     'data': np.array(
+                         np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                         dtype=np.uint8)})
+    if data:
+        yield Batch(pd.DataFrame(data))
