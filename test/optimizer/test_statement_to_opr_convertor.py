@@ -22,6 +22,7 @@ from src.parser.table_ref import TableRef, TableInfo
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
+from src.parser.load_statement import LoadDataStatement
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -161,7 +162,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    def test_visit_should_call_insert(self):
+    def test_visit_should_call_create(self):
         stmt = MagicMock(spec=CreateTableStatement)
         convertor = StatementToPlanConvertor()
         mock = MagicMock()
@@ -170,3 +171,39 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
+
+    def test_visit_should_call_load_data(self):
+        stmt = MagicMock(spec=LoadDataStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_load_data = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    @patch('src.optimizer.statement_to_opr_convertor.LogicalLoadData')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('src.optimizer.statement_to_opr_convertor.create_video_metadata')
+    def test_visit_load_data_when_bind_returns_valid(
+            self, mock_create, mock_bind, mock_load):
+        mock_bind.return_value = MagicMock()
+        table_ref = TableRef(TableInfo("test"))
+        stmt = MagicMock(table=table_ref, path='path')
+        StatementToPlanConvertor().visit_load_data(stmt)
+        mock_bind.assert_called_once_with(table_ref.table_info)
+        mock_load.assert_called_once_with(mock_bind.return_value, 'path')
+        mock_create.assert_not_called()
+
+    @patch('src.optimizer.statement_to_opr_convertor.LogicalLoadData')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('src.optimizer.statement_to_opr_convertor.create_video_metadata')
+    def test_visit_load_data_when_bind_returns_None(
+            self, mock_create, mock_bind, mock_load):
+        mock_bind.return_value = None
+        table_ref = TableRef(TableInfo("test"))
+        stmt = MagicMock(table=table_ref, path='path')
+        StatementToPlanConvertor().visit_load_data(stmt)
+        mock_create.assert_called_once_with(table_ref.table_info.table_name)
+        mock_bind.assert_called_with(table_ref.table_info)
+        mock_load.assert_called_with(mock_create.return_value, 'path')

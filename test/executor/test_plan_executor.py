@@ -13,14 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
+from pandas._testing import assert_frame_equal
+
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.executor.plan_executor import PlanExecutor
 from src.models.storage.batch import Batch
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
+from src.planner.pp_plan import PPScanPlan
+from src.planner.insert_plan import InsertPlan
+from src.planner.create_plan import CreatePlan
+from src.planner.create_udf_plan import CreateUDFPlan
+from src.planner.load_data_plan import LoadDataPlan
+from src.executor.load_executor import LoadDataExecutor
+from src.executor.seq_scan_executor import SequentialScanExecutor
+from src.executor.create_executor import CreateExecutor
+from src.executor.create_udf_executor import CreateUDFExecutor
+from src.executor.insert_executor import InsertExecutor
+from src.executor.pp_executor import PPExecutor
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -67,6 +80,137 @@ class PlanExecutorTest(unittest.TestCase):
                                        child_exec.children):
                 self.assertEqual(gc_abs.node_type, gc_exec._node.node_type)
 
+    def test_build_execution_tree_should_create_correct_exec_node(self):
+        # SequentialScanExecutor
+        plan = SeqScanPlan(MagicMock(), [])
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, SequentialScanExecutor)
+
+        # PPExecutor
+        plan = PPScanPlan(MagicMock())
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, PPExecutor)
+
+        # CreateExecutor
+        plan = CreatePlan(MagicMock(), [], False)
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, CreateExecutor)
+
+        # InsertExecutor
+        plan = InsertPlan(0, [], [])
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, InsertExecutor)
+
+        # CreateUDFExecutor
+        plan = CreateUDFPlan('test', False, [], [], MagicMock(), None)
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, CreateUDFExecutor)
+
+        # LoadDataExecutor
+        plan = LoadDataPlan(MagicMock(), MagicMock())
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, LoadDataExecutor)
+
+    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('src.executor.plan_executor.Batch')
+    def test_execute_plan_for_seq_scan_plan(
+            self, mock_batch, mock_clean, mock_build):
+
+        # SequentialScanExecutor
+        mock_batch.return_value = []
+        tree = MagicMock(node=SeqScanPlan(None, []))
+        tree.exec.return_value = [[1], [2], [3]]
+        mock_build.return_value = tree
+
+        actual = PlanExecutor(None).execute_plan()
+        mock_batch.assert_called_once()
+        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        tree.exec.assert_called_once()
+        self.assertEqual(actual, [1, 2, 3])
+
+    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('src.executor.plan_executor.Batch')
+    def test_execute_plan_for_pp_scan_plan(
+            self, mock_batch, mock_clean, mock_build):
+        # PPExecutor
+        mock_batch.return_value = []
+        tree = MagicMock(node=PPScanPlan(None))
+        tree.exec.return_value = [[1], [2], [3]]
+        mock_build.return_value = tree
+
+        actual = PlanExecutor(None).execute_plan()
+        mock_batch.assert_called_once()
+        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        tree.exec.assert_called_once()
+        self.assertEqual(actual, [1, 2, 3])
+
+    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('src.executor.plan_executor.Batch')
+    def test_execute_plan_for_create_insert_load_plans(
+            self, mock_batch, mock_clean, mock_build):
+        mock_batch.return_value = []
+
+        # CreateExecutor
+        tree = MagicMock(node=CreatePlan(None, [], False))
+        mock_build.return_value = tree
+        actual = PlanExecutor(None).execute_plan()
+        tree.exec.assert_called_once()
+        mock_batch.assert_called_once()
+        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+        # InsertExecutor
+        mock_batch.reset_mock()
+        mock_build.reset_mock()
+        mock_clean.reset_mock()
+        tree = MagicMock(node=InsertPlan(0, [], []))
+        mock_build.return_value = tree
+        actual = PlanExecutor(None).execute_plan()
+        tree.exec.assert_called_once()
+        mock_batch.assert_called_once()
+        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+        # CreateUDFExecutor
+        mock_batch.reset_mock()
+        mock_build.reset_mock()
+        mock_clean.reset_mock()
+        tree = MagicMock(node=CreateUDFPlan(None, False, [], [], None))
+        mock_build.return_value = tree
+        actual = PlanExecutor(None).execute_plan()
+        tree.exec.assert_called_once()
+        mock_batch.assert_called_once()
+        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+        # LoadDataExecutor
+        mock_batch.reset_mock()
+        mock_build.reset_mock()
+        mock_clean.reset_mock()
+        tree = MagicMock(node=LoadDataPlan(None, None))
+        mock_build.return_value = tree
+        actual = PlanExecutor(None).execute_plan()
+        tree.exec.assert_called_once()
+        mock_batch.assert_called_once()
+        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+    @unittest.skip("disk_based_storage_depricated")
     @patch('src.executor.disk_based_storage_executor.Loader')
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value

@@ -12,10 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
+import unittest
+from src.optimizer.operators import LogicalLoadData
+from src.optimizer.plan_generator import PlanGenerator
+from src.planner.load_data_plan import LoadDataPlan
 
-print(sys.path)
 
-
-def test():
-    print("hi")
+class LoadDataGeneratorTest(unittest.TestCase):
+    def test_should_return_correct_plan_tree_for_input_logical_tree(self):
+        logical_plan = LogicalLoadData('metainfo', 'path')
+        plan = PlanGenerator().build(logical_plan)
+        self.assertIsInstance(plan, LoadDataPlan)
+        self.assertEqual(plan.table_metainfo, 'metainfo')
+        self.assertEqual(plan.file_path, 'path')
+        

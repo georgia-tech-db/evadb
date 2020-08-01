@@ -38,6 +38,6 @@ class CreateUDFExecutor(AbstractExecutor):
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         impl_path = self.node.impl_path.absolute().as_posix()
-        udf_metadata = CatalogManager().create_udf(
+        CatalogManager().create_udf(
             self.node.name, impl_path, self.node.udf_type,
             io_list)

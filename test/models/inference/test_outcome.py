@@ -48,18 +48,6 @@ class OutcomeTest(unittest.TestCase):
         outcome = Outcome(data, identifier='A')
         self.assertTrue(outcome.A > 2)
 
-    def test_gt_should_return_false_if_no_value_gt_given(
-            self):
-        data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
-        outcome = Outcome(data, identifier='A')
-        self.assertFalse(outcome.A > 4)
-
-    def test_gt_should_return_true_if_atleast_one_value_gt_given(
-            self):
-        data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
-        outcome = Outcome(data, identifier='A')
-        self.assertTrue(outcome.A > 2)
-
     def test_gte_should_return_false_if_no_value_gte_given(
             self):
         data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})

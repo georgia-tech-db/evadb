@@ -34,8 +34,7 @@ class VideoLoaderTest(unittest.TestCase):
             yield {'id': i,
                    'frame_data': np.array(
                        np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
-                       dtype=np.uint8)
-                   }
+                       dtype=np.uint8)}
 
     def create_sample_video(self):
         try:

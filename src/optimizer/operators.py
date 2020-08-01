@@ -34,6 +34,7 @@ class OperatorType(IntEnum):
     LOGICALINSERT = 4,
     LOGICALCREATE = 5,
     LOGICALCREATEUDF = 6,
+    LOGICALLOADDATA = 7,
 
 
 class Operator:
@@ -232,3 +233,30 @@ class LogicalCreateUDF(Operator):
     @property
     def udf_type(self):
         return self._udf_type
+
+
+class LogicalLoadData(Operator):
+    """Logical node for load data operation
+
+    Arguments:
+        table_metainfo(DataFrameMetadata): table to load data into
+        path(Path): file path from where we are loading data
+    """
+
+    def __init__(self, table_metainfo: DataFrameMetadata,
+                 path: Path, children=None):
+        super().__init__(OperatorType.LOGICALLOADDATA, children=children)
+        self._table_metainfo = table_metainfo
+        self._path = path
+
+    @property
+    def table_metainfo(self):
+        return self._table_metainfo
+
+    @property
+    def path(self):
+        return self._path
+
+    def __str__(self):
+        return 'LogicalLoadData(table: {}, path: {})'.format(
+            self.table_metainfo, self.path)
