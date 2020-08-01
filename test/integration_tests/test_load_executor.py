@@ -62,6 +62,7 @@ class LoadExecutorTest(unittest.TestCase):
         os.remove('dummy.avi')
 
     # integration test
+    @unittest.skip("we need drop functionality before we can enable")
     def test_should_load_video_in_table(self):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
