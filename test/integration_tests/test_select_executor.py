@@ -14,47 +14,25 @@
 # limitations under the License.
 import unittest
 import os
-import cv2
+import pandas as pd
 import numpy as np
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
-from src.catalog.catalog_manager import CatalogManager
 from src.storage import StorageEngine
-from test.util import custom_list_of_dicts_equal
+from src.models.storage.batch import Batch
+from test.util import create_sample_video
+from test.util import create_dummy_batches
 
 NUM_FRAMES = 10
 
 
 class SelectExecutorTest(unittest.TestCase):
 
-    def create_sample_video(self):
-        try:
-            os.remove('dummy.avi')
-        except FileNotFoundError:
-            pass
-
-        out = cv2.VideoWriter('dummy.avi',
-                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
-                              (2, 2))
-        for i in range(NUM_FRAMES):
-            frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
-                             dtype=np.uint8)
-            out.write(frame)
-
-    def create_dummy_frames(self, num_frames=NUM_FRAMES, filters=[]):
-        if not filters:
-            filters = range(num_frames)
-        for i in filters:
-            yield {'id': i,
-                   'data': np.array(np.ones((2, 2, 3))
-                                    * 0.1 * float(i + 1) * 255,
-                                    dtype=np.uint8)}
-
     def setUp(self):
-        self.create_sample_video()
+        create_sample_video()
 
     def tearDown(self):
         os.remove('dummy.avi')
@@ -72,37 +50,30 @@ class SelectExecutorTest(unittest.TestCase):
         stmt = Parser().parse(select_query)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
-        batch = PlanExecutor(p_plan).execute_plan()
-        return_rows = batch.frames.to_dict('records')
-        dummy_rows = [{"id": i} for i in range(NUM_FRAMES)]
-
-        self.assertEqual(len(return_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_rows, return_rows))
+        actual_batch = PlanExecutor(p_plan).execute_plan()
+        expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertTrue(actual_batch, expected_batch)
 
         select_query = "SELECT data FROM MyVideo;"
         stmt = Parser().parse(select_query)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
-        batch = PlanExecutor(p_plan).execute_plan()
-        return_rows = batch.frames.to_dict('records')
-        dummy_rows = [{"data": np.array(np.ones((2, 2, 3))
+        actual_batch = PlanExecutor(p_plan).execute_plan()
+        expected_rows = [{"data": np.array(np.ones((2, 2, 3))
                                     * 0.1 * float(i + 1) * 255,
                                     dtype=np.uint8)} for i in range(NUM_FRAMES)]
-
-        self.assertEqual(len(return_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_rows, return_rows))
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertTrue(actual_batch, expected_batch)
 
         # select * is not supported
         select_query = "SELECT id,data FROM MyVideo;"
         stmt = Parser().parse(select_query)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
-        batch = PlanExecutor(p_plan).execute_plan()
-        return_rows = batch.frames.to_dict('records')
-        dummy_rows = self.create_dummy_frames()
-
-        self.assertEqual(len(return_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_rows, return_rows))
+        actual_batch = PlanExecutor(p_plan).execute_plan()
+        expected_batch = list(create_dummy_batches())[0]
+        self.assertTrue(actual_batch, expected_batch)
 
 if __name__ == "__main__":
     unittest.main()

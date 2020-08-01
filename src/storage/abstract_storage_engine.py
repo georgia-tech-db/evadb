@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Iterator, Dict
+from typing import Iterator
 from abc import ABCMeta, abstractmethod
+
+from src.models.storage.batch import Batch
 
 
 class AbstractStorageEngine(metaclass=ABCMeta):
@@ -43,14 +45,14 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def write_row(self, table, row):
-        """Interface responsible for inserting the row in the required
+    def write(self, table, rows):
+        """Interface responsible for inserting the rows into the required
         table. Internally calls the _open function and does the required
         task.
 
         Attributes:
             table: storage unit to be created
-            row : row data to be written
+            rows : rows data to be written
         """
 
     @abstractmethod
@@ -64,27 +66,23 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     @abstractmethod
     def _read_init(self, table):
         """Internal function responsible for doing tasks required before
-        we begin scaaning/reading a table
+        we begin scanning/reading a table
 
         Attributes:
             table: storage unit to be read
         """
 
     @abstractmethod
-    def read(self, table) -> Iterator[Dict]:
+    def read(self, table, pos) -> Iterator[Batch]:
         """Interface responsible for yielding row/rows to the client.
         This should be implemeneted as an interator over of table. Helpful
-        while doing full table scan.
+        while doing full table scan. `pos` parameter is used if user wants
+        to fetch specific rows.
 
         Attributes:
             table: storage unit to be read
-        """
+            pos: row position to be returned
 
-    @abstractmethod
-    def read_pos(self, table, pos):
-        """Interface which returns the row based on the position
-
-        Attributes:
-            table : storage unit to be read
-            pos : row position to be returned
+        Returns:
+            Batch: an iterator of the batch read
         """

@@ -13,23 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from mock import patch, MagicMock
+from mock import patch, MagicMock, call
 from src.executor.load_executor import LoadDataExecutor
 
 
 class LoadExecutorTest(unittest.TestCase):
     @patch('src.executor.load_executor.OpenCVReader')
     @patch('src.executor.load_executor.StorageEngine.create')
-    @patch('src.executor.load_executor.StorageEngine.write_row')
-    @patch('src.executor.load_executor.ConfigurationManager.get_value')
-    def test_should_call_opencv_reader_and_storage_engine_and_config(
-            self, get_val_mock, append_mock, create_mock, cv_mock):
-        batch_frames = [list(range(5))] * 5
-        frames = [frame for batch in batch_frames for frame in batch]
-        data = [{'id': i, 'data': d} for i, d in enumerate(frames)]
+    @patch('src.executor.load_executor.StorageEngine.write')
+    def test_should_call_opencv_reader_and_storage_engine(
+            self, write_mock, create_mock, cv_mock):
+        batch_frames = [list(range(5))] * 2
         attrs = {'read.return_value': batch_frames}
         cv_mock.return_value = MagicMock(**attrs)
-        get_val_mock.return_value = 40
         file_path = 'video'
         table_metainfo = 'info'
         plan = type(
@@ -38,32 +34,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         load_executor.exec()
-        get_val_mock.assert_called_once_with("executor", "batch_size")
-        cv_mock.assert_called_once_with(file_path, batch_size=40)
+        cv_mock.assert_called_once_with(file_path)
         create_mock.assert_called_once_with(table_metainfo)
-        append_mock.assert_called_once_with(table_metainfo, data)
-
-    @patch('src.executor.load_executor.OpenCVReader')
-    @patch('src.executor.load_executor.StorageEngine.create')
-    @patch('src.executor.load_executor.StorageEngine.write_row')
-    @patch('src.executor.load_executor.ConfigurationManager.get_value')
-    def test_exec_config_returns_None(
-            self, get_val_mock, append_mock, create_mock, cv_mock):
-        batch_frames = [list(range(5))] * 5
-        frames = [frame for batch in batch_frames for frame in batch]
-        data = [{'id': i, 'data': d} for i, d in enumerate(frames)]
-        attrs = {'read.return_value': batch_frames}
-        cv_mock.return_value = MagicMock(**attrs)
-        get_val_mock.return_value = None
-        file_path = 'video'
-        table_metainfo = 'info'
-        plan = type(
-            "LoadDataPlan", (), {
-                'file_path': file_path, 'table_metainfo': table_metainfo})
-
-        load_executor = LoadDataExecutor(plan)
-        load_executor.exec()
-        get_val_mock.assert_called_once_with("executor", "batch_size")
-        cv_mock.assert_called_once_with(file_path, batch_size=50)
-        create_mock.assert_called_once_with(table_metainfo)
-        append_mock.assert_called_once_with(table_metainfo, data)
+        write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
+            table_metainfo, batch_frames[1]))

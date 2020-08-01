@@ -20,6 +20,7 @@ import pandas as pd
 from pandas import DataFrame
 
 from src.models.inference.outcome import Outcome
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
@@ -30,8 +31,7 @@ class Batch:
     Data model used for storing a batch of frames
 
     Arguments:
-        frames (DataFrame): List of video frames
-        info (FrameInfo): Information about the frames in the batch
+        frames (DataFrame): pandas Dataframe holding frames data
         outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
         with name 'x' as key
         identifier_column (str): A column used to uniquely a row
@@ -39,15 +39,21 @@ class Batch:
 
     """
 
-    def __init__(self, frames: DataFrame, outcomes=None, temp_outcomes=None,
+    def __init__(self, frames, outcomes=None, temp_outcomes=None,
                  identifier_column='id'):
         super().__init__()
         if outcomes is None:
             outcomes = dict()
         if temp_outcomes is None:
             temp_outcomes = dict()
-
-        self._frames = frames
+        # store the batch with columns sorted
+        if isinstance(frames, DataFrame):
+            self._frames = frames[sorted(frames.columns)]
+        else:
+            LoggingManager().log('Batch constructor not properly called!',
+                                 LoggingLevel.DEBUG)
+            raise ValueError('Batch constructor not properly called. \
+                Expected pandas.DataFrame')
         self._batch_size = len(frames)
         self._outcomes = outcomes
         self._temp_outcomes = temp_outcomes
@@ -216,7 +222,7 @@ class Batch:
             return set(list(dict1.keys()) + list(dict2.keys()))
 
         if not isinstance(other, Batch):
-            raise TypeError("Input should be of type -  FrameBatch")
+            raise TypeError("Input should be of type Batch")
 
         new_frames = self.frames.append(other.frames)
         new_outcomes = {}
@@ -231,3 +237,10 @@ class Batch:
 
         return Batch(new_frames, outcomes=new_outcomes,
                      temp_outcomes=temp_new_outcomes)
+
+    def empty(self):
+        """Checks if the batch is empty
+        Returns:
+            True if the batch_size == 0
+        """
+        return self.batch_size == 0

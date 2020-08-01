@@ -16,46 +16,28 @@ import unittest
 import os
 import cv2
 import numpy as np
+import pandas as pd
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
+from src.models.storage.batch import Batch
 from src.storage import StorageEngine
 from test.util import custom_list_of_dicts_equal
 from src.catalog.models.base_model import drop_db
+
+from test.util import create_sample_video
+from test.util import create_dummy_batches
 
 NUM_FRAMES = 10
 
 
 class UDFExecutorTest(unittest.TestCase):
 
-    def create_sample_video(self):
-        try:
-            os.remove('dummy.avi')
-        except FileNotFoundError:
-            pass
-
-        out = cv2.VideoWriter('dummy.avi',
-                              cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
-                              (2, 2))
-        for i in range(NUM_FRAMES):
-            frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
-                             dtype=np.uint8)
-            out.write(frame)
-
-    def create_dummy_frames(self, num_frames=NUM_FRAMES, filters=[]):
-        if not filters:
-            filters = range(num_frames)
-        for i in filters:
-            yield {'id': i,
-                   'data': np.array(np.ones((2, 2, 3))
-                                    * 0.1 * float(i + 1) * 255,
-                                    dtype=np.uint8)}
-
     def setUp(self):
-        self.create_sample_video()
+        create_sample_video()
         try:
             drop_db()
         except:
@@ -87,14 +69,13 @@ class UDFExecutorTest(unittest.TestCase):
         self.perform_query(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
-        batch = self.perform_query(select_query)
+        actual_batch = self.perform_query(select_query)
 
-        return_rows = batch.frames.to_dict('records')
-        dummy_frames = [{'id' : i, 'label' : ['bicycle', 'apple']} for i in range(NUM_FRAMES)]
-        dummy_frames[5]['label'][0] = 'person'
+        expected = [{'id' : i, 'label' : ['bicycle', 'apple']} for i in range(NUM_FRAMES)]
+        expected[5]['label'][0] = 'person'
+        expected_batch = Batch(frames=pd.DataFrame(expected))
 
-        self.assertEqual(len(return_rows), NUM_FRAMES)
-        self.assertTrue(custom_list_of_dicts_equal(dummy_frames, return_rows))
+        self.assertTrue(actual_batch, expected_batch)
 
 
 if __name__ == "__main__":
