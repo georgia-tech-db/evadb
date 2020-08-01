@@ -53,3 +53,9 @@ class UdfMetadata(BaseModel):
         udf_str = 'udf: ({}, {}, {})\n'.format(
             self.name, self.impl_file_path, self.type)
         return udf_str
+
+    def __eq__(self, other):
+        return self.id == other.id and \
+            self.impl_file_path == other.impl_file_path and \
+            self.name == other.name and \
+            self.type == other.type

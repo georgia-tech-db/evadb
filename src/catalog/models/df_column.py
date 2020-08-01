@@ -85,14 +85,21 @@ class DataFrameColumn(BaseModel):
         self._metadata_id = value
 
     def __str__(self):
-        column_str = "\tColumn: (%s, %s, %s, " % (self._name,
-                                                  self._type.name,
-                                                  self._is_nullable)
+        column_str = "Column: (%s, %s, %s, " % (self._name,
+                                                self._type.name,
+                                                self._is_nullable)
 
         column_str += "["
         column_str += ', '.join(['%d'] * len(self.array_dimensions)) \
                       % tuple(self.array_dimensions)
-        column_str += "] "
-        column_str += ")\n"
+        column_str += "])"
 
         return column_str
+
+    def __eq__(self, other):
+        return self.id == other.id and \
+            self.metadata_id == other.metadata_id and \
+            self.is_nullable == other.is_nullable and \
+            self.array_dimensions == other.array_dimensions and \
+            self.name == other.name and \
+            self.type == other.type
