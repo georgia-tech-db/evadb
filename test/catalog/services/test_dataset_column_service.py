@@ -80,16 +80,3 @@ class DatasetColumnServiceTest(unittest.TestCase):
             mocked._metadata_id == metadata_id
         )
         self.assertEqual(actual, return_val)
-
-    def test_should_delete_all_columns(self):
-        mocks = [MagicMock() for i in range(5)]
-        service = DatasetColumnService()
-        self.assertTrue(service.delete_columns(mocks))
-        for mock in mocks:
-            mock.delete.assert_called_once()
-
-    def test_delete_columns_should_raise_exception(self):
-        mocks = MagicMock()
-        mocks.delete.side_effect = Exception()
-        service = DatasetColumnService()
-        self.assertFalse(service.delete_columns([mocks]))

@@ -256,26 +256,6 @@ class CatalogManager(object):
         self._udf_io_service.add_udf_io(udf_io_list)
         return metadata
 
-    def delete_column_metadata(self, table_name: str,
-                               column_names: List[str]) -> bool:
-        """
-        This method deletes the columns associated with the given
-        metadata
-
-        Arguments:
-           table_name(str): table for which we will delete the columns
-           column_names(List[str]): List of columns that needs to deleted
-        Returns:
-            True if successfully deleted else false
-        """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-
-        columns_to_be_deleted = \
-            self._column_service.columns_by_dataset_id_and_names(
-                metadata_id, column_names)
-
-        return self._column_service.delete_columns(columns_to_be_deleted)
-
     def delete_metadata(self, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
@@ -288,7 +268,7 @@ class CatalogManager(object):
            True if successfully deleted else False
         """
         metadata_id = self._dataset_service.dataset_by_name(table_name)
-        return self._dataset_service.delete_dataset(metadata_id)
+        return self._dataset_service.delete_dataset_by_id(metadata_id)
 
     def get_udf_by_name(self, name: str) -> UdfMetadata:
         """
