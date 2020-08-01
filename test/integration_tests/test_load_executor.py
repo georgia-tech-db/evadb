@@ -14,12 +14,14 @@
 # limitations under the License.
 import unittest
 import os
+import pandas as pd
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
+from src.models.storage.batch import Batch
 from src.storage import StorageEngine
 
 from test.util import create_sample_video
@@ -35,7 +37,7 @@ class LoadExecutorTest(unittest.TestCase):
         os.remove('dummy.avi')
 
     # integration test
-    @unittest.skip("we need drop functionality before we can enable")
+    # @unittest.skip("we need drop functionality before we can enable")
     def test_should_load_video_in_table(self):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
@@ -47,5 +49,5 @@ class LoadExecutorTest(unittest.TestCase):
         # Do we have select command now?
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
         actual_batch = list(StorageEngine.read(metadata))[0]
-        expected_batch = list(create_dummy_batches())
+        expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
