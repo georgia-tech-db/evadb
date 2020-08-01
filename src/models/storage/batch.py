@@ -69,6 +69,19 @@ class Batch:
     def column_as_numpy_array(self, column_name='data'):
         return np.array(self._frames[column_name])
 
+    def __str__(self):
+        """
+        For debug propose
+        """
+        return 'Batch Object:\n' \
+               '@dataframe: %s\n' \
+               '@batch_size: %d\n' \
+               '@outcome: %s\n' \
+               '@temp_outcome: %s\n' \
+               '@identifier_column: %s\n' \
+               % (self._frames, self._batch_size, self._outcomes,
+                  self._temp_outcomes, self.identifier_column)
+
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \
             self._outcomes == other._outcomes and \
