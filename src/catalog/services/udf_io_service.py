@@ -27,7 +27,7 @@ class UdfIOService(BaseService):
             .with_entities(self.model._id) \
             .filter(self.model._udf_id == udf_id,
                     self.model._is_input == True).all()  # noqa
-        
+
         return result
 
     def get_outputs_by_udf_id(self, udf_id: int):
@@ -35,16 +35,15 @@ class UdfIOService(BaseService):
             .with_entities(self.model._id) \
             .filter(self.model._udf_id == udf_id,
                     self.model._is_input == False).all()  # noqa
-        
+
         return result
 
     def add_udf_io(self, io_list: List[UdfIO]):
         """Commit an entry in the udf_io table
-        
+
         Arguments:
             io_list (List[UdfIO]): List of io info io be added
         """
 
         for io in io_list:
             io.save()
-        

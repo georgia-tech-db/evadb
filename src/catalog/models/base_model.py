@@ -52,10 +52,10 @@ class CustomModel:
         try:
             db_session.add(self)
             self._commit()
-        except Exception:
+        except Exception as e:
             LoggingManager().log("Object already exists in database",
                                  LoggingLevel.ERROR)
-            raise Exception
+            raise e
         return self
 
     def update(self, **kwargs):

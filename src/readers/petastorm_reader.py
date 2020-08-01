@@ -19,8 +19,8 @@ from src.readers.abstract_reader import AbstractReader
 
 
 class PetastormReader(AbstractReader):
-    def __init__(self, cur_shard=None, shard_count=None,
-                 predicate=None, *args, **kwargs):
+    def __init__(self, *args, cur_shard=None, shard_count=None,
+                 predicate=None, **kwargs):
         """
         Reads data from the petastorm parquet stores. Note this won't
         work for any arbitary parquet store apart from one materialized

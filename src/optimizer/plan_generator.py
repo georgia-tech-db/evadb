@@ -44,4 +44,3 @@ class PlanGenerator:
             return CreateUDFGenerator().build(logical_plan)
         if logical_plan.type is self._LOAD_NODE_TYPE:
             return LoadDataGenerator().build(logical_plan)
-            

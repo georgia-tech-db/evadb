@@ -23,7 +23,7 @@ from src.utils.logging_manager import LoggingManager
 
 class OpenCVReader(AbstractReader):
 
-    def __init__(self, start_frame_id=0, *args, **kwargs):
+    def __init__(self, *args, start_frame_id=0, **kwargs):
         """
             Reads video using OpenCV and yields frame data.
             It will use the `start_frame_id` while annotating the
