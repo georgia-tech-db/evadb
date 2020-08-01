@@ -20,10 +20,8 @@ import numpy as np
 from src.models.storage.batch import Batch
 from test.util import create_dataframe_same, create_dataframe
 
-NUM_FRAMES = 10
 
-
-class FrameBatchTest(unittest.TestCase):
+class BatchTest(unittest.TestCase):
 
     def test_set_outcomes_method_should_set_the_predictions_with_udf_name(
             self):
@@ -162,3 +160,10 @@ class FrameBatchTest(unittest.TestCase):
         batch_4 = Batch(frames = pd.DataFrame([{'id' : 0,
                                                 'data': 1}]))
 
+    def test_should_fail_for_list(self):
+        frames = [{'id': 0, 'data': [1, 2]}, {'id': 1, 'data': [1, 2]}]
+        self.assertRaises(ValueError, Batch, frames)
+
+    def test_should_fail_for_dict(self):
+        frames = {'id': 0, 'data': [1, 2]}
+        self.assertRaises(ValueError, Batch, frames)

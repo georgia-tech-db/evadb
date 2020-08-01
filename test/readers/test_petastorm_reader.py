@@ -21,6 +21,14 @@ from src.readers.petastorm_reader import PetastormReader
 
 class PetastormLoaderTest(unittest.TestCase):
 
+    class DummyRow:
+        def __init__(self, frame_id, frame_data):
+            self.frame_id = frame_id
+            self.frame_data = frame_data
+
+        def _asdict(self):
+            return {'id': self.frame_id, 'data': self.frame_data}
+
     class DummyReader:
         def __init__(self, data):
             self.data = data
@@ -38,25 +46,28 @@ class PetastormLoaderTest(unittest.TestCase):
     def test_should_call_petastorm_make_reader_with_correct_params(self,
                                                                    mock):
         petastorm_reader = PetastormReader(file_url='dummy.avi', cur_shard=2,
-                                           shard_count=3)
-        print(list(petastorm_reader._read()))
-        mock.assert_called_once_with('dummy.avi', shard_count=3, cur_shard=2)
+                                           shard_count=3, predicate='pred')
+        list(petastorm_reader._read())
+        mock.assert_called_once_with(
+            'dummy.avi', shard_count=3, cur_shard=2, predicate='pred')
 
     @patch("src.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_negative_shards(self,
                                                                     mock):
         petastorm_reader = PetastormReader(file_url='dummy.avi', cur_shard=-1,
                                            shard_count=-2)
-        print(list(petastorm_reader._read()))
+        list(petastorm_reader._read())
         mock.assert_called_once_with(
-            'dummy.avi', shard_count=None, cur_shard=None)
+            'dummy.avi', shard_count=None, cur_shard=None, predicate=None)
 
     @patch("src.readers.petastorm_reader.make_reader")
     def test_should_read_data_using_petastorm_reader(self, mock):
         petastorm_reader = PetastormReader(file_url='dummy.avi')
-        dummy_values = map(lambda i: np.ones((2, 2, 3)) * i, range(3))
+        dummy_values = map(lambda i: self.DummyRow(
+            i, np.ones((2, 2, 3)) * i), range(3))
         mock.return_value = self.DummyReader(dummy_values)
         actual = list(petastorm_reader._read())
         expected = list(dummy_values)
+        print(actual)
         self.assertTrue(all([np.allclose(i, j)
                              for i, j in zip(actual, expected)]))

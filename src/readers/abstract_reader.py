@@ -14,12 +14,17 @@
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
+from typing import Iterator, Dict
+import pandas as pd
+
+from src.models.storage.batch import Batch
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 class AbstractReader(metaclass=ABCMeta):
     """
     Abstract class for defining data reader. All other video readers use this
-    abstract class. Video readers are expected to return data
+    abstract class. Video readers are expected to return Batch
     in an iterative manner.
 
     Attributes:
@@ -28,7 +33,7 @@ class AbstractReader(metaclass=ABCMeta):
         offset (int, optional): Start frame location in video
         """
 
-    def __init__(self, file_url: str, batch_size=1,
+    def __init__(self, file_url: str, batch_size=None,
                  offset=None):
         # Opencv doesn't support pathlib.Path so convert to raw str
         if isinstance(file_url, Path):
@@ -38,26 +43,31 @@ class AbstractReader(metaclass=ABCMeta):
         self.batch_size = batch_size
         self.offset = offset
 
-    def read(self):
+    def read(self) -> Iterator[Batch]:
         """
         This calls the sub class read implementation and
-        yields the data to the caller
+        yields the batch to the caller
         """
+
         data_batch = []
-        # Incase we receive negative batch_size set it to 1
-        if self.batch_size <= 0:
-            self.batch_size = 1
+        # Fetch batch_size from Config if not provided
+        if self.batch_size is None or self.batch_size < 0:
+            self.batch_size = ConfigurationManager().get_value(
+                "executor", "batch_size")
+            if self.batch_size is None:
+                self.batch_size = 50
+
         for data in self._read():
             data_batch.append(data)
             if len(data_batch) % self.batch_size == 0:
-                yield data_batch
+                yield Batch(pd.DataFrame(data_batch))
                 data_batch = []
         if data_batch:
-            yield data_batch
+            yield Batch(pd.DataFrame(data_batch))
 
     @abstractmethod
-    def _read(self):
+    def _read(self) -> Iterator[Dict]:
         """
         Every sub class implements it's own logic
-        to read the file and yield the data
+        to read the file and yields an object iterator.
         """
