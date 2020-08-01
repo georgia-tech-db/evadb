@@ -14,14 +14,12 @@
 # limitations under the License.
 import unittest
 import os
-import pandas as pd
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
-from src.models.storage.batch import Batch
 from src.storage import StorageEngine
 
 from test.util import create_sample_video
