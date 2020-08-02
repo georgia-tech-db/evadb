@@ -46,6 +46,6 @@ class LoadExecutorTest(unittest.TestCase):
 
         # Do we have select command now?
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-        actual_batch = list(StorageEngine.read(metadata))[0]
-        expected_batch = list(create_dummy_batches())[0]
+        actual_batch = list(StorageEngine.read(metadata))
+        expected_batch = list(create_dummy_batches())
         self.assertEqual(actual_batch, expected_batch)
