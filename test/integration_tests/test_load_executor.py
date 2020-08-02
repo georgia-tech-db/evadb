@@ -43,8 +43,8 @@ class LoadExecutorTest(unittest.TestCase):
         p_plan = PlanGenerator().build(l_plan)
         PlanExecutor(p_plan).execute_plan()
 
-        # Do we have select command now?
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-        actual_batch = list(StorageEngine.read(metadata))[0]
+        actual_batch = list(StorageEngine.read(metadata))
         expected_batch = list(create_dummy_batches())
+        print(len(expected_batch))
         self.assertEqual(actual_batch, expected_batch)
