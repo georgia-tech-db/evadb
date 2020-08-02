@@ -113,5 +113,6 @@ def drop_db():
     """Drop all of the record from tables and the tables themselves. Drop the
     database as well."""
     engine = SQLConfig().engine
-    BaseModel.metadata.drop_all(bind=engine)
-    drop_database(engine.url)
+    if database_exists(engine.url):
+        BaseModel.metadata.drop_all(bind=engine)
+        drop_database(engine.url)

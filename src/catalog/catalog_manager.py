@@ -16,7 +16,7 @@
 from typing import List, Tuple
 
 from src.catalog.column_type import ColumnType
-from src.catalog.models.base_model import init_db
+from src.catalog.models.base_model import init_db, drop_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.catalog.models.udf import UdfMetadata
@@ -38,7 +38,7 @@ class CatalogManager(object):
         if cls._instance is None:
             cls._instance = super(CatalogManager, cls).__new__(cls)
 
-            cls._instance.bootstrap_catalog()
+            cls._instance._bootstrap_catalog()
 
         return cls._instance
 
@@ -48,7 +48,17 @@ class CatalogManager(object):
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
 
-    def bootstrap_catalog(self):
+    def reset(self):
+        """
+        This method resets the state of the singleton instance.
+        It should drop the catalog table and reinitialize all the member
+        variables and services.
+        """
+        self._shutdown_catalog()
+        self._bootstrap_catalog()
+        self.__init__()
+
+    def _bootstrap_catalog(self):
         """Bootstraps catalog.
 
         This method runs all tasks required for using catalog. Currently,
@@ -58,6 +68,14 @@ class CatalogManager(object):
         """
         LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
+
+    def _shutdown_catalog(self):
+        """
+        This method is responsible for gracefully shutting the
+        catalog manager. Currently, it includes dropping the catalog database
+        """
+        LoggingManager().log("Shutting catalog", LoggingLevel.INFO)
+        drop_db()
 
     def create_metadata(self, name: str, file_url: str,
                         column_list: List[DataFrameColumn],
