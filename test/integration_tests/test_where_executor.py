@@ -71,7 +71,15 @@ class WhereExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertTrue(actual_batch, expected_batch)
 
-        # Arithmetic operation is not supported yet
+        # mod operation is not supported now
+        select_query = "SELECT id, data FROM MyVideo WHERE id + 1 = 5;"
+        actual_batch = self.perform_query(select_query)
+        expected_rows = [{"id" : 4,
+                          "data": np.array(np.ones((2, 2, 3))
+                                    * 0.1 * float(4 + 1) * 255,
+                                    dtype=np.uint8)}]
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertTrue(actual_batch, expected_batch)
 
 if __name__ == "n__":
     unittest.main()
