@@ -14,10 +14,12 @@
 # limitations under the License.
 
 import unittest
+import pandas as pd
 
 from unittest import mock
 from unittest.mock import MagicMock, call
 
+from src.models.storage.batch import Batch
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
@@ -183,7 +185,7 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitConstant(ctx)
         self.assertEqual(
             expected.evaluate(),
-            float(ctx.getText()))
+            Batch(pd.DataFrame([float(ctx.getText())])))
 
     def test_visit_query_specification_base_exception(self):
         ''' Testing Base Exception error handling

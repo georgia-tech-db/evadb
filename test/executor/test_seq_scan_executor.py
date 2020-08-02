@@ -40,8 +40,9 @@ class SeqScanExecutorTest(unittest.TestCase):
                 outcome_3
             ]
         })
-        expression = type("AbstractExpression", (), {"evaluate": lambda x: [
-            False, False, True]})
+        expression = type("AbstractExpression", (),
+                          {"evaluate": lambda x: Batch(
+                              pd.DataFrame([False, False, True]))})
 
         plan = type("ScanPlan", (), {"predicate": expression,
                                      "columns": None})

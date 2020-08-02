@@ -14,7 +14,8 @@
 # limitations under the License.
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
-
+from src.models.storage.batch import Batch
+import pandas as pd
 
 class ConstantValueExpression(AbstractExpression):
     # ToDo Implement generic value class
@@ -26,7 +27,7 @@ class ConstantValueExpression(AbstractExpression):
         self._value = value
 
     def evaluate(self, *args):
-        return self._value
+        return Batch(pd.DataFrame([self._value]))
 
     @property
     def value(self):

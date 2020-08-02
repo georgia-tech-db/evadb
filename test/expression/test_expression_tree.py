@@ -26,20 +26,18 @@ from test.util import create_dataframe
 
 
 class ExpressionEvaluationTest(unittest.TestCase):
-    @unittest.skip("ComparisonExpression needs to be reimplmented")
+    @unittest.skip("This test case needs to be redesigned")
     def test_func_expr_with_cmpr_and_const_expr_should_work(self):
-        frames = create_dataframe(2)
+        frames = create_dataframe(1)
         outcome_1 = Outcome(pd.DataFrame(
-            {'labels': ["car", "bus"], 'scores': [0.5, 0.6]}), 'labels')
-        outcome_2 = Outcome(pd.DataFrame(
-            {'labels': ["bus"], 'scores': [0.6]}), 'labels')
+            [{'labels': ["car", "bus"], 'scores': [0.5, 0.6]}]), 'labels')
 
-        func = FunctionExpression(lambda x: [outcome_1, outcome_2])
+        func = FunctionExpression(lambda x, y: [outcome_1])
         value_expr = ConstantValueExpression("car")
         expression_tree = ComparisonExpression(ExpressionType.COMPARE_EQUAL,
                                                func,
                                                value_expr)
 
         batch = Batch(frames=frames)
-
-        self.assertEqual([True, False], expression_tree.evaluate(batch))
+        output = expression_tree.evaluate(batch)
+        self.assertEqual([True, False], output)
