@@ -26,7 +26,6 @@ from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.storage import StorageEngine
 from test.util import custom_list_of_dicts_equal
-from src.catalog.models.base_model import drop_db
 
 from test.util import create_sample_video
 from test.util import create_dummy_batches
@@ -38,10 +37,6 @@ class UDFExecutorTest(unittest.TestCase):
 
     def setUp(self):
         create_sample_video()
-        try:
-            drop_db()
-        except:
-            pass
 
     def tearDown(self):
         os.remove('dummy.avi')
@@ -53,8 +48,6 @@ class UDFExecutorTest(unittest.TestCase):
         return PlanExecutor(p_plan).execute_plan()
 
     # integration test
-    @unittest.skip("we need drop functionality before we can enable.\
-                   This test cases can be run separately")
     def test_should_load_and_select_and_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 

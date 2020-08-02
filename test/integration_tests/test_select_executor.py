@@ -21,6 +21,7 @@ from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
+from src.catalog.catalog_manager import CatalogManager
 from src.storage import StorageEngine
 from src.models.storage.batch import Batch
 from test.util import create_sample_video
@@ -32,6 +33,7 @@ NUM_FRAMES = 10
 class SelectExecutorTest(unittest.TestCase):
 
     def setUp(self):
+        #CatalogManager().reset()
         create_sample_video()
 
     def tearDown(self):
