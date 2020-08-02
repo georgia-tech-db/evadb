@@ -49,7 +49,6 @@ class WhereExecutorTest(unittest.TestCase):
         return PlanExecutor(p_plan).execute_plan()
 
     # integration test
-    @unittest.skip("Disable due to strange sql connection error.")
     def test_select_and_where_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
