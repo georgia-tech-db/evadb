@@ -38,10 +38,6 @@ class UDFExecutorTest(unittest.TestCase):
 
     def setUp(self):
         create_sample_video()
-        try:
-            drop_db()
-        except:
-            pass
 
     def tearDown(self):
         os.remove('dummy.avi')
