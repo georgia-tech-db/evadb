@@ -274,6 +274,18 @@ class CatalogManager(object):
         self._udf_io_service.add_udf_io(udf_io_list)
         return metadata
 
+    def get_udf_by_name(self, name: str) -> UdfMetadata:
+        """
+        Get the UDF information based on name.
+
+        Arguments:
+             name (str): name of the UDF
+
+        Returns:
+            UdfMetadata object
+        """
+        return self._udf_service.udf_by_name(name)
+
     def delete_metadata(self, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
@@ -288,14 +300,14 @@ class CatalogManager(object):
         metadata_id = self._dataset_service.dataset_by_name(table_name)
         return self._dataset_service.delete_dataset_by_id(metadata_id)
 
-    def get_udf_by_name(self, name: str) -> UdfMetadata:
+    def delete_udf(self, udf_name: str) -> bool:
         """
-        Get the UDF information based on name.
+        This method drops the udf entry from the catalog
 
         Arguments:
-             name (str): name of the UDF
+           udf_name: udf name to be dropped.
 
         Returns:
-            UdfMetadata object
+           True if successfully deleted else False
         """
-        return self._udf_service.udf_by_name(name)
+        return self._udf_service.delete_udf_by_name(udf_name)
