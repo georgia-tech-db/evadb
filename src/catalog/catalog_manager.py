@@ -31,8 +31,6 @@ from src.utils.logging_manager import LoggingManager
 
 class CatalogManager(object):
     _instance = None
-    _catalog = None
-    _catalog_dictionary = {}
 
     def __new__(cls):
         if cls._instance is None:
