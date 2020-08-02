@@ -26,11 +26,33 @@ class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @mock.patch('src.catalog.catalog_manager.init_db')
-    def test_catalog_manager_singleton_pattern(self, mocked_db):
+    def test_catalog_manager_singleton_pattern(self):
         x = CatalogManager()
         y = CatalogManager()
         self.assertEqual(x, y)
+
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    def test_catalog_bootstrap(self, mocked_db):
+        x = CatalogManager()
+        x._bootstrap_catalog()
+        mocked_db.assert_called()
+
+    @mock.patch('src.catalog.catalog_manager.drop_db')
+    def test_catalog_shutdown(self, mocked_db):
+        x = CatalogManager()
+        x._shutdown_catalog()
+        mocked_db.assert_called_once()
+
+    @mock.patch('src.catalog.catalog_manager.CatalogManager._shutdown_catalog')
+    @mock.patch('src.catalog.catalog_manager.CatalogManager._bootstrap_catalog')  # noqa
+    def test_catalog_manager_reset(self, mock_bootstrap, mock_shutdown):
+        x = CatalogManager()
+        mock_init = MagicMock()
+        with mock.patch.object(CatalogManager, '__init__', mock_init):
+            x.reset()
+            mock_init.assert_called_once_with()
+            mock_bootstrap.assert_called_once_with()
+            mock_shutdown.assert_called_once_with()
 
     @mock.patch('src.catalog.catalog_manager.init_db')
     @mock.patch('src.catalog.catalog_manager.DatasetService')
@@ -176,6 +198,18 @@ class CatalogManagerTests(unittest.TestCase):
             'udf', 'sample.py', 'classification')
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
 
+    @mock.patch('src.catalog.catalog_manager.init_db')
+    @mock.patch('src.catalog.catalog_manager.DatasetService')
+    @mock.patch('src.catalog.catalog_manager.DatasetColumnService')
+    def test_delete_metadata(self, dcs_mock, ds_mock, initdb_mock):
+        dataset_name = "name"
+        catalog = CatalogManager()
+        catalog.delete_metadata(dataset_name)
+        ds_id_mock = ds_mock.return_value.dataset_by_name
+        ds_id_mock.assert_called_with(dataset_name)
+        ds_mock.return_value.delete_dataset_by_id.assert_called_with(
+            ds_id_mock.return_value)
+
     @mock.patch('src.catalog.catalog_manager.UdfService')
     def test_get_udf_by_name(self, udf_mock):
         catalog = CatalogManager()
@@ -183,3 +217,11 @@ class CatalogManagerTests(unittest.TestCase):
         udf_mock.return_value.udf_by_name.assert_called_with('name')
         self.assertEqual(actual,
                          udf_mock.return_value.udf_by_name.return_value)
+
+    @mock.patch('src.catalog.catalog_manager.UdfService')
+    def test_delete_udf(self, udf_mock):
+        actual = CatalogManager().delete_udf('name')
+        udf_mock.return_value.delete_udf_by_name.assert_called_with('name')
+        self.assertEqual(
+            udf_mock.return_value.delete_udf_by_name.return_value,
+            actual)

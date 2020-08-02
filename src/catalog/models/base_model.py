@@ -74,9 +74,13 @@ class CustomModel:
 
     def delete(self):
         """Delete and commit"""
-
-        db_session.delete(self)
-        self._commit()
+        try:
+            db_session.delete(self)
+            self._commit()
+        except Exception:
+            LoggingManager().log("Object couldn't be deleted",
+                                 LoggingLevel.ERROR)
+            raise Exception
 
     def _commit(self):
         """Try to commit. If an error is raised, the session is rollbacked."""
@@ -84,6 +88,9 @@ class CustomModel:
             db_session.commit()
         except DatabaseError:
             db_session.rollback()
+            LoggingManager().log(
+                "Exception occurred while committing to database.",
+                LoggingLevel.ERROR)
             raise Exception("Exception occurred while committing to database.")
 
 
@@ -106,5 +113,6 @@ def drop_db():
     """Drop all of the record from tables and the tables themselves. Drop the
     database as well."""
     engine = SQLConfig().engine
-    BaseModel.metadata.drop_all(bind=engine)
-    drop_database(engine.url)
+    if database_exists(engine.url):
+        BaseModel.metadata.drop_all(bind=engine)
+        drop_database(engine.url)
