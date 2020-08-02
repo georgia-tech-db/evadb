@@ -14,7 +14,7 @@
 # limitations under the License.
 from unittest import TestCase
 
-from mock import patch
+from mock import patch, MagicMock
 
 from src.catalog.services.udf_service import UdfService
 
@@ -55,3 +55,31 @@ class UdfServiceTest(TestCase):
             mocked._id == UDF_ID)
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
+
+    @patch('src.catalog.services.udf_service.UdfService.udf_by_name')
+    def test_udf_delete_by_name(self, mock_udf_by_name):
+        mock_udf_by_name.return_value = MagicMock()
+        actual = UdfService().delete_udf_by_name(UDF_NAME)
+        mock_udf_by_name.assert_called_once_with(UDF_NAME)
+        mock_udf_by_name.return_value.delete.assert_called_once()
+        self.assertTrue(actual)
+
+        mock_udf_by_name.reset_mock(return_value=True, side_effect=True)
+        mock_udf_by_name.return_value = None
+        actual = UdfService().delete_udf_by_name(UDF_NAME)
+        mock_udf_by_name.assert_called_once_with(UDF_NAME)
+        self.assertTrue(actual)
+
+        mock_udf_by_name.reset_mock(return_value=True, side_effect=True)
+        mock_udf_by_name.side_effect = [Exception]
+        actual = UdfService().delete_udf_by_name(UDF_NAME)
+        mock_udf_by_name.assert_called_once_with(UDF_NAME)
+        self.assertFalse(actual)
+
+        mock_udf_by_name.reset_mock(return_value=True, side_effect=True)
+        mock_udf_by_name.return_value = MagicMock()
+        mock_udf_by_name.return_value.delete.side_effect = [Exception]
+        actual = UdfService().delete_udf_by_name(UDF_NAME)
+        mock_udf_by_name.assert_called_once_with(UDF_NAME)
+        mock_udf_by_name.return_value.delete.assert_called_once()
+        self.assertFalse(actual)
