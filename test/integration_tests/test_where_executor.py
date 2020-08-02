@@ -56,11 +56,7 @@ class WhereExecutorTest(unittest.TestCase):
 
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
         actual_batch = self.perform_query(select_query)
-        expected_rows = [{"id" : 5,
-                          "data": np.array(np.ones((2, 2, 3))
-                                    * 0.1 * float(5 + 1) * 255,
-                                    dtype=np.uint8)}]
-        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        expected_batch = list(create_dummy_batches(filters=[5]))[0]
         self.assertTrue(actual_batch, expected_batch)
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
@@ -71,14 +67,20 @@ class WhereExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertTrue(actual_batch, expected_batch)
 
+        select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
+        actual_batch = self.perform_query(select_query)
+        expected_batch = list(create_dummy_batches(filters=range(2,NUM_FRAMES)))[0]
+        self.assertTrue(actual_batch, expected_batch)
+
+        select_query = "SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
+        actual_batch = self.perform_query(select_query)
+        expected_batch = list(create_dummy_batches(filters=range(2,5)))[0]
+
+        self.assertTrue(actual_batch, expected_batch)
         # mod operation is not supported now
         select_query = "SELECT id, data FROM MyVideo WHERE id + 1 = 5;"
         actual_batch = self.perform_query(select_query)
-        expected_rows = [{"id" : 4,
-                          "data": np.array(np.ones((2, 2, 3))
-                                    * 0.1 * float(4 + 1) * 255,
-                                    dtype=np.uint8)}]
-        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        expected_batch = list(create_dummy_batches(filters=[4]))[0]
         self.assertTrue(actual_batch, expected_batch)
 
 if __name__ == "n__":
