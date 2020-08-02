@@ -467,6 +467,12 @@ class ParserVisitor(evaql_parserVisitor):
             return ExpressionType.COMPARE_LESSER
         elif op == '>':
             return ExpressionType.COMPARE_GREATER
+        elif op == '>=':
+            return ExpressionType.COMPARE_GEQ
+        elif op == '<=':
+            return ExpressionType.COMPARE_LEQ
+        elif op == '!=':
+            return ExpressionType.COMPARE_NEQ
         else:
             return ExpressionType.INVALID
 
