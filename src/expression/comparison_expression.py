@@ -15,7 +15,9 @@
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
-
+from src.models.storage.batch import Batch
+import pandas as pd
+import numpy as np
 
 class ComparisonExpression(AbstractExpression):
     def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
@@ -29,29 +31,32 @@ class ComparisonExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        left_values = self.get_child(0).evaluate(*args)
-        right_values = self.get_child(1).evaluate(*args)
+        # evaluate always return batch
+        left_values = self.get_child(0).evaluate(*args).frames
+        right_values = self.get_child(1).evaluate(*args).frames
 
-        # Broadcasting scalars
-        if not isinstance(left_values, list):
-            left_values = [left_values]
-        if not isinstance(right_values, list):
-            right_values = [right_values] * len(left_values)
-        # TODO implement a better way to compare value_left and value_right
-        # Implement a generic return type
-        outcome = []
-        for value_left, value_right in zip(left_values, right_values):
-            if self.etype == ExpressionType.COMPARE_EQUAL:
-                outcome.append(value_left == value_right)
-            elif self.etype == ExpressionType.COMPARE_GREATER:
-                outcome.append(value_left > value_right)
-            elif self.etype == ExpressionType.COMPARE_LESSER:
-                outcome.append(value_left < value_right)
-            elif self.etype == ExpressionType.COMPARE_GEQ:
-                outcome.append(value_left >= value_right)
-            elif self.etype == ExpressionType.COMPARE_LEQ:
-                outcome.append(value_left <= value_right)
-            elif self.etype == ExpressionType.COMPARE_NEQ:
-                outcome.append(value_left != value_right)
+        if len(left_values) != len(right_values):
+            if len(left_values) == 1:
+                left_values = pd.DataFrame(np.repeat(left_values.values,
+                                                     len(right_values),
+                                                     axis=0))
+            elif len(right_values) == 1:
+                right_values = pd.DataFrame(np.repeat(right_values.values,
+                                                     len(left_values),
+                                                     axis=0))
+            else:
+                raise Exception("Left and Right batch does not have equal elements")
 
-        return outcome
+        if self.etype == ExpressionType.COMPARE_EQUAL:
+            return Batch(pd.DataFrame(left_values.values == right_values.values))
+        elif self.etype == ExpressionType.COMPARE_GREATER:
+            return Batch(pd.DataFrame(left_values.values > right_values.values))
+        elif self.etype == ExpressionType.COMPARE_LESSER:
+            return Batch(pd.DataFrame(left_values.values < right_values.values))
+        elif self.etype == ExpressionType.COMPARE_GEQ:
+            return Batch(pd.DataFrame(left_values.values >= right_values.values))
+        elif self.etype == ExpressionType.COMPARE_LEQ:
+            return Batch(pd.DataFrame(left_values.values <= right_values.values))
+        elif self.etype == ExpressionType.COMPARE_NEQ:
+            return Batch(pd.DataFrame(left_values.values != right_values.values))
+

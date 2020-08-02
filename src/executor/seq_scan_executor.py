@@ -42,12 +42,8 @@ class SequentialScanExecutor(AbstractExecutor):
         for batch in child_executor.exec():
             # We do the predicate first
             if self.predicate is not None:
-                outcomes = self.predicate.evaluate(batch)
-                required_frame_ids = []
-                for i, outcome in enumerate(outcomes):
-                    if outcome:
-                        required_frame_ids.append(i)
-
+                outcomes = self.predicate.evaluate(batch).frames
+                required_frame_ids = outcomes.index[outcomes[0]].tolist()
                 batch = batch[required_frame_ids]
 
             # Then do project
