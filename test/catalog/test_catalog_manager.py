@@ -218,3 +218,11 @@ class CatalogManagerTests(unittest.TestCase):
         udf_mock.return_value.udf_by_name.assert_called_with('name')
         self.assertEqual(actual,
                          udf_mock.return_value.udf_by_name.return_value)
+
+    @mock.patch('src.catalog.catalog_manager.UdfService')
+    def test_delete_udf(self, udf_mock):
+        actual = CatalogManager().delete_udf('name')
+        udf_mock.return_value.delete_udf_by_name.assert_called_with('name')
+        self.assertEqual(
+            udf_mock.return_value.delete_udf_by_name.return_value,
+            actual)
