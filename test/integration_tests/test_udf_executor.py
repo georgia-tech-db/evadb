@@ -14,9 +14,8 @@
 # limitations under the License.
 import unittest
 import os
-import cv2
-import numpy as np
 import pandas as pd
+import numpy as np
 
 from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
@@ -24,11 +23,41 @@ from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from src.storage import StorageEngine
-from test.util import custom_list_of_dicts_equal
-
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import ColorSpace
+from src.models.inference.outcome import Outcome
+from src.udfs.abstract_udfs import AbstractClassifierUDF
 from test.util import create_sample_video
-from test.util import create_dummy_batches
+from typing import List
+
+
+class DummyObjectDetector(AbstractClassifierUDF):
+
+    @property
+    def name(self) -> str:
+        return "dummyObjectDetector"
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def input_format(self) -> FrameInfo:
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self) -> List[str]:
+        return ['__background__', 'person', 'bicycle']
+
+    def classify(self, frames: np.ndarray) -> List[Outcome]:
+        if (frames == np.array(np.ones((2, 2, 3)) * 0.1 * float(5 + 1) * 255,
+                               dtype=np.uint8)).all():
+            label = self.labels[1]
+        else:
+            label = self.labels[2]
+        prediction_df_list = [Outcome(
+            pd.DataFrame([{'label': [label, 'apple']}]), 'label')]
+        return prediction_df_list
+
 
 NUM_FRAMES = 10
 
@@ -58,14 +87,15 @@ class UDFExecutorTest(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
                   OUTPUT (Labels NDARRAY (10))
                   TYPE  Classification
-                  IMPL  'src/udfs/dummy_object_detector.py';
+                  IMPL  'test/integration_tests/test_udf_executor.py';
         """
         self.perform_query(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         actual_batch = self.perform_query(select_query)
 
-        expected = [{'id' : i, 'label' : ['bicycle', 'apple']} for i in range(NUM_FRAMES)]
+        expected = [{'id': i, 'label': ['bicycle', 'apple']}
+                    for i in range(NUM_FRAMES)]
         expected[5]['label'][0] = 'person'
         expected_batch = Batch(frames=pd.DataFrame(expected))
 

@@ -22,9 +22,6 @@ from pandas import DataFrame
 from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
-from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
-
 
 class Batch:
     """

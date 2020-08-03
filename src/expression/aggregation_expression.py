@@ -15,9 +15,8 @@
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
-import statistics
-import pandas as pd
 from src.models.storage.batch import Batch
+
 
 class AggregationExpression(AbstractExpression):
 
