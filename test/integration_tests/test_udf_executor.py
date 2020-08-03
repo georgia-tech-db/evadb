@@ -36,6 +36,7 @@ NUM_FRAMES = 10
 class UDFExecutorTest(unittest.TestCase):
 
     def setUp(self):
+        CatalogManager().reset()
         create_sample_video()
 
     def tearDown(self):
