@@ -103,3 +103,12 @@ class UdfIO(BaseModel):
         column_str += ")\n"
 
         return column_str
+
+    def __eq__(self, other):
+        return self.id == other.id and \
+            self.is_input == other.is_input and \
+            self.is_nullable == other.is_nullable and \
+            self.array_dimensions == other.array_dimensions and \
+            self.name == other.name and \
+            self.udf_id == other.udf_id and \
+            self.type == other.type
