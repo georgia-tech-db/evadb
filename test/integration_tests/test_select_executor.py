@@ -22,7 +22,6 @@ from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
-from src.storage import StorageEngine
 from src.models.storage.batch import Batch
 from test.util import create_sample_video
 from test.util import create_dummy_batches
@@ -39,43 +38,37 @@ class SelectExecutorTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
-    def test_should_load_and_select_in_table(self):
-        parser = Parser()
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-
+    def perform_query(self, query):
         stmt = Parser().parse(query)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
-        PlanExecutor(p_plan).execute_plan()
+        return PlanExecutor(p_plan).execute_plan()
+
+    def test_should_load_and_select_in_table(self):
+        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        self.perform_query(query)
 
         select_query = "SELECT id FROM MyVideo;"
-        stmt = Parser().parse(select_query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        actual_batch = PlanExecutor(p_plan).execute_plan()
+        actual_batch = self.perform_query(select_query)
         expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertTrue(actual_batch, expected_batch)
 
         select_query = "SELECT data FROM MyVideo;"
-        stmt = Parser().parse(select_query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        actual_batch = PlanExecutor(p_plan).execute_plan()
+        actual_batch = self.perform_query(select_query)
         expected_rows = [{"data": np.array(np.ones((2, 2, 3))
-                                    * 0.1 * float(i + 1) * 255,
-                                    dtype=np.uint8)} for i in range(NUM_FRAMES)]
+                                           * 0.1 * float(i + 1) * 255,
+                                           dtype=np.uint8)}
+                         for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertTrue(actual_batch, expected_batch)
 
         # select * is not supported
         select_query = "SELECT id,data FROM MyVideo;"
-        stmt = Parser().parse(select_query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        actual_batch = PlanExecutor(p_plan).execute_plan()
+        actual_batch = self.perform_query(select_query)
         expected_batch = list(create_dummy_batches())[0]
         self.assertTrue(actual_batch, expected_batch)
+
 
 if __name__ == "__main__":
     unittest.main()

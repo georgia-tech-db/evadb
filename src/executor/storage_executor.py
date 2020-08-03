@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-import pandas as pd
-
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.storage_plan import StoragePlan
