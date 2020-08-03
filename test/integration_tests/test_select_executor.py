@@ -33,7 +33,7 @@ NUM_FRAMES = 10
 class SelectExecutorTest(unittest.TestCase):
 
     def setUp(self):
-        #CatalogManager().reset()
+        CatalogManager().reset()
         create_sample_video()
 
     def tearDown(self):
