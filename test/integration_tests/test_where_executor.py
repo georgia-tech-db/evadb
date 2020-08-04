@@ -37,6 +37,7 @@ NUM_FRAMES = 10
 class WhereExecutorTest(unittest.TestCase):
 
     def setUp(self):
+        CatalogManager().reset()
         create_sample_video()
 
     def tearDown(self):
