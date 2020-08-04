@@ -74,12 +74,13 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         filters = range(num_frames)
     data = []
     for i in filters:
-        if i % batch_size == 0 and data:
-            yield Batch(pd.DataFrame(data))
-            data = []
         data.append({'id': i + start_id,
                      'data': np.array(
                          np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
                          dtype=np.uint8)})
+
+        if len(data) % batch_size == 0:
+            yield Batch(pd.DataFrame(data))
+            data = []
     if data:
         yield Batch(pd.DataFrame(data))

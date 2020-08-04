@@ -12,20 +12,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
-from src.models.storage.batch import Batch
-from src.executor.abstract_executor import AbstractExecutor
-from src.planner.storage_plan import StoragePlan
-from src.storage import StorageEngine
-
-
-class StorageExecutor(AbstractExecutor):
-
-    def __init__(self, node: StoragePlan):
-        super().__init__(node)
-
-    def validate(self):
-        pass
-
-    def exec(self) -> Iterator[Batch]:
-        return StorageEngine.read(self.node.video)

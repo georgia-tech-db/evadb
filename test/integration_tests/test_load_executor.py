@@ -29,6 +29,8 @@ from test.util import create_dummy_batches
 class LoadExecutorTest(unittest.TestCase):
 
     def setUp(self):
+        # reset the catalog manager before running each test
+        CatalogManager().reset()
         create_sample_video()
 
     def tearDown(self):
@@ -43,8 +45,7 @@ class LoadExecutorTest(unittest.TestCase):
         p_plan = PlanGenerator().build(l_plan)
         PlanExecutor(p_plan).execute_plan()
 
-        # Do we have select command now?
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-        actual_batch = list(StorageEngine.read(metadata))[0]
-        expected_batch = list(create_dummy_batches())[0]
+        actual_batch = list(StorageEngine.read(metadata))
+        expected_batch = list(create_dummy_batches())
         self.assertEqual(actual_batch, expected_batch)

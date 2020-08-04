@@ -36,6 +36,10 @@ class DataFrameSchema(object):
         return schema_str
 
     @property
+    def name(self):
+        return self._name
+
+    @property
     def column_list(self):
         return self._column_list
 
@@ -46,3 +50,7 @@ class DataFrameSchema(object):
     @property
     def pyspark_schema(self):
         return self._pyspark_schema
+
+    def __eq__(self, other):
+        return self.name == other.name and \
+            self._column_list == other.column_list

@@ -27,7 +27,8 @@ from src.udfs.gpu_compatible import GPUCompatible
 
 class FunctionExpressionTest(unittest.TestCase):
     def test_should_work_for_function_without_children_eval_mode(self):
-        expression = FunctionExpression(lambda x: [Outcome(pd.DataFrame([x]), None)])
+        expression = FunctionExpression(lambda x:
+                                        [Outcome(pd.DataFrame([x]), None)])
         values = Batch(pd.DataFrame([1, 2, 3]))
         actual = expression.evaluate(values)
         self.assertEqual(values, actual)
@@ -51,8 +52,10 @@ class FunctionExpressionTest(unittest.TestCase):
                           )
 
     def test_when_function_executor_with_a_child_should_allow_chaining(self):
-        expression = FunctionExpression(lambda x: [Outcome(pd.DataFrame([x]), None)])
-        child = FunctionExpression(lambda x: [Outcome(pd.DataFrame([x + 1]), None)])
+        expression = FunctionExpression(lambda x:
+                                        [Outcome(pd.DataFrame([x]), None)])
+        child = FunctionExpression(lambda x:
+                                   [Outcome(pd.DataFrame([x + 1]), None)])
         expression.append_child(child)
         values = Batch(pd.DataFrame([1, 2, 3]))
         actual = expression.evaluate(values)
@@ -104,7 +107,8 @@ class FunctionExpressionTest(unittest.TestCase):
     @patch('src.expression.function_expression.Context')
     def test_should_execute_same_function_if_no_gpu(self, context):
         context_instance = context.return_value
-        mock_function = MagicMock(spec=GPUCompatible, return_value=[Outcome(pd.DataFrame(), None)])
+        mock_function = MagicMock(spec=GPUCompatible,
+                                  return_value=[Outcome(pd.DataFrame(), None)])
 
         context_instance.gpu_device.return_value = NO_GPU
 

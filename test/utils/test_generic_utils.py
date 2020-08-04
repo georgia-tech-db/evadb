@@ -28,12 +28,11 @@ class ModulePathTest(unittest.TestCase):
         vl = str_to_class('src.readers.opencv_reader.OpenCVReader')
         self.assertEqual(vl, OpenCVReader)
 
-
     @unittest.skip('This returns opecv_reader.OpenCVReader \
                    instead of src.readers.opencv_reader.OpenCVReader')
     def test_should_return_correct_class_for_path(self):
         vl = path_to_class('src/readers/opencv_reader.py', 'OpenCVReader')
-        self.assertEqual(vl, opencv_reader.OpenCVReader)
+        self.assertEqual(vl, OpenCVReader)
 
     @patch('src.utils.generic_utils.torch')
     def test_should_use_torch_to_check_if_gpu_is_available(self,
