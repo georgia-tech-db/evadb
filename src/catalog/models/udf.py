@@ -26,7 +26,8 @@ class UdfMetadata(BaseModel):
     _type = Column('type', String(100))
 
     _cols = relationship('UdfIO',
-                         back_populates="_udf")
+                         back_populates="_udf",
+                         cascade='all, delete, delete-orphan')
 
     def __init__(self, name: str, impl_file_path: str, type: str):
         self._name = name
@@ -53,3 +54,9 @@ class UdfMetadata(BaseModel):
         udf_str = 'udf: ({}, {}, {})\n'.format(
             self.name, self.impl_file_path, self.type)
         return udf_str
+
+    def __eq__(self, other):
+        return self.id == other.id and \
+            self.impl_file_path == other.impl_file_path and \
+            self.name == other.name and \
+            self.type == other.type
