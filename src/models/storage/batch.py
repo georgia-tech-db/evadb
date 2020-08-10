@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 import numpy as np
 import pandas as pd
 
+from typing import List
+from collections import defaultdict
 from pandas import DataFrame
-
 from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
@@ -178,8 +177,10 @@ class Batch:
         return Batch(self._frames[verfied_cols], self._outcomes.copy(),
                      self._temp_outcomes.copy(), self._identifier_column)
 
+
     @classmethod
-    def merge_column_wise(cls, batches: ['Batch']) -> 'Batch':
+    def merge_column_wise(cls, batches: ['Batch'], auto_renaming = False) \
+            -> 'Batch':
         """
         Merge two batch frames column_wise and return a new batch frame
         No outcome merge. Add later when there is a actual usage.
@@ -191,7 +192,9 @@ class Batch:
         """
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1)
-
+        if new_frames.columns.duplicated().any():
+            LoggingManager().log("Duplicated column name detected %s" % new_frames,
+                                 LoggingLevel.WARNING)
         return Batch(new_frames)
 
     def __add__(self, other: 'Batch'):
