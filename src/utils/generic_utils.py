@@ -58,10 +58,8 @@ def path_to_class(filepath: str, classname: str):
         type: A class for given path
     """
     try:
-        abs_path = str(Path(filepath).resolve())
-        module_dir, module_file = os.path.split(abs_path)
-        module_name, module_ext = os.path.splitext(module_file)
-        spec = importlib.util.spec_from_file_location(module_name, abs_path)
+        abs_path = Path(filepath).resolve()
+        spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         classobj = getattr(module, classname)
