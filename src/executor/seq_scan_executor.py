@@ -51,12 +51,8 @@ class SequentialScanExecutor(AbstractExecutor):
 
             # Then do project
             if self.project_expr is not None:
-                if len(self.project_expr) > 0:
-                    new_batch = self.project_expr[0].evaluate(batch)
-                for expr in self.project_expr[1:]:
-                    temp_batch = expr.evaluate(batch)
-                    new_batch = new_batch.merge_column_wise(temp_batch)
-                yield new_batch
+                batches = [expr.evaluate(batch) for expr in self.project_expr]
+                yield Batch.merge_column_wise(batches)
             else:
-                # Should return nothing when there is no projection.
+                # Is this expected behavior? No projection = * 
                 yield batch

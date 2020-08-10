@@ -178,32 +178,21 @@ class Batch:
         return Batch(self._frames[verfied_cols], self._outcomes.copy(),
                      self._temp_outcomes.copy(), self._identifier_column)
 
-    def merge_column_wise(self, other: 'Batch') -> 'Batch':
+    @classmethod
+    def merge_column_wise(cls, batches: ['Batch']) -> 'Batch':
         """
         Merge two batch frames column_wise and return a new batch frame
+        No outcome merge. Add later when there is a actual usage.
         Arguments:
             other (Batch): other framebatch to add
 
         Returns:
             Batch
         """
-        new_frames = pd.concat([self.frames, other.frames], axis=1)
+        frames = [batch.frames for batch in batches]
+        new_frames = pd.concat(frames, axis=1)
 
-        def _unique_keys(dict1, dict2):
-            return set(list(dict1.keys()) + list(dict2.keys()))
-
-        new_outcomes = {}
-        temp_new_outcomes = {}
-
-        for key in _unique_keys(self._outcomes, other._outcomes):
-            new_outcomes[key] = self._outcomes.get(key, []) + \
-                other._outcomes.get(key, [])
-        for key in _unique_keys(self._temp_outcomes, other._temp_outcomes):
-            temp_new_outcomes[key] = self._temp_outcomes.get(key, []) + \
-                other._temp_outcomes.get(key, [])
-
-        return Batch(new_frames, outcomes=new_outcomes,
-                     temp_outcomes=temp_new_outcomes)
+        return Batch(new_frames)
 
     def __add__(self, other: 'Batch'):
         """
