@@ -17,17 +17,13 @@ import os
 import pandas as pd
 import numpy as np
 
-from src.parser.parser import Parser
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.optimizer.plan_generator import PlanGenerator
-from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.models.inference.outcome import Outcome
 from src.udfs.abstract_udfs import AbstractClassifierUDF
-from test.util import create_sample_video
+from test.util import create_sample_video, perform_query
 from typing import List
 
 
@@ -71,17 +67,11 @@ class UDFExecutorTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
-    def perform_query(self, query):
-        stmt = Parser().parse(query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        return PlanExecutor(p_plan).execute_plan()
-
     # integration test
     def test_should_load_and_select_and_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
-        self.perform_query(load_query)
+        perform_query(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
@@ -89,10 +79,10 @@ class UDFExecutorTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/integration_tests/test_udf_executor.py';
         """
-        self.perform_query(create_udf_query)
+        perform_query(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
-        actual_batch = self.perform_query(select_query)
+        actual_batch = perform_query(select_query)
 
         expected = [{'id': i, 'label': ['bicycle', 'apple']}
                     for i in range(NUM_FRAMES)]

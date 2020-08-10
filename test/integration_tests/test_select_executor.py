@@ -17,14 +17,9 @@ import os
 import pandas as pd
 import numpy as np
 
-from src.parser.parser import Parser
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.optimizer.plan_generator import PlanGenerator
-from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from test.util import create_sample_video
-from test.util import create_dummy_batches
+from test.util import create_sample_video, create_dummy_batches, perform_query
 
 NUM_FRAMES = 10
 
@@ -38,24 +33,18 @@ class SelectExecutorTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
-    def perform_query(self, query):
-        stmt = Parser().parse(query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        return PlanExecutor(p_plan).execute_plan()
-
     def test_should_load_and_select_in_table(self):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        self.perform_query(query)
+        perform_query(query)
 
         select_query = "SELECT id FROM MyVideo;"
-        actual_batch = self.perform_query(select_query)
+        actual_batch = perform_query(select_query)
         expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertTrue(actual_batch, expected_batch)
 
         select_query = "SELECT data FROM MyVideo;"
-        actual_batch = self.perform_query(select_query)
+        actual_batch = perform_query(select_query)
         expected_rows = [{"data": np.array(np.ones((2, 2, 3))
                                            * 0.1 * float(i + 1) * 255,
                                            dtype=np.uint8)}
@@ -65,7 +54,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         # select * is not supported
         select_query = "SELECT id,data FROM MyVideo;"
-        actual_batch = list(self.perform_query(select_query))
+        actual_batch = [perform_query(select_query)]
         expected_batch = list(create_dummy_batches())
         self.assertTrue(actual_batch, expected_batch)
 
