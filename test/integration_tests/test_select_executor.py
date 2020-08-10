@@ -65,8 +65,8 @@ class SelectExecutorTest(unittest.TestCase):
 
         # select * is not supported
         select_query = "SELECT id,data FROM MyVideo;"
-        actual_batch = self.perform_query(select_query)
-        expected_batch = list(create_dummy_batches())[0]
+        actual_batch = list(self.perform_query(select_query))
+        expected_batch = list(create_dummy_batches())
         self.assertTrue(actual_batch, expected_batch)
 
 
