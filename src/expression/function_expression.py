@@ -63,37 +63,19 @@ class FunctionExpression(AbstractExpression):
         self.function = func
         self.is_temp = is_temp
 
-    def _batch_to_args(self, batch: Batch):
-        for ind in range(len(batch.frames)):
-            yield batch.frames.iloc[ind].tolist()
-
     def evaluate(self, batch: Batch):
-        args_gen = []
-        if self.get_children_count() > 0:
-            child = self.get_child(0)
-            args_gen.append(self._batch_to_args(child.evaluate(batch)))
-        else:
-            args_gen.append(self._batch_to_args(batch))
+        new_batch = Batch()
+        for child in self.children:
+            child_batch = child.evaluate(batch)
+            new_batch = new_batch.merge_column_wise(child_batch)
+
+        if new_batch.empty():
+            new_batch = batch
+
         func = self._gpu_enabled_function()
 
-        called_once = False
-        frames = pd.DataFrame()
-        for args in zip(*args_gen):
-            flat_args = [item for arg in args for item in arg]
-            outcomes = func(*flat_args)
-            called_once = True
-            # We only consider outcomes size 1 here
-            frames = frames.append(outcomes[0].data, ignore_index=True)
-        # Even when batch.frames is empty, the generator will still be returned
-        if not called_once:
-            outcomes = func()
-            frames = outcomes[0].data
-        new_batch = Batch(frames=frames)
-
-        # This is not used now
-        # if self.mode == ExecutionMode.EXEC:
-        #    batch.set_outcomes(self.name, outcomes, is_temp=self.is_temp)
-        return new_batch
+        outcomes = func(new_batch.frames.to_numpy())
+        return Batch(pd.DataFrame(outcomes))
 
     def _gpu_enabled_function(self):
         if isinstance(self.function, GPUCompatible):
