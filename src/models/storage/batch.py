@@ -36,7 +36,10 @@ class Batch:
 
     """
 
-    def __init__(self, frames, outcomes=None, temp_outcomes=None,
+    def __init__(self,
+                 frames=pd.DataFrame(),
+                 outcomes=None,
+                 temp_outcomes=None,
                  identifier_column='id'):
         super().__init__()
         if outcomes is None:
@@ -62,6 +65,9 @@ class Batch:
 
     @property
     def batch_size(self):
+        return self._batch_size
+
+    def __len__(self):
         return self._batch_size
 
     @property
