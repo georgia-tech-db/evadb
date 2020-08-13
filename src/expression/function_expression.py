@@ -22,6 +22,7 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
 from src.models.storage.batch import Batch
 from src.udfs.gpu_compatible import GPUCompatible
+from src.catalog.models.udf_io import UdfIO
 
 
 @unique
@@ -69,6 +70,30 @@ class FunctionExpression(AbstractExpression):
         self._is_temp = is_temp
         self._output = output
         self._output_obj = None
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def output(self):
+        return self._output
+
+    @property
+    def output_obj(self):
+        return self._output_obj
+
+    @output_obj.setter
+    def output_obj(self, val: UdfIO):
+        self._output_obj = val
+
+    @property
+    def function(self):
+        return self._function
+
+    @function.setter
+    def function(self, func: Callable):
+        self._function = func
 
     def evaluate(self, batch: Batch):
         new_batch = Batch()
