@@ -18,6 +18,10 @@ import cv2
 import os
 
 from src.models.storage.batch import Batch
+from src.parser.parser import Parser
+from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from src.optimizer.plan_generator import PlanGenerator
+from src.executor.plan_executor import PlanExecutor
 
 NUM_FRAMES = 10
 
@@ -84,3 +88,10 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
             data = []
     if data:
         yield Batch(pd.DataFrame(data))
+
+
+def perform_query(query):
+        stmt = Parser().parse(query)[0]
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        return PlanExecutor(p_plan).execute_plan()
