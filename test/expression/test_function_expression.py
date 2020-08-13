@@ -59,6 +59,13 @@ class FunctionExpressionTest(unittest.TestCase):
         expected = Batch(pd.DataFrame([2, 3, 4]))
         self.assertEqual(expected, actual)
 
+    def test_should_filter_function_output(self):
+        expression = FunctionExpression(lambda x: x + 1, output='id')
+        values = pd.DataFrame({'id': [1, 2], 'data': [1, 2]})
+        actual = expression.evaluate(Batch(values))
+        expected = Batch(pd.DataFrame(values['id']) + 1)
+        self.assertEqual(expected, actual)
+
     @unittest.skip("temp outcome in batch is not used.")
     def test_should_update_temp_outcomes_when_is_temp_set_exec_mode(self):
         values = [1, 2, 3]
