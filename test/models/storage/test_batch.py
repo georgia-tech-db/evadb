@@ -165,3 +165,11 @@ class BatchTest(unittest.TestCase):
     def test_should_fail_for_dict(self):
         frames = {'id': 0, 'data': [1, 2]}
         self.assertRaises(ValueError, Batch, frames)
+
+    def test_should_return_correct_length(self):
+        batch = Batch(create_dataframe(5))
+        self.assertEqual(5, len(batch))
+
+    def test_should_return_empty_dataframe(self):
+        batch = Batch()
+        self.assertEqual(batch, Batch(create_dataframe(0)))
