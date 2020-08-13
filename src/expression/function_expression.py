@@ -47,21 +47,28 @@ class FunctionExpression(AbstractExpression):
         is_temp (bool, default:False): In case of EXEC type, decides if the
         outcome needs to be stored in BatchFrame temporarily.
 
+        output(str): The column to return after executing function
+
+        output_obj(UdfIO): The catalog object corresponding to the func_output.
+        To be populated by optimizer.
+
     """
 
     def __init__(self, func: Callable,
                  mode: ExecutionMode = ExecutionMode.EVAL, name=None,
-                 is_temp: bool = False,
+                 is_temp: bool = False, output=None,
                  **kwargs):
         if mode == ExecutionMode.EXEC:
             assert name is not None
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
-        self.mode = mode
-        self.name = name
-        self.function = func
-        self.is_temp = is_temp
+        self._mode = mode
+        self._name = name
+        self._function = func
+        self._is_temp = is_temp
+        self._output = output
+        self._output_obj = None
 
     def evaluate(self, batch: Batch):
         new_batch = Batch()
@@ -75,11 +82,12 @@ class FunctionExpression(AbstractExpression):
         func = self._gpu_enabled_function()
 
         outcomes = func(new_batch.frames.to_numpy())
-        return Batch(pd.DataFrame(outcomes))
+        outcomes = Batch(pd.DataFrame(outcomes))
+        return outcomes.project([self._output])
 
     def _gpu_enabled_function(self):
-        if isinstance(self.function, GPUCompatible):
+        if isinstance(self._function, GPUCompatible):
             device = self._context.gpu_device()
             if device != NO_GPU:
-                return self.function.to_device(device)
-        return self.function
+                return self._function.to_device(device)
+        return self._function
