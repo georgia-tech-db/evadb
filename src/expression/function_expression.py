@@ -96,19 +96,19 @@ class FunctionExpression(AbstractExpression):
         self._function = func
 
     def evaluate(self, batch: Batch):
-        new_batch = Batch()
-        for child in self.children:
-            child_batch = child.evaluate(batch)
-            new_batch = new_batch.merge_column_wise(child_batch)
-
-        if new_batch.empty():
-            new_batch = batch
+        new_batch = batch
+        child_batches = [child.evaluate(batch) for child in self.children]
+        if len(child_batches):
+            new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
-
-        outcomes = func(new_batch.frames.to_numpy())
+        outcomes = func(new_batch.frames)
         outcomes = Batch(pd.DataFrame(outcomes))
-        return outcomes.project([self._output])
+
+        if self._output:
+            return outcomes.project([self._output])
+        else:
+            return outcomes
 
     def _gpu_enabled_function(self):
         if isinstance(self._function, GPUCompatible):

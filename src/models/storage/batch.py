@@ -197,6 +197,8 @@ class Batch:
             Batch: Merged batch object
         """
 
+        if not len(batches):
+            return Batch()
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1)
         if new_frames.columns.duplicated().any():
