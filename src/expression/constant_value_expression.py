@@ -17,6 +17,7 @@ from src.expression.abstract_expression import AbstractExpression, \
 from src.models.storage.batch import Batch
 import pandas as pd
 
+
 class ConstantValueExpression(AbstractExpression):
     # ToDo Implement generic value class
     # for now we don't assign any class to value
