@@ -46,7 +46,8 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_left,
             comparison_expression_right
         )
-        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual(
+            [True], logical_expr.evaluate(None).frames[0].tolist())
 
     def test_logical_or(self):
         const_exp1 = ConstantValueExpression(1)
@@ -69,7 +70,8 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_left,
             comparison_expression_right
         )
-        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual(
+            [True], logical_expr.evaluate(None).frames[0].tolist())
 
     def test_logical_not(self):
         const_exp1 = ConstantValueExpression(0)
@@ -85,4 +87,5 @@ class LogicalExpressionsTest(unittest.TestCase):
             None,
             comparison_expression_right
         )
-        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual(
+            [True], logical_expr.evaluate(None).frames[0].tolist())

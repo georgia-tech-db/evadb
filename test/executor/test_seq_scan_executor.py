@@ -16,30 +16,16 @@ import unittest
 import pandas as pd
 
 from src.executor.seq_scan_executor import SequentialScanExecutor
-from src.models.inference.outcome import Outcome
 from src.models.storage.batch import Batch
 from test.util import create_dataframe
-from ..executor.utils import DummyExecutor
+from test.executor.utils import DummyExecutor
 
 
 class SeqScanExecutorTest(unittest.TestCase):
 
     def test_should_return_only_frames_satisfy_predicate(self):
         dataframe = create_dataframe(3)
-
-        outcome_1 = Outcome(pd.DataFrame(
-            {'labels': ["car", "bus"], 'scores': [0.5, 0.6]}), 'labels')
-        outcome_2 = Outcome(pd.DataFrame(
-            {'labels': ["bus"], 'scores': [0.5]}), 'labels')
-        outcome_3 = Outcome(pd.DataFrame(
-            {'labels': ["car", "train"], 'scores': [0.5, 0.6]}), 'labels')
-        batch = Batch(frames=dataframe, outcomes={
-            "test": [
-                outcome_1,
-                outcome_2,
-                outcome_3
-            ]
-        })
+        batch = Batch(frames=dataframe)
         expression = type("AbstractExpression", (),
                           {"evaluate": lambda x: Batch(
                               pd.DataFrame([False, False, True]))})
@@ -57,19 +43,7 @@ class SeqScanExecutorTest(unittest.TestCase):
     def test_should_return_all_frames_when_no_predicate_is_applied(self):
         dataframe = create_dataframe(3)
 
-        outcome_1 = Outcome(pd.DataFrame(
-            {'labels': ["car", "bus"], 'scores': [0.5, 0.6]}), 'labels')
-        outcome_2 = Outcome(pd.DataFrame(
-            {'labels': ["bus"], 'scores': [0.5]}), 'labels')
-        outcome_3 = Outcome(pd.DataFrame(
-            {'labels': ["car", "train"], 'scores': [0.5, 0.6]}), 'labels')
-        batch = Batch(frames=dataframe, outcomes={
-            "test": [
-                outcome_1,
-                outcome_2,
-                outcome_3
-            ]
-        })
+        batch = Batch(frames=dataframe)
 
         plan = type("ScanPlan", (), {"predicate": None,
                                      "columns": None})
@@ -78,3 +52,23 @@ class SeqScanExecutorTest(unittest.TestCase):
 
         filtered = list(predicate_executor.exec())[0]
         self.assertEqual(batch, filtered)
+
+    def test_should_return_projected_columns(self):
+        dataframe = create_dataframe(3)
+
+        batch = Batch(frames=dataframe)
+        proj_batch = Batch(frames=pd.DataFrame(dataframe['data']))
+        expression = [
+            type(
+                "AbstractExpression", (), {
+                    "evaluate": lambda x: Batch(
+                        pd.DataFrame(
+                            x.frames['data']))})]
+
+        plan = type("ScanPlan", (), {"predicate": None,
+                                     "columns": expression})
+        proj_executor = SequentialScanExecutor(plan)
+        proj_executor.append_child(DummyExecutor([batch]))
+
+        actual = list(proj_executor.exec())[0]
+        self.assertEqual(proj_batch, actual)
