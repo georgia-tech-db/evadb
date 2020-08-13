@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+from sqlalchemy.orm.exc import NoResultFound
 
 from src.catalog.models.udf_io import UdfIO
 from src.catalog.services.base_service import BaseService
@@ -47,3 +48,16 @@ class UdfIOService(BaseService):
 
         for io in io_list:
             io.save()
+
+    def udf_io_by_name(self, name: str):
+        """return the udf_io entry that matches the name provided.
+           None if no such entry found.
+
+        Arguments:
+            name (str): name to be searched
+        """
+
+        try:
+            return self.model.query.filter(self.model._name == name).one()
+        except NoResultFound:
+            return None
