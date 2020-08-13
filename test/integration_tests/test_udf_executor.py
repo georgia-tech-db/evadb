@@ -19,6 +19,7 @@ import pandas as pd
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from test.util import create_sample_video, perform_query
+from test.util import DummyObjectDetector
 
 NUM_FRAMES = 10
 
@@ -33,29 +34,44 @@ class UDFExecutorTest(unittest.TestCase):
         os.remove('dummy.avi')
 
     # integration test
-    def test_should_load_and_select_and_udf_video_in_table(self):
+    def test_should_load_and_select_using_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-
         perform_query(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (Labels NDARRAY (10))
+                  OUTPUT (label TEXT(10))
                   TYPE  Classification
-                  IMPL  'test/example_udfs.py';
+                  IMPL  'test/util.py';
         """
         perform_query(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         actual_batch = perform_query(select_query)
-
-        expected = [{'id': i, 'label': ['bicycle', 'apple']}
+        print(actual_batch)
+        labels = DummyObjectDetector().labels
+        expected = [{'id': i, 'label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES)]
-        expected[5]['label'][0] = 'person'
         expected_batch = Batch(frames=pd.DataFrame(expected))
-
         self.assertTrue(actual_batch, expected_batch)
 
+    def test_should_load_and_select_using_udf_video(self):
+        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        perform_query(load_query)
 
-if __name__ == "__main__":
-    unittest.main()
+        create_udf_query = """CREATE UDF DummyObjectDetector
+                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  OUTPUT (label TEXT(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        perform_query(create_udf_query)
+
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = 'person';"
+        actual_batch = perform_query(select_query)
+        labels = DummyObjectDetector().labels
+        expected = [{'id': i, 'label': labels[1 + i % 2]}
+                    for i in range(NUM_FRAMES // 2)]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertTrue(actual_batch, expected_batch)

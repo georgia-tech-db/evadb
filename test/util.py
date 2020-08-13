@@ -22,6 +22,9 @@ from src.parser.parser import Parser
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import ColorSpace
+from src.udfs.abstract_udfs import AbstractClassifierUDF
 
 NUM_FRAMES = 10
 
@@ -91,7 +94,30 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
 
 
 def perform_query(query):
-        stmt = Parser().parse(query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        return PlanExecutor(p_plan).execute_plan()
+    stmt = Parser().parse(query)[0]
+    l_plan = StatementToPlanConvertor().visit(stmt)
+    p_plan = PlanGenerator().build(l_plan)
+    return PlanExecutor(p_plan).execute_plan()
+
+
+class DummyObjectDetector(AbstractClassifierUDF):
+
+    @property
+    def name(self) -> str:
+        return "dummyObjectDetector"
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return ['__background__', 'person', 'bicycle']
+
+    def classify(self, frames: np.ndarray):
+        labels = [self.labels[i % 2 + 1] for i in range(len(frames))]
+        prediction_df_list = pd.DataFrame({'label': labels})
+        return prediction_df_list
