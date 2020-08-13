@@ -18,6 +18,7 @@ from src.expression.abstract_expression import AbstractExpression, \
 import pandas as pd
 from src.models.storage.batch import Batch
 
+
 class LogicalExpression(AbstractExpression):
     def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
                  right: AbstractExpression):
