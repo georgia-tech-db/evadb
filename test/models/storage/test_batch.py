@@ -154,7 +154,7 @@ class BatchTest(unittest.TestCase):
         batch_1 = Batch(frames=pd.DataFrame([{'id': 0}]))
         batch_2 = Batch(frames=pd.DataFrame([{'data': 1}]))
 
-        batch_3 = batch_1.merge_column_wise(batch_2)
+        batch_3 = Batch.merge_column_wise([batch_1, batch_2])
         batch_4 = Batch(frames=pd.DataFrame([{'id': 0, 'data': 1}]))
         self.assertEqual(batch_3, batch_4)
 

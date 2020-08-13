@@ -46,10 +46,7 @@ class SequentialScanExecutor(AbstractExecutor):
 
             # Then do project
             if not batch.empty() and self.project_expr is not None:
-                new_batch = Batch()
-                for expr in self.project_expr:
-                    temp_batch = expr.evaluate(batch)
-                    new_batch = new_batch.merge_column_wise(temp_batch)
-                batch = new_batch
+                batches = [expr.evaluate(batch) for expr in self.project_expr]
+                batch = Batch.merge_column_wise(batches)
 
             yield batch
