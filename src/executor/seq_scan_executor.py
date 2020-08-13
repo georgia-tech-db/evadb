@@ -42,7 +42,9 @@ class SequentialScanExecutor(AbstractExecutor):
             # We do the predicate first
             if self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch).frames
-                batch = Batch(batch.frames[(outcomes > 0).to_numpy()])
+                batch = Batch(
+                    batch.frames[(outcomes > 0).to_numpy()].reset_index(
+                        drop=True))
 
             # Then do project
             if not batch.empty() and self.project_expr is not None:

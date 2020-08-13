@@ -79,4 +79,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         return self.to(torch.device("cuda:{}".format(device)))
 
     def __call__(self, *args, **kwargs):
-        return nn.Module.__call__(self, *args, **kwargs)
+        frames = None
+        if len(args):
+            frames = args[0].to_numpy()
+        return nn.Module.__call__(self, frames, **kwargs)

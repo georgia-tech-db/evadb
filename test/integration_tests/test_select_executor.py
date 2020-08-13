@@ -57,7 +57,3 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = [perform_query(select_query)]
         expected_batch = list(create_dummy_batches())
         self.assertTrue(actual_batch, expected_batch)
-
-
-if __name__ == "__main__":
-    unittest.main()
