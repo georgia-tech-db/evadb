@@ -63,7 +63,7 @@ class InsertTableStatement(AbstractStatement):
         return self._value_list
 
     def __eq__(self, other):
-        if isinstance(other, InsertTableStatement):
+        if not isinstance(other, InsertTableStatement):
             return False
         return (self.table == other.table
                 and self.column_list == other.column_list

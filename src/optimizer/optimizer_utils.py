@@ -24,7 +24,7 @@ from src.expression.tuple_value_expression import ExpressionType, \
     TupleValueExpression
 
 from src.parser.create_statement import ColumnDefinition, \
-    ColumnConstraintInformation
+    ColConstraintInfo
 from src.parser.types import ParserColumnDataType
 from src.utils.generic_utils import path_to_class, generate_file_path
 
@@ -199,7 +199,7 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     """
     catalog = CatalogManager()
     columns = [ColumnDefinition('id', ParserColumnDataType.INTEGER, [],
-                                ColumnConstraintInformation(unique=True))]
+                                ColConstraintInfo(unique=True))]
     # the ndarray dimensions are set as None. We need to fix this as we
     # cannot assume. Either ask the user to provide this with load or
     # we infer this from the provided video.
