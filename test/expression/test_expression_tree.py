@@ -18,6 +18,8 @@ import pandas as pd
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.tuple_value_expression import TupleValueExpression
+from src.expression.aggregation_expression import AggregationExpression
 from src.expression.function_expression import FunctionExpression
 from src.models.inference.outcome import Outcome
 from src.models.storage.batch import Batch
@@ -41,3 +43,32 @@ class ExpressionEvaluationTest(unittest.TestCase):
         batch = Batch(frames=frames)
         output = expression_tree.evaluate(batch)
         self.assertEqual([True, False], output)
+
+    def test_if_expr_tree_is_equal(self):
+        const_exp1 = ConstantValueExpression(0)
+        const_exp2 = ConstantValueExpression(0)
+        columnName1 = TupleValueExpression(col_name='DATA')
+        columnName2 = TupleValueExpression(col_name='DATA')
+
+        aggr_expr1 = AggregationExpression(
+            ExpressionType.AGGREGATION_AVG,
+            None,
+            columnName1
+        )
+        aggr_expr2 = AggregationExpression(
+            ExpressionType.AGGREGATION_AVG,
+            None,
+            columnName2
+        )
+        cmpr_exp1 = ComparisonExpression(
+            ExpressionType.COMPARE_NEQ,
+            aggr_expr1,
+            const_exp1
+        )
+        cmpr_exp2 = ComparisonExpression(
+            ExpressionType.COMPARE_NEQ,
+            aggr_expr2,
+            const_exp2
+        )
+
+        self.assertEqual(cmpr_exp1, cmpr_exp2)

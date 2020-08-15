@@ -86,3 +86,13 @@ class CreateUDFStatement(AbstractStatement):
     @property
     def udf_type(self):
         return self._udf_type
+
+    def __eq__(self, other):
+        if not isinstance(other, CreateUDFStatement):
+            return False
+        return (self.name == other.name
+                and self.if_not_exists == other.if_not_exists
+                and self.inputs == other.inputs
+                and self.outputs == other.outputs
+                and self.impl_path == other.impl_path
+                and self.udf_type == other.udf_type)
