@@ -21,7 +21,7 @@ from typing import List
 from src.parser.types import ParserColumnDataType
 
 
-class ColumnConstraintInformation:
+class ColConstraintInfo:
     def __init__(self, nullable=False, default_value=None,
                  primary=False, unique=False):
         self.nullable = nullable
@@ -30,7 +30,7 @@ class ColumnConstraintInformation:
         self.unique = unique
 
     def __eq__(self, other):
-        if not isinstance(other, ColumnConstraintInformation):
+        if not isinstance(other, ColConstraintInfo):
             return False
         return (self.nullable == other.nullable
                 and self.default_value == other.default_value
@@ -41,7 +41,7 @@ class ColumnConstraintInformation:
 class ColumnDefinition:
     def __init__(self, col_name: str,
                  col_type: ParserColumnDataType, col_dim: List[int],
-                 cci: ColumnConstraintInformation = None):
+                 cci: ColConstraintInfo = ColConstraintInfo()):
         self._name = col_name
         self._type = col_type
         self._dimension = col_dim
