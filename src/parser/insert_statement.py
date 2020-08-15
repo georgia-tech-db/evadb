@@ -61,3 +61,10 @@ class InsertTableStatement(AbstractStatement):
     @property
     def value_list(self) -> List[AbstractExpression]:
         return self._value_list
+
+    def __eq__(self, other):
+        if isinstance(other, InsertTableStatement):
+            return False
+        return (self.table == other.table
+                and self.column_list == other.column_list
+                and self.value_list == other.value_list)

@@ -126,3 +126,11 @@ class AbstractExpression(ABC):
     @abstractmethod
     def evaluate(self, *args):
         NotImplementedError('Must be implemented in subclasses.')
+
+    def __eq__(self, other):
+        is_subtree_equal = True
+        if self.get_children_count() != other.get_children_count():
+            return False
+        for child1, child2 in zip(self.children, other.children):
+            is_subtree_equal = is_subtree_equal and (child1 == child2)
+        return is_subtree_equal

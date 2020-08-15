@@ -30,15 +30,16 @@ class SelectStatement(AbstractStatement):
     _target_list : List[AbstractExpression]
         list of target attributes in the select query,
         each attribute is represented as a Abstract Expression
-    _from_table : TableRef
-        table reference in the select query
+    _from_table : TableRef | Select Statement
+        table reference in the select query, can be a select statement
+        in nested queries
     _where_clause : AbstractExpression
         predicate of the select query, represented as a expression tree.
     **kwargs : to support other functionality, Orderby, Distinct, Groupby.
     """
 
     def __init__(self, target_list: List[AbstractExpression] = None,
-                 from_table: TableRef = None,
+                 from_table=None,
                  where_clause: AbstractExpression = None,
                  **kwargs):
         super().__init__(StatementType.SELECT)
@@ -75,3 +76,10 @@ class SelectStatement(AbstractStatement):
                                                         self._from_table,
                                                         self._where_clause)
         return print_str
+
+    def __eq__(self, other):
+        if not isinstance(other, SelectStatement):
+            return False
+        return (self.from_table == other.from_table
+                and self.target_list == other.target_list
+                and self.where_clause == other.where_clause)

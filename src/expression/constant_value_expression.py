@@ -35,3 +35,10 @@ class ConstantValueExpression(AbstractExpression):
         return self._value
     # ToDo implement other functinalities like maintaining hash
     # comparing two objects of this class(==)
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, ConstantValueExpression):
+            return False
+        return (is_subtree_equal
+                and self.value == other.value)

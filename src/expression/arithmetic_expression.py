@@ -42,3 +42,10 @@ class ArithmeticExpression(AbstractExpression):
             return Batch(pd.DataFrame(vl * vr))
         elif self.etype == ExpressionType.ARITHMETIC_DIVIDE:
             return Batch(pd.DataFrame(vl / vr))
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, ArithmeticExpression):
+            return False
+        return (is_subtree_equal
+                and self.etype == other.etype)

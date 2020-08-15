@@ -29,6 +29,14 @@ class ColumnConstraintInformation:
         self.primary = primary
         self.unique = unique
 
+    def __eq__(self, other):
+        if not isinstance(other, ColumnConstraintInformation):
+            return False
+        return (self.nullable == other.nullable
+                and self.default_value == other.default_value
+                and self.primary == other.primary
+                and self.unique == other.unique)
+
 
 class ColumnDefinition:
     def __init__(self, col_name: str,
@@ -37,13 +45,7 @@ class ColumnDefinition:
         self._name = col_name
         self._type = col_type
         self._dimension = col_dim
-
-        # column constarint info
-        if cci is not None:
-            self._unique_column_constraint = cci.unique
-            self._nullable = cci.nullable
-            self._primary = cci.primary
-            self._default_value = cci.default_value
+        self._cci = cci
 
     @property
     def name(self):
@@ -57,16 +59,21 @@ class ColumnDefinition:
     def dimension(self):
         return self._dimension
 
+    @property
+    def cci(self):
+        return self._cci
+
     def __str__(self):
         return '{} {} {}'.format(self._name, self._type, self._dimension)
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):
-            # don't attempt to compare against unrelated types
-            return NotImplemented
+            return False
 
-        return self.name == other.name and \
-            self.type == other.type and self.dimension == other.dimension
+        return (self.name == other.name
+                and self.type == other.type
+                and self.dimension == other.dimension
+                and self.cci == other.cci)
 
 
 class CreateTableStatement(AbstractStatement):
@@ -102,3 +109,10 @@ class CreateTableStatement(AbstractStatement):
     @property
     def column_list(self):
         return self._column_list
+
+    def __eq__(self, other):
+        if not isinstance(other, CreateTableStatement):
+            return False
+        return (self.table_ref == other.table_ref
+                and self.if_not_exists == other.if_not_exists
+                and self.column_list == other.column_list)

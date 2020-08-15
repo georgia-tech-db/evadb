@@ -46,3 +46,9 @@ class LoadDataStatement(AbstractStatement):
     @property
     def path(self) -> Path:
         return self._path
+
+    def __eq__(self, other):
+        if not isinstance(other, LoadDataStatement):
+            return False
+        return (self.table == other.table
+                and self.path == other.path)
