@@ -61,9 +61,18 @@ class StatementToPlanConvertor:
         Arguments:
             statement {SelectStatement} -- [input select statement]
         """
-        # Create a logical get node
+
         video = statement.from_table
-        if video is not None:
+        if video is None:
+            LoggingManager().log('From entry missing in select statement',
+                                 LoggingLevel.ERROR)
+            return None
+
+        if isinstance(video, SelectStatement):
+            # NestedQuery
+            self.visit_select(video)
+        elif isinstance(video, TableRef):
+            # Table
             self.visit_table_ref(video)
 
         # Filter Operator
