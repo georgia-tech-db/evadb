@@ -63,6 +63,16 @@ class Operator:
     def type(self):
         return self._type
 
+    def __eq__(self, other):
+        is_subtree_equal = True
+        if not isinstance(other, Operator):
+            return False
+        if len(self.children) != len(other.children):
+            return False
+        for child1, child2 in zip(self.children, other.children):
+            is_subtree_equal = is_subtree_equal and (child1 == child2)
+        return is_subtree_equal
+
 
 class LogicalGet(Operator):
     def __init__(self, video: TableRef, dataset_metadata: DataFrameMetadata,
@@ -79,6 +89,14 @@ class LogicalGet(Operator):
     def dataset_metadata(self):
         return self._dataset_metadata
 
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalGet):
+            return False
+        return (is_subtree_equal
+                and self.video == other.video
+                and self.dataset_metadata == other.dataset_metadata)
+
 
 class LogicalFilter(Operator):
     def __init__(self, predicate: AbstractExpression, children: List = None):
@@ -88,6 +106,13 @@ class LogicalFilter(Operator):
     @property
     def predicate(self):
         return self._predicate
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFilter):
+            return False
+        return (is_subtree_equal
+                and self.predicate == other.predicate)
 
 
 class LogicalProject(Operator):
@@ -99,6 +124,13 @@ class LogicalProject(Operator):
     @property
     def target_list(self):
         return self._target_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalProject):
+            return False
+        return (is_subtree_equal
+                and self.target_list == other.target_list)
 
 
 class LogicalInsert(Operator):
@@ -141,6 +173,16 @@ class LogicalInsert(Operator):
     def column_list(self):
         return self._column_list
 
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalInsert):
+            return False
+        return (is_subtree_equal
+                and self.video == other.video
+                and self.video_catalog_id == other.video_catalog_id
+                and self.value_list == other.value_list
+                and self.column_list == other.column_list)
+
 
 class LogicalCreate(Operator):
     """Logical node for create table operations
@@ -171,6 +213,15 @@ class LogicalCreate(Operator):
     @property
     def if_not_exists(self):
         return self._if_not_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreate):
+            return False
+        return (is_subtree_equal
+                and self.video == other.video
+                and self.column_list == other.column_list
+                and self.if_not_exists == other.if_not_exists)
 
 
 class LogicalCreateUDF(Operator):
@@ -234,6 +285,18 @@ class LogicalCreateUDF(Operator):
     def udf_type(self):
         return self._udf_type
 
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateUDF):
+            return False
+        return (is_subtree_equal
+                and self.name == other.name
+                and self.if_not_exists == other.if_not_exists
+                and self.inputs == other.inputs
+                and self.outputs == other.outputs
+                and self.udf_type == other.udf_type
+                and self.impl_path == other.impl_path)
+
 
 class LogicalLoadData(Operator):
     """Logical node for load data operation
@@ -260,3 +323,11 @@ class LogicalLoadData(Operator):
     def __str__(self):
         return 'LogicalLoadData(table: {}, path: {})'.format(
             self.table_metainfo, self.path)
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalLoadData):
+            return False
+        return (is_subtree_equal
+                and self.table_metainfo == other.table_metainfo
+                and self.path == other.path)
