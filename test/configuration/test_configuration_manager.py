@@ -34,8 +34,3 @@ class ConfigurationManagerTests(unittest.TestCase):
 
         value = configuration_manager.get_value("core", "invalid")
         self.assertEqual(value, None)
-
-
-if __name__ == '__main__':
-
-    unittest.main()

@@ -38,8 +38,3 @@ class SparkSessionTest(unittest.TestCase):
         session2 = Session()
         self.assertEqual(self.session, session2)
         self.assertIsInstance(spark_session, SparkSession)
-
-
-if __name__ == '__main__':
-
-    unittest.main()

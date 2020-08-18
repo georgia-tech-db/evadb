@@ -29,7 +29,3 @@ class InterpreterTests(unittest.TestCase):
         prompt.prompt = '> '
 
         prompt.do_greet("test")
-
-
-if __name__ == '__main__':
-    unittest.main()

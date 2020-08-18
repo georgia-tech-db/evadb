@@ -25,7 +25,8 @@ from src.parser.create_statement import CreateTableStatement
 from src.parser.load_statement import LoadDataStatement
 from src.parser.parser import Parser
 
-from src.optimizer.operators import LogicalProject, LogicalGet, LogicalFilter
+from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
+                                     LogicalQueryDerivedGet)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
@@ -233,6 +234,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     ExpressionType.COMPARE_GREATER,
                     TupleValueExpression('id'),
                     ConstantValueExpression(3))))
+        plans.append(LogicalQueryDerivedGet())
         plans.append(LogicalProject(
             [TupleValueExpression('data'), TupleValueExpression('id')]))
         plans.append(
