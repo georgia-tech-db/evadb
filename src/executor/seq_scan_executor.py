@@ -30,6 +30,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def __init__(self, node: SeqScanPlan):
         super().__init__(node)
         self.predicate = node.predicate
+        self.project_expr = node.columns
 
     def validate(self):
         pass
@@ -38,14 +39,16 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.exec():
+            # We do the predicate first
             if self.predicate is not None:
-                outcomes = self.predicate.evaluate(batch)
-                required_frame_ids = []
-                for i, outcome in enumerate(outcomes):
-                    if outcome:
-                        required_frame_ids.append(i)
+                outcomes = self.predicate.evaluate(batch).frames
+                batch = Batch(
+                    batch.frames[(outcomes > 0).to_numpy()].reset_index(
+                        drop=True))
 
-                yield batch[required_frame_ids]
+            # Then do project
+            if not batch.empty() and self.project_expr is not None:
+                batches = [expr.evaluate(batch) for expr in self.project_expr]
+                batch = Batch.merge_column_wise(batches)
 
-            else:
-                yield batch
+            yield batch

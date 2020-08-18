@@ -81,6 +81,10 @@ class AbstractExpression(ABC):
         else:
             return self._children[index]
 
+    @property
+    def children(self):
+        return self._children
+
     def append_child(self, child):
         self._children.append(child)
 

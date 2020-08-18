@@ -17,15 +17,21 @@ import unittest
 from mock import patch, MagicMock
 from pathlib import Path
 
-from src.utils.generic_utils import (str_to_class, is_gpu_available,
-                                     generate_file_path)
+from src.utils.generic_utils import (str_to_class, path_to_class,
+                                     is_gpu_available, generate_file_path)
 from src.readers.opencv_reader import OpenCVReader
 
 
 class ModulePathTest(unittest.TestCase):
 
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class("src.readers.opencv_reader.OpenCVReader")
+        vl = str_to_class('src.readers.opencv_reader.OpenCVReader')
+        self.assertEqual(vl, OpenCVReader)
+
+    @unittest.skip('This returns opecv_reader.OpenCVReader \
+                   instead of src.readers.opencv_reader.OpenCVReader')
+    def test_should_return_correct_class_for_path(self):
+        vl = path_to_class('src/readers/opencv_reader.py', 'OpenCVReader')
         self.assertEqual(vl, OpenCVReader)
 
     @patch('src.utils.generic_utils.torch')

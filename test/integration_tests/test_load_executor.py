@@ -15,15 +15,10 @@
 import unittest
 import os
 
-from src.parser.parser import Parser
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.optimizer.plan_generator import PlanGenerator
-from src.executor.plan_executor import PlanExecutor
 from src.catalog.catalog_manager import CatalogManager
 from src.storage import StorageEngine
 
-from test.util import create_sample_video
-from test.util import create_dummy_batches
+from test.util import create_sample_video, create_dummy_batches, perform_query
 
 
 class LoadExecutorTest(unittest.TestCase):
@@ -40,10 +35,7 @@ class LoadExecutorTest(unittest.TestCase):
     def test_should_load_video_in_table(self):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
 
-        stmt = Parser().parse(query)[0]
-        l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
-        PlanExecutor(p_plan).execute_plan()
+        perform_query(query)
 
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
         actual_batch = list(StorageEngine.read(metadata))

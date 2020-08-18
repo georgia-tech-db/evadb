@@ -15,6 +15,8 @@
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
+import pandas as pd
+from src.models.storage.batch import Batch
 
 
 class LogicalExpression(AbstractExpression):
@@ -30,18 +32,15 @@ class LogicalExpression(AbstractExpression):
 
     def evaluate(self, *args):
         if self.get_children_count() == 2:
-            outcomes = []
-            left_values = self.get_child(0).evaluate(*args)
-            right_values = self.get_child(1).evaluate(*args)
-            for value_left, value_right in zip(left_values, right_values):
-                if self.etype == ExpressionType.LOGICAL_AND:
-                    outcomes.append(value_left and value_right)
-                elif self.etype == ExpressionType.LOGICAL_OR:
-                    outcomes.append(value_left or value_right)
-            return outcomes
+            left_values = self.get_child(0).evaluate(*args).frames
+            right_values = self.get_child(1).evaluate(*args).frames
+            if self.etype == ExpressionType.LOGICAL_AND:
+                return Batch(pd.DataFrame(left_values & right_values))
+            elif self.etype == ExpressionType.LOGICAL_OR:
+                return Batch(pd.DataFrame(left_values | right_values))
 
         else:
-            values = self.get_child(0).evaluate(*args)
+            values = self.get_child(0).evaluate(*args).frames
 
             if self.etype == ExpressionType.LOGICAL_NOT:
-                return [not value for value in values]
+                return Batch(pd.DataFrame(~values))

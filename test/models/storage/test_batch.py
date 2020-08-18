@@ -34,15 +34,13 @@ class BatchTest(unittest.TestCase):
         self.assertEqual([], batch.get_outcomes_for('test'))
 
     def test_frames_as_numpy_array_should_frames_as_numpy_array(self):
-        batch = Batch(
-            frames=create_dataframe_same(2))
+        batch = Batch(frames=create_dataframe_same(2))
         expected = list(np.ones((2, 1, 1)))
         actual = list(batch.column_as_numpy_array())
         self.assertEqual(expected, actual)
 
     def test_return_only_frames_specified_in_the_indices(self):
-        batch = Batch(
-            frames=create_dataframe(2))
+        batch = Batch(frames=create_dataframe(2))
         expected = Batch(frames=create_dataframe())
         output = batch[[0]]
         self.assertEqual(expected, output)
@@ -143,6 +141,23 @@ class BatchTest(unittest.TestCase):
 
         self.assertEqual(batch_3, batch_1 + batch_2)
 
+    def test_project_batch_frame(self):
+        batch_1 = Batch(frames=pd.DataFrame([{'id': 1,
+                                              'data': 2,
+                                              'info': 3}]))
+        batch_2 = batch_1.project(['id', 'info'])
+        batch_3 = Batch(frames=pd.DataFrame([{'id': 1,
+                                              'info': 3}]))
+        self.assertEqual(batch_2, batch_3)
+
+    def test_merge_column_wise_batch_frame(self):
+        batch_1 = Batch(frames=pd.DataFrame([{'id': 0}]))
+        batch_2 = Batch(frames=pd.DataFrame([{'data': 1}]))
+
+        batch_3 = Batch.merge_column_wise([batch_1, batch_2])
+        batch_4 = Batch(frames=pd.DataFrame([{'id': 0, 'data': 1}]))
+        self.assertEqual(batch_3, batch_4)
+
     def test_should_fail_for_list(self):
         frames = [{'id': 0, 'data': [1, 2]}, {'id': 1, 'data': [1, 2]}]
         self.assertRaises(ValueError, Batch, frames)
@@ -150,3 +165,11 @@ class BatchTest(unittest.TestCase):
     def test_should_fail_for_dict(self):
         frames = {'id': 0, 'data': [1, 2]}
         self.assertRaises(ValueError, Batch, frames)
+
+    def test_should_return_correct_length(self):
+        batch = Batch(create_dataframe(5))
+        self.assertEqual(5, len(batch))
+
+    def test_should_return_empty_dataframe(self):
+        batch = Batch()
+        self.assertEqual(batch, Batch(create_dataframe(0)))

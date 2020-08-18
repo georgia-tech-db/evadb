@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 import numpy as np
-from pandas import DataFrame
+import pandas as pd
 
+from typing import List
+from pandas import DataFrame
 from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
@@ -34,7 +34,10 @@ class Batch:
 
     """
 
-    def __init__(self, frames, outcomes=None, temp_outcomes=None,
+    def __init__(self,
+                 frames=pd.DataFrame(),
+                 outcomes=None,
+                 temp_outcomes=None,
                  identifier_column='id'):
         super().__init__()
         if outcomes is None:
@@ -62,12 +65,28 @@ class Batch:
     def batch_size(self):
         return self._batch_size
 
+    def __len__(self):
+        return self._batch_size
+
     @property
     def identifier_column(self):
         return self._identifier_column
 
     def column_as_numpy_array(self, column_name='data'):
         return np.array(self._frames[column_name])
+
+    def __str__(self):
+        """
+        For debug propose
+        """
+        return 'Batch Object:\n' \
+               '@dataframe: %s\n' \
+               '@batch_size: %d\n' \
+               '@outcome: %s\n' \
+               '@temp_outcome: %s\n' \
+               '@identifier_column: %s\n' \
+               % (self._frames, self._batch_size, self._outcomes,
+                  self._temp_outcomes, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \
@@ -148,6 +167,45 @@ class Batch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
+
+    def project(self, cols: []) -> 'Batch':
+        """
+        Takes as input the column list, returns the projection.
+        Keep the outcomes and temp_outcomes unchanged.
+        We do a copy for now.
+        """
+        verfied_cols = [c for c in cols if c in self._frames]
+        unknown_cols = list(set(cols) - set(verfied_cols))
+        if len(unknown_cols):
+            LoggingManager().log("Unexpected columns %s" % unknown_cols,
+                                 LoggingLevel.WARNING)
+        return Batch(self._frames[verfied_cols], self._outcomes.copy(),
+                     self._temp_outcomes.copy(), self._identifier_column)
+
+    @classmethod
+    def merge_column_wise(cls,
+                          batches: ['Batch'],
+                          auto_renaming=False) -> 'Batch':
+        """
+        Merge list of batch frames column_wise and return a new batch frame
+        No outcome merge. Add later when there is a actual usage.
+        Arguments:
+            batches: List[Batch]: lsit of batch objects to be merged
+            auto_renaming: if true rename column names if required
+
+        Returns:
+            Batch: Merged batch object
+        """
+
+        if not len(batches):
+            return Batch()
+        frames = [batch.frames for batch in batches]
+        new_frames = pd.concat(frames, axis=1, copy=False)
+        if new_frames.columns.duplicated().any():
+            LoggingManager().log(
+                'Duplicated column name detected {}'.format(new_frames),
+                LoggingLevel.WARNING)
+        return Batch(new_frames)
 
     def __add__(self, other: 'Batch'):
         """

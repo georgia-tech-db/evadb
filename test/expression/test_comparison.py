@@ -33,7 +33,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp1,
             const_exp2
         )
-        self.assertEqual([True], cmpr_exp.evaluate(None))
+        self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_greater(self):
         const_exp1 = ConstantValueExpression(1)
@@ -44,7 +44,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp1,
             const_exp2
         )
-        self.assertEqual([True], cmpr_exp.evaluate(None))
+        self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_lesser(self):
         const_exp1 = ConstantValueExpression(0)
@@ -55,7 +55,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp1,
             const_exp2
         )
-        self.assertEqual([True], cmpr_exp.evaluate(None))
+        self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_geq(self):
         const_exp1 = ConstantValueExpression(1)
@@ -74,9 +74,9 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp3
         )
         # checking equal
-        self.assertEqual([True], cmpr_exp1.evaluate(None))
+        self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
         # checking greater equal
-        self.assertEqual([True], cmpr_exp2.evaluate(None))
+        self.assertEqual([True], cmpr_exp2.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_leq(self):
         const_exp1 = ConstantValueExpression(0)
@@ -96,9 +96,9 @@ class ComparisonExpressionsTest(unittest.TestCase):
         )
 
         # checking lesser
-        self.assertEqual([True], cmpr_exp1.evaluate(None))
+        self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
         # checking equal
-        self.assertEqual([True], cmpr_exp2.evaluate(None))
+        self.assertEqual([True], cmpr_exp2.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_neq(self):
         const_exp1 = ConstantValueExpression(0)
@@ -110,4 +110,4 @@ class ComparisonExpressionsTest(unittest.TestCase):
             const_exp2
         )
 
-        self.assertEqual([True], cmpr_exp.evaluate(None))
+        self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())

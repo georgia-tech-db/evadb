@@ -55,7 +55,7 @@ class Session(object):
         # This is added to help with to and fro conversion
         # between pandas and spark dataframe
         # https://docs.databricks.com/spark/latest/spark-sql/spark-pandas.html
-        eva_spark_conf.set('spark.sql.execution.arrow.enabled', 'true')
+        eva_spark_conf.set('spark.sql.execution.arrow.pyspark.enabled', 'true')
 
         session_builder = SparkSession \
             .builder \

@@ -467,6 +467,12 @@ class ParserVisitor(evaql_parserVisitor):
             return ExpressionType.COMPARE_LESSER
         elif op == '>':
             return ExpressionType.COMPARE_GREATER
+        elif op == '>=':
+            return ExpressionType.COMPARE_GEQ
+        elif op == '<=':
+            return ExpressionType.COMPARE_LEQ
+        elif op == '!=':
+            return ExpressionType.COMPARE_NEQ
         else:
             return ExpressionType.INVALID
 
@@ -495,17 +501,22 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
     def visitUdfFunction(self, ctx: evaql_parser.UdfFunctionContext):
         udf_name = None
+        udf_output = None
         if ctx.simpleId():
             udf_name = self.visit(ctx.simpleId())
         else:
             LoggingManager().log('UDF function name missing.',
                                  LoggingLevel.ERROR)
+        if ctx.dottedId():
+            udf_output = self.visit(ctx.dottedId())
 
         udf_args = self.visit(ctx.functionArgs())
         func_expr = FunctionExpression(None, name=udf_name,
-                                       mode=ExecutionMode.EXEC)
+                                       mode=ExecutionMode.EXEC,
+                                       output=udf_output)
         for arg in udf_args:
             func_expr.append_child(arg)
+
         return func_expr
 
     def visitFunctionArgs(self, ctx: evaql_parser.FunctionArgsContext):
