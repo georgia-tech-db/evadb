@@ -28,7 +28,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
-        create_sample_video()
+        create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
         os.remove('dummy.avi')

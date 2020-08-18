@@ -7,7 +7,7 @@
 flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
 linter_code=$?
 # Run unit tests
-PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=10
+PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
 test_code=$?
 if [ $linter_code -ne 0 ];
 then
