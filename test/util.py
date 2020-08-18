@@ -60,7 +60,7 @@ def custom_list_of_dicts_equal(one, two):
     return True
 
 
-def create_sample_video():
+def create_sample_video(num_frames=NUM_FRAMES):
     try:
         os.remove('dummy.avi')
     except FileNotFoundError:
@@ -69,14 +69,14 @@ def create_sample_video():
     out = cv2.VideoWriter('dummy.avi',
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
-    for i in range(NUM_FRAMES):
+    for i in range(num_frames):
         frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
                          dtype=np.uint8)
         out.write(frame)
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES,
-                         filters=[], batch_size=NUM_FRAMES, start_id=0):
+                         filters=[], batch_size=10, start_id=0):
     if not filters:
         filters = range(num_frames)
     data = []
