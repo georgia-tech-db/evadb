@@ -41,7 +41,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = perform_query(select_query)
         expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT data FROM MyVideo;"
         actual_batch = perform_query(select_query)
@@ -50,13 +50,13 @@ class SelectExecutorTest(unittest.TestCase):
                                            dtype=np.uint8)}
                          for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
         # select * is not supported
         select_query = "SELECT id,data FROM MyVideo;"
         actual_batch = [perform_query(select_query)]
         expected_batch = list(create_dummy_batches())
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
@@ -64,14 +64,14 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
         actual_batch = perform_query(select_query)
         expected_batch = list(create_dummy_batches(filters=[5]))[0]
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = perform_query(select_query)
         expected_rows = [{"data": np.array(
             np.ones((2, 2, 3)) * 0.1 * float(5 + 1) * 255, dtype=np.uint8)}]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = perform_query(select_query)
@@ -79,10 +79,21 @@ class SelectExecutorTest(unittest.TestCase):
             create_dummy_batches(
                 filters=range(
                     2, NUM_FRAMES)))[0]
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
         actual_batch = perform_query(select_query)
         expected_batch = list(create_dummy_batches(filters=range(2, 5)))[0]
 
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
+
+        nested_select_query = """SELECT id, data FROM \
+            (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5)
+            WHERE id >= 3;"""
+        actual_batch = perform_query(nested_select_query)
+        expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
+        self.assertEqual(actual_batch, expected_batch)
+
+
+if __name__ == "__main__":
+    unittest.main()
