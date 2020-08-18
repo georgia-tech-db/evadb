@@ -120,6 +120,7 @@ data/*
 !data/README.md
 !data/ua_detrac/README.md
 !data/ua_detrac/*.sh
+!data/ua_detrac/ua_detrac.mp4
 
 # Eclipse
 .pydevproject
