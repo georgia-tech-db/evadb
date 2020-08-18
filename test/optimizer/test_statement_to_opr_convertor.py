@@ -26,7 +26,8 @@ from src.parser.load_statement import LoadDataStatement
 from src.parser.parser import Parser
 
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
-                                     LogicalQueryDerivedGet)
+                                     LogicalQueryDerivedGet, LogicalCreate,
+                                     LogicalCreateUDF)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
@@ -251,3 +252,18 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                 plan.append_child(expected_plan)
             expected_plan = plan
         self.assertEqual(expected_plan, actual_plan)
+        wrong_plan = plans[0]
+        for plan in plans[1:]:
+            wrong_plan.append_child(plan)
+        self.assertNotEqual(wrong_plan, actual_plan)
+
+    def should_return_false_for_unequal_plans(self):
+        m = MagicMock()
+        create_plan = LogicalCreate(
+            TableRef(TableInfo('video')), [MagicMock()])
+        create_udf_plan = LogicalCreateUDF('udf', False, [m], [m])
+        self.assertNotEqual(create_plan, create_udf_plan)
+        create_plan.append_child(create_udf_plan)
+        self.assertNotEqual(create_plan, create_udf_plan)
+        self.assertEqual(create_udf_plan, create_udf_plan)
+        self.assertEqual(create_plan, create_plan)
