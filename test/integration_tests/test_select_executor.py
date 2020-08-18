@@ -60,7 +60,8 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertTrue(actual_batch, expected_batch)
 
     def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;"""
+        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
+                   INTO MyVideo;"""
         perform_query(query)
 
         select_query = "SELECT id,data FROM MyVideo;"
