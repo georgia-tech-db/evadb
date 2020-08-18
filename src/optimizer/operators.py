@@ -51,12 +51,8 @@ class Operator:
         self._children = children if children is not None else []
 
     def append_child(self, child: 'Operator'):
-        if child is None:
-            return
-        if self._children is None:
-            self._children = []
-
-        self._children.append(child)
+        if child:
+            self._children.append(child)
 
     @property
     def children(self):

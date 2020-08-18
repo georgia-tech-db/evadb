@@ -21,6 +21,7 @@ from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.aggregation_expression import AggregationExpression
 from src.expression.function_expression import FunctionExpression
+from src.expression.logical_expression import LogicalExpression
 from src.models.inference.outcome import Outcome
 from src.models.storage.batch import Batch
 
@@ -88,8 +89,16 @@ class ExpressionEvaluationTest(unittest.TestCase):
             None,
             tuple_expr
         )
+        logical_expr = LogicalExpression(
+            ExpressionType.LOGICAL_OR,
+            cmpr_exp,
+            cmpr_exp
+        )
+
         self.assertNotEqual(const_exp1, const_exp2)
-        self.assertNotEqual(const_exp1, cmpr_exp)
+        self.assertNotEqual(cmpr_exp, const_exp1)
         self.assertNotEqual(func_expr, cmpr_exp)
         self.assertNotEqual(tuple_expr, aggr_expr)
+        self.assertNotEqual(aggr_expr, tuple_expr)
         self.assertNotEqual(tuple_expr, cmpr_exp)
+        self.assertNotEqual(logical_expr, cmpr_exp)

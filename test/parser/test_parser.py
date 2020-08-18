@@ -264,3 +264,21 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(actual_stmt.from_table, sub_query_stmt)
         self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
         self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
+
+    def test_should_return_false_for_unequal_expression(self):
+        table = TableRef(TableInfo('MyVideo'))
+        load_stmt = LoadDataStatement(table, Path('data/video.mp4'))
+        insert_stmt = InsertTableStatement(table)
+        create_udf = CreateUDFStatement(
+            'udf', False, [
+                ColumnDefinition(
+                    'frame', ParserColumnDataType.NDARRAY, [
+                        3, 256, 256])], [
+                    ColumnDefinition(
+                        'labels', ParserColumnDataType.NDARRAY, [10])],
+                    Path('data/fastrcnn.py'), 'Classification')
+        select_stmt = SelectStatement()
+        self.assertNotEqual(load_stmt, insert_stmt)
+        self.assertNotEqual(insert_stmt, load_stmt)
+        self.assertNotEqual(create_udf, insert_stmt)
+        self.assertNotEqual(select_stmt, create_udf)
