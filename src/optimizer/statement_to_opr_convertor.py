@@ -16,7 +16,8 @@ from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
-                                     LogicalCreateUDF, LogicalLoadData)
+                                     LogicalCreateUDF, LogicalLoadData,
+                                     LogicalQueryDerivedGet)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -71,6 +72,9 @@ class StatementToPlanConvertor:
         if isinstance(video, SelectStatement):
             # NestedQuery
             self.visit_select(video)
+            child_plan = self._plan
+            self._plan = LogicalQueryDerivedGet()
+            self._plan.append_child(child_plan)
         elif isinstance(video, TableRef):
             # Table
             self.visit_table_ref(video)

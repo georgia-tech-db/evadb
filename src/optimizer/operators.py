@@ -35,6 +35,7 @@ class OperatorType(IntEnum):
     LOGICALCREATE = 5,
     LOGICALCREATEUDF = 6,
     LOGICALLOADDATA = 7,
+    LOGICALQUERYDERIVEDGET = 8,
 
 
 class Operator:
@@ -50,6 +51,8 @@ class Operator:
         self._children = children if children is not None else []
 
     def append_child(self, child: 'Operator'):
+        if child is None:
+            return
         if self._children is None:
             self._children = []
 
@@ -96,6 +99,21 @@ class LogicalGet(Operator):
         return (is_subtree_equal
                 and self.video == other.video
                 and self.dataset_metadata == other.dataset_metadata)
+
+
+class LogicalQueryDerivedGet(Operator):
+    def __init__(self, children: List = None):
+        super().__init__(OperatorType.LOGICALQUERYDERIVEDGET,
+                         children=children)
+        # `TODO` We need to store the alias information here
+        # We need construct the map using the target list of the
+        # subquery to validate the overall query
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalQueryDerivedGet):
+            return False
+        return is_subtree_equal
 
 
 class LogicalFilter(Operator):
