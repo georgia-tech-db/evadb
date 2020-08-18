@@ -21,14 +21,14 @@ from src.models.storage.batch import Batch
 from test.util import create_sample_video, perform_query
 from test.util import DummyObjectDetector
 
-NUM_FRAMES = 10
+NUM_FRAMES = 150
 
 
 class UDFExecutorTest(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
-        create_sample_video()
+        create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
         os.remove('dummy.avi')
@@ -48,7 +48,7 @@ class UDFExecutorTest(unittest.TestCase):
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         actual_batch = perform_query(select_query)
-        print(actual_batch)
+        print(len(actual_batch))
         labels = DummyObjectDetector().labels
         expected = [{'id': i, 'label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES)]
