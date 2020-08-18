@@ -93,7 +93,3 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = perform_query(nested_select_query)
         expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
         self.assertEqual(actual_batch, expected_batch)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -17,6 +17,7 @@ import unittest
 from src.optimizer.operators import LogicalProject, LogicalFilter, LogicalGet
 from src.optimizer.generators.seq_scan_generator import ScanGenerator
 from src.planner.seq_scan_plan import SeqScanPlan
+from src.planner.storage_plan import StoragePlan
 from src.planner.types import PlanNodeType
 
 
@@ -35,8 +36,5 @@ class SequentialScanGeneratorTest(unittest.TestCase):
     def test_should_just_get_plan_with_storage_if_no_predicate_and_tlist(self):
         logical_plan = LogicalGet("video", 1)
         plan = ScanGenerator().build(logical_plan)
-        self.assertTrue(isinstance(plan, SeqScanPlan))
-        self.assertEqual(None, plan.predicate)
-        self.assertEqual(None, plan.columns)
-        self.assertEqual(PlanNodeType.STORAGE_PLAN, plan.children[0].node_type)
-        self.assertEqual(1, plan.children[0].video)
+        self.assertTrue(isinstance(plan, StoragePlan))
+        self.assertEqual(1, plan.video)

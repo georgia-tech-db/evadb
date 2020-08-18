@@ -37,8 +37,3 @@ class LoggingManagerTests(unittest.TestCase):
         LoggingManager().log("warn", LoggingLevel.WARNING)
         LoggingManager().log("error", LoggingLevel.ERROR)
         LoggingManager().log("critical", LoggingLevel.CRITICAL)
-
-
-if __name__ == '__main__':
-
-    unittest.main()
