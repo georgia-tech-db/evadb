@@ -68,6 +68,5 @@ class PetastormLoaderTest(unittest.TestCase):
         mock.return_value = self.DummyReader(dummy_values)
         actual = list(petastorm_reader._read())
         expected = list(dummy_values)
-        print(actual)
         self.assertTrue(all([np.allclose(i, j)
                              for i, j in zip(actual, expected)]))

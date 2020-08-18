@@ -33,7 +33,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
             const_exp2
         )
 
-        self.assertEqual(7, cmpr_exp.evaluate(None))
+        self.assertEqual([7], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_subtraction(self):
         const_exp1 = ConstantValueExpression(5)
@@ -45,7 +45,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
             const_exp2
         )
 
-        self.assertEqual(3, cmpr_exp.evaluate(None))
+        self.assertEqual([3], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_multiply(self):
         const_exp1 = ConstantValueExpression(3)
@@ -57,7 +57,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
             const_exp2
         )
 
-        self.assertEqual(15, cmpr_exp.evaluate(None))
+        self.assertEqual([15], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_divide(self):
         const_exp1 = ConstantValueExpression(5)
@@ -69,4 +69,4 @@ class ArithmeticExpressionsTest(unittest.TestCase):
             const_exp2
         )
 
-        self.assertEqual(1, cmpr_exp.evaluate(None))
+        self.assertEqual([1], cmpr_exp.evaluate(None).frames[0].tolist())

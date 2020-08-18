@@ -47,7 +47,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         return self.transforms(images).to(self.get_device())
 
     def forward(self, frames: np.ndarray):
-        return self.classify([self.transforms(frame) for frame in frames])
+        return self.classify([self.transform(frame[0]) for frame in frames])
 
     @abstractmethod
     def classify(self, frames: Tensor) -> List[Outcome]:
@@ -79,4 +79,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         return self.to(torch.device("cuda:{}".format(device)))
 
     def __call__(self, *args, **kwargs):
-        return nn.Module.__call__(self, *args, *kwargs)
+        frames = None
+        if len(args):
+            frames = args[0].to_numpy()
+        return nn.Module.__call__(self, frames, **kwargs)

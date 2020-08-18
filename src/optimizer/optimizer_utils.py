@@ -26,7 +26,7 @@ from src.expression.tuple_value_expression import ExpressionType, \
 from src.parser.create_statement import ColumnDefinition, \
     ColumnConstraintInformation
 from src.parser.types import ParserColumnDataType
-from src.utils.generic_utils import str_to_class, generate_file_path
+from src.utils.generic_utils import path_to_class, generate_file_path
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -123,8 +123,14 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 def bind_function_expr(expr: FunctionExpression, column_mapping):
     catalog = CatalogManager()
     udf_obj = catalog.get_udf_by_name(expr.name)
-    class_path = '.'.join([udf_obj.impl_file_path, udf_obj.name])
-    expr.function = str_to_class(class_path)()
+    if expr.output:
+        expr.output_obj = catalog.get_udf_io_by_name(expr.output)
+        if expr.output_obj is None:
+            LoggingManager().log(
+                'Invalid output {} selected for UDF {}'.format(
+                    expr.output, expr.name), LoggingLevel().ERROR)
+    expr.function = path_to_class(udf_obj.impl_file_path,
+                                  udf_obj.name)()
 
 
 def create_column_metadata(col_list: List[ColumnDefinition]):

@@ -26,8 +26,7 @@ class CatalogManagerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @mock.patch('src.catalog.catalog_manager.init_db')
-    def test_catalog_manager_singleton_pattern(self, mocked_db):
+    def test_catalog_manager_singleton_pattern(self):
         x = CatalogManager()
         y = CatalogManager()
         self.assertEqual(x, y)

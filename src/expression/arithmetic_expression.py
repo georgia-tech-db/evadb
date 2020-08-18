@@ -14,6 +14,8 @@
 # limitations under the License.
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, ExpressionReturnType
+import pandas as pd
+from src.models.storage.batch import Batch
 
 
 class ArithmeticExpression(AbstractExpression):
@@ -29,14 +31,14 @@ class ArithmeticExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        vl = self.get_child(0).evaluate(*args)
-        vr = self.get_child(1).evaluate(*args)
+        vl = self.get_child(0).evaluate(*args).frames
+        vr = self.get_child(1).evaluate(*args).frames
 
         if self.etype == ExpressionType.ARITHMETIC_ADD:
-            return vl + vr
+            return Batch(pd.DataFrame(vl + vr))
         elif self.etype == ExpressionType.ARITHMETIC_SUBTRACT:
-            return vl - vr
+            return Batch(pd.DataFrame(vl - vr))
         elif self.etype == ExpressionType.ARITHMETIC_MULTIPLY:
-            return vl * vr
+            return Batch(pd.DataFrame(vl * vr))
         elif self.etype == ExpressionType.ARITHMETIC_DIVIDE:
-            return vl / vr
+            return Batch(pd.DataFrame(vl / vr))

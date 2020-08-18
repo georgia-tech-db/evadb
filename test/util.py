@@ -18,6 +18,13 @@ import cv2
 import os
 
 from src.models.storage.batch import Batch
+from src.parser.parser import Parser
+from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from src.optimizer.plan_generator import PlanGenerator
+from src.executor.plan_executor import PlanExecutor
+from src.models.catalog.frame_info import FrameInfo
+from src.models.catalog.properties import ColorSpace
+from src.udfs.abstract_udfs import AbstractClassifierUDF
 
 NUM_FRAMES = 10
 
@@ -53,7 +60,7 @@ def custom_list_of_dicts_equal(one, two):
     return True
 
 
-def create_sample_video():
+def create_sample_video(num_frames=NUM_FRAMES):
     try:
         os.remove('dummy.avi')
     except FileNotFoundError:
@@ -62,14 +69,14 @@ def create_sample_video():
     out = cv2.VideoWriter('dummy.avi',
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
-    for i in range(NUM_FRAMES):
+    for i in range(num_frames):
         frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
                          dtype=np.uint8)
         out.write(frame)
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES,
-                         filters=[], batch_size=NUM_FRAMES, start_id=0):
+                         filters=[], batch_size=10, start_id=0):
     if not filters:
         filters = range(num_frames)
     data = []
@@ -84,3 +91,33 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
             data = []
     if data:
         yield Batch(pd.DataFrame(data))
+
+
+def perform_query(query):
+    stmt = Parser().parse(query)[0]
+    l_plan = StatementToPlanConvertor().visit(stmt)
+    p_plan = PlanGenerator().build(l_plan)
+    return PlanExecutor(p_plan).execute_plan()
+
+
+class DummyObjectDetector(AbstractClassifierUDF):
+
+    @property
+    def name(self) -> str:
+        return "dummyObjectDetector"
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return ['__background__', 'person', 'bicycle']
+
+    def classify(self, frames: np.ndarray):
+        labels = [self.labels[i % 2 + 1] for i in range(len(frames))]
+        prediction_df_list = pd.DataFrame({'label': labels})
+        return prediction_df_list

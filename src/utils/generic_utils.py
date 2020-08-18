@@ -45,6 +45,31 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
+def path_to_class(filepath: str, classname: str):
+    """
+    Convert the class in the path file into an object
+
+    Arguments:
+        filepath: absolute path of file
+        classname: the name of the imported class
+
+    Returns:
+        type: A class for given path
+    """
+    try:
+        abs_path = Path(filepath).resolve()
+        spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        classobj = getattr(module, classname)
+    except Exception as e:
+        LoggingManager().log(
+            'Failed to import %s from %s\nException: %s'
+            % (classname, filepath, e),
+            LoggingLevel.WARNING)
+    return classobj
+
+
 def is_gpu_available() -> bool:
     """
     Checks if the system has GPUS available to execute tasks

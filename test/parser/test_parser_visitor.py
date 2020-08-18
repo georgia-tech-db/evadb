@@ -14,10 +14,12 @@
 # limitations under the License.
 
 import unittest
+import pandas as pd
 
 from unittest import mock
 from unittest.mock import MagicMock, call
 
+from src.models.storage.batch import Batch
 from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
@@ -183,7 +185,7 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitConstant(ctx)
         self.assertEqual(
             expected.evaluate(),
-            float(ctx.getText()))
+            Batch(pd.DataFrame([float(ctx.getText())])))
 
     def test_visit_query_specification_base_exception(self):
         ''' Testing Base Exception error handling
@@ -211,9 +213,11 @@ class ParserVisitorTests(unittest.TestCase):
     def test_visit_udf_function_call(self, func_mock, visit_mock):
         ctx = MagicMock()
         udf_name = 'name'
+        udf_output = 'label'
         func_args = [MagicMock(), MagicMock()]
         values = {ctx.simpleId.return_value: udf_name,
-                  ctx.functionArgs.return_value: func_args}
+                  ctx.functionArgs.return_value: func_args,
+                  ctx.dottedId.return_value: udf_output}
 
         def side_effect(arg):
             return values[arg]
@@ -223,10 +227,11 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         actual = visitor.visitUdfFunction(ctx)
         visit_mock.assert_has_calls(
-            [call(ctx.simpleId()), call(ctx.functionArgs())])
+            [call(ctx.simpleId()), call(ctx.dottedId()),
+             call(ctx.functionArgs())])
 
         func_mock.assert_called_with(None, mode=ExecutionMode.EXEC,
-                                     name='name')
+                                     name='name', output=udf_output)
 
         for arg in func_args:
             func_mock.return_value.append_child.assert_any_call(arg)
