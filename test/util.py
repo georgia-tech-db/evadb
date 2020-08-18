@@ -28,6 +28,7 @@ from src.udfs.abstract_udfs import AbstractClassifierUDF
 
 NUM_FRAMES = 10
 
+
 def create_dataframe(num_frames=1) -> pd.DataFrame:
     frames = []
     for i in range(1, num_frames + 1):
