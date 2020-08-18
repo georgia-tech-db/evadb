@@ -72,3 +72,24 @@ class ExpressionEvaluationTest(unittest.TestCase):
         )
 
         self.assertEqual(cmpr_exp1, cmpr_exp2)
+
+    def test_should_return_false_for_unequal_expressions(self):
+        const_exp1 = ConstantValueExpression(0)
+        const_exp2 = ConstantValueExpression(1)
+        func_expr = FunctionExpression(lambda x: x + 1)
+        cmpr_exp = ComparisonExpression(
+            ExpressionType.COMPARE_NEQ,
+            const_exp1,
+            const_exp2
+        )
+        tuple_expr = TupleValueExpression(col_name='id')
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_MAX,
+            None,
+            tuple_expr
+        )
+        self.assertNotEqual(const_exp1, const_exp2)
+        self.assertNotEqual(const_exp1, cmpr_exp)
+        self.assertNotEqual(func_expr, cmpr_exp)
+        self.assertNotEqual(tuple_expr, aggr_expr)
+        self.assertNotEqual(tuple_expr, cmpr_exp)
