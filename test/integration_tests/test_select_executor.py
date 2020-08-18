@@ -19,6 +19,7 @@ import numpy as np
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
+from src.readers.opencv_reader import OpenCVReader
 from test.util import create_sample_video, create_dummy_batches, perform_query
 
 NUM_FRAMES = 10
@@ -56,6 +57,18 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id,data FROM MyVideo;"
         actual_batch = [perform_query(select_query)]
         expected_batch = list(create_dummy_batches())
+        self.assertTrue(actual_batch, expected_batch)
+
+    def test_should_load_and_select_real_video_in_table(self):
+        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;"""
+        perform_query(query)
+
+        select_query = "SELECT id,data FROM MyVideo;"
+        actual_batch = perform_query(select_query)
+        video_reader = OpenCVReader('data/ua_detrac/ua_detrac/mp4')
+        expected_batch = Batch(frames=pd.DataFrame())
+        for batch in video_reader.read():
+            expected_batch += batch
         self.assertTrue(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):

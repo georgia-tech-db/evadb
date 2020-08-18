@@ -21,7 +21,7 @@ from src.models.storage.batch import Batch
 from test.util import create_sample_video, perform_query
 from test.util import DummyObjectDetector
 
-NUM_FRAMES = 150
+NUM_FRAMES = 10
 
 
 class UDFExecutorTest(unittest.TestCase):
