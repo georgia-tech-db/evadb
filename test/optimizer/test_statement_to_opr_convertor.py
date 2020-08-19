@@ -258,11 +258,10 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             wrong_plan.append_child(plan)
         self.assertNotEqual(wrong_plan, actual_plan)
 
-    def should_return_false_for_unequal_plans(self):
-        m = MagicMock()
+    def test_should_return_false_for_unequal_plans(self):
         create_plan = LogicalCreate(
             TableRef(TableInfo('video')), [MagicMock()])
-        create_udf_plan = LogicalCreateUDF('udf', False, [m], [m])
+        create_udf_plan = LogicalCreateUDF('udf', False, None, None, None)
         insert_plan = LogicalInsert(
             MagicMock(), 0, [
                 MagicMock()], [
