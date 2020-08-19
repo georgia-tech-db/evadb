@@ -36,7 +36,7 @@ class TupleValueExpression(AbstractExpression):
 
     @property
     def col_metadata_id(self) -> int:
-        return self._column_metadata_id
+        return self._col_metadata_id
 
     @table_metadata_id.setter
     def table_metadata_id(self, id: int):
@@ -44,7 +44,7 @@ class TupleValueExpression(AbstractExpression):
 
     @col_metadata_id.setter
     def col_metadata_id(self, id: int):
-        self._column_metadata_id = id
+        self._col_metadata_id = id
 
     @property
     def table_name(self) -> str:
@@ -72,3 +72,14 @@ class TupleValueExpression(AbstractExpression):
             pass
 
         return batch.project([self.col_name])
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, TupleValueExpression):
+            return False
+        return (is_subtree_equal and self.table_name == other.table_name
+                and self.table_metadata_id == other.table_metadata_id
+                and self.col_name == other.col_name
+                and self.col_metadata_id == other.col_metadata_id
+                and self.col_object == other.col_object
+                and self._col_idx == other._col_idx)

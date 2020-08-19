@@ -41,6 +41,13 @@ class TableInfo:
 
         return table_info_str
 
+    def __eq__(self, other):
+        if not isinstance(other, TableInfo):
+            return False
+        return (self.table_name == other.table_name
+                and self.schema_name == other.schema_name
+                and self.database_name == other.database_name)
+
 
 class TableRef:
     """
@@ -59,3 +66,8 @@ class TableRef:
     def __str__(self):
         table_ref_str = "TABLE REF:: (" + str(self._table_info) + ")"
         return table_ref_str
+
+    def __eq__(self, other):
+        if not isinstance(other, TableRef):
+            return False
+        return self.table_info == other.table_info

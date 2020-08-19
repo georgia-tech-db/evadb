@@ -33,6 +33,10 @@ class ScanGenerator(Generator):
 
     def _visit_logical_project(self, operator: LogicalProject):
         self._target_list = operator.target_list
+        seq_scan = SeqScanPlan(self._predicate, self._target_list)
+        if self._plan:
+            seq_scan.append_child(self._plan)
+        self._plan = seq_scan
 
     def _visit(self, operator: Operator):
         for child in operator.children:
@@ -50,6 +54,4 @@ class ScanGenerator(Generator):
     def build(self, operator: Operator):
         self.__init__()
         self._visit(operator)
-        seq_scan = SeqScanPlan(self._predicate, self._target_list)
-        seq_scan.append_child(self._plan)
-        return seq_scan
+        return self._plan

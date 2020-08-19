@@ -58,7 +58,3 @@ class ClientTests(unittest.TestCase):
         # none of the connections will work due to server not running
         exception_count = client_count
         self.assertEqual(summary[1], exception_count)
-
-
-if __name__ == '__main__':
-    unittest.main()
