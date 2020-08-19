@@ -42,3 +42,10 @@ class AggregationExpression(AbstractExpression):
             return Batch(frames=batch.frames.agg(['min']))
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             return Batch(frames=batch.frames.agg(['max']))
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, AggregationExpression):
+            return False
+        return (is_subtree_equal
+                and self.etype == other.etype)

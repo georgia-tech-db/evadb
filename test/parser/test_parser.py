@@ -23,12 +23,17 @@ from src.parser.statement import StatementType
 from src.parser.select_statement import SelectStatement
 from src.parser.types import ParserColumnDataType
 from src.parser.create_statement import ColumnDefinition
+from src.parser.create_udf_statement import CreateUDFStatement
+from src.parser.load_statement import LoadDataStatement
+from src.parser.insert_statement import InsertTableStatement
 
 from src.expression.abstract_expression import ExpressionType
+from src.expression.tuple_value_expression import TupleValueExpression
+from src.expression.constant_value_expression import ConstantValueExpression
+
 from src.parser.table_ref import TableRef, TableInfo
 
 from pathlib import Path
-from src.utils.logging_manager import LoggingManager
 
 
 class ParserTests(unittest.TestCase):
@@ -54,8 +59,6 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
 
-            LoggingManager().log(eva_statement_list[0])
-
     def test_single_statement_queries(self):
         parser = Parser()
 
@@ -76,8 +79,6 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
-
-            LoggingManager().log(eva_statement_list[0])
 
     def test_multiple_statement_queries(self):
         parser = Parser()
@@ -174,32 +175,20 @@ class ParserTests(unittest.TestCase):
         insert_query = """INSERT INTO MyVideo (Frame_ID, Frame_Path)
                                     VALUES    (1, '/mnt/frames/1.png');
                         """
-
+        expected_stmt = InsertTableStatement(
+            TableRef(
+                TableInfo('MyVideo')), [
+                TupleValueExpression('Frame_ID'),
+                TupleValueExpression('Frame_Path')], [
+                ConstantValueExpression(1),
+                ConstantValueExpression('/mnt/frames/1.png')])
         eva_statement_list = parser.parse(insert_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
         self.assertEqual(eva_statement_list[0].stmt_type, StatementType.INSERT)
 
         insert_stmt = eva_statement_list[0]
-
-        # into_table
-        self.assertIsNotNone(insert_stmt.table)
-        self.assertIsInstance(insert_stmt.table, TableRef)
-        self.assertEqual(
-            insert_stmt.table.table_info.table_name, 'MyVideo')
-
-        # Column
-        self.assertIsNotNone(insert_stmt.column_list)
-        self.assertIsInstance(insert_stmt.column_list, list)
-        self.assertEqual(len(insert_stmt.column_list), 2)
-        self.assertEqual(insert_stmt.column_list[0].col_name, 'Frame_ID')
-        self.assertEqual(insert_stmt.column_list[1].col_name, 'Frame_Path')
-
-        # Values
-        self.assertIsNotNone(insert_stmt.value_list)
-        self.assertIsInstance(insert_stmt.value_list, list)
-        self.assertEqual(len(insert_stmt.value_list), 2)
-        self.assertEqual(insert_stmt.value_list[0].value, 1)
+        self.assertEqual(insert_stmt, expected_stmt)
 
     def test_create_udf_statement(self):
         parser = Parser()
@@ -210,6 +199,16 @@ class ParserTests(unittest.TestCase):
                   IMPL  'data/fastrcnn.py';
         """
 
+        expected_stmt = CreateUDFStatement(
+            'FastRCNN', False, [
+                ColumnDefinition(
+                    'Frame_Array', ParserColumnDataType.NDARRAY, [
+                        3, 256, 256])], [
+                    ColumnDefinition(
+                        'Labels', ParserColumnDataType.NDARRAY, [10]),
+                    ColumnDefinition(
+                        'Bbox', ParserColumnDataType.NDARRAY, [10, 4])],
+                    Path('data/fastrcnn.py'), 'Classification')
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -219,27 +218,15 @@ class ParserTests(unittest.TestCase):
 
         create_udf_stmt = eva_statement_list[0]
 
-        self.assertEqual(create_udf_stmt.name, 'FastRCNN')
-        self.assertEqual(create_udf_stmt.if_not_exists, False)
-        self.assertEqual(
-            create_udf_stmt.inputs[0],
-            ColumnDefinition('Frame_Array',
-                             ParserColumnDataType.NDARRAY, [3, 256, 256]))
-        self.assertEqual(
-            create_udf_stmt.outputs[0],
-            ColumnDefinition('Labels',
-                             ParserColumnDataType.NDARRAY, [10]))
-        self.assertEqual(
-            create_udf_stmt.outputs[1],
-            ColumnDefinition('Bbox',
-                             ParserColumnDataType.NDARRAY, [10, 4]))
-        self.assertEqual(create_udf_stmt.impl_path, Path('data/fastrcnn.py'))
-        self.assertEqual(create_udf_stmt.udf_type, 'Classification')
+        self.assertEqual(create_udf_stmt, expected_stmt)
 
     def test_load_data_statement(self):
         parser = Parser()
         load_data_query = """LOAD DATA INFILE 'data/video.mp4' INTO MyVideo;"""
-
+        expected_stmt = LoadDataStatement(
+            TableRef(
+                TableInfo('MyVideo')),
+            Path('data/video.mp4'))
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -248,13 +235,50 @@ class ParserTests(unittest.TestCase):
             StatementType.LOAD_DATA)
 
         load_data_stmt = eva_statement_list[0]
-        # into table
-        self.assertIsNotNone(load_data_stmt.table)
-        self.assertIsInstance(load_data_stmt.table, TableRef)
-        self.assertEqual(
-            load_data_stmt.table.table_info.table_name, 'MyVideo')
-        self.assertEqual(load_data_stmt.path, Path('data/video.mp4'))
+        self.assertEqual(load_data_stmt, expected_stmt)
 
+    def test_nested_select_statement(self):
+        parser = Parser()
+        sub_query = """SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN'"""
+        nested_query = """SELECT ID FROM ({});""".format(sub_query)
+        parsed_sub_query = parser.parse(sub_query)[0]
+        actual_stmt = parser.parse(nested_query)[0]
+        self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
+        self.assertEqual(actual_stmt.target_list[0].col_name, 'ID')
+        self.assertEqual(actual_stmt.from_table, parsed_sub_query)
 
-if __name__ == '__main__':
-    unittest.main()
+        sub_query = """SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
+                              WHERE Yolo(frame).label = 'vehicle'"""
+        nested_query = """SELECT Licence_plate(bbox) FROM
+                            ({})
+                          WHERE Is_suspicious(bbox) = 1 AND
+                                Licence_plate(bbox) = '12345';
+                      """.format(sub_query)
+        query = """SELECT Licence_plate(bbox) FROM TAIPAI
+                    WHERE Is_suspicious(bbox) = 1 AND
+                        Licence_plate(bbox) = '12345';
+                """
+        query_stmt = parser.parse(query)[0]
+        actual_stmt = parser.parse(nested_query)[0]
+        sub_query_stmt = parser.parse(sub_query)[0]
+        self.assertEqual(actual_stmt.from_table, sub_query_stmt)
+        self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
+        self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
+
+    def test_should_return_false_for_unequal_expression(self):
+        table = TableRef(TableInfo('MyVideo'))
+        load_stmt = LoadDataStatement(table, Path('data/video.mp4'))
+        insert_stmt = InsertTableStatement(table)
+        create_udf = CreateUDFStatement(
+            'udf', False, [
+                ColumnDefinition(
+                    'frame', ParserColumnDataType.NDARRAY, [
+                        3, 256, 256])], [
+                    ColumnDefinition(
+                        'labels', ParserColumnDataType.NDARRAY, [10])],
+                    Path('data/fastrcnn.py'), 'Classification')
+        select_stmt = SelectStatement()
+        self.assertNotEqual(load_stmt, insert_stmt)
+        self.assertNotEqual(insert_stmt, load_stmt)
+        self.assertNotEqual(create_udf, insert_stmt)
+        self.assertNotEqual(select_stmt, create_udf)

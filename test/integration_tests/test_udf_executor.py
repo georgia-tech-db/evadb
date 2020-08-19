@@ -48,12 +48,11 @@ class UDFExecutorTest(unittest.TestCase):
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         actual_batch = perform_query(select_query)
-        print(len(actual_batch))
         labels = DummyObjectDetector().labels
         expected = [{'id': i, 'label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)
 
     def test_should_load_and_select_using_udf_video(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
@@ -71,7 +70,7 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label = 'person';"
         actual_batch = perform_query(select_query)
         labels = DummyObjectDetector().labels
-        expected = [{'id': i, 'label': labels[1 + i % 2]}
+        expected = [{'id': i * 2, 'label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
-        self.assertTrue(actual_batch, expected_batch)
+        self.assertEqual(actual_batch, expected_batch)

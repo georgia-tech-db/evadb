@@ -83,7 +83,3 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(str(plan), plan_str)
-
-
-if __name__ == '__main__':
-    unittest.main()

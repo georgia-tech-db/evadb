@@ -67,3 +67,10 @@ class ComparisonExpression(AbstractExpression):
         elif self.etype == ExpressionType.COMPARE_NEQ:
             return Batch(pd.DataFrame(
                 left_values.values != right_values.values))
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, ComparisonExpression):
+            return False
+        return (is_subtree_equal
+                and self.etype == other.etype)

@@ -145,7 +145,3 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(udf_io, udf_io2)
         udf_io2 = UdfIO('name', ColumnType.FLOAT, True, [2, 3], True, 2)
         self.assertNotEqual(udf_io, udf_io2)
-
-
-if __name__ == "__main__":
-    unittest.main()

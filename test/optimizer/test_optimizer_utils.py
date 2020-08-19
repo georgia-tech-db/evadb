@@ -101,7 +101,7 @@ xform_parser_column_type_to_catalog_type')
 
     @patch('src.optimizer.optimizer_utils.CatalogManager')
     @patch('src.optimizer.optimizer_utils.ColumnDefinition')
-    @patch('src.optimizer.optimizer_utils.ColumnConstraintInformation')
+    @patch('src.optimizer.optimizer_utils.ColConstraintInfo')
     @patch('src.optimizer.optimizer_utils.create_column_metadata')
     @patch('src.optimizer.optimizer_utils.generate_file_path')
     def test_create_video_metadata(self, m_gfp, m_ccm, m_cci, m_cd, m_cm):

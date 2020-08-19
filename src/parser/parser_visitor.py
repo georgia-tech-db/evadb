@@ -35,7 +35,7 @@ from src.parser.types import ParserColumnDataType
 from src.parser.load_statement import LoadDataStatement
 
 from src.parser.types import ColumnConstraintEnum
-from src.parser.create_statement import ColumnConstraintInformation
+from src.parser.create_statement import ColConstraintInfo
 
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
@@ -195,7 +195,7 @@ class ParserVisitor(evaql_parserVisitor):
 
         constraint_count = len(ctx.columnConstraint())
 
-        column_constraint_information = ColumnConstraintInformation()
+        column_constraint_information = ColConstraintInfo()
 
         for i in range(constraint_count):
             return_type = self.visit(ctx.columnConstraint(i))
@@ -311,6 +311,11 @@ class ParserVisitor(evaql_parserVisitor):
             table_list.append(table)
 
         return table_list
+
+    # Nested sub query
+    def visitSubqueryTableItem(
+            self, ctx: evaql_parser.SubqueryTableItemContext):
+        return self.visit(ctx.selectStatement())
 
     def visitQuerySpecification(
             self, ctx: evaql_parser.QuerySpecificationContext):

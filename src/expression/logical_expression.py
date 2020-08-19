@@ -44,3 +44,10 @@ class LogicalExpression(AbstractExpression):
 
             if self.etype == ExpressionType.LOGICAL_NOT:
                 return Batch(pd.DataFrame(~values))
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExpression):
+            return False
+        return (is_subtree_equal
+                and self.etype == other.etype)

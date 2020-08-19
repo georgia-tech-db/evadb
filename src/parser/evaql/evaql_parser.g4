@@ -1,8 +1,8 @@
 
 parser grammar evaql_parser;
 
-options { 
-	tokenVocab=evaql_lexer; 
+options {
+	tokenVocab=evaql_lexer;
 }
 
 // Top Level Description
@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf
-    | dropDatabase | dropTable | dropIndex 
+    | dropDatabase | dropTable | dropIndex
     ;
 
 dmlStatement
@@ -35,7 +35,7 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement 
+    : simpleDescribeStatement | helpStatement
     ;
 
 // Data Definition Language
@@ -43,8 +43,8 @@ utilityStatement
 //    Create statements
 
 createDatabase
-    : CREATE DATABASE 
-      ifNotExists? uid 
+    : CREATE DATABASE
+      ifNotExists? uid
     ;
 
 createIndex
@@ -54,20 +54,20 @@ createIndex
     ;
 
 createTable
-    : CREATE TABLE 
+    : CREATE TABLE
       ifNotExists?
       tableName createDefinitions                                  #columnCreateTable
     ;
 
 // Create UDFs
 createUdf
-    : CREATE UDF 
+    : CREATE UDF
       ifNotExists?
-      udfName   
-      INPUT  createDefinitions      
+      udfName
+      INPUT  createDefinitions
       OUTPUT createDefinitions
       TYPE   udfType
-      IMPL   udfImpl                
+      IMPL   udfImpl
     ;
 
 // details
@@ -119,13 +119,13 @@ dropDatabase
     ;
 
 dropIndex
-    : DROP INDEX 
+    : DROP INDEX
       uid ON tableName
     ;
 
 dropTable
     : DROP TABLE ifExists?
-      tables 
+      tables
     ;
 
 // Data Manipulation Language
@@ -133,7 +133,7 @@ dropTable
 //    Primary DML Statements
 
 deleteStatement
-    : singleDeleteStatement 
+    : singleDeleteStatement
     ;
 
 insertStatement
@@ -153,7 +153,7 @@ updateStatement
     ;
 
 loadStatement
-    : LOAD DATA 
+    : LOAD DATA
       INFILE fileName
       INTO tableName
     ;
@@ -178,7 +178,7 @@ updatedElement
 //    Detailed DML Statements
 
 singleDeleteStatement
-    : DELETE 
+    : DELETE
     FROM tableName
       (WHERE expression)?
       orderByClause? (LIMIT decimalLiteral)?
@@ -210,6 +210,10 @@ tableSource
 
 tableSourceItem
     : tableName                                                     #atomTableItem
+    | (
+      selectStatement |
+      LR_BRACKET selectStatement RR_BRACKET
+      )                                                            #subqueryTableItem
     ;
 
 joinPart
@@ -228,9 +232,9 @@ queryExpression
     ;
 
 querySpecification
-    : SELECT selectElements 
-      fromClause orderByClause? limitClause? 
-      errorBoundsExpression? confidenceLevelExpression? 
+    : SELECT selectElements
+      fromClause orderByClause? limitClause?
+      errorBoundsExpression? confidenceLevelExpression?
     ;
 
 // details
@@ -269,7 +273,7 @@ limitClause
     ;
 
 errorBoundsExpression
-	: ERROR_BOUNDS REAL_LITERAL 
+	: ERROR_BOUNDS REAL_LITERAL
 	;
 
 confidenceLevelExpression
@@ -435,7 +439,7 @@ functionCall
     ;
 
 udfFunction
-    : simpleId '(' functionArgs ')' dottedId?                                  
+    : simpleId '(' functionArgs ')' dottedId?
     ;
 
 
@@ -511,4 +515,3 @@ bitOperator
 mathOperator
     : '*' | '/' | '%' | DIV | MOD | '+' | '-' | '--'
     ;
-

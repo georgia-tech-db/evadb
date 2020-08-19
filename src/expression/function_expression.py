@@ -116,3 +116,12 @@ class FunctionExpression(AbstractExpression):
             if device != NO_GPU:
                 return self._function.to_device(device)
         return self._function
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, FunctionExpression):
+            return False
+        return (is_subtree_equal and self.name == other.name
+                and self.output == other.output
+                and self.output_obj == other.output_obj
+                and self.function == other.function)

@@ -38,7 +38,3 @@ class CommandHandlerTests(unittest.TestCase):
         request_message = "query"
 
         asyncio.run(handle_request(transport, request_message))
-
-
-if __name__ == '__main__':
-    unittest.main()

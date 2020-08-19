@@ -113,7 +113,3 @@ class ServerTests(unittest.TestCase):
             data.decode = MagicMock(return_value="query")
             # error due to lack of asyncio loop
             eva_server.data_received(data)
-
-
-if __name__ == '__main__':
-    unittest.main()
