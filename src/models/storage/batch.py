@@ -172,10 +172,9 @@ class Batch:
         """
         in_place sort
         """
-        if by == None and self.identifier_column in self._frames:
+        if by is None and self.identifier_column in self._frames:
             by = [self.identifier_column]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
-
 
     def project(self, cols: []) -> 'Batch':
         """

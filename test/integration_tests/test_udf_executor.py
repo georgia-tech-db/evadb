@@ -71,7 +71,6 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label = 'person';"
         actual_batch = perform_query(select_query)
         actual_batch.sort()
-        labels = DummyObjectDetector().labels
         expected = [{'id': i * 2, 'label': 'person'}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))

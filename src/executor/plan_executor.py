@@ -27,6 +27,7 @@ from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
+
 class PlanExecutor:
     """
     This is an interface between plan tree and execution tree.
@@ -109,8 +110,8 @@ class PlanExecutor:
                 if not batch.empty():
                     output_batches += batch
                 else:
-                    LoggingManager().log('Empty Batch detected.',
-                        LoggingLevel.WARNING)
+                    LoggingManager().log('Empty Batch detected',
+                                         LoggingLevel.WARNING)
 
         self._clean_execution_tree(execution_tree)
         return output_batches
