@@ -1,6 +1,6 @@
 core:
   location: "eva_datasets"
-  sqlalchemy_database_uri: 'mysql+pymysql://root:root@localhost/eva_catalog'
+  sqlalchemy_database_uri: 'mysql+pymysql://root@localhost/eva_catalog'
   application: "eva"
 
 executor:
