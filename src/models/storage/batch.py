@@ -168,6 +168,15 @@ class Batch:
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
 
+    def sort(self, by=None):
+        """
+        in_place sort
+        """
+        if by == None and self.identifier_column in self._frames:
+            by = [self.identifier_column]
+        self._frames.sort_values(by=by, ignore_index=True, inplace=True)
+
+
     def project(self, cols: []) -> 'Batch':
         """
         Takes as input the column list, returns the projection.
@@ -223,7 +232,7 @@ class Batch:
         if not isinstance(other, Batch):
             raise TypeError("Input should be of type Batch")
 
-        new_frames = self.frames.append(other.frames)
+        new_frames = self.frames.append(other.frames, ignore_index=True)
         new_outcomes = {}
         temp_new_outcomes = {}
 
