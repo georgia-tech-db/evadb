@@ -186,7 +186,8 @@ class Batch:
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
         if len(unknown_cols):
-            LoggingManager().log("Unexpected columns %s" % unknown_cols,
+            LoggingManager().log("Unexpected columns %s\n\
+                                 Frames: %s" % (unknown_cols, self._frames),
                                  LoggingLevel.WARNING)
         return Batch(self._frames[verfied_cols], self._outcomes.copy(),
                      self._temp_outcomes.copy(), self._identifier_column)

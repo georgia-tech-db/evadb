@@ -113,42 +113,40 @@ class PlanExecutorTest(unittest.TestCase):
 
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    @patch('src.executor.plan_executor.Batch')
     def test_execute_plan_for_seq_scan_plan(
-            self, mock_batch, mock_clean, mock_build):
+            self, mock_clean, mock_build):
 
         # SequentialScanExecutor
-        mock_batch.return_value = []
         tree = MagicMock(node=SeqScanPlan(None, []))
-        tree.exec.return_value = [[1], [2], [3]]
+        tree.exec.return_value = [
+            Batch(pd.DataFrame([1])),
+            Batch(pd.DataFrame([2])),
+            Batch(pd.DataFrame([3]))]
         mock_build.return_value = tree
 
         actual = PlanExecutor(None).execute_plan()
-        mock_batch.assert_called_once()
-        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         tree.exec.assert_called_once()
-        self.assertEqual(actual, [1, 2, 3])
+        self.assertEqual(actual, Batch(pd.DataFrame([[1], [2], [3]])))
 
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    @patch('src.executor.plan_executor.Batch')
     def test_execute_plan_for_pp_scan_plan(
-            self, mock_batch, mock_clean, mock_build):
+            self, mock_clean, mock_build):
         # PPExecutor
-        mock_batch.return_value = []
         tree = MagicMock(node=PPScanPlan(None))
-        tree.exec.return_value = [[1], [2], [3]]
+        tree.exec.return_value = [
+            Batch(pd.DataFrame([1])),
+            Batch(pd.DataFrame([2])),
+            Batch(pd.DataFrame([3]))]
         mock_build.return_value = tree
 
         actual = PlanExecutor(None).execute_plan()
-        mock_batch.assert_called_once()
-        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         tree.exec.assert_called_once()
-        self.assertEqual(actual, [1, 2, 3])
+        self.assertEqual(actual, Batch(pd.DataFrame([[1], [2], [3]])))
 
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
