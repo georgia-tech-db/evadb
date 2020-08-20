@@ -1,10 +1,10 @@
 core:
   location: "eva_datasets"
-  sqlalchemy_database_uri: 'mysql+pymysql://root@localhost/eva_catalog'
+  sqlalchemy_database_uri: 'mysql+pymysql://root:root@localhost/eva_catalog'
   application: "eva"
 
 executor:
-  batch_size: 20
+  batch_size: 2
   gpus: {'130.207.125.60': [1]}
 storage:
   engine: "src.storage.petastorm_storage_engine.PetastormStorageEngine"
