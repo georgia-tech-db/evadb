@@ -89,9 +89,8 @@ class SelectExecutorTest(unittest.TestCase):
         expected_rows = [{"data": np.array(
             np.ones((2, 2, 3)) * 0.1 * float(5 + 1) * 255, dtype=np.uint8)}]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        print(actual_batch)
-        print(expected_batch)
         self.assertEqual(actual_batch, expected_batch)
+
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = perform_query(select_query)
