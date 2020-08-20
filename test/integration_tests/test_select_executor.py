@@ -91,7 +91,6 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
-
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = perform_query(select_query)
         actual_batch.sort()
@@ -108,10 +107,12 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch, expected_batch)
 
-        nested_select_query = """SELECT id, data FROM \
+        nested_select_query = """SELECT id, data FROM
             (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5)
             WHERE id >= 3;"""
         actual_batch = perform_query(nested_select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
         self.assertEqual(actual_batch, expected_batch)
+
+

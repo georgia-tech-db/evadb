@@ -25,7 +25,7 @@ from src.executor.insert_executor import InsertExecutor
 from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
-
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 class PlanExecutor:
     """
@@ -106,8 +106,11 @@ class PlanExecutor:
             execution_tree.exec()
         else:
             for batch in execution_tree.exec():
-                if not batch.frames.empty:
+                if not batch.empty():
                     output_batches += batch
+                else:
+                    LoggingManager().log('Empty Batch detected.',
+                        LoggingLevel.WARNING)
 
         self._clean_execution_tree(execution_tree)
         return output_batches
