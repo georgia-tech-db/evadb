@@ -14,8 +14,10 @@
 # limitations under the License.
 import unittest
 import os
+import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
+from src.models.storage.batch import Batch
 from src.storage import StorageEngine
 
 from test.util import create_sample_video, create_dummy_batches, perform_query
@@ -38,6 +40,9 @@ class LoadExecutorTest(unittest.TestCase):
         perform_query(query)
 
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-        actual_batch = list(StorageEngine.read(metadata))
+        actual_batch = Batch(pd.DataFrame())
+        for batch in StorageEngine.read(metadata):
+            actual_batch += batch
+        actual_batch.sort()
         expected_batch = list(create_dummy_batches())
-        self.assertEqual(actual_batch, expected_batch)
+        self.assertEqual([actual_batch], expected_batch)
