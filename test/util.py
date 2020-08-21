@@ -39,8 +39,7 @@ def create_dataframe(num_frames=1) -> pd.DataFrame:
 def create_dataframe_same(times=1):
     base_df = create_dataframe()
     for i in range(1, times):
-        base_df = base_df.append(create_dataframe())
-
+        base_df = base_df.append(create_dataframe(), ignore_index=True)
     return base_df
 
 

@@ -18,7 +18,7 @@ import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from test.util import create_sample_video, perform_query
+from test.util import create_sample_video, create_dummy_batches, perform_query
 from test.util import DummyObjectDetector
 
 NUM_FRAMES = 10
@@ -48,6 +48,7 @@ class UDFExecutorTest(unittest.TestCase):
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         actual_batch = perform_query(select_query)
+        actual_batch.sort()
         labels = DummyObjectDetector().labels
         expected = [{'id': i, 'label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES)]
@@ -69,8 +70,23 @@ class UDFExecutorTest(unittest.TestCase):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = 'person';"
         actual_batch = perform_query(select_query)
-        labels = DummyObjectDetector().labels
-        expected = [{'id': i * 2, 'label': labels[1 + i % 2]}
+        actual_batch.sort()
+        expected = [{'id': i * 2, 'label': 'person'}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
+
+        nested_select_query = """SELECT id, data FROM
+            (SELECT id, data, DummyObjectDetector(data) FROM MyVideo
+                WHERE id >= 2
+            )
+            WHERE label = 'person';
+            """
+        actual_batch = perform_query(nested_select_query)
+        actual_batch.sort()
+        expected_batch = list(
+            create_dummy_batches(
+                filters=[i
+                         for i in range(2, NUM_FRAMES)
+                         if i % 2 == 0]))[0]
         self.assertEqual(actual_batch, expected_batch)

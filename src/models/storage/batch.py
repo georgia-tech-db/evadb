@@ -168,6 +168,14 @@ class Batch:
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
 
+    def sort(self, by=None):
+        """
+        in_place sort
+        """
+        if by is None and self.identifier_column in self._frames:
+            by = [self.identifier_column]
+        self._frames.sort_values(by=by, ignore_index=True, inplace=True)
+
     def project(self, cols: []) -> 'Batch':
         """
         Takes as input the column list, returns the projection.
@@ -177,7 +185,8 @@ class Batch:
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
         if len(unknown_cols):
-            LoggingManager().log("Unexpected columns %s" % unknown_cols,
+            LoggingManager().log("Unexpected columns %s\n\
+                                 Frames: %s" % (unknown_cols, self._frames),
                                  LoggingLevel.WARNING)
         return Batch(self._frames[verfied_cols], self._outcomes.copy(),
                      self._temp_outcomes.copy(), self._identifier_column)
@@ -223,7 +232,13 @@ class Batch:
         if not isinstance(other, Batch):
             raise TypeError("Input should be of type Batch")
 
-        new_frames = self.frames.append(other.frames)
+        # Appending a empty dataframe with column name leads to NaN row.
+        if self.empty():
+            return other
+        if other.empty():
+            return self
+
+        new_frames = self.frames.append(other.frames, ignore_index=True)
         new_outcomes = {}
         temp_new_outcomes = {}
 
