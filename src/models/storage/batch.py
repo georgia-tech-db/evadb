@@ -232,6 +232,12 @@ class Batch:
         if not isinstance(other, Batch):
             raise TypeError("Input should be of type Batch")
 
+        # Appending a empty dataframe with column name leads to NaN row.
+        if self.empty():
+            return other
+        if other.empty():
+            return self
+
         new_frames = self.frames.append(other.frames, ignore_index=True)
         new_outcomes = {}
         temp_new_outcomes = {}
