@@ -79,6 +79,7 @@ class LogicalGet(Operator):
         super().__init__(OperatorType.LOGICALGET, children)
         self._video = video
         self._dataset_metadata = dataset_metadata
+        self._predicate = None
 
     @property
     def video(self):
@@ -88,6 +89,14 @@ class LogicalGet(Operator):
     def dataset_metadata(self):
         return self._dataset_metadata
 
+    @property
+    def predicate(self):
+        return self._predicate
+    
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+    
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):
