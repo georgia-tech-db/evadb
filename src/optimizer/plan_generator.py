@@ -18,6 +18,8 @@ from src.optimizer.generators.create_generator import CreateGenerator
 from src.optimizer.generators.create_udf_generator import CreateUDFGenerator
 from src.optimizer.generators.load_generator import LoadDataGenerator
 from src.optimizer.operators import Operator, OperatorType
+from src.optimizer.optimizer_context import OptimizerContext
+from src.optimizer.optimizer_tasks import TopDownRewrite
 
 
 class PlanGenerator:
@@ -33,7 +35,19 @@ class PlanGenerator:
     _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
     _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
 
+    def optimize(self, logical_plan: Operator):
+        optimizer_context = OptimizerContext()
+        optimizer_task_queue = optimizer_context.optimizer_task_queue()
+        # TopDown Rewrite
+        TopDownRewrite(logical_plan, optimizer_context).execute()
+
     def build(self, logical_plan: Operator):
+        # apply optimizations
+
+        optimized_plan = self.optimize(logical_plan)
+
+        #############################################
+        # remove this code once done with optimizer
         if logical_plan.type in self._SCAN_NODE_TYPES:
             return ScanGenerator().build(logical_plan)
         if logical_plan.type is self._INSERT_NODE_TYPE:
@@ -44,3 +58,4 @@ class PlanGenerator:
             return CreateUDFGenerator().build(logical_plan)
         if logical_plan.type is self._LOAD_NODE_TYPE:
             return LoadDataGenerator().build(logical_plan)
+        ###############################################
