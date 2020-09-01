@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique
+from enum import IntEnum, auto
 from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -23,19 +23,19 @@ from src.catalog.models.udf_io import UdfIO
 from pathlib import Path
 
 
-@unique
 class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
     """
-    LOGICALGET = 1,
-    LOGICALFILTER = 2,
-    LOGICALPROJECT = 3,
-    LOGICALINSERT = 4,
-    LOGICALCREATE = 5,
-    LOGICALCREATEUDF = 6,
-    LOGICALLOADDATA = 7,
-    LOGICALQUERYDERIVEDGET = 8,
+    DUMMY = auto()
+    LOGICALGET = auto()
+    LOGICALFILTER = auto()
+    LOGICALPROJECT = auto()
+    LOGICALINSERT = auto()
+    LOGICALCREATE = auto()
+    LOGICALCREATEUDF = auto()
+    LOGICALLOADDATA = auto()
+    LOGICALQUERYDERIVEDGET = auto()
 
 
 class Operator:
@@ -73,6 +73,11 @@ class Operator:
         return is_subtree_equal
 
 
+class Dummy(Operator):
+    def __init__(self):
+        super().__init__(OperatorType.DUMMY, None)
+
+
 class LogicalGet(Operator):
     def __init__(self, video: TableRef, dataset_metadata: DataFrameMetadata,
                  children: List = None):
@@ -92,11 +97,11 @@ class LogicalGet(Operator):
     @property
     def predicate(self):
         return self._predicate
-    
+
     @predicate.setter
     def predicate(self, predicate):
         self._predicate = predicate
-    
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):

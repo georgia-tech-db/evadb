@@ -14,12 +14,12 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from enum import IntEnum, auto
+from enum import IntFlag, auto
 from src.optimizer.rules.patterns import Pattern
 from src.optimizer.operators import OperatorType, Operator
 
 
-class RuleType(IntEnum):
+class RuleType(IntFlag):
     """
     Manages enums for all the supported rules
     """
@@ -90,16 +90,19 @@ class Rule(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def transform(self, before) -> Operator:
-        """Transform the before expression to the afte expression
-        
+    def apply(self, before) -> Operator:
+        """Transform the before expression to the after expression
+
         Args:
             before ([type]): the before expression
-            
+
         Returns:
             Operator: the transformed expression
         """
         raise NotImplementedError
+
+##############################################
+# RULES START
 
 
 class EmbedFilterIntoGet(Rule):
@@ -112,9 +115,29 @@ class EmbedFilterIntoGet(Rule):
         # nothing else to check if logical match found return true
         return super()._compare_expr_with_pattern(input_expr)
 
-    def transform(self, before):
+    def apply(self, before):
         logical_get = before.children[0]
         filter_predicate = before.predicate
         logical_get.predicate = filter_predicate
         return logical_get
-    
+
+# RULES END
+##############################################
+
+
+class RulesManager:
+    """Singelton class to manage all the rules in our system
+    """
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(RulesManager, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        self._rewrite_rules = [EmbedFilterIntoGet()]
+
+    @property
+    def rewrite_rules(self):
+        return self._rewrite_rules
