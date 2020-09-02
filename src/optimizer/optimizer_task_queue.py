@@ -14,15 +14,13 @@
 # limitations under the License.
 from collections import deque
 
-from src.optimizer.optimizer_tasks import OptimizerTask
-
 
 class OptimizerTaskQueue():
     def __init__(self):
         self._task_queue = deque()
 
-    def push_task(task: OptimizerTask):
+    def push_task(self, task: 'OptimizerTask'):
         self._task_queue.append(task)
 
-    def pop_task() -> OptimizerTask:
+    def pop_task(self)   -> 'OptimizerTask':
         return self._task_queue.popleft()

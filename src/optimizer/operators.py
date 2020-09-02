@@ -58,6 +58,10 @@ class Operator:
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, children):
+        self._children = children
+
     @property
     def type(self):
         return self._type
