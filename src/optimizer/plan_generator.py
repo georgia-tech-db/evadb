@@ -37,14 +37,13 @@ class PlanGenerator:
 
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
-        optimizer_task_queue = optimizer_context.optimizer_task_queue()
         # TopDown Rewrite
         TopDownRewrite(logical_plan, optimizer_context).execute()
 
     def build(self, logical_plan: Operator):
         # apply optimizations
 
-        optimized_plan = self.optimize(logical_plan)
+        self.optimize(logical_plan)
 
         #############################################
         # remove this code once done with optimizer

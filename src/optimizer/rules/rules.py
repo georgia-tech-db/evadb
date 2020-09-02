@@ -15,7 +15,7 @@
 
 from abc import ABC, abstractmethod
 from enum import IntFlag, auto
-from src.optimizer.rules.patterns import Pattern
+from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
 
 
@@ -40,8 +40,8 @@ class Rule(ABC):
     """
 
     def __init__(self, rule_type: RuleType, pattern=None):
-        _pattern = None
-        _rule_type = None
+        self._pattern = pattern
+        self._rule_type = rule_type
 
     @property
     def rule_type(self):
@@ -55,25 +55,26 @@ class Rule(ABC):
     def pattern(self, pattern):
         self._pattern = pattern
 
-    def _compare_expr_with_pattern(self, input_expr) -> bool:
+    @classmethod
+    def _compare_expr_with_pattern(cls, input_expr, pattern) -> bool:
         """check if the logical tree of the expression matches the
-
+            provided pattern
         Args:
-            input_expr ([type]): expr to compare
-
+            input_expr ([type]): expr to match
+            pattern: pattern to match with
         Returns:
             bool: If rule pattern matches, return true, else false
         """
-        is_equal = False
+        is_equal = True
         if input_expr is None or not isinstance(input_expr, Operator):
-            return is_equal
-        if (input_expr.type != self.pattern.opr_type or
-                (len(input_expr.children) != len(self.pattern.children))):
-            return is_equal
+            return False
+        if (input_expr.type != pattern.opr_type or
+                (len(input_expr.children) != len(pattern.children))):
+            return False
         # recursively compare pattern and input_expr
         for expr_child, pattern_child in zip(input_expr.children,
-                                             self.pattern.children):
-            is_equal |= self._compare_expr_with_pattern(
+                                             pattern.children):
+            is_equal &= cls._compare_expr_with_pattern(
                 expr_child, pattern_child)
         return is_equal
 
@@ -113,7 +114,7 @@ class EmbedFilterIntoGet(Rule):
 
     def check(self, input_expr):
         # nothing else to check if logical match found return true
-        return super()._compare_expr_with_pattern(input_expr)
+        return Rule._compare_expr_with_pattern(input_expr, self._pattern)
 
     def apply(self, before):
         logical_get = before.children[0]
