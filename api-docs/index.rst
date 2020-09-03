@@ -11,5 +11,3 @@ Exploratory Video Analytics
 
    guide/index
    documentation/index
-
-
