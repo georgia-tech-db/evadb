@@ -1,19 +1,7 @@
 
-Catalog
+Server
 ===============
-< catalog description here >
-
-
-Subpackages
------------
-
-.. toctree::
-
-
-   catalog.services
-
-   catalog.models
-
+< server description here >
 
 
 
@@ -21,42 +9,42 @@ Submodules
 ----------
 
 
-catalog.catalog_manager module
+server.client module
 --------------------------
 
-.. automodule:: catalog.catalog_manager
+.. automodule:: server.client
    :members:
    :undoc-members:
    :show-inheritance:
 
-catalog.column_type module
+server.command_handler module
 --------------------------
 
-.. automodule:: catalog.column_type
+.. automodule:: server.command_handler
    :members:
    :undoc-members:
    :show-inheritance:
 
-catalog.df_schema module
+server.interpreter module
 --------------------------
 
-.. automodule:: catalog.df_schema
+.. automodule:: server.interpreter
    :members:
    :undoc-members:
    :show-inheritance:
 
-catalog.schema_utils module
+server.networking_utils module
 --------------------------
 
-.. automodule:: catalog.schema_utils
+.. automodule:: server.networking_utils
    :members:
    :undoc-members:
    :show-inheritance:
 
-catalog.sql_config module
+server.server module
 --------------------------
 
-.. automodule:: catalog.sql_config
+.. automodule:: server.server
    :members:
    :undoc-members:
    :show-inheritance:
