@@ -127,6 +127,6 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = perform_query(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(
-            filters=[i for i in range(NUM_FRAMES) \
+            filters=[i for i in range(NUM_FRAMES)
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
