@@ -32,7 +32,7 @@ def eva():
     config = ConfigurationManager()
     hostname = config.get_value('server', 'hostname')
     port = config.get_value('server', 'port')
-    socket_timeout = config.get_value('server', 'socket_timeout')    
+    socket_timeout = config.get_value('server', 'socket_timeout')
     loop = asyncio.new_event_loop()
     stop_server_future = loop.create_future()
 

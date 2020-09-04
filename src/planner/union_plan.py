@@ -12,17 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum
 
+from src.planner.types import PlanNodeType
+from src.planner.abstract_plan import AbstractPlan
 
-@unique
-class PlanNodeType(IntEnum):
-    SEQUENTIAL_SCAN = 1
-    STORAGE_PLAN = 2
-    PP_FILTER = 3
-    INSERT = 4
-    CREATE = 5
-    CREATE_UDF = 6
-    LOAD_DATA = 7
-    UNION = 8
-    # add other types
+class UnionPlan(AbstractPlan):
+    """
+    This plan is used for storing information required for union operations.
+
+    Arguments:
+        column_ids: List[AbstractExpression]
+            list of column names string in the plan
+        predicate: AbstractExpression
+            An expression used for filtering
+    """
+
+    def __init__(self, all: bool):
+        self._all = all
+        super().__init__(PlanNodeType.UNION)
+
+    @property
+    def all(self):
+        return self._all

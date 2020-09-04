@@ -68,6 +68,7 @@ SHUTDOWN:                            'SHUTDOWN';
 SOME:                                'SOME';
 TABLE:                               'TABLE';
 TRUE:                                'TRUE';
+UNION:                               'UNION';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';
 UNLOCK:                              'UNLOCK';
