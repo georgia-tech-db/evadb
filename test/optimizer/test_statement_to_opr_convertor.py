@@ -91,6 +91,7 @@ class StatementToOprTest(unittest.TestCase):
         converter.visit_table_ref = MagicMock()
         converter._visit_projection = MagicMock()
         converter._visit_select_predicate = MagicMock()
+        converter._visit_union = MagicMock()
 
         statement = MagicMock()
         statement.from_table = MagicMock(spec=TableRef)
@@ -106,6 +107,7 @@ class StatementToOprTest(unittest.TestCase):
         converter.visit_table_ref = MagicMock()
         converter._visit_projection = MagicMock()
         converter._visit_select_predicate = MagicMock()
+        converter._visit_union = MagicMock()
 
         statement = SelectStatement()
 

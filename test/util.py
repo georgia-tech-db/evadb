@@ -69,7 +69,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
     for i in range(num_frames):
-        frame = np.array(np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+        frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25,
                          dtype=np.uint8)
         out.write(frame)
 
@@ -82,7 +82,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
     for i in filters:
         data.append({'id': i + start_id,
                      'data': np.array(
-                         np.ones((2, 2, 3)) * 0.1 * float(i + 1) * 255,
+                         np.ones((2, 2, 3)) * float(i + 1) * 25,
                          dtype=np.uint8)})
 
         if len(data) % batch_size == 0:
@@ -116,8 +116,13 @@ class DummyObjectDetector(AbstractClassifierUDF):
     def labels(self):
         return ['__background__', 'person', 'bicycle']
 
-    def classify(self, frames: pd.DataFrame):
+    def classify(self, df: pd.DataFrame):
+        ret = pd.DataFrame()
+        ret['label'] = df.apply(self.classify_one, axis = 1)
+        return ret
+
+    def classify_one(self, frames: np.ndarray):
         # odd are labeled bicycle and even person
-        labels = [self.labels[i % 2 + 1] for i in range(len(frames))]
-        prediction_df_list = pd.DataFrame({'label': labels})
-        return prediction_df_list
+        i = int(frames[0][0][0][0] * 25) - 1
+        label = self.labels[i % 2 + 1]
+        return label

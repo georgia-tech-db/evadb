@@ -94,12 +94,15 @@ class StatementToPlanConvertor:
 
         # union
         if statement.union_link is not None:
-            left_child_plan = self._plan
-            self.visit_select(statement.union_link)
-            right_child_plan = self._plan
-            self._plan = LogicalUnion(all=statement.union_all)
-            self._plan.append_child(left_child_plan)
-            self._plan.append_child(right_child_plan)
+            self._visit_union(statement.union_link, statement.union_all)
+
+    def _visit_union(self, target, all):
+        left_child_plan = self._plan
+        self.visit_select(target)
+        right_child_plan = self._plan
+        self._plan = LogicalUnion(all=all)
+        self._plan.append_child(left_child_plan)
+        self._plan.append_child(right_child_plan)
 
     def _visit_projection(self, select_columns):
         # Bind the columns using catalog
