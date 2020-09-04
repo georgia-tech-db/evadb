@@ -146,6 +146,7 @@ insertStatement
 
 selectStatement
     : querySpecification                                            #simpleSelect
+    | left=selectStatement UNION all=ALL? right=selectStatement   #unionSelect
     ;
 
 updateStatement

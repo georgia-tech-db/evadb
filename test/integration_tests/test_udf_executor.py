@@ -74,6 +74,8 @@ class UDFExecutorTest(unittest.TestCase):
         expected = [{'id': i * 2, 'label': 'person'}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
+        print(actual_batch)
+        print(expected_batch)
         self.assertEqual(actual_batch, expected_batch)
 
         nested_select_query = """SELECT id, data FROM

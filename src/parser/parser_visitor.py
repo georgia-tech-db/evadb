@@ -317,6 +317,19 @@ class ParserVisitor(evaql_parserVisitor):
             self, ctx: evaql_parser.SubqueryTableItemContext):
         return self.visit(ctx.selectStatement())
 
+    def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
+        left_selectStatement = self.visit(ctx.left)
+        right_selectStatement = self.visit(ctx.right)
+        # This makes a difference becasue the LL parser (Left-to-right)
+        while right_selectStatement.union_link is not None:
+            right_selectStatement = right_selectStatement.union_link
+        right_selectStatement.union_link = left_selectStatement
+        if ctx.all is None:
+            right_selectStatement.union_all = False
+        else:
+            right_selectStatement.union_all = True
+        return right_selectStatement
+
     def visitQuerySpecification(
             self, ctx: evaql_parser.QuerySpecificationContext):
         target_list = None

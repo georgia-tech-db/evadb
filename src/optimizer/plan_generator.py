@@ -27,7 +27,7 @@ class PlanGenerator:
     needs to be incorporated.
     """
     _SCAN_NODE_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
-                        OperatorType.LOGICALPROJECT)
+                        OperatorType.LOGICALPROJECT, OperatorType.LOGICALUNION)
     _INSERT_NODE_TYPE = OperatorType.LOGICALINSERT
     _CREATE_NODE_TYPE = OperatorType.LOGICALCREATE
     _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
