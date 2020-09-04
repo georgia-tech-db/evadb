@@ -19,6 +19,7 @@ from src.executor.abstract_executor import AbstractExecutor
 from src.planner.union_plan import UnionPlan
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
+
 class UnionExecutor(AbstractExecutor):
     """
     Merge the seq scan queries
@@ -34,7 +35,7 @@ class UnionExecutor(AbstractExecutor):
         pass
 
     def exec(self) -> Iterator[Batch]:
-        if self.node.all == False:
+        if self.node.all is False:
             LoggingManager().log('Only UNION ALL is supported now.',
                                  LoggingLevel.WARNING)
 

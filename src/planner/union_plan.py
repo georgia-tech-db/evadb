@@ -16,6 +16,7 @@
 from src.planner.types import PlanNodeType
 from src.planner.abstract_plan import AbstractPlan
 
+
 class UnionPlan(AbstractPlan):
     """
     This plan is used for storing information required for union operations.

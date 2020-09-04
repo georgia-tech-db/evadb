@@ -118,7 +118,7 @@ class DummyObjectDetector(AbstractClassifierUDF):
 
     def classify(self, df: pd.DataFrame):
         ret = pd.DataFrame()
-        ret['label'] = df.apply(self.classify_one, axis = 1)
+        ret['label'] = df.apply(self.classify_one, axis=1)
         return ret
 
     def classify_one(self, frames: np.ndarray):

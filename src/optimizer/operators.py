@@ -163,6 +163,7 @@ class LogicalUnion(Operator):
             return False
         return (is_subtree_equal and self.all == other.all)
 
+
 class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
