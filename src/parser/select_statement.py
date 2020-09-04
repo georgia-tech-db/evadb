@@ -107,4 +107,5 @@ class SelectStatement(AbstractStatement):
         return (self.from_table == other.from_table
                 and self.target_list == other.target_list
                 and self.where_clause == other.where_clause
-                and self.union_link == other.union_link)
+                and self.union_link == other.union_link
+                and self.union_all == other.union_all)

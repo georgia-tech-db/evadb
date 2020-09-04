@@ -45,11 +45,10 @@ class SequentialScanExecutor(AbstractExecutor):
                 batch = Batch(
                     batch.frames[(outcomes > 0).to_numpy()].reset_index(
                         drop=True))
-            print(batch)
+
             # Then do project
             if not batch.empty() and self.project_expr is not None:
                 batches = [expr.evaluate(batch) for expr in self.project_expr]
                 batch = Batch.merge_column_wise(batches)
-            print(batch)
 
             yield batch
