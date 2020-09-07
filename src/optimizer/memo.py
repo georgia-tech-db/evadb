@@ -14,15 +14,35 @@
 # limitations under the License.
 
 from src.optimizer.group_expression import GroupExpression
+from src.optimizer.group import Group
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class Memo:
     def __init__(self):
-        self._group_exprs = None
-        self._groups = None
-    
-    def add_group(self):
-        raise NotImplementedError
-    
+        self._group_exprs = dict()
+        self._groups = []
+
+    def _create_new_group(self, expr: GroupExpression):
+        self._groups.append([expr])
+
     def add_group_expr(self, expr: GroupExpression):
-        raise NotImplementedError
+        # existing expression
+        if expr in self._group_exprs:
+            expr.group_id = self._group_exprs[expr]
+            return
+
+        # new expression
+        # existing group
+        if expr.group_id != Group.default_id:
+            if expr.group_id < len(self._groups):
+                self._groups[expr.group_id].add_expr(expr)
+                self._group_exprs[expr] = expr.group_id
+            else:
+                LoggingManager().log('Group Id out of bound', LoggingLevel.ERROR)
+
+        # create a new group
+        expr.group_id = len(self._groups)
+        self._groups.append(Group(expr.group_id))
+        self._groups[expr.group_id].add_expr(expr)
+        self._group_exprs[expr] = expr.group_id

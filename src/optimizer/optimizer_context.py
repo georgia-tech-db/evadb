@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.optimizer.optimizer_task_queue import OptimizerTaskQueue
+from src.optimizer.memo import Memo
+from src.optimizer.operators import Operator
+from src.optimizer.group_expression import GroupExpression
 
 
 class OptimizerContext:
@@ -26,7 +29,20 @@ class OptimizerContext:
 
     def __init__(self):
         self._optimizer_task_queue = OptimizerTaskQueue()
+        self._memo = Memo()
 
     @property
     def optimizer_task_queue(self):
         return self._optimizer_task_queue
+
+    @property
+    def memo(self):
+        return self._memo
+
+    def build_group_expr(self, expr: Operator) -> GroupExpression:
+        grp_exp = None
+        child_ids = [build_group_expr(
+            child_opr).group_id for child_opr in expr.children]
+        grp_exp = GroupExpression(children=child_ids)
+        self.memo.insert_group_expr(grp_exp)
+        
