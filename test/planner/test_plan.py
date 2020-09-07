@@ -34,6 +34,7 @@ class PlanNodeTests(unittest.TestCase):
         dummy_info = TableInfo('dummy')
         dummy_table = TableRef(dummy_info)
 
+        CatalogManager().reset()
         columns = [DataFrameColumn('id', ColumnType.INTEGER),
                    DataFrameColumn('name', ColumnType.TEXT,
                                    array_dimensions=50)]

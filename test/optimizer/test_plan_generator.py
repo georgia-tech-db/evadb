@@ -17,8 +17,8 @@ import unittest
 from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
-    LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, LogicalLoadData, \
-    LogicalUnion
+    LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, \
+    LogicalLoadData, LogicalUnion
 from src.optimizer.plan_generator import PlanGenerator
 
 
@@ -49,7 +49,7 @@ class PlanGeneratorTest(unittest.TestCase):
 
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_return_use_scan_generator_for_logical_union(self,
-                                                                 mock_class):
+                                                                mock_class):
         mock_instance = mock_class.return_value
         l_union = LogicalUnion(True, None)
         PlanGenerator().build(l_union)

@@ -252,7 +252,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         expected_plan = None
         for plan in reversed(plans):
             if expected_plan:
-                plan.append_child(expected_plan)
+                plan.append_child(expected_plan),
+
             expected_plan = plan
         self.assertEqual(expected_plan, actual_plan)
         wrong_plan = plans[0]
@@ -263,7 +264,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
     @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
     @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_should_visit_select_union_if_union_query(self, mock_p, mock_c, mock_d):
+    def test_should_visit_select_union_if_union_query(self, mock_p, mock_c,
+                                                      mock_d):
         m = MagicMock()
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT id FROM video WHERE id>3
