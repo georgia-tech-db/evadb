@@ -14,19 +14,30 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
-
+from src.optimizer.group import Group
 from typing import List
 
 
 class GroupExpression:
-    def __init__(self, group_id: int,
+    def __init__(self,
+                 opr: Operator,
+                 group_id: int = Group.default_id,
                  children: List[int] = None):
+        self._opr = opr
         self._group_id = group_id
         self._children = children
 
     @property
+    def opr(self):
+        return self._opr
+
+    @property
     def group_id(self):
         return self._group_id
+
+    @group_id.setter
+    def group_id(self, new_id):
+        self._group_id = new_id
 
     @property
     def children(self):
@@ -34,3 +45,13 @@ class GroupExpression:
 
     def append_child(self, child_id: int):
         self._children.append(child_id)
+
+    def __eq__(self, other: 'GroupExpression'):
+        return (self.opr == other.opr and
+                self.children == other.children)
+
+    def __hash__(self):
+        curr_hash = hash(self.opr.type)
+        for child_id in self.children:
+            curr_hash ^= hash(child_id)
+        return curr_hash

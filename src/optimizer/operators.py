@@ -36,7 +36,7 @@ class OperatorType(IntEnum):
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
     LOGICALQUERYDERIVEDGET = auto()
-
+    LOGICALDELIMITER = auto()
 
 class Operator:
     """Base class for logital plan of operators
@@ -76,7 +76,9 @@ class Operator:
             is_subtree_equal = is_subtree_equal and (child1 == child2)
         return is_subtree_equal
 
-
+    def is_logical(self):
+        return self._type < OperatorType.LOGICALDELIMITER
+    
 class Dummy(Operator):
     def __init__(self):
         super().__init__(OperatorType.DUMMY, None)

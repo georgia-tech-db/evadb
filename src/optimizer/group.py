@@ -14,11 +14,14 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
-
+from src.optimizer.group_expression import GroupExpression
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 from typing import List
 
 
 class Group:
+    default_id = -1
+
     def __init__(self, group_id: int,
                  logical_exprs: List[Operator] = None,
                  physical_exprs: List[Operator] = None):
@@ -30,8 +33,22 @@ class Group:
     def group_id(self):
         return self._group_id
 
-    def add_logical_expr(self, opr: Operator):
-        self._logical_exprs.append(opr)
+    def add_expr(self, expr: GroupExpression):
+        if expr.group_id == self.default_id:
+            expr.group_id = self.group_id
 
-    def add_physical_expr(self, opr: Operator):
-        self._physical_exprs.append(opr)
+        if expr.group_id != self.group_id:
+            LoggingManager().log('Expected group id {}, found {}'.format(
+                self.group_id, expr.group_id))
+            return
+
+        if expr.opr.is_logical():
+            self._add_logical_expr(expr)
+        else:
+            self._add_physical_expr(expr)
+
+    def _add_logical_expr(self, expr: GroupExpression):
+        self._logical_exprs.append(expr)
+
+    def _add_physical_expr(self, expr: GroupExpression):
+        self._physical_exprs.append(expr)
