@@ -28,7 +28,7 @@ from src.parser.parser import Parser
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData)
+                                     LogicalLoadData, LogicalUnion)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
@@ -259,6 +259,50 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         for plan in plans[1:]:
             wrong_plan.append_child(plan)
         self.assertNotEqual(wrong_plan, actual_plan)
+
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    def test_should_visit_select_union_if_union_query(self, mock_p, mock_c, mock_d):
+        m = MagicMock()
+        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        stmt = Parser().parse(""" SELECT id FROM video WHERE id>3
+                              UNION ALL
+                              SELECT id FROM video WHERE id<=3;""")[0]
+        converter = StatementToPlanConvertor()
+        actual_plan = converter.visit(stmt)
+        left_plans = [LogicalProject([TupleValueExpression('id')])]
+        left_plans.append(
+            LogicalFilter(
+                ComparisonExpression(
+                    ExpressionType.COMPARE_GREATER,
+                    TupleValueExpression('id'),
+                    ConstantValueExpression(3))))
+        left_plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+
+        def reverse_plan(plans):
+            return_plan = None
+            for plan in reversed(plans):
+                if return_plan:
+                    plan.append_child(return_plan)
+                return_plan = plan
+            return return_plan
+        expect_left_plan = reverse_plan(left_plans)
+
+        right_plans = [LogicalProject([TupleValueExpression('id')])]
+        right_plans.append(
+            LogicalFilter(
+                ComparisonExpression(
+                    ExpressionType.COMPARE_LEQ,
+                    TupleValueExpression('id'),
+                    ConstantValueExpression(3))))
+        right_plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+        expect_right_plan = reverse_plan(right_plans)
+        expected_plan = LogicalUnion(True)
+        expected_plan.append_child(expect_right_plan)
+        expected_plan.append_child(expect_left_plan)
+
+        self.assertEqual(expected_plan, actual_plan)
 
     def test_should_return_false_for_unequal_plans(self):
         create_plan = LogicalCreate(
