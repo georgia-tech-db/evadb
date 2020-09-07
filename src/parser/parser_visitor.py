@@ -323,6 +323,8 @@ class ParserVisitor(evaql_parserVisitor):
         # This makes a difference becasue the LL parser (Left-to-right)
         while right_selectStatement.union_link is not None:
             right_selectStatement = right_selectStatement.union_link
+        # We need to check the correctness for union operator.
+        # Here when parsing or later operator, plan?
         right_selectStatement.union_link = left_selectStatement
         if ctx.all is None:
             right_selectStatement.union_all = False
