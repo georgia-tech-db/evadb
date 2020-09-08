@@ -22,10 +22,8 @@ class UnionPlan(AbstractPlan):
     This plan is used for storing information required for union operations.
 
     Arguments:
-        column_ids: List[AbstractExpression]
-            list of column names string in the plan
-        predicate: AbstractExpression
-            An expression used for filtering
+        all: Bool
+            UNION (deduplication) vs UNION ALL (non-deduplication)
     """
 
     def __init__(self, all: bool):
