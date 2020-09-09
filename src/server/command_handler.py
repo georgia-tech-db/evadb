@@ -15,7 +15,12 @@
 
 import asyncio
 
-from src.utils.logging_manager import LoggingManager
+from src.parser.parser import Parser
+from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from src.optimizer.plan_generator import PlanGenerator
+from src.executor.plan_executor import PlanExecutor
+
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 @asyncio.coroutine
@@ -26,8 +31,22 @@ def handle_request(transport, request_message):
         If user inputs 'quit' stops the event loop
         otherwise just echoes user input
     """
+    LoggingManager().log('Receive request: --|' + str(request_message) + '|--')
 
-    response_message = "foo"
+    output_batch = None
+    try:
+        stmt = Parser().parse(request_message)[0]
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        output_batch = PlanExecutor().execute_plan()
+    except Exception as e:
+        LoggingManager().log(e, LoggingLevel.WARNING)
+        output_batch = 'Fail\n'
+
+    if output_batch is None:
+        response_message = 'Success\n'
+    else:
+        response_message = str(output_batch)
 
     LoggingManager().log('Response to client: --|' +
                          str(response_message) +
