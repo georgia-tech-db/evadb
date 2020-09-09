@@ -25,6 +25,7 @@ from src.executor.insert_executor import InsertExecutor
 from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
+from src.executor.union_executor import UnionExecutor
 
 
 class PlanExecutor:
@@ -58,6 +59,8 @@ class PlanExecutor:
 
         if plan_node_type == PlanNodeType.SEQUENTIAL_SCAN:
             executor_node = SequentialScanExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.UNION:
+            executor_node = UnionExecutor(node=plan)
         elif plan_node_type == PlanNodeType.STORAGE_PLAN:
             executor_node = StorageExecutor(node=plan)
         elif plan_node_type == PlanNodeType.PP_FILTER:
