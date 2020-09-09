@@ -14,14 +14,14 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
-from src.optimizer.group import Group
+from src.optimizer.group import INVALID_GROUP_ID
 from typing import List
 
 
 class GroupExpression:
     def __init__(self,
                  opr: Operator,
-                 group_id: int = Group.default_id,
+                 group_id: int = INVALID_GROUP_ID,
                  children: List[int] = None):
         self._opr = opr
         self._group_id = group_id
@@ -51,6 +51,9 @@ class GroupExpression:
                 self.children == other.children)
 
     def __hash__(self):
+        # correct this hash function.
+        # we are taking hash of just the opr type
+        
         curr_hash = hash(self.opr.type)
         for child_id in self.children:
             curr_hash ^= hash(child_id)

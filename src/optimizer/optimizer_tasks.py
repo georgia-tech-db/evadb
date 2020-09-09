@@ -15,6 +15,7 @@
 from enum import IntEnum, auto
 from src.optimizer.rules.rules import RulesManager
 from src.optimizer.operators import Operator
+from src.optimizer.group_expression import GroupExpression
 from src.optimizer.optimizer_context import OptimizerContext
 
 
@@ -51,7 +52,7 @@ class OptimizerTask:
 
 
 class TopDownRewrite(OptimizerTask):
-    def __init__(self, root_expr: Operator,
+    def __init__(self, root_expr: GroupExpression,
                  optimizer_context: OptimizerContext):
         super().__init__(root_expr, optimizer_context, OptimizerTaskType.TOP_DOWN_REWRITE)
 
