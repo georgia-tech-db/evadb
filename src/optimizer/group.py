@@ -14,27 +14,29 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
-from src.optimizer.group_expression import GroupExpression
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 from typing import List
 
 
-class Group:
-    default_id = -1
+INVALID_GROUP_ID = -1
 
-    def __init__(self, group_id: int,
-                 logical_exprs: List[Operator] = None,
-                 physical_exprs: List[Operator] = None):
+
+class Group:
+
+    def __init__(self, group_id: int):
         self._group_id = group_id
-        self._logical_exprs = logical_exprs
-        self._physical_exprs = physical_exprs
+        self._logical_exprs = []
+        self._physical_exprs = []
 
     @property
     def group_id(self):
         return self._group_id
 
-    def add_expr(self, expr: GroupExpression):
-        if expr.group_id == self.default_id:
+    def get_logical_expr(self):
+        return self._logical_exprs[0]
+    
+    def add_expr(self, expr: 'GroupExpression'):
+        if expr.group_id == INVALID_GROUP_ID:
             expr.group_id = self.group_id
 
         if expr.group_id != self.group_id:
@@ -47,8 +49,12 @@ class Group:
         else:
             self._add_physical_expr(expr)
 
-    def _add_logical_expr(self, expr: GroupExpression):
+    def erase_grp(self):
+        self._logical_exprs.clear()
+        self._physical_exprs.clear()
+    
+    def _add_logical_expr(self, expr: 'GroupExpression'):
         self._logical_exprs.append(expr)
 
-    def _add_physical_expr(self, expr: GroupExpression):
+    def _add_physical_expr(self, expr: 'GroupExpression'):
         self._physical_exprs.append(expr)

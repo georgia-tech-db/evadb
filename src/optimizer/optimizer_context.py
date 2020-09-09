@@ -39,10 +39,13 @@ class OptimizerContext:
     def memo(self):
         return self._memo
 
-    def build_group_expr(self, expr: Operator) -> GroupExpression:
+    def xform_opr_to_group_expr(self, opr: Operator) -> GroupExpression:
         grp_exp = None
-        child_ids = [build_group_expr(
-            child_opr).group_id for child_opr in expr.children]
-        grp_exp = GroupExpression(children=child_ids)
-        self.memo.insert_group_expr(grp_exp)
-        
+        child_ids = []
+        for child_opr in opr.children:
+            child_id = self.xform_opr_to_group_expr(child_opr).group_id
+            child_ids.append(child_id)
+        grp_exp = GroupExpression(opr=opr, children=child_ids)
+        self.memo.add_group_expr(grp_exp)
+        return grp_exp
+

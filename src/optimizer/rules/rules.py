@@ -15,8 +15,11 @@
 
 from abc import ABC, abstractmethod
 from enum import IntFlag, auto
+import copy
+
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
+from src.optimizer.optimizer_context import OptimizerContext
 
 
 class RuleType(IntFlag):
@@ -56,7 +59,7 @@ class Rule(ABC):
         self._pattern = pattern
 
     @classmethod
-    def _compare_expr_with_pattern(cls, input_expr, pattern) -> bool:
+    def _compare_expr_with_pattern(cls, grp_id, context: OptimizerContext, pattern) -> bool:
         """check if the logical tree of the expression matches the
             provided pattern
         Args:
@@ -66,20 +69,22 @@ class Rule(ABC):
             bool: If rule pattern matches, return true, else false
         """
         is_equal = True
-        if input_expr is None or not isinstance(input_expr, Operator):
+        grp = context.memo.get_group(grp_id)
+        grp_expr = grp.get_logical_expr() 
+        if grp_expr is None:
             return False
-        if (input_expr.type != pattern.opr_type or
-                (len(input_expr.children) != len(pattern.children))):
+        if (grp_expr.opr.type != pattern.opr_type or
+                (len(grp_expr.children) != len(pattern.children))):
             return False
         # recursively compare pattern and input_expr
-        for expr_child, pattern_child in zip(input_expr.children,
+        for child_id, pattern_child in zip(grp_expr.children,
                                              pattern.children):
             is_equal &= cls._compare_expr_with_pattern(
-                expr_child, pattern_child)
+                child_id, context, pattern_child)
         return is_equal
 
     @abstractmethod
-    def check(self, input_expr) -> bool:
+    def check(self, grp_id: int, context: 'OptimizerContext') -> bool:
         """Check whether the rule is applicable for the input_expr
 
         Args:
@@ -112,15 +117,17 @@ class EmbedFilterIntoGet(Rule):
         pattern.append_child(Pattern(OperatorType.LOGICALGET))
         super().__init__(RuleType.EMBED_FILTER_INTO_GET, pattern)
 
-    def check(self, input_expr):
+    def check(self, grp_id: int, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
-        return Rule._compare_expr_with_pattern(input_expr, self._pattern)
+        return Rule._compare_expr_with_pattern(grp_id, context, self._pattern)
 
-    def apply(self, before):
-        logical_get = before.children[0]
-        filter_predicate = before.predicate
-        logical_get.predicate = filter_predicate
-        return logical_get
+    def apply(self, grp_id: int, context: OptimizerContext):
+        before = context.memo.get_group(grp_id).get_logical_expr()
+        predicate = before.opr.predicate
+        
+        after = copy.deepcopy(context.memo.get_group(before.children[0]).get_logical_expr())
+        after.opr.predicate = predicate
+        context.memo.replace_group_expr(grp_id, after)
 
 # RULES END
 ##############################################

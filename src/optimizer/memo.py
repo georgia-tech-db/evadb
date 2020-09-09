@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.optimizer.group_expression import GroupExpression
-from src.optimizer.group import Group
+from src.optimizer.group import Group, INVALID_GROUP_ID
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
@@ -24,8 +24,23 @@ class Memo:
         self._groups = []
 
     def _create_new_group(self, expr: GroupExpression):
-        self._groups.append([expr])
+        expr.group_id = len(self._groups)
+        self._groups.append(Group(expr.group_id))
+        self._groups[expr.group_id].add_expr(expr)
 
+    def get_group(self, group_id: int):
+        return self._groups[group_id]
+
+    def replace_group_expr(self, group_id: int, after: GroupExpression):
+        """
+            Note: We assume that there is only one logical_expr in this group.
+            This should be used in rewrite rules.
+        """    
+        grp = self._groups[group_id]
+        grp_expr = grp.get_logical_expr()
+        del self._group_exprs[grp_expr]
+        grp.add_expr(after)
+        
     def add_group_expr(self, expr: GroupExpression):
         # existing expression
         if expr in self._group_exprs:
@@ -34,15 +49,13 @@ class Memo:
 
         # new expression
         # existing group
-        if expr.group_id != Group.default_id:
+        if expr.group_id != INVALID_GROUP_ID:
             if expr.group_id < len(self._groups):
                 self._groups[expr.group_id].add_expr(expr)
                 self._group_exprs[expr] = expr.group_id
             else:
                 LoggingManager().log('Group Id out of bound', LoggingLevel.ERROR)
-
+            return 
         # create a new group
-        expr.group_id = len(self._groups)
-        self._groups.append(Group(expr.group_id))
-        self._groups[expr.group_id].add_expr(expr)
+        self._create_new_group(expr)
         self._group_exprs[expr] = expr.group_id

@@ -37,8 +37,11 @@ class PlanGenerator:
 
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
+        memo = optimizer_context.memo
+        grp_expr = optimizer_context.xform_opr_to_group_expr(logical_plan)
+
         # TopDown Rewrite
-        TopDownRewrite(logical_plan, optimizer_context).execute()
+        TopDownRewrite(grp_expr, optimizer_context).execute()
 
     def build(self, logical_plan: Operator):
         # apply optimizations
