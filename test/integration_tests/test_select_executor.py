@@ -30,14 +30,13 @@ class SelectExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
+        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        perform_query(load_query)
 
     def tearDown(self):
         os.remove('dummy.avi')
 
     def test_should_load_and_select_in_table(self):
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(query)
-
         select_query = "SELECT id FROM MyVideo;"
         actual_batch = perform_query(select_query)
         actual_batch.sort()
@@ -77,8 +76,6 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertTrue(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
         actual_batch = perform_query(select_query)
         expected_batch = list(create_dummy_batches(filters=[5]))[0]
@@ -87,7 +84,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = perform_query(select_query)
         expected_rows = [{"data": np.array(
-            np.ones((2, 2, 3)) * 0.1 * float(5 + 1) * 255, dtype=np.uint8)}]
+            np.ones((2, 2, 3)) * float(5 + 1) * 25, dtype=np.uint8)}]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -115,4 +112,21 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
         self.assertEqual(actual_batch, expected_batch)
 
+    def test_select_and_union_video_in_table(self):
+        select_query = """SELECT id, data FROM MyVideo WHERE id < 3
+            UNION ALL SELECT id, data FROM MyVideo WHERE id > 7;"""
+        actual_batch = perform_query(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches(
+            filters=[i for i in range(NUM_FRAMES) if i < 3 or i > 7]))[0]
+        self.assertEqual(actual_batch, expected_batch)
 
+        select_query = """SELECT id, data FROM MyVideo WHERE id < 2
+            UNION ALL SELECT id, data FROM MyVideo WHERE id > 4 AND id < 6
+            UNION ALL SELECT id, data FROM MyVideo WHERE id > 7;"""
+        actual_batch = perform_query(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches(
+            filters=[i for i in range(NUM_FRAMES)
+                     if i < 2 or i == 5 or i > 7]))[0]
+        self.assertEqual(actual_batch, expected_batch)

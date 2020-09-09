@@ -16,11 +16,13 @@ import unittest
 from src.parser.table_ref import TableRef, TableInfo
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.column_type import ColumnType
+from src.catalog.catalog_manager import CatalogManager
 
 from src.planner.create_plan import CreatePlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
+from src.planner.union_plan import UnionPlan
 from src.planner.types import PlanNodeType
 
 
@@ -32,6 +34,7 @@ class PlanNodeTests(unittest.TestCase):
         dummy_info = TableInfo('dummy')
         dummy_table = TableRef(dummy_info)
 
+        CatalogManager().reset()
         columns = [DataFrameColumn('id', ColumnType.INTEGER),
                    DataFrameColumn('name', ColumnType.TEXT,
                                    array_dimensions=50)]
@@ -83,3 +86,9 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(str(plan), plan_str)
+
+    def test_union_plan(self):
+        all = True
+        plan = UnionPlan(all)
+        self.assertEqual(plan.node_type, PlanNodeType.UNION)
+        self.assertEqual(plan.all, all)

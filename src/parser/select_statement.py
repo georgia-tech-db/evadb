@@ -46,6 +46,24 @@ class SelectStatement(AbstractStatement):
         self._from_table = from_table
         self._where_clause = where_clause
         self._target_list = target_list
+        self._union_link = None
+        self._union_all = False
+
+    @property
+    def union_link(self):
+        return self._union_link
+
+    @union_link.setter
+    def union_link(self, next_select: 'SelectStatement'):
+        self._union_link = next_select
+
+    @property
+    def union_all(self):
+        return self._union_all
+
+    @union_all.setter
+    def union_all(self, all: bool):
+        self._union_all = all
 
     @property
     def where_clause(self):
@@ -75,6 +93,12 @@ class SelectStatement(AbstractStatement):
         print_str = "SELECT {} FROM {} WHERE {}".format(self._target_list,
                                                         self._from_table,
                                                         self._where_clause)
+        if self._union_link is not None:
+            if not self._union_all:
+                print_str += "\nUNION\n" + str(self._union_link)
+            else:
+                print_str += "\nUNION ALL\n" + str(self._union_link)
+
         return print_str
 
     def __eq__(self, other):
@@ -82,4 +106,6 @@ class SelectStatement(AbstractStatement):
             return False
         return (self.from_table == other.from_table
                 and self.target_list == other.target_list
-                and self.where_clause == other.where_clause)
+                and self.where_clause == other.where_clause
+                and self.union_link == other.union_link
+                and self.union_all == other.union_all)

@@ -17,7 +17,7 @@ from src.expression.abstract_expression import AbstractExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
-                                     LogicalQueryDerivedGet)
+                                     LogicalQueryDerivedGet, LogicalUnion)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -91,6 +91,18 @@ class StatementToPlanConvertor:
         # add support for SELECT STAR
         if select_columns is not None:
             self._visit_projection(select_columns)
+
+        # union
+        if statement.union_link is not None:
+            self._visit_union(statement.union_link, statement.union_all)
+
+    def _visit_union(self, target, all):
+        left_child_plan = self._plan
+        self.visit_select(target)
+        right_child_plan = self._plan
+        self._plan = LogicalUnion(all=all)
+        self._plan.append_child(left_child_plan)
+        self._plan.append_child(right_child_plan)
 
     def _visit_projection(self, select_columns):
         # Bind the columns using catalog
