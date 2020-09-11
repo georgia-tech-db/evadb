@@ -19,6 +19,7 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 ## Table of Contents
 * [Installation](#installation)
+* [Docker](#docker)
 * [Development](#development)
 * [Architecture](#architecture)
 
@@ -36,6 +37,13 @@ git clone https://github.com/georgia-tech-db/eva.git
 sh script/install/before_install.sh
 export PATH="$HOME/miniconda/bin:$PATH"
 sh script/install/install.sh
+```
+
+## Docker
+
+1. Build EVA image.
+```shell
+docker build -t eva:eva -f docker/Dockerfile .
 ```
 
 ## Development
