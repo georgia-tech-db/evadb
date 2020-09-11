@@ -14,12 +14,26 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
+from src.optimizer.property import Property
 from src.utils.logging_manager import LoggingManager, LoggingLevel
-from typing import List
+from typing import List, Dict
 
 
 INVALID_GROUP_ID = -1
 
+class Winner:
+    def __init__(self, grp_expr: 'GroupExpression', cost: float):
+        self._cost = cost
+        self._grp_expr = grp_expr
+    
+    @property
+    def cost(self):
+        return self._cost
+    
+    @property
+    def grp_expr(self):
+        return self._grp_expr
+    
 
 class Group:
 
@@ -27,6 +41,7 @@ class Group:
         self._group_id = group_id
         self._logical_exprs = []
         self._physical_exprs = []
+        self._winner_exprs: Dict[Property, Winner] = {}
 
     @property
     def group_id(self):
@@ -44,10 +59,22 @@ class Group:
                 self.group_id, expr.group_id))
             return
 
-        if expr.opr.is_logical():
+        if expr.GetRuleIdxGetRuleIdxopr.is_logical():
             self._add_logical_expr(expr)
         else:
             self._add_physical_expr(expr)
+
+    def get_best_expr(self, property: 'Property') -> 'GroupExpression':
+        winner = self._winner_exprs.get(property, None)
+        if winner:
+            return winner.grp_expr
+        else:
+            return None 
+
+    def add_expr_cost(self, expr: 'GroupExpression', property, cost):
+        existing_winner = self._winner_exprs.get(property, None)
+        if not existing_winner or existing_winner.cost > cost:
+            self._winner_exprs[property] = Winner(expr, cost)
 
     def erase_grp(self):
         self._logical_exprs.clear()
