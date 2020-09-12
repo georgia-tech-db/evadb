@@ -326,7 +326,7 @@ class ParserVisitor(evaql_parserVisitor):
         # We need to check the correctness for union operator.
         # Here when parsing or later operator, plan?
         right_selectStatement.union_link = left_selectStatement
-        if ctx.all is None:
+        if ctx.unionAll is None:
             right_selectStatement.union_all = False
         else:
             right_selectStatement.union_all = True
