@@ -32,6 +32,15 @@ class RuleType(IntFlag):
 
     REWRITE_DELIMETER = auto()
 
+class Promise(IntFlag):
+    """
+    Manages order in which rules should be applied.
+    Rule with a higher enum will be prefered in case of 
+    conflict
+    """
+    EMBED_FILTER_INTO_GET = auto()
+    UDF_LTOR = auto()
+
 
 class Rule(ABC):
     """Base class to define any optimization rule
@@ -83,12 +92,20 @@ class Rule(ABC):
                 child_id, context, pattern_child)
         return is_equal
 
+    def top_match(self, opr: Operator) -> bool:
+        return opr.type == self.pattern.opr_type
+
     @abstractmethod
-    def check(self, grp_id: int, context: 'OptimizerContext') -> bool:
+    def promise(self) -> int:
+        raise NotImplementedError
+
+
+    @abstractmethod
+    def check(self, before: Operator, context: 'OptimizerContext') -> bool:
         """Check whether the rule is applicable for the input_expr
 
         Args:
-            input_expr ([type]): the before expression
+            before (Operator): the before operator expression
 
         Returns:
             bool: If the rule is applicable, return true, else false
@@ -96,11 +113,11 @@ class Rule(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def apply(self, before) -> Operator:
+    def apply(self, before: Operator) -> Operator:
         """Transform the before expression to the after expression
 
         Args:
-            before ([type]): the before expression
+            before (Operator): the before expression
 
         Returns:
             Operator: the transformed expression
@@ -117,17 +134,18 @@ class EmbedFilterIntoGet(Rule):
         pattern.append_child(Pattern(OperatorType.LOGICALGET))
         super().__init__(RuleType.EMBED_FILTER_INTO_GET, pattern)
 
+    def promise(self):
+        return Promise.EMBED_FILTER_INTO_GET
+    
     def check(self, grp_id: int, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
         return Rule._compare_expr_with_pattern(grp_id, context, self._pattern)
 
-    def apply(self, grp_id: int, context: OptimizerContext):
-        before = context.memo.get_group(grp_id).get_logical_expr()
-        predicate = before.opr.predicate
-        
-        after = copy.deepcopy(context.memo.get_group(before.children[0]).get_logical_expr())
-        after.opr.predicate = predicate
-        context.memo.replace_group_expr(grp_id, after)
+    def apply(self, before: Operator, context: OptimizerContext):
+        predicate = before.predicate
+        logical_get = before.children[0]
+        logical_get.predicate = predicate
+        return logical_get
 
 # RULES END
 ##############################################
