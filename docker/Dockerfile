@@ -4,7 +4,7 @@ ARG PYTHON_VERSION=3.8
 
 # install system-wide package
 RUN apt-get update \
-    && apt-get -y install sudo wget bash
+    && apt-get -y install sudo wget bash openjdk-8-jdk openjdk-8-jre
 
 # set eva user and no password sudo
 RUN useradd -m eva && echo "eva:eva" | chpasswd && adduser eva sudo
@@ -29,3 +29,9 @@ RUN ~/miniconda/bin/conda env create -f /app/script/install/conda_eva_environmen
 
 # sanity check for GPU
 RUN ~/miniconda/bin/conda run -n eva python -c "import torch; torch.randn(1).cuda()"
+
+# generate eva-ql parser
+RUN wget https://www.antlr.org/download/antlr-4.8-complete.jar -O ~/antlr.jar \
+    && java -jar ~/antlr.jar -Dlanguage=Python3 /app/src/parser/evaql/evaql_lexer.g4 \
+    && java -jar ~/antlr.jar -Dlanguage=Python3 -visitor /app/src/parser/evaql/evaql_parser.g4 \
+    && rm ~/antlr.jar
