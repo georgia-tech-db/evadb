@@ -47,8 +47,8 @@ class Group:
     def group_id(self):
         return self._group_id
 
-    def get_logical_expr(self):
-        return self._logical_exprs[0]
+    def logical_exprs(self):
+        return self._logical_exprs
     
     def add_expr(self, expr: 'GroupExpression'):
         if expr.group_id == INVALID_GROUP_ID:
@@ -59,7 +59,7 @@ class Group:
                 self.group_id, expr.group_id))
             return
 
-        if expr.GetRuleIdxGetRuleIdxopr.is_logical():
+        if expr.opr.is_logical():
             self._add_logical_expr(expr)
         else:
             self._add_physical_expr(expr)

@@ -35,10 +35,6 @@ class OptimizerTask:
     def root_expr(self):
         return self._root_expr
 
-    @root_expr.setter
-    def root_expr(self, after):
-        self._root_expr = after
-
     @property
     def task_type(self):
         return self._task_type
@@ -62,13 +58,24 @@ class TopDownRewrite(OptimizerTask):
         when we have more rules it might be a better idea to 
         push optimization task to a queue.
         """
-        valid_rules = RulesManager().rewrite_rules
+
+        rewrite_rules = RulesManager().rewrite_rules
+        valid_rules = []
+        for rule in rewrite_rules:
+            if rule.top_match(self.root_expr.opr):
+                valid_rules.append(rule)
+        
+        # sort the rules by promise
+        sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
+        
+        
         for rule in valid_rules:
-            if rule.check(self.root_expr):
-                self.root_expr = rule.apply(self.root_expr)
+            if rule.check(self.root_id, self.optimizer_context):
+                self.root_expr = rule.apply(
+                    self.root_id, self.optimizer_context)
 
-        updated_children = [TopDownRewrite(
-            child, self.optimizer_context).execute()
-            for child in self.root_expr.children]
+        grp = self.optimizer_context.memo.get_group(self.root_id)
+        grp_expr = grp.get_logical_expr()
 
-        self.root_expr.children = updated_children
+        for child in grp_expr.children:
+            TopDownRewrite(child, self.optimizer_context).execute()

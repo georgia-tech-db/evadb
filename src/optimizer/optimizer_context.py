@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 from src.optimizer.optimizer_task_queue import OptimizerTaskQueue
 from src.optimizer.memo import Memo
 from src.optimizer.operators import Operator
@@ -45,7 +46,9 @@ class OptimizerContext:
         for child_opr in opr.children:
             child_id = self.xform_opr_to_group_expr(child_opr).group_id
             child_ids.append(child_id)
-        grp_exp = GroupExpression(opr=opr, children=child_ids)
+        opr_copy = copy.deepcopy(opr)
+        opr_copy.children = None
+        grp_exp = GroupExpression(opr=opr_copy, children=child_ids)
         self.memo.add_group_expr(grp_exp)
         return grp_exp
 

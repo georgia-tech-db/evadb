@@ -42,6 +42,9 @@ class PlanGenerator:
 
         # TopDown Rewrite
         TopDownRewrite(grp_expr, optimizer_context).execute()
+        
+        # Optimization
+        
 
     def build(self, logical_plan: Operator):
         # apply optimizations
