@@ -42,6 +42,7 @@ class PlanGenerator:
 
         # TopDown Rewrite
         TopDownRewrite(grp_expr, optimizer_context).execute()
+        # optimizer_context.task_stack.push_task(TopDownRewrite(grp_expr, optimizer_context))
         
         # Optimization
         

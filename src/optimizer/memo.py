@@ -39,6 +39,7 @@ class Memo:
         grp = self._groups[group_id]
         grp_expr = grp.get_logical_expr()
         del self._group_exprs[grp_expr]
+        after.group_id = group_id
         grp.add_expr(after)
         
     def add_group_expr(self, expr: GroupExpression):
@@ -59,3 +60,5 @@ class Memo:
         # create a new group
         self._create_new_group(expr)
         self._group_exprs[expr] = expr.group_id
+
+        
