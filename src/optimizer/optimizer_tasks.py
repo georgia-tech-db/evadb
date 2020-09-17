@@ -17,6 +17,7 @@ from src.optimizer.rules.rules import RulesManager
 from src.optimizer.operators import Operator
 from src.optimizer.group_expression import GroupExpression
 from src.optimizer.optimizer_context import OptimizerContext
+from src.optimizer.binder import Binder
 
 
 class OptimizerTaskType(IntEnum):
@@ -46,6 +47,9 @@ class OptimizerTask:
     def execute(self):
         raise NotImplementedError
 
+    def push_task(self, task):
+        self.optimizer_context.task_stack.push_task(task)
+
 
 class TopDownRewrite(OptimizerTask):
     def __init__(self, root_expr: GroupExpression,
@@ -68,14 +72,14 @@ class TopDownRewrite(OptimizerTask):
         # sort the rules by promise
         sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
         
-        
         for rule in valid_rules:
-            if rule.check(self.root_id, self.optimizer_context):
-                self.root_expr = rule.apply(
-                    self.root_id, self.optimizer_context)
+            binder = Binder(self.root_expr, rule.pattern, self.optimizer_context.memo)
+            for match in iter(binder):
+                after = rule.apply(match, self.optimizer_context)
+                new_expr = GroupExpression(after, self.root_expr.group_id)
+                self.optimizer_context.memo.replace_group_expr(root_expr.group_id, new_expr)
+                # self.push_task(TopDownRewrite(new_expr, self.optimizer_context))
+                TopDownRewrite(new_expr, optimizer_context)
 
-        grp = self.optimizer_context.memo.get_group(self.root_id)
-        grp_expr = grp.get_logical_expr()
-
-        for child in grp_expr.children:
-            TopDownRewrite(child, self.optimizer_context).execute()
+        # for child in grp_expr.children:
+        #     # self.optimizer_context.task_stack.push_task(TopDownRewrite(child, self.optimizer_context))
