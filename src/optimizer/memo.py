@@ -37,10 +37,11 @@ class Memo:
             This should be used in rewrite rules.
         """    
         grp = self._groups[group_id]
-        grp_expr = grp.get_logical_expr()
+        grp_expr = grp.logical_exprs[0]
         del self._group_exprs[grp_expr]
         after.group_id = group_id
         grp.add_expr(after)
+        self._group_exprs[after] = after.group_id
         
     def add_group_expr(self, expr: GroupExpression):
         # existing expression
