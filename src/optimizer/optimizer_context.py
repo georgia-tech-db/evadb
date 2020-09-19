@@ -47,7 +47,7 @@ class OptimizerContext:
             child_id = self.xform_opr_to_group_expr(child_opr).group_id
             child_ids.append(child_id)
         opr_copy = copy.deepcopy(opr)
-        opr_copy.children = None
+        opr_copy.children.clear()
         grp_exp = GroupExpression(opr=opr_copy, children=child_ids)
         self.memo.add_group_expr(grp_exp)
         return grp_exp

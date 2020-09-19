@@ -46,7 +46,8 @@ class Group:
     @property
     def group_id(self):
         return self._group_id
-
+    
+    @property
     def logical_exprs(self):
         return self._logical_exprs
     

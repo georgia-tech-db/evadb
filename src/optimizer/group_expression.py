@@ -22,7 +22,7 @@ class GroupExpression:
     def __init__(self,
                  opr: Operator,
                  group_id: int = INVALID_GROUP_ID,
-                 children: List[int] = None):
+                 children: List[int] = []):
         self._opr = opr
         self._group_id = group_id
         self._children = children
