@@ -34,24 +34,22 @@ class Binder:
         grp_exprs = grp.logical_exprs
 
         for expr in grp.logical_exprs:
-            yield from _binder(expr, pattern, memo)
+            yield from Binder._binder(expr, pattern, memo)
 
     @staticmethod
     def _binder(expr: GroupExpression, pattern: Pattern, memo: Memo):
         if expr.opr.type != pattern.opr_type:
             return
 
-        if not len(pattern.children):
-            yield expr.opr
-
-        if len(pattern.children) != len(expr.opr.children):
+        if len(pattern.children) != len(expr.children):
             return
 
+        curr_iterator = iter([expr.opr])
         child_binders = []
-        for expr_child, pattern_child in zip(expr.opr.children, pattern.children):
-            child_binders.append(_grp_binder(expr_child, pattern_child, memo))
+        for child_grp, pattern_child in zip(expr.children, pattern.children):
+            child_binders.append(Binder._grp_binder(child_grp, pattern_child, memo))
         
-        yield from itertools.product(*child_binders)
+        yield from itertools.product(curr_iterator, *child_binders)
 
     @staticmethod
     def build_opr_tree_from_inorder_repr(inorder_repr: tuple) -> Operator:
@@ -60,10 +58,10 @@ class Binder:
         else:
             opr_tree = inorder_repr[0]
             for child in inorder_repr[1:]:
-                opr_tree.append_child(build_opr_tree_from_inorder_repr(child))
+                opr_tree.append_child(Binder.build_opr_tree_from_inorder_repr(child))
             return opr_tree
             
     def __iter__(self):
-        for match in _binder(self._grp_expr, self._pattern, self._memo):
+        for match in Binder._binder(self._grp_expr, self._pattern, self._memo):
             yield Binder.build_opr_tree_from_inorder_repr(match)
             
