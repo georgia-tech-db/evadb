@@ -20,6 +20,7 @@ from src.optimizer.generators.load_generator import LoadDataGenerator
 from src.optimizer.operators import Operator, OperatorType
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.optimizer_tasks import TopDownRewrite
+from src.optimizer.optimizer_task_stack import OptimizerTaskStack
 
 
 class PlanGenerator:
@@ -35,22 +36,45 @@ class PlanGenerator:
     _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
     _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
 
+    def execute_task_stack(self, task_stack: OptimizerTaskStack):
+        while not task_stack.empty():
+            task = task_stack.pop()
+            task.execute()
+
+    def build_optimal_physical_plan(self, root_grp_id: int, optimizer_context: OptimizerContext):
+        physical_plan = None
+        root_grp = optimizer_context.get_group(root_grp_id)
+        best_grp_expr = root_grp.get_best_expr()
+
+        physical_plan = best_grp_expr.opr
+
+        for child_grp_id in best_grp_expr.children:
+            child_plan = self.build_optimal_physical_plan(child_grp_id, optimizer_context)
+            physical_plan.append_child(child_plan)
+
+        return physical_plan
+    
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
         memo = optimizer_context.memo
         grp_expr = optimizer_context.xform_opr_to_group_expr(logical_plan)
-
+        root_grp_id = grp_expr.group_id
         # TopDown Rewrite
-        TopDownRewrite(grp_expr, optimizer_context).execute()
-        # optimizer_context.task_stack.push_task(TopDownRewrite(grp_expr, optimizer_context))
-        
-        # Optimization
-        
+        optimizer_context.task_stack.push(TopDownRewrite(grp_expr, optimizer_context))
+        execute_task_stack(optimizer_context.task_stack)
+
+        # Optimize Expression (logical -> physical transformation)
+        optimizer_context.task_stack.push()
+        execute_task_stack(optimizer_context.task_stack)
+
+        # Build Optimal Tree 
+        optimal_plan = build_optimal_physical_plan(root_grp_id, optimizer_context)
+        return optimal_plan
 
     def build(self, logical_plan: Operator):
         # apply optimizations
 
-        self.optimize(logical_plan)
+        return self.optimize(logical_plan)
 
         #############################################
         # remove this code once done with optimizer
