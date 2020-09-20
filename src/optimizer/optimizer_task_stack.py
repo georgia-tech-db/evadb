@@ -19,8 +19,11 @@ class OptimizerTaskStack():
     def __init__(self):
         self._task_stack = deque()
 
-    def push_task(self, task: 'OptimizerTask'):
+    def push(self, task: 'OptimizerTask'):
         self._task_stack.append(task)
 
-    def pop_task(self) -> 'OptimizerTask':
+    def pop(self) -> 'OptimizerTask':
         return self._task_stack.pop()
+
+    def empty(self) -> bool:
+        return not self._task_stack
