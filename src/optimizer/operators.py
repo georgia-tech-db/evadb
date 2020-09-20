@@ -91,6 +91,7 @@ class LogicalGet(Operator):
         self._video = video
         self._dataset_metadata = dataset_metadata
         self._predicate = None
+        self._select_list = None
 
     @property
     def video(self):
@@ -108,13 +109,23 @@ class LogicalGet(Operator):
     def predicate(self, predicate):
         self._predicate = predicate
 
+    @property
+    def select_list(self):
+        self._select_list
+    
+    @select_list.setter
+    def select_list(self, select_list):
+        self._select_list = select_list
+    
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):
             return False
         return (is_subtree_equal
                 and self.video == other.video
-                and self.dataset_metadata == other.dataset_metadata)
+                and self.dataset_metadata == other.dataset_metadata
+                and self.predicate == other.predicate
+                and self.select_list == other.select_list)
 
 
 class LogicalQueryDerivedGet(Operator):
