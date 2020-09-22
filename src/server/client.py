@@ -116,7 +116,7 @@ class EvaClient(asyncio.Protocol):
 
 def process_cmd(prompt):
 
-    prompt.cmdloop('Foo')
+    prompt.cmdloop('Welcome to EVA Server')
 
 
 @asyncio.coroutine
@@ -139,9 +139,10 @@ def handle_user_input(loop, protocol):
     protocol.done.set_result(None)
 
 
-async def start_client(loop, factory,
+async def start_client(factory,
                        host: string, port: int,
-                       max_retry_count: int):
+                       max_retry_count: int,
+                       loop=None):
     """
         Wait for the connection to open and the task to be processed.
 
@@ -152,6 +153,9 @@ async def start_client(loop, factory,
 
     retries = max_retry_count * [1]  # non-exponential 10s
 
+    if loop is None:
+        loop = asyncio.get_event_loop()
+
     with ExitStack() as stack:
         while True:
             try:
@@ -160,9 +164,9 @@ async def start_client(loop, factory,
                 connection = loop.create_connection(factory, sock=sock)
                 transport, protocol = await connection
 
-            except Exception:
+            except Exception as e:
                 if not retries:
-                    raise RuntimeError('Client unable to connect to server')
+                    raise e
 
                 await asyncio.sleep(retries.pop(0) - random.random())
 
@@ -199,9 +203,9 @@ def start_clients(client_count: int, host: string, port: int,
 
     # Create client tasks
     client_coros = [
-        start_client(loop, lambda: EvaClient(),
+        start_client(lambda: EvaClient(),
                      host, port,
-                     max_retry_count
+                     max_retry_count, loop
                      )
         for i in range(client_count)
     ]
