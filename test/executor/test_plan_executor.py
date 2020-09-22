@@ -68,17 +68,17 @@ class PlanExecutorTest(unittest.TestCase):
             plan=root_abs_plan)._build_execution_tree(plan=root_abs_plan)
 
         # Root Nodes
-        self.assertEqual(root_abs_plan.node_type,
-                         root_abs_executor._node.node_type)
+        self.assertEqual(root_abs_plan.opr_type,
+                         root_abs_executor._node.opr_type)
 
         # Children of Root
         for child_abs, child_exec in zip(root_abs_plan.children,
                                          root_abs_executor.children):
-            self.assertEqual(child_abs.node_type, child_exec._node.node_type)
+            self.assertEqual(child_abs.opr_type, child_exec._node.opr_type)
             # Grand Children of Root
             for gc_abs, gc_exec in zip(child_abs.children,
                                        child_exec.children):
-                self.assertEqual(gc_abs.node_type, gc_exec._node.node_type)
+                self.assertEqual(gc_abs.opr_type, gc_exec._node.opr_type)
 
     def test_build_execution_tree_should_create_correct_exec_node(self):
         # SequentialScanExecutor
