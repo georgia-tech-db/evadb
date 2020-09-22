@@ -28,7 +28,7 @@ NUM_FRAMES = 10
 class SelectExecutorTest(unittest.TestCase):
 
     def setUp(self):
-        CatalogManager().reset()
+        # CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
@@ -43,6 +43,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        print(actual_batch, expected_batch)
         self.assertEqual(actual_batch, expected_batch)
 
         # Need Order by
@@ -78,7 +79,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_select_and_where_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
+        # perform_query(load_query)
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
         actual_batch = perform_query(select_query)
         expected_batch = list(create_dummy_batches(filters=[5]))[0]
@@ -116,3 +117,5 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
 
+if __name__ == "__main__":
+    unittest.main()
