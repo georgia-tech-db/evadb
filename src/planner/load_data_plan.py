@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from pathlib import Path
 from src.catalog.models.df_metadata import DataFrameMetadata
 
@@ -29,7 +29,7 @@ class LoadDataPlan(AbstractPlan):
         """
 
     def __init__(self, table_metainfo: DataFrameMetadata, file_path: Path):
-        super().__init__(PlanNodeType.LOAD_DATA)
+        super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
         self._file_path = file_path
 

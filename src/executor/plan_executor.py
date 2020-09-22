@@ -18,7 +18,7 @@ from src.executor.abstract_executor import AbstractExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from src.executor.pp_executor import PPExecutor
 from src.executor.create_executor import CreateExecutor
 from src.executor.insert_executor import InsertExecutor
@@ -54,21 +54,21 @@ class PlanExecutor:
             return root
 
         # Get plan node type
-        plan_node_type = plan.node_type
+        plan_opr_type = plan.opr_type
 
-        if plan_node_type == PlanNodeType.SEQUENTIAL_SCAN:
+        if plan_opr_type == PlanOprType.SEQUENTIAL_SCAN:
             executor_node = SequentialScanExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.STORAGE_PLAN:
+        elif plan_opr_type == PlanOprType.STORAGE_PLAN:
             executor_node = StorageExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.PP_FILTER:
+        elif plan_opr_type == PlanOprType.PP_FILTER:
             executor_node = PPExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.CREATE:
+        elif plan_opr_type == PlanOprType.CREATE:
             executor_node = CreateExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.INSERT:
+        elif plan_opr_type == PlanOprType.INSERT:
             executor_node = InsertExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.CREATE_UDF:
+        elif plan_opr_type == PlanOprType.CREATE_UDF:
             executor_node = CreateUDFExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.LOAD_DATA:
+        elif plan_opr_type == PlanOprType.LOAD_DATA:
             executor_node = LoadDataExecutor(node=plan)
 
         # Build Executor Tree for children
@@ -98,11 +98,11 @@ class PlanExecutor:
 
         # ToDo generalize this logic
         _INSERT_CREATE_LOAD = (
-            PlanNodeType.CREATE,
-            PlanNodeType.INSERT,
-            PlanNodeType.CREATE_UDF,
-            PlanNodeType.LOAD_DATA)
-        if execution_tree.node.node_type in _INSERT_CREATE_LOAD:
+            PlanOprType.CREATE,
+            PlanOprType.INSERT,
+            PlanOprType.CREATE_UDF,
+            PlanOprType.LOAD_DATA)
+        if execution_tree.node.opr_type in _INSERT_CREATE_LOAD:
             execution_tree.exec()
         else:
             for batch in execution_tree.exec():
