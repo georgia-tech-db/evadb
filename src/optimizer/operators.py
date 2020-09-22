@@ -47,7 +47,7 @@ class Operator:
     """
 
     def __init__(self, op_type: OperatorType, children: List = None):
-        self._type = op_type
+        self._opr_type = op_type
         self._children = children if children is not None else []
 
     def append_child(self, child: 'Operator'):
@@ -63,8 +63,8 @@ class Operator:
         self._children = children
 
     @property
-    def type(self):
-        return self._type
+    def opr_type(self):
+        return self._opr_type
 
     def __eq__(self, other):
         is_subtree_equal = True
@@ -77,7 +77,7 @@ class Operator:
         return is_subtree_equal
 
     def is_logical(self):
-        return self._type < OperatorType.LOGICALDELIMITER
+        return self._opr_type < OperatorType.LOGICALDELIMITER
     
 class Dummy(Operator):
     def __init__(self):

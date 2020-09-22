@@ -113,7 +113,7 @@ class Rule(ABC):
         grp_expr = grp.get_logical_expr()
         if grp_expr is None:
             return False
-        if (grp_expr.opr.type != pattern.opr_type or
+        if (grp_expr.opr.opr_type != pattern.opr_type or
                 (len(grp_expr.children) != len(pattern.children))):
             return False
         # recursively compare pattern and input_expr
@@ -124,7 +124,7 @@ class Rule(ABC):
         return is_equal
 
     def top_match(self, opr: Operator) -> bool:
-        return opr.type == self.pattern.opr_type
+        return opr.opr_type == self.pattern.opr_type
 
     @abstractmethod
     def promise(self) -> int:
@@ -209,7 +209,7 @@ class EmbedProjectIntoGet(Rule):
 class LogicalCreateToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATE)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -227,7 +227,7 @@ class LogicalCreateToPhysical(Rule):
 class LogicalCreateUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEUDF)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_UDF_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -245,7 +245,7 @@ class LogicalCreateUDFToPhysical(Rule):
 class LogicalInsertToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALINSERT)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_INSERT_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -263,7 +263,7 @@ class LogicalInsertToPhysical(Rule):
 class LogicalLoadToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALLOADDATA)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_LOAD_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -280,7 +280,7 @@ class LogicalLoadToPhysical(Rule):
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
 
     def promise(self):
@@ -290,7 +290,7 @@ class LogicalGetToSeqScan(Rule):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
-        after = SeqScanPlan(before.predicate, before.select_list)
+        after = SeqScanPlan(before.predicate, before.target_list)
         after.append_child(StoragePlan(before.dataset_metadata))
         return after
 

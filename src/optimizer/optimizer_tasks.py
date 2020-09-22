@@ -18,24 +18,32 @@ from src.optimizer.operators import Operator
 from src.optimizer.group_expression import GroupExpression
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.binder import Binder
-
+from src.optimizer.property import PropertyType
 
 class OptimizerTaskType(IntEnum):
     """Manages Enum for all the supported optimizer tasks
     """
     TOP_DOWN_REWRITE = auto()
+    BOTTOM_UP_REWRITE = auto()
     OPTIMIZE_EXPRESSION = auto()
+    OPTIMIZE_GROUP = auto()
+    OPTIMIZE_INPUTS = auto()
 
 
 class OptimizerTask:
-    def __init__(self, root_expr, optimizer_context, task_type: OptimizerTaskType):
+    def __init__(self, root_expr, root_id, optimizer_context, task_type: OptimizerTaskType):
         self._root_expr = root_expr
+        self._root_id = root_id
         self._task_type = task_type
         self._optimizer_context = optimizer_context
 
     @property
     def root_expr(self):
         return self._root_expr
+
+    @property
+    def root_id(self):
+        return self._root_id
 
     @property
     def task_type(self):
@@ -92,13 +100,59 @@ class TopDownRewrite(OptimizerTask):
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
                 self.optimizer_context.task_stack.push(TopDownRewrite(
-                    new_expr, new_expr.group_id, self.optimizer_context))
+                    new_expr, self.optimizer_context))
 
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.get_group(
                 child).logical_exprs[0]
             self.optimizer_context.task_stack.push(TopDownRewrite(
-                child_expr, child_expr.group_id, self.optimizer_context))
+                child_expr, self.optimizer_context))
+
+
+class BottomUpRewrite(OptimizerTask):
+    def __init__(self, root_expr: GroupExpression,
+                 optimizer_context: OptimizerContext, children_explored = False):
+        super().__init__(root_expr, root_expr.group_id,
+                         optimizer_context, OptimizerTaskType.BOTTOM_UP_REWRITE)
+        self._children_explored = children_explored
+    
+    @property
+    def root_expr(self):
+        return self._root_expr
+
+    @root_expr.setter
+    def root_expr(self, expr):
+        self._root_expr = expr
+
+    def execute(self):
+        if not self._children_explored:
+            self.optimizer_context.task_stack.push(BottomUpRewrite(
+                    self.root_expr, self.optimizer_context, True))
+            for child in self.root_expr.children:
+                child_expr = self.optimizer_context.memo.get_group(
+                    child).logical_exprs[0]
+                self.optimizer_context.task_stack.push(BottomUpRewrite(
+                    child_expr, self.optimizer_context))
+            return
+        rewrite_rules = RulesManager().rewrite_rules
+        valid_rules = []
+        for rule in rewrite_rules:
+            if rule.top_match(self.root_expr.opr):
+                valid_rules.append(rule)
+
+        # sort the rules by promise
+        sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
+        for rule in valid_rules:
+            binder = Binder(self.root_expr, rule.pattern,
+                            self.optimizer_context.memo)
+            for match in iter(binder):
+                after = rule.apply(match, self.optimizer_context)
+                new_expr = GroupExpression(after, self.root_expr.group_id)
+                self.root_expr = new_expr
+                self.optimizer_context.memo.replace_group_expr(
+                    self.root_expr.group_id, new_expr)
+                self.optimizer_context.task_stack.push(BottomUpRewrite(
+                    new_expr, self.optimizer_context))
 
 
 class OptimizeExpression(OptimizerTask):
@@ -118,13 +172,50 @@ class OptimizeExpression(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
-                after = rule.apply()
+                after = rule.apply(match, self.optimizer_context)
                 new_expr = GroupExpression(
                     after, self.root_expr.group_id, self.root_expr.children)
                 self.optimizer_context.memo.add_group_expr(new_expr)
-    
+                # Optimize inputs for this physical expr
+                self.optimizer_context.task_stack.push(OptimizeInputs(new_expr, self.optimizer_context))
+
             # Optimize the child groups
+            for child_id in self.root_expr.children:
+                child_expr = self.optimizer_context.task_stack.push(
+                    OptimizeGroup(None, child_id, self.optimizer_context))
+
+
+class OptimizeGroup(OptimizerTask):
+    def __init__(self, root_id, optimizer_context):
+        super().__init__(None, root_id,
+                         optimizer_context, OptimizerTaskType.OPTIMIZE_GROUP)
+
+    def execute(self):
+        grp = self.optimizer_context.memo.get_group(self.root_id)
+        for expr in grp.logical_exprs:
+            self.optimizer_context.task_stack.push(OptimizeExpression(expr, self.optimizer_context))
+        
+        for expr in grp.physical_exprs:
+            self.optimizer_context.task_stack.push(OptimizeInputs(expr, self.optimizer_context))
     
-            # for child_id in self.root_expr.children:
-            #     child_expr = self.optimizer_context.task_stack.push(
-            #         OptimizeGroup(None, child_id, self.optimizer_context, ))
+
+class OptimizeInputs(OptimizerTask):
+    def __init__(self, root_expr, optimizer_context):
+        super().__init__(root_expr, root_expr.group_id,
+                         optimizer_context, OptimizerTaskType.OPTIMIZE_INPUTS)
+
+    def execute(self):
+            cost = 0
+            grp = self.optimizer_context.memo.get_group(self.root_id)
+            for child_id in self.root_expr.children:
+                child_grp = self.optimizer_context.memo.get_group(child_id)
+                if child_grp.get_best_expr(PropertyType.DEFAULT):
+                    cost += child_grp.get_best_expr_cost(PropertyType.DEFAULT)
+                else:
+                    self.optimizer_context.task_stack.push(OptimizeInputs(self.root_expr, self.optimizer_context))
+                    self.optimizer_context.task_stack.push(
+                        OptimizeGroup(None, child_id, self.optimizer_context))
+                    return
+            
+            grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
+
