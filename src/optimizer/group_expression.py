@@ -61,7 +61,7 @@ class GroupExpression:
         # correct this hash function.
         # we are taking hash of just the opr type
         
-        curr_hash = hash(self.opr.type)
+        curr_hash = hash(self.opr.opr_type)
         for child_id in self.children:
             curr_hash ^= hash(child_id)
         return curr_hash

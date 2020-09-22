@@ -19,8 +19,9 @@ from src.optimizer.generators.create_udf_generator import CreateUDFGenerator
 from src.optimizer.generators.load_generator import LoadDataGenerator
 from src.optimizer.operators import Operator, OperatorType
 from src.optimizer.optimizer_context import OptimizerContext
-from src.optimizer.optimizer_tasks import TopDownRewrite
+from src.optimizer.optimizer_tasks import TopDownRewrite, OptimizeGroup, BottomUpRewrite
 from src.optimizer.optimizer_task_stack import OptimizerTaskStack
+from src.optimizer.property import PropertyType
 
 
 class PlanGenerator:
@@ -29,12 +30,12 @@ class PlanGenerator:
     NOTE: This currently just does node transformation. Optimizer logic
     needs to be incorporated.
     """
-    _SCAN_NODE_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
+    _SCAN_OPR_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
                         OperatorType.LOGICALPROJECT)
-    _INSERT_NODE_TYPE = OperatorType.LOGICALINSERT
-    _CREATE_NODE_TYPE = OperatorType.LOGICALCREATE
-    _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
-    _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
+    _INSERT_OPR_TYPE = OperatorType.LOGICALINSERT
+    _CREATE_OPR_TYPE = OperatorType.LOGICALCREATE
+    _CREATE_UDF_OPR_TYPE = OperatorType.LOGICALCREATEUDF
+    _LOAD_OPR_TYPE = OperatorType.LOGICALLOADDATA
 
     def execute_task_stack(self, task_stack: OptimizerTaskStack):
         while not task_stack.empty():
@@ -43,8 +44,8 @@ class PlanGenerator:
 
     def build_optimal_physical_plan(self, root_grp_id: int, optimizer_context: OptimizerContext):
         physical_plan = None
-        root_grp = optimizer_context.get_group(root_grp_id)
-        best_grp_expr = root_grp.get_best_expr()
+        root_grp = optimizer_context.memo.get_group(root_grp_id)
+        best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
 
         physical_plan = best_grp_expr.opr
 
@@ -61,14 +62,16 @@ class PlanGenerator:
         root_grp_id = grp_expr.group_id
         # TopDown Rewrite
         optimizer_context.task_stack.push(TopDownRewrite(grp_expr, optimizer_context))
-        execute_task_stack(optimizer_context.task_stack)
-
+        self.execute_task_stack(optimizer_context.task_stack)
+        optimizer_context.task_stack.push(BottomUpRewrite(grp_expr, optimizer_context))
+        self.execute_task_stack(optimizer_context.task_stack)
+        
         # Optimize Expression (logical -> physical transformation)
-        optimizer_context.task_stack.push()
-        execute_task_stack(optimizer_context.task_stack)
+        optimizer_context.task_stack.push(OptimizeGroup(root_grp_id, optimizer_context))
+        self.execute_task_stack(optimizer_context.task_stack)
 
         # Build Optimal Tree 
-        optimal_plan = build_optimal_physical_plan(root_grp_id, optimizer_context)
+        optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
         return optimal_plan
 
     def build(self, logical_plan: Operator):
@@ -78,14 +81,14 @@ class PlanGenerator:
 
         #############################################
         # remove this code once done with optimizer
-        if logical_plan.type in self._SCAN_NODE_TYPES:
+        if logical_plan.opr_type in self._SCAN_OPR_TYPES:
             return ScanGenerator().build(logical_plan)
-        if logical_plan.type is self._INSERT_NODE_TYPE:
+        if logical_plan.opr_type is self._INSERT_OPR_TYPE:
             return InsertGenerator().build(logical_plan)
-        if logical_plan.type is self._CREATE_NODE_TYPE:
+        if logical_plan.opr_type is self._CREATE_OPR_TYPE:
             return CreateGenerator().build(logical_plan)
-        if logical_plan.type is self._CREATE_UDF_NODE_TYPE:
+        if logical_plan.opr_type is self._CREATE_UDF_OPR_TYPE:
             return CreateUDFGenerator().build(logical_plan)
-        if logical_plan.type is self._LOAD_NODE_TYPE:
+        if logical_plan.opr_type is self._LOAD_OPR_TYPE:
             return LoadDataGenerator().build(logical_plan)
         ###############################################

@@ -38,7 +38,7 @@ class Binder:
 
     @staticmethod
     def _binder(expr: GroupExpression, pattern: Pattern, memo: Memo):
-        if expr.opr.type != pattern.opr_type:
+        if expr.opr.opr_type != pattern.opr_type:
             return
 
         if len(pattern.children) != len(expr.children):
