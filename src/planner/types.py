@@ -16,7 +16,7 @@ from enum import unique, IntEnum
 
 
 @unique
-class PlanNodeType(IntEnum):
+class PlanOprType(IntEnum):
     SEQUENTIAL_SCAN = 1
     STORAGE_PLAN = 2
     PP_FILTER = 3

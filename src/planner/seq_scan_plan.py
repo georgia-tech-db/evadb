@@ -16,7 +16,7 @@ from typing import List
 
 from src.expression.abstract_expression import AbstractExpression
 from src.planner.abstract_scan_plan import AbstractScan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class SeqScanPlan(AbstractScan):
@@ -35,7 +35,7 @@ class SeqScanPlan(AbstractScan):
                  predicate: AbstractExpression,
                  column_ids: List[AbstractExpression]):
         self._column_ids = column_ids
-        super().__init__(PlanNodeType.SEQUENTIAL_SCAN,
+        super().__init__(PlanOprType.SEQUENTIAL_SCAN,
                          predicate)
 
     @property
