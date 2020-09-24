@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 import numpy as np
 import pandas as pd
 
@@ -20,6 +21,17 @@ from pandas import DataFrame
 from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
+class BatchEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, pd.DataFrame):
+            return {"__dataframe__": obj.to_json()}
+        return json.JSONEncoder.default(self, obj)
+
+def as_batch(d):
+    if "__dataframe__" in d:
+        return pd.read_json(d["__dataframe__"])
+    else:
+        return d
 
 class Batch:
     """
@@ -75,18 +87,20 @@ class Batch:
     def column_as_numpy_array(self, column_name='data'):
         return np.array(self._frames[column_name])
 
+    def to_json(self):
+        obj = {'frames': self.frames,
+               'batch_size': self.batch_size,
+               'identifier_column': self.identifier_column}
+        return json.dumps(obj, cls=BatchEncoder)
+
+    @classmethod
+    def from_json(cls, json_str: str):
+        obj = json.loads(json_str, object_hook=as_batch)
+        return cls(frames=obj['frames'],
+                   identifier_column=obj['identifier_column'])
+
     def __str__(self):
-        """
-        For debug propose
-        """
-        return 'Batch Object:\n' \
-               '@dataframe: %s\n' \
-               '@batch_size: %d\n' \
-               '@outcome: %s\n' \
-               '@temp_outcome: %s\n' \
-               '@identifier_column: %s\n' \
-               % (self._frames, self._batch_size, self._outcomes,
-                  self._temp_outcomes, self.identifier_column)
+        return self.to_json()
 
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \
