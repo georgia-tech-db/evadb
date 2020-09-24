@@ -21,17 +21,20 @@ from pandas import DataFrame
 from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
+
 class BatchEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, pd.DataFrame):
             return {"__dataframe__": obj.to_json()}
         return json.JSONEncoder.default(self, obj)
 
+
 def as_batch(d):
     if "__dataframe__" in d:
         return pd.read_json(d["__dataframe__"])
     else:
         return d
+
 
 class Batch:
     """
@@ -100,7 +103,14 @@ class Batch:
                    identifier_column=obj['identifier_column'])
 
     def __str__(self):
-        return self.to_json()
+        """
+        For debug propose
+        """
+        return 'Batch Object:\n' \
+               '@dataframe: %s\n' \
+               '@batch_size: %d\n' \
+               '@identifier_column: %s' \
+               % (self._frames, self._batch_size, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames) and \

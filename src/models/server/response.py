@@ -1,5 +1,4 @@
 import json
-import pandas as pd
 
 from enum import Enum
 from src.models.storage.batch import Batch
@@ -51,7 +50,11 @@ class Response:
             self.metrics == other.metrics
 
     def __str__(self):
-        return self.to_json(indent=2)
+        return 'Response Object:\n' \
+               '@status: %s\n' \
+               '@batch: %s\n' \
+               '@metrics: %s' \
+               % (self.status, self.batch, self.metrics)
 
     @property
     def status(self):
