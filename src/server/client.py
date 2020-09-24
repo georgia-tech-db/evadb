@@ -43,7 +43,7 @@ class EvaClient(asyncio.Protocol):
     __errors__ = 0
 
     # Store response from server
-    _response_chunk = None
+    _response_chunks = []
 
     def __init__(self):
         self.done = asyncio.Future()
@@ -98,7 +98,7 @@ class EvaClient(asyncio.Protocol):
                              str(response_chunk) + "|--"
                              )
 
-        self._response_chunk = response_chunk
+        self._response_chunks.append(response_chunk)
 
     def send_message(self, message):
 
