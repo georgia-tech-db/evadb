@@ -19,7 +19,7 @@ import itertools
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.group_expression import GroupExpression
 from src.optimizer.memo import Memo
-from src.optimizer.operators import Operator
+from src.optimizer.operators import Operator, OperatorType
 
 
 class Binder:
@@ -47,7 +47,8 @@ class Binder:
         curr_iterator = iter([expr.opr])
         child_binders = []
         for child_grp, pattern_child in zip(expr.children, pattern.children):
-            child_binders.append(Binder._grp_binder(child_grp, pattern_child, memo))
+            if pattern_child.opr_type is not OperatorType.DUMMY:
+                child_binders.append(Binder._grp_binder(child_grp, pattern_child, memo))
         
         yield from itertools.product(curr_iterator, *child_binders)
 
@@ -57,8 +58,11 @@ class Binder:
             return inorder_repr
         else:
             opr_tree = inorder_repr[0]
-            for child in inorder_repr[1:]:
-                opr_tree.append_child(Binder.build_opr_tree_from_inorder_repr(child))
+            if len(inorder_repr) > 1:
+                # remove old children
+                opr_tree.children.clear()
+                for child in inorder_repr[1:]:
+                    opr_tree.append_child(Binder.build_opr_tree_from_inorder_repr(child))
             return opr_tree
             
     def __iter__(self):
