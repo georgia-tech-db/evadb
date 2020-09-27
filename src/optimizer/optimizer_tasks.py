@@ -85,17 +85,18 @@ class TopDownRewrite(OptimizerTask):
         rewrite_rules = RulesManager().rewrite_rules
         valid_rules = []
         for rule in rewrite_rules:
-            if rule.top_match(self.root_expr.opr):
+            if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 
         # sort the rules by promise
-        sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
+        valid_rules = sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
         for rule in valid_rules:
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
                 after = rule.apply(match, self.optimizer_context)
-                new_expr = GroupExpression(after, self.root_expr.group_id)
+                new_expr = self.optimizer_context.xform_opr_to_group_expr(after)
+                new_expr.mark_rule_explored(rule.rule_type)
                 self.root_expr = new_expr
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
@@ -137,7 +138,7 @@ class BottomUpRewrite(OptimizerTask):
         rewrite_rules = RulesManager().rewrite_rules
         valid_rules = []
         for rule in rewrite_rules:
-            if rule.top_match(self.root_expr.opr):
+            if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 
         # sort the rules by promise
@@ -149,6 +150,7 @@ class BottomUpRewrite(OptimizerTask):
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = GroupExpression(after, self.root_expr.group_id)
                 self.root_expr = new_expr
+                new_expr.mark_rule_explored(rule.rule_type)
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
                 self.optimizer_context.task_stack.push(BottomUpRewrite(
