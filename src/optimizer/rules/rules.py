@@ -22,13 +22,14 @@ from src.optimizer.operators import OperatorType, Operator
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
-    LogicalCreateUDF, LogicalProject, LogicalGet)
+    LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
+from src.expression.abstract_expression import ExpressionType
 
 
 class RuleType(IntFlag):
@@ -38,7 +39,7 @@ class RuleType(IntFlag):
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
-    # UDF_LTOR = auto()
+    UDF_LTOR = auto()
 
     REWRITE_DELIMETER = auto()
 
@@ -197,6 +198,48 @@ class EmbedProjectIntoGet(Rule):
         logical_get.target_list = select_list
         return logical_get
 
+
+class UdfLTOR(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.UDF_LTOR, pattern)
+
+    def promise(self):
+        return Promise.UDF_LTOR
+
+    def check(self, grp_id: int, context: 'OptimizerContext'):
+        # nothing else to check if logical match found return true
+        return True
+
+    def _rotate(self, before):
+        """Reorders the children based o their estimated execution cost
+        After rotation rightmost child has the highest cost 
+
+        Args:
+            before (AbstractExpression): expression tree to rotate
+
+        Returns:
+            int: extimated cost of execution
+        """
+        children_cost = []
+        node_cost = 0
+        # fetch cost from the catalog
+        if before.etype is ExpressionType.FUNCTION_EXPRESSION:
+            node_cost = 1
+        for child in before.children:
+            cost = self._rotate(child)
+            children_cost.append((cost, child))
+            node_cost += cost
+        children_cost = sorted(children_cost, key= lambda entry: entry[0])
+        updated_children = [entry[1] for entry in children_cost]
+        before.chidren = updated_children
+        return node_cost
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        self._rotate(before.predicate)
+        return before
+
 # REWRITE RULES END
 ##############################################
 
@@ -309,7 +352,8 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
-        self._rewrite_rules = [EmbedFilterIntoGet(), EmbedProjectIntoGet()]
+        self._rewrite_rules = [
+            EmbedFilterIntoGet(), EmbedProjectIntoGet(), UdfLTOR()]
         self._implementation_rules = [LogicalCreateToPhysical(),
                                       LogicalCreateUDFToPhysical(),
                                       LogicalInsertToPhysical(),
