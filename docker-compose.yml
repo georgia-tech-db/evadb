@@ -24,8 +24,9 @@ services:
       - /bin/sh
       - -c
       - |
-        ~/miniconda/bin/conda run -n eva flake8 --select E,F /app/src/ /app/test/ --exclude /app/src/filters,/app/src/parser/evaql
-        ~/miniconda/bin/conda run -n eva PYTHONPATH=/app/ pytest /app/test/ --cov-report= --cov-config=/app/.coveragerc --cov=/app/src/ -s -v --log-level=WARNING
+        cd /app
+        ~/miniconda/bin/conda run -n eva flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
+        ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
 
   eva-cpu:
     depends_on:
@@ -40,8 +41,9 @@ services:
       - /bin/sh
       - -c
       - |
-        ~/miniconda/bin/conda run -n eva flake8 --select E,F /app/src/ /app/test/ --exclude /app/src/filters,/app/src/parser/evaql
-        ~/miniconda/bin/conda run -n eva PYTHONPATH=/app/ pytest /app/test/ --cov-report= --cov-config=/app/.coveragerc --cov=/app/src/ -s -v --log-level=WARNING
+        cd /app
+        ~/miniconda/bin/conda run -n eva flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
+        ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
 
 volumes:
   db_data: {}
