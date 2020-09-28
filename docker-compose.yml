@@ -11,7 +11,7 @@ services:
       MYSQL_DATABASE: eva
       MYSQL_HOST: db
 
-  eva-gpu:
+  eva-test-gpu:
     depends_on:
       - db
     links:
@@ -28,7 +28,7 @@ services:
         ~/miniconda/bin/conda run -n eva flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
         ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
 
-  eva-cpu:
+  eva-test-cpu:
     depends_on:
       - db
     links:
