@@ -1,16 +1,14 @@
-FROM nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+FROM ubuntu:18.04
 
 ARG PYTHON_VERSION=3.8
 
 # install system-wide package
 RUN apt-get update \
-    && apt-get -y install sudo wget bash openjdk-8-jdk openjdk-8-jre
+    && apt-get -y install sudo wget bash openjdk-8-jdk openjdk-8-jre \
+    && apt-get -y install gcc python-dev python3-dev python3.7-dev python3.8-dev
 
 # set eva user and no password sudo
-RUN useradd -m eva && echo "eva:eva" | chpasswd && adduser eva sudo
-RUN echo "eva ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-USER eva
+RUN echo "root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # install miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh \
@@ -22,13 +20,9 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
     && ~/miniconda/bin/conda info -a
 
 COPY . /app
-RUN sudo chown -R eva:eva /app
 
 # install eva env
 RUN ~/miniconda/bin/conda env create -f /app/script/install/conda_eva_environment.yml
-
-# sanity check for GPU
-RUN ~/miniconda/bin/conda run -n eva python -c "import torch; torch.randn(1).cuda()"
 
 # generate eva-ql parser
 RUN wget https://www.antlr.org/download/antlr-4.8-complete.jar -O ~/antlr.jar \
