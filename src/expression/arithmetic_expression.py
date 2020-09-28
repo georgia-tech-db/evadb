@@ -16,6 +16,7 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, ExpressionReturnType
 import pandas as pd
 from src.models.storage.batch import Batch
+from src.models.server.metrics import timer
 
 
 class ArithmeticExpression(AbstractExpression):
@@ -30,6 +31,7 @@ class ArithmeticExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.FLOAT,
                          children=children)
 
+    @timer
     def evaluate(self, *args):
         vl = self.get_child(0).evaluate(*args).frames
         vr = self.get_child(1).evaluate(*args).frames

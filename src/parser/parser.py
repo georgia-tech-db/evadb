@@ -19,6 +19,7 @@ from antlr4.error.ErrorListener import ErrorListener
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.evaql.evaql_lexer import evaql_lexer
 
+from src.models.server.metrics import timer
 from src.parser.parser_visitor import ParserVisitor
 
 
@@ -68,6 +69,7 @@ class Parser(object):
         self._visitor = ParserVisitor()
         self._error_listener = MyErrorListener()
 
+    @timer
     def parse(self, query_string: str) -> list:
         lexer = evaql_lexer(InputStream(query_string))
         stream = CommonTokenStream(lexer)

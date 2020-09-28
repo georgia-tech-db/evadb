@@ -16,6 +16,7 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
 from src.models.storage.batch import Batch
+from src.models.server.metrics import timer
 
 
 class AggregationExpression(AbstractExpression):
@@ -30,6 +31,7 @@ class AggregationExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.INTEGER,
                          children=children)  # can also be a float
 
+    @timer
     def evaluate(self, *args):
         batch = self.get_child(0).evaluate(*args)
         if self.etype == ExpressionType.AGGREGATION_SUM:

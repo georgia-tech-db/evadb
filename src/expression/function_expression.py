@@ -23,6 +23,7 @@ from src.expression.abstract_expression import AbstractExpression, \
 from src.models.storage.batch import Batch
 from src.udfs.gpu_compatible import GPUCompatible
 from src.catalog.models.udf_io import UdfIO
+from src.models.server.metrics import timer
 
 
 @unique
@@ -95,6 +96,7 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
+    @timer
     def evaluate(self, batch: Batch):
         new_batch = batch
         child_batches = [child.evaluate(batch) for child in self.children]

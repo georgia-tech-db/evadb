@@ -17,6 +17,7 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionReturnType
 import pandas as pd
 from src.models.storage.batch import Batch
+from src.models.server.metrics import timer
 
 
 class LogicalExpression(AbstractExpression):
@@ -30,6 +31,7 @@ class LogicalExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
+    @timer
     def evaluate(self, *args):
         if self.get_children_count() == 2:
             left_values = self.get_child(0).evaluate(*args).frames

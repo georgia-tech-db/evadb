@@ -2,6 +2,7 @@ import json
 
 from enum import Enum
 from src.models.storage.batch import Batch
+from src.models.server.metrics import timer
 
 
 class ResponseStatus(str, Enum):
@@ -33,6 +34,7 @@ class Response:
         self._batch = batch
         self._metrics = metrics
 
+    @timer
     def to_json(self):
         obj = {'status': self.status,
                'batch': self.batch,
@@ -40,6 +42,7 @@ class Response:
         return json.dumps(obj, cls=ResponseEncoder)
 
     @classmethod
+    @timer
     def from_json(cls, json_str: str):
         obj = json.loads(json_str, object_hook=as_response)
         return cls(**obj)

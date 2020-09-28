@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
 import asyncio
 
 from src.parser.parser import Parser
@@ -36,6 +37,7 @@ def handle_request(transport, request_message):
 
     output_batch = None
     response = None
+    start_time = time.perf_counter()
     try:
         stmt = Parser().parse(request_message)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
@@ -45,9 +47,12 @@ def handle_request(transport, request_message):
         LoggingManager().log(e, LoggingLevel.WARNING)
         response = Response(status=ResponseStatus.FAIL, batch=None)
 
+    end_time = time.perf_counter()
+    run_time = end_time - start_time
     if response is None:
         response = Response(status=ResponseStatus.SUCCESS,
-                            batch=output_batch)
+                            batch=output_batch,
+                            metrics={"latency": run_time})
 
     responseData = response.to_json()
     # Send data length, because response can be very large

@@ -16,6 +16,7 @@ from src.catalog.models.df_column import DataFrameColumn
 from src.models.storage.batch import Batch
 from .abstract_expression import AbstractExpression, ExpressionType, \
     ExpressionReturnType
+from src.models.server.metrics import timer
 
 
 class TupleValueExpression(AbstractExpression):
@@ -66,6 +67,7 @@ class TupleValueExpression(AbstractExpression):
     def col_object(self, value: DataFrameColumn):
         self._col_object = value
 
+    @timer
     def evaluate(self, batch: Batch, *args):
         if args is None:
             # error Handling

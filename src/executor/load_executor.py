@@ -17,7 +17,7 @@ from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.storage import StorageEngine
 from src.readers.opencv_reader import OpenCVReader
-
+from src.models.server.metrics import timer
 
 class LoadDataExecutor(AbstractExecutor):
 
@@ -27,6 +27,7 @@ class LoadDataExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    @timer
     def exec(self):
         """
         Read the input video using opencv and persist data

@@ -17,7 +17,7 @@ from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.storage_plan import StoragePlan
 from src.storage import StorageEngine
-
+from src.models.server.metrics import timer
 
 class StorageExecutor(AbstractExecutor):
 
@@ -27,5 +27,6 @@ class StorageExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    @timer
     def exec(self) -> Iterator[Batch]:
         return StorageEngine.read(self.node.video)

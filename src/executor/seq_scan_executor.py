@@ -17,6 +17,7 @@ from typing import Iterator
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.seq_scan_plan import SeqScanPlan
+from src.models.server.metrics import timer
 
 
 class SequentialScanExecutor(AbstractExecutor):
@@ -35,6 +36,7 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    @timer
     def exec(self) -> Iterator[Batch]:
 
         child_executor = self.children[0]

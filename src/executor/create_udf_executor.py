@@ -16,6 +16,7 @@
 from src.catalog.catalog_manager import CatalogManager
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.create_udf_plan import CreateUDFPlan
+from src.models.server.metrics import timer
 
 
 class CreateUDFExecutor(AbstractExecutor):
@@ -26,6 +27,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    @timer
     def exec(self):
         """Create udf executor
 

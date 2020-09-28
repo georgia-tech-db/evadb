@@ -26,7 +26,7 @@ from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
-
+from src.models.server.metrics import timer
 
 class PlanExecutor:
     """
@@ -89,6 +89,7 @@ class PlanExecutor:
         # ToDo
         # clear all the nodes from the execution tree
 
+    @timer
     def execute_plan(self):
         """execute the plan tree
 

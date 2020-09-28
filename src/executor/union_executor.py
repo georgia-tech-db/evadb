@@ -18,6 +18,7 @@ from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.union_plan import UnionPlan
 from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.models.server.metrics import timer
 
 
 class UnionExecutor(AbstractExecutor):
@@ -34,6 +35,7 @@ class UnionExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    @timer
     def exec(self) -> Iterator[Batch]:
         if self.node.all is False:
             LoggingManager().log('Only UNION ALL is supported now.',

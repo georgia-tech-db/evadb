@@ -18,7 +18,7 @@ from src.optimizer.generators.create_generator import CreateGenerator
 from src.optimizer.generators.create_udf_generator import CreateUDFGenerator
 from src.optimizer.generators.load_generator import LoadDataGenerator
 from src.optimizer.operators import Operator, OperatorType
-
+from src.models.server.metrics import timer
 
 class PlanGenerator:
     """
@@ -33,6 +33,7 @@ class PlanGenerator:
     _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
     _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
 
+    @timer
     def build(self, logical_plan: Operator):
         if logical_plan.type in self._SCAN_NODE_TYPES:
             return ScanGenerator().build(logical_plan)

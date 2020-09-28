@@ -15,6 +15,7 @@
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
 from src.models.storage.batch import Batch
+from src.models.server.metrics import timer
 import pandas as pd
 
 
@@ -27,6 +28,7 @@ class ConstantValueExpression(AbstractExpression):
         super().__init__(ExpressionType.CONSTANT_VALUE)
         self._value = value
 
+    @timer
     def evaluate(self, *args):
         return Batch(pd.DataFrame([self._value]))
 

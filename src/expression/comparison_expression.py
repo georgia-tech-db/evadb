@@ -16,6 +16,7 @@ from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
 from src.models.storage.batch import Batch
+from src.models.server.metrics import timer
 import pandas as pd
 import numpy as np
 
@@ -31,6 +32,7 @@ class ComparisonExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
+    @timer
     def evaluate(self, *args):
         # evaluate always return batch
         left_values = self.get_child(0).evaluate(*args).frames

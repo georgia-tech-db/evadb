@@ -31,6 +31,8 @@ from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            column_definition_to_udf_io,
                                            create_video_metadata)
 from src.parser.table_ref import TableRef
+
+from src.models.server.metrics import timer
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 
@@ -198,6 +200,7 @@ class StatementToPlanConvertor:
         load_data_opr = LogicalLoadData(table_metainfo, statement.path)
         self._plan = load_data_opr
 
+    @timer
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
