@@ -1,0 +1,47 @@
+version: '3.3'
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
+      MYSQL_DATABASE: eva
+      MYSQL_HOST: db
+
+  eva-gpu:
+    depends_on:
+      - db
+    links:
+      - "db:db"
+    user: root
+    build:
+      context: .
+      dockerfile: docker/eva_gpu.Dockerfile
+    command:
+      - /bin/sh
+      - -c
+      - |
+        ~/miniconda/bin/conda run -n eva flake8 --select E,F /app/src/ /app/test/ --exclude /app/src/filters,/app/src/parser/evaql
+        ~/miniconda/bin/conda run -n eva PYTHONPATH=/app/ pytest /app/test/ --cov-report= --cov-config=/app/.coveragerc --cov=/app/src/ -s -v --log-level=WARNING
+
+  eva-cpu:
+    depends_on:
+      - db
+    links:
+      - "db:db"
+    user: root
+    build:
+      context: .
+      dockerfile: docker/eva_cpu.Dockerfile
+    command:
+      - /bin/sh
+      - -c
+      - |
+        ~/miniconda/bin/conda run -n eva flake8 --select E,F /app/src/ /app/test/ --exclude /app/src/filters,/app/src/parser/evaql
+        ~/miniconda/bin/conda run -n eva PYTHONPATH=/app/ pytest /app/test/ --cov-report= --cov-config=/app/.coveragerc --cov=/app/src/ -s -v --log-level=WARNING
+
+volumes:
+  db_data: {}
