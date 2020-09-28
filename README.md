@@ -41,9 +41,9 @@ sh script/install/install.sh
 
 ## Docker
 
-1. Build EVA image.
+1. Standup EVA testing for CPU/GPU hardware.
 ```shell
-docker build -t eva:eva -f docker/Dockerfile .
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu]
 ```
 
 ## Development
