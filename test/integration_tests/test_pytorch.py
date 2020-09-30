@@ -18,12 +18,12 @@ from src.catalog.catalog_manager import CatalogManager
 from test.util import perform_query
 
 
-class UDFExecutorTest(unittest.TestCase):
+class PytorchTest(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
 
-    def test_should_run_pytorch(self):
+    def test_should_run_pytorch_and_fastrcnn(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                    INTO MyVideo;"""
         perform_query(query)
