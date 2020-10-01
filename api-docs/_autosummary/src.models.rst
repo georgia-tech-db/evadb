@@ -1,0 +1,31 @@
+﻿src.models
+==========
+
+.. automodule:: src.models
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   src.models.catalog
+   src.models.inference
+   src.models.storage
