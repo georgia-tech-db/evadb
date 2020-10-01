@@ -29,7 +29,12 @@ from src.planner.insert_plan import InsertPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
-from src.expression.abstract_expression import ExpressionType
+from src.expression.abstract_expression import (
+    AbstractExpression, ExpressionType)
+from src.expression.function_expression import FunctionExpression
+from src.catalog.catalog_manager import CatalogManager
+from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.utils.generic_utils import path_to_class
 
 
 class RuleType(IntFlag):
@@ -39,6 +44,7 @@ class RuleType(IntFlag):
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
+    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     UDF_LTOR = auto()
 
     REWRITE_DELIMETER = auto()
@@ -50,7 +56,6 @@ class RuleType(IntFlag):
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
-
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -69,6 +74,7 @@ class Promise(IntFlag):
     LOGICAL_GET_TO_SEQSCAN = auto()
 
     # REWRITE RULES
+    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     UDF_LTOR = auto()
@@ -231,13 +237,62 @@ class UdfLTOR(Rule):
             cost = self._rotate(child)
             children_cost.append((cost, child))
             node_cost += cost
-        children_cost = sorted(children_cost, key= lambda entry: entry[0])
+        children_cost = sorted(children_cost, key=lambda entry: entry[0])
         updated_children = [entry[1] for entry in children_cost]
         before.chidren = updated_children
         return node_cost
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         self._rotate(before.predicate)
+        return before
+
+
+class LogicalUdfFilterToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGET)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_UDF_FILTER_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UDF_FILTER_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def _bind_udf(self, expr: FunctionExpression):
+        """search for all the physical equivalence of this udf
+        and replace with the optimal one"""
+        if not expr.is_logical():
+            return
+        catalog = CatalogManager()
+        udfs = catalog.get_udfs_by_type(expr.name)
+        # randomly selecting right now
+        # select the optimal udf
+        if udfs:
+            udf_obj = udfs[0]
+            if expr.output:
+                expr.output_obj = catalog.get_udf_io_by_name(expr.output)
+                if expr.output_obj is None:
+                    LoggingManager().log(
+                        'Invalid output {} selected for UDF {}'.format(
+                            expr.output, expr.name), LoggingLevel().ERROR)
+            expr.function = path_to_class(
+                udf_obj.impl_file_path, udf_obj.name)()
+
+        else:
+            LoggingManager().log('Invalid UDF{}'.format(expr.name),
+                                 LoggingLevel().ERROR)
+
+    def _convert_logical_udfs_to_physical(self, predicate: AbstractExpression):
+        if predicate.etype == ExpressionType.FUNCTION_EXPRESSION:
+            self._bind_udf(predicate)
+
+        for child in predicate.children:
+            self._convert_logical_udfs_to_physical(child)
+
+    def apply(self, before: LogicalGet, context: OptimizerContext):
+        self._convert_logical_udfs_to_physical(
+            before.predicate)
         return before
 
 # REWRITE RULES END
@@ -352,8 +407,10 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
-        self._rewrite_rules = [
-            EmbedFilterIntoGet(), EmbedProjectIntoGet(), UdfLTOR()]
+        self._rewrite_rules = [EmbedFilterIntoGet(),
+                               EmbedProjectIntoGet(),
+                               UdfLTOR(),
+                               LogicalUdfFilterToPhysical()]
         self._implementation_rules = [LogicalCreateToPhysical(),
                                       LogicalCreateUDFToPhysical(),
                                       LogicalInsertToPhysical(),
