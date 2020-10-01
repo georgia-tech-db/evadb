@@ -19,6 +19,7 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 ## Table of Contents
 * [Installation](#installation)
+* [Docker](#docker)
 * [Development](#development)
 * [Architecture](#architecture)
 
@@ -36,6 +37,16 @@ git clone https://github.com/georgia-tech-db/eva.git
 sh script/install/before_install.sh
 export PATH="$HOME/miniconda/bin:$PATH"
 sh script/install/install.sh
+```
+
+3. Install `docker` and `docker-compose`.
+Please refer to [official doc](https://docs.docker.com/engine/install/).
+
+## Docker
+
+1. Standup EVA testing for CPU/GPU hardware.
+```shell
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up
 ```
 
 ## Development
