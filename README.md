@@ -43,7 +43,7 @@ sh script/install/install.sh
 
 1. Standup EVA testing for CPU/GPU hardware.
 ```shell
-docker-compose -f docker-compose.yml eva-test-[cpu/gpu]
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up
 ```
 
 ## Development
