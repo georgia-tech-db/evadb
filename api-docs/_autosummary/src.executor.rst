@@ -1,0 +1,40 @@
+﻿src.executor
+============
+
+.. automodule:: src.executor
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   src.executor.abstract_executor
+   src.executor.abstract_storage_executor
+   src.executor.create_executor
+   src.executor.create_udf_executor
+   src.executor.disk_based_storage_executor
+   src.executor.execution_context
+   src.executor.insert_executor
+   src.executor.load_executor
+   src.executor.plan_executor
+   src.executor.pp_executor
+   src.executor.seq_scan_executor
+   src.executor.storage_executor

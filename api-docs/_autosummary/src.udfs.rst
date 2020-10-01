@@ -1,0 +1,32 @@
+﻿src.udfs
+========
+
+.. automodule:: src.udfs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   src.udfs.abstract_udfs
+   src.udfs.fastrcnn_object_detector
+   src.udfs.gpu_compatible
+   src.udfs.pytorch_abstract_udf
