@@ -39,6 +39,9 @@ export PATH="$HOME/miniconda/bin:$PATH"
 sh script/install/install.sh
 ```
 
+3. Install `docker` and `docker-compose`.
+Please refer to [official doc](https://docs.docker.com/engine/install/).
+
 ## Docker
 
 1. Standup EVA testing for CPU/GPU hardware.
