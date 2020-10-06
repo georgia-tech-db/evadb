@@ -35,8 +35,8 @@ class Session(object):
         return cls._instance
 
     def __init__(self):
-        config = ConfigurationManager()
-        name = config.get_value('core', 'application')
+        self._config = ConfigurationManager()
+        name = self._config.get_value('core', 'application')
         self.init_spark_session(name)
 
     def init_spark_session(self, application_name, spark_master=None):
@@ -49,13 +49,11 @@ class Session(object):
 
         :return: spark_session: A spark session
         """
+
         eva_spark_conf = SparkConf()
-        eva_spark_conf.set('spark.logConf', 'true')
-        # enable Arrow optimization for spark Session
-        # This is added to help with to and fro conversion
-        # between pandas and spark dataframe
-        # https://docs.databricks.com/spark/latest/spark-sql/spark-pandas.html
-        eva_spark_conf.set('spark.sql.execution.arrow.pyspark.enabled', 'true')
+        pyspark_config = self._config.get_value('pyspark', 'property') 
+        for key, value in pyspark_config.items():
+            eva_spark_conf.set(key, value)
 
         session_builder = SparkSession \
             .builder \
