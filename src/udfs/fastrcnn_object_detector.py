@@ -16,13 +16,11 @@ from typing import List
 
 import pandas as pd
 import torchvision
-import torch
 
 from torch import Tensor
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
-from src.configuration.configuration_manager import ConfigurationManager
 
 
 class FastRCNNObjectDetector(PytorchAbstractUDF):
@@ -113,17 +111,3 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
                 },
                 ignore_index=True)
         return outcome
-
-    def classify(self, frames: Tensor) -> pd.DataFrame:
-        gpu_batch_size = ConfigurationManager()\
-            .get_value('executor', 'gpu_batch_size')
-
-        if gpu_batch_size:
-            chunks = torch.split(frames, gpu_batch_size)
-            outcome = pd.DataFrame()
-            for tensor in chunks:
-                outcome = outcome.append(self._get_predictions(tensor),
-                                         ignore_index=True)
-            return outcome
-        else:
-            return self._get_predictions(frames)
