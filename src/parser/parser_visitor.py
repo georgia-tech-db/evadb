@@ -337,7 +337,12 @@ class ParserVisitor(evaql_parserVisitor):
         target_list = None
         from_clause = None
         where_clause = None
+        # orderby_clause = ctx.orderByClause()
+        orderby_clause = None
+
         # first child will be a SELECT terminal token
+        # print("children:", ctx.children)
+
         for child in ctx.children[1:]:
             try:
                 rule_idx = child.getRuleIndex()
@@ -349,6 +354,9 @@ class ParserVisitor(evaql_parserVisitor):
                     from_clause = clause.get('from', None)
                     where_clause = clause.get('where', None)
 
+                elif rule_idx == evaql_parser.RULE_orderByClause:
+                    orderby_clause = self.visit(child)
+
             except BaseException:
                 # stop parsing something bad happened
                 return None
@@ -357,7 +365,9 @@ class ParserVisitor(evaql_parserVisitor):
         if from_clause is not None:
             from_clause = from_clause[0]
 
-        select_stmt = SelectStatement(target_list, from_clause, where_clause)
+        select_stmt = SelectStatement(
+            target_list, from_clause, where_clause,
+            orderby_clause_list=orderby_clause)
 
         return select_stmt
 
@@ -380,6 +390,37 @@ class ParserVisitor(evaql_parserVisitor):
             where_clause = self.visit(ctx.whereExpr)
 
         return {"from": from_table, "where": where_clause}
+
+    def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
+        # print("visitOrderByClause ---------------")
+        # print("ORDER:", ctx.ORDER())
+        # print("BY:", ctx.BY())
+        # print("orderByExpression:", ctx.orderByExpression())
+        # print("COMMA:", ctx.COMMA())
+
+        orderby_clause_data = []
+        # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
+        for expression in ctx.orderByExpression():
+            orderby_clause_data.append(self.visitOrderByExpression(expression))
+
+        return orderby_clause_data
+
+    def visitOrderByExpression(
+            self, ctx: evaql_parser.OrderByExpressionContext):
+        # print("visitOrderByExpression ---------------")
+        # print("expression:", ctx.expression())
+        # print("ASC:", ctx.ASC())
+        # print("DESC:", ctx.DESC())
+        # print("getRuleIndex:", ctx.getRuleIndex())
+
+        # print(self.visitChildren(ctx.expression()))
+
+        if ctx.DESC():
+            sort_token = evaql_parser.DESC
+        else:
+            sort_token = evaql_parser.ASC
+
+        return self.visitChildren(ctx.expression()), sort_token
 
     ##################################################################
     # LOAD STATEMENT
