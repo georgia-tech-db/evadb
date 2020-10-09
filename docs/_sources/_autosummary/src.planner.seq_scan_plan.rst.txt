@@ -1,0 +1,23 @@
+src.planner.seq\_scan\_plan
+===========================
+
+.. automodule:: src.planner.seq_scan_plan
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      SeqScanPlan

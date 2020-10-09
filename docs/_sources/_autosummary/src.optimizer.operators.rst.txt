@@ -1,0 +1,32 @@
+src.optimizer.operators
+=======================
+
+.. automodule:: src.optimizer.operators
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      LogicalCreate
+      LogicalCreateUDF
+      LogicalFilter
+      LogicalGet
+      LogicalInsert
+      LogicalLoadData
+      LogicalProject
+      LogicalQueryDerivedGet
+      Operator
+      OperatorType

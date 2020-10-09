@@ -1,0 +1,19 @@
+src.optimizer.generators.load\_generator.LoadDataGenerator
+==========================================================
+
+.. currentmodule:: src.optimizer.generators.load_generator
+
+.. autoclass:: LoadDataGenerator
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~LoadDataGenerator.build

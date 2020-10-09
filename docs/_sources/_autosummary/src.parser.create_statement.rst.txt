@@ -1,0 +1,25 @@
+src.parser.create\_statement
+============================
+
+.. automodule:: src.parser.create_statement
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      ColConstraintInfo
+      ColumnDefinition
+      CreateTableStatement

@@ -1,0 +1,25 @@
+src.parser.types
+================
+
+.. automodule:: src.parser.types
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      ColumnConstraintEnum
+      ParserColumnDataType
+      StatementType

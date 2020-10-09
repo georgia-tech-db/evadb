@@ -1,0 +1,32 @@
+src.executor.seq\_scan\_executor.SequentialScanExecutor
+=======================================================
+
+.. currentmodule:: src.executor.seq_scan_executor
+
+.. autoclass:: SequentialScanExecutor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~SequentialScanExecutor.append_child
+      ~SequentialScanExecutor.exec
+      ~SequentialScanExecutor.validate
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~SequentialScanExecutor.children
+      ~SequentialScanExecutor.node

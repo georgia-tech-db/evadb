@@ -1,0 +1,30 @@
+src.optimizer.operators.Operator
+================================
+
+.. currentmodule:: src.optimizer.operators
+
+.. autoclass:: Operator
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~Operator.append_child
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~Operator.children
+      ~Operator.type

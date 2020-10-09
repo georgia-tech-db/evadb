@@ -1,0 +1,23 @@
+src.udfs.fastrcnn\_object\_detector
+===================================
+
+.. automodule:: src.udfs.fastrcnn_object_detector
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      FastRCNNObjectDetector

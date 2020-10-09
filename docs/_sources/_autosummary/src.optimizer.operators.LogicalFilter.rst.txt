@@ -1,0 +1,31 @@
+src.optimizer.operators.LogicalFilter
+=====================================
+
+.. currentmodule:: src.optimizer.operators
+
+.. autoclass:: LogicalFilter
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~LogicalFilter.append_child
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~LogicalFilter.children
+      ~LogicalFilter.predicate
+      ~LogicalFilter.type

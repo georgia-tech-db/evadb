@@ -1,0 +1,314 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>src.catalog.models.base_model &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../../../../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../_autosummary/src.html">src</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+
+      <li>src.catalog.models.base_model</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for src.catalog.models.base_model</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2018-2020 EVA</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Integer</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="kn">import</span> <span class="n">DatabaseError</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="kn">import</span> <span class="n">declarative_base</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy_utils</span> <span class="kn">import</span> <span class="n">database_exists</span><span class="p">,</span> <span class="n">create_database</span><span class="p">,</span> <span class="n">drop_database</span>
+
+<span class="kn">from</span> <span class="nn">src.catalog.sql_config</span> <span class="kn">import</span> <span class="n">SQLConfig</span>
+<span class="kn">from</span> <span class="nn">src.utils.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingLevel</span>
+<span class="kn">from</span> <span class="nn">src.utils.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingManager</span>
+
+<span class="n">db_session</span> <span class="o">=</span> <span class="n">SQLConfig</span><span class="p">()</span><span class="o">.</span><span class="n">session</span>
+
+
+<div class="viewcode-block" id="CustomModel"><a class="viewcode-back" href="../../../../_autosummary/src.catalog.models.base_model.CustomModel.html#src.catalog.models.base_model.CustomModel">[docs]</a><span class="k">class</span> <span class="nc">CustomModel</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;This overrides the default `_declarative_constructor` constructor.</span>
+
+<span class="sd">    It skips the attributes that are not present for the model, thus if a</span>
+<span class="sd">    dict is passed with some unknown attributes for the model on creation,</span>
+<span class="sd">    it won&#39;t complain for `unkwnown field`s.</span>
+<span class="sd">    Declares and int id field for all tables</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">db_session</span><span class="o">.</span><span class="n">query_property</span><span class="p">()</span>
+    <span class="n">_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">cls_</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+<div class="viewcode-block" id="CustomModel.save"><a class="viewcode-back" href="../../../../_autosummary/src.catalog.models.base_model.CustomModel.html#src.catalog.models.base_model.CustomModel.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add and commit</span>
+
+<span class="sd">        Returns: saved object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Object already exists in database&quot;</span><span class="p">,</span>
+                                 <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="CustomModel.update"><a class="viewcode-back" href="../../../../_autosummary/src.catalog.models.base_model.CustomModel.html#src.catalog.models.base_model.CustomModel.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update and commit</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs: attributes to update</span>
+
+<span class="sd">        Returns: updated object</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CustomModel.delete"><a class="viewcode-back" href="../../../../_autosummary/src.catalog.models.base_model.CustomModel.html#src.catalog.models.base_model.CustomModel.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete and commit&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Object couldn&#39;t be deleted&quot;</span><span class="p">,</span>
+                                 <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span></div>
+
+    <span class="k">def</span> <span class="nf">_commit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to commit. If an error is raised, the session is rollbacked.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">DatabaseError</span><span class="p">:</span>
+            <span class="n">db_session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="s2">&quot;Exception occurred while committing to database.&quot;</span><span class="p">,</span>
+                <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Exception occurred while committing to database.&quot;</span><span class="p">)</span></div>
+
+
+<span class="c1"># Custom Base Model to be inherited by all models</span>
+<span class="n">BaseModel</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="o">=</span><span class="n">CustomModel</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">bind</span><span class="o">=</span><span class="n">SQLConfig</span><span class="p">()</span><span class="o">.</span><span class="n">engine</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="init_db"><a class="viewcode-back" href="../../../../_autosummary/src.catalog.models.base_model.init_db.html#src.catalog.models.base_model.init_db">[docs]</a><span class="k">def</span> <span class="nf">init_db</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Create database if doesn&#39;t exist and create all tables.&quot;&quot;&quot;</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">SQLConfig</span><span class="p">()</span><span class="o">.</span><span class="n">engine</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">database_exists</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">url</span><span class="p">):</span>
+        <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Database does not exist, creating database.&quot;</span><span class="p">,</span>
+                             <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">create_database</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Creating tables&quot;</span><span class="p">,</span> <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">BaseModel</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="drop_db"><a class="viewcode-back" href="../../../../_autosummary/src.catalog.models.base_model.drop_db.html#src.catalog.models.base_model.drop_db">[docs]</a><span class="k">def</span> <span class="nf">drop_db</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Drop all of the record from tables and the tables themselves. Drop the</span>
+<span class="sd">    database as well.&quot;&quot;&quot;</span>
+    <span class="n">engine</span> <span class="o">=</span> <span class="n">SQLConfig</span><span class="p">()</span><span class="o">.</span><span class="n">engine</span>
+    <span class="k">if</span> <span class="n">database_exists</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">url</span><span class="p">):</span>
+        <span class="n">db_session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">BaseModel</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">drop_all</span><span class="p">()</span>
+        <span class="n">drop_database</span><span class="p">(</span><span class="n">engine</span><span class="o">.</span><span class="n">url</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+
+          </div>
+          <footer>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

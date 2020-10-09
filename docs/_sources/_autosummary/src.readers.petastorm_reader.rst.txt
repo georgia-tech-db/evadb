@@ -1,0 +1,23 @@
+src.readers.petastorm\_reader
+=============================
+
+.. automodule:: src.readers.petastorm_reader
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      PetastormReader

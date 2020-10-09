@@ -1,0 +1,26 @@
+src.expression.abstract\_expression.ExpressionReturnType
+========================================================
+
+.. currentmodule:: src.expression.abstract_expression
+
+.. autoclass:: ExpressionReturnType
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~ExpressionReturnType.BOOLEAN
+      ~ExpressionReturnType.FLOAT
+      ~ExpressionReturnType.INTEGER
+      ~ExpressionReturnType.INVALID
+      ~ExpressionReturnType.VARCHAR

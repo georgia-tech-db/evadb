@@ -1,0 +1,25 @@
+src.server.client.EvaClient
+===========================
+
+.. currentmodule:: src.server.client
+
+.. autoclass:: EvaClient
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~EvaClient.connection_lost
+      ~EvaClient.connection_made
+      ~EvaClient.data_received
+      ~EvaClient.eof_received
+      ~EvaClient.pause_writing
+      ~EvaClient.resume_writing
+      ~EvaClient.send_message

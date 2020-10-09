@@ -1,0 +1,31 @@
+src.parser.select\_statement.SelectStatement
+============================================
+
+.. currentmodule:: src.parser.select_statement
+
+.. autoclass:: SelectStatement
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~SelectStatement.from_table
+      ~SelectStatement.stmt_type
+      ~SelectStatement.target_list
+      ~SelectStatement.where_clause

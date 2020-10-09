@@ -1,0 +1,23 @@
+src.planner.abstract\_scan\_plan
+================================
+
+.. automodule:: src.planner.abstract_scan_plan
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      AbstractScan

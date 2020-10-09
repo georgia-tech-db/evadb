@@ -1,0 +1,25 @@
+src.parser.types.ColumnConstraintEnum
+=====================================
+
+.. currentmodule:: src.parser.types
+
+.. autoclass:: ColumnConstraintEnum
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~ColumnConstraintEnum.DEFAULT
+      ~ColumnConstraintEnum.NULLNOTNULL
+      ~ColumnConstraintEnum.PRIMARY
+      ~ColumnConstraintEnum.UNIQUE

@@ -1,0 +1,22 @@
+src.parser.parser.MyErrorListener
+=================================
+
+.. currentmodule:: src.parser.parser
+
+.. autoclass:: MyErrorListener
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~MyErrorListener.reportAmbiguity
+      ~MyErrorListener.reportAttemptingFullContext
+      ~MyErrorListener.reportContextSensitivity
+      ~MyErrorListener.syntaxError

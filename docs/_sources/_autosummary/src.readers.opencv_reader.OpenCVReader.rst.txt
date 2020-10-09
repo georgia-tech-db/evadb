@@ -1,0 +1,19 @@
+src.readers.opencv\_reader.OpenCVReader
+=======================================
+
+.. currentmodule:: src.readers.opencv_reader
+
+.. autoclass:: OpenCVReader
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~OpenCVReader.read

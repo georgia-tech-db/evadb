@@ -1,0 +1,23 @@
+src.parser.create\_udf\_statement
+=================================
+
+.. automodule:: src.parser.create_udf_statement
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      CreateUDFStatement

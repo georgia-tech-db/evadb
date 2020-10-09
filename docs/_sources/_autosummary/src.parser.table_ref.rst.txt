@@ -1,0 +1,24 @@
+src.parser.table\_ref
+=====================
+
+.. automodule:: src.parser.table_ref
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      TableInfo
+      TableRef

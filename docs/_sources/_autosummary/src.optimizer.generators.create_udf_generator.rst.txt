@@ -1,0 +1,23 @@
+src.optimizer.generators.create\_udf\_generator
+===============================================
+
+.. automodule:: src.optimizer.generators.create_udf_generator
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      CreateUDFGenerator

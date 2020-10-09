@@ -1,0 +1,23 @@
+src.expression.function\_expression.ExecutionMode
+=================================================
+
+.. currentmodule:: src.expression.function_expression
+
+.. autoclass:: ExecutionMode
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~ExecutionMode.EVAL
+      ~ExecutionMode.EXEC

@@ -1,0 +1,23 @@
+src.optimizer.statement\_to\_opr\_convertor
+===========================================
+
+.. automodule:: src.optimizer.statement_to_opr_convertor
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      StatementToPlanConvertor

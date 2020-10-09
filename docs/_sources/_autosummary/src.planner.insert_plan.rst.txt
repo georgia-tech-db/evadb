@@ -1,0 +1,23 @@
+src.planner.insert\_plan
+========================
+
+.. automodule:: src.planner.insert_plan
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      InsertPlan

@@ -1,0 +1,40 @@
+src.parser
+==========
+
+.. automodule:: src.parser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   src.parser.create_statement
+   src.parser.create_udf_statement
+   src.parser.evaql
+   src.parser.insert_statement
+   src.parser.load_statement
+   src.parser.parser
+   src.parser.parser_visitor
+   src.parser.select_statement
+   src.parser.statement
+   src.parser.table_ref
+   src.parser.types
+   src.parser.utils

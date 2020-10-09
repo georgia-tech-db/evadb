@@ -1,0 +1,795 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>src.parser.evaql.evaql_parserVisitor &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../../../../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../_autosummary/src.html">src</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+
+      <li>src.parser.evaql.evaql_parserVisitor</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for src.parser.evaql.evaql_parserVisitor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Generated from src/parser/evaql/evaql_parser.g4 by ANTLR 4.8</span>
+<span class="kn">from</span> <span class="nn">antlr4</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="vm">__name__</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.evaql_parser</span> <span class="kn">import</span> <span class="n">evaql_parser</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">evaql_parser</span> <span class="kn">import</span> <span class="n">evaql_parser</span>
+
+<span class="c1"># This class defines a complete generic visitor for a parse tree produced by evaql_parser.</span>
+
+<div class="viewcode-block" id="evaql_parserVisitor"><a class="viewcode-back" href="../../../../_autosummary/src.parser.evaql.evaql_parserVisitor.evaql_parserVisitor.html#src.parser.evaql.evaql_parserVisitor.evaql_parserVisitor">[docs]</a><span class="k">class</span> <span class="nc">evaql_parserVisitor</span><span class="p">(</span><span class="n">ParseTreeVisitor</span><span class="p">):</span>
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#root.</span>
+    <span class="k">def</span> <span class="nf">visitRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">RootContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#sqlStatements.</span>
+    <span class="k">def</span> <span class="nf">visitSqlStatements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SqlStatementsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#sqlStatement.</span>
+    <span class="k">def</span> <span class="nf">visitSqlStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SqlStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#emptyStatement.</span>
+    <span class="k">def</span> <span class="nf">visitEmptyStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">EmptyStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#ddlStatement.</span>
+    <span class="k">def</span> <span class="nf">visitDdlStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DdlStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#dmlStatement.</span>
+    <span class="k">def</span> <span class="nf">visitDmlStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DmlStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#utilityStatement.</span>
+    <span class="k">def</span> <span class="nf">visitUtilityStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UtilityStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#createDatabase.</span>
+    <span class="k">def</span> <span class="nf">visitCreateDatabase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">CreateDatabaseContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#createIndex.</span>
+    <span class="k">def</span> <span class="nf">visitCreateIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">CreateIndexContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#columnCreateTable.</span>
+    <span class="k">def</span> <span class="nf">visitColumnCreateTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ColumnCreateTableContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#createUdf.</span>
+    <span class="k">def</span> <span class="nf">visitCreateUdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">CreateUdfContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#udfName.</span>
+    <span class="k">def</span> <span class="nf">visitUdfName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UdfNameContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#udfType.</span>
+    <span class="k">def</span> <span class="nf">visitUdfType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UdfTypeContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#udfImpl.</span>
+    <span class="k">def</span> <span class="nf">visitUdfImpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UdfImplContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#indexType.</span>
+    <span class="k">def</span> <span class="nf">visitIndexType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IndexTypeContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#createDefinitions.</span>
+    <span class="k">def</span> <span class="nf">visitCreateDefinitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">CreateDefinitionsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#columnDeclaration.</span>
+    <span class="k">def</span> <span class="nf">visitColumnDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ColumnDeclarationContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#indexDeclaration.</span>
+    <span class="k">def</span> <span class="nf">visitIndexDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IndexDeclarationContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#columnDefinition.</span>
+    <span class="k">def</span> <span class="nf">visitColumnDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ColumnDefinitionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#nullColumnConstraint.</span>
+    <span class="k">def</span> <span class="nf">visitNullColumnConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">NullColumnConstraintContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#defaultColumnConstraint.</span>
+    <span class="k">def</span> <span class="nf">visitDefaultColumnConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DefaultColumnConstraintContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#primaryKeyColumnConstraint.</span>
+    <span class="k">def</span> <span class="nf">visitPrimaryKeyColumnConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">PrimaryKeyColumnConstraintContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#uniqueKeyColumnConstraint.</span>
+    <span class="k">def</span> <span class="nf">visitUniqueKeyColumnConstraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UniqueKeyColumnConstraintContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#simpleIndexDeclaration.</span>
+    <span class="k">def</span> <span class="nf">visitSimpleIndexDeclaration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleIndexDeclarationContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#dropDatabase.</span>
+    <span class="k">def</span> <span class="nf">visitDropDatabase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DropDatabaseContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#dropIndex.</span>
+    <span class="k">def</span> <span class="nf">visitDropIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DropIndexContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#dropTable.</span>
+    <span class="k">def</span> <span class="nf">visitDropTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DropTableContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#deleteStatement.</span>
+    <span class="k">def</span> <span class="nf">visitDeleteStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DeleteStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#insertStatement.</span>
+    <span class="k">def</span> <span class="nf">visitInsertStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">InsertStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#unionSelect.</span>
+    <span class="k">def</span> <span class="nf">visitUnionSelect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UnionSelectContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#simpleSelect.</span>
+    <span class="k">def</span> <span class="nf">visitSimpleSelect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleSelectContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#updateStatement.</span>
+    <span class="k">def</span> <span class="nf">visitUpdateStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UpdateStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#loadStatement.</span>
+    <span class="k">def</span> <span class="nf">visitLoadStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LoadStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#fileName.</span>
+    <span class="k">def</span> <span class="nf">visitFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FileNameContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#insertStatementValue.</span>
+    <span class="k">def</span> <span class="nf">visitInsertStatementValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">InsertStatementValueContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#updatedElement.</span>
+    <span class="k">def</span> <span class="nf">visitUpdatedElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UpdatedElementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#singleDeleteStatement.</span>
+    <span class="k">def</span> <span class="nf">visitSingleDeleteStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SingleDeleteStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#singleUpdateStatement.</span>
+    <span class="k">def</span> <span class="nf">visitSingleUpdateStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SingleUpdateStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#orderByClause.</span>
+    <span class="k">def</span> <span class="nf">visitOrderByClause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">OrderByClauseContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#orderByExpression.</span>
+    <span class="k">def</span> <span class="nf">visitOrderByExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">OrderByExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#tableSources.</span>
+    <span class="k">def</span> <span class="nf">visitTableSources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">TableSourcesContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#tableSourceBase.</span>
+    <span class="k">def</span> <span class="nf">visitTableSourceBase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">TableSourceBaseContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#atomTableItem.</span>
+    <span class="k">def</span> <span class="nf">visitAtomTableItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">AtomTableItemContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#subqueryTableItem.</span>
+    <span class="k">def</span> <span class="nf">visitSubqueryTableItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SubqueryTableItemContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#innerJoin.</span>
+    <span class="k">def</span> <span class="nf">visitInnerJoin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">InnerJoinContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#queryExpression.</span>
+    <span class="k">def</span> <span class="nf">visitQueryExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">QueryExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#querySpecification.</span>
+    <span class="k">def</span> <span class="nf">visitQuerySpecification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">QuerySpecificationContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#selectElements.</span>
+    <span class="k">def</span> <span class="nf">visitSelectElements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SelectElementsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#selectStarElement.</span>
+    <span class="k">def</span> <span class="nf">visitSelectStarElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SelectStarElementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#selectColumnElement.</span>
+    <span class="k">def</span> <span class="nf">visitSelectColumnElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SelectColumnElementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#selectFunctionElement.</span>
+    <span class="k">def</span> <span class="nf">visitSelectFunctionElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SelectFunctionElementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#selectExpressionElement.</span>
+    <span class="k">def</span> <span class="nf">visitSelectExpressionElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SelectExpressionElementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#fromClause.</span>
+    <span class="k">def</span> <span class="nf">visitFromClause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FromClauseContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#groupByItem.</span>
+    <span class="k">def</span> <span class="nf">visitGroupByItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">GroupByItemContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#limitClause.</span>
+    <span class="k">def</span> <span class="nf">visitLimitClause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LimitClauseContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#errorBoundsExpression.</span>
+    <span class="k">def</span> <span class="nf">visitErrorBoundsExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ErrorBoundsExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#confidenceLevelExpression.</span>
+    <span class="k">def</span> <span class="nf">visitConfidenceLevelExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ConfidenceLevelExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#shutdownStatement.</span>
+    <span class="k">def</span> <span class="nf">visitShutdownStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ShutdownStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#simpleDescribeStatement.</span>
+    <span class="k">def</span> <span class="nf">visitSimpleDescribeStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleDescribeStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#helpStatement.</span>
+    <span class="k">def</span> <span class="nf">visitHelpStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">HelpStatementContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#fullId.</span>
+    <span class="k">def</span> <span class="nf">visitFullId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FullIdContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#tableName.</span>
+    <span class="k">def</span> <span class="nf">visitTableName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">TableNameContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#fullColumnName.</span>
+    <span class="k">def</span> <span class="nf">visitFullColumnName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FullColumnNameContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#indexColumnName.</span>
+    <span class="k">def</span> <span class="nf">visitIndexColumnName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IndexColumnNameContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#userName.</span>
+    <span class="k">def</span> <span class="nf">visitUserName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UserNameContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#uuidSet.</span>
+    <span class="k">def</span> <span class="nf">visitUuidSet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UuidSetContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#uid.</span>
+    <span class="k">def</span> <span class="nf">visitUid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UidContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#simpleId.</span>
+    <span class="k">def</span> <span class="nf">visitSimpleId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleIdContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#dottedId.</span>
+    <span class="k">def</span> <span class="nf">visitDottedId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DottedIdContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#decimalLiteral.</span>
+    <span class="k">def</span> <span class="nf">visitDecimalLiteral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DecimalLiteralContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#stringLiteral.</span>
+    <span class="k">def</span> <span class="nf">visitStringLiteral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">StringLiteralContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#booleanLiteral.</span>
+    <span class="k">def</span> <span class="nf">visitBooleanLiteral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">BooleanLiteralContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#nullNotnull.</span>
+    <span class="k">def</span> <span class="nf">visitNullNotnull</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">NullNotnullContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#constant.</span>
+    <span class="k">def</span> <span class="nf">visitConstant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ConstantContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#simpleDataType.</span>
+    <span class="k">def</span> <span class="nf">visitSimpleDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleDataTypeContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#dimensionDataType.</span>
+    <span class="k">def</span> <span class="nf">visitDimensionDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DimensionDataTypeContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#integerDataType.</span>
+    <span class="k">def</span> <span class="nf">visitIntegerDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IntegerDataTypeContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#lengthOneDimension.</span>
+    <span class="k">def</span> <span class="nf">visitLengthOneDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LengthOneDimensionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#lengthTwoDimension.</span>
+    <span class="k">def</span> <span class="nf">visitLengthTwoDimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LengthTwoDimensionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#lengthDimensionList.</span>
+    <span class="k">def</span> <span class="nf">visitLengthDimensionList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LengthDimensionListContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#uidList.</span>
+    <span class="k">def</span> <span class="nf">visitUidList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UidListContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#tables.</span>
+    <span class="k">def</span> <span class="nf">visitTables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">TablesContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#indexColumnNames.</span>
+    <span class="k">def</span> <span class="nf">visitIndexColumnNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IndexColumnNamesContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#expressions.</span>
+    <span class="k">def</span> <span class="nf">visitExpressions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ExpressionsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#expressionsWithDefaults.</span>
+    <span class="k">def</span> <span class="nf">visitExpressionsWithDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ExpressionsWithDefaultsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#defaultValue.</span>
+    <span class="k">def</span> <span class="nf">visitDefaultValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">DefaultValueContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#expressionOrDefault.</span>
+    <span class="k">def</span> <span class="nf">visitExpressionOrDefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ExpressionOrDefaultContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#ifExists.</span>
+    <span class="k">def</span> <span class="nf">visitIfExists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IfExistsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#ifNotExists.</span>
+    <span class="k">def</span> <span class="nf">visitIfNotExists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IfNotExistsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#udfFunctionCall.</span>
+    <span class="k">def</span> <span class="nf">visitUdfFunctionCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UdfFunctionCallContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#aggregateFunctionCall.</span>
+    <span class="k">def</span> <span class="nf">visitAggregateFunctionCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">AggregateFunctionCallContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#udfFunction.</span>
+    <span class="k">def</span> <span class="nf">visitUdfFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UdfFunctionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#aggregateWindowedFunction.</span>
+    <span class="k">def</span> <span class="nf">visitAggregateWindowedFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">AggregateWindowedFunctionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#functionArgs.</span>
+    <span class="k">def</span> <span class="nf">visitFunctionArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FunctionArgsContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#functionArg.</span>
+    <span class="k">def</span> <span class="nf">visitFunctionArg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FunctionArgContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#isExpression.</span>
+    <span class="k">def</span> <span class="nf">visitIsExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IsExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#notExpression.</span>
+    <span class="k">def</span> <span class="nf">visitNotExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">NotExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#logicalExpression.</span>
+    <span class="k">def</span> <span class="nf">visitLogicalExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LogicalExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#predicateExpression.</span>
+    <span class="k">def</span> <span class="nf">visitPredicateExpression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">PredicateExpressionContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#expressionAtomPredicate.</span>
+    <span class="k">def</span> <span class="nf">visitExpressionAtomPredicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ExpressionAtomPredicateContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#subqueryComparisonPredicate.</span>
+    <span class="k">def</span> <span class="nf">visitSubqueryComparisonPredicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SubqueryComparisonPredicateContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#binaryComparisonPredicate.</span>
+    <span class="k">def</span> <span class="nf">visitBinaryComparisonPredicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">BinaryComparisonPredicateContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#inPredicate.</span>
+    <span class="k">def</span> <span class="nf">visitInPredicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">InPredicateContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#isNullPredicate.</span>
+    <span class="k">def</span> <span class="nf">visitIsNullPredicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">IsNullPredicateContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#likePredicate.</span>
+    <span class="k">def</span> <span class="nf">visitLikePredicate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LikePredicateContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#unaryExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitUnaryExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UnaryExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#subqueryExpessionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitSubqueryExpessionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">SubqueryExpessionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#constantExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitConstantExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ConstantExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#functionCallExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitFunctionCallExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FunctionCallExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#fullColumnNameExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitFullColumnNameExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">FullColumnNameExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#bitExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitBitExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">BitExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#nestedExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitNestedExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">NestedExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#mathExpressionAtom.</span>
+    <span class="k">def</span> <span class="nf">visitMathExpressionAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">MathExpressionAtomContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#unaryOperator.</span>
+    <span class="k">def</span> <span class="nf">visitUnaryOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">UnaryOperatorContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#comparisonOperator.</span>
+    <span class="k">def</span> <span class="nf">visitComparisonOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">ComparisonOperatorContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#logicalOperator.</span>
+    <span class="k">def</span> <span class="nf">visitLogicalOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">LogicalOperatorContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#bitOperator.</span>
+    <span class="k">def</span> <span class="nf">visitBitOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">BitOperatorContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+
+    <span class="c1"># Visit a parse tree produced by evaql_parser#mathOperator.</span>
+    <span class="k">def</span> <span class="nf">visitMathOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span><span class="n">evaql_parser</span><span class="o">.</span><span class="n">MathOperatorContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span></div>
+
+
+
+<span class="k">del</span> <span class="n">evaql_parser</span>
+</pre></div>
+
+           </div>
+
+          </div>
+          <footer>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

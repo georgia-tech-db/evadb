@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>src.catalog.catalog_manager &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../../../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/src.html">src</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+
+      <li>src.catalog.catalog_manager</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for src.catalog.catalog_manager</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2018-2020 EVA</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">src.catalog.column_type</span> <span class="kn">import</span> <span class="n">ColumnType</span>
+<span class="kn">from</span> <span class="nn">src.catalog.models.base_model</span> <span class="kn">import</span> <span class="n">init_db</span><span class="p">,</span> <span class="n">drop_db</span>
+<span class="kn">from</span> <span class="nn">src.catalog.models.df_column</span> <span class="kn">import</span> <span class="n">DataFrameColumn</span>
+<span class="kn">from</span> <span class="nn">src.catalog.models.df_metadata</span> <span class="kn">import</span> <span class="n">DataFrameMetadata</span>
+<span class="kn">from</span> <span class="nn">src.catalog.models.udf</span> <span class="kn">import</span> <span class="n">UdfMetadata</span>
+<span class="kn">from</span> <span class="nn">src.catalog.models.udf_io</span> <span class="kn">import</span> <span class="n">UdfIO</span>
+<span class="kn">from</span> <span class="nn">src.catalog.services.df_column_service</span> <span class="kn">import</span> <span class="n">DatasetColumnService</span>
+<span class="kn">from</span> <span class="nn">src.catalog.services.df_service</span> <span class="kn">import</span> <span class="n">DatasetService</span>
+<span class="kn">from</span> <span class="nn">src.catalog.services.udf_service</span> <span class="kn">import</span> <span class="n">UdfService</span>
+<span class="kn">from</span> <span class="nn">src.catalog.services.udf_io_service</span> <span class="kn">import</span> <span class="n">UdfIOService</span>
+<span class="kn">from</span> <span class="nn">src.utils.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingLevel</span>
+<span class="kn">from</span> <span class="nn">src.utils.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingManager</span>
+
+
+<div class="viewcode-block" id="CatalogManager"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager">[docs]</a><span class="k">class</span> <span class="nc">CatalogManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_instance</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">CatalogManager</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span><span class="o">.</span><span class="n">_bootstrap_catalog</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_instance</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span> <span class="o">=</span> <span class="n">DatasetService</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span> <span class="o">=</span> <span class="n">DatasetColumnService</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udf_service</span> <span class="o">=</span> <span class="n">UdfService</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udf_io_service</span> <span class="o">=</span> <span class="n">UdfIOService</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CatalogManager.reset"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method resets the state of the singleton instance.</span>
+<span class="sd">        It should drop the catalog table and reinitialize all the member</span>
+<span class="sd">        variables and services.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shutdown_catalog</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bootstrap_catalog</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_bootstrap_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Bootstraps catalog.</span>
+
+<span class="sd">        This method runs all tasks required for using catalog. Currently,</span>
+<span class="sd">        it includes only one task ie. initializing database. It creates the</span>
+<span class="sd">        catalog database and tables if they do not exist.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Bootstrapping catalog&quot;</span><span class="p">,</span> <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">init_db</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_shutdown_catalog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is responsible for gracefully shutting the</span>
+<span class="sd">        catalog manager. Currently, it includes dropping the catalog database</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Shutting catalog&quot;</span><span class="p">,</span> <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">drop_db</span><span class="p">()</span>
+
+<div class="viewcode-block" id="CatalogManager.create_metadata"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.create_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">create_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                        <span class="n">column_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DataFrameColumn</span><span class="p">],</span>
+                        <span class="n">identifier_column</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> \
+            <span class="n">DataFrameMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates metadata object</span>
+
+<span class="sd">        Creates a metadata object and column objects and persists them in</span>
+<span class="sd">        database. Sets the schema field of the metadata object.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: name of the dataset/video to which this metdata corresponds</span>
+<span class="sd">            file_url: #todo</span>
+<span class="sd">            column_list: list of columns</span>
+<span class="sd">            identifier_column (str):  A unique identifier column for each row</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The persisted DataFrameMetadata object with the id field populated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">file_url</span><span class="p">,</span> <span class="n">identifier_id</span><span class="o">=</span><span class="n">identifier_column</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">column_list</span><span class="p">:</span>
+            <span class="n">column</span><span class="o">.</span><span class="n">metadata_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">id</span>
+        <span class="n">column_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span><span class="o">.</span><span class="n">create_column</span><span class="p">(</span><span class="n">column_list</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">column_list</span>
+        <span class="k">return</span> <span class="n">metadata</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_table_bindings"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_table_bindings">[docs]</a>    <span class="k">def</span> <span class="nf">get_table_bindings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                           <span class="n">column_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span>
+                                                                    <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+        <span class="sd">&quot;&quot;&quot;This method fetches bindings for strings.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            database_name: currently not in use</span>
+<span class="sd">            table_name: the table that is being referred to</span>
+<span class="sd">            column_names: the column names of the table for which</span>
+<span class="sd">           bindings are required</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            returns metadata_id of table and a list of column ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">metadata_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">dataset_by_name</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="n">column_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">column_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                    <span class="s2">&quot;CatalogManager::get_table_binding() expected list&quot;</span><span class="p">,</span>
+                    <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+            <span class="n">column_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span><span class="o">.</span><span class="n">columns_by_dataset_id_and_names</span><span class="p">(</span>
+                <span class="n">metadata_id</span><span class="p">,</span>
+                <span class="n">column_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metadata_id</span><span class="p">,</span> <span class="n">column_ids</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_metadata"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                     <span class="n">col_id_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrameMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;This method returns the metadata object given a metadata_id.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            metadata_id: metadata id of the table</span>
+<span class="sd">            col_id_list: optional column ids of the table referred.</span>
+<span class="sd">                         If none all the columns are required</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            metadata object with all the details of video/dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">dataset_by_id</span><span class="p">(</span><span class="n">metadata_id</span><span class="p">)</span>
+        <span class="n">df_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span><span class="o">.</span><span class="n">columns_by_id_and_dataset_id</span><span class="p">(</span>
+            <span class="n">metadata_id</span><span class="p">,</span> <span class="n">col_id_list</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">df_columns</span>
+        <span class="k">return</span> <span class="n">metadata</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_column_types"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_column_types">[docs]</a>    <span class="k">def</span> <span class="nf">get_column_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_metadata_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">col_id_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ColumnType</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method consumes the input table_id and the input column_id_list</span>
+<span class="sd">        and</span>
+<span class="sd">        returns a list of ColumnType for each provided column_id.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            table_metadata_id {int} -- [metadata_id of the table]</span>
+<span class="sd">            col_id_list {List[int]} -- [metadata ids of the columns; If list</span>
+<span class="sd">            = None, return type for all columns in the table]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[ColumnType] -- [list of required column type for each input</span>
+<span class="sd">            column]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">dataset_by_id</span><span class="p">(</span><span class="n">table_metadata_id</span><span class="p">)</span>
+        <span class="n">col_types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">df_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span><span class="o">.</span><span class="n">columns_by_id_and_dataset_id</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">col_id_list</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_columns</span><span class="p">:</span>
+            <span class="n">col_types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">col_types</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_column_ids"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_column_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_column_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_metadata_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method returns all the column_ids associated with the given</span>
+<span class="sd">        table_metadata_id</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            table_metadata_id {int} -- [table metadata id for which columns</span>
+<span class="sd">            are required]</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int] -- [list of columns ids for this table]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">col_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">df_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span><span class="o">.</span><span class="n">columns_by_id_and_dataset_id</span><span class="p">(</span>
+            <span class="n">table_metadata_id</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_columns</span><span class="p">:</span>
+            <span class="n">col_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">col_ids</span></div>
+
+<div class="viewcode-block" id="CatalogManager.create_column_metadata"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.create_column_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">create_column_metadata</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">ColumnType</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;Create a dataframe column object this column.</span>
+<span class="sd">        This function won&#39;t commit this object in the catalog database.</span>
+<span class="sd">        If you want to commit it into catalog table call create_metadata with</span>
+<span class="sd">        corresponding table_id</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            column_name {str} -- column name to be created</span>
+<span class="sd">            data_type {ColumnType} -- type of column created</span>
+<span class="sd">            dimensions {List[int]} -- dimensions of the column created</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DataFrameColumn</span><span class="p">(</span><span class="n">column_name</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span>
+                               <span class="n">array_dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_dataset_metadata"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_dataset_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_dataset_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> \
+            <span class="n">DataFrameMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Dataset metadata for the given dataset name</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            dataset_name (str): name of the dataset</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataFrameMetadata</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">dataset_object_by_name</span><span class="p">(</span>
+            <span class="n">database_name</span><span class="p">,</span> <span class="n">dataset_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># we are forced to set schema every time metadata is fetched</span>
+        <span class="c1"># ToDo: maybe keep schema as a part of persistent metadata object</span>
+        <span class="n">df_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_column_service</span><span class="o">.</span><span class="n">columns_by_id_and_dataset_id</span><span class="p">(</span>
+            <span class="n">metadata</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">metadata</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">df_columns</span>
+        <span class="k">return</span> <span class="n">metadata</span></div>
+
+<div class="viewcode-block" id="CatalogManager.udf_io"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.udf_io">[docs]</a>    <span class="k">def</span> <span class="nf">udf_io</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">io_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data_type</span><span class="p">:</span> <span class="n">ColumnType</span><span class="p">,</span>
+            <span class="n">dimensions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">is_input</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs an in memory udf_io object with given info.</span>
+<span class="sd">        This function won&#39;t commit this object in the catalog database.</span>
+<span class="sd">        If you want to commit it into catalog call create_udf with</span>
+<span class="sd">        corresponding udf_id and io list</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            name(str): io name to be created</span>
+<span class="sd">            data_type(ColumnType): type of io created</span>
+<span class="sd">            dimensions(List[int]):dimensions of the io created</span>
+<span class="sd">            is_input(bool): whether a input or output, if true it is an input</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">UdfIO</span><span class="p">(</span><span class="n">io_name</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span>
+                     <span class="n">array_dimensions</span><span class="o">=</span><span class="n">dimensions</span><span class="p">,</span> <span class="n">is_input</span><span class="o">=</span><span class="n">is_input</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CatalogManager.create_udf"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.create_udf">[docs]</a>    <span class="k">def</span> <span class="nf">create_udf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">impl_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                   <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">udf_io_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">UdfIO</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">UdfMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates an udf metadata object and udf_io objects and persists them</span>
+<span class="sd">        in database.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            name(str): name of the udf to which this metdata corresponds</span>
+<span class="sd">            impl_file_path(str): implementation path of the udf,</span>
+<span class="sd">                                 relative to src/udf</span>
+<span class="sd">            type(str): what kind of udf operator like classification,</span>
+<span class="sd">                                                        detection etc</span>
+<span class="sd">            udf_io_list(List[UdfIO]): input/output info of this udf</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The persisted UdfMetadata object with the id field populated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udf_service</span><span class="o">.</span><span class="n">create_udf</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">impl_file_path</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">udf_io</span> <span class="ow">in</span> <span class="n">udf_io_list</span><span class="p">:</span>
+            <span class="n">udf_io</span><span class="o">.</span><span class="n">udf_id</span> <span class="o">=</span> <span class="n">metadata</span><span class="o">.</span><span class="n">id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_udf_io_service</span><span class="o">.</span><span class="n">add_udf_io</span><span class="p">(</span><span class="n">udf_io_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">metadata</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_udf_by_name"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_udf_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_udf_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UdfMetadata</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the UDF information based on name.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">             name (str): name of the UDF</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UdfMetadata object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udf_service</span><span class="o">.</span><span class="n">udf_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CatalogManager.delete_metadata"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.delete_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">delete_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method deletes the table along with its columns from df_metadata</span>
+<span class="sd">        and df_columns respectively</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">           table_name: table name to be deleted.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           True if successfully deleted else False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">metadata_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">dataset_by_name</span><span class="p">(</span><span class="n">table_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_service</span><span class="o">.</span><span class="n">delete_dataset_by_id</span><span class="p">(</span><span class="n">metadata_id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CatalogManager.delete_udf"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.delete_udf">[docs]</a>    <span class="k">def</span> <span class="nf">delete_udf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udf_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method drops the udf entry from the catalog</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">           udf_name: udf name to be dropped.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">           True if successfully deleted else False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udf_service</span><span class="o">.</span><span class="n">delete_udf_by_name</span><span class="p">(</span><span class="n">udf_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CatalogManager.get_udf_io_by_name"><a class="viewcode-back" href="../../../_autosummary/src.catalog.catalog_manager.CatalogManager.html#src.catalog.catalog_manager.CatalogManager.get_udf_io_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_udf_io_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">udf_io_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UdfIO</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the catalog object for the input udfio name</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            udf_io_name (str): name to query the UDFIO catalog table</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            UdfIO: catalog object found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_udf_io_service</span><span class="o">.</span><span class="n">udf_io_by_name</span><span class="p">(</span><span class="n">udf_io_name</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+
+          </div>
+          <footer>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

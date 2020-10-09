@@ -1,0 +1,19 @@
+src.readers.abstract\_reader.AbstractReader
+===========================================
+
+.. currentmodule:: src.readers.abstract_reader
+
+.. autoclass:: AbstractReader
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~AbstractReader.read

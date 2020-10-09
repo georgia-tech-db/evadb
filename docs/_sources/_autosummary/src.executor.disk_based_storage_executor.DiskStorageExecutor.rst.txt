@@ -1,0 +1,32 @@
+src.executor.disk\_based\_storage\_executor.DiskStorageExecutor
+===============================================================
+
+.. currentmodule:: src.executor.disk_based_storage_executor
+
+.. autoclass:: DiskStorageExecutor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~DiskStorageExecutor.append_child
+      ~DiskStorageExecutor.exec
+      ~DiskStorageExecutor.validate
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~DiskStorageExecutor.children
+      ~DiskStorageExecutor.node

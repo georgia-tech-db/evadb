@@ -1,0 +1,26 @@
+src.parser.types.ParserColumnDataType
+=====================================
+
+.. currentmodule:: src.parser.types
+
+.. autoclass:: ParserColumnDataType
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~ParserColumnDataType.BOOLEAN
+      ~ParserColumnDataType.FLOAT
+      ~ParserColumnDataType.INTEGER
+      ~ParserColumnDataType.NDARRAY
+      ~ParserColumnDataType.TEXT

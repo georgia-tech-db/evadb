@@ -1,0 +1,324 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>src.expression.function_expression.FunctionExpression &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="src.expression.logical_expression" href="src.expression.logical_expression.html" />
+    <link rel="prev" title="src.expression.function_expression.ExecutionMode" href="src.expression.function_expression.ExecutionMode.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="src.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="src.catalog.html">src.catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.configuration.html">src.configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.constants.html">src.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.executor.html">src.executor</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="src.expression.html">src.expression</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="src.expression.abstract_expression.html">src.expression.abstract_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.aggregation_expression.html">src.expression.aggregation_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.arithmetic_expression.html">src.expression.arithmetic_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.comparison_expression.html">src.expression.comparison_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.constant_value_expression.html">src.expression.constant_value_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.expression_utils.html">src.expression.expression_utils</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="src.expression.function_expression.html">src.expression.function_expression</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="src.expression.function_expression.ExecutionMode.html">src.expression.function_expression.ExecutionMode</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">src.expression.function_expression.FunctionExpression</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.logical_expression.html">src.expression.logical_expression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.expression.tuple_value_expression.html">src.expression.tuple_value_expression</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.models.html">src.models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.optimizer.html">src.optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.parser.html">src.parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.planner.html">src.planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.readers.html">src.readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.server.html">src.server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.spark.html">src.spark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.udfs.html">src.udfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.utils.html">src.utils</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="src.html">src</a> &raquo;</li>
+
+          <li><a href="src.expression.html">src.expression</a> &raquo;</li>
+
+          <li><a href="src.expression.function_expression.html">src.expression.function_expression</a> &raquo;</li>
+
+      <li>src.expression.function_expression.FunctionExpression</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <div class="section" id="src-expression-function-expression-functionexpression">
+<h1>src.expression.function_expression.FunctionExpression<a class="headerlink" href="#src-expression-function-expression-functionexpression" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="src.expression.function_expression.FunctionExpression">
+<em class="property">class </em><code class="sig-prename descclassname">src.expression.function_expression.</code><code class="sig-name descname">FunctionExpression</code><span class="sig-paren">(</span><em class="sig-param">func: Callable</em>, <em class="sig-param">mode: src.expression.function_expression.ExecutionMode = &lt;ExecutionMode.EVAL: 2&gt;</em>, <em class="sig-param">name=None</em>, <em class="sig-param">is_temp: bool = False</em>, <em class="sig-param">output=None</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/expression/function_expression.html#FunctionExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.expression.function_expression.FunctionExpression" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="src.expression.abstract_expression.AbstractExpression.html#src.expression.abstract_expression.AbstractExpression" title="src.expression.abstract_expression.AbstractExpression"><code class="xref py py-class docutils literal notranslate"><span class="pre">src.expression.abstract_expression.AbstractExpression</span></code></a></p>
+<p>Expression used for function evaluation
+:param func: UDF or EVA built in function for performing
+:type func: Callable
+:param operations on the:
+:param mode: The mode in which execution needs to happen.
+:type mode: ExecutionMode
+:param Will just return the output in EVAL mode. EXEC mode updates the:
+:param BatchFrame with output.:
+:param is_temp (bool: False): In case of EXEC type, decides if the
+:param default: False): In case of EXEC type, decides if the
+:param outcome needs to be stored in BatchFrame temporarily.:
+:param output: The column to return after executing function
+:type output: str
+:param output_obj: The catalog object corresponding to the func_output.
+:type output_obj: UdfIO
+:param To be populated by optimizer.:</p>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">append_child</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear_predicates</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">evaluate</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_child</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_children_count</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_predicate_count</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">children</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">etype</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">function</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">name</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_obj</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">predicates</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">return_type</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+           </div>
+
+          </div>
+          <footer>
+
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+
+        <a href="src.expression.logical_expression.html" class="btn btn-neutral float-right" title="src.expression.logical_expression" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+
+
+        <a href="src.expression.function_expression.ExecutionMode.html" class="btn btn-neutral float-left" title="src.expression.function_expression.ExecutionMode" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+
+    </div>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

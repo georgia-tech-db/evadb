@@ -1,0 +1,38 @@
+src.expression.constant\_value\_expression.ConstantValueExpression
+==================================================================
+
+.. currentmodule:: src.expression.constant_value_expression
+
+.. autoclass:: ConstantValueExpression
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~ConstantValueExpression.append_child
+      ~ConstantValueExpression.clear_predicates
+      ~ConstantValueExpression.evaluate
+      ~ConstantValueExpression.get_child
+      ~ConstantValueExpression.get_children_count
+      ~ConstantValueExpression.get_predicate_count
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~ConstantValueExpression.children
+      ~ConstantValueExpression.etype
+      ~ConstantValueExpression.predicates
+      ~ConstantValueExpression.return_type
+      ~ConstantValueExpression.value

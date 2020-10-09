@@ -1,0 +1,37 @@
+src.expression.aggregation\_expression.AggregationExpression
+============================================================
+
+.. currentmodule:: src.expression.aggregation_expression
+
+.. autoclass:: AggregationExpression
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~AggregationExpression.append_child
+      ~AggregationExpression.clear_predicates
+      ~AggregationExpression.evaluate
+      ~AggregationExpression.get_child
+      ~AggregationExpression.get_children_count
+      ~AggregationExpression.get_predicate_count
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~AggregationExpression.children
+      ~AggregationExpression.etype
+      ~AggregationExpression.predicates
+      ~AggregationExpression.return_type

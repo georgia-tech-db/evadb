@@ -1,0 +1,38 @@
+src.models.storage.batch.Batch
+==============================
+
+.. currentmodule:: src.models.storage.batch
+
+.. autoclass:: Batch
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~Batch.column_as_numpy_array
+      ~Batch.empty
+      ~Batch.get_outcomes_for
+      ~Batch.has_outcome
+      ~Batch.merge_column_wise
+      ~Batch.project
+      ~Batch.set_outcomes
+      ~Batch.sort
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~Batch.batch_size
+      ~Batch.frames
+      ~Batch.identifier_column

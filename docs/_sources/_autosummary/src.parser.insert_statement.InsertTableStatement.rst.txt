@@ -1,0 +1,31 @@
+src.parser.insert\_statement.InsertTableStatement
+=================================================
+
+.. currentmodule:: src.parser.insert_statement
+
+.. autoclass:: InsertTableStatement
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~InsertTableStatement.column_list
+      ~InsertTableStatement.stmt_type
+      ~InsertTableStatement.table
+      ~InsertTableStatement.value_list

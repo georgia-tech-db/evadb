@@ -1,0 +1,41 @@
+src.expression.function\_expression.FunctionExpression
+======================================================
+
+.. currentmodule:: src.expression.function_expression
+
+.. autoclass:: FunctionExpression
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~FunctionExpression.append_child
+      ~FunctionExpression.clear_predicates
+      ~FunctionExpression.evaluate
+      ~FunctionExpression.get_child
+      ~FunctionExpression.get_children_count
+      ~FunctionExpression.get_predicate_count
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~FunctionExpression.children
+      ~FunctionExpression.etype
+      ~FunctionExpression.function
+      ~FunctionExpression.name
+      ~FunctionExpression.output
+      ~FunctionExpression.output_obj
+      ~FunctionExpression.predicates
+      ~FunctionExpression.return_type

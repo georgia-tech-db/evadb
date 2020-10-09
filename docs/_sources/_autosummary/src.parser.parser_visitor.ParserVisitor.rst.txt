@@ -1,0 +1,143 @@
+src.parser.parser\_visitor.ParserVisitor
+========================================
+
+.. currentmodule:: src.parser.parser_visitor
+
+.. autoclass:: ParserVisitor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~ParserVisitor.aggregateResult
+      ~ParserVisitor.defaultResult
+      ~ParserVisitor.shouldVisitNextChild
+      ~ParserVisitor.visit
+      ~ParserVisitor.visitAggregateFunctionCall
+      ~ParserVisitor.visitAggregateWindowedFunction
+      ~ParserVisitor.visitAtomTableItem
+      ~ParserVisitor.visitBinaryComparisonPredicate
+      ~ParserVisitor.visitBitExpressionAtom
+      ~ParserVisitor.visitBitOperator
+      ~ParserVisitor.visitBooleanLiteral
+      ~ParserVisitor.visitChildren
+      ~ParserVisitor.visitColumnCreateTable
+      ~ParserVisitor.visitColumnDeclaration
+      ~ParserVisitor.visitColumnDefinition
+      ~ParserVisitor.visitComparisonOperator
+      ~ParserVisitor.visitConfidenceLevelExpression
+      ~ParserVisitor.visitConstant
+      ~ParserVisitor.visitConstantExpressionAtom
+      ~ParserVisitor.visitCreateDatabase
+      ~ParserVisitor.visitCreateDefinitions
+      ~ParserVisitor.visitCreateIndex
+      ~ParserVisitor.visitCreateUdf
+      ~ParserVisitor.visitDdlStatement
+      ~ParserVisitor.visitDecimalLiteral
+      ~ParserVisitor.visitDefaultColumnConstraint
+      ~ParserVisitor.visitDefaultValue
+      ~ParserVisitor.visitDeleteStatement
+      ~ParserVisitor.visitDimensionDataType
+      ~ParserVisitor.visitDmlStatement
+      ~ParserVisitor.visitDottedId
+      ~ParserVisitor.visitDropDatabase
+      ~ParserVisitor.visitDropIndex
+      ~ParserVisitor.visitDropTable
+      ~ParserVisitor.visitEmptyStatement
+      ~ParserVisitor.visitErrorBoundsExpression
+      ~ParserVisitor.visitErrorNode
+      ~ParserVisitor.visitExpressionAtomPredicate
+      ~ParserVisitor.visitExpressionOrDefault
+      ~ParserVisitor.visitExpressions
+      ~ParserVisitor.visitExpressionsWithDefaults
+      ~ParserVisitor.visitFileName
+      ~ParserVisitor.visitFromClause
+      ~ParserVisitor.visitFullColumnName
+      ~ParserVisitor.visitFullColumnNameExpressionAtom
+      ~ParserVisitor.visitFullId
+      ~ParserVisitor.visitFunctionArg
+      ~ParserVisitor.visitFunctionArgs
+      ~ParserVisitor.visitFunctionCallExpressionAtom
+      ~ParserVisitor.visitGroupByItem
+      ~ParserVisitor.visitHelpStatement
+      ~ParserVisitor.visitIfExists
+      ~ParserVisitor.visitIfNotExists
+      ~ParserVisitor.visitInPredicate
+      ~ParserVisitor.visitIndexColumnName
+      ~ParserVisitor.visitIndexColumnNames
+      ~ParserVisitor.visitIndexDeclaration
+      ~ParserVisitor.visitIndexType
+      ~ParserVisitor.visitInnerJoin
+      ~ParserVisitor.visitInsertStatement
+      ~ParserVisitor.visitInsertStatementValue
+      ~ParserVisitor.visitIntegerDataType
+      ~ParserVisitor.visitIsExpression
+      ~ParserVisitor.visitIsNullPredicate
+      ~ParserVisitor.visitLengthDimensionList
+      ~ParserVisitor.visitLengthOneDimension
+      ~ParserVisitor.visitLengthTwoDimension
+      ~ParserVisitor.visitLikePredicate
+      ~ParserVisitor.visitLimitClause
+      ~ParserVisitor.visitLoadStatement
+      ~ParserVisitor.visitLogicalExpression
+      ~ParserVisitor.visitLogicalOperator
+      ~ParserVisitor.visitMathExpressionAtom
+      ~ParserVisitor.visitMathOperator
+      ~ParserVisitor.visitNestedExpressionAtom
+      ~ParserVisitor.visitNotExpression
+      ~ParserVisitor.visitNullColumnConstraint
+      ~ParserVisitor.visitNullNotnull
+      ~ParserVisitor.visitOrderByClause
+      ~ParserVisitor.visitOrderByExpression
+      ~ParserVisitor.visitPredicateExpression
+      ~ParserVisitor.visitPrimaryKeyColumnConstraint
+      ~ParserVisitor.visitQueryExpression
+      ~ParserVisitor.visitQuerySpecification
+      ~ParserVisitor.visitRoot
+      ~ParserVisitor.visitSelectColumnElement
+      ~ParserVisitor.visitSelectElements
+      ~ParserVisitor.visitSelectExpressionElement
+      ~ParserVisitor.visitSelectFunctionElement
+      ~ParserVisitor.visitSelectStarElement
+      ~ParserVisitor.visitShutdownStatement
+      ~ParserVisitor.visitSimpleDataType
+      ~ParserVisitor.visitSimpleDescribeStatement
+      ~ParserVisitor.visitSimpleId
+      ~ParserVisitor.visitSimpleIndexDeclaration
+      ~ParserVisitor.visitSimpleSelect
+      ~ParserVisitor.visitSingleDeleteStatement
+      ~ParserVisitor.visitSingleUpdateStatement
+      ~ParserVisitor.visitSqlStatement
+      ~ParserVisitor.visitSqlStatements
+      ~ParserVisitor.visitStringLiteral
+      ~ParserVisitor.visitSubqueryComparisonPredicate
+      ~ParserVisitor.visitSubqueryExpessionAtom
+      ~ParserVisitor.visitSubqueryTableItem
+      ~ParserVisitor.visitTableName
+      ~ParserVisitor.visitTableSourceBase
+      ~ParserVisitor.visitTableSources
+      ~ParserVisitor.visitTables
+      ~ParserVisitor.visitTerminal
+      ~ParserVisitor.visitUdfFunction
+      ~ParserVisitor.visitUdfFunctionCall
+      ~ParserVisitor.visitUdfImpl
+      ~ParserVisitor.visitUdfName
+      ~ParserVisitor.visitUdfType
+      ~ParserVisitor.visitUid
+      ~ParserVisitor.visitUidList
+      ~ParserVisitor.visitUnaryExpressionAtom
+      ~ParserVisitor.visitUnaryOperator
+      ~ParserVisitor.visitUnionSelect
+      ~ParserVisitor.visitUniqueKeyColumnConstraint
+      ~ParserVisitor.visitUpdateStatement
+      ~ParserVisitor.visitUpdatedElement
+      ~ParserVisitor.visitUserName
+      ~ParserVisitor.visitUtilityStatement
+      ~ParserVisitor.visitUuidSet

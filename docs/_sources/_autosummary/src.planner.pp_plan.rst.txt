@@ -1,0 +1,23 @@
+src.planner.pp\_plan
+====================
+
+.. automodule:: src.planner.pp_plan
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      PPScanPlan

@@ -1,0 +1,23 @@
+src.udfs.abstract\_udfs
+=======================
+
+.. automodule:: src.udfs.abstract_udfs
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      AbstractClassifierUDF

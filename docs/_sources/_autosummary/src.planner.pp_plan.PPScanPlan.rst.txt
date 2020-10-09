@@ -1,0 +1,32 @@
+src.planner.pp\_plan.PPScanPlan
+===============================
+
+.. currentmodule:: src.planner.pp_plan
+
+.. autoclass:: PPScanPlan
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~PPScanPlan.append_child
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~PPScanPlan.children
+      ~PPScanPlan.node_type
+      ~PPScanPlan.parent
+      ~PPScanPlan.predicate

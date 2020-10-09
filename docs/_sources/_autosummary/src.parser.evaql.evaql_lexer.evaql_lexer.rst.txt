@@ -1,0 +1,227 @@
+src.parser.evaql.evaql\_lexer.evaql\_lexer
+==========================================
+
+.. currentmodule:: src.parser.evaql.evaql_lexer
+
+.. autoclass:: evaql_lexer
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~evaql_lexer.addErrorListener
+      ~evaql_lexer.checkVersion
+      ~evaql_lexer.emit
+      ~evaql_lexer.emitEOF
+      ~evaql_lexer.emitToken
+      ~evaql_lexer.extractVersion
+      ~evaql_lexer.getAllTokens
+      ~evaql_lexer.getCharErrorDisplay
+      ~evaql_lexer.getCharIndex
+      ~evaql_lexer.getErrorDisplay
+      ~evaql_lexer.getErrorDisplayForChar
+      ~evaql_lexer.getErrorHeader
+      ~evaql_lexer.getErrorListenerDispatch
+      ~evaql_lexer.getRuleIndexMap
+      ~evaql_lexer.getTokenErrorDisplay
+      ~evaql_lexer.getTokenType
+      ~evaql_lexer.getTokenTypeMap
+      ~evaql_lexer.mode
+      ~evaql_lexer.more
+      ~evaql_lexer.nextToken
+      ~evaql_lexer.notifyListeners
+      ~evaql_lexer.popMode
+      ~evaql_lexer.precpred
+      ~evaql_lexer.pushMode
+      ~evaql_lexer.recover
+      ~evaql_lexer.removeErrorListener
+      ~evaql_lexer.removeErrorListeners
+      ~evaql_lexer.reset
+      ~evaql_lexer.sempred
+      ~evaql_lexer.skip
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~evaql_lexer.ABS
+      ~evaql_lexer.ACTION_CLASSICATION
+      ~evaql_lexer.ALL
+      ~evaql_lexer.ALTER
+      ~evaql_lexer.AND
+      ~evaql_lexer.AND_ASSIGN
+      ~evaql_lexer.ANY
+      ~evaql_lexer.AS
+      ~evaql_lexer.ASC
+      ~evaql_lexer.AT_SIGN
+      ~evaql_lexer.AUTO_INCREMENT
+      ~evaql_lexer.AVG
+      ~evaql_lexer.BIT_AND_OP
+      ~evaql_lexer.BIT_NOT_OP
+      ~evaql_lexer.BIT_OR_OP
+      ~evaql_lexer.BIT_XOR_OP
+      ~evaql_lexer.BOOLEAN
+      ~evaql_lexer.BTREE
+      ~evaql_lexer.BY
+      ~evaql_lexer.COLON_SYMB
+      ~evaql_lexer.COLUMN
+      ~evaql_lexer.COLUMNS
+      ~evaql_lexer.COMMA
+      ~evaql_lexer.COMMENT_INPUT
+      ~evaql_lexer.CONFIDENCE_LEVEL
+      ~evaql_lexer.COUNT
+      ~evaql_lexer.CREATE
+      ~evaql_lexer.DATA
+      ~evaql_lexer.DATABASE
+      ~evaql_lexer.DECIMAL_LITERAL
+      ~evaql_lexer.DEFAULT
+      ~evaql_lexer.DEFAULT_MODE
+      ~evaql_lexer.DEFAULT_TOKEN_CHANNEL
+      ~evaql_lexer.DELETE
+      ~evaql_lexer.DESC
+      ~evaql_lexer.DESCRIBE
+      ~evaql_lexer.DISTINCT
+      ~evaql_lexer.DIV
+      ~evaql_lexer.DIVIDE
+      ~evaql_lexer.DIV_ASSIGN
+      ~evaql_lexer.DOT
+      ~evaql_lexer.DOT_ID
+      ~evaql_lexer.DOUBLE_QUOTE_SYMB
+      ~evaql_lexer.DROP
+      ~evaql_lexer.EQUAL_SYMBOL
+      ~evaql_lexer.ERRORCHANNEL
+      ~evaql_lexer.ERROR_BOUNDS
+      ~evaql_lexer.ERROR_RECONGNIGION
+      ~evaql_lexer.EVAQLCOMMENT
+      ~evaql_lexer.EXCLAMATION_SYMBOL
+      ~evaql_lexer.EXISTS
+      ~evaql_lexer.EXIT
+      ~evaql_lexer.EXPLAIN
+      ~evaql_lexer.FALSE
+      ~evaql_lexer.FCOUNT
+      ~evaql_lexer.FLOAT
+      ~evaql_lexer.FROM
+      ~evaql_lexer.GLOBAL_ID
+      ~evaql_lexer.GREATER_SYMBOL
+      ~evaql_lexer.GROUP
+      ~evaql_lexer.HASH
+      ~evaql_lexer.HAVING
+      ~evaql_lexer.HELP
+      ~evaql_lexer.HIDDEN
+      ~evaql_lexer.ID
+      ~evaql_lexer.IF
+      ~evaql_lexer.IMPL
+      ~evaql_lexer.IN
+      ~evaql_lexer.INDEX
+      ~evaql_lexer.INDIR
+      ~evaql_lexer.INFILE
+      ~evaql_lexer.INPUT
+      ~evaql_lexer.INSERT
+      ~evaql_lexer.INTEGER
+      ~evaql_lexer.INTO
+      ~evaql_lexer.IS
+      ~evaql_lexer.JOIN
+      ~evaql_lexer.KEY
+      ~evaql_lexer.LESS_SYMBOL
+      ~evaql_lexer.LIKE
+      ~evaql_lexer.LIMIT
+      ~evaql_lexer.LINE_COMMENT
+      ~evaql_lexer.LOAD
+      ~evaql_lexer.LOCAL_ID
+      ~evaql_lexer.LR_BRACKET
+      ~evaql_lexer.MAX
+      ~evaql_lexer.MAX_CHAR_VALUE
+      ~evaql_lexer.MIN
+      ~evaql_lexer.MINUS
+      ~evaql_lexer.MINUSMINUS
+      ~evaql_lexer.MINUS_ASSIGN
+      ~evaql_lexer.MIN_CHAR_VALUE
+      ~evaql_lexer.MOD
+      ~evaql_lexer.MODULE
+      ~evaql_lexer.MOD_ASSIGN
+      ~evaql_lexer.MORE
+      ~evaql_lexer.MULT_ASSIGN
+      ~evaql_lexer.NDARRAY
+      ~evaql_lexer.NO
+      ~evaql_lexer.NOT
+      ~evaql_lexer.NULL_LITERAL
+      ~evaql_lexer.NULL_SPEC_LITERAL
+      ~evaql_lexer.OBJECT_DETECTION
+      ~evaql_lexer.OFFSET
+      ~evaql_lexer.ON
+      ~evaql_lexer.ONE_DECIMAL
+      ~evaql_lexer.OR
+      ~evaql_lexer.ORDER
+      ~evaql_lexer.OR_ASSIGN
+      ~evaql_lexer.OUTPUT
+      ~evaql_lexer.PLUS
+      ~evaql_lexer.PLUS_ASSIGN
+      ~evaql_lexer.PRIMARY
+      ~evaql_lexer.REAL_LITERAL
+      ~evaql_lexer.REFERENCES
+      ~evaql_lexer.REVERSE_QUOTE_ID
+      ~evaql_lexer.REVERSE_QUOTE_SYMB
+      ~evaql_lexer.RR_BRACKET
+      ~evaql_lexer.SELECT
+      ~evaql_lexer.SEMI
+      ~evaql_lexer.SET
+      ~evaql_lexer.SHUTDOWN
+      ~evaql_lexer.SINGLE_QUOTE_SYMB
+      ~evaql_lexer.SKIP
+      ~evaql_lexer.SOME
+      ~evaql_lexer.SPACE
+      ~evaql_lexer.SPEC_EVAQL_COMMENT
+      ~evaql_lexer.STAR
+      ~evaql_lexer.STD
+      ~evaql_lexer.STRING_LITERAL
+      ~evaql_lexer.STRING_USER_NAME
+      ~evaql_lexer.SUM
+      ~evaql_lexer.TABLE
+      ~evaql_lexer.TEMPTABLE
+      ~evaql_lexer.TEXT
+      ~evaql_lexer.TRUE
+      ~evaql_lexer.TWO_DECIMAL
+      ~evaql_lexer.TYPE
+      ~evaql_lexer.UDF
+      ~evaql_lexer.UNION
+      ~evaql_lexer.UNIQUE
+      ~evaql_lexer.UNKNOWN
+      ~evaql_lexer.UNLOCK
+      ~evaql_lexer.UNSIGNED
+      ~evaql_lexer.UPDATE
+      ~evaql_lexer.USING
+      ~evaql_lexer.VALUE
+      ~evaql_lexer.VALUES
+      ~evaql_lexer.VAR_ASSIGN
+      ~evaql_lexer.WHERE
+      ~evaql_lexer.XOR
+      ~evaql_lexer.XOR_ASSIGN
+      ~evaql_lexer.ZERO_DECIMAL
+      ~evaql_lexer.atn
+      ~evaql_lexer.channelNames
+      ~evaql_lexer.column
+      ~evaql_lexer.decisionsToDFA
+      ~evaql_lexer.grammarFileName
+      ~evaql_lexer.inputStream
+      ~evaql_lexer.line
+      ~evaql_lexer.literalNames
+      ~evaql_lexer.modeNames
+      ~evaql_lexer.ruleIndexMapCache
+      ~evaql_lexer.ruleNames
+      ~evaql_lexer.sourceName
+      ~evaql_lexer.state
+      ~evaql_lexer.symbolicNames
+      ~evaql_lexer.text
+      ~evaql_lexer.tokenTypeMapCache
+      ~evaql_lexer.type
