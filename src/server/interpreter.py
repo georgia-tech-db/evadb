@@ -56,16 +56,16 @@ class EvaCommandInterpreter(Cmd):
         self._server_result = segs[1]
         next_chunk = 1
         while len(self._server_result) < result_length:
-            print('Total length: %d, Received: %d' %
-                  (result_length, len(self._server_result)), end='\r')
+            #print('Total length: %d, Received: %d' %
+            #      (result_length, len(self._server_result)), end='\r')
             # next chunk is not avaiable yet
             while len(self._protocol._response_chunks) <= next_chunk:
                 _ = 1
             self._server_result += self._protocol._response_chunks[next_chunk]
             next_chunk += 1
 
-        print('Total length: %d, Received: %d' %
-              (result_length, len(self._server_result)))
+        #print('Total length: %d, Received: %d' %
+        #      (result_length, len(self._server_result)))
         response = Response.from_json(self._server_result)
         print(response)
         return False

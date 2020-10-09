@@ -21,12 +21,6 @@ from test.util import create_dataframe
 
 class ResponseTest(unittest.TestCase):
 
-    def test_server_response_to_json_string(self):
-        batch = Batch(frames=create_dataframe())
-        response = Response(status=ResponseStatus.SUCCESS,
-                            batch=batch)
-        print(response.to_json())
-
     def test_server_reponse_from_json_string(self):
         batch = Batch(frames=create_dataframe())
         response = Response(status=ResponseStatus.SUCCESS,
