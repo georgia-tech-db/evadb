@@ -23,11 +23,6 @@ from test.util import create_dataframe_same, create_dataframe
 
 class BatchTest(unittest.TestCase):
 
-    def test_batch_to_json(self):
-        batch = Batch(frames=create_dataframe(),
-                      identifier_column='id')
-        print(batch.to_json())
-
     def test_batch_from_json(self):
         batch = Batch(frames=create_dataframe(),
                       identifier_column='id')
