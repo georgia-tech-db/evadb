@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>src.models.storage.batch.Batch &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="src.optimizer" href="src.optimizer.html" />
+    <link rel="prev" title="src.models.storage.batch" href="src.models.storage.batch.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="src.html">src</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="src.catalog.html">src.catalog</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.configuration.html">src.configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.constants.html">src.constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.executor.html">src.executor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.expression.html">src.expression</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="src.models.html">src.models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="src.models.catalog.html">src.models.catalog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="src.models.inference.html">src.models.inference</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="src.models.storage.html">src.models.storage</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="src.models.storage.batch.html">src.models.storage.batch</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="src.optimizer.html">src.optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.parser.html">src.parser</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.planner.html">src.planner</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.readers.html">src.readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.server.html">src.server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.spark.html">src.spark</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.udfs.html">src.udfs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="src.utils.html">src.utils</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="src.html">src</a> &raquo;</li>
+
+          <li><a href="src.models.html">src.models</a> &raquo;</li>
+
+          <li><a href="src.models.storage.html">src.models.storage</a> &raquo;</li>
+
+          <li><a href="src.models.storage.batch.html">src.models.storage.batch</a> &raquo;</li>
+
+      <li>src.models.storage.batch.Batch</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <div class="section" id="src-models-storage-batch-batch">
+<h1>src.models.storage.batch.Batch<a class="headerlink" href="#src-models-storage-batch-batch" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="src.models.storage.batch.Batch">
+<em class="property">class </em><code class="sig-prename descclassname">src.models.storage.batch.</code><code class="sig-name descname">Batch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">frames</span><span class="o">=</span><span class="default_value">pandas.DataFrame</span></em>, <em class="sig-param"><span class="n">outcomes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">temp_outcomes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">identifier_column</span><span class="o">=</span><span class="default_value">'id'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data model used for storing a batch of frames</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frames</strong> (<em>DataFrame</em>) – pandas Dataframe holding frames data</p></li>
+<li><p><strong>outcomes</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>List</em><em>[</em><em>BasePrediction</em><em>]</em><em>]</em>) – outcomes of running a udf</p></li>
+<li><p><strong>name 'x' as key</strong> (<em>with</em>) – </p></li>
+<li><p><strong>identifier_column</strong> (<em>str</em>) – A column used to uniquely a row</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">column_as_numpy_array</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.empty" title="src.models.storage.batch.Batch.empty"><code class="xref py py-obj docutils literal notranslate"><span class="pre">empty</span></code></a></p></td>
+<td><p>Checks if the batch is empty :returns: True if the batch_size == 0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.get_outcomes_for" title="src.models.storage.batch.Batch.get_outcomes_for"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_outcomes_for</span></code></a></p></td>
+<td><p>Returns names corresponding to a name :param name: name of the udf on which predicate is being executed :type name: str</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.has_outcome" title="src.models.storage.batch.Batch.has_outcome"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_outcome</span></code></a></p></td>
+<td><p>Method used for checking if the outcome with given name is present.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.merge_column_wise" title="src.models.storage.batch.Batch.merge_column_wise"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_column_wise</span></code></a></p></td>
+<td><p>Merge list of batch frames column_wise and return a new batch frame No outcome merge.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.project" title="src.models.storage.batch.Batch.project"><code class="xref py py-obj docutils literal notranslate"><span class="pre">project</span></code></a></p></td>
+<td><p>Takes as input the column list, returns the projection.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.set_outcomes" title="src.models.storage.batch.Batch.set_outcomes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_outcomes</span></code></a></p></td>
+<td><p>Used for storing outcomes of the UDF predictions</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#src.models.storage.batch.Batch.sort" title="src.models.storage.batch.Batch.sort"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort</span></code></a></p></td>
+<td><p>in_place sort</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">batch_size</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">frames</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">identifier_column</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.__add__">
+<code class="sig-name descname">__add__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">other</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#src.models.storage.batch.Batch" title="src.models.storage.batch.Batch">src.models.storage.batch.Batch</a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.__add__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.__add__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds two batch frames and return a new batch frame
+:param other: other framebatch to add
+:type other: Batch</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Batch</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.empty">
+<code class="sig-name descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks if the batch is empty
+:returns: True if the batch_size == 0</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.get_outcomes_for">
+<code class="sig-name descname">get_outcomes_for</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span><a class="reference internal" href="src.models.inference.outcome.Outcome.html#src.models.inference.outcome.Outcome" title="src.models.inference.outcome.Outcome">src.models.inference.outcome.Outcome</a><span class="p">]</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.get_outcomes_for"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.get_outcomes_for" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns names corresponding to a name
+:param name: name of the udf on which predicate is being executed
+:type name: str</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List[BasePrediction]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.has_outcome">
+<code class="sig-name descname">has_outcome</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.has_outcome"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.has_outcome" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method used for checking if the outcome with given name is present.
+Either in temporary outcomes or actual outcomes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>str</em>) – name of the outcome to check</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True if present else false</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.merge_column_wise">
+<em class="property">classmethod </em><code class="sig-name descname">merge_column_wise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">batches</span><span class="p">:</span> <span class="n">[‘Batch’]</span></em>, <em class="sig-param"><span class="n">auto_renaming</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#src.models.storage.batch.Batch" title="src.models.storage.batch.Batch">src.models.storage.batch.Batch</a><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.merge_column_wise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.merge_column_wise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge list of batch frames column_wise and return a new batch frame
+No outcome merge. Add later when there is a actual usage.
+:param batches: List[Batch]: lsit of batch objects to be merged
+:param auto_renaming: if true rename column names if required</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Merged batch object</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#src.models.storage.batch.Batch" title="src.models.storage.batch.Batch">Batch</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.project">
+<code class="sig-name descname">project</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cols</span><span class="p">:</span> <span class="n"><span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#src.models.storage.batch.Batch" title="src.models.storage.batch.Batch">src.models.storage.batch.Batch</a><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes as input the column list, returns the projection.
+Keep the outcomes and temp_outcomes unchanged.
+We do a copy for now.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.set_outcomes">
+<code class="sig-name descname">set_outcomes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">predictions</span><span class="p">:</span> <span class="n">List<span class="p">[</span><a class="reference internal" href="src.models.inference.outcome.Outcome.html#src.models.inference.outcome.Outcome" title="src.models.inference.outcome.Outcome">src.models.inference.outcome.Outcome</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">is_temp</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.set_outcomes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.set_outcomes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used for storing outcomes of the UDF predictions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – name of the UDF to which the predictions belong to</p></li>
+<li><p><strong>predictions</strong> (<em>pandas.DataFrame</em>) – Predictions/Outcome after executing</p></li>
+<li><p><strong>UDF on prediction</strong> (<em>the</em>) – </p></li>
+<li><p><strong>(</strong><strong>bool</strong> (<em>is_temp</em>) – False): Check if the outcomes are temporary</p></li>
+<li><p><strong>default</strong> – False): Check if the outcomes are temporary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="src.models.storage.batch.Batch.sort">
+<code class="sig-name descname">sort</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">by</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/src/models/storage/batch.html#Batch.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#src.models.storage.batch.Batch.sort" title="Permalink to this definition">¶</a></dt>
+<dd><p>in_place sort</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+
+          </div>
+          <footer>
+
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+
+        <a href="src.optimizer.html" class="btn btn-neutral float-right" title="src.optimizer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+
+
+        <a href="src.models.storage.batch.html" class="btn btn-neutral float-left" title="src.models.storage.batch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+
+    </div>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

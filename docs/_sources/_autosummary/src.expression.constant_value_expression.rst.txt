@@ -1,0 +1,23 @@
+src.expression.constant\_value\_expression
+==========================================
+
+.. automodule:: src.expression.constant_value_expression
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      ConstantValueExpression

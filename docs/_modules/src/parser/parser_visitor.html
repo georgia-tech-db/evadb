@@ -1,0 +1,775 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>src.parser.parser_visitor &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../../../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../_autosummary/src.html">src</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+
+      <li>src.parser.parser_visitor</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for src.parser.parser_visitor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># coding=utf-8</span>
+<span class="c1"># Copyright 2018-2020 EVA</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="kn">from</span> <span class="nn">antlr4</span> <span class="kn">import</span> <span class="n">TerminalNode</span>
+
+<span class="kn">from</span> <span class="nn">src.expression.abstract_expression</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ExpressionType</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">src.expression.comparison_expression</span> <span class="kn">import</span> <span class="n">ComparisonExpression</span>
+<span class="kn">from</span> <span class="nn">src.expression.constant_value_expression</span> <span class="kn">import</span> <span class="n">ConstantValueExpression</span>
+<span class="kn">from</span> <span class="nn">src.expression.function_expression</span> <span class="kn">import</span> <span class="n">FunctionExpression</span><span class="p">,</span> \
+    <span class="n">ExecutionMode</span>
+<span class="kn">from</span> <span class="nn">src.expression.logical_expression</span> <span class="kn">import</span> <span class="n">LogicalExpression</span>
+<span class="kn">from</span> <span class="nn">src.expression.tuple_value_expression</span> <span class="kn">import</span> <span class="n">TupleValueExpression</span>
+<span class="kn">from</span> <span class="nn">src.parser.create_statement</span> <span class="kn">import</span> <span class="n">CreateTableStatement</span><span class="p">,</span> <span class="n">ColumnDefinition</span>
+<span class="kn">from</span> <span class="nn">src.parser.create_udf_statement</span> <span class="kn">import</span> <span class="n">CreateUDFStatement</span>
+<span class="kn">from</span> <span class="nn">src.parser.evaql.evaql_parser</span> <span class="kn">import</span> <span class="n">evaql_parser</span>
+<span class="kn">from</span> <span class="nn">src.parser.evaql.evaql_parserVisitor</span> <span class="kn">import</span> <span class="n">evaql_parserVisitor</span>
+<span class="kn">from</span> <span class="nn">src.parser.insert_statement</span> <span class="kn">import</span> <span class="n">InsertTableStatement</span>
+<span class="kn">from</span> <span class="nn">src.parser.select_statement</span> <span class="kn">import</span> <span class="n">SelectStatement</span>
+<span class="kn">from</span> <span class="nn">src.parser.table_ref</span> <span class="kn">import</span> <span class="n">TableRef</span><span class="p">,</span> <span class="n">TableInfo</span>
+<span class="kn">from</span> <span class="nn">src.parser.types</span> <span class="kn">import</span> <span class="n">ParserColumnDataType</span>
+<span class="kn">from</span> <span class="nn">src.parser.load_statement</span> <span class="kn">import</span> <span class="n">LoadDataStatement</span>
+
+<span class="kn">from</span> <span class="nn">src.parser.types</span> <span class="kn">import</span> <span class="n">ColumnConstraintEnum</span>
+<span class="kn">from</span> <span class="nn">src.parser.create_statement</span> <span class="kn">import</span> <span class="n">ColConstraintInfo</span>
+
+<span class="kn">from</span> <span class="nn">src.utils.logging_manager</span> <span class="kn">import</span> <span class="n">LoggingLevel</span><span class="p">,</span> <span class="n">LoggingManager</span>
+
+
+<div class="viewcode-block" id="ParserVisitor"><a class="viewcode-back" href="../../../_autosummary/src.parser.parser_visitor.ParserVisitor.html#src.parser.parser_visitor.ParserVisitor">[docs]</a><span class="k">class</span> <span class="nc">ParserVisitor</span><span class="p">(</span><span class="n">evaql_parserVisitor</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">visitRoot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RootContext</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">TerminalNode</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitSqlStatements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">SqlStatementsContext</span><span class="p">):</span>
+        <span class="n">eva_statements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sql_statement_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">sqlStatement</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">child_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sql_statement_count</span><span class="p">):</span>
+            <span class="n">statement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">sqlStatement</span><span class="p">(</span><span class="n">child_index</span><span class="p">))</span>
+            <span class="n">eva_statements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">eva_statements</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># STATEMENTS</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitDdlStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">DdlStatementContext</span><span class="p">):</span>
+        <span class="n">ddl_statement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ddl_statement</span>
+
+    <span class="k">def</span> <span class="nf">visitDmlStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">DdlStatementContext</span><span class="p">):</span>
+        <span class="n">dml_statement</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dml_statement</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># INSERT STATEMENTS</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitInsertStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">InsertStatementContext</span><span class="p">):</span>
+        <span class="n">table_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">column_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">value_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># first two children with be INSERT INTO</span>
+        <span class="c1"># Then we will have terminal nodes for &#39;(&#39;, &#39;)&#39;</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">TerminalNode</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rule_idx</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">getRuleIndex</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_tableName</span><span class="p">:</span>
+                        <span class="n">table_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">tableName</span><span class="p">())</span>
+
+                    <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_uidList</span><span class="p">:</span>
+                        <span class="n">column_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">uidList</span><span class="p">())</span>
+
+                    <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_insertStatementValue</span><span class="p">:</span>
+                        <span class="n">insrt_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">insertStatementValue</span><span class="p">())</span>
+                        <span class="c1"># Support only (value1, value2, .... value n)</span>
+                        <span class="n">value_list</span> <span class="o">=</span> <span class="n">insrt_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception&quot;</span><span class="p">)</span>
+                    <span class="c1"># stop parsing something bad happened</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">insert_stmt</span> <span class="o">=</span> <span class="n">InsertTableStatement</span><span class="p">(</span><span class="n">table_ref</span><span class="p">,</span> <span class="n">column_list</span><span class="p">,</span> <span class="n">value_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">insert_stmt</span>
+
+    <span class="k">def</span> <span class="nf">visitUidList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">UidListContext</span><span class="p">):</span>
+        <span class="n">uid_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">uid_list_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">uid</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">uid_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">uid_list_length</span><span class="p">):</span>
+            <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">uid</span><span class="p">(</span><span class="n">uid_index</span><span class="p">))</span>
+            <span class="n">uid_expr</span> <span class="o">=</span> <span class="n">TupleValueExpression</span><span class="p">(</span><span class="n">uid</span><span class="p">)</span>
+            <span class="n">uid_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">uid_expr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">uid_list</span>
+
+    <span class="k">def</span> <span class="nf">visitInsertStatementValue</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">InsertStatementValueContext</span><span class="p">):</span>
+        <span class="n">insert_stmt_value</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">TerminalNode</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rule_idx</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">getRuleIndex</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_expressionsWithDefaults</span><span class="p">:</span>
+                        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                        <span class="n">insert_stmt_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+
+                <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception&quot;</span><span class="p">)</span>
+                    <span class="c1"># stop parsing something bad happened</span>
+                    <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">insert_stmt_value</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># CREATE STATEMENTS</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitColumnCreateTable</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">ColumnCreateTableContext</span><span class="p">):</span>
+
+        <span class="n">table_ref</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">if_not_exists</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">create_definitions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># first two children will be CREATE TABLE terminal token</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">rule_idx</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">getRuleIndex</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_tableName</span><span class="p">:</span>
+                    <span class="n">table_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">tableName</span><span class="p">())</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_ifNotExists</span><span class="p">:</span>
+                    <span class="n">if_not_exists</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_createDefinitions</span><span class="p">:</span>
+                    <span class="n">create_definitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">createDefinitions</span><span class="p">())</span>
+
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Exception&quot;</span><span class="p">)</span>
+                <span class="c1"># stop parsing something bad happened</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">create_stmt</span> <span class="o">=</span> <span class="n">CreateTableStatement</span><span class="p">(</span><span class="n">table_ref</span><span class="p">,</span>
+                                           <span class="n">if_not_exists</span><span class="p">,</span>
+                                           <span class="n">create_definitions</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">create_stmt</span>
+
+    <span class="k">def</span> <span class="nf">visitCreateDefinitions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">CreateDefinitionsContext</span><span class="p">):</span>
+        <span class="n">column_definitions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">child_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">create_definition</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">createDefinition</span><span class="p">(</span><span class="n">child_index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">create_definition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">column_definition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">create_definition</span><span class="p">)</span>
+                <span class="n">column_definitions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column_definition</span><span class="p">)</span>
+            <span class="n">child_index</span> <span class="o">=</span> <span class="n">child_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">column_definitions</span>
+
+    <span class="k">def</span> <span class="nf">visitColumnDeclaration</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">ColumnDeclarationContext</span><span class="p">):</span>
+
+        <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">column_constraint_information</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span>
+            <span class="n">ctx</span><span class="o">.</span><span class="n">columnDefinition</span><span class="p">())</span>
+
+        <span class="n">column_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">uid</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">column_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ColumnDefinition</span><span class="p">(</span>
+                <span class="n">column_name</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span>
+                <span class="n">column_constraint_information</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitColumnDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">ColumnDefinitionContext</span><span class="p">):</span>
+
+        <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">dataType</span><span class="p">())</span>
+
+        <span class="n">constraint_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">columnConstraint</span><span class="p">())</span>
+
+        <span class="n">column_constraint_information</span> <span class="o">=</span> <span class="n">ColConstraintInfo</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">constraint_count</span><span class="p">):</span>
+            <span class="n">return_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">columnConstraint</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">return_type</span> <span class="o">==</span> <span class="n">ColumnConstraintEnum</span><span class="o">.</span><span class="n">UNIQUE</span><span class="p">:</span>
+
+                <span class="n">column_constraint_information</span><span class="o">.</span><span class="n">unique</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span><span class="p">,</span> <span class="n">column_constraint_information</span>
+
+    <span class="k">def</span> <span class="nf">visitUniqueKeyColumnConstraint</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">UniqueKeyColumnConstraintContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ColumnConstraintEnum</span><span class="o">.</span><span class="n">UNIQUE</span>
+
+    <span class="k">def</span> <span class="nf">visitSimpleDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleDataTypeContext</span><span class="p">):</span>
+
+        <span class="n">data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">BOOLEAN</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">ParserColumnDataType</span><span class="o">.</span><span class="n">BOOLEAN</span>
+
+        <span class="k">return</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">visitIntegerDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">IntegerDataTypeContext</span><span class="p">):</span>
+
+        <span class="n">data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">INTEGER</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">ParserColumnDataType</span><span class="o">.</span><span class="n">INTEGER</span>
+        <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">UNSIGNED</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">ParserColumnDataType</span><span class="o">.</span><span class="n">INTEGER</span>
+
+        <span class="k">return</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">visitDimensionDataType</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">DimensionDataTypeContext</span><span class="p">):</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">FLOAT</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">ParserColumnDataType</span><span class="o">.</span><span class="n">FLOAT</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">lengthTwoDimension</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">TEXT</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">ParserColumnDataType</span><span class="o">.</span><span class="n">TEXT</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">lengthOneDimension</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">NDARRAY</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">ParserColumnDataType</span><span class="o">.</span><span class="n">NDARRAY</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">lengthDimensionList</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">visitLengthOneDimension</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">LengthOneDimensionContext</span><span class="p">):</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">())]</span>
+
+        <span class="k">return</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">visitLengthTwoDimension</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">LengthTwoDimensionContext</span><span class="p">):</span>
+        <span class="n">first_decimal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">second_decimal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[</span><span class="n">first_decimal</span><span class="p">,</span> <span class="n">second_decimal</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">visitLengthDimensionList</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">LengthDimensionListContext</span><span class="p">):</span>
+        <span class="n">dimensions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dimension_list_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">dimension_list_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dimension_list_length</span><span class="p">):</span>
+            <span class="n">decimal_literal</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">(</span><span class="n">dimension_list_index</span><span class="p">)</span>
+            <span class="n">decimal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">decimal_literal</span><span class="p">)</span>
+            <span class="n">dimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">decimal</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dimensions</span>
+
+    <span class="k">def</span> <span class="nf">visitDecimalLiteral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">DecimalLiteralContext</span><span class="p">):</span>
+
+        <span class="n">decimal</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">DECIMAL_LITERAL</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">decimal</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">DECIMAL_LITERAL</span><span class="p">()))</span>
+        <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">ONE_DECIMAL</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">decimal</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">ONE_DECIMAL</span><span class="p">()))</span>
+        <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">TWO_DECIMAL</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">decimal</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">TWO_DECIMAL</span><span class="p">()))</span>
+        <span class="k">elif</span> <span class="n">ctx</span><span class="o">.</span><span class="n">ZERO_DECIMAL</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">decimal</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">ZERO_DECIMAL</span><span class="p">()))</span>
+
+        <span class="k">return</span> <span class="n">decimal</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># SELECT STATEMENT</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitSimpleSelect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleSelectContext</span><span class="p">):</span>
+        <span class="n">select_stmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">select_stmt</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># TABLE SOURCES</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitTableSources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">TableSourcesContext</span><span class="p">):</span>
+
+        <span class="n">table_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">table_sources_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">tableSource</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">table_sources_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">table_sources_count</span><span class="p">):</span>
+            <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">tableSource</span><span class="p">(</span><span class="n">table_sources_index</span><span class="p">))</span>
+            <span class="n">table_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">table_list</span>
+
+    <span class="c1"># Nested sub query</span>
+    <span class="k">def</span> <span class="nf">visitSubqueryTableItem</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">SubqueryTableItemContext</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">selectStatement</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">visitQuerySpecification</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">QuerySpecificationContext</span><span class="p">):</span>
+        <span class="n">target_list</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">from_clause</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">where_clause</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># first child will be a SELECT terminal token</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">rule_idx</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">getRuleIndex</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_selectElements</span><span class="p">:</span>
+                    <span class="n">target_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_fromClause</span><span class="p">:</span>
+                    <span class="n">clause</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                    <span class="n">from_clause</span> <span class="o">=</span> <span class="n">clause</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="n">where_clause</span> <span class="o">=</span> <span class="n">clause</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;where&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="c1"># stop parsing something bad happened</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># we don&#39;t support multiple table sources</span>
+        <span class="k">if</span> <span class="n">from_clause</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">from_clause</span> <span class="o">=</span> <span class="n">from_clause</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">select_stmt</span> <span class="o">=</span> <span class="n">SelectStatement</span><span class="p">(</span><span class="n">target_list</span><span class="p">,</span> <span class="n">from_clause</span><span class="p">,</span> <span class="n">where_clause</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">select_stmt</span>
+
+    <span class="k">def</span> <span class="nf">visitSelectElements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">SelectElementsContext</span><span class="p">):</span>
+        <span class="n">select_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">select_elements_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">selectElement</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">select_element_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">select_elements_count</span><span class="p">):</span>
+            <span class="n">element</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">selectElement</span><span class="p">(</span><span class="n">select_element_index</span><span class="p">))</span>
+            <span class="n">select_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">select_list</span>
+
+    <span class="k">def</span> <span class="nf">visitFromClause</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">FromClauseContext</span><span class="p">):</span>
+        <span class="n">from_table</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">where_clause</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">tableSources</span><span class="p">():</span>
+            <span class="n">from_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">tableSources</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">whereExpr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">where_clause</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">whereExpr</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;from&quot;</span><span class="p">:</span> <span class="n">from_table</span><span class="p">,</span> <span class="s2">&quot;where&quot;</span><span class="p">:</span> <span class="n">where_clause</span><span class="p">}</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># LOAD STATEMENT</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitLoadStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">LoadStatementContext</span><span class="p">):</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">fileName</span><span class="p">())</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">tableName</span><span class="p">())</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">LoadDataStatement</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stmt</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># COMMON CLAUSES Ids, Column_names, Table_names</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitTableName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">TableNameContext</span><span class="p">):</span>
+
+        <span class="n">table_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">fullId</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">table_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">table_info</span> <span class="o">=</span> <span class="n">TableInfo</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="n">table_name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">TableRef</span><span class="p">(</span><span class="n">table_info</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Invalid from table&quot;</span><span class="p">,</span> <span class="ne">SyntaxWarning</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitFullColumnName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">FullColumnNameContext</span><span class="p">):</span>
+        <span class="c1"># Adding support for a.b</span>
+        <span class="c1"># Will restrict implementation to raise error for a.b.c</span>
+        <span class="n">dottedIds</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">dottedId</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">dottedId</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">&quot;Only tablename.colname syntax supported&quot;</span><span class="p">,</span>
+                                     <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">dottedId</span><span class="p">():</span>
+                <span class="n">dottedIds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+
+        <span class="n">uid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">uid</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dottedIds</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">TupleValueExpression</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">col_name</span><span class="o">=</span><span class="n">dottedIds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TupleValueExpression</span><span class="p">(</span><span class="n">col_name</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitSimpleId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">SimpleIdContext</span><span class="p">):</span>
+        <span class="c1"># todo handle children, right now assuming TupleValueExpr</span>
+        <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+        <span class="c1"># return self.visitChildren(ctx)</span>
+
+    <span class="k">def</span> <span class="nf">visitDottedId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">DOT_ID</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">DOT_ID</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">uid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">uid</span><span class="p">())</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># EXPRESSIONS</span>
+    <span class="c1">##################################################################</span>
+
+    <span class="k">def</span> <span class="nf">visitStringLiteral</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">StringLiteralContext</span><span class="p">):</span>
+        <span class="c1"># Fix a bug here; &#39;VAN&#39; Literal gets converted to &quot;&#39;VAN&#39;&quot;;</span>
+        <span class="c1"># Multiple quotes should be removed</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">STRING_LITERAL</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ConstantValueExpression</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># todo handle other types</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitConstant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">ConstantContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">REAL_LITERAL</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ConstantValueExpression</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()))</span>
+
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ConstantValueExpression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">decimalLiteral</span><span class="p">()))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visitChildren</span><span class="p">(</span><span class="n">ctx</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitLogicalExpression</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">LogicalExpressionContext</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="c1"># error scenario, should have 3 children</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">getChild</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">LogicalExpression</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitBinaryComparisonPredicate</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">BinaryComparisonPredicateContext</span><span class="p">):</span>
+        <span class="n">left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
+        <span class="n">right</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">right</span><span class="p">)</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">comparisonOperator</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">ComparisonExpression</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitNestedExpressionAtom</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">NestedExpressionAtomContext</span><span class="p">):</span>
+        <span class="c1"># ToDo Can there be &gt;1 expression in this case</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">visitComparisonOperator</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">ComparisonOperatorContext</span><span class="p">):</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">COMPARE_EQUAL</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">COMPARE_LESSER</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">COMPARE_GREATER</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">COMPARE_GEQ</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">COMPARE_LEQ</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;!=&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">COMPARE_NEQ</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">INVALID</span>
+
+    <span class="k">def</span> <span class="nf">visitLogicalOperator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">LogicalOperatorContext</span><span class="p">):</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;OR&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">LOGICAL_OR</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="o">==</span> <span class="s1">&#39;AND&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">LOGICAL_AND</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ExpressionType</span><span class="o">.</span><span class="n">INVALID</span>
+
+    <span class="k">def</span> <span class="nf">visitExpressionsWithDefaults</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">ExpressionsWithDefaultsContext</span><span class="p">):</span>
+        <span class="n">expr_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">expressions_with_defaults_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">expressionOrDefault</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">expressions_with_defaults_count</span><span class="p">):</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">expressionOrDefault</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">expr_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">expr_list</span>
+
+    <span class="c1">##################################################################</span>
+    <span class="c1"># Functions - UDFs, Aggregate Windowed functions</span>
+    <span class="c1">##################################################################</span>
+    <span class="k">def</span> <span class="nf">visitUdfFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">UdfFunctionContext</span><span class="p">):</span>
+        <span class="n">udf_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">udf_output</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">simpleId</span><span class="p">():</span>
+            <span class="n">udf_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">simpleId</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;UDF function name missing.&#39;</span><span class="p">,</span>
+                                 <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ctx</span><span class="o">.</span><span class="n">dottedId</span><span class="p">():</span>
+            <span class="n">udf_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">dottedId</span><span class="p">())</span>
+
+        <span class="n">udf_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">functionArgs</span><span class="p">())</span>
+        <span class="n">func_expr</span> <span class="o">=</span> <span class="n">FunctionExpression</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">udf_name</span><span class="p">,</span>
+                                       <span class="n">mode</span><span class="o">=</span><span class="n">ExecutionMode</span><span class="o">.</span><span class="n">EXEC</span><span class="p">,</span>
+                                       <span class="n">output</span><span class="o">=</span><span class="n">udf_output</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">udf_args</span><span class="p">:</span>
+            <span class="n">func_expr</span><span class="o">.</span><span class="n">append_child</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">func_expr</span>
+
+    <span class="k">def</span> <span class="nf">visitFunctionArgs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">FunctionArgsContext</span><span class="p">):</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="c1"># ignore COMMAs</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">TerminalNode</span><span class="p">):</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="c1"># Create UDF</span>
+    <span class="k">def</span> <span class="nf">visitCreateUdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">CreateUdfContext</span><span class="p">):</span>
+        <span class="n">udf_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">if_not_exists</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">input_definitions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">output_definitions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">impl_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">udf_type</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ctx</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">TerminalNode</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="n">rule_idx</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">getRuleIndex</span><span class="p">()</span>
+
+                <span class="k">if</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_udfName</span><span class="p">:</span>
+                    <span class="n">udf_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">udfName</span><span class="p">())</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_ifNotExists</span><span class="p">:</span>
+                    <span class="n">if_not_exists</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_createDefinitions</span><span class="p">:</span>
+                    <span class="c1"># There should be 2 createDefinition</span>
+                    <span class="c1"># idx 0 describing udf INPUT</span>
+                    <span class="c1"># idx 1 describing udf OUTPUT</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">createDefinitions</span><span class="p">())</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;UDF Input or Output Missing&#39;</span><span class="p">,</span>
+                                             <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+                    <span class="n">input_definitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">createDefinitions</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+                    <span class="n">output_definitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">createDefinitions</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_udfType</span><span class="p">:</span>
+                    <span class="n">udf_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">udfType</span><span class="p">())</span>
+
+                <span class="k">elif</span> <span class="n">rule_idx</span> <span class="o">==</span> <span class="n">evaql_parser</span><span class="o">.</span><span class="n">RULE_udfImpl</span><span class="p">:</span>
+                    <span class="n">impl_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">visit</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">udfImpl</span><span class="p">())</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="n">LoggingManager</span><span class="p">()</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;CREATE UDF Failed&#39;</span><span class="p">,</span> <span class="n">LoggingLevel</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+                <span class="c1"># stop parsing something bad happened</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">CreateUDFStatement</span><span class="p">(</span>
+            <span class="n">udf_name</span><span class="p">,</span>
+            <span class="n">if_not_exists</span><span class="p">,</span>
+            <span class="n">input_definitions</span><span class="p">,</span>
+            <span class="n">output_definitions</span><span class="p">,</span>
+            <span class="n">impl_path</span><span class="p">,</span>
+            <span class="n">udf_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stmt</span></div>
+</pre></div>
+
+           </div>
+
+          </div>
+          <footer>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

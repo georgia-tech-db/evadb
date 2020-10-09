@@ -1,0 +1,25 @@
+src.expression.abstract\_expression
+===================================
+
+.. automodule:: src.expression.abstract_expression
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      AbstractExpression
+      ExpressionReturnType
+      ExpressionType

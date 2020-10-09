@@ -1,0 +1,30 @@
+src.parser.table\_ref.TableInfo
+===============================
+
+.. currentmodule:: src.parser.table_ref
+
+.. autoclass:: TableInfo
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~TableInfo.database_name
+      ~TableInfo.schema_name
+      ~TableInfo.table_name

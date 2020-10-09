@@ -1,0 +1,24 @@
+src.expression.function\_expression
+===================================
+
+.. automodule:: src.expression.function_expression
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      ExecutionMode
+      FunctionExpression

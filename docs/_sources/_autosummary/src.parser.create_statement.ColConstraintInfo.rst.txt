@@ -1,0 +1,17 @@
+src.parser.create\_statement.ColConstraintInfo
+==============================================
+
+.. currentmodule:: src.parser.create_statement
+
+.. autoclass:: ColConstraintInfo
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:

@@ -1,0 +1,6 @@
+src.server.client.start\_clients
+================================
+
+.. currentmodule:: src.server.client
+
+.. autofunction:: start_clients

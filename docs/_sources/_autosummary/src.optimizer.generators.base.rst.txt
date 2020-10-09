@@ -1,0 +1,23 @@
+src.optimizer.generators.base
+=============================
+
+.. automodule:: src.optimizer.generators.base
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      Generator

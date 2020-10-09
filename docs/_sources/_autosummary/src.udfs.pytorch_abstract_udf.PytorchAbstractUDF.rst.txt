@@ -1,0 +1,37 @@
+src.udfs.pytorch\_abstract\_udf.PytorchAbstractUDF
+==================================================
+
+.. currentmodule:: src.udfs.pytorch_abstract_udf
+
+.. autoclass:: PytorchAbstractUDF
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~PytorchAbstractUDF.as_numpy
+      ~PytorchAbstractUDF.classify
+      ~PytorchAbstractUDF.forward
+      ~PytorchAbstractUDF.get_device
+      ~PytorchAbstractUDF.to_device
+      ~PytorchAbstractUDF.transform
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~PytorchAbstractUDF.input_format
+      ~PytorchAbstractUDF.labels
+      ~PytorchAbstractUDF.name
+      ~PytorchAbstractUDF.transforms

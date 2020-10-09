@@ -1,0 +1,29 @@
+src.optimizer.operators.OperatorType
+====================================
+
+.. currentmodule:: src.optimizer.operators
+
+.. autoclass:: OperatorType
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~OperatorType.LOGICALCREATE
+      ~OperatorType.LOGICALCREATEUDF
+      ~OperatorType.LOGICALFILTER
+      ~OperatorType.LOGICALGET
+      ~OperatorType.LOGICALINSERT
+      ~OperatorType.LOGICALLOADDATA
+      ~OperatorType.LOGICALPROJECT
+      ~OperatorType.LOGICALQUERYDERIVEDGET

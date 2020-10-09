@@ -1,0 +1,32 @@
+src.executor.pp\_executor.PPExecutor
+====================================
+
+.. currentmodule:: src.executor.pp_executor
+
+.. autoclass:: PPExecutor
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~PPExecutor.append_child
+      ~PPExecutor.exec
+      ~PPExecutor.validate
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~PPExecutor.children
+      ~PPExecutor.node

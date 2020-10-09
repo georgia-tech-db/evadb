@@ -1,0 +1,28 @@
+src.models.inference.outcome.Outcome
+====================================
+
+.. currentmodule:: src.models.inference.outcome
+
+.. autoclass:: Outcome
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~Outcome.data

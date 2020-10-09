@@ -16,9 +16,12 @@ import sys
 
 sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../src2/'))
+sys.path.insert(0, os.path.abspath('../src/'))
 
-
+print('Sys paths:')
+for pathx in sys.path:
+    print(pathx)
 # Temp. workaround for
 # https://github.com/agronholm/sphinx-autodoc-typehints/issues/133
 warnings.filterwarnings(
@@ -63,8 +66,8 @@ autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
 # Remove 'view source code' from top of page (for html, not python)
 html_show_sourcelink = False
 # If no class summary, inherit base class summary
-autodoc_inherit_docstrings = True
-
+autodoc_inherit_docstrings = False
+numpydoc_show_class_members = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -72,7 +75,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['.py', '_build', 'Thumbs.db', '.DS_Store']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -90,7 +93,8 @@ todo_include_todos = True
 #     sys.modules[mod_name] = mock.Mock()
 
 autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
-                        "petastorm", "yaml", "pyspark"]
+                        "petastorm", "yaml", "pyspark", "torch",
+                        "pandas", "cv2"]
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

@@ -1,0 +1,31 @@
+src.optimizer.operators.LogicalProject
+======================================
+
+.. currentmodule:: src.optimizer.operators
+
+.. autoclass:: LogicalProject
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~LogicalProject.append_child
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~LogicalProject.children
+      ~LogicalProject.target_list
+      ~LogicalProject.type

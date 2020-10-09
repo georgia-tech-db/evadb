@@ -1,0 +1,23 @@
+src.parser.insert\_statement
+============================
+
+.. automodule:: src.parser.insert_statement
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      InsertTableStatement

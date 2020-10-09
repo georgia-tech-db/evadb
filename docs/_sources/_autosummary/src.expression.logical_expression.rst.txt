@@ -1,0 +1,23 @@
+src.expression.logical\_expression
+==================================
+
+.. automodule:: src.expression.logical_expression
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      LogicalExpression

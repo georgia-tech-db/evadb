@@ -1,0 +1,23 @@
+src.expression.arithmetic\_expression
+=====================================
+
+.. automodule:: src.expression.arithmetic_expression
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      ArithmeticExpression

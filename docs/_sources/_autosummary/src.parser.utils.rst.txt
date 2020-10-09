@@ -1,0 +1,18 @@
+src.parser.utils
+================
+
+.. automodule:: src.parser.utils
+
+
+
+
+
+
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+
+      xform_parser_column_type_to_catalog_type

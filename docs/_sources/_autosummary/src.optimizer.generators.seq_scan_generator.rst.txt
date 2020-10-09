@@ -1,0 +1,23 @@
+src.optimizer.generators.seq\_scan\_generator
+=============================================
+
+.. automodule:: src.optimizer.generators.seq_scan_generator
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      ScanGenerator

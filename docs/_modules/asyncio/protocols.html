@@ -1,0 +1,402 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>asyncio.protocols &mdash; EVA 0.0.1 documentation</title>
+
+
+
+
+
+
+
+
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+
+
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+
+
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+</head>
+
+<body class="wy-body-for-nav">
+
+
+  <div class="wy-grid-for-nav">
+
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+
+
+            <a href="../../index.html" class="icon icon-home"> EVA
+
+
+
+          </a>
+
+
+
+
+
+
+
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+
+
+
+
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../guide/index.html">Guide</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_autosummary/src.html">src</a></li>
+</ul>
+
+
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+
+      <nav class="wy-nav-top" aria-label="top navigation">
+
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">EVA</a>
+
+      </nav>
+
+
+      <div class="wy-nav-content">
+
+        <div class="rst-content">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+
+      <li>asyncio.protocols</li>
+
+
+      <li class="wy-breadcrumbs-aside">
+
+      </li>
+
+  </ul>
+
+
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+
+  <h1>Source code for asyncio.protocols</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Abstract Protocol base classes.&quot;&quot;&quot;</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="s1">&#39;BaseProtocol&#39;</span><span class="p">,</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">,</span> <span class="s1">&#39;DatagramProtocol&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SubprocessProtocol&#39;</span><span class="p">,</span> <span class="s1">&#39;BufferedProtocol&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BaseProtocol</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Common base class for protocol interfaces.</span>
+
+<span class="sd">    Usually user implements protocols that derived from BaseProtocol</span>
+<span class="sd">    like Protocol or ProcessProtocol.</span>
+
+<span class="sd">    The only case when BaseProtocol should be implemented directly is</span>
+<span class="sd">    write-only transport like write pipe</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">connection_made</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">transport</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when a connection is made.</span>
+
+<span class="sd">        The argument is the transport representing the pipe connection.</span>
+<span class="sd">        To receive data, wait for data_received() calls.</span>
+<span class="sd">        When the connection is closed, connection_lost() is called.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">connection_lost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the connection is lost or closed.</span>
+
+<span class="sd">        The argument is an exception object or None (the latter</span>
+<span class="sd">        meaning a regular EOF is received or the connection was</span>
+<span class="sd">        aborted or closed).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">pause_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the transport&#39;s buffer goes over the high-water mark.</span>
+
+<span class="sd">        Pause and resume calls are paired -- pause_writing() is called</span>
+<span class="sd">        once when the buffer goes strictly over the high-water mark</span>
+<span class="sd">        (even if subsequent writes increases the buffer size even</span>
+<span class="sd">        more), and eventually resume_writing() is called once when the</span>
+<span class="sd">        buffer size reaches the low-water mark.</span>
+
+<span class="sd">        Note that if the buffer size equals the high-water mark,</span>
+<span class="sd">        pause_writing() is not called -- it must go strictly over.</span>
+<span class="sd">        Conversely, resume_writing() is called when the buffer size is</span>
+<span class="sd">        equal or lower than the low-water mark.  These end conditions</span>
+<span class="sd">        are important to ensure that things go as expected when either</span>
+<span class="sd">        mark is zero.</span>
+
+<span class="sd">        NOTE: This is the only Protocol callback that is not called</span>
+<span class="sd">        through EventLoop.call_soon() -- if it were, it would have no</span>
+<span class="sd">        effect when it&#39;s most needed (when the app keeps writing</span>
+<span class="sd">        without yielding until pause_writing() is called).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">resume_writing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the transport&#39;s buffer drains below the low-water mark.</span>
+
+<span class="sd">        See pause_writing() for details.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">BaseProtocol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface for stream protocol.</span>
+
+<span class="sd">    The user should implement this interface.  They can inherit from</span>
+<span class="sd">    this class but don&#39;t need to.  The implementations here do</span>
+<span class="sd">    nothing (they don&#39;t raise exceptions).</span>
+
+<span class="sd">    When the user wants to requests a transport, they pass a protocol</span>
+<span class="sd">    factory to a utility function (e.g., EventLoop.create_connection()).</span>
+
+<span class="sd">    When the connection is made successfully, connection_made() is</span>
+<span class="sd">    called with a suitable transport object.  Then data_received()</span>
+<span class="sd">    will be called 0 or more times with data (bytes) received from the</span>
+<span class="sd">    transport; finally, connection_lost() will be called exactly once</span>
+<span class="sd">    with either an exception object or None as an argument.</span>
+
+<span class="sd">    State machine of calls:</span>
+
+<span class="sd">      start -&gt; CM [-&gt; DR*] [-&gt; ER?] -&gt; CL -&gt; end</span>
+
+<span class="sd">    * CM: connection_made()</span>
+<span class="sd">    * DR: data_received()</span>
+<span class="sd">    * ER: eof_received()</span>
+<span class="sd">    * CL: connection_lost()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">data_received</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when some data is received.</span>
+
+<span class="sd">        The argument is a bytes object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">eof_received</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the other end calls write_eof() or equivalent.</span>
+
+<span class="sd">        If this returns a false value (including None), the transport</span>
+<span class="sd">        will close itself.  If it returns a true value, closing the</span>
+<span class="sd">        transport is up to the protocol.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">BufferedProtocol</span><span class="p">(</span><span class="n">BaseProtocol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface for stream protocol with manual buffer control.</span>
+
+<span class="sd">    Important: this has been added to asyncio in Python 3.7</span>
+<span class="sd">    *on a provisional basis*!  Consider it as an experimental API that</span>
+<span class="sd">    might be changed or removed in Python 3.8.</span>
+
+<span class="sd">    Event methods, such as `create_server` and `create_connection`,</span>
+<span class="sd">    accept factories that return protocols that implement this interface.</span>
+
+<span class="sd">    The idea of BufferedProtocol is that it allows to manually allocate</span>
+<span class="sd">    and control the receive buffer.  Event loops can then use the buffer</span>
+<span class="sd">    provided by the protocol to avoid unnecessary data copies.  This</span>
+<span class="sd">    can result in noticeable performance improvement for protocols that</span>
+<span class="sd">    receive big amounts of data.  Sophisticated protocols can allocate</span>
+<span class="sd">    the buffer only once at creation time.</span>
+
+<span class="sd">    State machine of calls:</span>
+
+<span class="sd">      start -&gt; CM [-&gt; GB [-&gt; BU?]]* [-&gt; ER?] -&gt; CL -&gt; end</span>
+
+<span class="sd">    * CM: connection_made()</span>
+<span class="sd">    * GB: get_buffer()</span>
+<span class="sd">    * BU: buffer_updated()</span>
+<span class="sd">    * ER: eof_received()</span>
+<span class="sd">    * CL: connection_lost()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">get_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sizehint</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called to allocate a new receive buffer.</span>
+
+<span class="sd">        *sizehint* is a recommended minimal size for the returned</span>
+<span class="sd">        buffer.  When set to -1, the buffer size can be arbitrary.</span>
+
+<span class="sd">        Must return an object that implements the</span>
+<span class="sd">        :ref:`buffer protocol &lt;bufferobjects&gt;`.</span>
+<span class="sd">        It is an error to return a zero-sized buffer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">buffer_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbytes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the buffer was updated with the received data.</span>
+
+<span class="sd">        *nbytes* is the total number of bytes that were written to</span>
+<span class="sd">        the buffer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">eof_received</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the other end calls write_eof() or equivalent.</span>
+
+<span class="sd">        If this returns a false value (including None), the transport</span>
+<span class="sd">        will close itself.  If it returns a true value, closing the</span>
+<span class="sd">        transport is up to the protocol.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">DatagramProtocol</span><span class="p">(</span><span class="n">BaseProtocol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface for datagram protocol.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">datagram_received</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">addr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when some datagram is received.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">error_received</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when a send or receive operation raises an OSError.</span>
+
+<span class="sd">        (Other than BlockingIOError or InterruptedError.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">SubprocessProtocol</span><span class="p">(</span><span class="n">BaseProtocol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Interface for protocol for subprocess calls.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">pipe_data_received</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when the subprocess writes data into stdout/stderr pipe.</span>
+
+<span class="sd">        fd is int file descriptor.</span>
+<span class="sd">        data is bytes object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">pipe_connection_lost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fd</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when a file descriptor associated with the child process is</span>
+<span class="sd">        closed.</span>
+
+<span class="sd">        fd is the int file descriptor that was closed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">process_exited</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Called when subprocess has exited.&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">_feed_data_to_buffered_proto</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">data_len</span><span class="p">:</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">proto</span><span class="o">.</span><span class="n">get_buffer</span><span class="p">(</span><span class="n">data_len</span><span class="p">)</span>
+        <span class="n">buf_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">buf_len</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;get_buffer() returned an empty buffer&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">buf_len</span> <span class="o">&gt;=</span> <span class="n">data_len</span><span class="p">:</span>
+            <span class="n">buf</span><span class="p">[:</span><span class="n">data_len</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="n">proto</span><span class="o">.</span><span class="n">buffer_updated</span><span class="p">(</span><span class="n">data_len</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">buf</span><span class="p">[:</span><span class="n">buf_len</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">buf_len</span><span class="p">]</span>
+            <span class="n">proto</span><span class="o">.</span><span class="n">buffer_updated</span><span class="p">(</span><span class="n">buf_len</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">buf_len</span><span class="p">:]</span>
+            <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+
+          </div>
+          <footer>
+
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018-2020, Georgia Tech Database Group
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+
+
+
+
+
+</body>
+</html>

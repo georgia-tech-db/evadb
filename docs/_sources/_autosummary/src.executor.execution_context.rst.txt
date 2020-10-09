@@ -1,0 +1,23 @@
+src.executor.execution\_context
+===============================
+
+.. automodule:: src.executor.execution_context
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      Context

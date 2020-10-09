@@ -1,0 +1,23 @@
+src.udfs.pytorch\_abstract\_udf
+===============================
+
+.. automodule:: src.udfs.pytorch_abstract_udf
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      PytorchAbstractUDF

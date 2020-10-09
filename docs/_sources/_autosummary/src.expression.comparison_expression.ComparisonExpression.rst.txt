@@ -1,0 +1,37 @@
+src.expression.comparison\_expression.ComparisonExpression
+==========================================================
+
+.. currentmodule:: src.expression.comparison_expression
+
+.. autoclass:: ComparisonExpression
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+      ~ComparisonExpression.append_child
+      ~ComparisonExpression.clear_predicates
+      ~ComparisonExpression.evaluate
+      ~ComparisonExpression.get_child
+      ~ComparisonExpression.get_children_count
+      ~ComparisonExpression.get_predicate_count
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~ComparisonExpression.children
+      ~ComparisonExpression.etype
+      ~ComparisonExpression.predicates
+      ~ComparisonExpression.return_type

@@ -1,0 +1,34 @@
+src.server.client
+=================
+
+.. automodule:: src.server.client
+
+
+
+
+
+
+
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+      :nosignatures:
+
+      handle_user_input
+      process_cmd
+      start_client
+      start_clients
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      EvaClient

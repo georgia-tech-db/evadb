@@ -1,0 +1,34 @@
+src.parser.create\_udf\_statement.CreateUDFStatement
+====================================================
+
+.. currentmodule:: src.parser.create_udf_statement
+
+.. autoclass:: CreateUDFStatement
+   :members:
+   :show-inheritance:
+   :inherited-members:
+   :special-members: __call__, __add__, __mul__
+
+
+
+   .. rubric:: Methods
+
+   .. autosummary::
+      :nosignatures:
+
+
+
+
+
+
+   .. rubric:: Attributes
+
+   .. autosummary::
+
+      ~CreateUDFStatement.if_not_exists
+      ~CreateUDFStatement.impl_path
+      ~CreateUDFStatement.inputs
+      ~CreateUDFStatement.name
+      ~CreateUDFStatement.outputs
+      ~CreateUDFStatement.stmt_type
+      ~CreateUDFStatement.udf_type

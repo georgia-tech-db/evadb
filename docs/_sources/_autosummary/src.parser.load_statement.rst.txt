@@ -1,0 +1,23 @@
+src.parser.load\_statement
+==========================
+
+.. automodule:: src.parser.load_statement
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      LoadDataStatement

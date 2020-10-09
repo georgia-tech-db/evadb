@@ -1,0 +1,23 @@
+src.models.inference.outcome
+============================
+
+.. automodule:: src.models.inference.outcome
+
+
+
+
+
+
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+      :nosignatures:
+
+      Outcome

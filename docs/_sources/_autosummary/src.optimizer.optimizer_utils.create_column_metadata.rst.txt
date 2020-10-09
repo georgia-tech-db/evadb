@@ -1,0 +1,6 @@
+src.optimizer.optimizer\_utils.create\_column\_metadata
+=======================================================
+
+.. currentmodule:: src.optimizer.optimizer_utils
+
+.. autofunction:: create_column_metadata
