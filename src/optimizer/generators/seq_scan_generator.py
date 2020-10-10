@@ -14,8 +14,9 @@
 # limitations under the License.
 from src.optimizer.generators.base import Generator
 from src.optimizer.operators import LogicalGet, Operator, LogicalFilter, \
-    LogicalProject
+    LogicalProject, LogicalUnion
 from src.planner.seq_scan_plan import SeqScanPlan
+from src.planner.union_plan import UnionPlan
 from src.planner.storage_plan import StoragePlan
 
 
@@ -38,7 +39,19 @@ class ScanGenerator(Generator):
             seq_scan.append_child(self._plan)
         self._plan = seq_scan
 
+    def _visit_logical_union(self, operator: LogicalUnion):
+        union = UnionPlan(operator.all)
+        self._visit(operator.children[0])
+        union.append_child(self._plan)
+        self._visit(operator.children[1])
+        union.append_child(self._plan)
+        self._plan = union
+
     def _visit(self, operator: Operator):
+        if isinstance(operator, LogicalUnion):
+            self._visit_logical_union(operator)
+            return
+
         for child in operator.children:
             self._visit(child)
 

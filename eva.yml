@@ -4,12 +4,16 @@ core:
   application: "eva"
 
 executor:
-  batch_size: 2
+  batch_size: 20
+  gpu_batch_size: 1
   gpus: {'130.207.125.60': [1]}
 storage:
   engine: "src.storage.petastorm_storage_engine.PetastormStorageEngine"
 
-
+pyspark:
+  property: {'spark.logConf': 'true',
+             'spark.driver.memory': '1g',
+             'spark.sql.execution.arrow.pyspark.enabled': 'true'}
 
 server:
   host: "0.0.0.0"

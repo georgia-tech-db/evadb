@@ -127,6 +127,17 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.where_clause)
         # other tests should go in expression testing
 
+    def test_select_union_statement(self):
+        parser = Parser()
+        select_union_query = "SELECT CLASS, REDNESS FROM TAIPAI \
+            UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;"
+        eva_statement_list = parser.parse(select_union_query)
+        select_stmt = eva_statement_list[0]
+        self.assertIsNotNone(select_stmt.union_link)
+        self.assertEqual(select_stmt.union_all, True)
+        second_select_stmt = select_stmt.union_link
+        self.assertIsNone(second_select_stmt.union_link)
+
     def test_select_statement_class(self):
         ''' Testing setting different clauses for Select
         Statement class

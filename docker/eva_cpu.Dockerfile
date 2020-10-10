@@ -1,0 +1,31 @@
+FROM ubuntu:18.04
+
+ARG PYTHON_VERSION=3.8
+
+# install system-wide package
+RUN apt-get update \
+    && apt-get -y install sudo wget bash openjdk-8-jdk openjdk-8-jre \
+    && apt-get -y install gcc python-dev python3-dev python3.7-dev python3.8-dev
+
+# set eva user and no password sudo
+RUN echo "root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# install miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh \
+    && chmod +x ~/miniconda.sh \
+    && bash ~/miniconda.sh -b -p ~/miniconda \
+    && hash -r \
+    && ~/miniconda/bin/conda config --set always_yes yes --set changeps1 no \
+    && ~/miniconda/bin/conda update -q conda \
+    && ~/miniconda/bin/conda info -a
+
+COPY . /app
+
+# install eva env
+RUN ~/miniconda/bin/conda env create -f /app/script/install/conda_eva_environment.yml
+
+# generate eva-ql parser
+RUN wget https://www.antlr.org/download/antlr-4.8-complete.jar -O ~/antlr.jar \
+    && java -jar ~/antlr.jar -Dlanguage=Python3 /app/src/parser/evaql/evaql_lexer.g4 \
+    && java -jar ~/antlr.jar -Dlanguage=Python3 -visitor /app/src/parser/evaql/evaql_parser.g4 \
+    && rm ~/antlr.jar
