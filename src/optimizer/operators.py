@@ -36,7 +36,9 @@ class OperatorType(IntEnum):
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
     LOGICALQUERYDERIVEDGET = auto()
+    LOGICALUNION = auto()
     LOGICALDELIMITER = auto()
+    
 
 class Operator:
     """Base class for logital plan of operators
@@ -176,6 +178,22 @@ class LogicalProject(Operator):
             return False
         return (is_subtree_equal
                 and self.target_list == other.target_list)
+
+
+class LogicalUnion(Operator):
+    def __init__(self, all: bool, children: List = None):
+        super().__init__(OperatorType.LOGICALUNION, children)
+        self._all = all
+
+    @property
+    def all(self):
+        return self._all
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalUnion):
+            return False
+        return (is_subtree_equal and self.all == other.all)
 
 
 class LogicalInsert(Operator):

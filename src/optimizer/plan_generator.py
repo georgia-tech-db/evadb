@@ -30,12 +30,12 @@ class PlanGenerator:
     NOTE: This currently just does node transformation. Optimizer logic
     needs to be incorporated.
     """
-    _SCAN_OPR_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
-                        OperatorType.LOGICALPROJECT)
-    _INSERT_OPR_TYPE = OperatorType.LOGICALINSERT
-    _CREATE_OPR_TYPE = OperatorType.LOGICALCREATE
-    _CREATE_UDF_OPR_TYPE = OperatorType.LOGICALCREATEUDF
-    _LOAD_OPR_TYPE = OperatorType.LOGICALLOADDATA
+    _SCAN_NODE_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
+                        OperatorType.LOGICALPROJECT, OperatorType.LOGICALUNION)
+    _INSERT_NODE_TYPE = OperatorType.LOGICALINSERT
+    _CREATE_NODE_TYPE = OperatorType.LOGICALCREATE
+    _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
+    _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
 
     def execute_task_stack(self, task_stack: OptimizerTaskStack):
         while not task_stack.empty():
