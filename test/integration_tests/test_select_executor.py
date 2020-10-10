@@ -60,7 +60,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)
 
-    @unittest.skip('Too slow when batch size is small')
+    @unittest.skip('Too slow when batch size is small.')
     def test_should_load_and_select_real_video_in_table(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                    INTO MyVideo;"""
