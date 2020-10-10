@@ -52,7 +52,7 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def classify(self, frames: np.ndarray) -> List[pd.DataFrame]:
+    def classify(self, frames: np.ndarray) -> pd.DataFrame:
         """
         Takes as input a batch of frames and returns the predictions by
         applying the classification model.
@@ -62,7 +62,7 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
             needs to be made
 
         Returns:
-            List[DataFrame]: The predictions made by the classifier
+            DataFrame: The predictions made by the classifier
         """
 
     def __call__(self, *args, **kwargs):
