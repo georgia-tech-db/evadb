@@ -23,6 +23,12 @@ from test.util import create_dataframe_same, create_dataframe
 
 class BatchTest(unittest.TestCase):
 
+    def test_batch_from_json(self):
+        batch = Batch(frames=create_dataframe(),
+                      identifier_column='id')
+        batch2 = Batch.from_json(batch.to_json())
+        self.assertEqual(batch, batch2)
+
     def test_set_outcomes_method_should_set_the_predictions_with_udf_name(
             self):
         batch = Batch(frames=create_dataframe())
