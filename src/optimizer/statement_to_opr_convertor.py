@@ -17,7 +17,8 @@ from src.expression.abstract_expression import AbstractExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
-                                     LogicalQueryDerivedGet, LogicalUnion)
+                                     LogicalQueryDerivedGet, LogicalUnion,
+                                     LogicalOrderBy)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -95,6 +96,18 @@ class StatementToPlanConvertor:
         # union
         if statement.union_link is not None:
             self._visit_union(statement.union_link, statement.union_all)
+
+        if statement.orderby_list is not None:
+            self._visit_orderby(statement.orderby_list)
+
+    def _visit_orderby(self, orderby_list):
+        print("OrderByList:", orderby_list)
+        # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
+        orderby_columns = [orderbyexpr[0] for orderbyexpr in orderby_list]
+        bind_columns_expr(orderby_columns, self._column_map)
+        orderby_opr = LogicalOrderBy(orderby_list)
+        orderby_opr.append_child(self._plan)
+        self._plan = orderby_opr
 
     def _visit_union(self, target, all):
         left_child_plan = self._plan
