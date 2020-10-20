@@ -15,7 +15,6 @@
 
 import unittest
 
-from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.parser import Parser
 from src.parser.statement import AbstractStatement
 
@@ -33,6 +32,7 @@ from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 
 from src.parser.table_ref import TableRef, TableInfo
+from src.parser.types import ParserOrderBySortType
 
 from pathlib import Path
 
@@ -205,9 +205,11 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
         self.assertEqual(select_stmt.orderby_list[0][0].col_name, 'CLASS')
-        self.assertEqual(select_stmt.orderby_list[0][1], evaql_parser.ASC)
+        self.assertEqual(
+            select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
         self.assertEqual(select_stmt.orderby_list[1][0].col_name, 'REDNESS')
-        self.assertEqual(select_stmt.orderby_list[1][1], evaql_parser.DESC)
+        self.assertEqual(
+            select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
     def test_table_ref(self):
         ''' Testing table info in TableRef

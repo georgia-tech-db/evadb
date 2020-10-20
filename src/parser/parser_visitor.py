@@ -31,7 +31,7 @@ from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
-from src.parser.types import ParserColumnDataType
+from src.parser.types import ParserColumnDataType, ParserOrderBySortType
 from src.parser.load_statement import LoadDataStatement
 
 from src.parser.types import ColumnConstraintEnum
@@ -341,7 +341,6 @@ class ParserVisitor(evaql_parserVisitor):
         orderby_clause = None
 
         # first child will be a SELECT terminal token
-        # print("children:", ctx.children)
 
         for child in ctx.children[1:]:
             try:
@@ -392,12 +391,6 @@ class ParserVisitor(evaql_parserVisitor):
         return {"from": from_table, "where": where_clause}
 
     def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
-        # print("visitOrderByClause ---------------")
-        # print("ORDER:", ctx.ORDER())
-        # print("BY:", ctx.BY())
-        # print("orderByExpression:", ctx.orderByExpression())
-        # print("COMMA:", ctx.COMMA())
-
         orderby_clause_data = []
         # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
         for expression in ctx.orderByExpression():
@@ -407,18 +400,11 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitOrderByExpression(
             self, ctx: evaql_parser.OrderByExpressionContext):
-        # print("visitOrderByExpression ---------------")
-        # print("expression:", ctx.expression())
-        # print("ASC:", ctx.ASC())
-        # print("DESC:", ctx.DESC())
-        # print("getRuleIndex:", ctx.getRuleIndex())
-
-        # print(self.visitChildren(ctx.expression()))
 
         if ctx.DESC():
-            sort_token = evaql_parser.DESC
+            sort_token = ParserOrderBySortType.DESC
         else:
-            sort_token = evaql_parser.ASC
+            sort_token = ParserOrderBySortType.ASC
 
         return self.visitChildren(ctx.expression()), sort_token
 
