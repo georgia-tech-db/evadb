@@ -182,8 +182,6 @@ class ParserTests(unittest.TestCase):
 
         select_stmt = eva_statement_list[0]
 
-        # print("parsed statement:", select_stmt)
-
         # target List
         self.assertIsNotNone(select_stmt.target_list)
         self.assertEqual(len(select_stmt.target_list), 2)

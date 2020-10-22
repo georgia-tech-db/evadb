@@ -272,7 +272,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT data, id FROM video \
             WHERE data > 2 ORDER BY data, id DESC;""")[0]
-        print()
+
         converter = StatementToPlanConvertor()
         actual_plan = converter.visit(stmt)
         plans = []
@@ -298,24 +298,6 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             if expected_plan:
                 plan.append_child(expected_plan)
             expected_plan = plan
-
-        # print("EXPECTED PLAN BREAKDOWN:")
-        # expected_plan_head = expected_plan
-        # while expected_plan_head:
-        #     print(expected_plan_head)
-        #     if expected_plan_head.children:
-        #         expected_plan_head = expected_plan_head.children[0]
-        #     else:
-        #         break
-        #
-        # print("ACTUAL PLAN BREAKDOWN:")
-        # actual_plan_head = actual_plan
-        # while actual_plan_head:
-        #     print(actual_plan_head)
-        #     if actual_plan_head.children:
-        #         actual_plan_head = actual_plan_head.children[0]
-        #     else:
-        #         break
 
         self.assertEqual(expected_plan, actual_plan)
 

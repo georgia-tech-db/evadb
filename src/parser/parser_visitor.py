@@ -337,7 +337,6 @@ class ParserVisitor(evaql_parserVisitor):
         target_list = None
         from_clause = None
         where_clause = None
-        # orderby_clause = ctx.orderByClause()
         orderby_clause = None
 
         # first child will be a SELECT terminal token
@@ -354,7 +353,7 @@ class ParserVisitor(evaql_parserVisitor):
                     where_clause = clause.get('where', None)
 
                 elif rule_idx == evaql_parser.RULE_orderByClause:
-                    orderby_clause = self.visit(child)
+                    orderby_clause = self.visit(ctx.orderByClause())
 
             except BaseException:
                 # stop parsing something bad happened
@@ -394,7 +393,7 @@ class ParserVisitor(evaql_parserVisitor):
         orderby_clause_data = []
         # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
         for expression in ctx.orderByExpression():
-            orderby_clause_data.append(self.visitOrderByExpression(expression))
+            orderby_clause_data.append(self.visit(expression))
 
         return orderby_clause_data
 
