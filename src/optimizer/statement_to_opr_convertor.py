@@ -101,7 +101,6 @@ class StatementToPlanConvertor:
             self._visit_orderby(statement.orderby_list)
 
     def _visit_orderby(self, orderby_list):
-        print("OrderByList:", orderby_list)
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
         orderby_columns = [orderbyexpr[0] for orderbyexpr in orderby_list]
         bind_columns_expr(orderby_columns, self._column_map)
