@@ -1,6 +1,0 @@
-src.optimizer.optimizer\_utils.xform\_parser\_column\_type\_to\_catalog\_type
-=============================================================================
-
-.. currentmodule:: src.optimizer.optimizer_utils
-
-.. autofunction:: xform_parser_column_type_to_catalog_type

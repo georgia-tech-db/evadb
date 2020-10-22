@@ -1,6 +1,0 @@
-src.optimizer.optimizer\_utils.bind\_predicate\_expr
-====================================================
-
-.. currentmodule:: src.optimizer.optimizer_utils
-
-.. autofunction:: bind_predicate_expr

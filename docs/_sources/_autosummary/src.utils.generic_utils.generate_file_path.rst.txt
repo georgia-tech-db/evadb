@@ -1,6 +1,0 @@
-src.utils.generic\_utils.generate\_file\_path
-=============================================
-
-.. currentmodule:: src.utils.generic_utils
-
-.. autofunction:: generate_file_path

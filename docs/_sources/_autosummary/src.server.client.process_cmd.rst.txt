@@ -1,6 +1,0 @@
-src.server.client.process\_cmd
-==============================
-
-.. currentmodule:: src.server.client
-
-.. autofunction:: process_cmd

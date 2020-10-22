@@ -1,4 +1,0 @@
-src.constants
-=============
-
-.. automodule:: src.constants

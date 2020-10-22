@@ -1,6 +1,0 @@
-src.parser.evaql.evaql\_lexer.serializedATN
-===========================================
-
-.. currentmodule:: src.parser.evaql.evaql_lexer
-
-.. autofunction:: serializedATN

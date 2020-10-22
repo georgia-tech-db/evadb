@@ -1,6 +1,0 @@
-src.utils.generic\_utils.str\_to\_class
-=======================================
-
-.. currentmodule:: src.utils.generic_utils
-
-.. autofunction:: str_to_class
