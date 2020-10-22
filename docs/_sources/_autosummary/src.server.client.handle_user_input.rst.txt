@@ -1,6 +1,0 @@
-src.server.client.handle\_user\_input
-=====================================
-
-.. currentmodule:: src.server.client
-
-.. autofunction:: handle_user_input

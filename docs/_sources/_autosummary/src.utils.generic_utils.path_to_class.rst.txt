@@ -1,6 +1,0 @@
-src.utils.generic\_utils.path\_to\_class
-========================================
-
-.. currentmodule:: src.utils.generic_utils
-
-.. autofunction:: path_to_class

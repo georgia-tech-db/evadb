@@ -93,6 +93,8 @@ todo_include_todos = True
 #     sys.modules[mod_name] = mock.Mock()
 
 autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
+                        "sqlalchemy.orm", "sqlalchemy.orm.exc",
+                        "sqlalchemy.types",
                         "petastorm", "yaml", "pyspark", "torch",
                         "pandas", "cv2"]
 # -- Options for HTML output -------------------------------------------------

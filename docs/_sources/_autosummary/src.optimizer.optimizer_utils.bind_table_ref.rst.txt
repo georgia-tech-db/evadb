@@ -1,6 +1,0 @@
-src.optimizer.optimizer\_utils.bind\_table\_ref
-===============================================
-
-.. currentmodule:: src.optimizer.optimizer_utils
-
-.. autofunction:: bind_table_ref

@@ -1,6 +1,0 @@
-src.utils.generic\_utils.is\_gpu\_available
-===========================================
-
-.. currentmodule:: src.utils.generic_utils
-
-.. autofunction:: is_gpu_available
