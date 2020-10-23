@@ -17,7 +17,7 @@ from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_plan import CreatePlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.utils.generic_utils import generate_file_path
-from src.storage import StorageEngine
+from src.storage.storage_engine import StorageEngine
 
 
 class CreateExecutor(AbstractExecutor):

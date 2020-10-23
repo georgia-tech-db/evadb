@@ -27,6 +27,8 @@ dependencies:
   - mock
   - pytest-asyncio
   - flake8
+  - sphinx 
+  - sphinx_rtd_theme
   - pip:
     - antlr4-python3-runtime==4.8
     - petastorm
