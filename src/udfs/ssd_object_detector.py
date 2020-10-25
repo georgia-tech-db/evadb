@@ -8,6 +8,7 @@ from math import sqrt
 import torch
 import torch.nn.functional as F
 from torch import Tensor
+from torchvision.transforms import Compose, transforms
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
@@ -66,8 +67,16 @@ class SSDObjectDetector(PytorchAbstractUDF):
     def input_format(self) -> FrameInfo:
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
+    @property
+    def transforms(self) -> Compose:
+        return Compose([
+            transforms.Resize([300, 300]),
+            transforms.ToTensor(),
+        ])
+
     def _get_predictions(self, frames: Tensor) -> List[Outcome]:
-        assert frames.size()[-1] == frames.size()[-2] == 3
+        print(frames.size())
+        assert frames.size()[-1] == frames.size()[-2] == 300
 
         prediction = self.model(frames)
 
