@@ -96,7 +96,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
                 left, top, right, bottom = bboxes[idx]
                 x, y, w, h = [
                     val*300 for val in [left, top, right-left, bottom-top]]
-                label.append(self.labels[idx])
+                label.append(self.labels[classes[idx]])
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
 
