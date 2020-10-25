@@ -42,3 +42,20 @@ class PytorchTest(unittest.TestCase):
         print(actual_batch)
         self.assertEqual(actual_batch.batch_size, 5)
 
+    def test_should_run_pytorch_and_ssd(self):
+        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
+                   INTO MyVideo;"""
+        perform_query(query)
+
+        create_udf_query = """CREATE UDF SSDObjectDetector
+                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  OUTPUT (label TEXT(10))
+                  TYPE  Classification
+                  IMPL  'src/udfs/ssd_object_detector.py';
+        """
+        perform_query(create_udf_query)
+
+        select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = perform_query(select_query)
+        self.assertEqual(actual_batch.batch_size, 5)
