@@ -22,13 +22,15 @@ from src.optimizer.operators import OperatorType, Operator
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
-    LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter)
+    LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
+    LogicalUnion)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
+from src.planner.union_plan import UnionPlan
 from src.expression.abstract_expression import (
     AbstractExpression, ExpressionType)
 from src.expression.function_expression import FunctionExpression
@@ -50,6 +52,7 @@ class RuleType(IntFlag):
     REWRITE_DELIMETER = auto()
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
+    LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -66,6 +69,7 @@ class Promise(IntFlag):
     conflict
     """
     # IMPLEMENTATION RULES
+    LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -74,9 +78,9 @@ class Promise(IntFlag):
     LOGICAL_GET_TO_SEQSCAN = auto()
 
     # REWRITE RULES
-    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
+    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     UDF_LTOR = auto()
 
 
@@ -178,9 +182,9 @@ class EmbedFilterIntoGet(Rule):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: Operator, context: OptimizerContext):
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        logical_get = before.children[0]
+        logical_get = copy.deepcopy(before.children[0])
         logical_get.predicate = predicate
         return logical_get
 
@@ -249,8 +253,8 @@ class UdfLTOR(Rule):
 
 class LogicalUdfFilterToPhysical(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALGET)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_UDF_FILTER_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -392,6 +396,25 @@ class LogicalGetToSeqScan(Rule):
         after.append_child(StoragePlan(before.dataset_metadata))
         return after
 
+
+class LogicalUnionToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALUNION)
+        # add 2 dummy children
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_UNION_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UNION_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalUnion, context: OptimizerContext):
+        after = UnionPlan(before.all)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -409,13 +432,14 @@ class RulesManager:
     def __init__(self):
         self._rewrite_rules = [EmbedFilterIntoGet(),
                                EmbedProjectIntoGet(),
-                               UdfLTOR(),
+                            #    UdfLTOR(),
                                LogicalUdfFilterToPhysical()]
         self._implementation_rules = [LogicalCreateToPhysical(),
                                       LogicalCreateUDFToPhysical(),
                                       LogicalInsertToPhysical(),
                                       LogicalLoadToPhysical(),
-                                      LogicalGetToSeqScan()]
+                                      LogicalGetToSeqScan(),
+                                      LogicalUnionToPhysical()]
 
     @property
     def rewrite_rules(self):
