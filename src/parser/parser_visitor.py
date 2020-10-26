@@ -33,6 +33,8 @@ from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType
 from src.parser.load_statement import LoadDataStatement
+from src.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
@@ -596,3 +598,13 @@ class ParserVisitor(evaql_parserVisitor):
             impl_path,
             udf_type)
         return stmt
+
+    # MATERIALIZED VIEW
+    def visitCreateMaterializedView(self, ctx: evaql_parser.CreateMaterializedViewContext):
+        view_name = self.visit(ctx.tableName())
+        if_not_exists = False
+        if ctx.ifNotExists():
+            if_not_exists = self.visit(ctx.ifNotExists())
+        
+        query = self.visit(ctx.selectStatement())
+        return CreateMaterializedViewStatement(view_name, if_not_exists, query)
