@@ -86,7 +86,7 @@ class TopDownRewrite(OptimizerTask):
         valid_rules = []
         for rule in rewrite_rules:
             if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
-                valid_rules.append(rule)
+                valid_rules.append(rule) 
 
         # sort the rules by promise
         valid_rules = sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
@@ -97,11 +97,12 @@ class TopDownRewrite(OptimizerTask):
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.xform_opr_to_group_expr(after)
                 new_expr.mark_rule_explored(rule.rule_type)
-                self.root_expr = new_expr
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
+                self.root_expr = new_expr
                 self.optimizer_context.task_stack.push(TopDownRewrite(
-                    new_expr, self.optimizer_context))
+                    self.root_expr, self.optimizer_context))
+            self.root_expr.mark_rule_explored(rule.rule_type)
 
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.get_group(
@@ -184,7 +185,7 @@ class OptimizeExpression(OptimizerTask):
             # Optimize the child groups
             for child_id in self.root_expr.children:
                 child_expr = self.optimizer_context.task_stack.push(
-                    OptimizeGroup(None, child_id, self.optimizer_context))
+                    OptimizeGroup(child_id, self.optimizer_context))
 
 
 class OptimizeGroup(OptimizerTask):

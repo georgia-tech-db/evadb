@@ -47,6 +47,10 @@ class GroupExpression:
     def append_child(self, child_id: int):
         self._children.append(child_id)
 
+    @property
+    def rules_explored(self):
+        return self._rules_explored
+    
     def mark_rule_explored(self, rule_id: int):
         self._rules_explored |= rule_id
     
