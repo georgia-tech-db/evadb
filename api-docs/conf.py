@@ -17,12 +17,7 @@ import sys
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../'))
 
-#sys.path.insert(0, os.path.abspath('../src2/'))
-#sys.path.insert(0, os.path.abspath('../src/'))
 
-print('Sys paths:')
-for pathx in sys.path:
-    print(pathx)
 # Temp. workaround for
 # https://github.com/agronholm/sphinx-autodoc-typehints/issues/133
 warnings.filterwarnings(
@@ -76,7 +71,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['.py', '_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -88,10 +83,6 @@ highlight_language = 'python'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
-
-# MOCK_MODULES = ['numpy', 'sqlalchemy', 'petastorm', 'sqlalchemy.orm']
-# for mod_name in MOCK_MODULES:
-#     sys.modules[mod_name] = mock.Mock()
 
 autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
                         "sqlalchemy.orm", "sqlalchemy.orm.exc",
@@ -121,3 +112,11 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+
+def autodoc_skip_member(app, what, name, obj, skip, options):
+    return False
+
+
+def setup(app):
+    app.connect('autodoc-skip-member', autodoc_skip_member)
