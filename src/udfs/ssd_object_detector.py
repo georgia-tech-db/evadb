@@ -74,8 +74,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
             transforms.ToTensor(),
         ])
 
-    def _get_predictions(self, frames: Tensor) -> List[Outcome]:
-        print(frames.size())
+    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         assert frames.size()[-1] == frames.size()[-2] == 300
 
         prediction = self.model(frames)
@@ -85,11 +84,21 @@ class SSDObjectDetector(PytorchAbstractUDF):
         ploc, plabel = [val.float() for val in prediction]
         encoded = encoder.decode_batch(ploc, plabel, criteria=0.5)
 
-        res = []
+        res = pd.DataFrame()
+
         for batch in encoded:
             bboxes, classes, confidences = [
                 x.detach().cpu().numpy() for x in batch]
             best = np.argwhere(confidences > self.threshold).squeeze()
+
+            # deal with empty detection
+            if len(best.shape) == 0:
+                res.append({
+                    "label": [],
+                    "pred_score": [],
+                    "pred_boxes": []
+                })
+                continue
 
             label, bbox, conf = [], [], []
             for idx in best:
@@ -100,15 +109,15 @@ class SSDObjectDetector(PytorchAbstractUDF):
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
 
-            res.append(
-                Outcome(pd.DataFrame(
-                    {"label": label, "pred_score": conf, "pred_boxes": bbox}
-                ), "label")
-            )
+            res.append({
+                "label": label,
+                "pred_score": conf,
+                "pred_boxes": bbox
+            })
 
         return res
 
-    def classify(self, frames: Tensor) -> List[Outcome]:
+    def classify(self, frames: Tensor) -> pd.DataFrame:
         return self._get_predictions(frames)
 
 
