@@ -18,7 +18,7 @@ import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from src.storage import StorageEngine
+from src.storage.storage_engine import StorageEngine
 
 from test.util import create_sample_video, create_dummy_batches, perform_query
 

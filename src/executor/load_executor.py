@@ -15,7 +15,7 @@
 
 from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
-from src.storage import StorageEngine
+from src.storage.storage_engine import StorageEngine
 from src.readers.opencv_reader import OpenCVReader
 
 
