@@ -4,8 +4,6 @@ Guide
 *****
 
 .. toctree::
-    :numbered:
-
     overview
     setup
     contributing

@@ -146,3 +146,5 @@ evaql_parserVisitor.py
 
 #VSCode
 .vscode/*
+
+/api-docs/_autosummary/
