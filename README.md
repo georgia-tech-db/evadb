@@ -39,8 +39,7 @@ export PATH="$HOME/miniconda/bin:$PATH"
 sh script/install/install.sh
 ```
 
-3. Mysql
-Connect mysql user root with normal account and no password
+3. Connect mysql user root with normal account and no password
 ```mysql
 sudo mysql -u root
 > SELECT User,Host FROM mysql.user;
