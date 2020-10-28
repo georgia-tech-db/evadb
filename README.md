@@ -39,7 +39,20 @@ export PATH="$HOME/miniconda/bin:$PATH"
 sh script/install/install.sh
 ```
 
-3. Install `docker` and `docker-compose`.
+3. Mysql
+Connect mysql user root with normal account and no password
+```mysql
+sudo mysql -u root
+> SELECT User,Host FROM mysql.user;
+> DROP USER 'root'@'localhost';
+> CREATE USER 'root'@'%' IDENTIFIED BY '';
+> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+> FLUSH PRIVILEGES;
+mysql -u root
+```
+refer to [askubuntu](https://askubuntu.com/questions/766334/cant-login-as-mysql-user-root-from-normal-user-account-in-ubuntu-16-04)
+
+4. Install `docker` and `docker-compose`.
 Please refer to [official doc](https://docs.docker.com/engine/install/).
 
 ## Docker
