@@ -102,7 +102,7 @@ class TopDownRewrite(OptimizerTask):
                 self.root_expr = new_expr
                 self.optimizer_context.task_stack.push(TopDownRewrite(
                     self.root_expr, self.optimizer_context))
-            self.root_expr.mark_rule_explored(rule.rule_type)
+#            self.root_expr.mark_rule_explored(rule.rule_type)
 
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.get_group(
@@ -217,7 +217,7 @@ class OptimizeInputs(OptimizerTask):
                 else:
                     self.optimizer_context.task_stack.push(OptimizeInputs(self.root_expr, self.optimizer_context))
                     self.optimizer_context.task_stack.push(
-                        OptimizeGroup(None, child_id, self.optimizer_context))
+                        OptimizeGroup(child_id, self.optimizer_context))
                     return
             
             grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)

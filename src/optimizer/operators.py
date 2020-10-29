@@ -37,8 +37,9 @@ class OperatorType(IntEnum):
     LOGICALLOADDATA = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
+    LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALDELIMITER = auto()
-    
+
 
 class Operator:
     """Base class for logital plan of operators
@@ -394,3 +395,34 @@ class LogicalLoadData(Operator):
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
                 and self.path == other.path)
+
+
+class LogicalCreateMaterializedView(Operator):
+    """Logical node for create materiaziled view operations
+
+    Arguments:
+        view {TableRef}: [view table that is to be created]
+        if_not_exists {bool}: [whether to override if view exists]
+    """
+
+    def __init__(self, view: TableRef,
+                 if_not_exists: bool = False, children=None):
+        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children)
+        self._view = view
+        self._if_not_exists = if_not_exists
+
+    @property
+    def view(self):
+        return self._view
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateMaterializedView):
+            return False
+        return (is_subtree_equal
+                and self.view == other.view
+                and self.if_not_exists == other.if_not_exists)

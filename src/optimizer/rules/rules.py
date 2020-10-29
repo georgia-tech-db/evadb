@@ -23,7 +23,7 @@ from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion)
+    LogicalUnion, LogicalCreateMaterializedView)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -31,6 +31,7 @@ from src.planner.load_data_plan import LoadDataPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
+from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.expression.abstract_expression import (
     AbstractExpression, ExpressionType)
 from src.expression.function_expression import FunctionExpression
@@ -57,6 +58,7 @@ class RuleType(IntFlag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     IMPLEMENTATION_DELIMETER = auto()
@@ -70,6 +72,7 @@ class Promise(IntFlag):
     """
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -415,6 +418,25 @@ class LogicalUnionToPhysical(Rule):
         after = UnionPlan(before.all)
         return after
 
+
+class LogicalCreateMaterializedViewToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateMaterializedView,
+              context: OptimizerContext):
+        after = CreateMaterializedViewPlan(before.view, before.if_not_exists)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -432,14 +454,16 @@ class RulesManager:
     def __init__(self):
         self._rewrite_rules = [EmbedFilterIntoGet(),
                                EmbedProjectIntoGet(),
-                            #    UdfLTOR(),
+                               #    UdfLTOR(),
                                LogicalUdfFilterToPhysical()]
         self._implementation_rules = [LogicalCreateToPhysical(),
                                       LogicalCreateUDFToPhysical(),
                                       LogicalInsertToPhysical(),
                                       LogicalLoadToPhysical(),
                                       LogicalGetToSeqScan(),
-                                      LogicalUnionToPhysical()]
+                                      LogicalUnionToPhysical(),
+                                      LogicalCreateMaterializedViewToPhysical()
+                                      ]
 
     @property
     def rewrite_rules(self):
