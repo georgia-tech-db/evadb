@@ -96,8 +96,10 @@ class PlanNodeTests(unittest.TestCase):
 
     def test_create_materialized_view_plan(self):
         dummy_view = TableRef(TableInfo('dummy'))
+        col_list = ['id', 'id2']
         query = 'Select id from MyVideo'
-        plan = CreateMaterializedViewPlan(dummy_view, query)
+        plan = CreateMaterializedViewPlan(dummy_view, col_list, query)
         self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
         self.assertEqual(plan.view, dummy_view)
+        self.assertEqual(plan.col_list, col_list)
         self.assertEqual(plan.query, query)
