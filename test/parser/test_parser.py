@@ -297,13 +297,16 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(select_stmt, create_udf)
 
     def test_materialized_view(self):
-        select_query = '''SELECT id, FastRCNNObjectDetector(frame) FROM MyVideo
+        select_query = '''SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
                         WHERE id<5; '''
-        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN AS {}'.format(
+        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}'.format(
             select_query)
         parser = Parser()
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)
-        expected_stmt = CreateMaterializedViewStatement(
-            TableRef(TableInfo('uadtrac_fastRCNN')), False, select_stmt[0])
+        expected_stmt = CreateMaterializedViewStatement(TableRef(
+            TableInfo('uadtrac_fastRCNN')), [
+                ColumnDefinition('id', None, None),
+                ColumnDefinition('labels', None, None)
+                ], False, select_stmt[0])
         self.assertEqual(mat_view_stmt[0], expected_stmt)
