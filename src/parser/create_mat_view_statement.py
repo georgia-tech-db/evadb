@@ -17,7 +17,10 @@ from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from src.parser.table_ref import TableRef
+from src.parser.create_statement import ColumnDefinition
 from src.parser.select_statement import SelectStatement
+
+from typing import List
 
 
 class CreateMaterializedViewStatement(AbstractStatement):
@@ -31,16 +34,18 @@ class CreateMaterializedViewStatement(AbstractStatement):
 
     def __init__(self,
                  view_ref: TableRef,
+                 col_list: List[ColumnDefinition],
                  if_not_exists: bool,
                  query: SelectStatement):
         super().__init__(StatementType.CREATE_MATERIALIZED_VIEW)
         self._view_ref = view_ref
+        self._col_list = col_list
         self._if_not_exists = if_not_exists
         self._query = query
 
     def __str__(self) -> str:
-        print_str = "CREATE MATERIALIZED VIEW {} AS {} ".format(self._view_ref,
-                                                                self._query)
+        print_str = "CREATE MATERIALIZED VIEW {} ({}) AS {} ".format(
+            self._view_ref, self._col_list, self._query)
         return print_str
 
     @property
@@ -55,9 +60,14 @@ class CreateMaterializedViewStatement(AbstractStatement):
     def query(self):
         return self._query
 
+    @property
+    def col_list(self):
+        return self._col_list
+
     def __eq__(self, other):
         if not isinstance(other, CreateMaterializedViewStatement):
             return False
         return (self.view_ref == other.view_ref
                 and self.if_not_exists == other.if_not_exists
-                and self.query == other.query)
+                and self.query == other.query
+                and self.col_list == other.col_list)
