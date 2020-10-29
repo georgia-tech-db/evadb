@@ -93,7 +93,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
 
             # deal with empty detection
             if len(best.shape) == 0:
-                res.append({
+                res = res.append({
                     "label": [],
                     "pred_score": [],
                     "pred_boxes": []
@@ -109,7 +109,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
 
-            res.append({
+            res = res.append({
                 "label": label,
                 "pred_score": conf,
                 "pred_boxes": bbox
