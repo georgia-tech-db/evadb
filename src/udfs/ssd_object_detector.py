@@ -97,7 +97,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
                     "label": [],
                     "pred_score": [],
                     "pred_boxes": []
-                })
+                }, ignore_index=True)
                 continue
 
             label, bbox, conf = [], [], []
@@ -113,7 +113,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
                 "label": label,
                 "pred_score": conf,
                 "pred_boxes": bbox
-            })
+            }, ignore_index=True)
 
         return res
 
