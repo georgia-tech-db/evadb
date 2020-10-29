@@ -203,15 +203,15 @@ class StatementToPlanConvertor:
 
     def visit_materialized_view(self,
                                 statement: CreateMaterializedViewStatement):
-        mat_view_opr = LogicalCreateMaterializedView(
-            statement.view_ref, statement.if_not_exists)
         if statement.view_ref is None:
             LoggingManager().log("Missing View Name In Create Materialized \
                                     View Statement", LoggingLevel.ERROR)
         if statement.query is None:
             LoggingManager().log("Missing query in Create Materialized \
                                     View Statement", LoggingLevel.ERROR)
-
+        mat_view_opr = LogicalCreateMaterializedView(
+            statement.view_ref, statement.col_list, statement.if_not_exists)
+                
         self.visit_select(statement.query)
         mat_view_opr.append_child(self._plan)
         self._plan = mat_view_opr
