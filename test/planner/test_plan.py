@@ -23,6 +23,7 @@ from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.union_plan import UnionPlan
+from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.planner.types import PlanOprType
 
 
@@ -90,5 +91,13 @@ class PlanNodeTests(unittest.TestCase):
     def test_union_plan(self):
         all = True
         plan = UnionPlan(all)
-        self.assertEqual(plan.node_type, PlanNodeType.UNION)
+        self.assertEqual(plan.opr_type, PlanOprType.UNION)
         self.assertEqual(plan.all, all)
+
+    def test_create_materialized_view_plan(self):
+        dummy_view = TableRef(TableInfo('dummy'))
+        query = 'Select id from MyVideo'
+        plan = CreateMaterializedViewPlan(dummy_view, query)
+        self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
+        self.assertEqual(plan.view, dummy_view)
+        self.assertEqual(plan.query, query)
