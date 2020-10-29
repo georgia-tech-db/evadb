@@ -74,7 +74,7 @@ createUdf
 createMaterializedView
     : CREATE MATERIALIZED VIEW 
       ifNotExists?
-      tableName 
+      tableName ('(' columns=uidList ')')
       AS
       selectStatement
       ;

@@ -605,6 +605,11 @@ class ParserVisitor(evaql_parserVisitor):
         if_not_exists = False
         if ctx.ifNotExists():
             if_not_exists = self.visit(ctx.ifNotExists())
-        
+        uid_list = self.visit(ctx.uidList())
+        # setting all other column definition attributes as None,
+        # need to figure from query outout
+        col_list = [ColumnDefinition(
+            uid.col_name, None, None) for uid in uid_list]
         query = self.visit(ctx.selectStatement())
-        return CreateMaterializedViewStatement(view_name, if_not_exists, query)
+        return CreateMaterializedViewStatement(view_name, col_list,
+                                               if_not_exists, query)
