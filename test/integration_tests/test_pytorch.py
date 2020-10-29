@@ -59,3 +59,8 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = perform_query(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
+
+        # non-trivial test case
+        res = actual_batch.frames
+        for idx in res.index:
+            self.assertTrue('car' in res['label'][idx])
