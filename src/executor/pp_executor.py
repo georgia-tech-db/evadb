@@ -21,9 +21,9 @@ from src.planner.pp_plan import PPScanPlan
 
 class PPExecutor(AbstractExecutor):
     """
-      Applies PP to filter out the frames that doesn't satisfy the condition
-      Arguments:
-          node (AbstractPlan): ...
+    Applies PP to filter out the frames that doesn't satisfy the condition
+    Arguments:
+        node (AbstractPlan): ...
 
     Note: This look kind of redundant. This logic for now is similar to that
     of sequential scan executor. Will decide to delete it depending on how

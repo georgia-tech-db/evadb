@@ -183,9 +183,9 @@ class StatementToPlanConvertor:
 
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement
-            If the input table already exists we return its
-            metadata. Else we will create a new metadata object for this
-            table name.
+        If the input table already exists we return its
+        metadata. Else we will create a new metadata object for this
+        table name.
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
