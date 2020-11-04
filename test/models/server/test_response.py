@@ -12,4 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""creates a spark session"""
+import unittest
+
+from src.models.storage.batch import Batch
+from src.models.server.response import ResponseStatus, Response
+from test.util import create_dataframe
+
+
+class ResponseTest(unittest.TestCase):
+
+    def test_server_reponse_from_json_string(self):
+        batch = Batch(frames=create_dataframe())
+        response = Response(status=ResponseStatus.SUCCESS,
+                            batch=batch)
+        response2 = Response.from_json(response.to_json())
+        self.assertEqual(response, response2)
+
+
+
+
