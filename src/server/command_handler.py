@@ -15,7 +15,13 @@
 
 import asyncio
 
-from src.utils.logging_manager import LoggingManager
+from src.parser.parser import Parser
+from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from src.optimizer.plan_generator import PlanGenerator
+from src.executor.plan_executor import PlanExecutor
+from src.models.server.response import ResponseStatus, Response
+
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 @asyncio.coroutine
@@ -26,14 +32,31 @@ def handle_request(transport, request_message):
         If user inputs 'quit' stops the event loop
         otherwise just echoes user input
     """
+    LoggingManager().log('Receive request: --|' + str(request_message) + '|--')
 
-    response_message = "foo"
+    output_batch = None
+    response = None
+    try:
+        stmt = Parser().parse(request_message)[0]
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        output_batch = PlanExecutor(p_plan).execute_plan()
+    except Exception as e:
+        LoggingManager().log(e, LoggingLevel.WARNING)
+        response = Response(status=ResponseStatus.FAIL, batch=None)
+
+    if response is None:
+        response = Response(status=ResponseStatus.SUCCESS,
+                            batch=output_batch)
+
+    responseData = response.to_json()
+    # Send data length, because response can be very large
+    data = (str(len(responseData)) + '|' + responseData).encode('ascii')
 
     LoggingManager().log('Response to client: --|' +
-                         str(response_message) +
-                         '|--')
+                         str(response) + '|--\n' +
+                         'Length: ' + str(len(responseData)))
 
-    data = response_message.encode('ascii')
     transport.write(data)
 
-    return response_message
+    return response
