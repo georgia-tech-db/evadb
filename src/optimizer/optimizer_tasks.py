@@ -78,7 +78,7 @@ class TopDownRewrite(OptimizerTask):
     def execute(self):
         """We apply rewrite rules in a top down fashion.
         Right now we are applying rules aggressively. Later
-        when we have more rules it might be a better idea to 
+        when we have more rules it might be a better idea to
         push optimization task to a queue.
         """
 
@@ -86,7 +86,7 @@ class TopDownRewrite(OptimizerTask):
         valid_rules = []
         for rule in rewrite_rules:
             if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
-                valid_rules.append(rule) 
+                valid_rules.append(rule)
 
         # sort the rules by promise
         valid_rules = sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
@@ -117,7 +117,7 @@ class BottomUpRewrite(OptimizerTask):
         super().__init__(root_expr, root_expr.group_id,
                          optimizer_context, OptimizerTaskType.BOTTOM_UP_REWRITE)
         self._children_explored = children_explored
-    
+
     @property
     def root_expr(self):
         return self._root_expr
@@ -197,10 +197,10 @@ class OptimizeGroup(OptimizerTask):
         grp = self.optimizer_context.memo.get_group(self.root_id)
         for expr in grp.logical_exprs:
             self.optimizer_context.task_stack.push(OptimizeExpression(expr, self.optimizer_context))
-        
+
         for expr in grp.physical_exprs:
             self.optimizer_context.task_stack.push(OptimizeInputs(expr, self.optimizer_context))
-    
+
 
 class OptimizeInputs(OptimizerTask):
     def __init__(self, root_expr, optimizer_context):
@@ -219,6 +219,6 @@ class OptimizeInputs(OptimizerTask):
                     self.optimizer_context.task_stack.push(
                         OptimizeGroup(child_id, self.optimizer_context))
                     return
-            
+
             grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
 

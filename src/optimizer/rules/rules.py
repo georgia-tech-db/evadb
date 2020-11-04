@@ -23,7 +23,7 @@ from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion, LogicalCreateMaterializedView)
+    LogicalUnion, LogicalCreateMaterializedView, LogicalQueryDerivedGet)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -67,7 +67,7 @@ class RuleType(IntFlag):
 class Promise(IntFlag):
     """
     Manages order in which rules should be applied.
-    Rule with a higher enum will be prefered in case of 
+    Rule with a higher enum will be prefered in case of
     conflict
     """
     # IMPLEMENTATION RULES
@@ -227,7 +227,7 @@ class UdfLTOR(Rule):
 
     def _rotate(self, before):
         """Reorders the children based o their estimated execution cost
-        After rotation rightmost child has the highest cost 
+        After rotation rightmost child has the highest cost
 
         Args:
             before (AbstractExpression): expression tree to rotate

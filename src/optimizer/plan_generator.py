@@ -54,7 +54,7 @@ class PlanGenerator:
             physical_plan.append_child(child_plan)
 
         return physical_plan
-    
+
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
         memo = optimizer_context.memo
@@ -65,12 +65,12 @@ class PlanGenerator:
         self.execute_task_stack(optimizer_context.task_stack)
         optimizer_context.task_stack.push(BottomUpRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
-        
+
         # Optimize Expression (logical -> physical transformation)
         optimizer_context.task_stack.push(OptimizeGroup(root_grp_id, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
-        # Build Optimal Tree 
+        # Build Optimal Tree
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
         return optimal_plan
 

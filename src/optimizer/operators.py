@@ -427,7 +427,7 @@ class LogicalCreateMaterializedView(Operator):
     @property
     def col_list(self):
         return self._col_list
-    
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateMaterializedView):
