@@ -18,7 +18,7 @@ from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.planner.types import PlanOprType
 from src.executor.abstract_executor import AbstractExecutor
 from src.utils.generic_utils import generate_file_path
-from src.storage import StorageEngine
+from src.storage.storage_engine import StorageEngine
 from src.expression.abstract_expression import ExpressionType
 
 from src.utils.logging_manager import LoggingManager, LoggingLevel
