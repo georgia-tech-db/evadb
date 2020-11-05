@@ -105,9 +105,9 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
             pred_score = list(pred_score[:pred_t + 1])
             outcome = outcome.append(
                 {
-                    "label": pred_class,
-                    "pred_score": pred_score,
-                    "pred_boxes": pred_boxes
+                    "label": pred_class[0],
+                    "pred_score": pred_score[0],
+                    "pred_boxes": pred_boxes[0]
                 },
                 ignore_index=True)
         return outcome

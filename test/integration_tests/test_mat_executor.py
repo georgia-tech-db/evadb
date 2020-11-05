@@ -32,20 +32,21 @@ class MaterializedViewTest(unittest.TestCase):
 
         create_udf_query = """CREATE UDF FastRCNNObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  OUTPUT (label TEXT(10), pred_score INTEGER, pre_boxes NDARRAY(4))
                   TYPE  Classification
                   IMPL  'src/udfs/fastrcnn_object_detector.py';
         """
         perform_query(create_udf_query)
 
-        select_query = """SELECT id FROM MyVideo WHERE id < 5;"""
-        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id) AS {}' \
+        select_query = """SELECT id, FastRCNNObjectDetector(data).label FROM MyVideo WHERE id < 5;"""
+        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, label) AS {}' \
             .format(select_query)
-        perform_query(select_query)
+        perform_query(query)
 
-        query = 'SELECT id FROM uadtrac_fastRCNN;'
+        query = 'SELECT id, label FROM uadtrac_fastRCNN;'
         actual_batch = perform_query(select_query)
+        actual_batch.sort()
         expected_batch = Batch(
-            frames=pd.DataFrame([{'id': i} for i in range(5)])
+                frames=pd.DataFrame([{'id': i, 'label': 'person'} for i in range(5)])
         )
         self.assertEqual(actual_batch, expected_batch)
