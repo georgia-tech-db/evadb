@@ -38,18 +38,21 @@ class Binder:
 
     @staticmethod
     def _binder(expr: GroupExpression, pattern: Pattern, memo: Memo):
-        if expr.opr.opr_type != pattern.opr_type:
-            return
-
-        if len(pattern.children) != len(expr.children):
-            return
-
         curr_iterator = iter([expr.opr])
         child_binders = []
-        for child_grp, pattern_child in zip(expr.children, pattern.children):
-            if pattern_child.opr_type is not OperatorType.DUMMY:
-                child_binders.append(Binder._grp_binder(child_grp, pattern_child, memo))
-        
+        if pattern.opr_type is not OperatorType.DUMMY:
+            if expr.opr.opr_type != pattern.opr_type:
+                return
+
+            if len(pattern.children) != len(expr.children):
+                return
+
+            for child_grp, pattern_child in zip(expr.children,
+                                                pattern.children):
+                child_binders.append(
+                    Binder._grp_binder(child_grp, pattern_child, memo)
+                )
+
         yield from itertools.product(curr_iterator, *child_binders)
 
     @staticmethod
@@ -64,8 +67,8 @@ class Binder:
                 for child in inorder_repr[1:]:
                     opr_tree.append_child(Binder.build_opr_tree_from_inorder_repr(child))
             return opr_tree
-            
+
     def __iter__(self):
         for match in Binder._binder(self._grp_expr, self._pattern, self._memo):
             yield Binder.build_opr_tree_from_inorder_repr(match)
-            
+

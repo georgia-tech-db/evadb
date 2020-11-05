@@ -60,12 +60,23 @@ class PlanGenerator:
         memo = optimizer_context.memo
         grp_expr = optimizer_context.xform_opr_to_group_expr(logical_plan)
         root_grp_id = grp_expr.group_id
+        """
+        for g in optimizer_context.memo._groups:
+            for expr in g._logical_exprs:
+                print(expr)
+        """
         # TopDown Rewrite
         optimizer_context.task_stack.push(TopDownRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
         optimizer_context.task_stack.push(BottomUpRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
+        """
+        print('-------------------We are done logical rewriter-----------\n')
+        for g in optimizer_context.memo._groups:
+            for expr in g._logical_exprs:
+                print(expr)
+        """
         # Optimize Expression (logical -> physical transformation)
         optimizer_context.task_stack.push(OptimizeGroup(root_grp_id, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)

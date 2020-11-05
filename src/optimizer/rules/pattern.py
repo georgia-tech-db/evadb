@@ -20,15 +20,15 @@ from typing import List
 class Pattern:
     def __init__(self, opr_type: OperatorType):
         self._opr_type = opr_type
-        self._chilren = [] 
+        self._chilren = []
 
     def append_child(self, child: 'Pattern'):
         self._chilren.append(child)
-    
+
     @property
     def children(self):
         return self._chilren
-    
+
     @property
     def opr_type(self):
         return self._opr_type

@@ -25,15 +25,15 @@ class Winner:
     def __init__(self, grp_expr: 'GroupExpression', cost: float):
         self._cost = cost
         self._grp_expr = grp_expr
-    
+
     @property
     def cost(self):
         return self._cost
-    
+
     @property
     def grp_expr(self):
         return self._grp_expr
-    
+
 
 class Group:
 
@@ -46,14 +46,20 @@ class Group:
     @property
     def group_id(self):
         return self._group_id
-    
+
     @property
     def logical_exprs(self):
         return self._logical_exprs
-    
+
     @property
     def physical_exprs(self):
         return self._physical_exprs
+
+    def __str__(self) -> str:
+        return '%s(%s)' % (
+            type(self).__name__,
+            ', '.join('%s=%s' % item for item in vars(self).items())
+        )
 
     def add_expr(self, expr: 'GroupExpression'):
         if expr.group_id == INVALID_GROUP_ID:
@@ -74,7 +80,7 @@ class Group:
         if winner:
             return winner.grp_expr
         else:
-            return None 
+            return None
 
     def get_best_expr_cost(self, property: Property):
         winner = self._winner_exprs.get(property, None)
@@ -91,7 +97,7 @@ class Group:
     def clear_grp_exprs(self):
         self._logical_exprs.clear()
         self._physical_exprs.clear()
-    
+
     def _add_logical_expr(self, expr: 'GroupExpression'):
         self._logical_exprs.append(expr)
 

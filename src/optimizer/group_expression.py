@@ -50,22 +50,28 @@ class GroupExpression:
     @property
     def rules_explored(self):
         return self._rules_explored
-    
+
     def mark_rule_explored(self, rule_id: int):
         self._rules_explored |= rule_id
-    
+
     def is_rule_explored(self, rule_id: int):
         return self._rules_explored & rule_id
-    
+
     def __eq__(self, other: 'GroupExpression'):
         return (self.opr == other.opr and
                 self.children == other.children)
 
+    def __str__(self) -> str:
+        return '%s(%s)' % (
+            type(self).__name__,
+            ', '.join('%s=%s' % item for item in vars(self).items())
+        )
+
     def __hash__(self):
         # correct this hash function.
         # we are taking hash of just the opr type
-        
-        curr_hash = hash(self.opr.opr_type)
+
+        curr_hash = id(self.opr)
         for child_id in self.children:
             curr_hash ^= hash(child_id)
         return curr_hash
