@@ -49,7 +49,6 @@ class RuleType(IntFlag):
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     UDF_LTOR = auto()
 
     REWRITE_DELIMETER = auto()
@@ -64,6 +63,7 @@ class RuleType(IntFlag):
     # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -83,13 +83,13 @@ class Promise(IntFlag):
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     UDF_LTOR = auto()
 
 
@@ -527,8 +527,7 @@ class RulesManager:
                                EmbedProjectIntoGet(),
                                EmbedFilterIntoDerivedGet(),
                                EmbedProjectIntoDerivedGet()]
-                               #    UdfLTOR(),
-                               # LogicalUdfFilterToPhysical()]
+                               #    UdfLTOR()]
         self._implementation_rules = [LogicalCreateToPhysical(),
                                       LogicalCreateUDFToPhysical(),
                                       LogicalInsertToPhysical(),
@@ -536,7 +535,8 @@ class RulesManager:
                                       LogicalGetToSeqScan(),
                                       LogicalDerivedGetToPhysical(),
                                       LogicalUnionToPhysical(),
-                                      LogicalCreateMaterializedViewToPhysical()
+                                      LogicalCreateMaterializedViewToPhysical(),
+                                      LogicalUdfFilterToPhysical()
                                       ]
 
     @property
