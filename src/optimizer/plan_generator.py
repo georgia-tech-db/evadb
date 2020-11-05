@@ -58,7 +58,7 @@ class PlanGenerator:
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
         memo = optimizer_context.memo
-        grp_expr = optimizer_context.xform_opr_to_group_expr(logical_plan)
+        grp_expr = optimizer_context.xform_opr_to_group_expr(logical_plan, False)
         root_grp_id = grp_expr.group_id
         """
         for g in optimizer_context.memo._groups:
