@@ -35,7 +35,7 @@ class Memo:
         """
             Note: We assume that there is only one logical_expr in this group.
             This should be used in rewrite rules.
-        """    
+        """
         grp = self._groups[group_id]
         grp_expr = grp.logical_exprs[0]
         after.group_id = group_id
@@ -44,7 +44,7 @@ class Memo:
         grp.clear_grp_exprs()
         grp.add_expr(after)
         self._group_exprs[after] = after.group_id
-        
+
     def add_group_expr(self, expr: GroupExpression):
         # existing expression
         if expr in self._group_exprs:
@@ -59,9 +59,9 @@ class Memo:
                 self._group_exprs[expr] = expr.group_id
             else:
                 LoggingManager().log('Group Id out of bound', LoggingLevel.ERROR)
-            return 
+            return
         # create a new group
         self._create_new_group(expr)
         self._group_exprs[expr] = expr.group_id
 
-        
+

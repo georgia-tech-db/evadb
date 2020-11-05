@@ -81,35 +81,36 @@ class TopDownRewrite(OptimizerTask):
         when we have more rules it might be a better idea to
         push optimization task to a queue.
         """
-
         rewrite_rules = RulesManager().rewrite_rules
         valid_rules = []
         for rule in rewrite_rules:
             if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 
+        # print('TopDown Rewrite rules %s for %s' % (valid_rules, self.root_expr))
         # sort the rules by promise
         valid_rules = sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
         for rule in valid_rules:
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
+                # print("Rule %s matched" % rule)
                 after = rule.apply(match, self.optimizer_context)
-                new_expr = self.optimizer_context.xform_opr_to_group_expr(after)
+                new_expr = self.optimizer_context.xform_opr_to_group_expr(after, False)
+                # TODO: This might cause bug
                 new_expr.mark_rule_explored(rule.rule_type)
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
                 self.root_expr = new_expr
                 self.optimizer_context.task_stack.push(TopDownRewrite(
                     self.root_expr, self.optimizer_context))
-#            self.root_expr.mark_rule_explored(rule.rule_type)
-
+                # print('After rewriting: %s' % self.root_expr)
+        # print('----------------------------------------------------------------')
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.get_group(
                 child).logical_exprs[0]
             self.optimizer_context.task_stack.push(TopDownRewrite(
                 child_expr, self.optimizer_context))
-
 
 class BottomUpRewrite(OptimizerTask):
     def __init__(self, root_expr: GroupExpression,
@@ -141,6 +142,7 @@ class BottomUpRewrite(OptimizerTask):
         for rule in rewrite_rules:
             if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
+        # print('BottomUp Rewrite rules %s for %s' % (valid_rules, self.root_expr))
 
         # sort the rules by promise
         sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
@@ -148,15 +150,20 @@ class BottomUpRewrite(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
+                # print("Rule %s matched" % rule)
                 after = rule.apply(match, self.optimizer_context)
-                new_expr = GroupExpression(after, self.root_expr.group_id)
-                self.root_expr = new_expr
+                # Deepcopy causes sqlalchemy problem
+                new_expr = self.optimizer_context.xform_opr_to_group_expr(after, False)
+                # TODO: This might cause bug
                 new_expr.mark_rule_explored(rule.rule_type)
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
+                # Replace the root_expr after, so the original group_id is kept.
+                self.root_expr = new_expr
                 self.optimizer_context.task_stack.push(BottomUpRewrite(
                     new_expr, self.optimizer_context))
-
+                # print('After rewriting: %s' % self.root_expr)
+        # print('----------------------------------------------------------------')
 
 class OptimizeExpression(OptimizerTask):
     def __init__(self, root_expr, optimizer_context):

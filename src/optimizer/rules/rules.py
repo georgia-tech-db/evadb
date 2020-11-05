@@ -47,6 +47,8 @@ class RuleType(IntFlag):
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
+    EMBED_FILTER_INTO_DERIVED_GET = auto()
+    EMBED_PROJECT_INTO_DERIVED_GET = auto()
     LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     UDF_LTOR = auto()
 
@@ -61,6 +63,7 @@ class RuleType(IntFlag):
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
+    LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -79,10 +82,13 @@ class Promise(IntFlag):
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
+    LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
+    EMBED_FILTER_INTO_DERIVED_GET = auto()
+    EMBED_PROJECT_INTO_DERIVED_GET = auto()
     LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     UDF_LTOR = auto()
 
@@ -187,7 +193,8 @@ class EmbedFilterIntoGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        logical_get = copy.deepcopy(before.children[0])
+        #logical_get = copy.deepcopy(before.children[0])
+        logical_get = before.children[0]
         logical_get.predicate = predicate
         return logical_get
 
@@ -207,10 +214,57 @@ class EmbedProjectIntoGet(Rule):
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
         select_list = before.target_list
+        #logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
         logical_get.target_list = select_list
         return logical_get
 
+# For nestes queries
+
+class EmbedFilterIntoDerivedGet(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
+        pattern_get.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(pattern_get)
+        super().__init__(RuleType.EMBED_FILTER_INTO_DERIVED_GET, pattern)
+
+    def promise(self):
+        return Promise.EMBED_FILTER_INTO_DERIVED_GET
+
+    def check(self, grp_id: int, context: 'OptimizerContext'):
+        # nothing else to check if logical match found return true
+        return True
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        predicate = before.predicate
+        #logical_derived_get = copy.deepcopy(before.children[0])
+        logical_derived_get = before.children[0]
+        logical_derived_get.predicate = predicate
+        return logical_derived_get
+
+
+class EmbedProjectIntoDerivedGet(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern_get = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
+        pattern_get.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(pattern_get)
+        super().__init__(RuleType.EMBED_PROJECT_INTO_DERIVED_GET, pattern)
+
+    def promise(self):
+        return Promise.EMBED_PROJECT_INTO_DERIVED_GET
+
+    def check(self, grp_id: int, context: 'OptimizerContext'):
+        # nothing else to check if logical match found return true
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        select_list = before.target_list
+        #logical_derived_get = copy.deepcopy(before.children[0])
+        logical_derived_get = before.children[0]
+        logical_derived_get.target_list = select_list
+        return logical_derived_get
 
 class UdfLTOR(Rule):
     def __init__(self):
@@ -399,6 +453,22 @@ class LogicalGetToSeqScan(Rule):
         after.append_child(StoragePlan(before.dataset_metadata))
         return after
 
+class LogicalDerivedGetToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_DERIVED_GET_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalQueryDerivedGet, context: OptimizerContext):
+        after = SeqScanPlan(before.predicate, before.target_list)
+        return after
+
 
 class LogicalUnionToPhysical(Rule):
     def __init__(self):
@@ -455,13 +525,16 @@ class RulesManager:
     def __init__(self):
         self._rewrite_rules = [EmbedFilterIntoGet(),
                                EmbedProjectIntoGet(),
+                               EmbedFilterIntoDerivedGet(),
+                               EmbedProjectIntoDerivedGet()]
                                #    UdfLTOR(),
-                               LogicalUdfFilterToPhysical()]
+                               # LogicalUdfFilterToPhysical()]
         self._implementation_rules = [LogicalCreateToPhysical(),
                                       LogicalCreateUDFToPhysical(),
                                       LogicalInsertToPhysical(),
                                       LogicalLoadToPhysical(),
                                       LogicalGetToSeqScan(),
+                                      LogicalDerivedGetToPhysical(),
                                       LogicalUnionToPhysical(),
                                       LogicalCreateMaterializedViewToPhysical()
                                       ]

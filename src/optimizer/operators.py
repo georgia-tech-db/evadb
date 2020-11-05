@@ -70,6 +70,12 @@ class Operator:
     def opr_type(self):
         return self._opr_type
 
+    def __str__(self) -> str:
+        return '%s[%s](%s)' % (
+            type(self).__name__, hex(id(self)),
+            ', '.join('%s=%s' % item for item in vars(self).items())
+        )
+
     def __eq__(self, other):
         is_subtree_equal = True
         if not isinstance(other, Operator):
@@ -140,12 +146,32 @@ class LogicalQueryDerivedGet(Operator):
         # `TODO` We need to store the alias information here
         # We need construct the map using the target list of the
         # subquery to validate the overall query
+        self.predicate = None
+        self.select_list = None
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def select_list(self):
+        self._select_list
+
+    @select_list.setter
+    def select_list(self, select_list):
+        self._select_list = select_list
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalQueryDerivedGet):
             return False
-        return is_subtree_equal
+        return (is_subtree_equal
+                and self.predicate == other.predicate
+                and self.select_list == other.select_list)
 
 
 class LogicalFilter(Operator):

@@ -21,11 +21,11 @@ from src.optimizer.group_expression import GroupExpression
 
 class OptimizerContext:
     """
-        Maintain context information for the optimizer 
+        Maintain context information for the optimizer
 
         Arguments:
-            _task_queue(OptimizerTaskStack): 
-                stack to keep track outstanding tasks 
+            _task_queue(OptimizerTaskStack):
+                stack to keep track outstanding tasks
     """
 
     def __init__(self):
@@ -40,14 +40,15 @@ class OptimizerContext:
     def memo(self):
         return self._memo
 
-    def xform_opr_to_group_expr(self, opr: Operator) -> GroupExpression:
+    def xform_opr_to_group_expr(self, opr: Operator, copy_opr=True) -> GroupExpression:
         grp_exp = None
         child_ids = []
         for child_opr in opr.children:
-            child_id = self.xform_opr_to_group_expr(child_opr).group_id
+            child_id = self.xform_opr_to_group_expr(child_opr, copy_opr).group_id
             child_ids.append(child_id)
-        opr_copy = copy.deepcopy(opr)
-        opr_copy.children.clear()
+        if copy_opr:
+            opr_copy = copy.deepcopy(opr)
+            opr = opr_copy
         grp_exp = GroupExpression(opr=opr, children=child_ids)
         self.memo.add_group_expr(grp_exp)
         return grp_exp

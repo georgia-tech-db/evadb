@@ -211,7 +211,7 @@ class StatementToPlanConvertor:
                                     View Statement", LoggingLevel.ERROR)
         mat_view_opr = LogicalCreateMaterializedView(
             statement.view_ref, statement.col_list, statement.if_not_exists)
-                
+
         self.visit_select(statement.query)
         mat_view_opr.append_child(self._plan)
         self._plan = mat_view_opr
