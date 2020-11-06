@@ -19,6 +19,7 @@ from src.optimizer.group_expression import GroupExpression
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.binder import Binder
 from src.optimizer.property import PropertyType
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 class OptimizerTaskType(IntEnum):
     """Manages Enum for all the supported optimizer tasks
@@ -87,25 +88,29 @@ class TopDownRewrite(OptimizerTask):
             if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 
-        # print('TopDown Rewrite rules %s for %s' % (valid_rules, self.root_expr))
         # sort the rules by promise
         valid_rules = sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
         for rule in valid_rules:
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
-                # print("Rule %s matched" % rule)
+                if not rule.check(self.root_expr.group_id,
+                                  self.optimizer_context):
+                    continue
+                LoggingManager().log('In TopDown, Rule {} matched for {}'
+                                     .format(rule, self.root_expr),
+                                     LoggingLevel.DEBUG)
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.xform_opr_to_group_expr(after, False)
-                # TODO: This might cause bug
                 new_expr.mark_rule_explored(rule.rule_type)
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
                 self.root_expr = new_expr
+                LoggingManager().log('After rewiting {}'.format(self.root_expr),
+                                     LoggingLevel.DEBUG)
                 self.optimizer_context.task_stack.push(TopDownRewrite(
                     self.root_expr, self.optimizer_context))
-                # print('After rewriting: %s' % self.root_expr)
-        # print('----------------------------------------------------------------')
+
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.get_group(
                 child).logical_exprs[0]
@@ -142,7 +147,6 @@ class BottomUpRewrite(OptimizerTask):
         for rule in rewrite_rules:
             if not self.root_expr.is_rule_explored(rule.rule_type) and rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
-        # print('BottomUp Rewrite rules %s for %s' % (valid_rules, self.root_expr))
 
         # sort the rules by promise
         sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
@@ -150,20 +154,22 @@ class BottomUpRewrite(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
-                # print("Rule %s matched" % rule)
+                if not rule.check(self.root_expr.group_id,
+                                  self.optimizer_context):
+                    continue
+                LoggingManager().log('In BottomUp, Rule {} matched for {}'
+                                     .format(rule, self.root_expr),
+                                     LoggingLevel.DEBUG)
                 after = rule.apply(match, self.optimizer_context)
-                # Deepcopy causes sqlalchemy problem
                 new_expr = self.optimizer_context.xform_opr_to_group_expr(after, False)
-                # TODO: This might cause bug
                 new_expr.mark_rule_explored(rule.rule_type)
                 self.optimizer_context.memo.replace_group_expr(
                     self.root_expr.group_id, new_expr)
-                # Replace the root_expr after, so the original group_id is kept.
                 self.root_expr = new_expr
+                LoggingManager().log('After rewiting {}'.format(self.root_expr),
+                                     LoggingLevel.DEBUG)
                 self.optimizer_context.task_stack.push(BottomUpRewrite(
                     new_expr, self.optimizer_context))
-                # print('After rewriting: %s' % self.root_expr)
-        # print('----------------------------------------------------------------')
 
 class OptimizeExpression(OptimizerTask):
     def __init__(self, root_expr, optimizer_context):
@@ -182,9 +188,18 @@ class OptimizeExpression(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
+                if not rule.check(self.root_expr.group_id,
+                                  self.optimizer_context):
+                    continue
+                LoggingManager().log('In Optimize physical expression,'
+                                     'Rule {} matched for {}'
+                                     .format(rule, self.root_expr),
+                                     LoggingLevel.DEBUG)
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = GroupExpression(
                     after, self.root_expr.group_id, self.root_expr.children)
+                LoggingManager().log('After rewiting {}'.format(new_expr),
+                                     LoggingLevel.DEBUG)
                 self.optimizer_context.memo.add_group_expr(new_expr)
                 # Optimize inputs for this physical expr
                 self.optimizer_context.task_stack.push(OptimizeInputs(new_expr, self.optimizer_context))
