@@ -25,4 +25,5 @@ class PlanNodeType(IntEnum):
     CREATE_UDF = 6
     LOAD_DATA = 7
     UNION = 8
+    ORDER_BY = 9
     # add other types
