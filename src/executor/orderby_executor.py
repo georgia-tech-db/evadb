@@ -16,6 +16,7 @@ from typing import Iterator
 
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
+from src.parser.types import ParserOrderBySortType
 from src.planner.orderby_plan import OrderByPlan
 
 
@@ -31,30 +32,50 @@ class OrderByExecutor(AbstractExecutor):
     def __init__(self, node: OrderByPlan):
         super().__init__(node)
         self._orderby_list = node.orderby_list
+        self._columns = node.columns
+        self._sort_types = node.sort_types
+        self.batch_sizes = []
 
     def validate(self):
         pass
 
+    def extract_column_names(self):
+        """ extracts the string name of the column """
+        # self._columns: List[TupleValueExpression]
+        return [tve.col_name for tve in self._columns]
+
+    def extract_sort_types(self):
+        """ extracts the string name of the column """
+        # self._sort_types: List[ParserOrderBySortType]
+        sort_type_bools = []
+        for st in self._sort_types:
+            if st is ParserOrderBySortType.ASC:
+                sort_type_bools.append(True)
+            else:
+                sort_type_bools.append(False)
+        return sort_type_bools
+
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
         aggregated_data = []
+        aggregated_batch = Batch()
+
+        # aggregates the batches into one large batch
         for batch in child_executor.exec():
-            # We do the predicate first
-            # if not batch.empty() and self.predicate is not None:
-            #     outcomes = self.predicate.evaluate(batch).frames
-            #     batch = Batch(
-            #         batch.frames[(outcomes > 0).to_numpy()].reset_index(
-            #             drop=True))
-            #
-            # # Then do project
-            # if not batch.empty() and self.project_expr is not None:
-            #     batches =
-            #       [expr.evaluate(batch) for expr in self.project_expr]
-            #     batch = Batch.merge_column_wise(batches)
-
+            self.batch_sizes.append(batch.batch_size)
             aggregated_data.append(batch)
+            aggregated_batch = aggregated_batch.__add__(batch)
 
-        # do sorting on the aggregated_data
+        # sorts the batch
+        aggregated_batch.sort_orderby(
+            by=self.extract_column_names(),
+            sort_type=self.extract_sort_types())
 
-        for batch in aggregated_data:
+        # split the aggregated batch into smaller ones based
+        #  on self.batch_sizes which holds the input batches sizes
+        index = 0
+        for i in self.batch_sizes:
+            batch = aggregated_batch.__getitem__([index, index + i - 1])
+            batch.reset_index()
+            index += i
             yield batch
