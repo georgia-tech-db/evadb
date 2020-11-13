@@ -176,6 +176,23 @@ class Batch:
             by = [self.identifier_column]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
+    def sort_orderby(self, by=None, sort_type=None):
+        """
+        in_place sort for orderby
+
+        Args:
+            by: list of column names
+            sort_type: list of True/False if ASC for each column name in 'by'
+                i.e [True, False] means [ASC, DESC]
+        """
+        if by is None and self.identifier_column in self._frames:
+            by = [self.identifier_column]
+        if sort_type is None:
+            sort_type = [True]
+
+        self._frames.sort_values(
+            by, ascending=sort_type, ignore_index=True, inplace=True)
+
     def project(self, cols: []) -> 'Batch':
         """
         Takes as input the column list, returns the projection.
@@ -258,3 +275,7 @@ class Batch:
             True if the batch_size == 0
         """
         return self.batch_size == 0
+
+    def reset_index(self):
+        """ Resets the index of the data frame in the batch"""
+        self._frames.reset_index(drop=True, inplace=True)

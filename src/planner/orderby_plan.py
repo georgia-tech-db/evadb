@@ -36,5 +36,9 @@ class OrderByPlan(AbstractPlan):
         return [_[0] for _ in self._orderby_list]
 
     @property
+    def sort_types(self):
+        return [_[1] for _ in self._orderby_list]
+
+    @property
     def orderby_list(self):
         return self._orderby_list
