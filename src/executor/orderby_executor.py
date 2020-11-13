@@ -57,13 +57,11 @@ class OrderByExecutor(AbstractExecutor):
 
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
-        aggregated_data = []
         aggregated_batch = Batch()
 
         # aggregates the batches into one large batch
         for batch in child_executor.exec():
             self.batch_sizes.append(batch.batch_size)
-            aggregated_data.append(batch)
             aggregated_batch = aggregated_batch.__add__(batch)
 
         # sorts the batch
