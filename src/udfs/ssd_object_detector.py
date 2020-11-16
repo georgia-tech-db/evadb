@@ -12,7 +12,6 @@ from torchvision.transforms import Compose, transforms
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.models.inference.outcome import Outcome
 from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 
@@ -32,7 +31,8 @@ class SSDObjectDetector(PytorchAbstractUDF):
             pretrained=False,
             precision='fp16')
         model_state_dict = torch.hub.load_state_dict_from_url(
-            "https://api.ngc.nvidia.com/v2/models/nvidia/ssd_pyt_ckpt_amp/versions/19.09.0/zip",
+            ("https://api.ngc.nvidia.com/v2/models/"
+                "nvidia/ssd_pyt_ckpt_amp/versions/19.09.0/zip"),
             map_location=torch.device("cpu"))["model"]
         self.model.load_state_dict(model_state_dict)
         self.model.eval()
@@ -104,8 +104,8 @@ class SSDObjectDetector(PytorchAbstractUDF):
             label, bbox, conf = [], [], []
             for idx in best:
                 left, top, right, bottom = bboxes[idx]
-                x, y, w, h = [
-                    val*300 for val in [left, top, right-left, bottom-top]]
+                x, y, w, h = \
+                    [v * 300 for v in [left, top, right - left, bottom - top]]
                 label.append(self.labels[classes[idx]])
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
@@ -148,14 +148,14 @@ def calc_iou_tensor(box1, box2):
 
     delta = rb - lt
     delta[delta < 0] = 0
-    intersect = delta[:, :, 0]*delta[:, :, 1]
+    intersect = delta[:, :, 0] * delta[:, :, 1]
 
     delta1 = be1[:, :, 2:] - be1[:, :, :2]
-    area1 = delta1[:, :, 0]*delta1[:, :, 1]
+    area1 = delta1[:, :, 0] * delta1[:, :, 1]
     delta2 = be2[:, :, 2:] - be2[:, :, :2]
-    area2 = delta2[:, :, 0]*delta2[:, :, 1]
+    area2 = delta2[:, :, 0] * delta2[:, :, 1]
 
-    iou = intersect/(area1 + area2 - intersect)
+    iou = intersect / (area1 + area2 - intersect)
     return iou
 
 
@@ -172,7 +172,8 @@ class Encoder(object):
             output : bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
             criteria : IoU threshold of bboexes
         decode:
-            input  : bboxes_in (Tensor 8732 x 4), scores_in (Tensor 8732 x nitems)
+            input  : bboxes_in (Tensor 8732 x 4),
+                     scores_in (Tensor 8732 x nitems)
             output : bboxes_out (Tensor nboxes x 4), labels_out (Tensor nboxes)
             criteria : IoU threshold of bboexes
             max_output : maximum number of output bboxes
@@ -204,10 +205,10 @@ class Encoder(object):
         bboxes_out = self.dboxes.clone()
         bboxes_out[masks, :] = bboxes_in[best_dbox_idx[masks], :]
         # Transform format to xywh format
-        x, y, w, h = 0.5*(bboxes_out[:, 0] + bboxes_out[:, 2]), \
-            0.5*(bboxes_out[:, 1] + bboxes_out[:, 3]), \
-            -bboxes_out[:, 0] + bboxes_out[:, 2], \
-            -bboxes_out[:, 1] + bboxes_out[:, 3]
+        x, y, w, h = 0.5 * (bboxes_out[:, 0] + bboxes_out[:, 2]), \
+            0.5 * (bboxes_out[:, 1] + bboxes_out[:, 3]), \
+            - bboxes_out[:, 0] + bboxes_out[:, 2], \
+            - bboxes_out[:, 1] + bboxes_out[:, 3]
         bboxes_out[:, 0] = x
         bboxes_out[:, 1] = y
         bboxes_out[:, 2] = w
@@ -229,19 +230,19 @@ class Encoder(object):
         bboxes_in = bboxes_in.permute(0, 2, 1)
         scores_in = scores_in.permute(0, 2, 1)
 
-        bboxes_in[:, :, :2] = self.scale_xy*bboxes_in[:, :, :2]
-        bboxes_in[:, :, 2:] = self.scale_wh*bboxes_in[:, :, 2:]
+        bboxes_in[:, :, :2] = self.scale_xy * bboxes_in[:, :, :2]
+        bboxes_in[:, :, 2:] = self.scale_wh * bboxes_in[:, :, 2:]
 
         bboxes_in[:, :, :2] = bboxes_in[:, :, :2] * \
             self.dboxes_xywh[:, :, 2:] + self.dboxes_xywh[:, :, :2]
-        bboxes_in[:, :, 2:] = bboxes_in[:, :,
-                                        2:].exp()*self.dboxes_xywh[:, :, 2:]
+        bboxes_in[:, :, 2:] = \
+            bboxes_in[:, :, 2:].exp() * self.dboxes_xywh[:, :, 2:]
 
         # Transform format to ltrb
-        l, t, r, b = bboxes_in[:, :, 0] - 0.5*bboxes_in[:, :, 2],\
-            bboxes_in[:, :, 1] - 0.5*bboxes_in[:, :, 3],\
-            bboxes_in[:, :, 0] + 0.5*bboxes_in[:, :, 2],\
-            bboxes_in[:, :, 1] + 0.5*bboxes_in[:, :, 3]
+        l, t, r, b = bboxes_in[:, :, 0] - 0.5 * bboxes_in[:, :, 2],\
+            bboxes_in[:, :, 1] - 0.5 * bboxes_in[:, :, 3],\
+            bboxes_in[:, :, 0] + 0.5 * bboxes_in[:, :, 2],\
+            bboxes_in[:, :, 1] + 0.5 * bboxes_in[:, :, 3]
 
         bboxes_in[:, :, 0] = l
         bboxes_in[:, :, 1] = t
@@ -250,7 +251,11 @@ class Encoder(object):
 
         return bboxes_in, F.softmax(scores_in, dim=-1)
 
-    def decode_batch(self, bboxes_in, scores_in,  criteria=0.45, max_output=200):
+    def decode_batch(self,
+                     bboxes_in,
+                     scores_in,
+                     criteria=0.45,
+                     max_output=200):
         bboxes, probs = self.scale_back_batch(bboxes_in, scores_in)
 
         output = []
@@ -261,7 +266,12 @@ class Encoder(object):
         return output
 
     # perform non-maximum suppression
-    def decode_single(self, bboxes_in, scores_in, criteria, max_output, max_num=200):
+    def decode_single(self,
+                      bboxes_in,
+                      scores_in,
+                      criteria,
+                      max_output,
+                      max_num=200):
         # Reference to https://github.com/amdegroot/ssd.pytorch
 
         bboxes_out = []
@@ -300,7 +310,7 @@ class Encoder(object):
 
             bboxes_out.append(bboxes[candidates, :])
             scores_out.append(score[candidates])
-            labels_out.extend([i]*len(candidates))
+            labels_out.extend([i] * len(candidates))
 
         if not bboxes_out:
             return [torch.tensor([]) for _ in range(3)]
@@ -329,25 +339,24 @@ class DefaultBoxes(object):
         self.steps = steps
         self.scales = scales
 
-        fk = fig_size/np.array(steps)
+        fk = fig_size / np.array(steps)
         self.aspect_ratios = aspect_ratios
 
         self.default_boxes = []
         # size of feature and number of feature
         for idx, sfeat in enumerate(self.feat_size):
-
-            sk1 = scales[idx]/fig_size
-            sk2 = scales[idx+1]/fig_size
-            sk3 = sqrt(sk1*sk2)
+            sk1 = scales[idx] / fig_size
+            sk2 = scales[idx + 1] / fig_size
+            sk3 = sqrt(sk1 * sk2)
             all_sizes = [(sk1, sk1), (sk3, sk3)]
 
             for alpha in aspect_ratios[idx]:
-                w, h = sk1*sqrt(alpha), sk1/sqrt(alpha)
+                w, h = sk1 * sqrt(alpha), sk1 / sqrt(alpha)
                 all_sizes.append((w, h))
                 all_sizes.append((h, w))
             for w, h in all_sizes:
                 for i, j in itertools.product(range(sfeat), repeat=2):
-                    cx, cy = (j+0.5)/fk[idx], (i+0.5)/fk[idx]
+                    cx, cy = (j + 0.5) / fk[idx], (i + 0.5) / fk[idx]
                     self.default_boxes.append((cx, cy, w, h))
 
         self.dboxes = torch.tensor(self.default_boxes, dtype=torch.float)
@@ -378,7 +387,8 @@ def dboxes300_coco():
     figsize = 300
     feat_size = [38, 19, 10, 5, 3, 1]
     steps = [8, 16, 32, 64, 100, 300]
-    # use the scales here: https://github.com/amdegroot/ssd.pytorch/blob/master/data/config.py
+    # use the scales here:
+    # https://github.com/amdegroot/ssd.pytorch/blob/master/data/config.py
     scales = [21, 45, 99, 153, 207, 261, 315]
     aspect_ratios = [[2], [2, 3], [2, 3], [2, 3], [2], [2]]
     dboxes = DefaultBoxes(figsize, feat_size, steps, scales, aspect_ratios)
