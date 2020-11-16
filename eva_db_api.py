@@ -1,10 +1,8 @@
 import asyncio
-import string
 import random
 
-from src.server.client import EvaClient, start_client
+from src.server.client import EvaClient
 from src.models.server.response import Response
-from src.configuration.configuration_manager import ConfigurationManager
 
 class EVAConnection:
     def __init__(self, transport, protocol):
@@ -47,14 +45,15 @@ class EVACursor:
         return row_data
 
 
-async def connect (host: string, port: int, max_retry_count: int):
+async def connect (host: str, port: int, max_retry_count: int = 3):
     loop = asyncio.get_event_loop()
 
     retries = max_retry_count * [1]
 
     while True:
         try:
-            transport, protocol = await loop.create_connection(EvaClient, host, port)
+            transport, protocol = await \
+                loop.create_connection(EvaClient, host, port)
 
         except Exception as e:
             if not retries:
@@ -67,13 +66,12 @@ async def connect (host: string, port: int, max_retry_count: int):
 
 ###USAGE###
 '''
-async def run(query:string):
-    config = ConfigurationManager()
-    hostname = config.get_value('server', 'host')
-    port = config.get_value('server', 'port')
+async def run(query: str):
+    hostname = '0.0.0.0'
+    port = 5432
 
     loop = asyncio.get_event_loop()
-    connection = await connect(hostname, port,2)
+    connection = await connect(hostname, port)
     cursor = connection.cursor()
     await cursor.execute(query)
     #cursor.fetch_one()
