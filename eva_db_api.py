@@ -1,16 +1,16 @@
 import asyncio
 import string
 import random
-import time
 
 from src.server.client import EvaClient, start_client
 from src.models.server.response import Response
 from src.configuration.configuration_manager import ConfigurationManager
 
 class EVAConnection:
-    def __init__(self, protocol):
+    def __init__(self, transport, protocol):
+        self._transport = transport
         self._protocol = protocol
-    
+
     def cursor(self):
         return EVACursor(self._protocol)
 
@@ -45,7 +45,7 @@ class EVACursor:
         r = Response.from_json(self.query_result)
         row_data = r._batch._frames.loc[self.next_row]
         return row_data
-    
+
 
 async def connect (host: string, port: int, max_retry_count: int):
     loop = asyncio.get_event_loop()
@@ -55,15 +55,15 @@ async def connect (host: string, port: int, max_retry_count: int):
     while True:
         try:
             transport, protocol = await loop.create_connection(EvaClient, host, port)
-        
+
         except Exception as e:
             if not retries:
-                raise e 
-            time.sleep(retries.pop(0) - random.random())
-        else: 
+                raise e
+            await asyncio.sleep(retries.pop(0) - random.random())
+        else:
             break
-    
-    return EVAConnection(protocol)
+
+    return EVAConnection(transport, protocol)
 
 ###USAGE###
 '''
@@ -72,7 +72,7 @@ async def run(query:string):
     hostname = config.get_value('server', 'host')
     port = config.get_value('server', 'port')
 
-    loop = asyncio.get_event_loop() 
+    loop = asyncio.get_event_loop()
     connection = await connect(hostname, port,2)
     cursor = connection.cursor()
     await cursor.execute(query)
@@ -85,4 +85,4 @@ asyncio.run(run('SELECT id,data FROM MyVideo WHERE id < 5;'))
 
 
 
-    
+
