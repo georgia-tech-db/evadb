@@ -28,6 +28,37 @@ from src.utils.logging_manager import LoggingManager
 from src.server.interpreter import EvaCommandInterpreter
 
 
+class EvaProtocolBuffer:
+
+    def __init__(self):
+        self.empty()
+
+    def empty(self):
+        self.buf = ''
+        self.expected_length = -1
+
+    def feed_data(self, data: str):
+        if not self.buf:
+            # First chunk should contain the length of the message
+            segs = data.split('|', 1)
+            self.expected_length = int(segs[0])
+            self.buf += segs[1]
+        else:
+            self.buf += data
+
+    def has_complete_message(self) -> bool:
+        return self.expected_length > 0 and \
+            len(self.buf) >= self.expected_length
+
+    def read_message(self) -> str:
+        message = self.buf[:self.expected_length]
+        rest_data = self.buf[self.expected_length:]
+        self.empty()
+        if rest_data:
+            self.feed_data(rest_data)
+        return message
+
+
 class EvaClient(asyncio.Protocol):
     """
         Sends data to server and get results back.
@@ -42,12 +73,11 @@ class EvaClient(asyncio.Protocol):
     __connections__ = 0
     __errors__ = 0
 
-    # Store response from server
-    _response_chunks = []
-
     def __init__(self):
         self.done = asyncio.Future()
         self.transport = None
+        self.buffer = EvaProtocolBuffer()
+        self.queue = asyncio.Queue()
         self.id = EvaClient.__connections__
 
         EvaClient.__connections__ += 1
@@ -98,16 +128,17 @@ class EvaClient(asyncio.Protocol):
                              str(response_chunk) + "|--"
                              )
 
-        self._response_chunks.append(response_chunk)
+        self.buffer.feed_data(response_chunk)
+        while self.buffer.has_complete_message():
+            message = self.buffer.read_message()
+            self.queue.put_nowait(message)
 
+    @asyncio.coroutine
     def send_message(self, message):
 
         LoggingManager().log("[ " + str(self.id) + " ]" +
                              " Request to server: --|" + str(message) + "|--"
                              )
-
-        # Reset response for next reqeuest
-        # self._response_chunk = None
 
         # Send request
         request_chunk = message.encode('ascii')
