@@ -29,9 +29,10 @@ class SSDObjectDetector(PytorchAbstractUDF):
         self.model = torch.hub.load(
             "NVIDIA/DeepLearningExamples:torchhub",
             "nvidia_ssd",
-            pretrained=False)
+            pretrained=False,
+            precision='fp16')
         model_state_dict = torch.hub.load_state_dict_from_url(
-            "https://api.ngc.nvidia.com/v2/models/nvidia/ssdpyt_fp32/versions/1/files/nvidia_ssdpyt_fp32_20190225.pt",
+            "https://api.ngc.nvidia.com/v2/models/nvidia/ssd_pyt_ckpt_amp/versions/19.09.0/zip",
             map_location=torch.device("cpu"))["model"]
         self.model.load_state_dict(model_state_dict)
         self.model.eval()
