@@ -16,7 +16,7 @@ from typing import Iterator
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.storage_plan import StoragePlan
-from src.storage import StorageEngine
+from src.storage.storage_engine import StorageEngine
 
 
 class StorageExecutor(AbstractExecutor):

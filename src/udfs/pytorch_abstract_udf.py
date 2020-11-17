@@ -14,16 +14,18 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import List
 
 import numpy as np
+import pandas as pd
 import torch
+from PIL import Image
 from torch import nn, Tensor
 from torchvision.transforms import Compose, transforms
 
-from src.models.inference.outcome import Outcome
 from src.udfs.abstract_udfs import AbstractClassifierUDF
 from src.udfs.gpu_compatible import GPUCompatible
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
@@ -43,22 +45,48 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
     def transforms(self) -> Compose:
         return Compose([transforms.ToTensor()])
 
-    def transform(self, images: Any):
-        return self.transforms(images).to(self.get_device())
+    def transform(self, images: np.ndarray):
+        # reverse the channels from opencv
+        return self.transforms(Image.fromarray(images[:, :, ::-1]))\
+            .unsqueeze(0)
 
-    def forward(self, frames: np.ndarray):
-        return self.classify([self.transform(frame[0]) for frame in frames])
+    def forward(self, frames: List[np.ndarray]):
+        tens_batch = torch.cat([self.transform(x) for x in frames])\
+            .to(self.get_device())
+        return self.classify(tens_batch)
 
-    @abstractmethod
-    def classify(self, frames: Tensor) -> List[Outcome]:
+    @abstractmethod 
+    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Abstract method to work with tensors.
         Specified transformations are already applied
         Arguments:
             frames (Tensor): tensor on which transformation is performed
         Returns:
-            List[Outcome]: outcome after prediction
+            pd.DataFrame: outcome after prediction
         """
+
+    def classify(self, frames: Tensor) -> pd.DataFrame:
+        """
+        Given the gpu_batch_size, we split the input tensor inpto chunks.
+        And call the _get_predictions and merge the results.
+        Arguments:
+            frames (Tensor): tensor on which transformation is performed
+        Returns:
+            pd.DataFrame: outcome after prediction
+        """
+        gpu_batch_size = ConfigurationManager()\
+            .get_value('executor', 'gpu_batch_size')
+
+        if gpu_batch_size:
+            chunks = torch.split(frames, gpu_batch_size)
+            outcome = pd.DataFrame()
+            for tensor in chunks:
+                outcome = outcome.append(self._get_predictions(tensor),
+                                         ignore_index=True)
+            return outcome
+        else:
+            return self._get_predictions(frames)
 
     def as_numpy(self, val: Tensor) -> np.ndarray:
         """
@@ -81,5 +109,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
     def __call__(self, *args, **kwargs):
         frames = None
         if len(args):
-            frames = args[0].to_numpy()
+            frames = args[0]
+        if isinstance(frames, pd.DataFrame):
+            frames = frames.transpose().values.tolist()[0]
         return nn.Module.__call__(self, frames, **kwargs)
