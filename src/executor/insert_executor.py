@@ -19,7 +19,7 @@ from src.catalog.catalog_manager import CatalogManager
 from src.catalog.column_type import ColumnType
 from src.planner.insert_plan import InsertPlan
 from src.executor.abstract_executor import AbstractExecutor
-from src.storage import StorageEngine
+from src.storage.storage_engine import StorageEngine
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 

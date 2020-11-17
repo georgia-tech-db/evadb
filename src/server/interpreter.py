@@ -13,84 +13,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-import glob
-
-from PIL import Image
 from cmd import Cmd
-
-from src.parser.parser import Parser
+from src.models.server.response import Response
 
 
 class EvaCommandInterpreter(Cmd):
 
     # Store results from server
     _server_result = None
+    _url = None
+
+    def __init__(self):
+        super().__init__()
 
     def set_protocol(self, protocol):
-        self.protocol = protocol
+        self._protocol = protocol
 
     def do_greet(self, line):
         print("greeting")
 
+    def emptyline(self):
+        print("Enter a valid query.")
+        return False
+
     def onecmd(self, s):
-
-        cmd_result = Cmd.onecmd(self, s)
-
-        # Send request to server
-        self.protocol.send_message(s)
-        _server_result = self.protocol._response_chunk
-
-        if _server_result is not None:
-            print(_server_result)
-        _server_result = None
-
-        return cmd_result
+        if s == "":
+            return self.emptyline()
+        elif (s == "exit" or s == "EXIT"):
+            return SystemExit
+        else:
+            return self.do_query(s)
 
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
 
-        # Type exit to stop program
-        if(query == "exit" or query == "EXIT"):
-            raise SystemExit
+        self._protocol._response_chunks = []
+        self._protocol.send_message(query)
+        while len(self._protocol._response_chunks) == 0:
+            _ = 1
+        segs = self._protocol._response_chunks[0].split('|', 1)
+        result_length = int(segs[0])
+        self._server_result = segs[1]
+        next_chunk = 1
+        while len(self._server_result) < result_length:
+            # print('Total length: %d, Received: %d' %
+            #      (result_length, len(self._server_result)), end='\r')
+            # next chunk is not avaiable yet
+            while len(self._protocol._response_chunks) <= next_chunk:
+                _ = 1
+            self._server_result += self._protocol._response_chunks[next_chunk]
+            next_chunk += 1
 
-        if len(query) == 0:
-            print("Empty query")
-
-        else:
-            try:
-                # Connect and Query from Eva
-                parser = Parser()
-                eva_statement = parser.parse(query)
-                select_stmt = eva_statement[0]
-                print("Result from the parser:")
-                print(select_stmt)
-                print('\n')
-
-                # Read Input Videos
-                # Replace with Input Pipeline once finished
-                input_video = []
-                for filename in glob.glob('data/sample_video/*.jpg'):
-                    im = Image.open(filename)
-                    # to handle 'too many open files' error
-                    im_copy = im.copy()
-                    input_video.append(im_copy)
-                    im.close()
-
-                # Write Output to final folder
-                # Replace with output pipeline once finished
-                ouput_frames = random.sample(input_video, 50)
-                output_folder = "data/sample_output/"
-
-                for i in range(len(ouput_frames)):
-                    frame_name = output_folder + "output" + str(i) + ".jpg"
-                    ouput_frames[i].save(frame_name)
-
-                print("Refer pop-up for a sample of the output")
-                ouput_frames[0].show()
-
-            except TypeError:
-                print("SQL Statement improperly formatted. Try again.")
+        # print('Total length: %d, Received: %d' %
+        #      (result_length, len(self._server_result)))
+        response = Response.from_json(self._server_result)
+        print(response)
+        return False
 
     def do_quit(self, args):
         """Quits the program."""

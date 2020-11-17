@@ -15,7 +15,7 @@
 
 import asyncio
 
-from src.server.server import start_server
+from src.server.client import EvaClient, start_client
 
 from src.configuration.configuration_manager import ConfigurationManager
 
@@ -23,7 +23,7 @@ from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
 
-def eva():
+def eva_client():
     """
         Start the eva system
     """
@@ -32,17 +32,13 @@ def eva():
     config = ConfigurationManager()
     hostname = config.get_value('server', 'host')
     port = config.get_value('server', 'port')
-    socket_timeout = config.get_value('server', 'socket_timeout')
-    loop = asyncio.new_event_loop()
-    stop_server_future = loop.create_future()
 
     # Launch server
     try:
-        asyncio.run(start_server(host=hostname,
+        asyncio.run(start_client(factory=lambda: EvaClient(),
+                                 host=hostname,
                                  port=port,
-                                 loop=loop,
-                                 socket_timeout=socket_timeout,
-                                 stop_server_future=stop_server_future)
+                                 max_retry_count=3)
                     )
 
     except Exception as e:
@@ -51,4 +47,4 @@ def eva():
 
 if __name__ == '__main__':
     # execute only if run as the entry point into the program
-    eva()
+    eva_client()

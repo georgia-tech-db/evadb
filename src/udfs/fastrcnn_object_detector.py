@@ -16,11 +16,10 @@ from typing import List
 
 import pandas as pd
 import torchvision
-from torch import Tensor
 
+from torch import Tensor
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.models.inference.outcome import Outcome
 from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 
@@ -75,7 +74,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
             'toothbrush'
         ]
 
-    def _get_predictions(self, frames: Tensor) -> List[Outcome]:
+    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
@@ -88,9 +87,8 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
             predicted_scores (List[List[float]])
 
         """
-
         predictions = self.model(frames)
-        prediction_df_list = []
+        outcome = pd.DataFrame()
         for prediction in predictions:
             pred_class = [str(self.labels[i]) for i in
                           list(self.as_numpy(prediction['labels']))]
@@ -105,12 +103,11 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
             pred_boxes = list(pred_boxes[:pred_t + 1])
             pred_class = list(pred_class[:pred_t + 1])
             pred_score = list(pred_score[:pred_t + 1])
-            prediction_df_list.append(
-                Outcome(pd.DataFrame(
-                    {"label": pred_class, "pred_score": pred_score,
-                     "pred_boxes": pred_boxes}),
-                    'label'))
-        return prediction_df_list
-
-    def classify(self, frames: Tensor) -> List[Outcome]:
-        return self._get_predictions(frames)
+            outcome = outcome.append(
+                {
+                    "label": pred_class,
+                    "pred_score": pred_score,
+                    "pred_boxes": pred_boxes
+                },
+                ignore_index=True)
+        return outcome
