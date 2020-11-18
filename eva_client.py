@@ -12,10 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import asyncio
-
-from src.server.client import EvaClient, start_client
+from src.server.interpreter import start_client
 
 from src.configuration.configuration_manager import ConfigurationManager
 
@@ -30,18 +27,14 @@ def eva_client():
 
     # Get the hostname and port information from the configuration file
     config = ConfigurationManager()
-    hostname = config.get_value('server', 'host')
+    host = config.get_value('server', 'host')
     port = config.get_value('server', 'port')
 
     # Launch server
     try:
-        asyncio.run(start_client(factory=lambda: EvaClient(),
-                                 host=hostname,
-                                 port=port,
-                                 max_retry_count=3)
-                    )
-
+        start_client(host=host, port=port)
     except Exception as e:
+        raise e
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
