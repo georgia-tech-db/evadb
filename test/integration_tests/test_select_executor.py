@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 import os
-import pandas as pd
+import unittest
+
 import numpy as np
+import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
@@ -36,6 +37,35 @@ class SelectExecutorTest(unittest.TestCase):
     def tearDown(self):
         os.remove('dummy.avi')
 
+    def test_sort_on_nonprojected_column(self):
+        """ This tests doing an order by on a column
+        that is not projected. The orderby_executor currently
+        catches the KeyError, passes, and returns the untouched
+        data
+        """
+        select_query = "SELECT data FROM MyVideo ORDER BY id;"
+        actual_batch = perform_query(select_query)
+
+        select_query = "SELECT data FROM MyVideo"
+        expected_batch = perform_query(select_query)
+
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_load_and_sort_in_table(self):
+        select_query = "SELECT data, id FROM MyVideo ORDER BY id;"
+        actual_batch = perform_query(select_query)
+        expected_rows = [{'id': i,
+                          'data': np.array(np.ones((2, 2, 3)) *
+                                           float(i + 1) * 25, dtype=np.uint8)
+                          } for i in range(NUM_FRAMES)]
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertEqual(actual_batch, expected_batch)
+
+        select_query = "SELECT data, id FROM MyVideo ORDER BY id DESC;"
+        actual_batch = perform_query(select_query)
+        expected_batch.reverse()
+        self.assertEqual(actual_batch, expected_batch)
+
     def test_should_load_and_select_in_table(self):
         select_query = "SELECT id FROM MyVideo;"
         actual_batch = perform_query(select_query)
@@ -45,7 +75,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # Need Order by
-        # select_query = "SELECT data FROM MyVideo;"
+        # select_query = "SELECT data FROM MyVideo ORDER BY id;"
         # actual_batch = perform_query(select_query)
         # expected_rows = [{"data": np.array(np.ones((2, 2, 3))
         #                                   * 0.1 * float(i + 1) * 255,

@@ -17,21 +17,22 @@ class OrderByExecutorTest(unittest.TestCase):
         data (3 batches):
         'A' 'B' 'C'
         [1, 1, 1]
+        ----------
         [1, 5, 6]
-        ----------
         [4, 7, 10]
-        [2, 9, 7]
         ----------
+        [2, 9, 7]
         [4, 1, 2]
         [4, 2, 4]
         """
 
         df1 = pd.DataFrame(
-            np.array([[1, 1, 1], [1, 5, 6]]), columns=['A', 'B', 'C'])
+            np.array([[1, 1, 1]]), columns=['A', 'B', 'C'])
         df2 = pd.DataFrame(
-            np.array([[4, 7, 10], [2, 9, 7]]), columns=['A', 'B', 'C'])
+            np.array([[1, 5, 6], [4, 7, 10]]), columns=['A', 'B', 'C'])
         df3 = pd.DataFrame(
-            np.array([[4, 1, 2], [4, 2, 4]]), columns=['A', 'B', 'C'])
+            np.array([[2, 9, 7], [4, 1, 2],
+                      [4, 2, 4]]), columns=['A', 'B', 'C'])
 
         batches = [Batch(frames=df) for df in [df1, df2, df3]]
 
@@ -56,11 +57,12 @@ class OrderByExecutorTest(unittest.TestCase):
         5  4  1   2
         """
         expected_df1 = pd.DataFrame(
-            np.array([[1, 5, 6], [1, 1, 1]]), columns=['A', 'B', 'C'])
+            np.array([[1, 5, 6]]), columns=['A', 'B', 'C'])
         expected_df2 = pd.DataFrame(
-            np.array([[2, 9, 7], [4, 7, 10]]), columns=['A', 'B', 'C'])
+            np.array([[1, 1, 1], [2, 9, 7]]), columns=['A', 'B', 'C'])
         expected_df3 = pd.DataFrame(
-            np.array([[4, 2, 4], [4, 1, 2]]), columns=['A', 'B', 'C'])
+            np.array([[4, 7, 10], [4, 2, 4],
+                      [4, 1, 2]]), columns=['A', 'B', 'C'])
 
         expected_batches = [Batch(frames=df) for df in [
             expected_df1, expected_df2, expected_df3]]
