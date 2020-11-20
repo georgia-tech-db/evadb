@@ -28,13 +28,15 @@ NUM_FRAMES = 10
 
 class SelectExecutorTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         perform_query(load_query)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         os.remove('dummy.avi')
 
     def test_sort_on_nonprojected_column(self):
@@ -73,16 +75,6 @@ class SelectExecutorTest(unittest.TestCase):
         expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
-
-        # Need Order by
-        # select_query = "SELECT data FROM MyVideo ORDER BY id;"
-        # actual_batch = perform_query(select_query)
-        # expected_rows = [{"data": np.array(np.ones((2, 2, 3))
-        #                                   * 0.1 * float(i + 1) * 255,
-        #                                   dtype=np.uint8)}
-        #                 for i in range(NUM_FRAMES)]
-        # expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        # self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id,data FROM MyVideo;"
         actual_batch = perform_query(select_query)

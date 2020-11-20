@@ -57,12 +57,13 @@ class OrderByExecutor(AbstractExecutor):
 
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
-        aggregated_batch = Batch()
+        aggregated_batch_list = []
 
         # aggregates the batches into one large batch
         for batch in child_executor.exec():
             self.batch_sizes.append(batch.batch_size)
-            aggregated_batch = aggregated_batch.__add__(batch)
+            aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
 
         # sorts the batch
         try:
@@ -77,7 +78,7 @@ class OrderByExecutor(AbstractExecutor):
         #  on self.batch_sizes which holds the input batches sizes
         index = 0
         for i in self.batch_sizes:
-            batch = aggregated_batch.__getitem__(slice(index, index + i))
+            batch = aggregated_batch[index: index + i]
             batch.reset_index()
             index += i
             yield batch
