@@ -23,6 +23,7 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 * [Development](#development)
 * [Architecture](#architecture)
 
+
 ## Installation
 
 Installation of EVA involves setting a virtual environment using [miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and configuring git hooks.
@@ -53,6 +54,20 @@ refer to [askubuntu](https://askubuntu.com/questions/766334/cant-login-as-mysql-
 
 4. Install `docker` and `docker-compose`.
 Please refer to [official doc](https://docs.docker.com/engine/install/).
+
+## Client Testing
+1. Set up the server and client
+
+Launch EVA database Server: `python eva.py`
+
+Launch CLI: `python eva_client.py`
+
+2. Run these 2 commands in the client terminal: (may take a while)
+```
+LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;
+SELECT id, data FROM MyVideo WHERE id < 5;
+```
+
 
 ## Docker
 

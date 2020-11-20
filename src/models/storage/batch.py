@@ -214,6 +214,14 @@ class Batch:
         if sort_type is None:
             sort_type = [True]
 
+        for column in by:
+            if column not in self._frames.columns:
+                LoggingManager().log(
+                    'Can not orderby non-projected column: {}'.format(column),
+                    LoggingLevel.ERROR)
+                raise KeyError(
+                    'Can not orderby non-projected column: {}'.format(column))
+
         self._frames.sort_values(
             by, ascending=sort_type, ignore_index=True, inplace=True)
 
@@ -299,6 +307,11 @@ class Batch:
             True if the batch_size == 0
         """
         return self.batch_size == 0
+
+    def reverse(self):
+        """ Reverses dataframe """
+        self._frames = self._frames[::-1]
+        self._frames.reset_index(drop=True, inplace=True)
 
     def reset_index(self):
         """ Resets the index of the data frame in the batch"""

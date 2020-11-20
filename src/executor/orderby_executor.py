@@ -45,7 +45,7 @@ class OrderByExecutor(AbstractExecutor):
         return [tve.col_name for tve in self._columns]
 
     def extract_sort_types(self):
-        """ extracts the string name of the column """
+        """ extracts the sort type for the column """
         # self._sort_types: List[ParserOrderBySortType]
         sort_type_bools = []
         for st in self._sort_types:
@@ -65,15 +65,19 @@ class OrderByExecutor(AbstractExecutor):
             aggregated_batch = aggregated_batch.__add__(batch)
 
         # sorts the batch
-        aggregated_batch.sort_orderby(
-            by=self.extract_column_names(),
-            sort_type=self.extract_sort_types())
+        try:
+            aggregated_batch.sort_orderby(
+                by=self.extract_column_names(),
+                sort_type=self.extract_sort_types())
+        except KeyError:
+            # pass for now
+            pass
 
         # split the aggregated batch into smaller ones based
         #  on self.batch_sizes which holds the input batches sizes
         index = 0
         for i in self.batch_sizes:
-            batch = aggregated_batch.__getitem__([index, index + i - 1])
+            batch = aggregated_batch.__getitem__(slice(index, index + i))
             batch.reset_index()
             index += i
             yield batch
