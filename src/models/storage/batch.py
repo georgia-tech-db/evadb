@@ -200,7 +200,7 @@ class Batch:
             by = [self.identifier_column]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
-    def sort_orderby(self, by=None, sort_type=None):
+    def sort_orderby(self, by, sort_type):
         """
         in_place sort for orderby
 
@@ -209,21 +209,29 @@ class Batch:
             sort_type: list of True/False if ASC for each column name in 'by'
                 i.e [True, False] means [ASC, DESC]
         """
-        if by is None and self.identifier_column in self._frames:
-            by = [self.identifier_column]
+        # if by is None and self.identifier_column in self._frames:
+        #     by = [self.identifier_column]
+
         if sort_type is None:
             sort_type = [True]
 
-        for column in by:
-            if column not in self._frames.columns:
-                LoggingManager().log(
-                    'Can not orderby non-projected column: {}'.format(column),
-                    LoggingLevel.ERROR)
-                raise KeyError(
-                    'Can not orderby non-projected column: {}'.format(column))
+        if by is not None:
+            for column in by:
+                if column not in self._frames.columns:
+                    LoggingManager().log(
+                        'Can not orderby non-projected column: {}'.format(
+                            column),
+                        LoggingLevel.ERROR)
+                    raise KeyError(
+                        'Can not orderby non-projected column: {}'.format(
+                            column))
 
-        self._frames.sort_values(
-            by, ascending=sort_type, ignore_index=True, inplace=True)
+            self._frames.sort_values(
+                by, ascending=sort_type, ignore_index=True, inplace=True)
+        else:
+            LoggingManager().log(
+                'Columns and Sort Type are required for orderby',
+                LoggingLevel.WARNING)
 
     def project(self, cols: []) -> 'Batch':
         """
