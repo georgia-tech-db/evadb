@@ -19,6 +19,7 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 ## Table of Contents
 * [Installation](#installation)
+* [Client Testing](#client-testing)
 * [Docker](#docker)
 * [Development](#development)
 * [Architecture](#architecture)
@@ -58,15 +59,19 @@ Please refer to [official doc](https://docs.docker.com/engine/install/).
 ## Client Testing
 1. Set up the server and client
 
-Launch EVA database Server: `python eva.py`
+- Launch EVA database Server: `python eva.py`
 
-Launch CLI: `python eva_client.py`
+- Launch CLI: `python eva_client.py`
 
-2. Run these 2 commands in the client terminal: (may take a while)
-```
+2. Run the `LOAD` command in the client terminal: (may take a while)
+```mysql
 LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;
+```
+3. Below is a basic query that should work on the client
+```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
+
 
 
 ## Docker
@@ -85,7 +90,6 @@ pre-commit install
 ```
 
 2. Ensure that all the unit test cases (including the ones you have added) run succesfully and the coding style conventions are followed.
-
 ```shell
 bash script/test/test.sh
 ```
