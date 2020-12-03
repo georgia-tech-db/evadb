@@ -102,7 +102,7 @@ class LogicalGet(Operator):
         self._video = video
         self._dataset_metadata = dataset_metadata
         self._predicate = None
-        self._select_list = None
+        self._target_list = None
 
     @property
     def video(self):
@@ -121,12 +121,12 @@ class LogicalGet(Operator):
         self._predicate = predicate
 
     @property
-    def select_list(self):
-        self._select_list
+    def target_list(self):
+        return self._target_list
 
-    @select_list.setter
-    def select_list(self, select_list):
-        self._select_list = select_list
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -136,7 +136,7 @@ class LogicalGet(Operator):
                 and self.video == other.video
                 and self.dataset_metadata == other.dataset_metadata
                 and self.predicate == other.predicate
-                and self.select_list == other.select_list)
+                and self.target_list == other.target_list)
 
 
 class LogicalQueryDerivedGet(Operator):
@@ -147,7 +147,7 @@ class LogicalQueryDerivedGet(Operator):
         # We need construct the map using the target list of the
         # subquery to validate the overall query
         self.predicate = None
-        self.select_list = None
+        self.target_list = None
 
     @property
     def predicate(self):
@@ -158,12 +158,12 @@ class LogicalQueryDerivedGet(Operator):
         self._predicate = predicate
 
     @property
-    def select_list(self):
-        self._select_list
+    def target_list(self):
+        return self._target_list
 
-    @select_list.setter
-    def select_list(self, select_list):
-        self._select_list = select_list
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -171,7 +171,7 @@ class LogicalQueryDerivedGet(Operator):
             return False
         return (is_subtree_equal
                 and self.predicate == other.predicate
-                and self.select_list == other.select_list)
+                and self.target_list == other.target_list)
 
 
 class LogicalFilter(Operator):
