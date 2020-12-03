@@ -68,6 +68,9 @@ class PlanGenerator:
         # TopDown Rewrite
         optimizer_context.task_stack.push(TopDownRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
+        # Update the group expression
+        grp_expr = memo.get_group(root_grp_id).logical_exprs[0]
+        # BottomUp Rewrite
         optimizer_context.task_stack.push(BottomUpRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
