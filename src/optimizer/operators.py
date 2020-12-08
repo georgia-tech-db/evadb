@@ -37,6 +37,7 @@ class OperatorType(IntEnum):
     LOGICALLOADDATA = 7,
     LOGICALQUERYDERIVEDGET = 8,
     LOGICALUNION = 9,
+    LOGICALORDERBY = 10
 
 
 class Operator:
@@ -146,6 +147,24 @@ class LogicalProject(Operator):
             return False
         return (is_subtree_equal
                 and self.target_list == other.target_list)
+
+
+class LogicalOrderBy(Operator):
+    def __init__(self, orderby_list: List,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALORDERBY, children)
+        self._orderby_list = orderby_list
+
+    @property
+    def orderby_list(self):
+        return self._orderby_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalOrderBy):
+            return False
+        return (is_subtree_equal
+                and self.orderby_list == other.orderby_list)
 
 
 class LogicalUnion(Operator):
