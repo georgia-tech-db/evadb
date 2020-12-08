@@ -26,6 +26,7 @@ from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
+from src.executor.orderby_executor import OrderByExecutor
 
 
 class PlanExecutor:
@@ -73,6 +74,8 @@ class PlanExecutor:
             executor_node = CreateUDFExecutor(node=plan)
         elif plan_node_type == PlanNodeType.LOAD_DATA:
             executor_node = LoadDataExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.ORDER_BY:
+            executor_node = OrderByExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:

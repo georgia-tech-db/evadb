@@ -14,10 +14,16 @@
 # limitations under the License.
 import unittest
 
-from src.optimizer.operators import LogicalProject, LogicalFilter, LogicalGet
+
+from src.expression.tuple_value_expression import TupleValueExpression
+from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
+                                     LogicalOrderBy)
+
 from src.optimizer.generators.seq_scan_generator import ScanGenerator
+from src.parser.types import ParserOrderBySortType
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
+from src.planner.orderby_plan import OrderByPlan
 from src.planner.types import PlanNodeType
 
 
@@ -38,3 +44,17 @@ class SequentialScanGeneratorTest(unittest.TestCase):
         plan = ScanGenerator().build(logical_plan)
         self.assertTrue(isinstance(plan, StoragePlan))
         self.assertEqual(1, plan.video)
+
+    def test_should_return_correct_plan_tree_for_orderby_logical_tree(self):
+        # SELECT data, id FROM video ORDER BY data, id DESC;
+        logical_plan = LogicalOrderBy(
+            [(TupleValueExpression('data'), ParserOrderBySortType.ASC),
+             (TupleValueExpression('id'), ParserOrderBySortType.DESC)])
+
+        plan = ScanGenerator().build(logical_plan)
+
+        self.assertTrue(isinstance(plan, OrderByPlan))
+        self.assertEqual(TupleValueExpression('data'), plan.orderby_list[0][0])
+        self.assertEqual(ParserOrderBySortType.ASC, plan.orderby_list[0][1])
+        self.assertEqual(TupleValueExpression('id'), plan.orderby_list[1][0])
+        self.assertEqual(ParserOrderBySortType.DESC, plan.orderby_list[1][1])
