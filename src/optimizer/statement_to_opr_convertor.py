@@ -14,11 +14,12 @@
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
+from src.expression.constant_value_expression import ConstantValueExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy)
+                                     LogicalOrderBy, LogicalLimit)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -100,6 +101,9 @@ class StatementToPlanConvertor:
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
 
+        if statement.limit_count is not None:
+            self._visit_limit(statement.limit_count)
+
     def _visit_orderby(self, orderby_list):
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
         orderby_columns = [orderbyexpr[0] for orderbyexpr in orderby_list]
@@ -107,6 +111,11 @@ class StatementToPlanConvertor:
         orderby_opr = LogicalOrderBy(orderby_list)
         orderby_opr.append_child(self._plan)
         self._plan = orderby_opr
+
+    def _visit_limit(self, limit_count):
+        limit_opr = LogicalLimit(ConstantValueExpression(limit_count))
+        limit_opr.append_child(self._plan)
+        self._plan = limit_opr
 
     def _visit_union(self, target, all):
         left_child_plan = self._plan
