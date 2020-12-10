@@ -26,4 +26,5 @@ class PlanNodeType(IntEnum):
     LOAD_DATA = 7
     UNION = 8
     ORDER_BY = 9
+    LIMIT = 10
     # add other types
