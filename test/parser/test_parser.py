@@ -255,7 +255,9 @@ class ParserTests(unittest.TestCase):
 
         # limit_count
         self.assertIsNotNone(select_stmt.limit_count)
-        self.assertEqual(select_stmt.limit_count, 3)
+        self.assertEqual(select_stmt.limit_count, ConstantValueExpression(3))
+
+        print(select_stmt)
 
     def test_table_ref(self):
         ''' Testing table info in TableRef
