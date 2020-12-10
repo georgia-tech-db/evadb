@@ -16,6 +16,7 @@ from enum import IntEnum, unique
 from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
+from src.expression.constant_value_expression import ConstantValueExpression
 from src.parser.table_ref import TableRef
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
@@ -38,6 +39,7 @@ class OperatorType(IntEnum):
     LOGICALQUERYDERIVEDGET = 8,
     LOGICALUNION = 9,
     LOGICALORDERBY = 10
+    LOGICALLIMIT = 11
 
 
 class Operator:
@@ -165,6 +167,24 @@ class LogicalOrderBy(Operator):
             return False
         return (is_subtree_equal
                 and self.orderby_list == other.orderby_list)
+
+
+class LogicalLimit(Operator):
+    def __init__(self, limit_count: ConstantValueExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALLIMIT, children)
+        self._limit_count = limit_count
+
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalLimit):
+            return False
+        return (is_subtree_equal
+                and self.limit_count == other.limit_count)
 
 
 class LogicalUnion(Operator):
