@@ -413,7 +413,7 @@ class ParserVisitor(evaql_parserVisitor):
         return self.visitChildren(ctx.expression()), sort_token
 
     def visitLimitClause(self, ctx: evaql_parser.LimitClauseContext):
-        return self.visitChildren(ctx)
+        return ConstantValueExpression(self.visitChildren(ctx))
 
     ##################################################################
     # LOAD STATEMENT

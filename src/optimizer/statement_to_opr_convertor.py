@@ -14,7 +14,6 @@
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
-from src.expression.constant_value_expression import ConstantValueExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
@@ -113,7 +112,7 @@ class StatementToPlanConvertor:
         self._plan = orderby_opr
 
     def _visit_limit(self, limit_count):
-        limit_opr = LogicalLimit(ConstantValueExpression(limit_count))
+        limit_opr = LogicalLimit(limit_count)
         limit_opr.append_child(self._plan)
         self._plan = limit_opr
 

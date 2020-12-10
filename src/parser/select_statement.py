@@ -17,6 +17,7 @@ from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
+from src.expression.constant_value_expression import ConstantValueExpression
 from src.parser.table_ref import TableRef
 from typing import List
 
@@ -105,7 +106,7 @@ class SelectStatement(AbstractStatement):
         return self._limit_count
 
     @limit_count.setter
-    def limit_count(self, limit_count_new):
+    def limit_count(self, limit_count_new: ConstantValueExpression):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
