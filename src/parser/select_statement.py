@@ -49,6 +49,7 @@ class SelectStatement(AbstractStatement):
         self._union_link = None
         self._union_all = False
         self._orderby_list = kwargs.get("orderby_clause_list", None)
+        self._limit_count = kwargs.get("limit_count", None)
 
     @property
     def union_link(self):
@@ -99,6 +100,14 @@ class SelectStatement(AbstractStatement):
         # orderby_list_new: List[(TupleValueExpression, int)]
         self._orderby_list = orderby_list_new
 
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    @limit_count.setter
+    def limit_count(self, limit_count_new):
+        self._limit_count = limit_count_new
+
     def __str__(self) -> str:
         print_str = "SELECT {} FROM {} WHERE {}".format(self._target_list,
                                                         self._from_table,
@@ -112,6 +121,9 @@ class SelectStatement(AbstractStatement):
         if self._orderby_list is not None:
             print_str += " ORDER BY " + str(self._orderby_list)
 
+        if self._limit_count is not None:
+            print_str += " LIMIT " + str(self._limit_count)
+
         return print_str
 
     def __eq__(self, other):
@@ -122,4 +134,5 @@ class SelectStatement(AbstractStatement):
                 and self.where_clause == other.where_clause
                 and self.union_link == other.union_link
                 and self.union_all == other.union_all
-                and self.orderby_list == other.orderby_list)
+                and self.orderby_list == other.orderby_list
+                and self.limit_count == other.limit_count)
