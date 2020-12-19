@@ -94,20 +94,21 @@ class TopDownRewrite(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
-                if not rule.check(self.root_expr.group_id,
-                                  self.optimizer_context):
+                if not rule.check(match, self.optimizer_context):
                     continue
+                # Uncertain correctness
+                self.root_expr.mark_rule_explored(rule.rule_type)
                 LoggingManager().log('In TopDown, Rule {} matched for {}'
                                      .format(rule, self.root_expr),
-                                     LoggingLevel.DEBUG)
+                                     LoggingLevel.INFO)
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.xform_opr_to_group_expr(after, False)
-                new_expr.mark_rule_explored(rule.rule_type)
-                self.optimizer_context.memo.replace_group_expr(
-                    self.root_expr.group_id, new_expr)
+                self.optimizer_context.memo.switch_group_id(self.root_expr,
+                                                            new_expr)
                 self.root_expr = new_expr
-                LoggingManager().log('After rewiting {}'.format(self.root_expr),
-                                     LoggingLevel.DEBUG)
+                LoggingManager().log('After rewiting {}'
+                                     .format(self.root_expr),
+                                     LoggingLevel.INFO)
                 self.optimizer_context.task_stack.push(TopDownRewrite(
                     self.root_expr, self.optimizer_context))
 
@@ -154,20 +155,20 @@ class BottomUpRewrite(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
-                if not rule.check(self.root_expr.group_id,
-                                  self.optimizer_context):
+                if not rule.check(match, self.optimizer_context):
                     continue
+                # Uncertain correctness
+                self.root_expr.mark_rule_explored(rule.rule_type)
                 LoggingManager().log('In BottomUp, Rule {} matched for {}'
                                      .format(rule, self.root_expr),
-                                     LoggingLevel.DEBUG)
+                                     LoggingLevel.INFO)
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.xform_opr_to_group_expr(after, False)
-                new_expr.mark_rule_explored(rule.rule_type)
-                self.optimizer_context.memo.replace_group_expr(
-                    self.root_expr.group_id, new_expr)
+                self.optimizer_context.memo.switch_group_id(self.root_expr,
+                                                            new_expr)
                 self.root_expr = new_expr
                 LoggingManager().log('After rewiting {}'.format(self.root_expr),
-                                     LoggingLevel.DEBUG)
+                                     LoggingLevel.INFO)
                 self.optimizer_context.task_stack.push(BottomUpRewrite(
                     new_expr, self.optimizer_context))
 
@@ -188,18 +189,17 @@ class OptimizeExpression(OptimizerTask):
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
             for match in iter(binder):
-                if not rule.check(self.root_expr.group_id,
-                                  self.optimizer_context):
+                if not rule.check(match, self.optimizer_context):
                     continue
                 LoggingManager().log('In Optimize physical expression,'
                                      'Rule {} matched for {}'
                                      .format(rule, self.root_expr),
-                                     LoggingLevel.DEBUG)
+                                     LoggingLevel.INFO)
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = GroupExpression(
                     after, self.root_expr.group_id, self.root_expr.children)
-                LoggingManager().log('After rewiting {}'.format(new_expr),
-                                     LoggingLevel.DEBUG)
+                #LoggingManager().log('After rewiting {}'.format(new_expr),
+                #                     LoggingLevel.INFO)
                 self.optimizer_context.memo.add_group_expr(new_expr)
                 # Optimize inputs for this physical expr
                 self.optimizer_context.task_stack.push(OptimizeInputs(new_expr, self.optimizer_context))
