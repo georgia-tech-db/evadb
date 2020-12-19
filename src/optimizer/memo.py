@@ -39,11 +39,30 @@ class Memo:
         grp = self._groups[group_id]
         grp_expr = grp.logical_exprs[0]
         after.group_id = group_id
-        after.mark_rule_explored(grp_expr.rules_explored)
+        # after.mark_rule_explored(grp_expr.rules_explored)
         del self._group_exprs[grp_expr]
         grp.clear_grp_exprs()
         grp.add_expr(after)
         self._group_exprs[after] = after.group_id
+
+    def switch_group_id(self, before: GroupExpression, after: GroupExpression):
+        """
+            This function swtiches the group id between two group expressions.
+        """
+        temp = after.group_id
+        after.group_id = before.group_id
+        before.group_id = temp
+
+        # Uncertain correctness
+        grp = self._groups[after.group_id]
+        grp.clear_grp_exprs()
+        grp.add_expr(after)
+        grp = self._groups[before.group_id]
+        grp.clear_grp_exprs()
+        grp.add_expr(before)
+
+        self._group_exprs[after] = after.group_id
+        self._group_exprs[before] = before.group_id
 
     def add_group_expr(self, expr: GroupExpression):
         # existing expression

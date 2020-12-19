@@ -187,7 +187,7 @@ class EmbedFilterIntoGet(Rule):
     def promise(self):
         return Promise.EMBED_FILTER_INTO_GET
 
-    def check(self, grp_id: int, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
         return True
 
@@ -208,7 +208,7 @@ class EmbedProjectIntoGet(Rule):
     def promise(self):
         return Promise.EMBED_PROJECT_INTO_GET
 
-    def check(self, grp_id: int, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
         return True
 
@@ -232,7 +232,7 @@ class EmbedFilterIntoDerivedGet(Rule):
     def promise(self):
         return Promise.EMBED_FILTER_INTO_DERIVED_GET
 
-    def check(self, grp_id: int, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
         return True
 
@@ -255,7 +255,7 @@ class EmbedProjectIntoDerivedGet(Rule):
     def promise(self):
         return Promise.EMBED_PROJECT_INTO_DERIVED_GET
 
-    def check(self, grp_id: int, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
         return True
 
@@ -275,7 +275,7 @@ class UdfLTOR(Rule):
     def promise(self):
         return Promise.UDF_LTOR
 
-    def check(self, grp_id: int, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         # nothing else to check if logical match found return true
         return True
 
@@ -317,7 +317,7 @@ class LogicalUdfFilterToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_UDF_FILTER_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def _bind_udf(self, expr: FunctionExpression):
@@ -374,7 +374,7 @@ class LogicalCreateToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_CREATE_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
@@ -392,7 +392,7 @@ class LogicalCreateUDFToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
@@ -410,7 +410,7 @@ class LogicalInsertToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_INSERT_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
@@ -428,7 +428,7 @@ class LogicalLoadToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_LOAD_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalLoadData, context: OptimizerContext):
@@ -445,7 +445,7 @@ class LogicalGetToSeqScan(Rule):
     def promise(self):
         return Promise.LOGICAL_GET_TO_SEQSCAN
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
@@ -462,7 +462,7 @@ class LogicalDerivedGetToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalQueryDerivedGet, context: OptimizerContext):
@@ -481,7 +481,7 @@ class LogicalUnionToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_UNION_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalUnion, context: OptimizerContext):
@@ -499,7 +499,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
 
-    def check(self, grp_id: int, context: OptimizerContext):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def apply(self, before: LogicalCreateMaterializedView,
