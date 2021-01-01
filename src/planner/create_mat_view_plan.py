@@ -34,13 +34,11 @@ class CreateMaterializedViewPlan(AbstractPlan):
 
     def __init__(self, view: TableRef,
                  col_list: List[ColumnDefinition],
-                 query: SelectStatement,
                  if_not_exists: bool = False):
         super().__init__(PlanOprType.CREATE_MATERIALIZED_VIEW)
         self._view = view
         self._col_list = col_list
         self._if_not_exists = if_not_exists
-        self._query = query
 
     @property
     def view(self):
@@ -49,10 +47,6 @@ class CreateMaterializedViewPlan(AbstractPlan):
     @property
     def if_not_exists(self):
         return self._if_not_exists
-
-    @property
-    def query(self):
-        return self._query
 
     @property
     def col_list(self):
