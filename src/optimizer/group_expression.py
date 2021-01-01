@@ -44,6 +44,10 @@ class GroupExpression:
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, new_children):
+        self._children = new_children
+
     def append_child(self, child_id: int):
         self._children.append(child_id)
 
