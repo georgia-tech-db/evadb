@@ -53,6 +53,11 @@ class Memo:
         after.group_id = before.group_id
         before.group_id = temp
 
+        # Update children if one is the parent of another
+        before.children = list([after.group_id if id == before.group_id
+                                else id for id in before.children])
+        after.children = list([before.group_id if id == after.group_id
+                               else id for id in after.children])
         # Uncertain correctness
         grp = self._groups[after.group_id]
         grp.clear_grp_exprs()
@@ -82,5 +87,3 @@ class Memo:
         # create a new group
         self._create_new_group(expr)
         self._group_exprs[expr] = expr.group_id
-
-
