@@ -83,9 +83,10 @@ class MaterializedViewTest(unittest.TestCase):
             .format(select_query)
         perform_query(query)
 
-        actual_batch = perform_query(select_query)
+        select_view_query = 'SELECT id, label FROM uadtrac_fastRCNN'
+        actual_batch = perform_query(select_view_query)
         actual_batch.sort()
         expected_batch = Batch(
-            frames=pd.DataFrame([{'id': i, 'label': 'person'} for i in range(5)])
+            frames=pd.DataFrame([{'id': i, 'label': 'person'.encode()} for i in range(5)])
         )
         self.assertEqual(actual_batch, expected_batch)
