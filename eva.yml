@@ -4,7 +4,7 @@ core:
   application: "eva"
 
 executor:
-  batch_size: 20
+  batch_size: 50
   gpu_batch_size: 1
   gpus: {'130.207.125.60': [1]}
 storage:

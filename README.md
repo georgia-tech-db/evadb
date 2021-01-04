@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/georgia-tech-db/eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://exvian.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evagatech.readthedocs.io/en/latest/index.html)
 
 ## What is EVA?
 
@@ -19,9 +19,11 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 ## Table of Contents
 * [Installation](#installation)
+* [Client Testing](#client-testing)
 * [Docker](#docker)
 * [Development](#development)
 * [Architecture](#architecture)
+
 
 ## Installation
 
@@ -54,6 +56,24 @@ refer to [askubuntu](https://askubuntu.com/questions/766334/cant-login-as-mysql-
 4. Install `docker` and `docker-compose`.
 Please refer to [official doc](https://docs.docker.com/engine/install/).
 
+## Client Testing
+1. Set up the server and client
+
+- Launch EVA database Server: `python eva.py`
+
+- Launch CLI: `python eva_client.py`
+
+2. Run the `LOAD` command in the client terminal: (may take a while)
+```mysql
+LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;
+```
+3. Below is a basic query that should work on the client
+```mysql
+SELECT id, data FROM MyVideo WHERE id < 5;
+```
+
+
+
 ## Docker
 
 1. Standup EVA testing for CPU/GPU hardware.
@@ -70,7 +90,6 @@ pre-commit install
 ```
 
 2. Ensure that all the unit test cases (including the ones you have added) run succesfully and the coding style conventions are followed.
-
 ```shell
 bash script/test/test.sh
 ```
