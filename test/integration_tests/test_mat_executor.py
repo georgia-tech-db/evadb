@@ -59,7 +59,7 @@ class MaterializedViewTest(unittest.TestCase):
 
         labels = DummyObjectDetector().labels
         # BUG: materialized view turns the str to bstr.
-        expected = [{'id': i, 'label': labels[1 + i % 2].encode()}
+        expected = [{'id': i, 'label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -87,6 +87,6 @@ class MaterializedViewTest(unittest.TestCase):
         actual_batch = perform_query(select_view_query)
         actual_batch.sort()
         expected_batch = Batch(
-            frames=pd.DataFrame([{'id': i, 'label': 'person'.encode()} for i in range(5)])
+            frames=pd.DataFrame([{'id': i, 'label': 'person'} for i in range(5)])
         )
         self.assertEqual(actual_batch, expected_batch)
