@@ -18,7 +18,7 @@ from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
     LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, \
-    LogicalLoadData, LogicalUnion
+    LogicalLoadData, LogicalUnion, LogicalOrderBy
 from src.optimizer.plan_generator import PlanGenerator
 
 
@@ -54,6 +54,14 @@ class PlanGeneratorTest(unittest.TestCase):
         l_union = LogicalUnion(True, None)
         PlanGenerator().build(l_union)
         mock_instance.build.assert_called_with(l_union)
+
+    @patch("src.optimizer.plan_generator.ScanGenerator")
+    def test_should_return_use_scan_generator_for_logical_orderby(self,
+                                                                  mock_class):
+        mock_instance = mock_class.return_value
+        l_orderby = LogicalOrderBy(None)
+        PlanGenerator().build(l_orderby)
+        mock_instance.build.assert_called_with(l_orderby)
 
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_not_call_scan_generator_for_other_types(self,

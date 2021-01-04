@@ -200,6 +200,39 @@ class Batch:
             by = [self.identifier_column]
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
+    def sort_orderby(self, by, sort_type):
+        """
+        in_place sort for orderby
+
+        Args:
+            by: list of column names
+            sort_type: list of True/False if ASC for each column name in 'by'
+                i.e [True, False] means [ASC, DESC]
+        """
+        # if by is None and self.identifier_column in self._frames:
+        #     by = [self.identifier_column]
+
+        if sort_type is None:
+            sort_type = [True]
+
+        if by is not None:
+            for column in by:
+                if column not in self._frames.columns:
+                    LoggingManager().log(
+                        'Can not orderby non-projected column: {}'.format(
+                            column),
+                        LoggingLevel.ERROR)
+                    raise KeyError(
+                        'Can not orderby non-projected column: {}'.format(
+                            column))
+
+            self._frames.sort_values(
+                by, ascending=sort_type, ignore_index=True, inplace=True)
+        else:
+            LoggingManager().log(
+                'Columns and Sort Type are required for orderby',
+                LoggingLevel.WARNING)
+
     def project(self, cols: []) -> 'Batch':
         """
         Takes as input the column list, returns the projection.
@@ -276,9 +309,30 @@ class Batch:
         return Batch(new_frames, outcomes=new_outcomes,
                      temp_outcomes=temp_new_outcomes)
 
+    @classmethod
+    def concat(cls, batch_list: List['Batch'], copy=True) -> 'Batch':
+        """ Concat a list of batches. Avoid the extra copying overhead by
+        the append operation in __add__.
+        Notice: only frames are considered.
+        """
+
+        frame_list = [batch.frames for batch in batch_list]
+        frame = pd.concat(frame_list, ignore_index=True, copy=copy)
+
+        return Batch(frame)
+
     def empty(self):
         """Checks if the batch is empty
         Returns:
             True if the batch_size == 0
         """
         return self.batch_size == 0
+
+    def reverse(self):
+        """ Reverses dataframe """
+        self._frames = self._frames[::-1]
+        self._frames.reset_index(drop=True, inplace=True)
+
+    def reset_index(self):
+        """ Resets the index of the data frame in the batch"""
+        self._frames.reset_index(drop=True, inplace=True)
