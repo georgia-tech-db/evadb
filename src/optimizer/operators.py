@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique
+from enum import IntEnum, unique, auto
 from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -29,17 +29,17 @@ class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
     """
-    LOGICALGET = 1,
-    LOGICALFILTER = 2,
-    LOGICALPROJECT = 3,
-    LOGICALINSERT = 4,
-    LOGICALCREATE = 5,
-    LOGICALCREATEUDF = 6,
-    LOGICALLOADDATA = 7,
-    LOGICALQUERYDERIVEDGET = 8,
-    LOGICALUNION = 9,
-    LOGICALORDERBY = 10
-    LOGICALLIMIT = 11
+    LOGICALGET = auto()
+    LOGICALFILTER = auto()
+    LOGICALPROJECT = auto()
+    LOGICALINSERT = auto()
+    LOGICALCREATE = auto()
+    LOGICALCREATEUDF = auto()
+    LOGICALLOADDATA = auto()
+    LOGICALQUERYDERIVEDGET = auto()
+    LOGICALUNION = auto()
+    LOGICALORDERBY = auto()
+    LOGICALLIMIT = auto()
 
 
 class Operator:
