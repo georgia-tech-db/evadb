@@ -107,6 +107,8 @@ class LimitExecutorTest(unittest.TestCase):
         limit_executor.append_child(DummyExecutor(sorted_batches))
         reduced_batches = list(limit_executor.exec())
 
+        # merge everything into one batch
+        aggregated_batch = Batch.concat(reduced_batches, copy=False)
         """
            A  B   C
         0  1  5   6
@@ -118,4 +120,4 @@ class LimitExecutorTest(unittest.TestCase):
 
         expected_batches = [Batch(frames=df) for df in [expected_df1]]
 
-        self.assertEqual(expected_batches[0], reduced_batches[0])
+        self.assertEqual(expected_batches[0], aggregated_batch)
