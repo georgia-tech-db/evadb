@@ -46,7 +46,7 @@ class SchemaTests(unittest.TestCase):
 
         col = DataFrameColumn(col_name, ColumnType.TEXT, False)
         petastorm_col = UnischemaField(
-            col_name, np.string_, (), ScalarCodec(
+            col_name, np.str_, (), ScalarCodec(
                 StringType()), False)
         self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
 
