@@ -17,14 +17,16 @@ import unittest
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
-                                     LogicalOrderBy)
+                                     LogicalOrderBy, LogicalLimit)
 
 from src.optimizer.generators.seq_scan_generator import ScanGenerator
 from src.parser.types import ParserOrderBySortType
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.orderby_plan import OrderByPlan
+from src.planner.limit_plan import LimitPlan
 from src.planner.types import PlanNodeType
+from src.expression.constant_value_expression import ConstantValueExpression
 
 
 class SequentialScanGeneratorTest(unittest.TestCase):
@@ -58,3 +60,14 @@ class SequentialScanGeneratorTest(unittest.TestCase):
         self.assertEqual(ParserOrderBySortType.ASC, plan.orderby_list[0][1])
         self.assertEqual(TupleValueExpression('id'), plan.orderby_list[1][0])
         self.assertEqual(ParserOrderBySortType.DESC, plan.orderby_list[1][1])
+
+    def test_should_return_correct_plan_tree_for_limit_logical_tree(self):
+        # SELECT data, id FROM video limit 5;
+        logical_plan = LogicalLimit(ConstantValueExpression(5))
+
+        plan = ScanGenerator().build(logical_plan)
+
+        self.assertTrue(isinstance(plan, LimitPlan))
+        self.assertTrue(isinstance(
+            plan.limit_expression, ConstantValueExpression))
+        self.assertEqual(plan.limit_value, 5)
