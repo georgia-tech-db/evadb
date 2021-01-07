@@ -17,7 +17,7 @@ from typing import Iterator
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.limit_plan import LimitPlan
-from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 class LimitExecutor(AbstractExecutor):
@@ -32,35 +32,20 @@ class LimitExecutor(AbstractExecutor):
     def __init__(self, node: LimitPlan):
         super().__init__(node)
         self._limit_count = node.limit_value
-        self.BATCH_MAX_SIZE = 50  # from eva.yml
+        self.BATCH_MAX_SIZE = ConfigurationManager().get_value(
+            "executor", "batch_size")
 
     def validate(self):
         pass
 
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
-        aggregated_batch_list = []
-
+        remaining_tuples = self._limit_count
         # aggregates the batches into one large batch
         for batch in child_executor.exec():
-            aggregated_batch_list.append(batch)
-        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+            if len(batch) > remaining_tuples:
+                yield batch[:remaining_tuples]
+                return
 
-        aggregated_frame = aggregated_batch.frames
-
-        # limits the rows
-        if self._limit_count <= aggregated_frame.shape[0]:
-            aggregated_frame = aggregated_frame.iloc[:self._limit_count]
-        else:
-            LoggingManager().log('Limit value greater than \
-                    current size of data!', LoggingLevel.WARNING)
-
-        # split the aggregated batch into smaller ones based
-        #  on self.BATCH_MAX_SIZE
-        for i in range(0, aggregated_frame.shape[0], self.BATCH_MAX_SIZE):
-            bound = i + self.BATCH_MAX_SIZE
-            if bound > aggregated_frame.shape[0]:
-                bound = aggregated_frame.shape[0]
-            batch = Batch(frames=aggregated_frame.iloc[i: bound])
-            batch.reset_index()
+            remaining_tuples -= len(batch)
             yield batch
