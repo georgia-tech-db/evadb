@@ -46,3 +46,12 @@ class ParserColumnDataType(IntEnum):
     FLOAT = 3
     TEXT = 4
     NDARRAY = 5
+
+
+@unique
+class ParserOrderBySortType(IntEnum):
+    """
+    Manages enums for all order by sort types
+    """
+    ASC = 1
+    DESC = 2

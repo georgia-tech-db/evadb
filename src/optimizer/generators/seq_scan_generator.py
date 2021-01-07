@@ -14,10 +14,11 @@
 # limitations under the License.
 from src.optimizer.generators.base import Generator
 from src.optimizer.operators import LogicalGet, Operator, LogicalFilter, \
-    LogicalProject, LogicalUnion
+    LogicalProject, LogicalUnion, LogicalOrderBy
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.union_plan import UnionPlan
 from src.planner.storage_plan import StoragePlan
+from src.planner.orderby_plan import OrderByPlan
 
 
 class ScanGenerator(Generator):
@@ -47,6 +48,11 @@ class ScanGenerator(Generator):
         union.append_child(self._plan)
         self._plan = union
 
+    def _visit_logical_orderby(self, operator: LogicalOrderBy):
+        orderbyplan = OrderByPlan(operator.orderby_list)
+        orderbyplan.append_child(self._plan)
+        self._plan = orderbyplan
+
     def _visit(self, operator: Operator):
         if isinstance(operator, LogicalUnion):
             self._visit_logical_union(operator)
@@ -54,6 +60,9 @@ class ScanGenerator(Generator):
 
         for child in operator.children:
             self._visit(child)
+
+        if isinstance(operator, LogicalOrderBy):
+            self._visit_logical_orderby(operator)
 
         if isinstance(operator, LogicalGet):
             self._visit_logical_get(operator)

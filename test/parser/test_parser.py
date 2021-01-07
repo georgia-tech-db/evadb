@@ -34,6 +34,7 @@ from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 
 from src.parser.table_ref import TableRef, TableInfo
+from src.parser.types import ParserOrderBySortType
 
 from pathlib import Path
 
@@ -165,6 +166,51 @@ class ParserTests(unittest.TestCase):
             select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
 
+    def test_select_statement_orderby_class(self):
+        '''Testing order by clause in select statement
+        Class: SelectStatement'''
+
+        parser = Parser()
+
+        select_query = "SELECT CLASS, REDNESS FROM TAIPAI \
+                    WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
+                    ORDER BY CLASS, REDNESS DESC;"
+        # if orderby sort_type (ASC/DESC) not provided, should default to ASC
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 2)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(
+            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(
+            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+
+        # where_clause
+        self.assertIsNotNone(select_stmt.where_clause)
+
+        # orderby_clause
+        self.assertIsNotNone(select_stmt.orderby_list)
+        self.assertEqual(len(select_stmt.orderby_list), 2)
+        self.assertEqual(select_stmt.orderby_list[0][0].col_name, 'CLASS')
+        self.assertEqual(
+            select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
+        self.assertEqual(select_stmt.orderby_list[1][0].col_name, 'REDNESS')
+        self.assertEqual(
+            select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
+
     def test_table_ref(self):
         ''' Testing table info in TableRef
             Class: TableInfo
@@ -217,11 +263,11 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition(
                     'Frame_Array', ParserColumnDataType.NDARRAY, [
                         3, 256, 256])], [
-                    ColumnDefinition(
-                        'Labels', ParserColumnDataType.NDARRAY, [10]),
-                    ColumnDefinition(
-                        'Bbox', ParserColumnDataType.NDARRAY, [10, 4])],
-                    Path('data/fastrcnn.py'), 'Classification')
+                ColumnDefinition(
+                    'Labels', ParserColumnDataType.NDARRAY, [10]),
+                ColumnDefinition(
+                    'Bbox', ParserColumnDataType.NDARRAY, [10, 4])],
+            Path('data/fastrcnn.py'), 'Classification')
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -287,9 +333,9 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition(
                     'frame', ParserColumnDataType.NDARRAY, [
                         3, 256, 256])], [
-                    ColumnDefinition(
-                        'labels', ParserColumnDataType.NDARRAY, [10])],
-                    Path('data/fastrcnn.py'), 'Classification')
+                ColumnDefinition(
+                    'labels', ParserColumnDataType.NDARRAY, [10])],
+            Path('data/fastrcnn.py'), 'Classification')
         select_stmt = SelectStatement()
         self.assertNotEqual(load_stmt, insert_stmt)
         self.assertNotEqual(insert_stmt, load_stmt)

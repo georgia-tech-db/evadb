@@ -25,5 +25,6 @@ class PlanOprType(IntEnum):
     CREATE_UDF = 6
     LOAD_DATA = 7
     UNION = 8,
-    CREATE_MATERIALIZED_VIEW = 9
+    ORDER_BY = 9
+    CREATE_MATERIALIZED_VIEW = 10
     # add other types

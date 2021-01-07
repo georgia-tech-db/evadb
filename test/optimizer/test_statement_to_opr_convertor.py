@@ -28,12 +28,15 @@ from src.parser.parser import Parser
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData, LogicalUnion)
+                                     LogicalLoadData, LogicalUnion,
+                                     LogicalOrderBy)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.abstract_expression import ExpressionType
+
+from src.parser.types import ParserOrderBySortType
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -256,6 +259,48 @@ statement_to_opr_convertor.column_definition_to_udf_io')
 
             expected_plan = plan
         self.assertEqual(expected_plan, actual_plan)
+        wrong_plan = plans[0]
+        for plan in plans[1:]:
+            wrong_plan.append_child(plan)
+        self.assertNotEqual(wrong_plan, actual_plan)
+
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    def test_visit_select_orderby(self, mock_p, mock_c, mock_d):
+        m = MagicMock()
+        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        stmt = Parser().parse(""" SELECT data, id FROM video \
+            WHERE data > 2 ORDER BY data, id DESC;""")[0]
+
+        converter = StatementToPlanConvertor()
+        actual_plan = converter.visit(stmt)
+        plans = []
+
+        plans.append(LogicalOrderBy(
+            [(TupleValueExpression('data'), ParserOrderBySortType.ASC),
+             (TupleValueExpression('id'), ParserOrderBySortType.DESC)]))
+
+        plans.append(LogicalProject(
+            [TupleValueExpression('data'), TupleValueExpression('id')]))
+
+        plans.append(
+            LogicalFilter(
+                ComparisonExpression(
+                    ExpressionType.COMPARE_GREATER,
+                    TupleValueExpression('data'),
+                    ConstantValueExpression(2))))
+
+        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+
+        expected_plan = None
+        for plan in reversed(plans):
+            if expected_plan:
+                plan.append_child(expected_plan)
+            expected_plan = plan
+
+        self.assertEqual(expected_plan, actual_plan)
+
         wrong_plan = plans[0]
         for plan in plans[1:]:
             wrong_plan.append_child(plan)

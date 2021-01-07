@@ -28,6 +28,7 @@ from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
 from src.executor.create_mat_view_executor import \
     CreateMaterializedViewExecutor
+from src.executor.orderby_executor import OrderByExecutor
 
 
 class PlanExecutor:
@@ -77,6 +78,8 @@ class PlanExecutor:
             executor_node = LoadDataExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.ORDER_BY:
+            executor_node = OrderByExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:
