@@ -31,7 +31,7 @@ from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
-from src.parser.types import ParserColumnDataType
+from src.parser.types import ParserColumnDataType, ParserOrderBySortType
 from src.parser.load_statement import LoadDataStatement
 from src.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
@@ -339,7 +339,10 @@ class ParserVisitor(evaql_parserVisitor):
         target_list = None
         from_clause = None
         where_clause = None
+        orderby_clause = None
+
         # first child will be a SELECT terminal token
+
         for child in ctx.children[1:]:
             try:
                 rule_idx = child.getRuleIndex()
@@ -351,6 +354,9 @@ class ParserVisitor(evaql_parserVisitor):
                     from_clause = clause.get('from', None)
                     where_clause = clause.get('where', None)
 
+                elif rule_idx == evaql_parser.RULE_orderByClause:
+                    orderby_clause = self.visit(ctx.orderByClause())
+
             except BaseException:
                 # stop parsing something bad happened
                 return None
@@ -359,7 +365,9 @@ class ParserVisitor(evaql_parserVisitor):
         if from_clause is not None:
             from_clause = from_clause[0]
 
-        select_stmt = SelectStatement(target_list, from_clause, where_clause)
+        select_stmt = SelectStatement(
+            target_list, from_clause, where_clause,
+            orderby_clause_list=orderby_clause)
 
         return select_stmt
 
@@ -382,6 +390,24 @@ class ParserVisitor(evaql_parserVisitor):
             where_clause = self.visit(ctx.whereExpr)
 
         return {"from": from_table, "where": where_clause}
+
+    def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
+        orderby_clause_data = []
+        # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
+        for expression in ctx.orderByExpression():
+            orderby_clause_data.append(self.visit(expression))
+
+        return orderby_clause_data
+
+    def visitOrderByExpression(
+            self, ctx: evaql_parser.OrderByExpressionContext):
+
+        if ctx.DESC():
+            sort_token = ParserOrderBySortType.DESC
+        else:
+            sort_token = ParserOrderBySortType.ASC
+
+        return self.visitChildren(ctx.expression()), sort_token
 
     ##################################################################
     # LOAD STATEMENT

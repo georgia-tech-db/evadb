@@ -48,6 +48,7 @@ class SelectStatement(AbstractStatement):
         self._target_list = target_list
         self._union_link = None
         self._union_all = False
+        self._orderby_list = kwargs.get("orderby_clause_list", None)
 
     @property
     def union_link(self):
@@ -89,6 +90,15 @@ class SelectStatement(AbstractStatement):
     def from_table(self, table: TableRef):
         self._from_table = table
 
+    @property
+    def orderby_list(self):
+        return self._orderby_list
+
+    @orderby_list.setter
+    def orderby_list(self, orderby_list_new):
+        # orderby_list_new: List[(TupleValueExpression, int)]
+        self._orderby_list = orderby_list_new
+
     def __str__(self) -> str:
         print_str = "SELECT {} FROM {} WHERE {}".format(self._target_list,
                                                         self._from_table,
@@ -99,6 +109,9 @@ class SelectStatement(AbstractStatement):
             else:
                 print_str += "\nUNION ALL\n" + str(self._union_link)
 
+        if self._orderby_list is not None:
+            print_str += " ORDER BY " + str(self._orderby_list)
+
         return print_str
 
     def __eq__(self, other):
@@ -108,4 +121,5 @@ class SelectStatement(AbstractStatement):
                 and self.target_list == other.target_list
                 and self.where_clause == other.where_clause
                 and self.union_link == other.union_link
-                and self.union_all == other.union_all)
+                and self.union_all == other.union_all
+                and self.orderby_list == other.orderby_list)
