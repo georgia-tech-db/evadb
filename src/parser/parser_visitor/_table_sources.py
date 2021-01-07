@@ -18,6 +18,7 @@ from src.parser.select_statement import SelectStatement
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.types import ParserOrderBySortType
+from src.expression.constant_value_expression import ConstantValueExpression
 
 ##################################################################
 # TABLE SOURCES
@@ -61,6 +62,7 @@ class TableSources(evaql_parserVisitor):
         from_clause = None
         where_clause = None
         orderby_clause = None
+        limit_count = None
 
         # first child will be a SELECT terminal token
 
@@ -78,6 +80,9 @@ class TableSources(evaql_parserVisitor):
                 elif rule_idx == evaql_parser.RULE_orderByClause:
                     orderby_clause = self.visit(ctx.orderByClause())
 
+                elif rule_idx == evaql_parser.RULE_limitClause:
+                    limit_count = self.visit(ctx.limitClause())
+
             except BaseException:
                 # stop parsing something bad happened
                 return None
@@ -88,7 +93,8 @@ class TableSources(evaql_parserVisitor):
 
         select_stmt = SelectStatement(
             target_list, from_clause, where_clause,
-            orderby_clause_list=orderby_clause)
+            orderby_clause_list=orderby_clause,
+            limit_count=limit_count)
 
         return select_stmt
 
@@ -129,3 +135,6 @@ class TableSources(evaql_parserVisitor):
             sort_token = ParserOrderBySortType.ASC
 
         return self.visitChildren(ctx.expression()), sort_token
+
+    def visitLimitClause(self, ctx: evaql_parser.LimitClauseContext):
+        return ConstantValueExpression(self.visitChildren(ctx))
