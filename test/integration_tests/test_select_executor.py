@@ -152,3 +152,13 @@ class SelectExecutorTest(unittest.TestCase):
             filters=[i for i in range(NUM_FRAMES)
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_select_and_limit(self):
+        select_query = "SELECT id,data FROM MyVideo LIMIT 5;"
+        actual_batch = perform_query(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches(
+            num_frames=10, batch_size=5))
+
+        self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
+        self.assertEqual(actual_batch, expected_batch[0])
