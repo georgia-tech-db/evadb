@@ -5,7 +5,7 @@ channels:
   - defaults
   - pytorch
 dependencies:
-  - python=3.7
+  - python=3.7.6
   - pip
   - numpy
   - opencv
@@ -16,8 +16,8 @@ dependencies:
   - pytest-cov
   - autopep8
   - autoflake
-  - torchvision
-  - pytorch
+  - pytorch::torchvision
+  - pytorch::pytorch
   - tensorflow
   - tensorboard
   - pillow=6.1
