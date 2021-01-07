@@ -53,7 +53,7 @@ class SchemaUtils(object):
                                               column_is_nullable)
         elif column_type == ColumnType.TEXT:
             petastorm_column = UnischemaField(column_name,
-                                              np.string_,
+                                              np.str_,
                                               (),
                                               ScalarCodec(StringType()),
                                               column_is_nullable)
