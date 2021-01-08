@@ -13,15 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from antlr4 import TerminalNode, ExecutionMode
+from antlr4 import TerminalNode
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
-
-from src.expression.function_expression import FunctionExpression
-
+from src.expression.function_expression import FunctionExpression, \
+    ExecutionMode
 from src.parser.create_udf_statement import CreateUDFStatement
-
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 
