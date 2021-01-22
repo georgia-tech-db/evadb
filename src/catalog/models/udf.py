@@ -30,10 +30,17 @@ class UdfMetadata(BaseModel):
                          back_populates="_udf",
                          cascade='all, delete, delete-orphan')
 
-    def __init__(self, name: str, impl_file_path: str, type: str, cost: int):
+    def __init__(self,
+                 name: str,
+                 impl_file_path: str,
+                 type: str,
+                 cost: int = -1):
         self._name = name
         self._impl_file_path = impl_file_path
         self._type = type
+
+        # cost expects a positive integer, if not specified it is
+        # default to -1 (aka infinite).
         self._cost = cost
 
     @property
