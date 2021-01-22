@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship
 
 from src.catalog.models.base_model import BaseModel
@@ -24,15 +24,18 @@ class UdfMetadata(BaseModel):
     _name = Column('name', String(100), unique=True)
     _impl_file_path = Column('impl_file_path', String(128))
     _type = Column('type', String(100))
+    _cost = Column('cost', Integer)
 
     _cols = relationship('UdfIO',
                          back_populates="_udf",
                          cascade='all, delete, delete-orphan')
+    _metrics = relationship('UdfMetrics', back_populates='_udf')
 
-    def __init__(self, name: str, impl_file_path: str, type: str):
+    def __init__(self, name: str, impl_file_path: str, type: str, cost: int):
         self._name = name
         self._impl_file_path = impl_file_path
         self._type = type
+        self._cost = cost
 
     @property
     def id(self):
@@ -50,13 +53,18 @@ class UdfMetadata(BaseModel):
     def type(self):
         return self._type
 
+    @property
+    def cost(self):
+        return self._cost
+
     def __str__(self):
-        udf_str = 'udf: ({}, {}, {})\n'.format(
-            self.name, self.impl_file_path, self.type)
+        udf_str = 'udf: ({}, {}, {}, {})\n'.format(
+            self.name, self.impl_file_path, self.type, self.cost)
         return udf_str
 
     def __eq__(self, other):
         return self.id == other.id and \
             self.impl_file_path == other.impl_file_path and \
             self.name == other.name and \
-            self.type == other.type
+            self.type == other.type and \
+            self.cost == other.cost
