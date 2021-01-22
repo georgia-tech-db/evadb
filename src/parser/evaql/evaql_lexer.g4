@@ -126,6 +126,7 @@ INPUT:                          'INPUT';
 OUTPUT:                         'OUTPUT';
 TYPE:                           'TYPE';
 IMPL:                           'IMPL';
+COST:                           'COST';
 
 
 // Common function names

@@ -68,6 +68,7 @@ createUdf
       OUTPUT createDefinitions
       TYPE   udfType
       IMPL   udfImpl
+      COST   udfCost
     ;
 
 // details
@@ -81,6 +82,10 @@ udfType
 
 udfImpl
     : stringLiteral
+    ;
+
+udfCost
+    : decimalLiteral
     ;
 
 indexType
