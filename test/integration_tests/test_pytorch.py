@@ -64,3 +64,26 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['label'][idx])
+
+    def test_should_run_pytorch_and_default_udf_cost(self):
+        create_udf_query = """CREATE UDF SSDObjectDetector
+                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  OUTPUT (label TEXT(10))
+                  TYPE  Classification
+                  IMPL  'src/udfs/ssd_object_detector.py';
+        """
+        perform_query(create_udf_query)
+        ssd_udf = CatalogManager().get_udf_by_name("SSDObjectDetector")
+        self.assertEqual(ssd_udf.cost, -1)
+
+    def test_should_run_pytorch_and_user_defined_udf_cost(self):
+        create_udf_query = """CREATE UDF SSDObjectDetector
+                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  OUTPUT (label TEXT(10))
+                  TYPE  Classification
+                  IMPL  'src/udfs/ssd_object_detector.py'
+                  COST  10;
+        """
+        perform_query(create_udf_query)
+        ssd_udf = CatalogManager().get_udf_by_name("SSDObjectDetector")
+        self.assertEqual(ssd_udf.cost, 10)
