@@ -589,6 +589,7 @@ class ParserVisitor(evaql_parserVisitor):
         output_definitions = []
         impl_path = None
         udf_type = None
+        udf_cost = -1
 
         for child in ctx.children:
             try:
@@ -618,6 +619,9 @@ class ParserVisitor(evaql_parserVisitor):
                 elif rule_idx == evaql_parser.RULE_udfImpl:
                     impl_path = self.visit(ctx.udfImpl()).value
 
+                elif rule_idx == evaql_parser.RULE_udfCost:
+                    udf_cost = self.visit(ctx.udfCost())
+
             except BaseException:
                 LoggingManager().log('CREATE UDF Failed', LoggingLevel.ERROR)
                 # stop parsing something bad happened
@@ -628,5 +632,6 @@ class ParserVisitor(evaql_parserVisitor):
             input_definitions,
             output_definitions,
             impl_path,
-            udf_type)
+            udf_type,
+            udf_cost)
         return stmt

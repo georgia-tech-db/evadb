@@ -23,7 +23,8 @@ class UdfService(BaseService):
     def __init__(self):
         super().__init__(UdfMetadata)
 
-    def create_udf(self, name: str, impl_path: str, type: str) -> UdfMetadata:
+    def create_udf(self, name: str, impl_path: str, type: str,
+                   udf_cost: int) -> UdfMetadata:
         """Creates a new udf entry
 
         Arguments:
@@ -34,7 +35,7 @@ class UdfService(BaseService):
         Returns:
             UdfMetadata: Returns the new entry created
         """
-        metadata = self.model(name, impl_path, type)
+        metadata = self.model(name, impl_path, type, udf_cost)
         metadata = metadata.save()
         return metadata
 

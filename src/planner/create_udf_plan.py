@@ -47,7 +47,8 @@ class CreateUDFPlan(AbstractPlan):
                  inputs: List[UdfIO],
                  outputs: List[UdfIO],
                  impl_file_path: Path,
-                 udf_type: str = None):
+                 udf_type: str = None,
+                 udf_cost: int = -1):
         super().__init__(PlanNodeType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
@@ -55,6 +56,7 @@ class CreateUDFPlan(AbstractPlan):
         self._outputs = outputs
         self._impl_path = impl_file_path
         self._udf_type = udf_type
+        self._udf_cost = udf_cost
 
     @property
     def name(self):
@@ -79,3 +81,7 @@ class CreateUDFPlan(AbstractPlan):
     @property
     def udf_type(self):
         return self._udf_type
+    
+    @property
+    def udf_cost(self):
+        return self._udf_cost

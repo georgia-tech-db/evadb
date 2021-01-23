@@ -322,6 +322,7 @@ class LogicalCreateUDF(Operator):
                  outputs: List[UdfIO],
                  impl_path: Path,
                  udf_type: str = None,
+                 udf_cost: int = -1,
                  children=None):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
         self._name = name
@@ -330,6 +331,7 @@ class LogicalCreateUDF(Operator):
         self._outputs = outputs
         self._impl_path = impl_path
         self._udf_type = udf_type
+        self._udf_cost = udf_cost
 
     @property
     def name(self):
@@ -355,6 +357,10 @@ class LogicalCreateUDF(Operator):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def udf_cost(self):
+        return self._udf_cost
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalCreateUDF):
@@ -365,7 +371,8 @@ class LogicalCreateUDF(Operator):
                 and self.inputs == other.inputs
                 and self.outputs == other.outputs
                 and self.udf_type == other.udf_type
-                and self.impl_path == other.impl_path)
+                and self.impl_path == other.impl_path
+                and self.udf_cost == other.udf_cost)
 
 
 class LogicalLoadData(Operator):

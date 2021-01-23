@@ -198,7 +198,8 @@ class StatementToPlanConvertor:
                                           statement.if_not_exists,
                                           annotated_inputs, annotated_outputs,
                                           statement.impl_path,
-                                          statement.udf_type)
+                                          statement.udf_type,
+                                          statement.udf_cost)
         self._plan = create_udf_opr
 
     def visit_load_data(self, statement: LoadDataStatement):

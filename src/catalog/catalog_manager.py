@@ -250,7 +250,8 @@ class CatalogManager(object):
                      array_dimensions=dimensions, is_input=is_input)
 
     def create_udf(self, name: str, impl_file_path: str,
-                   type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
+                   type: str, udf_io_list: List[UdfIO],
+                   udf_cost: int) -> UdfMetadata:
         """Creates an udf metadata object and udf_io objects and persists them
         in database.
 
@@ -266,7 +267,8 @@ class CatalogManager(object):
             The persisted UdfMetadata object with the id field populated.
         """
 
-        metadata = self._udf_service.create_udf(name, impl_file_path, type)
+        metadata = self._udf_service.create_udf(
+            name, impl_file_path, type, udf_cost)
         for udf_io in udf_io_list:
             udf_io.udf_id = metadata.id
         self._udf_io_service.add_udf_io(udf_io_list)

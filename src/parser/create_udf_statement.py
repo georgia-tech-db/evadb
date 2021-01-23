@@ -40,6 +40,9 @@ class CreateUDFStatement(AbstractStatement):
             the path provided should be relative to the UDF dir.
         udf_type: str
             udf type. it ca be object detection, classification etc.
+        udf_cost: int
+            udf cost. an integer number that represents the compute
+            cost of a udf. If not set, it is default to -1 as infinite.
     """
 
     def __init__(self,
@@ -48,7 +51,8 @@ class CreateUDFStatement(AbstractStatement):
                  inputs: List[ColumnDefinition],
                  outputs: List[ColumnDefinition],
                  impl_path: str,
-                 udf_type: str = None):
+                 udf_type: str = None,
+                 udf_cost: int = -1):
         super().__init__(StatementType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
@@ -56,11 +60,13 @@ class CreateUDFStatement(AbstractStatement):
         self._outputs = outputs
         self._impl_path = Path(impl_path)
         self._udf_type = udf_type
+        self._udf_cost = udf_cost
 
     def __str__(self) -> str:
-        print_str = 'CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}'. \
-                    format(self._name, self._inputs, self._outputs,
-                           self._udf_type, self._impl_path.name)
+        print_str = \
+            'CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {} COST {}'. \
+            format(self._name, self._inputs, self._outputs,
+                   self._udf_type, self._impl_path.name, self._udf_cost)
         return print_str
 
     @property
@@ -87,6 +93,10 @@ class CreateUDFStatement(AbstractStatement):
     def udf_type(self):
         return self._udf_type
 
+    @property
+    def udf_cost(self):
+        return self._udf_cost
+
     def __eq__(self, other):
         if not isinstance(other, CreateUDFStatement):
             return False
@@ -95,4 +105,5 @@ class CreateUDFStatement(AbstractStatement):
                 and self.inputs == other.inputs
                 and self.outputs == other.outputs
                 and self.impl_path == other.impl_path
-                and self.udf_type == other.udf_type)
+                and self.udf_type == other.udf_type
+                and self.udf_cost == other.udf_cost)

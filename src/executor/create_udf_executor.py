@@ -40,4 +40,4 @@ class CreateUDFExecutor(AbstractExecutor):
         impl_path = self.node.impl_path.absolute().as_posix()
         CatalogManager().create_udf(
             self.node.name, impl_path, self.node.udf_type,
-            io_list)
+            io_list, self.node.udf_cost)
