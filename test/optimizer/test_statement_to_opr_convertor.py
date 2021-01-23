@@ -146,6 +146,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         stmt.impl_path = 'tmp.py'
         stmt.udf_type = 'classification'
         mock.side_effect = ['inp', 'out']
+        mock.udf_cost = 1
         convertor.visit_create_udf(stmt)
         mock.assert_any_call(stmt.inputs, True)
         mock.assert_any_call(stmt.outputs, False)
@@ -156,7 +157,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             'inp',
             'out',
             stmt.impl_path,
-            stmt.udf_type)
+            stmt.udf_type,
+            stmt.udf_cost)
 
     def test_visit_should_call_create_udf(self):
         stmt = MagicMock(spec=CreateUDFStatement)

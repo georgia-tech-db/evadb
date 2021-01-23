@@ -254,7 +254,7 @@ class ParserVisitorTests(unittest.TestCase):
     @mock.patch('src.parser.parser_visitor.CreateUDFStatement')
     def test_visit_create_udf(self, create_udf_mock, visit_mock):
         ctx = MagicMock()
-        ctx.children = [MagicMock() for i in range(5)]
+        ctx.children = [MagicMock() for i in range(6)]
         ctx.children[0].getRuleIndex.return_value = evaql_parser.RULE_udfName
         ctx.children[1].getRuleIndex.return_value = evaql_parser. \
             RULE_ifNotExists
@@ -262,6 +262,7 @@ class ParserVisitorTests(unittest.TestCase):
             RULE_createDefinitions
         ctx.children[3].getRuleIndex.return_value = evaql_parser.RULE_udfType
         ctx.children[4].getRuleIndex.return_value = evaql_parser.RULE_udfImpl
+        ctx.children[5].getRuleIndex.return_value = evaql_parser.RULE_udfCost
 
         ctx.createDefinitions.return_value.__len__.return_value = 2
 
@@ -269,10 +270,12 @@ class ParserVisitorTests(unittest.TestCase):
         udf_type = 'classification'
         udf_impl = MagicMock()
         udf_impl.value = 'udf_impl'
+        udf_cost = 1
         values = {
             ctx.udfName.return_value: udf_name,
             ctx.udfType.return_value: udf_type,
             ctx.udfImpl.return_value: udf_impl,
+            ctx.udfCost.return_value: udf_cost,
             ctx.createDefinitions.return_value: 'col'}
 
         def side_effect(arg):
@@ -288,11 +291,12 @@ class ParserVisitorTests(unittest.TestCase):
              call(ctx.createDefinitions(0)),
              call(ctx.createDefinitions(1)),
              call(ctx.udfType()),
-             call(ctx.udfImpl())])
+             call(ctx.udfImpl()),
+             call(ctx.udfCost())])
 
         create_udf_mock.assert_called_once()
         create_udf_mock.assert_called_with(
-            udf_name, True, 'col', 'col', 'udf_impl', udf_type)
+            udf_name, True, 'col', 'col', 'udf_impl', udf_type, udf_cost)
 
         self.assertEqual(actual, create_udf_mock.return_value)
 

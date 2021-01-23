@@ -195,7 +195,7 @@ class CatalogManagerTests(unittest.TestCase):
             'udf', 'sample.py', 'classification', udf_io_list)
         udfio_mock.return_value.add_udf_io.assert_called_with(udf_io_list)
         udf_mock.return_value.create_udf.assert_called_with(
-            'udf', 'sample.py', 'classification')
+            'udf', 'sample.py', 'classification', -1)
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
 
     @mock.patch('src.catalog.catalog_manager.init_db')

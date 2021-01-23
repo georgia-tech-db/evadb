@@ -22,6 +22,7 @@ UDF_TYPE = 'classification'
 UDF_IMPL_PATH = 'file1'
 UDF_NAME = 'name'
 UDF_ID = 123
+UDF_DEFAULT_COST = -1
 
 
 class UdfServiceTest(TestCase):
@@ -30,7 +31,8 @@ class UdfServiceTest(TestCase):
     def test_create_udf_should_create_model(self, mocked):
         service = UdfService()
         service.create_udf(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
-        mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
+        mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE,
+                                  UDF_DEFAULT_COST)
         mocked.return_value.save.assert_called_once()
 
     @patch("src.catalog.services.udf_service.UdfMetadata")

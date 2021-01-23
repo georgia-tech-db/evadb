@@ -32,9 +32,10 @@ class CreateUdfExecutorTest(unittest.TestCase):
                      'inputs': ['inp'],
                      'outputs': ['out'],
                      'impl_path': impl_path,
-                     'udf_type': 'classification'})
+                     'udf_type': 'classification',
+                     'udf_cost': 1})
 
         create_udf_executor = CreateUDFExecutor(plan)
         create_udf_executor.exec()
         catalog_instance.create_udf.assert_called_with(
-            'udf', 'test.py', 'classification', ['inp', 'out'])
+            'udf', 'test.py', 'classification', ['inp', 'out'], 1)
