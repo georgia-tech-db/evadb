@@ -24,7 +24,7 @@ class UdfService(BaseService):
         super().__init__(UdfMetadata)
 
     def create_udf(self, name: str, impl_path: str, type: str,
-                   udf_cost: int) -> UdfMetadata:
+                   udf_cost: int = -1) -> UdfMetadata:
         """Creates a new udf entry
 
         Arguments:

@@ -251,7 +251,7 @@ class CatalogManager(object):
 
     def create_udf(self, name: str, impl_file_path: str,
                    type: str, udf_io_list: List[UdfIO],
-                   udf_cost: int) -> UdfMetadata:
+                   udf_cost: int = -1) -> UdfMetadata:
         """Creates an udf metadata object and udf_io objects and persists them
         in database.
 
