@@ -68,13 +68,7 @@ createUdf
       OUTPUT createDefinitions
       TYPE   udfType
       IMPL   udfImpl
-    | CREATE UDF
-      ifNotExists?
-      udfName
-      INPUT  createDefinitions
-      OUTPUT createDefinitions
-      TYPE   udfType
-      COST   udfCost
+      udfCost ?
     ;
 
 // details
@@ -91,7 +85,7 @@ udfImpl
     ;
 
 udfCost
-    : decimalLiteral | 
+    : COST decimalLiteral
     ;
 
 indexType
