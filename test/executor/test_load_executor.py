@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
+from collections import deque
 from mock import patch, MagicMock, call
 from src.executor.load_executor import LoadDataExecutor
 
@@ -33,7 +35,7 @@ class LoadExecutorTest(unittest.TestCase):
                 'file_path': file_path, 'table_metainfo': table_metainfo})
 
         load_executor = LoadDataExecutor(plan)
-        load_executor.exec()
+        deque(load_executor.exec(), maxlen=0)
         cv_mock.assert_called_once_with(file_path)
         create_mock.assert_called_once_with(table_metainfo)
         write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(

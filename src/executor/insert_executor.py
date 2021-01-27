@@ -70,3 +70,5 @@ class InsertExecutor(AbstractExecutor):
                     return
 
         StorageEngine.write_row(metadata, [data_tuple])
+        return
+        yield

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
+from typing import Iterator
 
 from src.executor.abstract_executor import AbstractExecutor
 from src.executor.limit_executor import LimitExecutor
@@ -95,27 +95,9 @@ class PlanExecutor:
         # ToDo
         # clear all the nodes from the execution tree
 
-    def execute_plan(self):
+    def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree
-
         """
-        # TODO: for now this returns list of batch frames. Update to return
-        # a stitched output
         execution_tree = self._build_execution_tree(self._plan)
-
-        output_batches = Batch(pd.DataFrame())
-
-        # ToDo generalize this logic
-        _INSERT_CREATE_LOAD = (
-            PlanNodeType.CREATE,
-            PlanNodeType.INSERT,
-            PlanNodeType.CREATE_UDF,
-            PlanNodeType.LOAD_DATA)
-        if execution_tree.node.node_type in _INSERT_CREATE_LOAD:
-            execution_tree.exec()
-        else:
-            for batch in execution_tree.exec():
-                output_batches += batch
-
+        yield from execution_tree.exec()
         self._clean_execution_tree(execution_tree)
-        return output_batches
