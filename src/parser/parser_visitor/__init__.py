@@ -54,7 +54,3 @@ class ParserVisitor(CommonClauses, CreateTable, Expressions,
     def visitDdlStatement(self, ctx: evaql_parser.DdlStatementContext):
         ddl_statement = self.visitChildren(ctx)
         return ddl_statement
-
-    def visitDmlStatement(self, ctx: evaql_parser.DdlStatementContext):
-        dml_statement = self.visitChildren(ctx)
-        return dml_statement
