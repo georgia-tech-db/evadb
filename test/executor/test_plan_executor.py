@@ -12,10 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
-from pandas._testing import assert_frame_equal
-
 import unittest
+import pandas as pd
+
 from unittest.mock import patch, MagicMock
 
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -116,94 +115,87 @@ class PlanExecutorTest(unittest.TestCase):
     def test_execute_plan_for_seq_scan_plan(
             self, mock_clean, mock_build):
 
-        # SequentialScanExecutor
-        tree = MagicMock(node=SeqScanPlan(None, []))
-        tree.exec.return_value = [
+        batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
-            Batch(pd.DataFrame([3]))]
+            Batch(pd.DataFrame([3]))
+        ]
+
+        # SequentialScanExecutor
+        tree = MagicMock(node=SeqScanPlan(None, []))
+        tree.exec.return_value = batch_list
         mock_build.return_value = tree
 
-        actual = PlanExecutor(None).execute_plan()
+        actual = list(PlanExecutor(None).execute_plan())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         tree.exec.assert_called_once()
-        self.assertEqual(actual, Batch(pd.DataFrame([[1], [2], [3]])))
+        self.assertEqual(actual, batch_list)
 
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_pp_scan_plan(
             self, mock_clean, mock_build):
-        # PPExecutor
-        tree = MagicMock(node=PPScanPlan(None))
-        tree.exec.return_value = [
+
+        batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
-            Batch(pd.DataFrame([3]))]
+            Batch(pd.DataFrame([3]))
+        ]
+        # PPExecutor
+        tree = MagicMock(node=PPScanPlan(None))
+        tree.exec.return_value = batch_list
         mock_build.return_value = tree
 
-        actual = PlanExecutor(None).execute_plan()
+        actual = list(PlanExecutor(None).execute_plan())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         tree.exec.assert_called_once()
-        self.assertEqual(actual, Batch(pd.DataFrame([[1], [2], [3]])))
+        self.assertEqual(actual, batch_list)
 
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    @patch('src.executor.plan_executor.Batch')
     def test_execute_plan_for_create_insert_load_plans(
-            self, mock_batch, mock_clean, mock_build):
-        mock_batch.return_value = []
+            self, mock_clean, mock_build):
 
         # CreateExecutor
         tree = MagicMock(node=CreatePlan(None, [], False))
         mock_build.return_value = tree
-        actual = PlanExecutor(None).execute_plan()
+        actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
-        mock_batch.assert_called_once()
-        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
         # InsertExecutor
-        mock_batch.reset_mock()
         mock_build.reset_mock()
         mock_clean.reset_mock()
         tree = MagicMock(node=InsertPlan(0, [], []))
         mock_build.return_value = tree
-        actual = PlanExecutor(None).execute_plan()
+        actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
-        mock_batch.assert_called_once()
-        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
         # CreateUDFExecutor
-        mock_batch.reset_mock()
         mock_build.reset_mock()
         mock_clean.reset_mock()
         tree = MagicMock(node=CreateUDFPlan(None, False, [], [], None))
         mock_build.return_value = tree
-        actual = PlanExecutor(None).execute_plan()
+        actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
-        mock_batch.assert_called_once()
-        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
         # LoadDataExecutor
-        mock_batch.reset_mock()
         mock_build.reset_mock()
         mock_clean.reset_mock()
         tree = MagicMock(node=LoadDataPlan(None, None))
         mock_build.return_value = tree
-        actual = PlanExecutor(None).execute_plan()
+        actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
-        mock_batch.assert_called_once()
-        assert_frame_equal(mock_batch.call_args[0][0], pd.DataFrame())
         mock_build.assert_called_once_with(None)
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])

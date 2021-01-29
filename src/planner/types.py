@@ -27,4 +27,5 @@ class PlanOprType(IntEnum):
     UNION = 8,
     ORDER_BY = 9
     CREATE_MATERIALIZED_VIEW = 10
+    LIMIT = 11
     # add other types

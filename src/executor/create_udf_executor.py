@@ -41,3 +41,4 @@ class CreateUDFExecutor(AbstractExecutor):
         CatalogManager().create_udf(
             self.node.name, impl_path, self.node.udf_type,
             io_list)
+        yield from []

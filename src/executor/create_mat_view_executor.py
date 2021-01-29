@@ -72,3 +72,4 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
         # Populate the view
         for batch in child.exec():
             StorageEngine.write(view_metainfo, batch)
+        yield from []
