@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
+from typing import Iterator
 
 from src.executor.abstract_executor import AbstractExecutor
+from src.executor.limit_executor import LimitExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
@@ -80,6 +81,8 @@ class PlanExecutor:
             executor_node = CreateMaterializedViewExecutor(node=plan)
         elif plan_node_type == PlanNodeType.ORDER_BY:
             executor_node = OrderByExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.LIMIT:
+            executor_node = LimitExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:
@@ -96,28 +99,9 @@ class PlanExecutor:
         # ToDo
         # clear all the nodes from the execution tree
 
-    def execute_plan(self):
+    def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree
-
         """
-        # TODO: for now this returns list of batch frames. Update to return
-        # a stitched output
         execution_tree = self._build_execution_tree(self._plan)
-
-        output_batches = Batch(pd.DataFrame())
-
-        # ToDo generalize this logic
-        _INSERT_CREATE_LOAD = (
-            PlanOprType.CREATE,
-            PlanOprType.INSERT,
-            PlanOprType.CREATE_UDF,
-            PlanOprType.LOAD_DATA,
-            PlanOprType.CREATE_MATERIALIZED_VIEW)
-        if execution_tree.node.opr_type in _INSERT_CREATE_LOAD:
-            execution_tree.exec()
-        else:
-            for batch in execution_tree.exec():
-                output_batches += batch
-
+        yield from execution_tree.exec()
         self._clean_execution_tree(execution_tree)
-        return output_batches

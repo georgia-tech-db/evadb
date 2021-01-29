@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, auto
+from enum import IntEnum, unique, auto
 from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
+from src.expression.constant_value_expression import ConstantValueExpression
 from src.parser.table_ref import TableRef
 from src.parser.create_statement import ColumnDefinition
 from src.expression.abstract_expression import AbstractExpression
@@ -41,6 +42,7 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALDELIMITER = auto()
+    LOGICALLIMIT = auto()
 
 
 class Operator:
@@ -226,6 +228,24 @@ class LogicalOrderBy(Operator):
             return False
         return (is_subtree_equal
                 and self.orderby_list == other.orderby_list)
+
+
+class LogicalLimit(Operator):
+    def __init__(self, limit_count: ConstantValueExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALLIMIT, children)
+        self._limit_count = limit_count
+
+    @property
+    def limit_count(self):
+        return self._limit_count
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalLimit):
+            return False
+        return (is_subtree_equal
+                and self.limit_count == other.limit_count)
 
 
 class LogicalUnion(Operator):

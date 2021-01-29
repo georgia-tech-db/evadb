@@ -18,8 +18,10 @@ import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from test.util import create_sample_video, create_dummy_batches, perform_query
-from test.util import DummyObjectDetector
+from src.server.command_handler import execute_query_fetch_all
+
+from test.util import create_sample_video, create_dummy_batches, \
+    DummyObjectDetector
 
 NUM_FRAMES = 10
 
@@ -36,7 +38,7 @@ class UDFExecutorTest(unittest.TestCase):
     # integration test
     def test_should_load_and_select_using_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
+        execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
@@ -44,10 +46,10 @@ class UDFExecutorTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        perform_query(create_udf_query)
+        execute_query_fetch_all(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         labels = DummyObjectDetector().labels
         expected = [{'id': i, 'label': labels[1 + i % 2]}
@@ -57,7 +59,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     def test_should_load_and_select_using_udf_video(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
+        execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
@@ -65,11 +67,11 @@ class UDFExecutorTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        perform_query(create_udf_query)
+        execute_query_fetch_all(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = 'person';"
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected = [{'id': i * 2, 'label': 'person'}
                     for i in range(NUM_FRAMES // 2)]
@@ -83,7 +85,7 @@ class UDFExecutorTest(unittest.TestCase):
             )
             WHERE label = 'person';
             """
-        actual_batch = perform_query(nested_select_query)
+        actual_batch = execute_query_fetch_all(nested_select_query)
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
