@@ -16,8 +16,9 @@ dependencies:
   - pytest-cov
   - autopep8
   - autoflake
-  - pytorch::torchvision
-  - pytorch::pytorch
+  - pytorch::pytorch=1.6.0
+  - pytorch::torchvision=0.7.0
+  - cudatoolkit=10.2
   - tensorflow
   - tensorboard
   - pillow=6.1
