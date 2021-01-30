@@ -18,7 +18,8 @@ import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from test.util import create_sample_video, create_dummy_batches, perform_query
+from src.server.command_handler import execute_query_fetch_all
+from test.util import create_sample_video, create_dummy_batches
 from test.util import DummyObjectDetector
 
 NUM_FRAMES = 10
@@ -38,7 +39,7 @@ class MaterializedViewTest(unittest.TestCase):
 
     def test_should_mat_view_with_dummy(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
+        execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
@@ -46,15 +47,15 @@ class MaterializedViewTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        perform_query(create_udf_query)
+        execute_query_fetch_all(create_udf_query)
 
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
         """
-        perform_query(materialized_query)
+        execute_query_fetch_all(materialized_query)
 
         select_query = 'SELECT id, label FROM dummy_view;'
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
@@ -68,7 +69,7 @@ class MaterializedViewTest(unittest.TestCase):
     def test_should_mat_view_with_fastrcnn(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                    INTO MyVideo;"""
-        perform_query(query)
+        execute_query_fetch_all(query)
 
         create_udf_query = """CREATE UDF FastRCNNObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
@@ -76,15 +77,15 @@ class MaterializedViewTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'src/udfs/fastrcnn_object_detector.py';
         """
-        perform_query(create_udf_query)
+        execute_query_fetch_all(create_udf_query)
 
         select_query = """SELECT id, FastRCNNObjectDetector(data).label FROM MyVideo WHERE id < 5;"""
         query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, label) AS {}' \
             .format(select_query)
-        perform_query(query)
+        execute_query_fetch_all(query)
 
         select_view_query = 'SELECT id, label FROM uadtrac_fastRCNN'
-        actual_batch = perform_query(select_view_query)
+        actual_batch = execute_query_fetch_all(select_view_query)
         actual_batch.sort()
         expected_batch = Batch(
             frames=pd.DataFrame([{'id': i, 'label': 'person'} for i in range(5)])

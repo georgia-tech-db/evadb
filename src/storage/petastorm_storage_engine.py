@@ -40,7 +40,6 @@ class PetastormStorageEngine(AbstractStorageEngine):
         """
         Generate a spark/petastorm url given a table
         """
-        print(Path(table.file_url).resolve().as_uri())
         return Path(table.file_url).resolve().as_uri()
 
     def create(self, table: DataFrameMetadata):
