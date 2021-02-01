@@ -28,10 +28,10 @@ class UdfMetadata(BaseModel):
     _cols = relationship('UdfIO',
                          back_populates="_udf",
                          cascade='all, delete, delete-orphan')
-    
+
     _metrics = relationship('UdfMetrics',
-                         back_populates="_udf",
-                         cascade='all, delete, delete-orphan')
+                            back_populates="_udf",
+                            cascade='all, delete, delete-orphan')
 
     def __init__(self, name: str, impl_file_path: str, type: str):
         self._name = name

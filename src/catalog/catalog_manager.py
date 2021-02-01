@@ -21,6 +21,7 @@ from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.catalog.models.udf import UdfMetadata
 from src.catalog.models.udf_io import UdfIO
+from src.catalog.models.udf_metrics import UdfMetrics
 from src.catalog.services.df_column_service import DatasetColumnService
 from src.catalog.services.df_service import DatasetService
 from src.catalog.services.udf_service import UdfService
