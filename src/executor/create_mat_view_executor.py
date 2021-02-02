@@ -64,10 +64,23 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
             col_metainfo_list.append(catalog.create_column_metadata(
                 col_def.name, col_obj.type, col_obj.array_dimensions))
 
-        view_metainfo = CatalogManager().create_metadata(table_name,
-                                                         file_url,
-                                                         col_metainfo_list)
-        StorageEngine.create(view_metainfo)
+        try:
+            view_metainfo = CatalogManager().create_metadata(table_name,
+                                                             file_url,
+                                                             col_metainfo_list)
+        except:
+            # TODO check the type of exception
+            if self.node.if_not_exists == False:
+                raise
+            else:
+                view_metainfo = CatalogManager() \
+                        .get_dataset_metadata(None, table_name)
+                LoggingManager().log('Table: %s already exsits.'
+                                     'Writing to the exsiting table.'
+                                     % table_name, LoggingLevel.WARNING)
+
+        if self.node.if_not_exists == False:
+            StorageEngine.create(view_metainfo)
 
         # Populate the view
         for batch in child.exec():
