@@ -18,22 +18,21 @@ class UdfMetrics(BaseModel):
     _udf = relationship('UdfMetadata', back_populates='_metrics')
 
     __table_args__ = (
-        UniqueConstraint('name', 'dataset', 'category'), {}
+        UniqueConstraint('name'), {}
     )
 
     def __init__(self,
-                 name, str,
                  dataset: str,
                  category: str,
                  precision: float,
                  recall: float,
                  udf_id: int = None):
-        self._name = name
+        self._name = dataset + ': ' + category
         self._dataset = dataset
         self._category = category
         self._precision = precision
         self._recall = recall
-        self._udf_io = udf_id
+        self._udf_id = udf_id
 
     @property
     def id(self):
