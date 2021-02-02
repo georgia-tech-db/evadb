@@ -25,7 +25,7 @@ emptyStatement
     ;
 
 ddlStatement
-    : createDatabase | createTable | createIndex | createUdf
+    : createDatabase | createTable | createIndex | createUdf | createUdfMetrics
     | dropDatabase | dropTable | dropIndex
     ;
 
@@ -70,6 +70,16 @@ createUdf
       IMPL   udfImpl
     ;
 
+// Create UDF Accuracy Metrics
+createUdfMetrics
+    : CREATE UDFMETRICS
+      udfName
+      DATASET    udfDataset
+      CATEGORY   udfCategory
+      PRECISION  udfPrecision
+      RECALL     udfRecall
+    ;
+
 // details
 udfName
     : uid
@@ -81,6 +91,22 @@ udfType
 
 udfImpl
     : stringLiteral
+    ;
+
+udfDataset
+    : stringLiteral
+    ;
+
+udfCategory
+    : stringLiteral
+    ;
+
+udfPrecision
+    : realLiteral
+    ;
+
+udfRecall
+    : realLiteral
     ;
 
 indexType
@@ -347,6 +373,10 @@ dottedId
 
 decimalLiteral
     : DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL
+    ;
+
+realLiteral
+    : REAL_LITERAL
     ;
 
 stringLiteral

@@ -33,6 +33,7 @@ from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType, ParserOrderBySortType
 from src.parser.load_statement import LoadDataStatement
+from src.parser.create_udf_metrics_statement import CreateUDFMetricsStatement
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
@@ -289,6 +290,9 @@ class ParserVisitor(evaql_parserVisitor):
             decimal = int(str(ctx.ZERO_DECIMAL()))
 
         return decimal
+
+    def visitRealLiteral(self, ctx: evaql_parser.RealLiteralContext):
+        return float(str(ctx.REAL_LITERAL()))
 
     ##################################################################
     # SELECT STATEMENT
@@ -629,4 +633,42 @@ class ParserVisitor(evaql_parserVisitor):
             output_definitions,
             impl_path,
             udf_type)
+        return stmt
+
+    # Create UDF Metrics
+    def visitCreateUdfMetrics(self, ctx: evaql_parser.CreateUdfMetricsContext):
+        udf_name = None
+        dataset = None
+        category = None
+        precision = None
+        recall = None
+
+        for child in ctx.children:
+            try:
+                if isinstance(child, TerminalNode):
+                    continue
+                rule_idx = child.getRuleIndex()
+
+                if rule_idx == evaql_parser.RULE_udfName:
+                    udf_name = self.visit(ctx.udfName())
+
+                elif rule_idx == evaql_parser.RULE_udfDataset:
+                    dataset = self.visit(ctx.udfDataset())
+
+                elif rule_idx == evaql_parser.RULE_udfCategory:
+                    category = self.visit(ctx.udfCategory())
+
+                elif rule_idx == evaql_parser.RULE_udfPrecision:
+                    precision = self.visit(ctx.udfPrecision())
+
+                elif rule_idx == evaql_parser.RULE_udfRecall:
+                    recall = self.visit(ctx.udfRecall())
+
+            except BaseException:
+                LoggingManager().log('CREATE UDFMETRICS Failed',
+                                     LoggingLevel.ERROR)
+                # stop parsing something bad happened
+                return None
+        stmt = CreateUDFMetricsStatement(
+            udf_name, dataset, category, precision, recall)
         return stmt

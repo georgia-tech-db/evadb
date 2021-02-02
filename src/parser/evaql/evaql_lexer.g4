@@ -9,8 +9,8 @@ SPACE:                               [ \t\r\n]+    -> channel(HIDDEN);
 SPEC_EVAQL_COMMENT:                  '/*!' .+? '*/' -> channel(EVAQLCOMMENT);
 COMMENT_INPUT:                       '/*' .*? '*/' -> channel(HIDDEN);
 LINE_COMMENT:                        (
-                                       ('-- ' | '#') ~[\r\n]* ('\r'? '\n' | EOF) 
-                                       | '--' ('\r'? '\n' | EOF) 
+                                       ('-- ' | '#') ~[\r\n]* ('\r'? '\n' | EOF)
+                                       | '--' ('\r'? '\n' | EOF)
                                      ) -> channel(HIDDEN);
 
 // Keywords
@@ -122,11 +122,15 @@ VALUE:                               'VALUE';
 
 // UDF
 UDF:						                'UDF';
+UDFMETRICS:                     'UDFMETRICS';
 INPUT:                          'INPUT';
 OUTPUT:                         'OUTPUT';
 TYPE:                           'TYPE';
 IMPL:                           'IMPL';
-
+DATASET:                        'DATASET';
+CATEGORY:                       'CATEGORY';
+PRECISION:                      'PRECISION';
+RECALL:                         'RECALL';
 
 // Common function names
 
@@ -215,23 +219,23 @@ ID:                                  ID_LITERAL;
 // DOUBLE_QUOTE_ID:                  '"' ~'"'+ '"';
 REVERSE_QUOTE_ID:                    '`' ~'`'+ '`';
 STRING_USER_NAME:                    (
-                                       SQUOTA_STRING | DQUOTA_STRING 
+                                       SQUOTA_STRING | DQUOTA_STRING
                                        | BQUOTA_STRING | ID_LITERAL
-                                     ) '@' 
+                                     ) '@'
                                      (
-                                       SQUOTA_STRING | DQUOTA_STRING 
+                                       SQUOTA_STRING | DQUOTA_STRING
                                        | BQUOTA_STRING | ID_LITERAL
                                      );
 LOCAL_ID:                            '@'
                                 (
-                                  [A-Z0-9._$]+ 
+                                  [A-Z0-9._$]+
                                   | SQUOTA_STRING
                                   | DQUOTA_STRING
                                   | BQUOTA_STRING
                                 );
-GLOBAL_ID:                           '@' '@' 
+GLOBAL_ID:                           '@' '@'
                                 (
-                                  [A-Z0-9._$]+ 
+                                  [A-Z0-9._$]+
                                   | BQUOTA_STRING
                                 );
 
