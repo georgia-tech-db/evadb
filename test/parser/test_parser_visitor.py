@@ -296,9 +296,60 @@ class ParserVisitorTests(unittest.TestCase):
 
         self.assertEqual(actual, create_udf_mock.return_value)
 
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch('src.parser.parser_visitor.CreateUDFMetricsStatement')
+    def test_visit_create_udf_metrics(self,
+                                      create_udf_metrics_mock,
+                                      visit_mock):
+        ctx = MagicMock()
+        ctx.children = [MagicMock() for i in range(5)]
+        ctx.children[0].getRuleIndex.return_value = evaql_parser.RULE_udfName
+        ctx.children[1].getRuleIndex.return_value = evaql_parser. \
+            RULE_udfDataset
+        ctx.children[2].getRuleIndex.return_value = evaql_parser. \
+            RULE_udfCategory
+        ctx.children[3].getRuleIndex.return_value = evaql_parser. \
+            RULE_udfPrecision
+        ctx.children[4].getRuleIndex.return_value = evaql_parser. \
+            RULE_udfRecall
+
+        udf_name = 'name'
+        dataset = 'dataset'
+        category = 'category'
+        precision = 0.1
+        recall = 0.2
+        values = {
+            ctx.udfName.return_value: udf_name,
+            ctx.udfDataset.return_value: dataset,
+            ctx.udfCategory.return_value: category,
+            ctx.udfPrecision.return_value: precision,
+            ctx.udfRecall.return_value: recall}
+
+        def side_effect(arg):
+            return values[arg]
+
+        visit_mock.side_effect = side_effect
+
+        visitor = ParserVisitor()
+        actual = visitor.visitCreateUdfMetrics(ctx)
+
+        visit_mock.assert_has_calls(
+            [call(ctx.udfName()),
+             call(ctx.udfDataset()),
+             call(ctx.udfCategory()),
+             call(ctx.udfPrecision()),
+             call(ctx.udfRecall())])
+
+        create_udf_metrics_mock.assert_called_once()
+        create_udf_metrics_mock.assert_called_with(
+            udf_name, dataset, category, precision, recall)
+
+        self.assertEqual(actual, create_udf_metrics_mock.return_value)
+
     ##################################################################
     # LOAD DATA Statement
     ##################################################################
+
     @mock.patch.object(ParserVisitor, 'visit')
     @mock.patch('src.parser.parser_visitor.LoadDataStatement')
     def test_visit_load_statement(self, mock_load, mock_visit):
