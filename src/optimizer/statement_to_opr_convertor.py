@@ -18,13 +18,15 @@ from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit,
+                                     LogicalCreateUDFMetrics)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.create_udf_metrics_statement import CreateUDFMetricsStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
@@ -201,6 +203,14 @@ class StatementToPlanConvertor:
                                           statement.udf_type)
         self._plan = create_udf_opr
 
+    def visit_create_udf_metrics(self, statement: CreateUDFMetricsStatement):
+        create_udf_metrics_opr = LogicalCreateUDFMetrics(statement.udf_name,
+                                                         statement.dataset,
+                                                         statement.category,
+                                                         statement.precision,
+                                                         statement.recall)
+        self._plan = create_udf_metrics_opr
+
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement
         If the input table already exists we return its
@@ -236,6 +246,8 @@ class StatementToPlanConvertor:
             self.visit_create_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
+        elif isinstance(statement, CreateUDFMetricsStatement):
+            self.visit_create_udf_metrics(statement)
         return self._plan
 
     @property

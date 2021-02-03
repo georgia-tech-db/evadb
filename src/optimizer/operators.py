@@ -40,6 +40,7 @@ class OperatorType(IntEnum):
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
+    LOGICALCREATEUDFMETRICS = auto()
 
 
 class Operator:
@@ -366,6 +367,48 @@ class LogicalCreateUDF(Operator):
                 and self.outputs == other.outputs
                 and self.udf_type == other.udf_type
                 and self.impl_path == other.impl_path)
+
+
+class LogicalCreateUDFMetrics(Operator):
+    def __init__(self, udf_name: str,
+                 dataset: str, category: str,
+                 precision: float, recall: float):
+        self._udf_name = udf_name
+        self._dataset = dataset
+        self._category = category
+        self._precision = precision
+        self._recall = recall
+
+    @property
+    def udf_name(self):
+        return self._udf_name
+
+    @property
+    def dataset(self):
+        return self._dataset
+
+    @property
+    def category(self):
+        return self._category
+
+    @property
+    def precision(self):
+        return self._precision
+
+    @property
+    def recall(self):
+        return self._recall
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateUDFMetrics):
+            return False
+        return (is_subtree_equal and
+                self.udf_name == other.udf_name and
+                self.dataset == other.dataset and
+                self.category == other.category and
+                self.precision == other.precision and
+                self.recall == other.recall)
 
 
 class LogicalLoadData(Operator):

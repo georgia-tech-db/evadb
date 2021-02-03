@@ -23,6 +23,7 @@ from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.create_udf_metrics_statement import CreateUDFMetricsStatement
 from src.parser.parser import Parser
 
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
@@ -158,11 +159,39 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             stmt.impl_path,
             stmt.udf_type)
 
+    @patch('src.optimizer.statement_to_opr_convertor.LogicalCreateUDFMetrics')
+    def test_visit_create_udf_metrics(self, l_create_udf_metrics_mock):
+        convertor = StatementToPlanConvertor()
+        stmt = MagicMock()
+        stmt.udf_name = 'name'
+        stmt.dataset = 'dataset'
+        stmt.category = 'category'
+        stmt.precision = 0.1
+        stmt.recall = 0.2
+        convertor.visit_create_udf_metrics(stmt)
+        l_create_udf_metrics_mock.assert_called_once()
+        l_create_udf_metrics_mock.assert_called_with(
+            stmt.udf_name,
+            stmt.dataset,
+            stmt.category,
+            stmt.precision,
+            stmt.recall)
+
     def test_visit_should_call_create_udf(self):
         stmt = MagicMock(spec=CreateUDFStatement)
         convertor = StatementToPlanConvertor()
         mock = MagicMock()
         convertor.visit_create_udf = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_create_udf_metrics(self):
+        stmt = MagicMock(spec=CreateUDFMetricsStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_create_udf_metrics = mock
 
         convertor.visit(stmt)
         mock.assert_called_once()
