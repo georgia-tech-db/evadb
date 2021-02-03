@@ -23,6 +23,7 @@ from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.union_plan import UnionPlan
+from src.planner.create_udf_metrics_plan import CreateUDFMetricsPlan
 from src.planner.types import PlanNodeType
 
 
@@ -75,6 +76,25 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.outputs, [udfIO])
         self.assertEqual(node.impl_path, impl_path)
         self.assertEqual(node.udf_type, ty)
+
+    def test_create_udf_metrics_plan(self):
+        udf_name = 'name'
+        dataset = 'dataset'
+        category = 'category'
+        precision = 0.1
+        recall = 0.2
+        node = CreateUDFMetricsPlan(
+            udf_name,
+            dataset,
+            category,
+            precision,
+            recall)
+        self.assertEqual(node.node_type, PlanNodeType.CREATE_UDF_METRICS)
+        self.assertEqual(node.udf_name, udf_name)
+        self.assertEqual(node.dataset, dataset)
+        self.assertEqual(node.category, category)
+        self.assertEqual(node.precision, precision)
+        self.assertEqual(node.recall, recall)
 
     def test_load_data_plan(self):
         table_metainfo = 'meta_info'

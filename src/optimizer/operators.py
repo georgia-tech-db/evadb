@@ -370,9 +370,14 @@ class LogicalCreateUDF(Operator):
 
 
 class LogicalCreateUDFMetrics(Operator):
-    def __init__(self, udf_name: str,
-                 dataset: str, category: str,
-                 precision: float, recall: float):
+    def __init__(self,
+                 udf_name: str,
+                 dataset: str,
+                 category: str,
+                 precision: float,
+                 recall: float,
+                 children=None):
+        super().__init__(OperatorType.LOGICALCREATEUDFMETRICS, children)
         self._udf_name = udf_name
         self._dataset = dataset
         self._category = category

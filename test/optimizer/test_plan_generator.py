@@ -18,7 +18,8 @@ from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
     LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, \
-    LogicalLoadData, LogicalUnion, LogicalOrderBy, LogicalLimit
+    LogicalLoadData, LogicalUnion, LogicalOrderBy, LogicalLimit, \
+    LogicalCreateUDFMetrics
 from src.optimizer.plan_generator import PlanGenerator
 
 
@@ -102,6 +103,18 @@ class PlanGeneratorTest(unittest.TestCase):
         l_create_udf = LogicalCreateUDF('udf', True, [], [], 'tmp')
         PlanGenerator().build(l_create_udf)
         mock_instance.build.assert_called_with(l_create_udf)
+
+    @patch('src.optimizer.plan_generator.CreateUDFMetricsGenerator')
+    def test_should_call_create_udf_generator_for_logical_create_udf_metrics(
+            self, mock):
+        mock_instance = mock.return_value
+        l_create_udf_metrics = LogicalCreateUDFMetrics('name',
+                                                       'dataset',
+                                                       'category',
+                                                       0.1,
+                                                       0.2)
+        PlanGenerator().build(l_create_udf_metrics)
+        mock_instance.build.assert_called_with(l_create_udf_metrics)
 
     @patch('src.optimizer.plan_generator.LoadDataGenerator')
     def test_should_Call_load_data_generator(self, mock):
