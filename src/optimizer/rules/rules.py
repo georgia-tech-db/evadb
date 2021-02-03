@@ -129,7 +129,7 @@ class Rule(ABC):
             bool: If rule pattern matches, return true, else false
         """
         is_equal = True
-        grp = context.memo.get_group(grp_id)
+        grp = context.memo.groups[grp_id]
         grp_expr = grp.get_logical_expr()
         if grp_expr is None:
             return False

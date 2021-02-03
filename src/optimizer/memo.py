@@ -19,71 +19,107 @@ from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class Memo:
+    """
+    For now, we assume every group has only one logic expression.
+    """
+
     def __init__(self):
         self._group_exprs = dict()
         self._groups = []
 
-    def _create_new_group(self, expr: GroupExpression):
+    @property
+    def groups(self):
+        return self._groups
+
+    @property
+    def group_exprs(self):
+        return self._group_exprs
+
+    def get_group_id(self, expr: GroupExpression) -> int:
+        """
+        Find whether expr is in any exising group.
+        """
+        if expr in self.group_exprs:
+            return self.group_exprs[expr]
+        else:
+            return INVALID_GROUP_ID
+
+    """
+    For the consistency of the memo, all modification should use the
+    following functions.
+    """
+
+    def _append_expr(self, expr: GroupExpression):
+        """
+        Append the expr into a new group, and update the group_id of expr
+        """
         expr.group_id = len(self._groups)
         self._groups.append(Group(expr.group_id))
-        self._groups[expr.group_id].add_expr(expr)
-
-    def get_group(self, group_id: int):
-        return self._groups[group_id]
-
-    def replace_group_expr(self, group_id: int, after: GroupExpression):
-        """
-            Note: We assume that there is only one logical_expr in this group.
-            This should be used in rewrite rules.
-        """
-        grp = self._groups[group_id]
-        grp_expr = grp.logical_exprs[0]
-        after.group_id = group_id
-        # after.mark_rule_explored(grp_expr.rules_explored)
-        del self._group_exprs[grp_expr]
-        grp.clear_grp_exprs()
-        grp.add_expr(after)
-        self._group_exprs[after] = after.group_id
-
-    def switch_group_id(self, before: GroupExpression, after: GroupExpression):
-        """
-            This function swtiches the group id between two group expressions.
-        """
-        temp = after.group_id
-        after.group_id = before.group_id
-        before.group_id = temp
-
-        # Update children if one is the parent of another
-        before.children = list([after.group_id if id == before.group_id
-                                else id for id in before.children])
-        after.children = list([before.group_id if id == after.group_id
-                               else id for id in after.children])
-        # Uncertain correctness
-        grp = self._groups[after.group_id]
-        grp.clear_grp_exprs()
-        grp.add_expr(after)
-        grp = self._groups[before.group_id]
-        grp.clear_grp_exprs()
-        grp.add_expr(before)
-
-        self._group_exprs[after] = after.group_id
-        self._group_exprs[before] = before.group_id
-
-    def add_group_expr(self, expr: GroupExpression):
-        # existing expression
-        if expr in self._group_exprs:
-            expr.group_id = self._group_exprs[expr]
-            return
-
-        # new expression
-        # existing group
-        if expr.group_id != INVALID_GROUP_ID:
-            if expr.group_id < len(self._groups):
-                self._groups[expr.group_id].add_expr(expr)
-                self._group_exprs[expr] = expr.group_id
-            else:
-                LoggingManager().log('Group Id out of bound', LoggingLevel.ERROR)
-            return
-        # create a new group
-        self._create_new_group(expr)
+        self.groups[expr.group_id].add_expr(expr)
         self._group_exprs[expr] = expr.group_id
+
+    def _insert_expr(self, expr: GroupExpression, group_id: int):
+        """
+        Insert a group expressoin into a particular group, update the
+        group_id of expr
+        """
+        assert expr.group_id == INVALID_GROUP_ID, \
+            'Expression: %s is already in the memo' % expr
+        assert group_id < len(self.groups), 'Group Id out of the bound'
+
+        group = self.groups[group_id]
+        assert len(group.logical_exprs) == 0, \
+            'Expression exists in the targeted inserted group. Details: %s' \
+            % group.logical_exprs
+
+        self.groups[group_id].add_expr(expr)
+        self._group_exprs[expr] = group_id
+        expr.group_id = group_id
+
+    def _remove_expr(self, expr: GroupExpression):
+        """
+        Remove the expr from the memo, and update the group_id of expr
+        to be INVALID_GROUP_ID.
+        """
+        group_id = self.get_group_id(expr)
+        assert group_id == expr.group_id, \
+            'Inconsistent memo found when removing expression: %s' % expr
+
+        if group_id == INVALID_GROUP_ID:
+            return
+
+        del self._group_exprs[expr]
+        self.groups[group_id].clear_grp_exprs()
+        expr.group_id = INVALID_GROUP_ID
+
+    def add_group_expr(self, expr: GroupExpression) -> GroupExpression:
+        """
+        Add an expression into the memo.
+        If expr.group_id is not set, we will try reuse the exsiting one
+        (i.e., for rule_explored).
+        Otherwise, the expr will be considered as a new expression and
+        inserted into targeted group.
+        """
+        # If not forcing a group id
+        if expr.group_id == INVALID_GROUP_ID:
+            group_id = self.get_group_id(expr)
+            if group_id != INVALID_GROUP_ID:
+                # we found exsiting one
+                return self.groups[group_id].logical_exprs[0]
+            else:
+                # we append the expr as new one
+                self._append_expr(expr)
+                return expr
+        # If forcing a group id
+        else:
+            group_id = expr.group_id
+            assert len(self.groups[group_id].logical_exprs) < 2, \
+                'Unexpected number of expressions: %s' \
+                % self.groups[group_id].logical_exprs
+            if len(self.groups[group_id].logical_exprs) == 1:
+                old_expr = self.groups[group_id].logical_exprs[0]
+                self._remove_expr(old_expr)
+
+            expr.group_id = INVALID_GROUP_ID
+            self._insert_expr(expr, group_id)
+            return expr

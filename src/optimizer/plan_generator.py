@@ -45,7 +45,7 @@ class PlanGenerator:
 
     def build_optimal_physical_plan(self, root_grp_id: int, optimizer_context: OptimizerContext):
         physical_plan = None
-        root_grp = optimizer_context.memo.get_group(root_grp_id)
+        root_grp = optimizer_context.memo.groups[root_grp_id]
         best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
 
         physical_plan = best_grp_expr.opr
@@ -59,7 +59,10 @@ class PlanGenerator:
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
         memo = optimizer_context.memo
-        grp_expr = optimizer_context.xform_opr_to_group_expr(logical_plan, False)
+        grp_expr = optimizer_context.xform_opr_to_group_expr(
+            opr = logical_plan,
+            copy_opr = False
+        )
         root_grp_id = grp_expr.group_id
         """
         for g in optimizer_context.memo._groups:
@@ -70,7 +73,7 @@ class PlanGenerator:
         optimizer_context.task_stack.push(TopDownRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
         # Update the group expression
-        grp_expr = memo.get_group(root_grp_id).logical_exprs[0]
+        grp_expr = memo.groups[root_grp_id].logical_exprs[0]
         # BottomUp Rewrite
         optimizer_context.task_stack.push(BottomUpRewrite(grp_expr, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)

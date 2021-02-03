@@ -30,7 +30,7 @@ class Binder:
 
     @staticmethod
     def _grp_binder(id: int, pattern: Pattern, memo: Memo):
-        grp = memo.get_group(id)
+        grp = memo.groups[id]
         grp_exprs = grp.logical_exprs
 
         for expr in grp.logical_exprs:
