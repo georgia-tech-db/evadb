@@ -26,6 +26,7 @@ from src.catalog.services.df_column_service import DatasetColumnService
 from src.catalog.services.df_service import DatasetService
 from src.catalog.services.udf_service import UdfService
 from src.catalog.services.udf_io_service import UdfIOService
+from src.catalog.services.udf_metrics_service import UdfMetricsService
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -46,6 +47,7 @@ class CatalogManager(object):
         self._column_service = DatasetColumnService()
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
+        self._udf_metrics_service = UdfMetricsService()
 
     def reset(self):
         """
@@ -272,6 +274,19 @@ class CatalogManager(object):
             udf_io.udf_id = metadata.id
         self._udf_io_service.add_udf_io(udf_io_list)
         return metadata
+
+    def create_udf_metrics(self,
+                           udf_name: str,
+                           dataset: str,
+                           category: str,
+                           precision: float,
+                           recall: float):
+        udf = self.get_udf_by_name(udf_name)
+        return self._udf_metrics_service.create_udf_metrics(dataset,
+                                                            category,
+                                                            precision,
+                                                            recall,
+                                                            udf.id)
 
     def get_udf_by_name(self, name: str) -> UdfMetadata:
         """
