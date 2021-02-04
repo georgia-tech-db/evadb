@@ -314,8 +314,10 @@ class ParserVisitorTests(unittest.TestCase):
             RULE_udfRecall
 
         udf_name = 'name'
-        dataset = 'dataset'
-        category = 'category'
+        dataset = MagicMock()
+        dataset.value = 'dataset'
+        category = MagicMock()
+        category.value = 'category'
         precision = 0.1
         recall = 0.2
         values = {
@@ -342,7 +344,7 @@ class ParserVisitorTests(unittest.TestCase):
 
         create_udf_metrics_mock.assert_called_once()
         create_udf_metrics_mock.assert_called_with(
-            udf_name, dataset, category, precision, recall)
+            udf_name, dataset.value, category.value, precision, recall)
 
         self.assertEqual(actual, create_udf_metrics_mock.return_value)
 
