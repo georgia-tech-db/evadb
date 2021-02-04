@@ -12,20 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.expression.abstract_expression import AbstractExpression
-from src.planner.abstract_scan_plan import AbstractScan
-from src.planner.types import PlanOprType
+from enum import IntEnum, auto
+
+class PropertyType(IntEnum):
+    # We don't have specific properties right now
+    # default is a proxy to represent no specific properties
+    DEFAULT = auto()
 
 
-class PPScanPlan(AbstractScan):
-    """
-    This plan is used for storing information required for probabilistic
-    predicate.
-
-    Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-    """
-
-    def __init__(self, predicate: AbstractExpression):
-        super().__init__(PlanOprType.PP_FILTER, predicate)
+class Property:
+    def __init__(self, property_type):
+        self._property_type = property_type
+    
+    def property_type(self):
+        return self._property_type
+    
+    def __eq__(self, other):
+        return self.property_type == other.property_type
+    
+    def __hash__(self):
+        return hash(self._property_type)

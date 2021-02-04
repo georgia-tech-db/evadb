@@ -110,6 +110,14 @@ class FunctionExpression(AbstractExpression):
         else:
             return outcomes
 
+    def is_logical(self):
+        """Checks if the expression has a physical udf binded
+
+        Returns:
+            bool: true if not else false
+        """
+        return (self.function is None)
+    
     def _gpu_enabled_function(self):
         if isinstance(self._function, GPUCompatible):
             device = self._context.gpu_device()
