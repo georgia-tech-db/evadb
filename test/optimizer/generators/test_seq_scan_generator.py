@@ -25,7 +25,7 @@ from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from src.expression.constant_value_expression import ConstantValueExpression
 
 
