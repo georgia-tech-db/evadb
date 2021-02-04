@@ -1,5 +1,5 @@
 import unittest
-from mock import patch, MagicMock
+from mock import patch
 from src.executor.create_udf_metrics_executor import CreateUDFMetricsExecutor
 
 

@@ -1,9 +1,7 @@
 from unittest import TestCase
 
-from mock import patch, MagicMock
+from mock import patch
 
-from src.catalog.models.udf import UdfMetadata
-from src.catalog.models.udf_io import UdfIO
 from src.catalog.services.udf_metrics_service import UdfMetricsService
 
 

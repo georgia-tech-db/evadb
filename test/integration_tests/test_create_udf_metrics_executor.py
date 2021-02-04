@@ -1,13 +1,7 @@
-import os
 import unittest
 
-import numpy as np
-import pandas as pd
-
 from src.catalog.catalog_manager import CatalogManager
-from src.models.storage.batch import Batch
-from src.readers.opencv_reader import OpenCVReader
-from test.util import create_sample_video, create_dummy_batches, perform_query
+from test.util import perform_query
 
 
 class CreateUDFMetricsExecutorTest(unittest.TestCase):
