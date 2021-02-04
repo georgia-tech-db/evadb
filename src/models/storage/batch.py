@@ -16,7 +16,8 @@ import json
 import numpy as np
 import pandas as pd
 
-from typing import List
+from typing import List, Iterable
+
 from pandas import DataFrame
 from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
@@ -282,7 +283,6 @@ class Batch:
         Returns:
             Batch
         """
-
         def _unique_keys(dict1, dict2):
             return set(list(dict1.keys()) + list(dict2.keys()))
 
@@ -310,13 +310,17 @@ class Batch:
                      temp_outcomes=temp_new_outcomes)
 
     @classmethod
-    def concat(cls, batch_list: List['Batch'], copy=True) -> 'Batch':
+    def concat(cls, batch_list: Iterable['Batch'], copy=True) -> 'Batch':
         """ Concat a list of batches. Avoid the extra copying overhead by
         the append operation in __add__.
         Notice: only frames are considered.
         """
 
-        frame_list = [batch.frames for batch in batch_list]
+        # pd.concat will convert generator into list, so it does not hurt
+        # if we convert ourselves.
+        frame_list = list([batch.frames for batch in batch_list])
+        if len(frame_list) == 0:
+            raise ValueError('No batch to concatenate')
         frame = pd.concat(frame_list, ignore_index=True, copy=copy)
 
         return Batch(frame)

@@ -15,16 +15,16 @@
 
 
 from abc import ABC
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from typing import List
 
 
 class AbstractPlan(ABC):
 
-    def __init__(self, node_type):
+    def __init__(self, opr_type):
         self._children = []
         self._parent = None
-        self._node_type = node_type
+        self._opr_type = opr_type
 
     def append_child(self, child):
         """append node to children list
@@ -64,17 +64,20 @@ class AbstractPlan(ABC):
         return self._children[:]
 
     @property
-    def node_type(self) -> PlanNodeType:
+    def opr_type(self) -> PlanOprType:
         """
         Property used for returning the node type of Plan.
 
         Returns:
-            PlanNodeType: The node type corresponding to the plan
+            PlanOprType: The node type corresponding to the plan
         """
-        return self._node_type
+        return self._opr_type
 
     def __str__(self, level=0):
         out_string = "\t" * level + '' + "\n"
         for child in self.children:
             out_string += child.__str__(level + 1)
         return out_string
+
+    def is_logical(self):
+        return False

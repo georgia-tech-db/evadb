@@ -45,4 +45,4 @@ class CreateExecutor(AbstractExecutor):
                                                     self.node.column_list)
 
         StorageEngine.create(table=metadata)
-        return metadata
+        yield from []

@@ -33,6 +33,8 @@ from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType, ParserOrderBySortType
 from src.parser.load_statement import LoadDataStatement
+from src.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
@@ -630,3 +632,18 @@ class ParserVisitor(evaql_parserVisitor):
             impl_path,
             udf_type)
         return stmt
+
+    # MATERIALIZED VIEW
+    def visitCreateMaterializedView(self, ctx: evaql_parser.CreateMaterializedViewContext):
+        view_name = self.visit(ctx.tableName())
+        if_not_exists = False
+        if ctx.ifNotExists():
+            if_not_exists = self.visit(ctx.ifNotExists())
+        uid_list = self.visit(ctx.uidList())
+        # setting all other column definition attributes as None,
+        # need to figure from query outout
+        col_list = [ColumnDefinition(
+            uid.col_name, None, None) for uid in uid_list]
+        query = self.visit(ctx.selectStatement())
+        return CreateMaterializedViewStatement(view_name, col_list,
+                                               if_not_exists, query)

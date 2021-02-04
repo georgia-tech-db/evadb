@@ -12,20 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.expression.abstract_expression import AbstractExpression
-from src.planner.abstract_scan_plan import AbstractScan
-from src.planner.types import PlanOprType
+from collections import deque
 
 
-class PPScanPlan(AbstractScan):
-    """
-    This plan is used for storing information required for probabilistic
-    predicate.
+class OptimizerTaskStack():
+    def __init__(self):
+        self._task_stack = deque()
 
-    Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-    """
+    def push(self, task: 'OptimizerTask'):
+        self._task_stack.append(task)
 
-    def __init__(self, predicate: AbstractExpression):
-        super().__init__(PlanOprType.PP_FILTER, predicate)
+    def pop(self) -> 'OptimizerTask':
+        return self._task_stack.pop()
+
+    def empty(self) -> bool:
+        return not self._task_stack

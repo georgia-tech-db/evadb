@@ -12,20 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.expression.abstract_expression import AbstractExpression
-from src.planner.abstract_scan_plan import AbstractScan
-from src.planner.types import PlanOprType
+
+from src.optimizer.operators import OperatorType
+from typing import List
 
 
-class PPScanPlan(AbstractScan):
-    """
-    This plan is used for storing information required for probabilistic
-    predicate.
+class Pattern:
+    def __init__(self, opr_type: OperatorType):
+        self._opr_type = opr_type
+        self._chilren = []
 
-    Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-    """
+    def append_child(self, child: 'Pattern'):
+        self._chilren.append(child)
 
-    def __init__(self, predicate: AbstractExpression):
-        super().__init__(PlanOprType.PP_FILTER, predicate)
+    @property
+    def children(self):
+        return self._chilren
+
+    @property
+    def opr_type(self):
+        return self._opr_type

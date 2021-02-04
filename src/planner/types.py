@@ -16,7 +16,7 @@ from enum import unique, IntEnum
 
 
 @unique
-class PlanNodeType(IntEnum):
+class PlanOprType(IntEnum):
     SEQUENTIAL_SCAN = 1
     STORAGE_PLAN = 2
     PP_FILTER = 3
@@ -24,7 +24,8 @@ class PlanNodeType(IntEnum):
     CREATE = 5
     CREATE_UDF = 6
     LOAD_DATA = 7
-    UNION = 8
+    UNION = 8,
     ORDER_BY = 9
-    LIMIT = 10
+    CREATE_MATERIALIZED_VIEW = 10
+    LIMIT = 11
     # add other types

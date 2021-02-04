@@ -15,37 +15,39 @@
 
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanOprType
-from typing import List
 from src.parser.table_ref import TableRef
-from src.catalog.models.df_column import DataFrameColumn
+from src.parser.select_statement import SelectStatement
+from src.parser.create_statement import ColumnDefinition
+
+from typing import List
 
 
-class CreatePlan(AbstractPlan):
+class CreateMaterializedViewPlan(AbstractPlan):
     """
-    This plan is used for storing information required for create table
-    operations.
+    This plan is used for storing information required for creating materialized view.
     Arguments:
-        video_ref {TableRef} -- video ref for table to be created in storage
-        column_list {List[DataFrameColumn]} -- Columns to be added
-        if_not_exists {bool} -- Whether to override if there is existing table
+        view {TableRef} -- table ref for view to be created in storage
+        col_list{List[ColumnDefinition]} -- column names in the view
+        query{SelectStatement} -- query used to populate the created view
+        if_not_exists {bool} -- Whether to override if there is existing view
     """
 
-    def __init__(self, video_ref: TableRef,
-                 column_list: List[DataFrameColumn],
+    def __init__(self, view: TableRef,
+                 col_list: List[ColumnDefinition],
                  if_not_exists: bool = False):
-        super().__init__(PlanOprType.CREATE)
-        self._video_ref = video_ref
-        self._column_list = column_list
+        super().__init__(PlanOprType.CREATE_MATERIALIZED_VIEW)
+        self._view = view
+        self._col_list = col_list
         self._if_not_exists = if_not_exists
 
     @property
-    def video_ref(self):
-        return self._video_ref
+    def view(self):
+        return self._view
 
     @property
     def if_not_exists(self):
         return self._if_not_exists
 
     @property
-    def column_list(self):
-        return self._column_list
+    def col_list(self):
+        return self._col_list

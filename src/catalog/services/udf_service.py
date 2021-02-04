@@ -83,3 +83,6 @@ class UdfService(BaseService):
                 LoggingLevel.ERROR)
             return False
         return True
+
+    def udfs_by_type(self, udf_type: str) -> [UdfMetadata]:
+        return self.model.query.filter(self.model._type == udf_type)

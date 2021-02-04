@@ -129,6 +129,8 @@ class AbstractExpression(ABC):
 
     def __eq__(self, other):
         is_subtree_equal = True
+        if not isinstance(other, AbstractExpression):
+            return False
         if self.get_children_count() != other.get_children_count():
             return False
         for child1, child2 in zip(self.children, other.children):

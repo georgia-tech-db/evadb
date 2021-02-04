@@ -320,3 +320,7 @@ class CatalogManager(object):
             UdfIO: catalog object found
         """
         return self._udf_io_service.udf_io_by_name(udf_io_name)
+
+    def get_udfs_by_type(self, udf_type: str) -> [UdfMetadata]:
+        """Returns all the available udfs of input type"""
+        return self._udf_service.udfs_by_type(udf_type)

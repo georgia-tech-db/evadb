@@ -23,7 +23,8 @@ from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.union_plan import UnionPlan
-from src.planner.types import PlanNodeType
+from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
+from src.planner.types import PlanOprType
 
 
 class PlanNodeTests(unittest.TestCase):
@@ -39,7 +40,7 @@ class PlanNodeTests(unittest.TestCase):
                    DataFrameColumn('name', ColumnType.TEXT,
                                    array_dimensions=50)]
         dummy_plan_node = CreatePlan(dummy_table, columns, False)
-        self.assertEqual(dummy_plan_node.node_type, PlanNodeType.CREATE)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.CREATE)
         self.assertEqual(dummy_plan_node.if_not_exists, False)
         self.assertEqual(dummy_plan_node.video_ref.table_info.table_name,
                          "dummy")
@@ -52,7 +53,7 @@ class PlanNodeTests(unittest.TestCase):
         expression = type("AbstractExpression", (), {"evaluate": lambda: 1})
         values = [expression, expression]
         dummy_plan_node = InsertPlan(video_id, column_ids, values)
-        self.assertEqual(dummy_plan_node.node_type, PlanNodeType.INSERT)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.INSERT)
 
     def test_create_udf_plan(self):
         udf_name = 'udf'
@@ -69,7 +70,7 @@ class PlanNodeTests(unittest.TestCase):
             outputs,
             impl_path,
             ty)
-        self.assertEqual(node.node_type, PlanNodeType.CREATE_UDF)
+        self.assertEqual(node.opr_type, PlanOprType.CREATE_UDF)
         self.assertEqual(node.if_not_exists, True)
         self.assertEqual(node.inputs, [udfIO, udfIO])
         self.assertEqual(node.outputs, [udfIO])
@@ -82,7 +83,7 @@ class PlanNodeTests(unittest.TestCase):
         plan_str = 'LoadDataPlan(table_id={},file_path={})'.format(
             table_metainfo, file_path)
         plan = LoadDataPlan(table_metainfo, file_path)
-        self.assertEqual(plan.node_type, PlanNodeType.LOAD_DATA)
+        self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(str(plan), plan_str)
@@ -90,5 +91,15 @@ class PlanNodeTests(unittest.TestCase):
     def test_union_plan(self):
         all = True
         plan = UnionPlan(all)
-        self.assertEqual(plan.node_type, PlanNodeType.UNION)
+        self.assertEqual(plan.opr_type, PlanOprType.UNION)
         self.assertEqual(plan.all, all)
+
+    def test_create_materialized_view_plan(self):
+        dummy_view = TableRef(TableInfo('dummy'))
+        col_list = ['id', 'id2']
+        query = 'Select id from MyVideo'
+        plan = CreateMaterializedViewPlan(dummy_view, col_list, query)
+        self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
+        self.assertEqual(plan.view, dummy_view)
+        self.assertEqual(plan.col_list, col_list)
+        self.assertEqual(plan.query, query)

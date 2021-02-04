@@ -38,7 +38,7 @@ class SequentialScanGeneratorTest(unittest.TestCase):
         self.assertTrue(isinstance(plan, SeqScanPlan))
         self.assertEqual("a", plan.predicate)
         self.assertEqual([1, 2], plan.columns)
-        self.assertEqual(PlanNodeType.STORAGE_PLAN, plan.children[0].node_type)
+        self.assertEqual(PlanOprType.STORAGE_PLAN, plan.children[0].opr_type)
         self.assertEqual(1, plan.children[0].video)
 
     def test_should_just_get_plan_with_storage_if_no_predicate_and_tlist(self):

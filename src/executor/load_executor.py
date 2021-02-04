@@ -45,3 +45,4 @@ class LoadDataExecutor(AbstractExecutor):
         video_reader = OpenCVReader(self.node.file_path)
         for batch in video_reader.read():
             StorageEngine.write(self.node.table_metainfo, batch)
+        yield from []
