@@ -79,9 +79,9 @@ class PlanExecutor:
             executor_node = LoadDataExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.ORDER_BY:
+        elif plan_opr_type == PlanOprType.ORDER_BY:
             executor_node = OrderByExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.LIMIT:
+        elif plan_opr_type == PlanOprType.LIMIT:
             executor_node = LimitExecutor(node=plan)
 
         # Build Executor Tree for children

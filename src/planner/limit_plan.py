@@ -31,7 +31,7 @@ class LimitPlan(AbstractPlan):
 
     def __init__(self, limit_count: ConstantValueExpression):
         self._limit_count = limit_count
-        super().__init__(PlanNodeType.LIMIT)
+        super().__init__(PlanOprType.LIMIT)
 
     @property
     def limit_expression(self):

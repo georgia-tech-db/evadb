@@ -102,4 +102,3 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
         self.assertEqual(plan.view, dummy_view)
         self.assertEqual(plan.col_list, col_list)
-        self.assertEqual(plan.query, query)
