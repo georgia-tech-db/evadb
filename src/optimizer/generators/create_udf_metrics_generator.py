@@ -27,7 +27,7 @@ class CreateUDFMetricsGenerator(Generator):
         self.__init__()
         self._visit(operator)
         create_udf_metrics_plan = CreateUDFMetricsPlan(
-            self._name,
+            self._udf_name,
             self._dataset,
             self._category,
             self._precision,

@@ -653,10 +653,10 @@ class ParserVisitor(evaql_parserVisitor):
                     udf_name = self.visit(ctx.udfName())
 
                 elif rule_idx == evaql_parser.RULE_udfDataset:
-                    dataset = self.visit(ctx.udfDataset())
+                    dataset = self.visit(ctx.udfDataset()).value
 
                 elif rule_idx == evaql_parser.RULE_udfCategory:
-                    category = self.visit(ctx.udfCategory())
+                    category = self.visit(ctx.udfCategory()).value
 
                 elif rule_idx == evaql_parser.RULE_udfPrecision:
                     precision = self.visit(ctx.udfPrecision())
@@ -664,8 +664,8 @@ class ParserVisitor(evaql_parserVisitor):
                 elif rule_idx == evaql_parser.RULE_udfRecall:
                     recall = self.visit(ctx.udfRecall())
 
-            except BaseException:
-                LoggingManager().log('CREATE UDFMETRICS Failed',
+            except BaseException as e:
+                LoggingManager().log('CREATE UDFMETRICS Failed: {}'.format(e),
                                      LoggingLevel.ERROR)
                 # stop parsing something bad happened
                 return None
