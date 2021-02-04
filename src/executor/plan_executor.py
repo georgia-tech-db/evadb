@@ -28,6 +28,7 @@ from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
 from src.executor.orderby_executor import OrderByExecutor
+from src.executor.create_udf_metrics_executor import CreateUDFMetricsExecutor
 
 
 class PlanExecutor:
@@ -79,6 +80,8 @@ class PlanExecutor:
             executor_node = OrderByExecutor(node=plan)
         elif plan_node_type == PlanNodeType.LIMIT:
             executor_node = LimitExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.CREATE_UDF_METRICS:
+            executor_node = CreateUDFMetricsExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:
@@ -110,7 +113,8 @@ class PlanExecutor:
             PlanNodeType.CREATE,
             PlanNodeType.INSERT,
             PlanNodeType.CREATE_UDF,
-            PlanNodeType.LOAD_DATA)
+            PlanNodeType.LOAD_DATA,
+            PlanNodeType.CREATE_UDF_METRICS)
         if execution_tree.node.node_type in _INSERT_CREATE_LOAD:
             execution_tree.exec()
         else:
