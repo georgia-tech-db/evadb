@@ -26,7 +26,6 @@ from src.expression.abstract_expression import ExpressionType
 from src.expression.function_expression import ExecutionMode
 from antlr4 import TerminalNode
 
-
 class ParserVisitorTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -319,3 +318,34 @@ class ParserVisitorTests(unittest.TestCase):
             [call(ctx.fileName()), call(ctx.tableName())])
         mock_load.assert_called_once()
         mock_load.assert_called_with('myVideo', 'video.mp4')
+
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch('src.parser.parser_visitor.ExplodeStatement')
+    def test_visit_explode_statement(self, mock_explode, mock_visit):
+        ctx = MagicMock()
+        visitor = ParserVisitor()
+        obj = MagicMock()
+        select_statement = obj
+        column_list = [obj, obj]
+
+        def col_effect(arg=None):
+            if arg is None:
+                return column_list
+            else:
+                return column_list[0]
+
+        def sel_effect():
+            return select_statement
+
+        ctx.fullColumnName = MagicMock(side_effect=col_effect)
+        ctx.selectStatemeent = MagicMock(side_effect=sel_effect)
+
+        def side_effect(arg):
+            return obj
+
+        mock_visit.side_effect = side_effect
+
+        visitor = ParserVisitor()
+        visitor.visitExplodeStatement(ctx)
+        mock_explode.assert_called_once()
+        mock_explode.assert_called_with(column_list=column_list, select_statement=select_statement)

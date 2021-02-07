@@ -33,6 +33,7 @@ from src.parser.select_statement import SelectStatement
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserColumnDataType, ParserOrderBySortType
 from src.parser.load_statement import LoadDataStatement
+from src.parser.explode_statement import ExplodeStatement
 
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
@@ -373,6 +374,25 @@ class ParserVisitor(evaql_parserVisitor):
             limit_count=limit_count)
 
         return select_stmt
+
+    def visitExplodeStatement(self, ctx: evaql_parser.ExplodeStatementContext):
+        column_list = []
+        ctx_select = ctx.selectStatement()
+        select_statement = self.visit(ctx_select)
+        ctx_column = ctx.fullColumnName()
+        full_column_count = len(ctx_column)
+
+        print(full_column_count)
+
+        for full_column_index in range(full_column_count):
+            column = self.visit(ctx.fullColumnName(full_column_index))
+            column_list.append(column)
+
+        explode_stmt = ExplodeStatement(
+            select_statement=select_statement,
+            column_list=column_list
+            )
+        return explode_stmt
 
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
         select_list = []

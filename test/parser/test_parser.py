@@ -128,6 +128,33 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.where_clause)
         # other tests should go in expression testing
 
+    def test_explode_statement(self):
+        parser = Parser()
+        explode_query = "EXPLODE((SELECT id, FastRCNNObjectDetector(data).label FROM MyVideo), [LABELS, BBOXES]);"
+        eva_statement_list = parser.parse(explode_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLODE)
+
+        explode_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(explode_stmt.column_list)
+        self.assertEqual(len(explode_stmt.column_list), 2)
+        self.assertEqual(
+            explode_stmt.column_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(
+            explode_stmt.column_list[1].etype, ExpressionType.TUPLE_VALUE)
+
+        # from_table
+        self.assertIsNotNone(explode_stmt.select_statement)
+        self.assertIsInstance(explode_stmt.select_statement.from_table, TableRef)
+        self.assertEqual(
+            explode_stmt.select_statement.from_table.table_info.table_name, 'MyVideo')
+
+        # where_clause
+        self.assertIsNone(explode_stmt.select_statement.where_clause)
+
     def test_select_union_statement(self):
         parser = Parser()
         select_union_query = "SELECT CLASS, REDNESS FROM TAIPAI \

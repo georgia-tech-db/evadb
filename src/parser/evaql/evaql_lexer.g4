@@ -36,6 +36,9 @@ DROP:                                'DROP';
 EXIT:                                'EXIT';
 EXISTS:                              'EXISTS';
 EXPLAIN:                             'EXPLAIN';
+
+EXPLODE:                             'EXPLODE';
+
 FALSE:                               'FALSE';
 FROM:                                'FROM';
 GROUP:                               'GROUP';
@@ -178,6 +181,10 @@ BIT_XOR_OP:                          '^';
 DOT:                                 '.';
 LR_BRACKET:                          '(';
 RR_BRACKET:                          ')';
+
+LR_SQ_BRACKET:                       '[';
+RR_SQ_BRACKET:                       ']';
+
 COMMA:                               ',';
 SEMI:                                ';';
 AT_SIGN:                             '@';
