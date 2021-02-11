@@ -253,6 +253,7 @@ selectElement
 
 fromClause
     : FROM tableSources
+      (SAMPLE sample=decimalLiteral)?
       (WHERE whereExpr=expression)?
       (
         GROUP BY
