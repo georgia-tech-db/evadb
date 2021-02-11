@@ -56,20 +56,24 @@ class ParserVisitorTests(unittest.TestCase):
 
     @mock.patch.object(ParserVisitor, 'visit')
     def test_from_clause_visitor(self, mock_visit):
-        mock_visit.side_effect = ["tables", "predicates"]
+        mock_visit.side_effect = ["tables", "predicates", 'sample_freq']
 
         ctx = MagicMock()
         tableSources = MagicMock()
         ctx.tableSources.return_value = tableSources
         whereExpr = MagicMock()
         ctx.whereExpr = whereExpr
+        sample = MagicMock()
+        ctx.sample = sample
 
         visitor = ParserVisitor()
         expected = visitor.visitFromClause(ctx)
-        mock_visit.assert_has_calls([call(tableSources), call(whereExpr)])
+        mock_visit.assert_has_calls(
+            [call(tableSources), call(whereExpr), call(sample)])
 
         self.assertEqual(expected.get('where'), 'predicates')
         self.assertEqual(expected.get('from'), 'tables')
+        self.assertEqual(expected.get('sample'), 'sample_freq')
 
     def test_logical_operator(self):
         ctx = MagicMock()
