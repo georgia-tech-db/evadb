@@ -30,9 +30,9 @@ class ArithmeticExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.FLOAT,
                          children=children)
 
-    def evaluate(self, *args):
-        vl = self.get_child(0).evaluate(*args).frames
-        vr = self.get_child(1).evaluate(*args).frames
+    def evaluate(self, *args, **kwargs):
+        vl = self.get_child(0).evaluate(*args, **kwargs).frames
+        vr = self.get_child(1).evaluate(*args, **kwargs).frames
 
         if self.etype == ExpressionType.ARITHMETIC_ADD:
             return Batch(pd.DataFrame(vl + vr))

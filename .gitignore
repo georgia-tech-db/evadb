@@ -148,3 +148,9 @@ evaql_parserVisitor.py
 .vscode/*
 
 /api-docs/_autosummary/
+
+# Conda
+miniconda.sh
+
+# Datasets
+eva_datasets/

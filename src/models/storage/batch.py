@@ -163,6 +163,28 @@ class Batch:
 
         return name in self._outcomes or name in self._temp_outcomes
 
+    def __getitem__(self, indices) -> 'Batch':
+        """
+        Returns a batch with the desired frames
+
+        Arguments:
+            indices (list, slice or mask): list must be
+            a list of indices; mask is boolean array-like
+            (i.e. list, NumPy array, DataFrame, etc.)
+            of appropriate size with True for desired frames.
+        """
+        if isinstance(indices, list):
+            return self._get_frames_from_indices(indices)
+        elif isinstance(indices, slice):
+            start = indices.start if indices.start else 0
+            end = indices.stop if indices.stop else len(self.frames)
+            if end < 0:
+                end = len(self.frames) + end
+            step = indices.step if indices.step else 1
+            return self._get_frames_from_indices(range(start, end, step))
+        else:
+            return self._get_frames_from_mask(indices)
+
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
         new_batch = Batch(new_frames)
@@ -174,23 +196,16 @@ class Batch:
                                              for i in required_frame_ids]
         return new_batch
 
-    def __getitem__(self, indices) -> 'Batch':
-        """
-        Takes as input the slice for the list
-        Arguments:
-            item (list or Slice):
-
-        :return:
-        """
-        if isinstance(indices, list):
-            return self._get_frames_from_indices(indices)
-        elif isinstance(indices, slice):
-            start = indices.start if indices.start else 0
-            end = indices.stop if indices.stop else len(self.frames)
-            if end < 0:
-                end = len(self.frames) + end
-            step = indices.step if indices.step else 1
-            return self._get_frames_from_indices(range(start, end, step))
+    def _get_frames_from_mask(self, mask):
+        new_frames = self.frames.loc[mask, :]
+        new_batch = Batch(new_frames)
+        for key in self._outcomes:
+            new_batch._outcomes[key] = [self._outcomes[key][i] for i in
+                                        mask[mask].indices] # get indices of Trues
+        for key in self._temp_outcomes:
+            new_batch._temp_outcomes[key] = [self._temp_outcomes[key][i] for i in
+                                             mask[mask].indices]
+        return new_batch
 
     def sort(self, by=None):
         """
