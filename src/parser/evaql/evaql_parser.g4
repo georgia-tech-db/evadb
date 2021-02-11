@@ -253,7 +253,7 @@ selectElement
 
 fromClause
     : FROM tableSources
-      (SAMPLE sample=decimalLiteral)?
+      sample=sampleClause?
       (WHERE whereExpr=expression)?
       (
         GROUP BY
@@ -264,6 +264,10 @@ fromClause
 
 groupByItem
     : expression order=(ASC | DESC)?
+    ;
+
+sampleClause
+    : SAMPLE decimalLiteral
     ;
 
 limitClause
