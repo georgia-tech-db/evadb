@@ -49,6 +49,7 @@ class SelectStatement(AbstractStatement):
         self._target_list = target_list
         self._union_link = None
         self._union_all = False
+        self._sample_freq = kwargs.get("sample_freq", None)
         self._orderby_list = kwargs.get("orderby_clause_list", None)
         self._limit_count = kwargs.get("limit_count", None)
 
@@ -93,6 +94,14 @@ class SelectStatement(AbstractStatement):
         self._from_table = table
 
     @property
+    def sample_freq(self):
+        return self._sample_freq
+
+    @sample_freq.setter
+    def sample_freq(self, sample_freq_new: ConstantValueExpression):
+        self._sample_freq = sample_freq_new
+
+    @property
     def orderby_list(self):
         return self._orderby_list
 
@@ -110,9 +119,14 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {} WHERE {}".format(self._target_list,
-                                                        self._from_table,
-                                                        self._where_clause)
+        print_str = "SELECT {} FROM {}".format(self._target_list,
+                                               self._from_table)
+
+        if self._sample_freq is not None:
+            print_str += " SAMPLE " + str(self._sample_freq)
+
+        print_str += " WHERE {}".format(self._where_clause)
+
         if self._union_link is not None:
             if not self._union_all:
                 print_str += "\nUNION\n" + str(self._union_link)
@@ -135,5 +149,6 @@ class SelectStatement(AbstractStatement):
                 and self.where_clause == other.where_clause
                 and self.union_link == other.union_link
                 and self.union_all == other.union_all
+                and self.sample_freq == other.sample_freq
                 and self.orderby_list == other.orderby_list
                 and self.limit_count == other.limit_count)
