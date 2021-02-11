@@ -337,6 +337,7 @@ class ParserVisitor(evaql_parserVisitor):
         target_list = None
         from_clause = None
         where_clause = None
+        sample_freq = None
         orderby_clause = None
         limit_count = None
 
@@ -352,6 +353,7 @@ class ParserVisitor(evaql_parserVisitor):
                     clause = self.visit(child)
                     from_clause = clause.get('from', None)
                     where_clause = clause.get('where', None)
+                    sample_freq = clause.get('sample', None)
 
                 elif rule_idx == evaql_parser.RULE_orderByClause:
                     orderby_clause = self.visit(ctx.orderByClause())
@@ -369,6 +371,7 @@ class ParserVisitor(evaql_parserVisitor):
 
         select_stmt = SelectStatement(
             target_list, from_clause, where_clause,
+            sample_freq=sample_freq,
             orderby_clause_list=orderby_clause,
             limit_count=limit_count)
 
@@ -386,13 +389,17 @@ class ParserVisitor(evaql_parserVisitor):
     def visitFromClause(self, ctx: evaql_parser.FromClauseContext):
         from_table = None
         where_clause = None
+        sample_limit = None
 
         if ctx.tableSources():
             from_table = self.visit(ctx.tableSources())
         if ctx.whereExpr is not None:
             where_clause = self.visit(ctx.whereExpr)
+        if ctx.sample is not None:
+            sample_limit = self.visit(ctx.sample)
 
-        return {"from": from_table, "where": where_clause}
+        return {"from": from_table, "where": where_clause,
+                "sample": sample_limit}
 
     def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
         orderby_clause_data = []
