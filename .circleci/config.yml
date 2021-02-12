@@ -1,0 +1,39 @@
+version: 2.1
+
+orbs:
+  coveralls: coveralls/coveralls@1.0.6
+
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:202007-01
+    steps:
+      - run: 
+          command: | 
+            echo "Build starts >>> >>>"
+            sh script/install/before_install.sh
+            export PATH="$HOME/miniconda/bin:$PATH"
+            sh script/install/install.sh
+            echo "Build finishes"
+  test:
+    machine:
+      image: ubuntu-1604:202007-01
+    steps:
+      - run:
+          command: | 
+            echo "Test starts >>> >>>"
+            conda init bash
+            source ~/.bashrc
+            conda activate eva
+            sh script/test/test.sh
+            echo "Test finishes"
+      - coveralls/upload
+
+workflows:
+  main:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+
