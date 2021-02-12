@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  coveralls: coveralls/coveralls@1.0.6
-
 jobs:
   build:
     machine:
@@ -27,7 +24,6 @@ jobs:
             conda activate eva
             sh script/test/test.sh
             echo "Test finishes"
-      - coveralls/upload
 
 workflows:
   main:
