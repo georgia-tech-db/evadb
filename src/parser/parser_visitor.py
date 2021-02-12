@@ -377,19 +377,21 @@ class ParserVisitor(evaql_parserVisitor):
 
     def visitExplodeStatement(self, ctx: evaql_parser.ExplodeStatementContext):
         column_list = []
-        ctx_select = ctx.selectStatement()
-        select_statement = self.visit(ctx_select)
+        ctx_table = ctx.tableSources()
+
+        from_table = self.visit(ctx_table)
         ctx_column = ctx.fullColumnName()
         full_column_count = len(ctx_column)
-
-        print(full_column_count)
 
         for full_column_index in range(full_column_count):
             column = self.visit(ctx.fullColumnName(full_column_index))
             column_list.append(column)
 
+        if from_table is not None:
+            from_table = from_table[0]
+
         explode_stmt = ExplodeStatement(
-            select_statement=select_statement,
+            from_table=from_table,
             column_list=column_list
             )
         return explode_stmt

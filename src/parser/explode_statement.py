@@ -37,10 +37,10 @@ class ExplodeStatement(AbstractStatement):
     """
 
     def __init__(self, column_list: List[AbstractExpression] = None,
-                 select_statement: SelectStatement = None,
+                 from_table = None,
                  **kwargs):
         super().__init__(StatementType.EXPLODE)
-        self._select_statement = select_statement
+        self._from_table = from_table
         self._column_list = column_list
 
     @property
@@ -52,19 +52,19 @@ class ExplodeStatement(AbstractStatement):
         self._column_list = column_list
 
     @property
-    def select_statement(self):
-        return self._select_statement
+    def from_table(self):
+        return self._from_table
 
-    @select_statement.setter
-    def select_statement(self, select_statement: SelectStatement):
-        self._select_statement = select_statement
+    @from_table.setter
+    def from_table(self, from_table):
+        self._from_table = from_table
 
     def __str__(self) -> str:
-        print_str = "EXPLODE(({}), [{}])".format(self._select_statement, self._column_list)
+        print_str = "EXPLODE(({}), [{}])".format(self._from_table, self._column_list)
         return print_str
 
     def __eq__(self, other):
         if not isinstance(other, ExplodeStatement):
             return False
         return (self.column_list == other.column_list and
-                self.select_statement == other.select_statement)
+                self._from_table == other._from_table)

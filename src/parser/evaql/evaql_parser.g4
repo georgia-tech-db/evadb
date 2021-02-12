@@ -147,7 +147,7 @@ insertStatement
 explodeStatement
     : EXPLODE
         LR_BRACKET
-        LR_BRACKET selectStatement RR_BRACKET
+        LR_BRACKET tableSources RR_BRACKET
         COMMA
         LR_SQ_BRACKET
         fullColumnName (',' fullColumnName)*

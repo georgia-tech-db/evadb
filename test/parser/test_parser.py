@@ -147,13 +147,13 @@ class ParserTests(unittest.TestCase):
             explode_stmt.column_list[1].etype, ExpressionType.TUPLE_VALUE)
 
         # from_table
-        self.assertIsNotNone(explode_stmt.select_statement)
-        self.assertIsInstance(explode_stmt.select_statement.from_table, TableRef)
+        self.assertIsNotNone(explode_stmt.from_table)
+        self.assertIsInstance(explode_stmt.from_table.from_table, TableRef)
         self.assertEqual(
-            explode_stmt.select_statement.from_table.table_info.table_name, 'MyVideo')
+            explode_stmt.from_table.from_table.table_info.table_name, 'MyVideo')
 
         # where_clause
-        self.assertIsNone(explode_stmt.select_statement.where_clause)
+        self.assertIsNone(explode_stmt.from_table.where_clause)
 
     def test_select_union_statement(self):
         parser = Parser()

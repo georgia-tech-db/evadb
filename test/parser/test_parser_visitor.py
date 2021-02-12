@@ -325,7 +325,7 @@ class ParserVisitorTests(unittest.TestCase):
         ctx = MagicMock()
         visitor = ParserVisitor()
         obj = MagicMock()
-        select_statement = obj
+        table_source = obj
         column_list = [obj, obj]
 
         def col_effect(arg=None):
@@ -335,10 +335,10 @@ class ParserVisitorTests(unittest.TestCase):
                 return column_list[0]
 
         def sel_effect():
-            return select_statement
+            return table_source
 
         ctx.fullColumnName = MagicMock(side_effect=col_effect)
-        ctx.selectStatemeent = MagicMock(side_effect=sel_effect)
+        ctx.tableSources = MagicMock(side_effect=sel_effect)
 
         def side_effect(arg):
             return obj
@@ -348,4 +348,4 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         visitor.visitExplodeStatement(ctx)
         mock_explode.assert_called_once()
-        mock_explode.assert_called_with(column_list=column_list, select_statement=select_statement)
+        mock_explode.assert_called_with(column_list=column_list, from_table=table_source[0])

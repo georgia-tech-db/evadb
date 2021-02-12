@@ -14,17 +14,21 @@
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
+from src.expression.function_expression import FunctionExpression
+
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit, LogicalUnnest)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.explode_statement import ExplodeStatement
+
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
@@ -33,6 +37,8 @@ from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            create_video_metadata)
 from src.parser.table_ref import TableRef
 from src.utils.logging_manager import LoggingLevel, LoggingManager
+
+from src.catalog.catalog_manager import CatalogManager
 
 
 class StatementToPlanConvertor:
@@ -218,6 +224,43 @@ class StatementToPlanConvertor:
         load_data_opr = LogicalLoadData(table_metainfo, statement.path)
         self._plan = load_data_opr
 
+    def visit_explode(self, statement: ExplodeStatement):
+        """Concertor for parsed explode statement
+
+        Arguments:
+            statement(ExplodeStatement): [Explode statement]
+        """
+        table = statement.from_table
+        if table is None:
+            LoggingManager().log('Missing table entry in explode statement.',
+                                 LoggingLevel.ERROR)
+            return None
+
+        if isinstance(table, SelectStatement):
+            # Select
+            self.visit_select(table)
+
+            child_plan = self._plan
+            self._plan = LogicalQueryDerivedGet()
+            self._plan.append_child(child_plan)
+        elif isinstance(table, TableRef):
+            # Table
+            self.visit_table_ref(table)
+
+        column_list = statement.column_list
+        # Don't bind to any columns yet, since the column depends on
+        # the result from the get table/select operation.
+        # No need to bind here, could check during execution.
+        #if isinstance(table, TableRef):
+        #    bind_columns_expr(column_list, {})
+
+
+        unnest_plan = LogicalUnnest(table, column_list)
+        unnest_plan.append_child(self._plan)
+
+        self._plan = unnest_plan
+
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -236,6 +279,8 @@ class StatementToPlanConvertor:
             self.visit_create_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
+        elif isinstance(statement, ExplodeStatement):
+            self.visit_explode(statement)
         return self._plan
 
     @property
