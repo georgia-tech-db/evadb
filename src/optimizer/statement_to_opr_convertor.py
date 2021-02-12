@@ -18,7 +18,8 @@ from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit,
+                                     LogicalSample)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -80,6 +81,9 @@ class StatementToPlanConvertor:
             # Table
             self.visit_table_ref(video)
 
+        if statement.sample_freq is not None:
+            self._visit_sample(statement.sample_freq)
+
         # Filter Operator
         predicate = statement.where_clause
         if predicate is not None:
@@ -102,6 +106,11 @@ class StatementToPlanConvertor:
 
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
+
+    def _visit_sample(self, sample_freq):
+        sample_opr = LogicalSample(sample_freq)
+        sample_opr.append_child(self._plan)
+        self._plan = sample_opr
 
     def _visit_orderby(self, orderby_list):
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
