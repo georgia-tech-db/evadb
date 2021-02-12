@@ -16,6 +16,7 @@ import pandas as pd
 
 from src.executor.abstract_executor import AbstractExecutor
 from src.executor.limit_executor import LimitExecutor
+from src.executor.sample_executor import SampleExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.models.storage.batch import Batch
 from src.planner.abstract_plan import AbstractPlan
@@ -79,6 +80,8 @@ class PlanExecutor:
             executor_node = OrderByExecutor(node=plan)
         elif plan_node_type == PlanNodeType.LIMIT:
             executor_node = LimitExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.SAMPLE:
+            executor_node = SampleExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:
