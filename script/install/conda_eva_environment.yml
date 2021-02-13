@@ -33,4 +33,6 @@ dependencies:
     - antlr4-python3-runtime==4.8
     - petastorm
     - pre-commit
+    - flake8
+    - pytest
 prefix: eva
