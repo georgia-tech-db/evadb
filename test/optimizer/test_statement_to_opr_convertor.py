@@ -23,13 +23,14 @@ from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.explode_statement import ExplodeStatement
 from src.parser.parser import Parser
 
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
                                      LogicalLoadData, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit, LogicalExplode)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
@@ -309,6 +310,38 @@ statement_to_opr_convertor.column_definition_to_udf_io')
     @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
     @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    def test_visit_explode(self, mock_p, mock_c, mock_d):
+        m = MagicMock()
+        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        stmt = Parser().parse(""" EXPLODE MyTable, [label, pred_score];""")[0]
+
+        converter = StatementToPlanConvertor()
+        actual_plan = converter.visit(stmt)
+
+        plans = []
+
+        plans.append(LogicalExplode(column_list=[
+            TupleValueExpression(col_name="label"),
+            TupleValueExpression(col_name="pred_score")]))
+
+        plans.append(LogicalGet(TableRef(TableInfo("MyTable")), m))
+
+        expected_plan = None
+        for plan in reversed(plans):
+            if expected_plan:
+                plan.append_child(expected_plan)
+            expected_plan = plan
+
+        self.assertEqual(expected_plan, actual_plan)
+        wrong_plan = plans[0]
+        for plan in plans[1:]:
+            wrong_plan.append_child(plan)
+        self.assertNotEqual(wrong_plan, actual_plan)
+
+
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_visit_select_limit(self, mock_p, mock_c, mock_d):
         m = MagicMock()
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
@@ -410,3 +443,4 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         self.assertNotEqual(query_derived_plan, create_plan)
         self.assertNotEqual(insert_plan, query_derived_plan)
         self.assertNotEqual(load_plan, insert_plan)
+

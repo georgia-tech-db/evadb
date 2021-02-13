@@ -16,26 +16,19 @@ from src.catalog.models.df_metadata import DataFrameMetadata
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
 from src.parser.table_ref import TableRef
-from src.catalog.models.df_column import DataFrameColumn
+from src.expression.abstract_expression import AbstractExpression
 from typing import List
 
-class UnnestPlan(AbstractPlan):
+class ExplodePlan(AbstractPlan):
     """
-    This is the plan used for retrieving the frames from the storage and
-    and returning to the higher levels.
+    This is the plan used for explode operator
 
     Arguments:
-        video (DataFrameMetadata): Required meta-data for fetching data
-        batch_size (int): size of batch frame
-        skip_frames (int): skip frequency
-        offset (int): storage offset for retrieving data
-        limit (int): limit on data records to be retrieved
-        total_shards (int): number of shards of data (if sharded)
-        curr_shard (int): current curr_shard if data is sharded
+        column_list (List[AbstractExpression]): columns to be exploded.
     """
 
-    def __init__(self, column_list: List[DataFrameColumn]):
-        super().__init__(PlanNodeType.UNNSET)
+    def __init__(self, column_list: List[AbstractExpression]):
+        super().__init__(PlanNodeType.EXPLODE)
         self._column_list = column_list
 
     @property

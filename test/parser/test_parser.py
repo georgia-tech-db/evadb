@@ -130,7 +130,7 @@ class ParserTests(unittest.TestCase):
 
     def test_explode_statement(self):
         parser = Parser()
-        explode_query = "EXPLODE((SELECT id, FastRCNNObjectDetector(data).label FROM MyVideo), [LABELS, BBOXES]);"
+        explode_query = "EXPLODE SELECT id, FastRCNNObjectDetector(data).label FROM MyVideo, [LABELS, BBOXES];"
         eva_statement_list = parser.parse(explode_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

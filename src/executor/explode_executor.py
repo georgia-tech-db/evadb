@@ -16,20 +16,21 @@ from typing import Iterator
 
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
-from src.planner.unnest_plan import UnnestPlan
+from src.planner.explode_plan import ExplodePlan
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 import pandas as pd
 import numpy as np
 
-class UnnestExecutor(AbstractExecutor):
+class ExplodeExecutor(AbstractExecutor):
     """
-    Merge the seq scan queries
+    Executor for explode operator to explode nested list.
+
     Arguments:
-        node (AbstractPlan): The UnionPlan
+        node (AbstractPlan): ExplodePlan
 
     """
 
-    def __init__(self, node: UnnestPlan):
+    def __init__(self, node: ExplodePlan):
         super().__init__(node)
         self._column_list = node.column_list
 
@@ -39,9 +40,7 @@ class UnnestExecutor(AbstractExecutor):
     def exec(self) -> Iterator[Batch]:
         for batch in self.children[0].exec():
             if not batch.empty():
-                print(batch.frames)
                 frames: pd.DataFrame = batch.frames
-                print(frames.columns[0])
 
                 first_row = frames.iloc[0]
                 len_arr = []
@@ -54,16 +53,13 @@ class UnnestExecutor(AbstractExecutor):
                         col_list = frames[col_name].values.tolist()
                         len_arr = [len(r) for r in col_list]
 
-                # Asserting all the lists in the same row
-                # has the same length across the columns
-                unnested_list = []
+                # Asserting all the lists in the same row have the same length across the columns
+                exploded_list = []
                 for column in frames.columns:
                     if type(first_row[column]) == list:
-                        unnested_list.append(np.concatenate(frames[column].values.tolist()))
-                        print(len(unnested_list[-1]))
+                        exploded_list.append(np.concatenate(frames[column].values.tolist()))
                     else:
-                        unnested_list.append(np.repeat(frames[column], len_arr))
-                        print(len(unnested_list[-1]))
-                batch._frames = pd.DataFrame(np.column_stack(unnested_list), columns=frames.columns)
+                        exploded_list.append(np.repeat(frames[column], len_arr))
+                batch._frames = pd.DataFrame(np.column_stack(exploded_list), columns=frames.columns)
 
             yield batch

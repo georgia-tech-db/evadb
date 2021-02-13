@@ -28,7 +28,7 @@ from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
 from src.executor.orderby_executor import OrderByExecutor
-from src.executor.unnset_executor import UnnestExecutor
+from src.executor.explode_executor import ExplodeExecutor
 
 class PlanExecutor:
     """
@@ -78,8 +78,8 @@ class PlanExecutor:
             executor_node = OrderByExecutor(node=plan)
         elif plan_node_type == PlanNodeType.LIMIT:
             executor_node = LimitExecutor(node=plan)
-        elif plan_node_type == PlanNodeType.UNNSET:
-            executor_node = UnnestExecutor(node=plan)
+        elif plan_node_type == PlanNodeType.EXPLODE:
+            executor_node = ExplodeExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:

@@ -20,7 +20,7 @@ from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit, LogicalUnnest)
+                                     LogicalOrderBy, LogicalLimit, LogicalExplode)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -37,9 +37,6 @@ from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            create_video_metadata)
 from src.parser.table_ref import TableRef
 from src.utils.logging_manager import LoggingLevel, LoggingManager
-
-from src.catalog.catalog_manager import CatalogManager
-
 
 class StatementToPlanConvertor:
     def __init__(self):
@@ -255,10 +252,10 @@ class StatementToPlanConvertor:
         #    bind_columns_expr(column_list, {})
 
 
-        unnest_plan = LogicalUnnest(table, column_list)
-        unnest_plan.append_child(self._plan)
+        explode_plan = LogicalExplode(column_list)
+        explode_plan.append_child(self._plan)
 
-        self._plan = unnest_plan
+        self._plan = explode_plan
 
 
     def visit(self, statement: AbstractStatement):

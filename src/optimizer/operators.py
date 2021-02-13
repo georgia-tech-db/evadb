@@ -40,7 +40,7 @@ class OperatorType(IntEnum):
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
-    LOGICALUNNEST = auto()
+    LOGICALEXPLODE = auto()
 
 
 class Operator:
@@ -294,23 +294,16 @@ class LogicalCreate(Operator):
                 and self.column_list == other.column_list
                 and self.if_not_exists == other.if_not_exists)
 
-class LogicalUnnest(Operator):
-    """Logical node for create table operations
+class LogicalExplode(Operator):
+    """Logical node for explode operation
 
         Arguments:
-            table {TableRef}: [video table that is to be created]
-            column_list {List[DataFrameColumn]}:
-                [After binding annotated column_list]
+            column_list {List[AbstractExpression]}:
     """
-    def __init__(self, table: TableRef, column_list: List[DataFrameColumn],
+    def __init__(self, column_list: List[AbstractExpression],
                  children=None):
-        super().__init__(OperatorType.LOGICALUNNEST, children)
-        self._table = table
+        super().__init__(OperatorType.LOGICALEXPLODE, children)
         self._column_list = column_list
-
-    @property
-    def table(self):
-        return self._table
 
     @property
     def column_list(self):
@@ -318,10 +311,9 @@ class LogicalUnnest(Operator):
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalUnnest):
+        if not isinstance(other, LogicalExplode):
             return False
         return (is_subtree_equal
-                and self._table == other.table
                 and self._column_list == other.column_list)
 
 class LogicalCreateUDF(Operator):
