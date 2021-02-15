@@ -32,6 +32,7 @@ class StatementType(IntEnum):
     INSERT = 3,
     CREATE_UDF = 4,
     LOAD_DATA = 5,
+    EXPLODE = 6,
     # add other types
 
 

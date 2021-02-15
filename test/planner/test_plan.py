@@ -24,6 +24,7 @@ from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.union_plan import UnionPlan
 from src.planner.types import PlanNodeType
+from src.planner.explode_plan import ExplodePlan
 
 
 class PlanNodeTests(unittest.TestCase):
@@ -92,3 +93,9 @@ class PlanNodeTests(unittest.TestCase):
         plan = UnionPlan(all)
         self.assertEqual(plan.node_type, PlanNodeType.UNION)
         self.assertEqual(plan.all, all)
+
+    def test_explode_plan(self):
+        columns = [DataFrameColumn("test", 1)]
+        plan = ExplodePlan(columns)
+        self.assertEqual(plan.node_type, PlanNodeType.EXPLODE)
+        self.assertEqual(plan.column_list, columns)

@@ -27,4 +27,5 @@ class PlanNodeType(IntEnum):
     UNION = 8
     ORDER_BY = 9
     LIMIT = 10
+    EXPLODE = 11
     # add other types

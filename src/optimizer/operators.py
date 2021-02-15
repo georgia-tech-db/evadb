@@ -40,6 +40,7 @@ class OperatorType(IntEnum):
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
+    LOGICALEXPLODE = auto()
 
 
 class Operator:
@@ -293,6 +294,27 @@ class LogicalCreate(Operator):
                 and self.column_list == other.column_list
                 and self.if_not_exists == other.if_not_exists)
 
+class LogicalExplode(Operator):
+    """Logical node for explode operation
+
+        Arguments:
+            column_list {List[AbstractExpression]}:
+    """
+    def __init__(self, column_list: List[AbstractExpression],
+                 children=None):
+        super().__init__(OperatorType.LOGICALEXPLODE, children)
+        self._column_list = column_list
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExplode):
+            return False
+        return (is_subtree_equal
+                and self._column_list == other.column_list)
 
 class LogicalCreateUDF(Operator):
     """

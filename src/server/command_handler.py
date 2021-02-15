@@ -40,6 +40,7 @@ def handle_request(transport, request_message):
         stmt = Parser().parse(request_message)[0]
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
+
         output_batch = PlanExecutor(p_plan).execute_plan()
     except Exception as e:
         LoggingManager().log(e, LoggingLevel.WARNING)

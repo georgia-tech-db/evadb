@@ -17,7 +17,7 @@ import unittest
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit, LogicalExplode)
 
 from src.optimizer.generators.seq_scan_generator import ScanGenerator
 from src.parser.types import ParserOrderBySortType
@@ -26,6 +26,7 @@ from src.planner.storage_plan import StoragePlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
 from src.planner.types import PlanNodeType
+from src.planner.explode_plan import ExplodePlan
 from src.expression.constant_value_expression import ConstantValueExpression
 
 
@@ -71,3 +72,10 @@ class SequentialScanGeneratorTest(unittest.TestCase):
         self.assertTrue(isinstance(
             plan.limit_expression, ConstantValueExpression))
         self.assertEqual(plan.limit_value, 5)
+
+    def test_should_return_correct_plan_tree_for_explode_logical_tree(self):
+        logical_plan = LogicalExplode([TupleValueExpression("label")])
+        plan = ScanGenerator().build(logical_plan)
+        self.assertTrue(isinstance(plan, ExplodePlan))
+        self.assertTrue(isinstance(plan.column_list[0], TupleValueExpression))
+        self.assertEqual(plan.column_list[0].col_name, "label")
