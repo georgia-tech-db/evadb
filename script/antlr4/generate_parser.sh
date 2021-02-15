@@ -5,7 +5,7 @@
 ###############################################################
 
 # Get Antlr4 JAR
-# wget https://www.antlr.org/download/antlr-4.8-complete.jar
+wget https://www.antlr.org/download/antlr-4.8-complete.jar
 #export CLASSPATH="./antlr-4.8-complete.jar::$CLASSPATH"
 #alias antlr4='java -jar ./antlr-4.8-complete.jar'
 
