@@ -17,7 +17,7 @@ sqlStatements
     ;
 
 sqlStatement
-    : ddlStatement | dmlStatement | utilityStatement
+    : ddlStatement | dmlStatement | utilityStatement | explodeStatement
     ;
 
 emptyStatement
@@ -142,6 +142,15 @@ insertStatement
       (
         ('(' columns=uidList ')')? insertStatementValue
       )
+    ;
+
+explodeStatement
+    : EXPLODE
+        tableSources
+        COMMA
+        LR_SQ_BRACKET
+        fullColumnName (',' fullColumnName)*
+        RR_SQ_BRACKET
     ;
 
 selectStatement
