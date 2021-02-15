@@ -1,35 +1,41 @@
 version: 2.1
 
 jobs:
-  build:
+  build-and-test:
     machine:
       image: ubuntu-1604:202007-01
     steps:
-      - run: 
-          command: | 
-            echo "Build starts >>> >>>"
+      - checkout          
+
+      - run:
+          name: Before Install
+          command: |
             sh script/install/before_install.sh
+          environment:
+            DEBIAN_FRONTEND: noninteractive
+
+      - run:
+          name: Install
+          command: | 
             export PATH="$HOME/miniconda/bin:$PATH"
             sh script/install/install.sh
-            echo "Build finishes"
-  test:
-    machine:
-      image: ubuntu-1604:202007-01
-    steps:
+            # allow no-password connection for root
+            sudo mysql -u root -e "SELECT User,Host FROM mysql.user; 
+                                   DROP USER 'root'@'localhost'; 
+                                   CREATE USER 'root'@'%' IDENTIFIED BY ''; 
+                                   GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; 
+                                   FLUSH PRIVILEGES;" 
+
       - run:
+          name: Test
           command: | 
-            echo "Test starts >>> >>>"
+            export PATH="$HOME/miniconda/bin:$PATH"
             conda init bash
             source ~/.bashrc
             conda activate eva
             sh script/test/test.sh
-            echo "Test finishes"
 
 workflows:
   main:
     jobs:
-      - build
-      - test:
-          requires:
-            - build
-
+      - build-and-test
