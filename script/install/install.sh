@@ -11,3 +11,4 @@ mysql -e 'CREATE DATABASE IF NOT EXISTS eva_catalog;'
 # Generate eva-ql parser using antlr4
 sh script/antlr4/generate_parser.sh
 
+
