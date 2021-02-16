@@ -61,16 +61,3 @@ class UdfIOService(BaseService):
             return self.model.query.filter(self.model._name == name).one()
         except NoResultFound:
             return None
-
-    def udf_io_by_id(self, udf_io_id: str):
-        """return the udf_io entry that matches the id provided.
-           None if no such entry found.
-
-        Arguments:
-            name (str): name to be searched
-        """
-
-        try:
-            return self.model.query.filter(self.model._id == udf_io_id).one()
-        except NoResultFound:
-            return None

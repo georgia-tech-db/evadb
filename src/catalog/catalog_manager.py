@@ -284,42 +284,6 @@ class CatalogManager(object):
         """
         return self._udf_service.udf_by_name(name)
 
-    def get_udf_io_by_id(self, udf_io_id: int) -> UdfIO:
-        """
-           Get the UDF IO information based on id.
-
-           Arguments:
-                udf_io_id (str): id of the UDF IO
-
-           Returns:
-               UdfMetadata object
-           """
-        return self._udf_io_service.udf_io_by_id(udf_io_id)
-
-    def get_inputs_by_udf_id(self, udf_id: int):
-        """
-        Get the inputs of a certain udf with udf_id.
-
-        Args:
-            udf_id (int): id of the udf
-
-        Returns:
-            Inputs of the udf.
-        """
-        return self._udf_io_service.get_inputs_by_udf_id(udf_id)
-
-    def get_outputs_by_udf_id(self, udf_id: int):
-        """
-        Get the outputs of a certain udf with udf_id.
-
-       Args:
-            udf_id (int): id of the udf
-
-        Returns:
-            Outputs of the udf.
-        """
-        return self._udf_io_service.get_outputs_by_udf_id(udf_id)
-
     def delete_metadata(self, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
