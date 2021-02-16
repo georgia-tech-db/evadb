@@ -17,7 +17,6 @@ from typing import Iterator
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.sample_plan import SamplePlan
-from src.configuration.configuration_manager import ConfigurationManager
 
 
 class SampleExecutor(AbstractExecutor):
@@ -32,18 +31,14 @@ class SampleExecutor(AbstractExecutor):
     def __init__(self, node: SamplePlan):
         super().__init__(node)
         self._sample_freq = node.sample_value
-        self.BATCH_MAX_SIZE = ConfigurationManager().get_value(
-            "executor", "batch_size")
 
     def validate(self):
         pass
 
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
-        # aggregates the batches into one large batch
+
         current = 0
         for batch in child_executor.exec():
-            start = current
-            for i in range(start, len(batch), self._sample_freq):
-                yield batch[i:i + 1]
+            yield batch[current::self._sample_freq]
             current = (current - len(batch)) % self._sample_freq
