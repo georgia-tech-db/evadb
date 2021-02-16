@@ -321,7 +321,7 @@ class ParserVisitor(evaql_parserVisitor):
 
     # Explode sub query
     def visitSubqueryExplodeItem(
-            self, ctx:evaql_parser.SubqueryExplodeItemContext):
+            self, ctx: evaql_parser.SubqueryExplodeItemContext):
         return self.visit(ctx.explodeStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):

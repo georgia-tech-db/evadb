@@ -52,7 +52,7 @@ class ExplodeExecutorTest(unittest.TestCase):
         explode_executor.append_child(DummyExecutor(batches))
 
         with self.assertRaises(KeyError):
-            reduced_batches = list(explode_executor.exec())
+            list(explode_executor.exec())
 
 
 
