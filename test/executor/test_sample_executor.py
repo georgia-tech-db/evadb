@@ -1,7 +1,6 @@
 import unittest
 import pandas as pd
 import numpy as np
-import math
 
 from src.executor.sample_executor import SampleExecutor
 from src.models.storage.batch import Batch
@@ -18,12 +17,7 @@ class SampleExecutorTest(unittest.TestCase):
 
         batches = [Batch(frames=df) for df in dfs]
 
-        sample_value = 5
-
-        target_size = 0
-        for batch in batches:
-            target_size += batch.batch_size
-        target_size = int(math.ceil(target_size / sample_value))
+        sample_value = 3
 
         plan = SamplePlan(ConstantValueExpression(sample_value))
 
@@ -31,8 +25,12 @@ class SampleExecutorTest(unittest.TestCase):
         sample_executor.append_child(DummyExecutor(batches))
         reduced_batches = list(sample_executor.exec())
 
-        total_size = 0
-        for batch in reduced_batches:
-            total_size += batch.batch_size
+        original = Batch.concat(batches)
+        filter = range(0, len(original), sample_value)
+        original = original._get_frames_from_indices(filter)
+        original = Batch.concat([original])
 
-        self.assertEqual(total_size, target_size)
+        reduced = Batch.concat(reduced_batches)
+
+        self.assertEqual(len(original), len(reduced))
+        self.assertEqual(original, reduced)
