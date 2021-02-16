@@ -130,11 +130,15 @@ class ParserTests(unittest.TestCase):
 
     def test_explode_statement(self):
         parser = Parser()
-        explode_query = "EXPLODE SELECT id, FastRCNNObjectDetector(data).label FROM MyVideo, [LABELS, BBOXES];"
+        explode_query = "EXPLODE SELECT id, " \
+                        "FastRCNNObjectDetector(data).label FROM MyVideo, " \
+                        "[LABELS, BBOXES];"
+
         eva_statement_list = parser.parse(explode_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLODE)
+        self.assertEqual(eva_statement_list[0].stmt_type,
+                         StatementType.EXPLODE)
 
         explode_stmt = eva_statement_list[0]
 
@@ -149,8 +153,10 @@ class ParserTests(unittest.TestCase):
         # from_table
         self.assertIsNotNone(explode_stmt.from_table)
         self.assertIsInstance(explode_stmt.from_table.from_table, TableRef)
+
+        table = explode_stmt.from_table
         self.assertEqual(
-            explode_stmt.from_table.from_table.table_info.table_name, 'MyVideo')
+            table.from_table.table_info.table_name, 'MyVideo')
 
         # where_clause
         self.assertIsNone(explode_stmt.from_table.where_clause)

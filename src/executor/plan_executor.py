@@ -30,6 +30,7 @@ from src.executor.union_executor import UnionExecutor
 from src.executor.orderby_executor import OrderByExecutor
 from src.executor.explode_executor import ExplodeExecutor
 
+
 class PlanExecutor:
     """
     This is an interface between plan tree and execution tree.

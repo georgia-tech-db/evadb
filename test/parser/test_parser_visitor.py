@@ -26,6 +26,7 @@ from src.expression.abstract_expression import ExpressionType
 from src.expression.function_expression import ExecutionMode
 from antlr4 import TerminalNode
 
+
 class ParserVisitorTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -348,4 +349,5 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         visitor.visitExplodeStatement(ctx)
         mock_explode.assert_called_once()
-        mock_explode.assert_called_with(column_list=column_list, from_table=table_source[0])
+        mock_explode.assert_called_with(column_list=column_list,
+                                        from_table=table_source[0])

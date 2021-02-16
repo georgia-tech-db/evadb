@@ -23,14 +23,14 @@ from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.load_statement import LoadDataStatement
-from src.parser.explode_statement import ExplodeStatement
 from src.parser.parser import Parser
 
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
                                      LogicalLoadData, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit, LogicalExplode)
+                                     LogicalOrderBy, LogicalLimit,
+                                     LogicalExplode)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
@@ -333,11 +333,6 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             expected_plan = plan
 
         self.assertEqual(expected_plan, actual_plan)
-        wrong_plan = plans[0]
-        for plan in plans[1:]:
-            wrong_plan.append_child(plan)
-        self.assertNotEqual(wrong_plan, actual_plan)
-
 
     @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')

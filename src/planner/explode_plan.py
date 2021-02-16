@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.catalog.models.df_metadata import DataFrameMetadata
+
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanNodeType
-from src.parser.table_ref import TableRef
 from src.expression.abstract_expression import AbstractExpression
 from typing import List
+
 
 class ExplodePlan(AbstractPlan):
     """

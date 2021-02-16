@@ -307,6 +307,7 @@ class ParserVisitor(evaql_parserVisitor):
 
         table_list = []
         table_sources_count = len(ctx.tableSource())
+
         for table_sources_index in range(table_sources_count):
             table = self.visit(ctx.tableSource(table_sources_index))
             table_list.append(table)
@@ -317,6 +318,11 @@ class ParserVisitor(evaql_parserVisitor):
     def visitSubqueryTableItem(
             self, ctx: evaql_parser.SubqueryTableItemContext):
         return self.visit(ctx.selectStatement())
+
+    # Explode sub query
+    def visitSubqueryExplodeItem(
+            self, ctx:evaql_parser.SubqueryExplodeItemContext):
+        return self.visit(ctx.explodeStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
         left_selectStatement = self.visit(ctx.left)
@@ -393,7 +399,8 @@ class ParserVisitor(evaql_parserVisitor):
         explode_stmt = ExplodeStatement(
             from_table=from_table,
             column_list=column_list
-            )
+        )
+
         return explode_stmt
 
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):

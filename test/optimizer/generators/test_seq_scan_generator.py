@@ -16,8 +16,10 @@ import unittest
 
 
 from src.expression.tuple_value_expression import TupleValueExpression
-from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
-                                     LogicalOrderBy, LogicalLimit, LogicalExplode)
+from src.optimizer.operators import (LogicalProject,
+                                     LogicalGet, LogicalFilter,
+                                     LogicalOrderBy, LogicalLimit,
+                                     LogicalExplode)
 
 from src.optimizer.generators.seq_scan_generator import ScanGenerator
 from src.parser.types import ParserOrderBySortType

@@ -14,13 +14,14 @@
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.abstract_expression import AbstractExpression
-from src.expression.function_expression import FunctionExpression
 
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit, LogicalExplode)
+                                     LogicalOrderBy, LogicalLimit,
+                                     LogicalExplode)
+
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -37,6 +38,7 @@ from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            create_video_metadata)
 from src.parser.table_ref import TableRef
 from src.utils.logging_manager import LoggingLevel, LoggingManager
+
 
 class StatementToPlanConvertor:
     def __init__(self):
@@ -76,6 +78,12 @@ class StatementToPlanConvertor:
         if isinstance(video, SelectStatement):
             # NestedQuery
             self.visit_select(video)
+            child_plan = self._plan
+            self._plan = LogicalQueryDerivedGet()
+            self._plan.append_child(child_plan)
+        elif isinstance(video, ExplodeStatement):
+            # Explode
+            self.visit_explode(video)
             child_plan = self._plan
             self._plan = LogicalQueryDerivedGet()
             self._plan.append_child(child_plan)
@@ -240,23 +248,23 @@ class StatementToPlanConvertor:
             child_plan = self._plan
             self._plan = LogicalQueryDerivedGet()
             self._plan.append_child(child_plan)
+        elif isinstance(table, ExplodeStatement):
+            # Explode
+            self.visit_explode(table)
+            child_plan = self._plan
+            self._plan = LogicalQueryDerivedGet()
+            self._plan.append_child(child_plan)
         elif isinstance(table, TableRef):
             # Table
             self.visit_table_ref(table)
 
         column_list = statement.column_list
-        # Don't bind to any columns yet, since the column depends on
-        # the result from the get table/select operation.
-        # No need to bind here, could check during execution.
-        #if isinstance(table, TableRef):
-        #    bind_columns_expr(column_list, {})
 
-
+        # Don't bind the column list.
         explode_plan = LogicalExplode(column_list)
         explode_plan.append_child(self._plan)
 
         self._plan = explode_plan
-
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
@@ -266,6 +274,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} -- [Input statement]
         """
+
         if isinstance(statement, SelectStatement):
             self.visit_select(statement)
         elif isinstance(statement, InsertTableStatement):

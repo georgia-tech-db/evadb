@@ -294,6 +294,7 @@ class LogicalCreate(Operator):
                 and self.column_list == other.column_list
                 and self.if_not_exists == other.if_not_exists)
 
+
 class LogicalExplode(Operator):
     """Logical node for explode operation
 
@@ -315,6 +316,7 @@ class LogicalExplode(Operator):
             return False
         return (is_subtree_equal
                 and self._column_list == other.column_list)
+
 
 class LogicalCreateUDF(Operator):
     """

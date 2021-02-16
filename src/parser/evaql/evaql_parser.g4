@@ -224,6 +224,10 @@ tableSourceItem
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
       )                                                            #subqueryTableItem
+    | (
+      explodeStatement |
+      LR_BRACKET explodeStatement RR_BRACKET
+      )                                                            #subqueryExplodeItem
     ;
 
 joinPart

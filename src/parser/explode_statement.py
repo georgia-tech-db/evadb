@@ -17,9 +17,6 @@ from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
-from src.expression.constant_value_expression import ConstantValueExpression
-from src.parser.select_statement import SelectStatement
-from src.parser.table_ref import TableRef
 from typing import List
 
 
@@ -36,8 +33,9 @@ class ExplodeStatement(AbstractStatement):
     **kwargs : to support other functionality
     """
 
-    def __init__(self, column_list: List[AbstractExpression] = None,
-                 from_table = None,
+    def __init__(self,
+                 column_list: List[AbstractExpression] = None,
+                 from_table=None,
                  **kwargs):
         super().__init__(StatementType.EXPLODE)
         self._from_table = from_table
@@ -60,7 +58,8 @@ class ExplodeStatement(AbstractStatement):
         self._from_table = from_table
 
     def __str__(self) -> str:
-        print_str = "EXPLODE(({}), [{}])".format(self._from_table, self._column_list)
+        print_str = "EXPLODE(({}), [{}])" \
+            .format(self._from_table, self._column_list)
         return print_str
 
     def __eq__(self, other):
