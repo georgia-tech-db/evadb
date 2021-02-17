@@ -21,7 +21,7 @@ import pandas as pd
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.readers.opencv_reader import OpenCVReader
-from test.util import create_sample_video, create_dummy_batches, perform_query
+from test.util import create_sample_video, create_dummy_batches, perform_query, create_dummy_exploded_batches
 
 NUM_FRAMES = 10
 
@@ -160,5 +160,18 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches(
             num_frames=10, batch_size=5))
 
+        self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_explode(self):
+        load_query = """LOAD DATA INFILE 'dummy.avi' INTO TestVideo;"""
+        perform_query(load_query)
+
+        select_query = """SELECT id, data FROM (EXPLODE SELECT id, data 
+                            FROM TestVideo WHERE id < 1, [data]);"""
+        actual_batch = perform_query(select_query)
+
+        actual_batch.sort()
+        expected_batch = list(create_dummy_exploded_batches(num_frames=1))
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])

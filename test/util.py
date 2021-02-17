@@ -92,6 +92,24 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         yield Batch(pd.DataFrame(data))
 
 
+def create_dummy_exploded_batches(num_frames=NUM_FRAMES,
+                                  filters=[], batch_size=10, start_id=0):
+    if not filters:
+        filters = range(num_frames)
+    data = []
+    for i in filters:
+        for j in range(2 * 2 * 3):
+            data.append({
+                'id': i + start_id,
+                'data': float(i + 1) * 25,
+            })
+
+        if len(data) % batch_size == 0:
+            yield Batch(pd.DataFrame(data))
+            data = []
+    if data:
+        yield Batch(pd.DataFrame(data))
+
 def perform_query(query):
     stmt = Parser().parse(query)[0]
     l_plan = StatementToPlanConvertor().visit(stmt)

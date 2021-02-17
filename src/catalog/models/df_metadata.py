@@ -23,7 +23,7 @@ class DataFrameMetadata(BaseModel):
     __tablename__ = 'df_metadata'
 
     _name = Column('name', String(100), unique=True)
-    _file_url = Column('file_url', String(100))
+    _file_url = Column('file_url', String(200))
     _unique_identifier_column = Column('identifier_column', String(100))
 
     _columns = relationship('DataFrameColumn',

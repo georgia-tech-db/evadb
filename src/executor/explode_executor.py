@@ -63,8 +63,12 @@ class ExplodeExecutor(AbstractExecutor):
                                        .format(column.col_name))
 
                     element = first_row[col_name]
-                    if type(element) == list and len_arr == []:
-                        col_list = frames[col_name].values.tolist()
+                    if (type(element) == list or type(element) == np.ndarray) and len_arr == []:
+                        if type(element) == np.ndarray:
+                            col_list = frames[col_name].values
+                            col_list = [c.flatten().tolist() for c in col_list]
+                        else:
+                            col_list = frames[col_name].values.tolist()
                         len_arr = [len(r) for r in col_list]
 
                 # Asserting all the lists in the same row have
@@ -74,6 +78,11 @@ class ExplodeExecutor(AbstractExecutor):
                     if type(first_row[column]) == list:
                         exploded_list.append(np.concatenate(
                             frames[column].values.tolist()))
+                    elif type(first_row[column]) == np.ndarray:
+                        col_list = frames[col_name].values
+                        col_list = [c.flatten().tolist() for c in col_list]
+                        exploded_list.append(np.concatenate(
+                            col_list))
                     else:
                         exploded_list.append(
                             np.repeat(frames[column], len_arr))
