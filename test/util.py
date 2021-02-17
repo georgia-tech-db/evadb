@@ -110,6 +110,7 @@ def create_dummy_exploded_batches(num_frames=NUM_FRAMES,
     if data:
         yield Batch(pd.DataFrame(data))
 
+
 def perform_query(query):
     stmt = Parser().parse(query)[0]
     l_plan = StatementToPlanConvertor().visit(stmt)

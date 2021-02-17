@@ -21,7 +21,8 @@ import pandas as pd
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.readers.opencv_reader import OpenCVReader
-from test.util import create_sample_video, create_dummy_batches, perform_query, create_dummy_exploded_batches
+from test.util import create_sample_video, create_dummy_batches, \
+    perform_query, create_dummy_exploded_batches
 
 NUM_FRAMES = 10
 

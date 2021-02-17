@@ -63,7 +63,8 @@ class ExplodeExecutor(AbstractExecutor):
                                        .format(column.col_name))
 
                     element = first_row[col_name]
-                    if (type(element) == list or type(element) == np.ndarray) and len_arr == []:
+                    if (type(element) == list or
+                            type(element) == np.ndarray) and len_arr == []:
                         if type(element) == np.ndarray:
                             col_list = frames[col_name].values
                             col_list = [c.flatten().tolist() for c in col_list]
