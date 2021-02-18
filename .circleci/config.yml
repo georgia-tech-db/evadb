@@ -34,6 +34,7 @@ jobs:
             source ~/.bashrc
             conda activate eva
             sh script/test/test.sh
+            coveralls
 
 workflows:
   main:

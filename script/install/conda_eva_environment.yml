@@ -35,4 +35,5 @@ dependencies:
     - pre-commit
     - flake8
     - pytest
+    - coveralls
 prefix: eva
