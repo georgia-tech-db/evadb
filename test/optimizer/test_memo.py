@@ -13,6 +13,12 @@ class MemoTest(unittest.TestCase):
         memo = Memo()
         self.assertEqual(memo.add_group_expr(group_expr), group_expr)
 
+    def test_memo_add_with_forcing_id(self):
+        group_expr = MagicMock()
+        group_expr.group_id = 0
+        memo = Memo()
+        self.assertEqual(memo.add_group_expr(group_expr), group_expr)
+
     def test_memo_add_existing_group_id_under_no_forcing_id(self):
         group_expr = MagicMock()
         group_expr.group_id = INVALID_GROUP_ID
