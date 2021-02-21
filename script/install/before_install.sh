@@ -1,12 +1,12 @@
 #!/bin/sh
 
 # Install mysql and start server
-sudo apt-get update
-sudo apt-get install mysql-server
+sudo -E apt-get update
+sudo -E apt-get -q -y install mysql-server
 sudo systemctl start mysql
 
 # Install java8 (for running antlr4)
-sudo apt install openjdk-8-jdk openjdk-8-jre
+sudo -E apt install -y openjdk-8-jdk openjdk-8-jre
 
 # Install conda
 wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
