@@ -175,4 +175,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(create_dummy_exploded_batches(num_frames=1))
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
-        self.assertEqual(actual_batch, expected_batch[0])
+        for col in expected_batch[0].frames.columns:
+            expected_col = expected_batch[0].column_as_numpy_array(col)
+            actual_col = actual_batch.column_as_numpy_array(col)
+            self.assertTrue(np.array_equal(expected_col, actual_col))

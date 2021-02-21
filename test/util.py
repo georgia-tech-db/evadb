@@ -98,10 +98,11 @@ def create_dummy_exploded_batches(num_frames=NUM_FRAMES,
         filters = range(num_frames)
     data = []
     for i in filters:
-        for j in range(2 * 2 * 3):
+        for j in range(2):
             data.append({
                 'id': i + start_id,
-                'data': float(i + 1) * 25,
+                'data': (np.ones((2, 3)).astype(np.int)
+                         * (i + 1) * 25).tolist(),
             })
 
         if len(data) % batch_size == 0:
