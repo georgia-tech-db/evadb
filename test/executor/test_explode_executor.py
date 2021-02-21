@@ -31,9 +31,12 @@ class ExplodeExecutorTest(unittest.TestCase):
 
         expected_list = [[1, "car", 0.5], [1, "truck", 0.6],
                          [2, "plane", 0.3], [2, "car", 0.4], [3, "car", 0.5]]
+        expected_df = pd.DataFrame(
+            expected_list, columns=['id', 'label', 'pred_score'])
 
-        self.assertEqual(expected_list,
-                         reduced_batches[0].frames.values.tolist())
+        for col in expected_df.columns:
+            self.assertTrue(expected_df[col]
+                            .equals(reduced_batches[0].frames[col]))
 
     def test_should_throw_no_such_column_error(self):
         data_list = [[1, ["car", "truck"], [0.5, 0.6]],
@@ -54,5 +57,19 @@ class ExplodeExecutorTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             list(explode_executor.exec())
 
+    def test_empty_data_frame_should_work(self):
+        df = pd.DataFrame(columns=['id', 'label', 'pred_score'])
+
+        dfs = [df]
+        batches = [Batch(frames=df) for df in dfs]
+
+        columns = [TupleValueExpression("test")]
+        explode_plan = ExplodePlan(column_list=columns)
+        explode_executor = ExplodeExecutor(explode_plan)
+        explode_executor.append_child(DummyExecutor(batches))
+
+        reduced_batches = list(explode_executor.exec())
+        self.assertEqual([],
+                         reduced_batches[0].frames.values.tolist())
 
 

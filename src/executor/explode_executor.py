@@ -49,56 +49,32 @@ class ExplodeExecutor(AbstractExecutor):
         for batch in self.children[0].exec():
             if not batch.empty():
                 frames: pd.DataFrame = batch.frames
-                old_types = frames.dtypes.values
-
-                first_row = frames.iloc[0]
+                nested_cols = {}
+                flat_cols = {}
                 len_arr = []
 
-                for column in self._column_list:
-                    col_name = column.col_name
-
+                col_names = [col.col_name for col in self._column_list]
+                for col_name in col_names:
                     if col_name not in frames.columns:
                         raise KeyError("Column doesn't exist in "
                                        "the data frame: {}"
-                                       .format(column.col_name))
+                                       .format(col_name))
 
-                    element = first_row[col_name]
-                    if (type(element) == list or
-                            type(element) == np.ndarray) and len_arr == []:
-                        if type(element) == np.ndarray:
-                            col_list = frames[col_name].values
-                            col_list = [c.flatten().tolist() for c in col_list]
-                        else:
-                            col_list = frames[col_name].values.tolist()
-                        len_arr = [len(r) for r in col_list]
-
-                # Asserting all the lists in the same row have
-                # the same length across the columns
-                exploded_list = []
-                for column in frames.columns:
-                    if type(first_row[column]) == list:
-                        exploded_list.append(np.concatenate(
-                            frames[column].values.tolist()))
-                    elif type(first_row[column]) == np.ndarray:
-                        col_list = frames[col_name].values
-                        col_list = [c.flatten().tolist() for c in col_list]
-                        exploded_list.append(np.concatenate(
-                            col_list))
+                for col_name in frames.columns:
+                    col = batch.column_as_numpy_array(col_name)
+                    if len(col) == len(frames) and col.dtype != np.object:
+                        flat_cols[col_name] = col
                     else:
-                        exploded_list.append(
-                            np.repeat(frames[column], len_arr))
+                        flat_col = np.concatenate(col)
+                        nested_cols[col_name] = flat_col
+                        if len(len_arr) == 0:
+                            len_arr = [len(r) for r in col]
 
-                exploded_list = np.column_stack(exploded_list)
-                batch._frames = pd.DataFrame(exploded_list,
-                                             columns=frames.columns)
-
-                for (col, d_type) in zip(batch._frames.columns, old_types):
-                    final_type = d_type
-                    if d_type == "object":
-                        if self.is_float(batch._frames[col].iloc[0]):
-                            final_type = "float64"
-                        elif str(batch._frames[col].iloc).isnumeric():
-                            final_type = "int64"
-                    batch._frames[col] = batch._frames[col].astype(final_type)
+                result_dict = {}
+                for k, v in nested_cols.items():
+                    result_dict[k] = v.tolist()
+                for k, v in flat_cols.items():
+                    result_dict[k] = np.repeat(v, len_arr).tolist()
+                batch._frames = pd.DataFrame.from_dict(result_dict)
 
             yield batch
