@@ -113,6 +113,7 @@ class Memo:
         # If forcing a group id
         else:
             group_id = expr.group_id
+            assert group_id < len(self.groups), 'Group Id out of the bound'
             assert len(self.groups[group_id].logical_exprs) < 2, \
                 'Unexpected number of expressions: %s' \
                 % self.groups[group_id].logical_exprs
