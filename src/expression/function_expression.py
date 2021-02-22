@@ -97,7 +97,8 @@ class FunctionExpression(AbstractExpression):
 
     def evaluate(self, batch: Batch, **kwargs):
         new_batch = batch
-        child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+        child_batches = \
+            [child.evaluate(batch, **kwargs) for child in self.children]
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
 

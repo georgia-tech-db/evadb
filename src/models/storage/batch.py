@@ -182,8 +182,6 @@ class Batch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
-        else:
-            return self._get_frames_from_mask(indices)
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
@@ -194,17 +192,6 @@ class Batch:
         for key in self._temp_outcomes:
             new_batch._temp_outcomes[key] = [self._temp_outcomes[key][i]
                                              for i in required_frame_ids]
-        return new_batch
-
-    def _get_frames_from_mask(self, mask):
-        new_frames = self.frames.loc[mask, :]
-        new_batch = Batch(new_frames)
-        for key in self._outcomes:
-            new_batch._outcomes[key] = [self._outcomes[key][i] for i in
-                                        mask[mask].indices] # get indices of Trues
-        for key in self._temp_outcomes:
-            new_batch._temp_outcomes[key] = [self._temp_outcomes[key][i] for i in
-                                             mask[mask].indices]
         return new_batch
 
     def sort(self, by=None):
