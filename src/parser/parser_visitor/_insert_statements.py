@@ -50,7 +50,6 @@ class Insert(evaql_parserVisitor):
                         # Support only (value1, value2, .... value n)
                         value_list = insrt_value[0]
                 except BaseException:
-                    print("Exception")
                     # stop parsing something bad happened
                     return None
 
@@ -80,7 +79,6 @@ class Insert(evaql_parserVisitor):
                         insert_stmt_value.append(expr)
 
                 except BaseException:
-                    print("Exception")
                     # stop parsing something bad happened
                     return None
         return insert_stmt_value

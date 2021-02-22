@@ -47,7 +47,6 @@ class CreateTable(evaql_parserVisitor):
                     create_definitions = self.visit(ctx.createDefinitions())
 
             except BaseException:
-                print("Exception")
                 # stop parsing something bad happened
                 return None
 
