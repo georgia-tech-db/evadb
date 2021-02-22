@@ -280,10 +280,8 @@ class Encoder(object):
 
         for i, score in enumerate(scores_in.split(1, 1)):
             # skip background
-            # print(score[score>0.90])
             if i == 0:
                 continue
-            # print(i)
 
             score = score.squeeze(1)
             mask = score > 0.05
