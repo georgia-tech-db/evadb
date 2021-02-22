@@ -34,18 +34,20 @@ class LogicalExpression(AbstractExpression):
         if self.get_children_count() == 2:
             left_values = self.get_child(0).evaluate(*args, **kwargs).frames
             if self.etype == ExpressionType.LOGICAL_AND:
-                if (~left_values).all().bool(): # check if all are false
+                if (~left_values).all().bool():  # check if all are false
                     return Batch(left_values)
-                kwargs["mask"] = left_values[0]
-                right_values = self.get_child(1).evaluate(*args, **kwargs).frames
-                left_values[kwargs["mask"]] = right_values
+                kwargs["mask"] = left_values[left_values[0]].index.tolist()
+                right_values = self.get_child(
+                    1).evaluate(*args, **kwargs).frames
+                left_values.iloc[kwargs["mask"]] = right_values
                 return Batch(pd.DataFrame(left_values))
             elif self.etype == ExpressionType.LOGICAL_OR:
-                if left_values.all().bool(): # check if all are true
+                if left_values.all().bool():  # check if all are true
                     return Batch(left_values)
-                kwargs["mask"] = ~left_values[0]
-                right_values = self.get_child(1).evaluate(*args, **kwargs).frames
-                left_values[kwargs["mask"]] = right_values
+                kwargs["mask"] = left_values[~left_values[0]].index.tolist()
+                right_values = self.get_child(
+                    1).evaluate(*args, **kwargs).frames
+                left_values.iloc[kwargs["mask"]] = right_values
                 return Batch(pd.DataFrame(left_values))
         else:
             values = self.get_child(0).evaluate(*args).frames
