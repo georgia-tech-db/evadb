@@ -18,7 +18,6 @@ import pandas as pd
 
 from typing import List
 from pandas import DataFrame
-from src.models.inference.outcome import Outcome
 from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
@@ -42,8 +41,6 @@ class Batch:
 
     Arguments:
         frames (DataFrame): pandas Dataframe holding frames data
-        outcomes (Dict[str, List[BasePrediction]]): outcomes of running a udf
-        with name 'x' as key
         identifier_column (str): A column used to uniquely a row
 
 
@@ -51,14 +48,8 @@ class Batch:
 
     def __init__(self,
                  frames=pd.DataFrame(),
-                 outcomes=None,
-                 temp_outcomes=None,
                  identifier_column='id'):
         super().__init__()
-        if outcomes is None:
-            outcomes = dict()
-        if temp_outcomes is None:
-            temp_outcomes = dict()
         # store the batch with columns sorted
         if isinstance(frames, DataFrame):
             self._frames = frames[sorted(frames.columns)]
@@ -68,8 +59,6 @@ class Batch:
             raise ValueError('Batch constructor not properly called. \
                 Expected pandas.DataFrame')
         self._batch_size = len(frames)
-        self._outcomes = outcomes
-        self._temp_outcomes = temp_outcomes
         self._identifier_column = identifier_column
 
     @property
@@ -113,65 +102,11 @@ class Batch:
                % (self._frames, self._batch_size, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
-        return self.frames.equals(other.frames) and \
-            self._outcomes == other._outcomes and \
-            self._temp_outcomes == other._temp_outcomes
-
-    def set_outcomes(self, name, predictions: List[Outcome],
-                     is_temp: bool = False):
-        """
-        Used for storing outcomes of the UDF predictions
-
-        Arguments:
-            name (str): name of the UDF to which the predictions belong to
-
-            predictions (pandas.DataFrame): Predictions/Outcome after executing
-            the UDF on prediction
-
-            is_temp (bool, default: False): Check if the outcomes are temporary
-
-        """
-        if is_temp:
-            self._temp_outcomes[name] = predictions
-        else:
-            self._outcomes[name] = predictions
-
-    def get_outcomes_for(self, name: str) -> List[Outcome]:
-        """
-        Returns names corresponding to a name
-        Arguments:
-            name (str): name of the udf on which predicate is being executed
-
-        Returns:
-            List[BasePrediction]
-        """
-        if name in self._outcomes:
-            return self._outcomes.get(name, [])
-        else:
-            return self._temp_outcomes.get(name, [])
-
-    def has_outcome(self, name: str):
-        """
-        Method used for checking if the outcome with given name is present.
-        Either in temporary outcomes or actual outcomes.
-
-        Arguments:
-            name (str): name of the outcome to check
-        Returns:
-            bool: True if present else false
-        """
-
-        return name in self._outcomes or name in self._temp_outcomes
+        return self.frames.equals(other.frames)
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
         new_batch = Batch(new_frames)
-        for key in self._outcomes:
-            new_batch._outcomes[key] = [self._outcomes[key][i]
-                                        for i in required_frame_ids]
-        for key in self._temp_outcomes:
-            new_batch._temp_outcomes[key] = [self._temp_outcomes[key][i]
-                                             for i in required_frame_ids]
         return new_batch
 
     def __getitem__(self, indices) -> 'Batch':
@@ -236,7 +171,6 @@ class Batch:
     def project(self, cols: []) -> 'Batch':
         """
         Takes as input the column list, returns the projection.
-        Keep the outcomes and temp_outcomes unchanged.
         We do a copy for now.
         """
         verfied_cols = [c for c in cols if c in self._frames]
@@ -245,8 +179,7 @@ class Batch:
             LoggingManager().log("Unexpected columns %s\n\
                                  Frames: %s" % (unknown_cols, self._frames),
                                  LoggingLevel.WARNING)
-        return Batch(self._frames[verfied_cols], self._outcomes.copy(),
-                     self._temp_outcomes.copy(), self._identifier_column)
+        return Batch(self._frames[verfied_cols], self._identifier_column)
 
     @classmethod
     def merge_column_wise(cls,
@@ -254,7 +187,6 @@ class Batch:
                           auto_renaming=False) -> 'Batch':
         """
         Merge list of batch frames column_wise and return a new batch frame
-        No outcome merge. Add later when there is a actual usage.
         Arguments:
             batches: List[Batch]: lsit of batch objects to be merged
             auto_renaming: if true rename column names if required
@@ -296,18 +228,8 @@ class Batch:
             return self
 
         new_frames = self.frames.append(other.frames, ignore_index=True)
-        new_outcomes = {}
-        temp_new_outcomes = {}
 
-        for key in _unique_keys(self._outcomes, other._outcomes):
-            new_outcomes[key] = self._outcomes.get(key, []) + \
-                other._outcomes.get(key, [])
-        for key in _unique_keys(self._temp_outcomes, other._temp_outcomes):
-            temp_new_outcomes[key] = self._temp_outcomes.get(key, []) + \
-                other._temp_outcomes.get(key, [])
-
-        return Batch(new_frames, outcomes=new_outcomes,
-                     temp_outcomes=temp_new_outcomes)
+        return Batch(new_frames)
 
     @classmethod
     def concat(cls, batch_list: List['Batch'], copy=True) -> 'Batch':
