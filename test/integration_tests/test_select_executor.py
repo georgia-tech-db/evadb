@@ -162,3 +162,8 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_logical_expression_shortcircuits(self):
+        query = "SELECT id FROM MyVideo WHERE id < 10 OR id > 20 AND id < 30;"
+        actual_batch = perform_query(query)
+        print(actual_batch)
