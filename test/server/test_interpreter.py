@@ -28,7 +28,7 @@ class InterpreterTests(unittest.TestCase):
     def test_run_event_loop(self):
         prompt = EvaCommandInterpreter()
         prompt.prompt = '> '
-        
+
         with io.StringIO() as buf:
             with contextlib.redirect_stdout(buf):
                 prompt.do_greet('test')
