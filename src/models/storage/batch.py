@@ -16,7 +16,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from typing import List, Iterable
+from typing import Iterable
 
 from pandas import DataFrame
 from src.utils.logging_manager import LoggingManager, LoggingLevel
