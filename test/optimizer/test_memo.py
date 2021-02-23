@@ -13,6 +13,7 @@ class MemoTest(unittest.TestCase):
         memo = Memo()
         self.assertEqual(memo.add_group_expr(group_expr), group_expr)
 
+    @unittest.skip('Program should not force id when memo is empty')
     def test_memo_add_with_forcing_id(self):
         group_expr = MagicMock()
         group_expr.group_id = 0
