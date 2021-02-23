@@ -19,7 +19,9 @@ import cv2
 import pandas as pd
 
 from src.models.storage.batch import Batch
-from src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
+from src.udfs.classifier_udfs.fastrcnn_object_detector \
+    import FastRCNNObjectDetector
+
 
 NUM_FRAMES = 10
 

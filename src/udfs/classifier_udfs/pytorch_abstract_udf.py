@@ -23,7 +23,7 @@ from PIL import Image
 from torch import nn, Tensor
 from torchvision.transforms import Compose, transforms
 
-from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.udfs.classifier_udfs.abstract_udfs import AbstractClassifierUDF
 from src.udfs.gpu_compatible import GPUCompatible
 from src.configuration.configuration_manager import ConfigurationManager
 
@@ -55,7 +55,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
             .to(self.get_device())
         return self.classify(tens_batch)
 
-    @abstractmethod 
+    @abstractmethod
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Abstract method to work with tensors.

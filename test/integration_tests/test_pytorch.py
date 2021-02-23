@@ -30,9 +30,9 @@ class PytorchTest(unittest.TestCase):
 
         create_udf_query = """CREATE UDF FastRCNNObjectDetector
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  OUTPUT (labels (10))
                   TYPE  Classification
-                  IMPL  'src/udfs/fastrcnn_object_detector.py';
+                  IMPL  'src/udfs/classifier_udfs/fastrcnn_object_detector.py';
         """
         perform_query(create_udf_query)
 
@@ -50,7 +50,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY (3, 256, 256))
                   OUTPUT (label TEXT(10))
                   TYPE  Classification
-                  IMPL  'src/udfs/ssd_object_detector.py';
+                  IMPL  'src/udfs/classifier_udfs/ssd_object_detector.py';
         """
         perform_query(create_udf_query)
 

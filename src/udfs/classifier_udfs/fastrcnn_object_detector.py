@@ -16,11 +16,12 @@ from typing import List
 
 import pandas as pd
 import torchvision
+import numpy as np
 
 from torch import Tensor
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from src.udfs.classifier_udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 
 class FastRCNNObjectDetector(PytorchAbstractUDF):
@@ -92,22 +93,21 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
         for prediction in predictions:
             pred_class = [str(self.labels[i]) for i in
                           list(self.as_numpy(prediction['labels']))]
-            pred_boxes = [[[i[0], i[1]],
-                           [i[2], i[3]]]
-                          for i in
-                          list(self.as_numpy(prediction['boxes']))]
+            # x, y, w, h
+            pred_boxes = [[i[0], i[1], i[2] - i[0], i[3] - i[1]]
+                          for i in list(self.as_numpy(prediction['boxes']))]
             pred_score = list(self.as_numpy(prediction['scores']))
             pred_t = \
                 [pred_score.index(x) for x in pred_score if
                  x > self.threshold][-1]
-            pred_boxes = list(pred_boxes[:pred_t + 1])
-            pred_class = list(pred_class[:pred_t + 1])
-            pred_score = list(pred_score[:pred_t + 1])
+            pred_boxes = np.array(pred_boxes[:pred_t + 1])
+            pred_class = np.array(pred_class[:pred_t + 1])
+            pred_score = np.array(pred_score[:pred_t + 1])
             outcome = outcome.append(
                 {
-                    "label": pred_class,
-                    "pred_score": pred_score,
-                    "pred_boxes": pred_boxes
+                    "labels": pred_class,
+                    "scores": pred_score,
+                    "boxes": pred_boxes
                 },
                 ignore_index=True)
         return outcome

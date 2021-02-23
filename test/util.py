@@ -24,7 +24,7 @@ from src.optimizer.plan_generator import PlanGenerator
 from src.executor.plan_executor import PlanExecutor
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.udfs.classifier_udfs.abstract_udfs import AbstractClassifierUDF
 
 NUM_FRAMES = 10
 
@@ -97,6 +97,36 @@ def perform_query(query):
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()
+
+
+def load_ndarray_udfs():
+    # TODO
+    # UDF should support TABLE INPUT/OUTPUT
+    # we need to change the UDFIO
+
+    unnest_udf = """CREATE UDF Unnest
+                  INPUT  (inp NDARRAY(10))
+                  OUTPUT (out NDARRAY(10))
+                  TYPE  Ndarray
+                  IMPL  'src/udfs/ndarray_udfs/unnest.py';
+        """
+    perform_query(unnest_udf)
+
+
+def load_classifier_udfs():
+    fastrcnn_udf = """CREATE UDF FastRCNNObjectDetector
+                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  OUTPUT (labels NDARRAY (10), bboxes NDARRAY (10),
+                            scores NDARRAY (10))
+                  TYPE  Classification
+                  IMPL  'src/udfs/classifier_udfs/fastrcnn_object_detector.py';
+                  """
+    perform_query(fastrcnn_udf)
+
+
+def populate_catalog_with_built_in_udfs():
+    load_ndarray_udfs()
+    load_classifier_udfs()
 
 
 class DummyObjectDetector(AbstractClassifierUDF):

@@ -12,7 +12,7 @@ from torchvision.transforms import Compose, transforms
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
-from src.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from src.udfs.classifier_udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 
 class SSDObjectDetector(PytorchAbstractUDF):
