@@ -16,28 +16,23 @@ import unittest
 
 from src.catalog.catalog_manager import CatalogManager
 from test.util import perform_query
+from test.util import populate_catalog_with_built_in_udfs
 
 
 class PytorchTest(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
+        populate_catalog_with_built_in_udfs()
 
     def test_should_run_pytorch_and_fastrcnn(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                    INTO MyVideo;"""
         perform_query(query)
 
-        create_udf_query = """CREATE UDF FastRCNNObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (labels (10))
-                  TYPE  Classification
-                  IMPL  'src/udfs/classifier_udfs/fastrcnn_object_detector.py';
-        """
-        perform_query(create_udf_query)
-
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
+
         actual_batch = perform_query(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
 

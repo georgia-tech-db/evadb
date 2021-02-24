@@ -19,14 +19,14 @@ from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from test.util import perform_query
 from test.util import populate_catalog_with_built_in_udfs
-from test.util import create_sample_video, NUM_FRAMES
 
 
-class UnnestTest(unittest.TestCase):
+class UnnestTests(unittest.TestCase):
+
     def setUp(self):
         CatalogManager().reset()
         populate_catalog_with_built_in_udfs()
-        create_sample_video(NUM_FRAMES)
+
         load_query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                         INTO MyVideo;"""
         perform_query(load_query)
@@ -60,3 +60,7 @@ class UnnestTest(unittest.TestCase):
         unnest_batch = perform_query(query)
         expected = Batch(self.unnest(without_unnest_batch.frames))
         self.assertEqual(unnest_batch, expected)
+
+
+if __name__ == "__main__":
+    unittest.main()

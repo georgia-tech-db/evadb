@@ -27,10 +27,6 @@ class SparkSessionTest(unittest.TestCase):
     def setUp(self):
         self.session = Session()
 
-    def tearDown(self):
-        self.session = Session()
-        self.session.stop()
-
     def test_session(self):
 
         spark_session = self.session.get_session()
