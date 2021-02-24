@@ -300,7 +300,7 @@ class UdfLTOR(Rule):
             node_cost += cost
         children_cost = sorted(children_cost, key=lambda entry: entry[0])
         updated_children = [entry[1] for entry in children_cost]
-        before.chidren = updated_children
+        before.rewrite_children(updated_children)
         return node_cost
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):

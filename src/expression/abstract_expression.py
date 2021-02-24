@@ -85,6 +85,13 @@ class AbstractExpression(ABC):
     def children(self):
         return self._children
 
+    def rewrite_children(self, children):
+        # do sanity check 
+        assert len(children) == len(self._children)
+        for child in self._children:
+            assert(child in children)
+        self._children = children
+
     def append_child(self, child):
         self._children.append(child)
 
