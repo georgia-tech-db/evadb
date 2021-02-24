@@ -41,8 +41,8 @@ class OperatorType(IntEnum):
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
-    LOGICALDELIMITER = auto()
     LOGICALLIMIT = auto()
+    LOGICALDELIMITER = auto()
 
 
 class Operator:
