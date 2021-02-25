@@ -78,12 +78,11 @@ class UDFExecutorTest(unittest.TestCase):
         print(actual_batch)
         self.assertEqual(actual_batch, expected_batch)
 
-        return
         nested_select_query = """SELECT id, data FROM
             (SELECT id, data, DummyObjectDetector(data) FROM MyVideo
                 WHERE id >= 2
             )
-            WHERE label = 'person';
+            WHERE ['person'] <@ label;
             """
         actual_batch = perform_query(nested_select_query)
         actual_batch.sort()
