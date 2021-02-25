@@ -266,46 +266,46 @@ class EmbedProjectIntoDerivedGet(Rule):
         logical_derived_get.target_list = select_list
         return logical_derived_get
 
-class UdfLTOR(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.UDF_LTOR, pattern)
+# class UdfLTOR(Rule):
+#     def __init__(self):
+#         pattern = Pattern(OperatorType.LOGICALFILTER)
+#         pattern.append_child(Pattern(OperatorType.DUMMY))
+#         super().__init__(RuleType.UDF_LTOR, pattern)
 
-    def promise(self):
-        return Promise.UDF_LTOR
+#     def promise(self):
+#         return Promise.UDF_LTOR
 
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        # nothing else to check if logical match found return true
-        return True
+#     def check(self, before: Operator, context: 'OptimizerContext'):
+#         # nothing else to check if logical match found return true
+#         return True
 
-    def _rotate(self, before):
-        """Reorders the children based o their estimated execution cost
-        After rotation rightmost child has the highest cost
+#     def _rotate(self, before):
+#         """Reorders the children based o their estimated execution cost
+#         After rotation rightmost child has the highest cost
 
-        Args:
-            before (AbstractExpression): expression tree to rotate
+#         Args:
+#             before (AbstractExpression): expression tree to rotate
 
-        Returns:
-            int: extimated cost of execution
-        """
-        children_cost = []
-        node_cost = 0
-        # fetch cost from the catalog
-        if before.etype is ExpressionType.FUNCTION_EXPRESSION:
-            node_cost = 1
-        for child in before.children:
-            cost = self._rotate(child)
-            children_cost.append((cost, child))
-            node_cost += cost
-        children_cost = sorted(children_cost, key=lambda entry: entry[0])
-        updated_children = [entry[1] for entry in children_cost]
-        before.rewrite_children(updated_children)
-        return node_cost
+#         Returns:
+#             int: extimated cost of execution
+#         """
+#         children_cost = []
+#         node_cost = 0
+#         # fetch cost from the catalog
+#         if before.etype is ExpressionType.FUNCTION_EXPRESSION:
+#             node_cost = 1
+#         for child in before.children:
+#             cost = self._rotate(child)
+#             children_cost.append((cost, child))
+#             node_cost += cost
+#         children_cost = sorted(children_cost, key=lambda entry: entry[0])
+#         updated_children = [entry[1] for entry in children_cost]
+#         before.rewrite_children(updated_children)
+#         return node_cost
 
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
-        self._rotate(before.predicate)
-        return before
+#     def apply(self, before: LogicalFilter, context: OptimizerContext):
+#         self._rotate(before.predicate)
+#         return before
 
 
 class LogicalUdfFilterToPhysical(Rule):
