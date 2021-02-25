@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import numpy as np
+
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
@@ -35,6 +38,11 @@ class Expressions(evaql_parserVisitor):
             return ConstantValueExpression(ctx.getText()[1:-1])
         # todo handle other types
         return self.visitChildren(ctx)
+
+    def visitArrayLiteral(self, ctx: evaql_parser.ArrayLiteralContext):
+        # change the dtype when we add support for np.float
+        return ConstantValueExpression(np.array(json.loads(ctx.getText()),
+                                                dtype=np.uint8))
 
     def visitConstant(self, ctx: evaql_parser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
