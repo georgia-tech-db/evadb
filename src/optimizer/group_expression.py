@@ -56,10 +56,10 @@ class GroupExpression:
         return self._rules_explored
 
     def mark_rule_explored(self, rule_id: int):
-        self._rules_explored |= rule_id
+        self._rules_explored |= (1 << rule_id)
 
     def is_rule_explored(self, rule_id: int):
-        return self._rules_explored & rule_id
+        return self._rules_explored & (1 << rule_id)
 
     def __eq__(self, other: 'GroupExpression'):
         return (self.opr == other.opr and
