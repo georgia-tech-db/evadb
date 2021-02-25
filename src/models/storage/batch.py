@@ -51,9 +51,7 @@ class Batch:
                  identifier_column='id'):
         super().__init__()
         # store the batch with columns sorted
-        if isinstance(frames, DataFrame):
-            self._frames = frames[sorted(frames.columns)]
-        else:
+        if not isinstance(frames, DataFrame):
             LoggingManager().log('Batch constructor not properly called!',
                                  LoggingLevel.DEBUG)
             raise ValueError('Batch constructor not properly called. \

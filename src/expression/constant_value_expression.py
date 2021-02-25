@@ -30,7 +30,7 @@ class ConstantValueExpression(AbstractExpression):
         self._value = value
 
     def evaluate(self, *args):
-        return Batch(pd.DataFrame({0: [self._value]}))
+        return Batch(pd.DataFrame([[self._value]]))
 
     @property
     def value(self):
