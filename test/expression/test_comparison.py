@@ -111,3 +111,45 @@ class ComparisonExpressionsTest(unittest.TestCase):
         )
 
         self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
+
+    def test_comparison_compare_contains(self):
+        const_exp1 = ConstantValueExpression([1,2])
+        const_exp2 = ConstantValueExpression([1,5])
+        const_exp3 = ConstantValueExpression([1,2,3,4])
+
+        cmpr_exp1 = ComparisonExpression(
+            ExpressionType.COMPARE_CONTAINS,
+            const_exp3,
+            const_exp1
+        )
+
+        self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
+
+        cmpr_exp2 = ComparisonExpression(
+            ExpressionType.COMPARE_CONTAINS,
+            const_exp3,
+            const_exp2
+        )
+
+        self.assertEqual([False], cmpr_exp2.evaluate(None).frames[0].tolist())
+
+    def test_comparison_compare_is_contained(self):
+        const_exp1 = ConstantValueExpression([1,2])
+        const_exp2 = ConstantValueExpression([1,5])
+        const_exp3 = ConstantValueExpression([1,2,3,4])
+
+        cmpr_exp1 = ComparisonExpression(
+            ExpressionType.COMPARE_IS_CONTAINED,
+            const_exp1,
+            const_exp3
+        )
+
+        self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
+
+        cmpr_exp2 = ComparisonExpression(
+            ExpressionType.COMPARE_IS_CONTAINED,
+            const_exp2,
+            const_exp3
+        )
+
+        self.assertEqual([False], cmpr_exp2.evaluate(None).frames[0].tolist())

@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
+import numpy as np
+
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType, \
     ExpressionReturnType
 from src.models.storage.batch import Batch
-import pandas as pd
-import numpy as np
 
 
 class ComparisonExpression(AbstractExpression):
@@ -32,41 +33,43 @@ class ComparisonExpression(AbstractExpression):
                          children=children)
 
     def evaluate(self, *args):
-        # evaluate always return batch
-        left_values = self.get_child(0).evaluate(*args).frames
-        right_values = self.get_child(1).evaluate(*args).frames
+        # cast in to numpy array
+        lvalues = self.get_child(0).evaluate(*args).frames.values
+        rvalues = self.get_child(1).evaluate(*args).frames.values
 
-        if len(left_values) != len(right_values):
-            if len(left_values) == 1:
-                left_values = pd.DataFrame(np.repeat(left_values.values,
-                                                     len(right_values),
-                                                     axis=0))
-            elif len(right_values) == 1:
-                right_values = pd.DataFrame(np.repeat(right_values.values,
-                                                      len(left_values),
-                                                      axis=0))
+        if len(lvalues) != len(rvalues):
+            if len(lvalues) == 1:
+                lvalues = np.repeat(lvalues, len(rvalues), axis=0)
+            elif len(rvalues) == 1:
+                rvalues = np.repeat(rvalues, len(lvalues), axis=0)
             else:
                 raise Exception(
                     "Left and Right batch does not have equal elements")
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
-            return Batch(pd.DataFrame(
-                left_values.values == right_values.values))
+            return Batch(pd.DataFrame(lvalues == rvalues))
         elif self.etype == ExpressionType.COMPARE_GREATER:
-            return Batch(pd.DataFrame(
-                left_values.values > right_values.values))
+            return Batch(pd.DataFrame(lvalues > rvalues))
         elif self.etype == ExpressionType.COMPARE_LESSER:
-            return Batch(pd.DataFrame(
-                left_values.values < right_values.values))
+            return Batch(pd.DataFrame(lvalues < rvalues))
         elif self.etype == ExpressionType.COMPARE_GEQ:
-            return Batch(pd.DataFrame(
-                left_values.values >= right_values.values))
+            return Batch(pd.DataFrame(lvalues >= rvalues))
         elif self.etype == ExpressionType.COMPARE_LEQ:
-            return Batch(pd.DataFrame(
-                left_values.values <= right_values.values))
+            return Batch(pd.DataFrame(lvalues <= rvalues))
         elif self.etype == ExpressionType.COMPARE_NEQ:
-            return Batch(pd.DataFrame(
-                left_values.values != right_values.values))
+            return Batch(pd.DataFrame(lvalues != rvalues))
+        elif self.etype == ExpressionType.COMPARE_CONTAINS:
+            res = [[all(x in p for x in q) \
+                   for p, q in zip(left, right)] \
+                   for left, right in zip(lvalues, rvalues)]
+            return Batch(pd.DataFrame(res))
+        elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
+            res = [[all(x in q for x in p) \
+                   for p, q in zip(left, right)] \
+                   for left, right in zip(lvalues, rvalues)]
+            return Batch(pd.DataFrame(res))
+        else:
+            raise NotImplementedError
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

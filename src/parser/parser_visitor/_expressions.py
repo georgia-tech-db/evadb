@@ -82,6 +82,10 @@ class Expressions(evaql_parserVisitor):
             return ExpressionType.COMPARE_LEQ
         elif op == '!=':
             return ExpressionType.COMPARE_NEQ
+        elif op == '@>':
+            return ExpressionType.COMPARE_CONTAINS
+        elif op == '<@':
+            return ExpressionType.COMPARE_IS_CONTAINED
         else:
             return ExpressionType.INVALID
 

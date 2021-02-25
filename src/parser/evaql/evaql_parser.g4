@@ -503,6 +503,7 @@ unaryOperator
 comparisonOperator
     : '=' | '>' | '<' | '<' '=' | '>' '='
     | '<' '>' | '!' '=' | '<' '=' '>'
+    | '@' '>' | '<' '@'
     ;
 
 logicalOperator
