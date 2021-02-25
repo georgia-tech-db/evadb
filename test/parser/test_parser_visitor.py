@@ -95,22 +95,38 @@ class ParserVisitorTests(unittest.TestCase):
 
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.INVALID)
+            ExpressionType.INVALID
+        )
 
         ctx.getText.return_value = '='
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_EQUAL)
+            ExpressionType.COMPARE_EQUAL
+        )
 
         ctx.getText.return_value = '<'
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_LESSER)
+            ExpressionType.COMPARE_LESSER
+        )
 
         ctx.getText.return_value = '>'
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_GREATER)
+            ExpressionType.COMPARE_GREATER
+        )
+
+        ctx.getText.return_value = '@>'
+        self.assertEqual(
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_CONTAINS
+        )
+
+        ctx.getText.return_value = '<@'
+        self.assertEqual(
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_IS_CONTAINED
+        )
 
     # To be fixed
     # def test_visit_full_column_name_none(self):

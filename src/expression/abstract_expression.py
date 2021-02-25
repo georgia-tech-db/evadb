@@ -13,52 +13,54 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from enum import IntEnum, unique
+from enum import IntEnum, unique, auto
 
 from src.utils import generic_utils
 
 
 @unique
 class ExpressionType(IntEnum):
-    INVALID = 0,
-    CONSTANT_VALUE = 1,
-    TUPLE_VALUE = 2,
+    INVALID = auto()
+    CONSTANT_VALUE = auto()
+    TUPLE_VALUE = auto()
     # Compare operators
-    COMPARE_EQUAL = 3,
-    COMPARE_GREATER = 4,
-    COMPARE_LESSER = 5,
-    COMPARE_GEQ = 6,
-    COMPARE_LEQ = 7,
-    COMPARE_NEQ = 8,
+    COMPARE_EQUAL = auto()
+    COMPARE_GREATER = auto()
+    COMPARE_LESSER = auto()
+    COMPARE_GEQ = auto()
+    COMPARE_LEQ = auto()
+    COMPARE_NEQ = auto()
+    COMPARE_CONTAINS = auto()
+    COMPARE_IS_CONTAINED = auto()
     # Logical operators
-    LOGICAL_AND = 9,
-    LOGICAL_OR = 10,
-    LOGICAL_NOT = 11,
+    LOGICAL_AND = auto()
+    LOGICAL_OR = auto()
+    LOGICAL_NOT = auto()
     # Arithmetic operators
-    ARITHMETIC_ADD = 12,
-    ARITHMETIC_SUBTRACT = 13,
-    ARITHMETIC_MULTIPLY = 14,
-    ARITHMETIC_DIVIDE = 15,
+    ARITHMETIC_ADD = auto()
+    ARITHMETIC_SUBTRACT = auto()
+    ARITHMETIC_MULTIPLY = auto()
+    ARITHMETIC_DIVIDE = auto()
 
-    FUNCTION_EXPRESSION = 16,
+    FUNCTION_EXPRESSION = auto()
 
-    AGGREGATION_COUNT = 17,
-    AGGREGATION_SUM = 18,
-    AGGREGATION_MIN = 19,
-    AGGREGATION_MAX = 20,
-    AGGREGATION_AVG = 21,
+    AGGREGATION_COUNT = auto()
+    AGGREGATION_SUM = auto()
+    AGGREGATION_MIN = auto()
+    AGGREGATION_MAX = auto()
+    AGGREGATION_AVG = auto()
 
-    CASE = 22,
+    CASE = auto()
     # add other types
 
 
 @unique
 class ExpressionReturnType(IntEnum):
-    INVALID = 0,
-    BOOLEAN = 1,
-    INTEGER = 2,
-    VARCHAR = 3,
-    FLOAT = 4,
+    INVALID = auto()
+    BOOLEAN = auto()
+    INTEGER = auto()
+    VARCHAR = auto()
+    FLOAT = auto()
     # add others
 
 

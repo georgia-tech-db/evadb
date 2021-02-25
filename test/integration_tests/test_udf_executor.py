@@ -50,7 +50,7 @@ class UDFExecutorTest(unittest.TestCase):
         actual_batch = perform_query(select_query)
         actual_batch.sort()
         labels = DummyObjectDetector().labels
-        expected = [{'id': i, 'label': labels[1 + i % 2]}
+        expected = [{'id': i, 'label': [labels[1 + i % 2]]}
                     for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -68,14 +68,17 @@ class UDFExecutorTest(unittest.TestCase):
         perform_query(create_udf_query)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = 'person';"
+            WHERE DummyObjectDetector(data).label @> ['person'];"
         actual_batch = perform_query(select_query)
         actual_batch.sort()
         expected = [{'id': i * 2, 'label': 'person'}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
+        print(expected_batch)
+        print(actual_batch)
         self.assertEqual(actual_batch, expected_batch)
 
+        return
         nested_select_query = """SELECT id, data FROM
             (SELECT id, data, DummyObjectDetector(data) FROM MyVideo
                 WHERE id >= 2
