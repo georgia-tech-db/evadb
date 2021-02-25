@@ -41,8 +41,9 @@ class Expressions(evaql_parserVisitor):
 
     def visitArrayLiteral(self, ctx: evaql_parser.ArrayLiteralContext):
         # change the dtype when we add support for np.float
-        return ConstantValueExpression(np.array(json.loads(ctx.getText()),
+        res = ConstantValueExpression(np.array(json.loads(ctx.getText()),
                                                 dtype=np.uint8))
+        return res
 
     def visitConstant(self, ctx: evaql_parser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
@@ -50,6 +51,7 @@ class Expressions(evaql_parserVisitor):
 
         if ctx.decimalLiteral() is not None:
             return ConstantValueExpression(self.visit(ctx.decimalLiteral()))
+        print(ctx.getText())
         return self.visitChildren(ctx)
 
     def visitLogicalExpression(

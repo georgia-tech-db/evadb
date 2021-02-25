@@ -56,6 +56,7 @@ class Batch:
                                  LoggingLevel.DEBUG)
             raise ValueError('Batch constructor not properly called. \
                 Expected pandas.DataFrame')
+        self._frames = frames[sorted(frames.columns)]
         self._batch_size = len(frames)
         self._identifier_column = identifier_column
 

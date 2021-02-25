@@ -94,6 +94,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
 
 def perform_query(query):
     stmt = Parser().parse(query)[0]
+    print(stmt)
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()

@@ -25,12 +25,10 @@ class ConstantValueExpression(AbstractExpression):
     # return type not set, handle that based on value
     def __init__(self, value):
         super().__init__(ExpressionType.CONSTANT_VALUE)
-        print('In constant:')
-        print(value)
         self._value = value
 
     def evaluate(self, *args):
-        return Batch(pd.DataFrame([[self._value]]))
+        return Batch(pd.DataFrame({0: [self._value]}))
 
     @property
     def value(self):
