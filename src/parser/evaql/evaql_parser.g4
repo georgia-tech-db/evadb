@@ -360,12 +360,18 @@ nullNotnull
     : NOT? (NULL_LITERAL | NULL_SPEC_LITERAL)
     ;
 
+arrayLiteral
+    : LR_SQ_BRACKET  constant (',' constant)* RR_SQ_BRACKET
+    | LR_SQ_BRACKET RR_SQ_BRACKET
+    ;
+
 constant
     : stringLiteral | decimalLiteral
     | '-' decimalLiteral
     | booleanLiteral
     | REAL_LITERAL
     | NOT? nullLiteral=(NULL_LITERAL | NULL_SPEC_LITERAL)
+    | arrayLiteral
     ;
 
 
