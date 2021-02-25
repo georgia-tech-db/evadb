@@ -56,19 +56,19 @@ class Binder:
         yield from itertools.product(curr_iterator, *child_binders)
 
     @staticmethod
-    def build_opr_tree_from_inorder_repr(inorder_repr: tuple) -> Operator:
-        if isinstance(inorder_repr, Operator):
-            return inorder_repr
+    def build_opr_tree_from_pre_order_repr(pre_order_repr: tuple) -> Operator:
+        if isinstance(pre_order_repr, Operator):
+            return pre_order_repr
         else:
-            opr_tree = inorder_repr[0]
-            if len(inorder_repr) > 1:
+            opr_tree = pre_order_repr[0]
+            if len(pre_order_repr) > 1:
                 # remove old children
                 opr_tree.children.clear()
-                for child in inorder_repr[1:]:
-                    opr_tree.append_child(Binder.build_opr_tree_from_inorder_repr(child))
+                for child in pre_order_repr[1:]:
+                    opr_tree.append_child(Binder.build_opr_tree_from_pre_order_repr(child))
             return opr_tree
 
     def __iter__(self):
         for match in Binder._binder(self._grp_expr, self._pattern, self._memo):
-            yield Binder.build_opr_tree_from_inorder_repr(match)
+            yield Binder.build_opr_tree_from_pre_order_repr(match)
 
