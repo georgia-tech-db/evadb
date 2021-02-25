@@ -15,6 +15,7 @@
 
 import unittest
 import pandas as pd
+import numpy as np
 
 from unittest import mock
 from unittest.mock import MagicMock, call
@@ -202,6 +203,19 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(
             expected.evaluate(),
             Batch(pd.DataFrame([float(ctx.getText())])))
+
+    def test_visit_array_literal(self):
+        ''' Testing when array literal
+            Function: visitArrayLiteral
+        '''
+        ctx = MagicMock()
+        visitor = ParserVisitor()
+        ctx.getText.return_value = '[1,2,3,4]'
+        expected = visitor.visitArrayLiteral(ctx)
+        self.assertEqual(
+            expected.evaluate(),
+            Batch(pd.DataFrame({0: [np.array([1,2,3,4])]}))
+        )
 
     def test_visit_query_specification_base_exception(self):
         ''' Testing Base Exception error handling
