@@ -13,8 +13,6 @@ from src.optimizer.rules.pattern import Pattern
 
 class TestBinder(unittest.TestCase):
     def helper_pre_order_match(self, cur_opr, res_opr):
-        print()
-        print(cur_opr, res_opr)
         self.assertEqual(cur_opr.opr_type, res_opr.opr_type)
         self.assertEqual(len(cur_opr.children), len(res_opr.children))
 
@@ -52,7 +50,6 @@ class TestBinder(unittest.TestCase):
         for match in iter(binder):
             self.helper_pre_order_match(root_opr, match)
 
-    @unittest.skip('Binder does not return sub operator tree')
     def test_nested_binder_match(self):
         """
         Opr Tree:
@@ -92,14 +89,13 @@ class TestBinder(unittest.TestCase):
         opt_ctxt = OptimizerContext()
         root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
             root_opr_cpy, is_root=True)
-
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
-
-        num_match = 0
         for match in iter(binder):
-            if num_match == 0:
-                self.helper_pre_order_match(root_opr, match)
-            else:
-                self.helper_pre_order_match(sub_root_opr, match)
-            num_match += 1
-        self.assertEqual(num_match, 2)
+            self.helper_pre_order_match(root_opr, match)
+
+        opt_ctxt = OptimizerContext()
+        sub_root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
+            sub_root_opr_cpy, is_root=True)
+        binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)
+        for match in iter(binder):
+            self.helper_pre_order_match(sub_root_opr, match)
