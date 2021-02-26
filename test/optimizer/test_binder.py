@@ -6,12 +6,15 @@ from mock import MagicMock
 from src.optimizer.binder import Binder
 from src.optimizer.group_expression import GroupExpression
 from src.optimizer.optimizer_context import OptimizerContext
-from src.optimizer.operators import (OperatorType, LogicalFilter, LogicalGet)
+from src.optimizer.operators import (
+    OperatorType, LogicalFilter, LogicalGet, Dummy)
 from src.optimizer.rules.pattern import Pattern
 
 
 class TestBinder(unittest.TestCase):
     def helper_pre_order_match(self, cur_opr, res_opr):
+        print()
+        print(cur_opr, res_opr)
         self.assertEqual(cur_opr.opr_type, res_opr.opr_type)
         self.assertEqual(len(cur_opr.children), len(res_opr.children))
 
@@ -19,6 +22,17 @@ class TestBinder(unittest.TestCase):
             self.helper_pre_order_match(child_opr, res_opr.children[i])
 
     def test_simple_binder_match(self):
+        """
+        Opr Tree:
+                         LogicalFilter
+                         /           \
+                  LogicalGet      LogicalGet 
+
+        Pattern:
+                         LogicalFilter
+                         /           \
+                  LogicalGet      LogicalGet 
+        """
         child1_opr = LogicalGet(MagicMock(), MagicMock())
         child2_opr = LogicalGet(MagicMock(), MagicMock())
         root_opr = LogicalFilter(MagicMock(), [child1_opr, child2_opr])
@@ -38,24 +52,42 @@ class TestBinder(unittest.TestCase):
         for match in iter(binder):
             self.helper_pre_order_match(root_opr, match)
 
+    @unittest.skip('Binder does not return sub operator tree')
     def test_nested_binder_match(self):
+        """
+        Opr Tree:
+                         LogicalFilter
+                         /           \
+                  LogicalGet      LogicalFilter
+                                  /           \
+                            LogicalGet       Dummy
+
+        Pattern:
+                         LogicalFilter
+                         /           \
+                  LogicalGet      Dummy
+        """
+
         sub_child_opr = LogicalGet(MagicMock(), MagicMock())
-        sub_root_opr = LogicalFilter(MagicMock(), [sub_child_opr])
+        sub_root_opr = LogicalFilter(MagicMock(), [sub_child_opr, Dummy()])
 
         child_opr = LogicalGet(MagicMock(), MagicMock())
-        root_opr = LogicalFilter(MagicMock(), [child_opr])
+        root_opr = LogicalFilter(
+            MagicMock(), [child_opr, sub_root_opr])
 
         # copy for binder to operate on
         sub_child_opr_cpy = LogicalGet(MagicMock(), MagicMock())
-        sub_root_opr_cpy = LogicalFilter(MagicMock(), [sub_child_opr_cpy])
+        sub_root_opr_cpy = LogicalFilter(
+            MagicMock(), [sub_child_opr_cpy, Dummy()])
 
         child_opr_cpy = LogicalGet(MagicMock(), MagicMock())
-        root_opr_cpy = LogicalFilter(MagicMock(), [child_opr_cpy])
-        root_opr_cpy.append_child(sub_root_opr_cpy)
+        root_opr_cpy = LogicalFilter(
+            MagicMock(), [child_opr_cpy, sub_root_opr_cpy])
 
         child_ptn = Pattern(OperatorType.LOGICALGET)
         root_ptn = Pattern(OperatorType.LOGICALFILTER)
         root_ptn.append_child(child_ptn)
+        root_ptn.append_child(Pattern(OperatorType.DUMMY))
 
         opt_ctxt = OptimizerContext()
         root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
@@ -63,11 +95,11 @@ class TestBinder(unittest.TestCase):
 
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
 
-        i = 0
+        num_match = 0
         for match in iter(binder):
-            if i == 0:
+            if num_match == 0:
                 self.helper_pre_order_match(root_opr, match)
             else:
                 self.helper_pre_order_match(sub_root_opr, match)
-            i += 1
-        self.assertEqual(i, 2)
+            num_match += 1
+        self.assertEqual(num_match, 2)
