@@ -30,17 +30,16 @@ from src.parser.insert_statement import InsertTableStatement
 from src.expression.abstract_expression import ExpressionType
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.function_expression import FunctionExpression
 
-from src.parser.table_ref import TableRef, TableInfo
-from src.parser.types import ParserOrderBySortType
+from src.parser.table_ref import TableRef, TableInfo, JoinNode
+from src.parser.types import ParserOrderBySortType, JoinType
 from src.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
 
 
 class ParserTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
 
     def test_create_statement(self):
         parser = Parser()
@@ -436,3 +435,18 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(insert_stmt, load_stmt)
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
+
+    def test_should_handle_lateral_join(self):
+        parser = Parser()
+        query = """SELECT id, frame FROM DETRAC,
+                LATERAL UNNEST(ObjDet(frame)) WHERE id < 10;"""
+
+        right = FunctionExpression(func=None, name='UNNEST')
+        child = FunctionExpression(func=None, name='ObjDet')
+        child.append_child(TupleValueExpression('frame'))
+        right.append_child(child)
+        left = TableRef(TableInfo('DETRAC'))
+        expected_from_clause = TableRef(join=JoinNode(
+            left=left, right=right, join_type=JoinType.LATERAL_JOIN))
+        query_stmt = parser.parse(query)[0]
+        self.assertEqual(query_stmt.from_table, expected_from_clause)

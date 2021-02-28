@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique
+from enum import IntEnum, unique, auto
 
 
 class ColumnConstraintEnum(IntEnum):
@@ -43,3 +43,19 @@ class ParserOrderBySortType(IntEnum):
     """
     ASC = 1
     DESC = 2
+
+
+@unique
+class TableRefType(IntEnum):
+    """
+    manage enums for all table reference types
+    join, subquery, atomic table
+    """
+    TABLEATOM = auto()
+    SUBQUERY = auto()
+    JOIN = auto()
+
+
+@unique
+class JoinType(IntEnum):
+    LATERAL_JOIN = auto()

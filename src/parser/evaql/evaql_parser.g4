@@ -226,11 +226,17 @@ tableSourceItemWithSample
     ;
 
 tableSourceItem
-    : tableName                                  #atomTableItem
-    | (
+    : tableName                                                     #atomTableItem
+    | (LATERAL)? subqueryTableSourceItem                            #subqueryTableItem
+    ;
+
+subqueryTableSourceItem
+    : (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )                                                            #subqueryTableItem
+      )
+      |
+      functionCall
     ;
 
 sampleClause

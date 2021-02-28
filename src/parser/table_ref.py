@@ -14,10 +14,9 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Union
-
-
 from src.parser.select_statement import SelectStatement
+from src.parser.types import TableRefType, JoinType
+from src.expression.abstract_expression import AbstractExpression
 
 
 class TableInfo:
@@ -55,9 +54,30 @@ class TableInfo:
                 and self.database_name == other.database_name)
 
 
+class JoinNode:
+    def __init__(self,
+                 left: 'TableRef' = None,
+                 right: 'TableRef' = None,
+                 predicate: AbstractExpression = None,
+                 join_type: JoinType = None):
+        self.left = left
+        self.right = right
+        self.predicate = predicate
+        self.join_type = join_type
+
+    def __eq__(self, other):
+        if not isinstance(other, JoinNode):
+            return False
+        return (self.left == other.left
+                and self.right == other.right
+                and self.predicate == other.predicate
+                and self.join_type == other.join_type)
+
+
 class TableRef:
     """
-    dummy class right now need to handle join expression
+    TableRef: Can be table, subquery, or join
+    TODO: port subquery code
     Attributes:
         table: can be one of the following based on the query type:
             TableInfo: expression of table name and database name,
@@ -67,10 +87,16 @@ class TableRef:
     """
 
     def __init__(self,
-                 table: Union[TableInfo, SelectStatement] = None,
+                 table_info: TableInfo = None,
+                 join: JoinNode = None,
                  sample_freq: float = None):
-        self._table = table
+        self._table_info = table_info
         self._sample_freq = sample_freq
+        self._join = join
+        self._table_ref_type = TableRefType.TABLEATOM
+
+        if join is not None:
+            self._table_ref_type = TableRefType.JOIN
 
     @property
     def table(self):
@@ -83,13 +109,28 @@ class TableRef:
     def is_select(self) -> bool:
         return isinstance(self.table, SelectStatement)
 
+    @property
+    def join(self):
+        return self._join
+
+    @property
+    def table_ref_type(self):
+        return self._table_ref_type
+
     def __str__(self):
+        table_ref = None
+        if self._table_ref_type is TableRefType.TABLEATOM:
+            table_ref = str(self._table_info)
+        elif self._table_ref_type is TableRefType.JOIN:
+            table_ref = str(self._join)
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            str(self.table), str(self.sample_freq))
+            table_ref, str(self.sample_freq))
         return table_ref_str
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
             return False
-        return (self.table == other.table
+        return (self.table_info == other.table_info
+                and self.join == other.join
+                and self.table_ref_type == other.table_ref_type
                 and self.sample_freq == other.sample_freq)

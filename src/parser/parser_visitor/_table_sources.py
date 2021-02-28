@@ -14,11 +14,13 @@
 # limitations under the License.
 
 from src.parser.select_statement import SelectStatement
+from src.parser.table_ref import JoinNode
 from src.parser.table_ref import TableRef
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.utils.logging_manager import LoggingLevel, LoggingManager
+from src.parser.types import JoinType
 
 ##################################################################
 # TABLE SOURCES
@@ -30,9 +32,18 @@ class TableSources(evaql_parserVisitor):
 
         table_list = []
         table_sources_count = len(ctx.tableSource())
+
         for table_sources_index in range(table_sources_count):
             table = self.visit(ctx.tableSource(table_sources_index))
             table_list.append(table)
+
+        # Join Nodes
+        if table_sources_count > 1:
+            # merge join nodes
+            # table, join_node1, join_node2 -> join_node_1, join_node_2
+            for i in range(table_sources_count - 1):
+                table_list[i + 1].join.left = table_list[i]
+            table_list = table_list[1:]
 
         return table_list
 
@@ -47,7 +58,20 @@ class TableSources(evaql_parserVisitor):
     # Nested sub query
     def visitSubqueryTableItem(
             self, ctx: evaql_parser.SubqueryTableItemContext):
-        return self.visit(ctx.selectStatement())
+        table_ref = self.visit(ctx.subqueryTableSourceItem())
+        # Lateral Join
+        if ctx.LATERAL():
+            return TableRef(join=JoinNode(right=table_ref,
+                                          join_type=JoinType.LATERAL_JOIN))
+
+        return table_ref
+
+    def visitSubqueryTableSourceItem(
+            self, ctx: evaql_parser.SubqueryTableSourceItemContext):
+        if ctx.selectStatement():
+            return self.visit(ctx.selectStatement())
+        else:
+            return self.visit(ctx.functionCall())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
         left_selectStatement = self.visit(ctx.left)
