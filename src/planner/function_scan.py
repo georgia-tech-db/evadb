@@ -12,23 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum, auto
+
+from src.planner.types import PlanNodeType
+from src.planner.abstract_plan import AbstractPlan
+from src.expression.function_expression import FunctionExpression
 
 
-@unique
-class PlanOprType(IntEnum):
-    SEQUENTIAL_SCAN = auto()
-    STORAGE_PLAN = auto()
-    PP_FILTER = auto()
-    INSERT = auto()
-    CREATE = auto()
-    CREATE_UDF = auto()
-    LOAD_DATA = auto()
-    UPLOAD = auto()
-    UNION = auto()
-    ORDER_BY = auto()
-    LIMIT = auto()
-    SAMPLE = auto()
-    JOIN = auto()
-    FUNCTION_SCAN = auto()
-    # add other types
+class FunctionScan(AbstractPlan):
+    """
+    This plan used to store metadata to perform function table scan.
+
+    Arguments:
+
+    """
+
+    def __init__(self, func_expr: FunctionExpression):
+        self._func_expr = func_expr
+        super().__init__(PlanNodeType.FUNCTION_SCAN)
+
+    @property
+    def func_expr(self):
+        return self._func_expr

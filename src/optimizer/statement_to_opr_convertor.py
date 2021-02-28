@@ -19,7 +19,8 @@ from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
-                                     LogicalLimit, LogicalSample)
+                                     LogicalLimit, LogicalSample,
+                                     LogicalJoin, LogicalFunctionScan)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -47,32 +48,51 @@ class StatementToPlanConvertor:
         for column in dataset.columns:
             self._column_map[column.name.lower()] = column
 
-    def visit_table_ref(self, table_ref: TableRef):
-        """Bind table ref object and convert to Logical get operator
+    def visit_table_ref(self, video: TableRef):
+        """Bind table ref object and convert to Logical Get
+            or Logical Join
 
         Arguments:
-            table {TableRef} -- [Input table ref object created by the parser]
+            table {TableRef} - - [Input table ref object created by the parser]
         """
-        if table_ref.is_select():
+        if video.is_select():
             # NestedQuery
-            self.visit_select(table_ref.table)
+            self.visit_select(video.table)
             child_plan = self._plan
             self._plan = LogicalQueryDerivedGet()
             self._plan.append_child(child_plan)
-        else:
-            # Table
-            catalog_vid_metadata = bind_dataset(table_ref.table)
-            self._populate_column_map(catalog_vid_metadata)
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
 
-        if table_ref.sample_freq:
-            self._visit_sample(table_ref.sample_freq)
+        if (video.table_info):
+            catalog_vid_metadata = bind_dataset(video.table_info)
+            self._populate_column_map(catalog_vid_metadata)
+            self._plan = LogicalGet(video, catalog_vid_metadata)
+
+        if (video.join):
+            if isinstance(video.join.left, TableRef):
+                self.visit_table_ref(video.join.left)
+            if isinstance(video.join.left, AbstractExpression):
+                self._plan = LogicalFunctionScan(func_expr=video.join.left)
+            left_child_plan = self._plan
+
+            if isinstance(video.join.right, TableRef):
+                self.visit_table_ref(video.join.right)
+            if isinstance(video.join.right, AbstractExpression):
+                self._plan = LogicalFunctionScan(func_expr=video.join.right)
+            right_child_plan = self._plan
+
+            self._plan = LogicalJoin(join_type=video.join.join_type,
+                                     join_predicate=video.join.predicate)
+            self._plan.append_child(left_child_plan)
+            self._plan.append_child(right_child_plan)
+
+        if video.sample_freq:
+            self._visit_sample(video.sample_freq)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement
 
         Arguments:
-            statement {SelectStatement} -- [input select statement]
+            statement {SelectStatement} - - [input select statement]
         """
 
         table_ref = statement.from_table
@@ -150,7 +170,7 @@ class StatementToPlanConvertor:
         """Converter for parsed insert statement
 
         Arguments:
-            statement {AbstractStatement} -- [input insert statement]
+            statement {AbstractStatement} - - [input insert statement]
         """
         # Bind the table reference
         table_ref = statement.table
@@ -178,7 +198,7 @@ class StatementToPlanConvertor:
         """Convertor for parsed insert Statement
 
         Arguments:
-            statement {AbstractStatement} -- [Create statement]
+            statement {AbstractStatement} - - [Create statement]
         """
         video_ref = statement.table_ref
         if video_ref is None:
@@ -196,7 +216,7 @@ class StatementToPlanConvertor:
         """Convertor for parsed create udf statement
 
         Arguments:
-            statement {CreateUDFStatement} -- Create UDF Statement
+            statement {CreateUDFStatement} - - Create UDF Statement
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
         annotated_outputs = column_definition_to_udf_io(
@@ -241,7 +261,7 @@ class StatementToPlanConvertor:
            The logic is hidden from client.
 
         Arguments:
-            statement {AbstractStatement} -- [Input statement]
+            statement {AbstractStatement} - - [Input statement]
         """
         if isinstance(statement, SelectStatement):
             self.visit_select(statement)
