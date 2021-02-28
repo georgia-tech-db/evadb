@@ -377,12 +377,19 @@ constant
 
 //    Data Types
 
+arrayType
+    : INT8 | UINT8 | INT16 | INT32 | INT64
+    | UNICODE | BOOL
+    | FLOAT32 | FLOAT64 | DECIMAL
+    | STR | DATETIME
+    ; 
+
 dataType
     : BOOLEAN                                         #simpleDataType
     | TEXT lengthOneDimension?                        #dimensionDataType
     | INTEGER UNSIGNED?                               #integerDataType
     | FLOAT lengthTwoDimension? UNSIGNED?             #dimensionDataType
-    | NDARRAY lengthDimensionList                     #dimensionDataType
+    | NDARRAY arrayType lengthDimensionList           #arrayDataType
     ;
 
 lengthOneDimension

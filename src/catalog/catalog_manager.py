@@ -15,7 +15,7 @@
 
 from typing import List, Tuple
 
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.models.base_model import init_db, drop_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -195,8 +195,9 @@ class CatalogManager(object):
         return col_ids
 
     def create_column_metadata(
-            self, column_name: str, data_type: ColumnType,
-            dimensions: List[int]):
+        self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
+        dimensions: List[int]
+    ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
@@ -205,9 +206,10 @@ class CatalogManager(object):
         Arguments:
             column_name {str} -- column name to be created
             data_type {ColumnType} -- type of column created
+            array_type {NdArrayType} -- type of ndarray
             dimensions {List[int]} -- dimensions of the column created
         """
-        return DataFrameColumn(column_name, data_type,
+        return DataFrameColumn(column_name, data_type, array_type=array_type,
                                array_dimensions=dimensions)
 
     def get_dataset_metadata(self, database_name: str, dataset_name: str) -> \

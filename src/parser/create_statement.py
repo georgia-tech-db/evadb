@@ -12,14 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
 from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from src.parser.table_ref import TableRef
-from typing import List
-from src.parser.types import ParserColumnDataType
-
+from src.catalog.column_type import ColumnType, NdArrayType
 
 class ColConstraintInfo:
     def __init__(self, nullable=False, default_value=None,
@@ -39,11 +38,12 @@ class ColConstraintInfo:
 
 
 class ColumnDefinition:
-    def __init__(self, col_name: str,
-                 col_type: ParserColumnDataType, col_dim: List[int],
+    def __init__(self, col_name: str, col_type: ColumnType,
+                 col_array_type: NdArrayType, col_dim: List[int],
                  cci: ColConstraintInfo = ColConstraintInfo()):
         self._name = col_name
         self._type = col_type
+        self._array_type = col_array_type
         self._dimension = col_dim
         self._cci = cci
 
@@ -56,6 +56,10 @@ class ColumnDefinition:
         return self._type
 
     @property
+    def array_type(self):
+        return self._array_type
+
+    @property
     def dimension(self):
         return self._dimension
 
@@ -64,7 +68,8 @@ class ColumnDefinition:
         return self._cci
 
     def __str__(self):
-        return '{} {} {}'.format(self._name, self._type, self._dimension)
+        return '{} {} {}'.format(self._name, self._type, self.array_type,
+                                 self._dimension)
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):
@@ -72,6 +77,7 @@ class ColumnDefinition:
 
         return (self.name == other.name
                 and self.type == other.type
+                and self.array_type == other.array_type
                 and self.dimension == other.dimension
                 and self.cci == other.cci)
 
