@@ -52,7 +52,7 @@ class Batch:
         super().__init__()
         # store the batch with columns sorted
         if isinstance(frames, DataFrame):
-            self._frames = frames
+            self._frames = frames[sorted(frames.columns)]
         else:
             LoggingManager().log('Batch constructor not properly called!',
                                  LoggingLevel.DEBUG)

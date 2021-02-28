@@ -100,6 +100,18 @@ INTEGER:                             'INTEGER';
 FLOAT:                               'FLOAT';
 TEXT:                                'TEXT';
 NDARRAY:                             'NDARRAY';
+INT8:                                'INT8';
+UINT8:                               'UINT8';
+INT16:                               'INT16';
+INT32:                               'INT32';
+INT64:                               'INT64';
+UNICODE:                             'UNICODE';
+BOOL:                                'BOOL';
+FLOAT32:                             'FLOAT32';
+FLOAT64:                             'FLOAT64';
+DECIMAL:                             'DECIMAL'; 
+STR:                                 'STR';
+DATETIME:                            'DATETIME'; 
 
 // Group function Keywords
 

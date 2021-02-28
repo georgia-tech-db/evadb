@@ -12,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum
-
+from enum import Enum, auto
 
 class ColumnType(Enum):
     BOOLEAN = 1
@@ -21,3 +20,51 @@ class ColumnType(Enum):
     FLOAT = 3
     TEXT = 4
     NDARRAY = 5
+
+class NdArrayType(Enum):
+    INT8 = auto()
+    UINT8 = auto()
+    INT16 = auto()
+    INT32 = auto()
+    INT64 = auto()
+    UNICODE = auto()
+    BOOL = auto()
+    FLOAT32 = auto()
+    FLOAT64 = auto()
+    DECIMAL = auto()
+    STR = auto()
+    DATETIME = auto()
+
+    @classmethod
+    def to_numpy_type(cls, t):
+        import numpy as np
+        from decimal import Decimal
+
+        if t == cls.INT8:
+            np_type = np.int8
+        elif t is NdArrayType.UINT8:
+            np_type = np.uint8
+        elif t == cls.INT16:
+            np_type = np.int16
+        elif t == cls.INT32:
+            np_type = np.int32
+        elif t == cls.INT64:
+            np_type = np.int64
+        elif t == cls.UNICODE:
+            np_type = np.unicode_
+        elif t == cls.BOOL:
+            np_type = np.bool_
+        elif t == cls.FLOAT32:
+            np_type = np.float32
+        elif t == cls.FLOAT64:
+            np_type = np.float64
+        elif t == cls.DECIMAL:
+            np_type = Decimal
+        elif t == cls.STR:
+            np_type = np.str_
+        elif t == cls.DATETIME:
+            np_type = np.datetime64
+        else:
+            raise ValueError('Can not auto convert %s to numpy type' % t)
+
+        return np_type

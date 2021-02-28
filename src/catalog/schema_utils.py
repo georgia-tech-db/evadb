@@ -19,7 +19,7 @@ from petastorm.unischema import Unischema
 from petastorm.unischema import UnischemaField
 from pyspark.sql.types import IntegerType, FloatType, StringType
 
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
 
@@ -32,6 +32,7 @@ class SchemaUtils(object):
         column_type = df_column.type
         column_name = df_column.name
         column_is_nullable = df_column.is_nullable
+        column_array_type = df_column.array_type
         column_array_dimensions = df_column.array_dimensions
 
         # Reference:
@@ -58,8 +59,9 @@ class SchemaUtils(object):
                                               ScalarCodec(StringType()),
                                               column_is_nullable)
         elif column_type == ColumnType.NDARRAY:
+            np_type = NdArrayType.to_numpy_type(column_array_type)
             petastorm_column = UnischemaField(column_name,
-                                              np.uint8,
+                                              np_type,
                                               column_array_dimensions,
                                               NdarrayCodec(),
                                               column_is_nullable)

@@ -16,9 +16,10 @@
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
 from src.parser.evaql.evaql_parser import evaql_parser
-from src.parser.types import ParserColumnDataType
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
+
+from src.catalog.column_type import ColumnType, NdArrayType
 
 
 ##################################################################
@@ -71,19 +72,19 @@ class CreateTable(evaql_parserVisitor):
     def visitColumnDeclaration(
             self, ctx: evaql_parser.ColumnDeclarationContext):
 
-        data_type, dimensions, column_constraint_information = self.visit(
-            ctx.columnDefinition())
+        data_type, array_type, dimensions, column_constraint_information = \
+            self.visit(ctx.columnDefinition())
 
         column_name = self.visit(ctx.uid())
 
         if column_name is not None:
             return ColumnDefinition(
-                column_name, data_type, dimensions,
+                column_name, data_type, array_type, dimensions,
                 column_constraint_information)
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
-        data_type, dimensions = self.visit(ctx.dataType())
+        data_type, array_type, dimensions = self.visit(ctx.dataType())
 
         constraint_count = len(ctx.columnConstraint())
 
@@ -95,7 +96,7 @@ class CreateTable(evaql_parserVisitor):
 
                 column_constraint_information.unique = True
 
-        return data_type, dimensions, column_constraint_information
+        return data_type, array_type, dimensions, column_constraint_information
 
     def visitUniqueKeyColumnConstraint(
             self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
@@ -104,41 +105,78 @@ class CreateTable(evaql_parserVisitor):
     def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
 
         data_type = None
+        array_type = None
         dimensions = []
 
         if ctx.BOOLEAN() is not None:
-            data_type = ParserColumnDataType.BOOLEAN
+            data_type = ColumnType.BOOLEAN
 
-        return data_type, dimensions
+        return data_type, array_type, dimensions
 
     def visitIntegerDataType(self, ctx: evaql_parser.IntegerDataTypeContext):
 
         data_type = None
+        array_type = None
         dimensions = []
 
         if ctx.INTEGER() is not None:
-            data_type = ParserColumnDataType.INTEGER
+            data_type = ColumnType.INTEGER
         elif ctx.UNSIGNED() is not None:
-            data_type = ParserColumnDataType.INTEGER
+            data_type = ColumnType.INTEGER
 
-        return data_type, dimensions
+        return data_type, array_type, dimensions
 
     def visitDimensionDataType(
             self, ctx: evaql_parser.DimensionDataTypeContext):
         data_type = None
+        array_type = None
         dimensions = []
 
         if ctx.FLOAT() is not None:
-            data_type = ParserColumnDataType.FLOAT
+            data_type = ColumnType.FLOAT
             dimensions = self.visit(ctx.lengthTwoDimension())
         elif ctx.TEXT() is not None:
-            data_type = ParserColumnDataType.TEXT
+            data_type = ColumnType.TEXT
             dimensions = self.visit(ctx.lengthOneDimension())
-        elif ctx.NDARRAY() is not None:
-            data_type = ParserColumnDataType.NDARRAY
-            dimensions = self.visit(ctx.lengthDimensionList())
 
-        return data_type, dimensions
+        return data_type, array_type, dimensions
+
+    def visitArrayDataType(self, ctx: evaql_parser.ArrayDataTypeContext):
+        data_type = ColumnType.NDARRAY
+        array_type = self.visit(ctx.arrayType())
+        dimensions = self.visit(ctx.lengthDimensionList())
+        return data_type, array_type, dimensions
+
+    def visitArrayType(self, ctx: evaql_parser.ArrayTypeContext):
+        array_type = None
+
+        if ctx.INT8() is not None:
+            array_type = NdArrayType.INT8
+        elif ctx.UINT8() is not None:
+            array_type = NdArrayType.UINT8
+        elif ctx.INT16() is not None:
+            array_type = NdArrayType.INT16
+        elif ctx.INT32() is not None:
+            array_type = NdArrayType.INT32
+        elif ctx.INT64() is not None:
+            array_type = NdArrayType.INT64
+        elif ctx.UNICODE() is not None:
+            array_type = NdArrayType.UNICODE
+        elif ctx.BOOL() is not None:
+            array_type = NdArrayType.BOOL
+        elif ctx.FLOAT32() is not None:
+            array_type = NdArrayType.FLOAT32
+        elif ctx.FLOAT64() is not None:
+            array_type = NdArrayType.FLOAT64
+        elif ctx.DECIMAL() is not None:
+            array_type = NdArrayType.DECIMAL
+        elif ctx.STR() is not None:
+            array_type = NdArrayType.STR
+        elif ctx.DATETIME() is not None:
+            array_type = NdArrayType.DATETIME
+
+        return array_type
+
 
     def visitLengthOneDimension(
             self, ctx: evaql_parser.LengthOneDimensionContext):
