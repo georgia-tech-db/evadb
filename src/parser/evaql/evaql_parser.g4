@@ -211,11 +211,18 @@ tableSource
 
 tableSourceItem
     : tableName                                                     #atomTableItem
-    | (
+    | (LATERAL)? subqueryTableSourceItem                            #subqueryTableItem
+    ;
+
+subqueryTableSourceItem
+    : (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )                                                            #subqueryTableItem
+      )
+      |
+      functionCall
     ;
+
 
 joinPart
     : JOIN tableSourceItem
