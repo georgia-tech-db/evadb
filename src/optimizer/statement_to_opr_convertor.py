@@ -18,7 +18,8 @@ from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit, LogicalJoin,
+                                     LogicalFunctionScan)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -46,16 +47,34 @@ class StatementToPlanConvertor:
             self._column_map[column.name.lower()] = column
 
     def visit_table_ref(self, video: TableRef):
-        """Bind table ref object and convert to Logical get operator
+        """Bind table ref object and convert to Logical Get
+            or Logical Join
 
         Arguments:
             video {TableRef} -- [Input table ref object created by the parser]
         """
-        catalog_vid_metadata = bind_dataset(video.table_info)
+        if (video.table_info):
+            catalog_vid_metadata = bind_dataset(video.table_info)
+            self._populate_column_map(catalog_vid_metadata)
+            self._plan = LogicalGet(video, catalog_vid_metadata)
 
-        self._populate_column_map(catalog_vid_metadata)
+        if (video.join):
+            if isinstance(video.join.left, TableRef):
+                self.visit_table_ref(video.join.left)
+            if isinstance(video.join.left, AbstractExpression):
+                self._plan = LogicalFunctionScan(func_expr=video.join.left)
+            left_child_plan = self._plan
 
-        self._plan = LogicalGet(video, catalog_vid_metadata)
+            if isinstance(video.join.right, TableRef):
+                self.visit_table_ref(video.join.right)
+            if isinstance(video.join.right, AbstractExpression):
+                self._plan = LogicalFunctionScan(func_expr=video.join.right)
+            right_child_plan = self._plan
+
+            self._plan = LogicalJoin(join_type=video.join.join_type,
+                                     join_predicate=video.join.predicate)
+            self._plan.append_child(left_child_plan)
+            self._plan.append_child(right_child_plan)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement

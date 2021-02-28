@@ -18,6 +18,7 @@ from typing import List
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.parser.table_ref import TableRef
+from src.parser.types import JoinType
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.udf_io import UdfIO
@@ -40,6 +41,8 @@ class OperatorType(IntEnum):
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
+    LOGICALJOIN = auto()
+    LOGICAL_FUNCTION_SCAN = auto()
 
 
 class Operator:
@@ -401,3 +404,70 @@ class LogicalLoadData(Operator):
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
                 and self.path == other.path)
+
+
+class LogicalJoin(Operator):
+    """
+    Logical node for join operators
+
+    Attributes:
+        join_type: JoinType
+            Join type provided by the user - Lateral, Inner, Outer
+        left: TableRef
+            Left join table
+        right: TableRef
+            Right join table
+        join_predicate: AbstractExpression
+            condition/predicate expression used to join the tables
+    """
+
+    def __init__(self,
+                 join_type: JoinType,
+                 join_predicate: AbstractExpression = None,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALJOIN, children)
+        self._join_type = join_type
+        self._join_predicate = join_predicate
+
+    @property
+    def join_type(self):
+        return self._join_type
+
+    @property
+    def join_predicate(self):
+        return self._join_predicate
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalJoin):
+            return False
+        return (is_subtree_equal
+                and self.join_type == other.join_type
+                and self.join_predicate == other.join_predicate)
+
+
+class LogicalFunctionScan(Operator):
+    """
+    Logical node for function table scans
+
+    Attributes:
+        func_expr: AbstractExpression
+            function_expression that yield a table like output
+    """
+
+    def __init__(self,
+                 func_expr: AbstractExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICAL_FUNCTION_SCAN, children)
+        self._func_expr = func_expr
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFunctionScan):
+            return False
+        return (is_subtree_equal
+                and self.func_expr == other.func_expr)
