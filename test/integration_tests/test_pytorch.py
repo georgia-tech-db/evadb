@@ -23,6 +23,7 @@ class PytorchTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
 
+    @unittest.skip('Too slow when batch size is small.')
     def test_should_run_pytorch_and_fastrcnn(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                    INTO MyVideo;"""
@@ -30,7 +31,7 @@ class PytorchTest(unittest.TestCase):
 
         create_udf_query = """CREATE UDF FastRCNNObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'src/udfs/fastrcnn_object_detector.py';
         """
@@ -41,6 +42,7 @@ class PytorchTest(unittest.TestCase):
         actual_batch = perform_query(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
 
+    @unittest.skip('Too slow when batch size is small.')
     def test_should_run_pytorch_and_ssd(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                    INTO MyVideo;"""
@@ -48,7 +50,7 @@ class PytorchTest(unittest.TestCase):
 
         create_udf_query = """CREATE UDF SSDObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'src/udfs/ssd_object_detector.py';
         """

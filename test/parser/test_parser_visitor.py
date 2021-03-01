@@ -214,7 +214,7 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
             expected.evaluate(),
-            Batch(pd.DataFrame({0: [np.array([1,2,3,4])]}))
+            Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
         )
 
     def test_visit_str_array_literal(self):

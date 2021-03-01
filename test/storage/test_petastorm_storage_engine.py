@@ -18,7 +18,7 @@ import unittest
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.storage.petastorm_storage_engine import PetastormStorageEngine
 from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 
 from test.util import create_dummy_batches
 from test.util import NUM_FRAMES
@@ -34,7 +34,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
         table_info = DataFrameMetadata("dataset", 'dataset')
         column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn(
-            "data", ColumnType.NDARRAY, False, [
+            "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [
                 2, 2, 3])
         table_info.schema = [column_1, column_2]
         return table_info

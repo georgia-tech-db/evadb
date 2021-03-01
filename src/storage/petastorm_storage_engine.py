@@ -12,9 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
-import pandas as pd
-
 from typing import Iterator, List
 from pathlib import Path
 
@@ -25,13 +22,8 @@ from src.storage.abstract_storage_engine import AbstractStorageEngine
 from src.readers.petastorm_reader import PetastormReader
 from src.models.storage.batch import Batch
 
-from petastorm.unischema import Unischema
 from petastorm.unischema import dict_to_spark_row
-from petastorm.codecs import NdarrayCodec
 from petastorm.predicates import in_lambda
-
-from src.utils.logging_manager import LoggingLevel
-from src.utils.logging_manager import LoggingManager
 
 
 class PetastormStorageEngine(AbstractStorageEngine):
@@ -67,24 +59,6 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .mode('overwrite') \
                 .parquet(self._spark_url(table))
 
-    def _write_type_cast(self, schema: Unischema, df: pd.DataFrame) \
-            -> np.ndarray:
-        """
-        Try to cast the type if schema defined in UnischemeField for
-        Petastorm is not consistent with panda DataFrame provided.
-        """
-        for unischema in schema.fields.values():
-            if not isinstance(unischema.codec, NdarrayCodec):
-                continue
-            # We only care when the cell data is np.ndarray
-            col = unischema.name
-            dtype = unischema.numpy_dtype
-            try:
-                df[col] = df[col].apply(lambda x: x.astype(dtype))
-            except Exception as e:
-                LoggingManager().exception('Failed to cast type for Petastorm')
-        return df
-
     def write(self, table: DataFrameMetadata, rows: Batch):
         """
         Write rows into the dataframe.
@@ -99,12 +73,11 @@ class PetastormStorageEngine(AbstractStorageEngine):
         # ToDo
         # Throw an error if the row schema doesn't match the table schema
 
-        records = self._write_type_cast(table.schema.petastorm_schema,
-                                        rows.frames)
         with materialize_dataset(self.spark_session,
                                  self._spark_url(table),
                                  table.schema.petastorm_schema):
 
+            records = rows.frames
             columns = records.keys()
             rows_rdd = self.spark_context.parallelize(records.values) \
                 .map(lambda x: dict(zip(columns, x))) \

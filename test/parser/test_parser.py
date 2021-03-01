@@ -21,7 +21,6 @@ from src.parser.statement import AbstractStatement
 from src.parser.statement import StatementType
 
 from src.parser.select_statement import SelectStatement
-from src.parser.types import ParserColumnDataType
 from src.parser.create_statement import ColumnDefinition
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
@@ -33,6 +32,7 @@ from src.expression.constant_value_expression import ConstantValueExpression
 
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserOrderBySortType
+from src.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
 
@@ -50,7 +50,7 @@ class ParserTests(unittest.TestCase):
                   Frame_ID INTEGER UNIQUE,
                   Frame_Data TEXT(10),
                   Frame_Value FLOAT(1000, 201),
-                  Frame_Array NDARRAY (5, 100, 2432, 4324, 100)
+                  Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
             );""")
 
         for query in single_queries:
@@ -298,8 +298,8 @@ class ParserTests(unittest.TestCase):
     def test_create_udf_statement(self):
         parser = Parser()
         create_udf_query = """CREATE UDF FastRCNN
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (Labels NDARRAY (10), Bbox NDARRAY (10, 4))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
                   IMPL  'data/fastrcnn.py';
         """
@@ -307,12 +307,12 @@ class ParserTests(unittest.TestCase):
         expected_stmt = CreateUDFStatement(
             'FastRCNN', False, [
                 ColumnDefinition(
-                    'Frame_Array', ParserColumnDataType.NDARRAY, [
-                        3, 256, 256])], [
+                    'Frame_Array', ColumnType.NDARRAY, NdArrayType.UINT8,
+                    [3, 256, 256])], [
                 ColumnDefinition(
-                    'Labels', ParserColumnDataType.NDARRAY, [10]),
+                    'Labels', ColumnType.NDARRAY, NdArrayType.STR, [10]),
                 ColumnDefinition(
-                    'Bbox', ParserColumnDataType.NDARRAY, [10, 4])],
+                    'Bbox', ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4])],
             Path('data/fastrcnn.py'), 'Classification')
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
@@ -377,10 +377,10 @@ class ParserTests(unittest.TestCase):
         create_udf = CreateUDFStatement(
             'udf', False, [
                 ColumnDefinition(
-                    'frame', ParserColumnDataType.NDARRAY, [
-                        3, 256, 256])], [
+                    'frame', ColumnType.NDARRAY, NdArrayType.UINT8,
+                    [3, 256, 256])], [
                 ColumnDefinition(
-                    'labels', ParserColumnDataType.NDARRAY, [10])],
+                    'labels', ColumnType.NDARRAY, NdArrayType.STR, [10])],
             Path('data/fastrcnn.py'), 'Classification')
         select_stmt = SelectStatement()
         self.assertNotEqual(load_stmt, insert_stmt)

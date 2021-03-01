@@ -14,12 +14,14 @@
 # limitations under the License.
 from enum import Enum, auto
 
+
 class ColumnType(Enum):
     BOOLEAN = 1
     INTEGER = 2
     FLOAT = 3
     TEXT = 4
     NDARRAY = 5
+
 
 class NdArrayType(Enum):
     INT8 = auto()
@@ -42,7 +44,7 @@ class NdArrayType(Enum):
 
         if t == cls.INT8:
             np_type = np.int8
-        elif t is NdArrayType.UINT8:
+        elif t == cls.UINT8:
             np_type = np.uint8
         elif t == cls.INT16:
             np_type = np.int16

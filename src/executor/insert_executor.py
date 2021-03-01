@@ -18,6 +18,7 @@ from src.planner.insert_plan import InsertPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.storage.storage_engine import StorageEngine
 from src.models.storage.batch import Batch
+from src.catalog.schema_utils import SchemaUtils
 
 
 class InsertExecutor(AbstractExecutor):
@@ -44,4 +45,7 @@ class InsertExecutor(AbstractExecutor):
         batch = Batch.merge_column_wise(data_tuple)
         metadata = CatalogManager().get_metadata(table_id)
         # verify value types are consistent
+
+        batch.frames = SchemaUtils.petastorm_type_cast(
+            metadata.schema.petastorm_schema, batch.frames)
         StorageEngine.write(metadata, batch)

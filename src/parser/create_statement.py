@@ -20,6 +20,7 @@ from src.parser.types import StatementType
 from src.parser.table_ref import TableRef
 from src.catalog.column_type import ColumnType, NdArrayType
 
+
 class ColConstraintInfo:
     def __init__(self, nullable=False, default_value=None,
                  primary=False, unique=False):
@@ -68,8 +69,8 @@ class ColumnDefinition:
         return self._cci
 
     def __str__(self):
-        return '{} {} {}'.format(self._name, self._type, self.array_type,
-                                 self._dimension)
+        return '{} {} {} {}'.format(self._name, self._type, self.array_type,
+                                    self._dimension)
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):

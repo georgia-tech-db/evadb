@@ -51,19 +51,23 @@ class Batch:
                  identifier_column='id'):
         super().__init__()
         # store the batch with columns sorted
-        if isinstance(frames, DataFrame):
-            self._frames = frames[sorted(frames.columns)]
-        else:
-            LoggingManager().log('Batch constructor not properly called!',
-                                 LoggingLevel.DEBUG)
-            raise ValueError('Batch constructor not properly called. \
-                Expected pandas.DataFrame')
-        self._batch_size = len(frames)
+        self.frames = frames
         self._identifier_column = identifier_column
 
     @property
     def frames(self):
         return self._frames
+
+    @frames.setter
+    def frames(self, values):
+        if isinstance(values, DataFrame):
+            self._frames = values[sorted(values.columns)]
+        else:
+            LoggingManager().log('Batch constructor not properly called!',
+                                 LoggingLevel.DEBUG)
+            raise ValueError('Batch constructor not properly called. \
+                Expected pandas.DataFrame')
+        self._batch_size = len(values)
 
     @property
     def batch_size(self):
