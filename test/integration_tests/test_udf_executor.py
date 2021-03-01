@@ -48,9 +48,9 @@ class UDFExecutorTest(unittest.TestCase):
         """
         perform_query(create_udf_query)
 
-        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+            ORDER BY id;"
         actual_batch = perform_query(select_query)
-        actual_batch.sort()
         labels = DummyObjectDetector().labels
         expected = [{'id': i, 'label': [labels[1 + i % 2]]}
                     for i in range(NUM_FRAMES)]
@@ -62,25 +62,44 @@ class UDFExecutorTest(unittest.TestCase):
         perform_query(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label TEXT(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
         perform_query(create_udf_query)
 
+        # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person'];"
+            WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = perform_query(select_query)
-        actual_batch.sort()
-        expected = [{'id': i * 2, 'label': 'person'}
+        expected = [{'id': i * 2, 'label': ['person']}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
-        print(expected_batch)
-        print(actual_batch)
         self.assertEqual(actual_batch, expected_batch)
 
-        return
+        # Contain test
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+            WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
+        actual_batch = perform_query(select_query)
+        self.assertEqual(actual_batch, expected_batch)
+
+
+        # Mutli element contain test
+
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+            WHERE DummyObjectDetector(data).label <@ ['person', 'bicycle'] \
+            ORDER BY id;"
+        actual_batch = perform_query(select_query)
+        expected = [{'id': i * 2, 'label': ['person']}
+                    for i in range(NUM_FRAMES // 2)]
+        expected += [{'id': i, 'label': ['bicycle']}
+                     for i in range(NUM_FRAMES)
+                     if i % 2 + 1 == 2]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        expected_batch.sort()
+        self.assertEqual(actual_batch, expected_batch)
+
         nested_select_query = """SELECT id, data FROM
             (SELECT id, data, DummyObjectDetector(data) FROM MyVideo
                 WHERE id >= 2

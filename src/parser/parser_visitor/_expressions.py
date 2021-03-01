@@ -12,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import json
+import ast
 import numpy as np
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
@@ -40,9 +39,7 @@ class Expressions(evaql_parserVisitor):
         return self.visitChildren(ctx)
 
     def visitArrayLiteral(self, ctx: evaql_parser.ArrayLiteralContext):
-        # change the dtype when we add support for np.float
-        res = ConstantValueExpression(np.array(json.loads(ctx.getText()),
-                                                dtype=np.uint8))
+        res = ConstantValueExpression(np.array(ast.literal_eval(ctx.getText())))
         return res
 
     def visitConstant(self, ctx: evaql_parser.ConstantContext):
@@ -51,7 +48,6 @@ class Expressions(evaql_parserVisitor):
 
         if ctx.decimalLiteral() is not None:
             return ConstantValueExpression(self.visit(ctx.decimalLiteral()))
-        print(ctx.getText())
         return self.visitChildren(ctx)
 
     def visitLogicalExpression(
