@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import numpy as np
+import pandas as pd
+
 from petastorm.codecs import NdarrayCodec
 from petastorm.codecs import ScalarCodec
 from petastorm.unischema import Unischema
@@ -80,3 +82,24 @@ class SchemaUtils(object):
 
         petastorm_schema = Unischema(name, petastorm_column_list)
         return petastorm_schema
+
+    @staticmethod
+    def petastorm_type_cast(schema: Unischema, df: pd.DataFrame) \
+            -> pd.DataFrame:
+        """
+        Try to cast the type if schema defined in UnischemeField for
+        Petastorm is not consistent with panda DataFrame provided.
+        """
+        for unischema in schema.fields.values():
+            if not isinstance(unischema.codec, NdarrayCodec):
+                continue
+            # We only care when the cell data is np.ndarray
+            col = unischema.name
+            dtype = unischema.numpy_dtype
+            try:
+                df[col] = df[col].apply(lambda x: x.astype(dtype, copy=False))
+            except Exception:
+                LoggingManager().exception(
+                    'Failed to cast %s to %s for Petastorm' % (col, dtype)
+                )
+        return df

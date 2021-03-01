@@ -39,7 +39,9 @@ class Expressions(evaql_parserVisitor):
         return self.visitChildren(ctx)
 
     def visitArrayLiteral(self, ctx: evaql_parser.ArrayLiteralContext):
-        res = ConstantValueExpression(np.array(ast.literal_eval(ctx.getText())))
+        res = ConstantValueExpression(
+            np.array(ast.literal_eval(ctx.getText()))
+        )
         return res
 
     def visitConstant(self, ctx: evaql_parser.ConstantContext):

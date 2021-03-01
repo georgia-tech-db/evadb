@@ -25,7 +25,7 @@ from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
                                            bind_columns_expr,
                                            create_video_metadata)
 from src.parser.create_statement import ColumnDefinition
-from src.parser.types import ParserColumnDataType
+from src.catalog.column_type import ColumnType, NdArrayType
 
 
 class OptimizerUtilsTest(unittest.TestCase):
@@ -61,19 +61,15 @@ class OptimizerUtilsTest(unittest.TestCase):
                          mock_str_path.return_value.return_value)
 
     @patch('src.optimizer.optimizer_utils.CatalogManager')
-    @patch('src.optimizer.optimizer_utils.\
-xform_parser_column_type_to_catalog_type')
-    def test_column_definition_to_udf_io(self, mock_func, mock):
+    def test_column_definition_to_udf_io(self, mock):
         mock.return_value.udf_io.return_value = 'udf_io'
         col = MagicMock(spec=ColumnDefinition)
         col.name = 'name'
         col.type = 'type'
         col.dimension = 'dimension'
         col_list = [col, col]
-        mock_func.return_value = col.type
         actual = column_definition_to_udf_io(col_list, True)
         for col in col_list:
-            mock_func.assert_called_with('type')
             mock.return_value.udf_io.assert_called_with(
                 'name', 'type', 'dimension', True)
 
@@ -116,9 +112,9 @@ xform_parser_column_type_to_catalog_type')
         m_cm.return_value = catalog_ins
         catalog_ins.create_metadata.return_value = expected
 
-        calls = [call('id', ParserColumnDataType.INTEGER, [],
+        calls = [call('id', ColumnType.INTEGER, None, [],
                       'cci'),
-                 call('data', ParserColumnDataType.NDARRAY,
+                 call('data', ColumnType.NDARRAY, NdArrayType.UINT8,
                       [None, None, None])]
 
         actual = create_video_metadata(name)

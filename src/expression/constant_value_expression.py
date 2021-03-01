@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
-import numpy as np
 
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType

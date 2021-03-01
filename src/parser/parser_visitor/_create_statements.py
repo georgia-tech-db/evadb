@@ -177,7 +177,6 @@ class CreateTable(evaql_parserVisitor):
 
         return array_type
 
-
     def visitLengthOneDimension(
             self, ctx: evaql_parser.LengthOneDimensionContext):
         dimensions = []

@@ -20,7 +20,7 @@ from petastorm.unischema import UnischemaField
 from pyspark.sql.types import IntegerType, FloatType, StringType
 
 from unittest.mock import MagicMock, call, patch
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.schema_utils import SchemaUtils
@@ -50,7 +50,8 @@ class SchemaTests(unittest.TestCase):
                 StringType()), False)
         self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
 
-        col = DataFrameColumn(col_name, ColumnType.NDARRAY, True, [10, 10])
+        col = DataFrameColumn(col_name, ColumnType.NDARRAY, True,
+                              NdArrayType.UINT8, [10, 10])
         petastorm_col = UnischemaField(
             col_name, np.uint8, [
                 10, 10], NdarrayCodec(), True)
@@ -77,7 +78,7 @@ class SchemaTests(unittest.TestCase):
         schema_name = "foo"
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False,
-                                   [28, 28])
+                                   NdArrayType.UINT8, [28, 28])
         column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]
         schema = DataFrameSchema(schema_name, col_list)
@@ -99,7 +100,7 @@ class SchemaTests(unittest.TestCase):
         schema_name = "foo"
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False,
-                                   [28, 28])
+                                   NdArrayType.UINT8, [28, 28])
         column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]
         schema1 = DataFrameSchema(schema_name, col_list)

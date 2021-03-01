@@ -35,7 +35,8 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(df_col.type, ColumnType.TEXT)
         self.assertEqual(df_col.metadata_id, 1)
         self.assertEqual(df_col.id, None)
-        self.assertEqual(str(df_col), 'Column: (name, TEXT, False, [1, 2])')
+        self.assertEqual(str(df_col),
+                         'Column: (name, TEXT, False, None[1, 2])')
 
     def test_df_equality(self):
         df_col = DataFrameColumn('name', ColumnType.TEXT, is_nullable=False)

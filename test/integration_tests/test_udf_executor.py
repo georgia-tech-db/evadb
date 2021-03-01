@@ -35,14 +35,13 @@ class UDFExecutorTest(unittest.TestCase):
 
     # integration test
 
-    @unittest.skip('Too slow when batch size is small.')
     def test_should_load_and_select_using_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         perform_query(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
@@ -63,7 +62,7 @@ class UDFExecutorTest(unittest.TestCase):
 
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
@@ -83,7 +82,6 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
         actual_batch = perform_query(select_query)
         self.assertEqual(actual_batch, expected_batch)
-
 
         # Mutli element contain test
 
