@@ -204,8 +204,8 @@ class ParserVisitorTests(unittest.TestCase):
             expected.evaluate(),
             Batch(pd.DataFrame([float(ctx.getText())])))
 
-    def test_visit_array_literal(self):
-        ''' Testing when array literal
+    def test_visit_int_array_literal(self):
+        ''' Testing int array literal
             Function: visitArrayLiteral
         '''
         ctx = MagicMock()
@@ -215,6 +215,19 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(
             expected.evaluate(),
             Batch(pd.DataFrame({0: [np.array([1,2,3,4])]}))
+        )
+
+    def test_visit_str_array_literal(self):
+        ''' Testing str array literal
+            Function: visitArrayLiteral
+        '''
+        ctx = MagicMock()
+        visitor = ParserVisitor()
+        ctx.getText.return_value = "['person', 'car']"
+        expected = visitor.visitArrayLiteral(ctx)
+        self.assertEqual(
+            expected.evaluate(),
+            Batch(pd.DataFrame({0: [np.array(['person', 'car'])]}))
         )
 
     def test_visit_query_specification_base_exception(self):
