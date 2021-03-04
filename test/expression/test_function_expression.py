@@ -31,17 +31,6 @@ class FunctionExpressionTest(unittest.TestCase):
         actual = expression.evaluate(values)
         self.assertEqual(values, actual)
 
-    @unittest.skip("outcome in batch is not used.")
-    def test_should_update_the_batch_with_outcomes_in_exec_mode(self):
-        values = [1, 2, 3]
-        expression = FunctionExpression(lambda x: values,
-                                        mode=ExecutionMode.EXEC, name="test")
-        expected_batch = Batch(frames=pd.DataFrame(),
-                               outcomes={"test": [1, 2, 3]})
-        input_batch = Batch(frames=pd.DataFrame())
-        expression.evaluate(input_batch)
-        self.assertEqual(expected_batch, input_batch)
-
     def test_should_throw_assert_error_when_name_not_provided_exec_mode(self):
         self.assertRaises(AssertionError,
                           lambda _=None:
@@ -65,18 +54,6 @@ class FunctionExpressionTest(unittest.TestCase):
         actual = expression.evaluate(Batch(values))
         expected = Batch(pd.DataFrame(values['id']) + 1)
         self.assertEqual(expected, actual)
-
-    @unittest.skip("temp outcome in batch is not used.")
-    def test_should_update_temp_outcomes_when_is_temp_set_exec_mode(self):
-        values = [1, 2, 3]
-        expression = FunctionExpression(lambda x: values,
-                                        mode=ExecutionMode.EXEC,
-                                        name="test", is_temp=True)
-        expected_batch = Batch(frames=pd.DataFrame(),
-                               temp_outcomes={"test": [1, 2, 3]})
-        input_batch = Batch(frames=pd.DataFrame())
-        expression.evaluate(input_batch)
-        self.assertEqual(expected_batch, input_batch)
 
     @patch('src.expression.function_expression.Context')
     def test_function_move_the_device_to_gpu_if_compatible(self, context):
