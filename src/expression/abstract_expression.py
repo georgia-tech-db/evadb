@@ -126,7 +126,7 @@ class AbstractExpression(ABC):
     # how about if we maintain *args
     # refactor if need be
     @abstractmethod
-    def evaluate(self, *args):
+    def evaluate(self, *args, **kwargs):
         NotImplementedError('Must be implemented in subclasses.')
 
     def __eq__(self, other):

@@ -32,7 +32,7 @@ class ComparisonExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
-    def evaluate(self, *args):
+    def evaluate(self, *args, **kwargs):
         # cast in to numpy array
         lvalues = self.get_child(0).evaluate(*args).frames.values
         rvalues = self.get_child(1).evaluate(*args).frames.values
