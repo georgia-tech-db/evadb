@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pandas as pd
+from mock import Mock
 
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.logical_expression import LogicalExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.expression.tuple_value_expression import TupleValueExpression
+from src.models.storage.batch import Batch
 
 
 class LogicalExpressionsTest(unittest.TestCase):
@@ -71,7 +75,9 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_right
         )
         self.assertEqual(
-            [True], logical_expr.evaluate(None).frames[0].tolist())
+            [True],
+            logical_expr.evaluate(None).frames[0].tolist()
+        )
 
     def test_logical_not(self):
         const_exp1 = ConstantValueExpression(0)
@@ -88,4 +94,112 @@ class LogicalExpressionsTest(unittest.TestCase):
             comparison_expression_right
         )
         self.assertEqual(
-            [True], logical_expr.evaluate(None).frames[0].tolist())
+            [True],
+            logical_expr.evaluate(None).frames[0].tolist()
+        )
+
+    def test_short_circuiting_and_complete(self):
+        # tests whether right-hand side is bypassed completely with and
+        tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_r = TupleValueExpression(col_name=1)
+
+        comp_exp_l = ComparisonExpression(
+            ExpressionType.COMPARE_EQUAL,
+            tup_val_exp_l,
+            tup_val_exp_r
+        )
+        comp_exp_r = Mock(spec=ComparisonExpression)
+
+        logical_exp = LogicalExpression(
+            ExpressionType.LOGICAL_AND,
+            comp_exp_l,
+            comp_exp_r
+        )
+
+        tuples = Batch(pd.DataFrame(
+            {0: [1, 2, 3], 1: [4, 5, 6]}))
+        self.assertEqual(
+            [False, False, False],
+            logical_exp.evaluate(tuples).frames[0].tolist()
+        )
+        comp_exp_r.evaluate.assert_not_called()
+
+    def test_short_circuiting_or_complete(self):
+        # tests whether right-hand side is bypassed completely with or
+        tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_r = TupleValueExpression(col_name=1)
+
+        comp_exp_l = ComparisonExpression(
+            ExpressionType.COMPARE_EQUAL,
+            tup_val_exp_l,
+            tup_val_exp_r
+        )
+        comp_exp_r = Mock(spec=ComparisonExpression)
+
+        logical_exp = LogicalExpression(
+            ExpressionType.LOGICAL_OR,
+            comp_exp_l,
+            comp_exp_r
+        )
+
+        tuples = Batch(pd.DataFrame(
+            {0: [1, 2, 3], 1: [1, 2, 3]}))
+        self.assertEqual(
+            [True, True, True],
+            logical_exp.evaluate(tuples).frames[0].tolist()
+        )
+        comp_exp_r.evaluate.assert_not_called()
+
+    def test_short_circuiting_and_partial(self):
+        # tests whether right-hand side is partially executed with and
+        tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_r = TupleValueExpression(col_name=1)
+
+        comp_exp_l = ComparisonExpression(
+            ExpressionType.COMPARE_EQUAL,
+            tup_val_exp_l,
+            tup_val_exp_r
+        )
+        comp_exp_r = Mock(spec=ComparisonExpression)
+        comp_exp_r.evaluate = Mock(return_value=Mock(frames=[[True], [False]]))
+
+        logical_exp = LogicalExpression(
+            ExpressionType.LOGICAL_AND,
+            comp_exp_l,
+            comp_exp_r
+        )
+
+        tuples = Batch(pd.DataFrame(
+            {0: [1, 2, 3, 4], 1: [1, 2, 5, 6]}))
+        self.assertEqual(
+            [True, False, False, False],
+            logical_exp.evaluate(tuples).frames[0].tolist()
+        )
+        comp_exp_r.evaluate.assert_called_once_with(tuples, mask=[0, 1])
+
+    def test_short_circuiting_or_partial(self):
+        # tests whether right-hand side is partially executed with or
+        tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_r = TupleValueExpression(col_name=1)
+
+        comp_exp_l = ComparisonExpression(
+            ExpressionType.COMPARE_EQUAL,
+            tup_val_exp_l,
+            tup_val_exp_r
+        )
+        comp_exp_r = Mock(spec=ComparisonExpression)
+        comp_exp_r.evaluate = Mock(return_value=Mock(frames=[[True], [False]]))
+
+        logical_exp = LogicalExpression(
+            ExpressionType.LOGICAL_OR,
+            comp_exp_l,
+            comp_exp_r
+        )
+
+        tuples = Batch(pd.DataFrame(
+            {0: [1, 2, 3, 4], 1: [5, 6, 3, 4]}))
+        self.assertEqual(
+            [True, False, True, True],
+            logical_exp.evaluate(tuples).frames[0].tolist()
+        )
+        comp_exp_r.evaluate.assert_called_once_with(tuples, mask=[0, 1])
