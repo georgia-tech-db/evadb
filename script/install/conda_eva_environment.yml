@@ -32,7 +32,7 @@ dependencies:
   - pip:
     - antlr4-python3-runtime==4.8
     - pyspark==3.0.2
-    - petastorm
+    - petastorm==0.9.8
     - pre-commit
     - flake8
     - pytest
