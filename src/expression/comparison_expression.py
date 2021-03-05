@@ -34,8 +34,8 @@ class ComparisonExpression(AbstractExpression):
 
     def evaluate(self, *args, **kwargs):
         # cast in to numpy array
-        lvalues = self.get_child(0).evaluate(*args).frames.values
-        rvalues = self.get_child(1).evaluate(*args).frames.values
+        lvalues = self.get_child(0).evaluate(*args, **kwargs).frames.values
+        rvalues = self.get_child(1).evaluate(*args, **kwargs).frames.values
 
         if len(lvalues) != len(rvalues):
             if len(lvalues) == 1:
