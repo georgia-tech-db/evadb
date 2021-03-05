@@ -30,8 +30,8 @@ class AggregationExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.INTEGER,
                          children=children)  # can also be a float
 
-    def evaluate(self, *args):
-        batch = self.get_child(0).evaluate(*args)
+    def evaluate(self, *args, **kwargs):
+        batch = self.get_child(0).evaluate(*args, **kwargs)
         if self.etype == ExpressionType.AGGREGATION_SUM:
             return Batch(frames=batch.frames.agg(['sum']))
         elif self.etype == ExpressionType.AGGREGATION_COUNT:
