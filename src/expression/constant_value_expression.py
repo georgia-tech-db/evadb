@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
+
 from src.expression.abstract_expression import AbstractExpression, \
     ExpressionType
 from src.models.storage.batch import Batch
-import pandas as pd
 
 
 class ConstantValueExpression(AbstractExpression):
@@ -27,8 +28,8 @@ class ConstantValueExpression(AbstractExpression):
         super().__init__(ExpressionType.CONSTANT_VALUE)
         self._value = value
 
-    def evaluate(self, *args):
-        return Batch(pd.DataFrame([self._value]))
+    def evaluate(self, *args, **kwargs):
+        return Batch(pd.DataFrame({0: [self._value]}))
 
     @property
     def value(self):

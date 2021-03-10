@@ -30,6 +30,14 @@ class PytorchTest(unittest.TestCase):
                    INTO MyVideo;"""
         perform_query(query)
 
+        create_udf_query = """CREATE UDF FastRCNNObjectDetector
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'src/udfs/fastrcnn_object_detector.py';
+        """
+        perform_query(create_udf_query)
+
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
 
@@ -42,8 +50,8 @@ class PytorchTest(unittest.TestCase):
         perform_query(query)
 
         create_udf_query = """CREATE UDF SSDObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'src/udfs/classifier_udfs/ssd_object_detector.py';
         """

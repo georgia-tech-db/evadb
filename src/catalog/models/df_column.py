@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 from ast import literal_eval
 
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.models.base_model import BaseModel
 
 
@@ -30,6 +30,7 @@ class DataFrameColumn(BaseModel):
     _name = Column('name', String(100))
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
+    _array_type = Column('array_type', Enum(NdArrayType), nullable=True)
     _array_dimensions = Column('array_dimensions', String(100))
     _metadata_id = Column('metadata_id', Integer,
                           ForeignKey('df_metadata.id'))
@@ -44,11 +45,13 @@ class DataFrameColumn(BaseModel):
                  name: str,
                  type: ColumnType,
                  is_nullable: bool = False,
+                 array_type: NdArrayType = None,
                  array_dimensions: List[int] = [],
                  metadata_id: int = None):
         self._name = name
         self._type = type
         self._is_nullable = is_nullable
+        self._array_type = array_type
         self._array_dimensions = str(array_dimensions)
         self._metadata_id = metadata_id
 
@@ -67,6 +70,10 @@ class DataFrameColumn(BaseModel):
     @property
     def is_nullable(self):
         return self._is_nullable
+
+    @property
+    def array_type(self):
+        return self._array_type
 
     @property
     def array_dimensions(self):
@@ -89,7 +96,7 @@ class DataFrameColumn(BaseModel):
                                                 self._type.name,
                                                 self._is_nullable)
 
-        column_str += "["
+        column_str += "%s[" % self.array_type
         column_str += ', '.join(['%d'] * len(self.array_dimensions)) \
                       % tuple(self.array_dimensions)
         column_str += "])"
@@ -100,6 +107,7 @@ class DataFrameColumn(BaseModel):
         return self.id == other.id and \
             self.metadata_id == other.metadata_id and \
             self.is_nullable == other.is_nullable and \
+            self.array_type == other.array_type and \
             self.array_dimensions == other.array_dimensions and \
             self.name == other.name and \
             self.type == other.type

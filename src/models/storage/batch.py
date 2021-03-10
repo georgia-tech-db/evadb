@@ -51,19 +51,23 @@ class Batch:
                  identifier_column='id'):
         super().__init__()
         # store the batch with columns sorted
-        if isinstance(frames, DataFrame):
-            self._frames = frames[sorted(frames.columns)]
-        else:
-            LoggingManager().log('Batch constructor not properly called!',
-                                 LoggingLevel.DEBUG)
-            raise ValueError('Batch constructor not properly called. \
-                Expected pandas.DataFrame')
-        self._batch_size = len(frames)
+        self.frames = frames
         self._identifier_column = identifier_column
 
     @property
     def frames(self):
         return self._frames
+
+    @frames.setter
+    def frames(self, values):
+        if isinstance(values, DataFrame):
+            self._frames = values[sorted(values.columns)]
+        else:
+            LoggingManager().log('Batch constructor not properly called!',
+                                 LoggingLevel.DEBUG)
+            raise ValueError('Batch constructor not properly called. \
+                Expected pandas.DataFrame')
+        self._batch_size = len(values)
 
     @property
     def batch_size(self):
@@ -104,18 +108,15 @@ class Batch:
     def __eq__(self, other: 'Batch'):
         return self.frames.equals(other.frames)
 
-    def _get_frames_from_indices(self, required_frame_ids):
-        new_frames = self.frames.iloc[required_frame_ids, :]
-        new_batch = Batch(new_frames)
-        return new_batch
-
     def __getitem__(self, indices) -> 'Batch':
         """
-        Takes as input the slice for the list
-        Arguments:
-            item (list or Slice):
+        Returns a batch with the desired frames
 
-        :return:
+        Arguments:
+            indices (list, slice or mask): list must be
+            a list of indices; mask is boolean array-like
+            (i.e. list, NumPy array, DataFrame, etc.)
+            of appropriate size with True for desired frames.
         """
         if isinstance(indices, list):
             return self._get_frames_from_indices(indices)
@@ -126,6 +127,11 @@ class Batch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
+
+    def _get_frames_from_indices(self, required_frame_ids):
+        new_frames = self.frames.iloc[required_frame_ids, :]
+        new_batch = Batch(new_frames)
+        return new_batch
 
     def sort(self, by=None):
         """
