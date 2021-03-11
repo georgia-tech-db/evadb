@@ -19,6 +19,7 @@ from src.expression.function_expression import FunctionExpression
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
 from src.catalog.column_type import ColumnType, NdArrayType
+from src.catalog.models.udf_io import UdfIO
 
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType, \
@@ -179,8 +180,10 @@ def column_definition_to_udf_io(
                 LoggingLevel.ERROR)
             result_list.append(col)
         result_list.append(
-            CatalogManager().udf_io(col.name, col.type,
-                                    col.dimension, is_input)
+            UdfIO(col.name, col.type,
+                  array_type=col.array_type,
+                  array_dimensions=col.dimension,
+                  is_input=is_input)
         )
     return result_list
 

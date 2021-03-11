@@ -60,26 +60,30 @@ class OptimizerUtilsTest(unittest.TestCase):
         self.assertEqual(func_expr.function,
                          mock_str_path.return_value.return_value)
 
-    @patch('src.optimizer.optimizer_utils.CatalogManager')
-    def test_column_definition_to_udf_io(self, mock):
-        mock.return_value.udf_io.return_value = 'udf_io'
-        col = MagicMock(spec=ColumnDefinition)
-        col.name = 'name'
-        col.type = 'type'
-        col.dimension = 'dimension'
+    def test_column_definition_to_udf_io(self):
+        col = ColumnDefinition('data', ColumnType.NDARRAY, NdArrayType.UINT8,
+                               [None, None, None])
         col_list = [col, col]
         actual = column_definition_to_udf_io(col_list, True)
-        for col in col_list:
-            mock.return_value.udf_io.assert_called_with(
-                'name', 'type', 'dimension', True)
-
-        self.assertEqual(actual, ['udf_io', 'udf_io'])
+        for io in actual:
+            self.assertEqual(io.name, 'data')
+            self.assertEqual(io.type, ColumnType.NDARRAY)
+            self.assertEqual(io.is_nullable, False)
+            self.assertEqual(io.array_type, NdArrayType.UINT8)
+            self.assertEqual(io.array_dimensions, [None, None, None])
+            self.assertEqual(io.is_input, True)
+            self.assertEqual(io.udf_id, None)
 
         # input not list
         actual2 = column_definition_to_udf_io(col, True)
-        mock.return_value.udf_io.assert_called_with(
-            'name', 'type', 'dimension', True)
-        self.assertEqual(actual2, ['udf_io'])
+        for io in actual2:
+            self.assertEqual(io.name, 'data')
+            self.assertEqual(io.type, ColumnType.NDARRAY)
+            self.assertEqual(io.is_nullable, False)
+            self.assertEqual(io.array_type, NdArrayType.UINT8)
+            self.assertEqual(io.array_dimensions, [None, None, None])
+            self.assertEqual(io.is_input, True)
+            self.assertEqual(io.udf_id, None)
 
     @patch('src.optimizer.optimizer_utils.bind_function_expr')
     def test_bind_predicate_calls_bind_func_expr_if_type_functional(self,
