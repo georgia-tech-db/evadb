@@ -95,18 +95,18 @@ class PlanGenerator:
     def build(self, logical_plan: Operator):
         # apply optimizations
 
-        return self.optimize(logical_plan)
+        self.optimize(logical_plan)
 
         #############################################
         # remove this code once done with optimizer
-        if logical_plan.opr_type in self._SCAN_OPR_TYPES:
+        if logical_plan.opr_type in self._SCAN_NODE_TYPES:
             return ScanGenerator().build(logical_plan)
-        if logical_plan.opr_type is self._INSERT_OPR_TYPE:
+        if logical_plan.opr_type is self._INSERT_NODE_TYPE:
             return InsertGenerator().build(logical_plan)
-        if logical_plan.opr_type is self._CREATE_OPR_TYPE:
+        if logical_plan.opr_type is self._CREATE_NODE_TYPE:
             return CreateGenerator().build(logical_plan)
-        if logical_plan.opr_type is self._CREATE_UDF_OPR_TYPE:
+        if logical_plan.opr_type is self._CREATE_UDF_NODE_TYPE:
             return CreateUDFGenerator().build(logical_plan)
-        if logical_plan.opr_type is self._LOAD_OPR_TYPE:
+        if logical_plan.opr_type is self._LOAD_NODE_TYPE:
             return LoadDataGenerator().build(logical_plan)
         ###############################################
