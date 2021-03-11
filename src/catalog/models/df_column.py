@@ -52,7 +52,7 @@ class DataFrameColumn(BaseModel):
         self._type = type
         self._is_nullable = is_nullable
         self._array_type = array_type
-        self._array_dimensions = str(array_dimensions)
+        self.array_dimensions = array_dimensions
         self._metadata_id = metadata_id
 
     @property
@@ -80,7 +80,7 @@ class DataFrameColumn(BaseModel):
         return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
-    def array_dimensions(self, value):
+    def array_dimensions(self, value: List[int]):
         self._array_dimensions = str(value)
 
     @property

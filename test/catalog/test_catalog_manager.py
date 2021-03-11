@@ -175,17 +175,6 @@ class CatalogManagerTests(unittest.TestCase):
         dcs_mock.return_value.columns_by_id_and_dataset_id.assert_not_called()
         self.assertEqual(actual, metadata_obj)
 
-    @mock.patch('src.catalog.catalog_manager.UdfIO')
-    def test_create_udf_io_object(self, udfio_mock):
-        catalog = CatalogManager()
-        actual = catalog.udf_io('name', ColumnType.TEXT, [100], True)
-        udfio_mock.assert_called_with(
-            'name',
-            ColumnType.TEXT,
-            array_dimensions=[100],
-            is_input=True)
-        self.assertEqual(actual, udfio_mock.return_value)
-
     @mock.patch('src.catalog.catalog_manager.UdfService')
     @mock.patch('src.catalog.catalog_manager.UdfIOService')
     def test_create_udf(self, udfio_mock, udf_mock):
