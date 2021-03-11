@@ -2,12 +2,20 @@ import unittest
 
 from mock import MagicMock
 
-from src.optimizer.optimizer_tasks import TopDownRewrite
+from src.optimizer.optimizer_tasks import (
+    TopDownRewrite, BottomUpRewrite, OptimizeGroup)
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (LogicalGet, LogicalFilter)
+from src.optimizer.property import PropertyType
+from src.planner.seq_scan_plan import SeqScanPlan
 
 
 class TestOptimizerTask(unittest.TestCase):
+    def execute_task_stack(self, task_stack):
+        while not task_stack.empty():
+            task = task_stack.pop()
+            task.execute()
+
     def top_down_rewrite(self, opr):
         opt_cxt = OptimizerContext()
         grp_expr = opt_cxt.xform_opr_to_group_expr(
@@ -16,11 +24,18 @@ class TestOptimizerTask(unittest.TestCase):
         )
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(TopDownRewrite(grp_expr, opt_cxt))
+        self.execute_task_stack(opt_cxt.task_stack)
+        return opt_cxt, root_grp_id
 
-        while not opt_cxt.task_stack.empty():
-            task = opt_cxt.task_stack.pop()
-            task.execute()
+    def bottom_up_rewrite(self, root_grp_id, opt_cxt):
+        grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
+        opt_cxt.task_stack.push(BottomUpRewrite(grp_expr, opt_cxt))
+        self.execute_task_stack(opt_cxt.task_stack)
+        return opt_cxt, root_grp_id
 
+    def implement_group(self, root_grp_id, opt_cxt):
+        opt_cxt.task_stack.push(OptimizeGroup(root_grp_id, opt_cxt))
+        self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
     def test_simple_top_down_rewrite(self):
@@ -75,3 +90,39 @@ class TestOptimizerTask(unittest.TestCase):
                 self.assertEqual(expr.opr.predicate, child1_predicate)
             else:
                 self.assertEqual(expr.opr.predicate, child2_predicate)
+
+    def test_simple_implementation(self):
+        predicate = MagicMock()
+        child_opr = LogicalGet(MagicMock(), MagicMock())
+        root_opr = LogicalFilter(predicate, [child_opr])
+
+        opt_cxt, root_grp_id = self.top_down_rewrite(root_opr)
+        opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
+        opt_cxt, root_grp_id = self.implement_group(root_grp_id, opt_cxt)
+
+        root_grp = opt_cxt.memo.groups[root_grp_id]
+        best_root_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
+        
+        self.assertEqual(type(best_root_grp_expr.opr), SeqScanPlan)
+        self.assertEqual(best_root_grp_expr.opr.predicate, predicate)
+
+    def test_nested_implementation(self):
+        child1_predicate = MagicMock()
+        child2_predicate = MagicMock()
+        root_predicate = MagicMock()
+
+        child1_child_opr = LogicalGet(MagicMock(), MagicMock())
+        child2_child_opr = LogicalGet(MagicMock(), MagicMock())
+        child1_opr = LogicalFilter(child1_predicate, [child1_child_opr])
+        child2_opr = LogicalFilter(child2_predicate, [child2_child_opr])
+        root_opr = LogicalFilter(root_predicate, [child1_opr, child2_opr])
+
+        opt_cxt, root_grp_id = self.top_down_rewrite(root_opr)
+        opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
+        opt_cxt, root_grp_id = self.implement_group(root_grp_id, opt_cxt)
+
+        root_grp = opt_cxt.memo.groups[root_grp_id]
+        best_root_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
+
+        # TODO: nested implementation cannot pass, need to fix plan generator
+        self.assertTrue(False)
