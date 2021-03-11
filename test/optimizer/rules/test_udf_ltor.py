@@ -2,7 +2,7 @@ import unittest
 
 from mock import MagicMock
 
-from src.optimizer.rules.rules import UdfLTOR
+# from src.optimizer.rules.rules import UdfLTOR
 from src.optimizer.operators import LogicalFilter, Dummy
 from src.expression.abstract_expression import ExpressionType
 from src.expression.function_expression import FunctionExpression
