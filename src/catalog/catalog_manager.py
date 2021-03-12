@@ -234,6 +234,24 @@ class CatalogManager(object):
         metadata.schema = df_columns
         return metadata
 
+    def udf_io(
+            self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
+            dimensions: List[int], is_input: bool):
+        """Constructs an in memory udf_io object with given info.
+        This function won't commit this object in the catalog database.
+        If you want to commit it into catalog call create_udf with
+        corresponding udf_id and io list
+
+        Arguments:
+            name(str): io name to be created
+            data_type(ColumnType): type of io created
+            array_type(NdArrayType): type of array content
+            dimensions(List[int]):dimensions of the io created
+            is_input(bool): whether a input or output, if true it is an input
+        """
+        return UdfIO(io_name, data_type, array_type=array_type,
+                     array_dimensions=dimensions, is_input=is_input)
+
     def create_udf(self, name: str, impl_file_path: str,
                    type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
         """Creates an udf metadata object and udf_io objects and persists them
