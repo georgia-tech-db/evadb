@@ -206,16 +206,25 @@ tableSources
     ;
 
 tableSource
-    : tableSourceItem joinPart*                                     #tableSourceBase
+    : tableSourceJoined sampleClause?
+    ;
+
+tableSourceJoined
+    : tableSourceItem joinPart*                #tableSourceBase
     ;
 
 tableSourceItem
-    : tableName                                                     #atomTableItem
+    : tableName                                  #atomTableItem
     | (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
       )                                                            #subqueryTableItem
     ;
+
+sampleClause
+    : SAMPLE decimalLiteral
+    ;
+
 
 joinPart
     : JOIN tableSourceItem
@@ -253,7 +262,6 @@ selectElement
 
 fromClause
     : FROM tableSources
-      sample=sampleClause?
       (WHERE whereExpr=expression)?
       (
         GROUP BY
@@ -264,10 +272,6 @@ fromClause
 
 groupByItem
     : expression order=(ASC | DESC)?
-    ;
-
-sampleClause
-    : SAMPLE decimalLiteral
     ;
 
 limitClause

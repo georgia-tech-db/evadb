@@ -303,14 +303,19 @@ class ParserVisitor(evaql_parserVisitor):
     ##################################################################
 
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
-
         table_list = []
+        sample_freqs = []
         table_sources_count = len(ctx.tableSource())
         for table_sources_index in range(table_sources_count):
-            table = self.visit(ctx.tableSource(table_sources_index))
+            source = ctx.tableSource(table_sources_index)
+            table = self.visit(source.tableSourceJoined())
+            sample_freq = None 
+            if source.sampleClause() is not None:
+                sample_freq = self.visit(source.sampleClause())
             table_list.append(table)
+            sample_freqs.append(sample_freq)
 
-        return table_list
+        return table_list, sample_freqs
 
     # Nested sub query
     def visitSubqueryTableItem(
@@ -337,9 +342,9 @@ class ParserVisitor(evaql_parserVisitor):
         target_list = None
         from_clause = None
         where_clause = None
-        sample_freq = None
         orderby_clause = None
         limit_count = None
+        sample_freqs = None
 
         # first child will be a SELECT terminal token
 
@@ -353,7 +358,7 @@ class ParserVisitor(evaql_parserVisitor):
                     clause = self.visit(child)
                     from_clause = clause.get('from', None)
                     where_clause = clause.get('where', None)
-                    sample_freq = clause.get('sample', None)
+                    sample_freqs = clause.get('sample', None)
 
                 elif rule_idx == evaql_parser.RULE_orderByClause:
                     orderby_clause = self.visit(ctx.orderByClause())
@@ -368,11 +373,11 @@ class ParserVisitor(evaql_parserVisitor):
         # we don't support multiple table sources
         if from_clause is not None:
             from_clause = from_clause[0]
-
+        if sample_freqs is not None:
+            sample_freqs = sample_freqs[0]
         select_stmt = SelectStatement(
-            target_list, from_clause, where_clause,
-            sample_freq=sample_freq,
-            orderby_clause_list=orderby_clause,
+            target_list=target_list, from_table=from_clause, where_clause=where_clause,
+            sample_freq=sample_freqs, orderby_clause_list=orderby_clause,
             limit_count=limit_count)
 
         return select_stmt
@@ -389,17 +394,15 @@ class ParserVisitor(evaql_parserVisitor):
     def visitFromClause(self, ctx: evaql_parser.FromClauseContext):
         from_table = None
         where_clause = None
-        sample_limit = None
+        sample_freqs = None
 
         if ctx.tableSources():
-            from_table = self.visit(ctx.tableSources())
+            from_table, sample_freqs = self.visit(ctx.tableSources())
         if ctx.whereExpr is not None:
             where_clause = self.visit(ctx.whereExpr)
-        if ctx.sample is not None:
-            sample_limit = self.visit(ctx.sample)
 
-        return {"from": from_table, "where": where_clause,
-                "sample": sample_limit}
+        return {"from": from_table, "where": where_clause, 
+                "sample": sample_freqs}
 
     def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
         orderby_clause_data = []
@@ -419,10 +422,10 @@ class ParserVisitor(evaql_parserVisitor):
 
         return self.visitChildren(ctx.expression()), sort_token
 
-    def visitSampleClause(self, ctx: evaql_parser.SampleClauseContext):
-        return ConstantValueExpression(self.visitChildren(ctx))
-
     def visitLimitClause(self, ctx: evaql_parser.LimitClauseContext):
+        return ConstantValueExpression(self.visitChildren(ctx))
+    
+    def visitSampleClause(self, ctx: evaql_parser.SampleClauseContext):
         return ConstantValueExpression(self.visitChildren(ctx))
 
     ##################################################################
