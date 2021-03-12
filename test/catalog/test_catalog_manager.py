@@ -17,7 +17,7 @@ import unittest
 import mock
 from mock import MagicMock
 from src.catalog.catalog_manager import CatalogManager
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.models.df_column import DataFrameColumn
 
 
@@ -174,6 +174,19 @@ class CatalogManagerTests(unittest.TestCase):
             database_name, dataset_name)
         dcs_mock.return_value.columns_by_id_and_dataset_id.assert_not_called()
         self.assertEqual(actual, metadata_obj)
+
+    @mock.patch('src.catalog.catalog_manager.UdfIO')
+    def test_create_udf_io_object(self, udfio_mock):
+        catalog = CatalogManager()
+        actual = catalog.udf_io('name', ColumnType.NDARRAY, NdArrayType.UINT8,
+                                [2, 3, 4], True)
+        udfio_mock.assert_called_with(
+            'name',
+            ColumnType.NDARRAY,
+            array_type=NdArrayType.UINT8,
+            array_dimensions=[2, 3, 4],
+            is_input=True)
+        self.assertEqual(actual, udfio_mock.return_value)
 
     @mock.patch('src.catalog.catalog_manager.UdfService')
     @mock.patch('src.catalog.catalog_manager.UdfIOService')
