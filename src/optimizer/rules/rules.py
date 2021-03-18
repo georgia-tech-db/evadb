@@ -62,6 +62,8 @@ class RuleType(IntFlag):
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
+    LOGICAL_PROJECT_TO_SEQSCAN = auto()
+    LOGICAL_FILTER_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
@@ -80,8 +82,10 @@ class Promise(IntFlag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    LOGICAL_PROJECT_TO_PHYSICAL = auto()
+    # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
+    LOGICAL_PROJECT_TO_SEQSCAN = auto()
+    LOGICAL_FILTER_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
 
@@ -453,6 +457,36 @@ class LogicalGetToSeqScan(Rule):
         after.append_child(StoragePlan(before.dataset_metadata))
         return after
 
+class LogicalProjectToSeqScan(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        super().__init__(RuleType.LOGICAL_PROJECT_TO_SEQSCAN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_PROJECT_TO_SEQSCAN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        after = SeqScanPlan(None, before.target_list)
+        return after
+
+class LogicalFilterToSeqScan(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        super().__init__(RuleType.LOGICAL_FILTER_TO_SEQSCAN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FILTER_TO_SEQSCAN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        after = SeqScanPlan(before.predicate, None)
+        return after
+
 class LogicalDerivedGetToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
@@ -533,11 +567,12 @@ class RulesManager:
                                       LogicalInsertToPhysical(),
                                       LogicalLoadToPhysical(),
                                       LogicalGetToSeqScan(),
+                                      LogicalProjectToSeqScan(),
+                                      LogicalFilterToSeqScan(),
                                       LogicalDerivedGetToPhysical(),
                                       LogicalUnionToPhysical(),
                                       LogicalCreateMaterializedViewToPhysical(),
-                                      LogicalUdfFilterToPhysical()
-                                      ]
+                                      LogicalUdfFilterToPhysical()]
 
     @property
     def rewrite_rules(self):

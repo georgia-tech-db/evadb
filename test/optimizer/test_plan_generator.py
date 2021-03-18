@@ -18,13 +18,11 @@ from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
     LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, \
-    LogicalLoadData, LogicalUnion, LogicalOrderBy, LogicalLimit
+    LogicalLoadData, LogicalUnion, LogicalOrderBy, LogicalLimit, OperatorType
 from src.optimizer.plan_generator import PlanGenerator
 
 
-
 class PlanGeneratorTest(unittest.TestCase):
-    @unittest.skip("deprecated")
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_return_use_scan_generator_for_logical_project(self,
                                                                   mock_class):
@@ -41,7 +39,6 @@ class PlanGeneratorTest(unittest.TestCase):
         PlanGenerator().build(l_get)
         mock_instance.build.assert_called_with(l_get)
 
-    @unittest.skip("deprecated")
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_return_use_scan_generator_for_logical_filter(self,
                                                                  mock_class):
@@ -51,7 +48,7 @@ class PlanGeneratorTest(unittest.TestCase):
         mock_instance.build.assert_called_with(l_filter)
 
     @unittest.skip("deprecated")
-    @patch("src.optimizer.plan_generator.ScanGenerator")
+    @patch("src.optimizer.plan_generator.UnionGenerator")
     def test_should_return_use_scan_generator_for_logical_union(self,
                                                                 mock_class):
         mock_instance = mock_class.return_value
@@ -77,11 +74,10 @@ class PlanGeneratorTest(unittest.TestCase):
         PlanGenerator().build(l_limit)
         mock_instance.build.assert_called_with(l_limit)
 
-    @unittest.skip("deprecated")
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_not_call_scan_generator_for_other_types(self,
                                                             mock_class):
-        PlanGenerator().build(Operator(None))
+        # PlanGenerator().build(Operator(None))
         PlanGenerator().build(LogicalInsert(None, 1, [], []))
         mock_class.assert_not_called()
 
@@ -93,14 +89,13 @@ class PlanGeneratorTest(unittest.TestCase):
         PlanGenerator().build(l_insert)
         mock_instance.build.assert_called_with(l_insert)
 
-    @unittest.skip("deprecated")
     @patch("src.optimizer.plan_generator.InsertGenerator")
     def test_should_not_call_insert_generator_for_other_types(
             self, mock_class):
-        PlanGenerator().build(Operator(None))
-        PlanGenerator().build(Operator(LogicalFilter(None)))
-        PlanGenerator().build(Operator(LogicalGet(None, 1)))
-        PlanGenerator().build(Operator(LogicalProject([])))
+        # PlanGenerator().build(Operator(None))
+        PlanGenerator().build(LogicalFilter(None))
+        PlanGenerator().build(LogicalGet(None, 1))
+        PlanGenerator().build(LogicalProject([]))
         mock_class.assert_not_called()
 
     @patch('src.optimizer.plan_generator.CreateUDFGenerator')
