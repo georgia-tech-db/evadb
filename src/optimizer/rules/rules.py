@@ -23,7 +23,8 @@ from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion, LogicalCreateMaterializedView, LogicalQueryDerivedGet)
+    LogicalUnion, LogicalOrderBy, LogicalCreateMaterializedView, 
+    LogicalQueryDerivedGet)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -31,6 +32,7 @@ from src.planner.load_data_plan import LoadDataPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
+from src.planner.orderby_plan import OrderByPlan
 from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.expression.abstract_expression import (
     AbstractExpression, ExpressionType)
@@ -55,6 +57,7 @@ class RuleType(IntFlag):
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_UNION_TO_PHYSICAL = auto()
+    LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -77,6 +80,7 @@ class Promise(IntFlag):
     """
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
+    LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
@@ -457,6 +461,7 @@ class LogicalGetToSeqScan(Rule):
         after.append_child(StoragePlan(before.dataset_metadata))
         return after
 
+
 class LogicalProjectToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
@@ -472,6 +477,7 @@ class LogicalProjectToSeqScan(Rule):
         after = SeqScanPlan(None, before.target_list)
         return after
 
+
 class LogicalFilterToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
@@ -486,6 +492,7 @@ class LogicalFilterToSeqScan(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         after = SeqScanPlan(before.predicate, None)
         return after
+
 
 class LogicalDerivedGetToPhysical(Rule):
     def __init__(self):
@@ -520,6 +527,23 @@ class LogicalUnionToPhysical(Rule):
 
     def apply(self, before: LogicalUnion, context: OptimizerContext):
         after = UnionPlan(before.all)
+        return after
+
+
+class LogicalOrderByToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALORDERBY)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_ORDERBY_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_ORDERBY_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalOrderBy, context: OptimizerContext):
+        after = OrderByPlan(LogicalOrderBy.orderby_list)
         return after
 
 
@@ -571,6 +595,7 @@ class RulesManager:
                                       LogicalFilterToSeqScan(),
                                       LogicalDerivedGetToPhysical(),
                                       LogicalUnionToPhysical(),
+                                      LogicalOrderByToPhysical(),
                                       LogicalCreateMaterializedViewToPhysical(),
                                       LogicalUdfFilterToPhysical()]
 

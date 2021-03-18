@@ -56,8 +56,7 @@ class PlanGeneratorTest(unittest.TestCase):
         PlanGenerator().build(l_union)
         mock_instance.build.assert_called_with(l_union)
 
-    @unittest.skip("deprecated")
-    @patch("src.optimizer.plan_generator.ScanGenerator")
+    @patch("src.optimizer.plan_generator.OrderByGenerator")
     def test_should_return_use_scan_generator_for_logical_orderby(self,
                                                                   mock_class):
         mock_instance = mock_class.return_value
