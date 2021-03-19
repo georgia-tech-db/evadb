@@ -23,8 +23,8 @@ from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion, LogicalOrderBy, LogicalCreateMaterializedView, 
-    LogicalQueryDerivedGet)
+    LogicalUnion, LogicalOrderBy, LogicalLimit, 
+    LogicalCreateMaterializedView, LogicalQueryDerivedGet)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -33,6 +33,7 @@ from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
+from src.planner.limit_plan import LimitPlan
 from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.expression.abstract_expression import (
     AbstractExpression, ExpressionType)
@@ -58,6 +59,7 @@ class RuleType(IntFlag):
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
+    LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -81,6 +83,7 @@ class Promise(IntFlag):
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
+    LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
@@ -533,7 +536,7 @@ class LogicalUnionToPhysical(Rule):
 class LogicalOrderByToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALORDERBY)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_ORDERBY_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -544,6 +547,23 @@ class LogicalOrderByToPhysical(Rule):
 
     def apply(self, before: LogicalOrderBy, context: OptimizerContext):
         after = OrderByPlan(LogicalOrderBy.orderby_list)
+        return after
+
+
+class LogicalLimitToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_LIMIT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_LIMIT_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        after = LimitPlan(LogicalLimit.limit_count)
         return after
 
 
@@ -596,6 +616,7 @@ class RulesManager:
                                       LogicalDerivedGetToPhysical(),
                                       LogicalUnionToPhysical(),
                                       LogicalOrderByToPhysical(),
+                                      LogicalLimitToPhysical(),
                                       LogicalCreateMaterializedViewToPhysical(),
                                       LogicalUdfFilterToPhysical()]
 

@@ -47,29 +47,31 @@ class PlanGeneratorTest(unittest.TestCase):
         PlanGenerator().build(l_filter)
         mock_instance.build.assert_called_with(l_filter)
 
-    @unittest.skip("deprecated")
-    @patch("src.optimizer.plan_generator.UnionGenerator")
+    @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_return_use_scan_generator_for_logical_union(self,
                                                                 mock_class):
         mock_instance = mock_class.return_value
         l_union = LogicalUnion(True, None)
+        l_union.append_child(LogicalGet(None, 1))
+        l_union.append_child(LogicalGet(None, 1))
         PlanGenerator().build(l_union)
         mock_instance.build.assert_called_with(l_union)
 
-    @patch("src.optimizer.plan_generator.OrderByGenerator")
+    @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_return_use_scan_generator_for_logical_orderby(self,
                                                                   mock_class):
         mock_instance = mock_class.return_value
         l_orderby = LogicalOrderBy(None)
+        l_orderby.append_child(LogicalGet(None, 1))
         PlanGenerator().build(l_orderby)
         mock_instance.build.assert_called_with(l_orderby)
 
-    @unittest.skip("deprecated")
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_return_use_scan_generator_for_logical_limit(self,
                                                                 mock_class):
         mock_instance = mock_class.return_value
         l_limit = LogicalLimit(None)
+        l_limit.append_child(LogicalGet(None, 1))
         PlanGenerator().build(l_limit)
         mock_instance.build.assert_called_with(l_limit)
 

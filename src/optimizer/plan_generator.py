@@ -17,7 +17,6 @@ from src.optimizer.generators.insert_generator import InsertGenerator
 from src.optimizer.generators.create_generator import CreateGenerator
 from src.optimizer.generators.create_udf_generator import CreateUDFGenerator
 from src.optimizer.generators.load_generator import LoadDataGenerator
-from src.optimizer.generators.orderby_generator import OrderByGenerator
 from src.optimizer.operators import Operator, OperatorType
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.optimizer_tasks import TopDownRewrite, OptimizeGroup, BottomUpRewrite
@@ -33,12 +32,11 @@ class PlanGenerator:
     """
     _SCAN_NODE_TYPES = (OperatorType.LOGICALFILTER, OperatorType.LOGICALGET,
                         OperatorType.LOGICALPROJECT, OperatorType.LOGICALUNION,
-                        OperatorType.LOGICALLIMIT)
+                        OperatorType.LOGICALORDERBY, OperatorType.LOGICALLIMIT)
     _INSERT_NODE_TYPE = OperatorType.LOGICALINSERT
     _CREATE_NODE_TYPE = OperatorType.LOGICALCREATE
     _CREATE_UDF_NODE_TYPE = OperatorType.LOGICALCREATEUDF
     _LOAD_NODE_TYPE = OperatorType.LOGICALLOADDATA
-    _ORDERBY_NODE_TYPE = OperatorType.LOGICALORDERBY
 
     def execute_task_stack(self, task_stack: OptimizerTaskStack):
         while not task_stack.empty():
@@ -111,6 +109,4 @@ class PlanGenerator:
             return CreateUDFGenerator().build(logical_plan)
         if logical_plan.opr_type is self._LOAD_NODE_TYPE:
             return LoadDataGenerator().build(logical_plan)
-        if logical_plan.opr_type is self._ORDERBY_NODE_TYPE:
-            return OrderByGenerator().build(logical_plan)
         ###############################################
