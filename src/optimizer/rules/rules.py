@@ -15,15 +15,14 @@
 
 from abc import ABC, abstractmethod
 from enum import IntFlag, auto
-import copy
 
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
-    LogicalCreate, LogicalCreateUDF, LogicalInsert, LogicalLoadData,
+    LogicalCreate, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion, LogicalOrderBy, LogicalLimit, 
+    LogicalUnion, LogicalOrderBy, LogicalLimit,
     LogicalCreateMaterializedView, LogicalQueryDerivedGet)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
@@ -130,7 +129,10 @@ class Rule(ABC):
         self._pattern = pattern
 
     @classmethod
-    def _compare_expr_with_pattern(cls, grp_id, context: OptimizerContext, pattern) -> bool:
+    def _compare_expr_with_pattern(cls,
+                                   grp_id,
+                                   context: OptimizerContext,
+                                   pattern) -> bool:
         """check if the logical tree of the expression matches the
             provided pattern
         Args:
@@ -204,7 +206,7 @@ class EmbedFilterIntoGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        #logical_get = copy.deepcopy(before.children[0])
+        # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
         logical_get.predicate = predicate
         return logical_get
@@ -225,12 +227,13 @@ class EmbedProjectIntoGet(Rule):
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
         select_list = before.target_list
-        #logical_get = copy.deepcopy(before.children[0])
+        # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
         logical_get.target_list = select_list
         return logical_get
 
 # For nestes queries
+
 
 class EmbedFilterIntoDerivedGet(Rule):
     def __init__(self):
@@ -249,7 +252,7 @@ class EmbedFilterIntoDerivedGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        #logical_derived_get = copy.deepcopy(before.children[0])
+        # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
         logical_derived_get.predicate = predicate
         return logical_derived_get
@@ -272,7 +275,7 @@ class EmbedProjectIntoDerivedGet(Rule):
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
         select_list = before.target_list
-        #logical_derived_get = copy.deepcopy(before.children[0])
+        # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
         logical_derived_get.target_list = select_list
         return logical_derived_get
@@ -407,8 +410,12 @@ class LogicalCreateUDFToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
-        after = CreateUDFPlan(before.name, before.if_not_exists, before.inputs,
-                              before.outputs, before.impl_path, before.udf_type)
+        after = CreateUDFPlan(before.name,
+                              before.if_not_exists,
+                              before.inputs,
+                              before.outputs,
+                              before.impl_path,
+                              before.udf_type)
         return after
 
 
@@ -468,6 +475,7 @@ class LogicalGetToSeqScan(Rule):
 class LogicalProjectToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_PROJECT_TO_SEQSCAN, pattern)
 
     def promise(self):
@@ -484,6 +492,7 @@ class LogicalProjectToSeqScan(Rule):
 class LogicalFilterToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_FILTER_TO_SEQSCAN, pattern)
 
     def promise(self):
@@ -546,7 +555,7 @@ class LogicalOrderByToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalOrderBy, context: OptimizerContext):
-        after = OrderByPlan(LogicalOrderBy.orderby_list)
+        after = OrderByPlan(before.orderby_list)
         return after
 
 
@@ -563,7 +572,7 @@ class LogicalLimitToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalLimit, context: OptimizerContext):
-        after = LimitPlan(LogicalLimit.limit_count)
+        after = LimitPlan(before.limit_count)
         return after
 
 
@@ -601,24 +610,29 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
-        self._rewrite_rules = [EmbedFilterIntoGet(),
-                               EmbedProjectIntoGet(),
-                               EmbedFilterIntoDerivedGet(),
-                               EmbedProjectIntoDerivedGet()]
-                               #    UdfLTOR()]
-        self._implementation_rules = [LogicalCreateToPhysical(),
-                                      LogicalCreateUDFToPhysical(),
-                                      LogicalInsertToPhysical(),
-                                      LogicalLoadToPhysical(),
-                                      LogicalGetToSeqScan(),
-                                      LogicalProjectToSeqScan(),
-                                      LogicalFilterToSeqScan(),
-                                      LogicalDerivedGetToPhysical(),
-                                      LogicalUnionToPhysical(),
-                                      LogicalOrderByToPhysical(),
-                                      LogicalLimitToPhysical(),
-                                      LogicalCreateMaterializedViewToPhysical(),
-                                      LogicalUdfFilterToPhysical()]
+        self._rewrite_rules = [
+            EmbedFilterIntoGet(),
+            EmbedProjectIntoGet(),
+            EmbedFilterIntoDerivedGet(),
+            EmbedProjectIntoDerivedGet()
+        ]
+
+        #    UdfLTOR()]
+        self._implementation_rules = [
+            LogicalCreateToPhysical(),
+            LogicalCreateUDFToPhysical(),
+            LogicalInsertToPhysical(),
+            LogicalLoadToPhysical(),
+            LogicalGetToSeqScan(),
+            LogicalProjectToSeqScan(),
+            LogicalFilterToSeqScan(),
+            LogicalDerivedGetToPhysical(),
+            LogicalUnionToPhysical(),
+            LogicalOrderByToPhysical(),
+            LogicalLimitToPhysical(),
+            LogicalCreateMaterializedViewToPhysical(),
+            LogicalUdfFilterToPhysical()
+        ]
 
     @property
     def rewrite_rules(self):
