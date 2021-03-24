@@ -41,7 +41,6 @@ class SelectExecutorTest(unittest.TestCase):
     def tearDownClass(cls):
         os.remove('dummy.avi')
 
-    @unittest.skip('Order by is not supported in the optimizer.')
     def test_sort_on_nonprojected_column(self):
         """ This tests doing an order by on a column
         that is not projected. The orderby_executor currently
@@ -56,7 +55,6 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch, expected_batch)
 
-    @unittest.skip('Order by is not supported in the optimizer.')
     def test_should_load_and_sort_in_table(self):
         select_query = "SELECT data, id FROM MyVideo ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -158,7 +156,6 @@ class SelectExecutorTest(unittest.TestCase):
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
 
-    @unittest.skip('Limit is not supported in the optimizer.')
     def test_select_and_limit(self):
         select_query = "SELECT id,data FROM MyVideo LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
