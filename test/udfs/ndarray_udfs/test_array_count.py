@@ -17,12 +17,12 @@ import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from src.udfs.ndarray_udfs.unnest import Unnest
+from src.udfs.ndarray_udfs.array_count import Array_Count
 from test.util import perform_query
 from test.util import populate_catalog_with_built_in_udfs
 
 
-class UnnestTests(unittest.TestCase):
+class ArrayCountTests(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
@@ -32,16 +32,24 @@ class UnnestTests(unittest.TestCase):
                         INTO MyVideo;"""
         perform_query(load_query)
 
+    def test_should_return_count(self):
+        query = """SELECT FastRCNNObjectDetector(data).labels FROM MyVideo WHERE id < 2;"""
+        obj_det_batch = perform_query(query)
 
-    def test_should_unnest_dataframe(self):
-        query = """SELECT FastRCNNObjectDetector(data).labels FROM
-                    MyVideo WHERE id < 2;"""
-        without_unnest_batch = perform_query(query)
-        query = """SELECT Unnest(FastRCNNObjectDetector(data).labels) FROM
-                    MyVideo WHERE id < 2;"""
-        unnest_batch = perform_query(query)
-        expected = Batch(Unnest().exec(without_unnest_batch.frames))
-        self.assertEqual(unnest_batch, expected)
+        print(obj_det_batch.frames.shape)
+
+        # ac = Array_Count(obj_det_batch.frames, "car")
+        # print(ac.name)
+        # print(ac.exec(obj_det_batch.frames))
+
+        query = """SELECT Array_Count(FastRCNNObjectDetector(data).labels, "car") FROM MyVideo WHERE id < 2;"""
+
+        array_count_result = perform_query(query)
+        print(array_count_result)
+
+        select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo WHERE id < 5;"""
+        actual_batch = perform_query(select_query)
+        self.assertEqual(actual_batch.batch_size, 5)
 
 
 if __name__ == "__main__":

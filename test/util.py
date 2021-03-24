@@ -94,9 +94,9 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
 
 def perform_query(query):
     stmt = Parser().parse(query)[0]
-    print(stmt)
+    print("STMT:", stmt)
     l_plan = StatementToPlanConvertor().visit(stmt)
-    print(l_plan)
+    print("L PLAN:", l_plan)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()
 
@@ -107,19 +107,27 @@ def load_ndarray_udfs():
     # we need to change the UDFIO
 
     unnest_udf = """CREATE UDF Unnest
-                  INPUT  (inp NDARRAY(10))
-                  OUTPUT (out NDARRAY(10))
-                  TYPE  Ndarray
-                  IMPL  'src/udfs/ndarray_udfs/unnest.py';
+                INPUT  (inp NDARRAY UINT8(10, 10, 10))
+                OUTPUT (out NDARRAY UINT8(10, 10, 10))
+                TYPE  Ndarray
+                IMPL  "src/udfs/ndarray_udfs/unnest.py";
         """
+    arraycount_udf = """CREATE UDF Array_Count
+                    INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10)) 
+                    OUTPUT(count INTEGER)
+                    TYPE Ndarray
+                    IMPL "src/udfs/ndarray_udfs/array_count.py";
+                    """
+
     perform_query(unnest_udf)
+    perform_query(arraycount_udf)
 
 
 def load_classifier_udfs():
     fastrcnn_udf = """CREATE UDF FastRCNNObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (labels NDARRAY (10), bboxes NDARRAY (10),
-                            scores NDARRAY (10))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(10),
+                            scores NDARRAY FLOAT32(10))
                   TYPE  Classification
                   IMPL  'src/udfs/classifier_udfs/fastrcnn_object_detector.py';
                   """

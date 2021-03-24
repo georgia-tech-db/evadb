@@ -31,7 +31,7 @@ class AbstractNdarrayUDF(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def exec(self, inp: pd.DataFrame) -> pd.DataFrame:
+    def exec(self, inp: pd.DataFrame, **kwargs) -> pd.DataFrame:
         """
         All the UDFs need to implement exec function.
 
