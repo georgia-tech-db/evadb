@@ -31,10 +31,10 @@ class ComparisonExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
-    def evaluate(self, *args):
+    def evaluate(self, *args, **kwargs):
         # evaluate always return batch
-        left_values = self.get_child(0).evaluate(*args).frames
-        right_values = self.get_child(1).evaluate(*args).frames
+        left_values = self.get_child(0).evaluate(*args, **kwargs).frames
+        right_values = self.get_child(1).evaluate(*args, **kwargs).frames
 
         if len(left_values) != len(right_values):
             if len(left_values) == 1:

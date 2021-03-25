@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pandas as pd
 
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
@@ -22,29 +21,9 @@ from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.aggregation_expression import AggregationExpression
 from src.expression.function_expression import FunctionExpression
 from src.expression.logical_expression import LogicalExpression
-from src.models.inference.outcome import Outcome
-from src.models.storage.batch import Batch
-
-from test.util import create_dataframe
 
 
 class ExpressionEvaluationTest(unittest.TestCase):
-    @unittest.skip("This test case needs to be redesigned")
-    def test_func_expr_with_cmpr_and_const_expr_should_work(self):
-        frames = create_dataframe(1)
-        outcome_1 = Outcome(pd.DataFrame(
-            [{'labels': ["car", "bus"], 'scores': [0.5, 0.6]}]), 'labels')
-
-        func = FunctionExpression(lambda x, y: [outcome_1])
-        value_expr = ConstantValueExpression("car")
-        expression_tree = ComparisonExpression(ExpressionType.COMPARE_EQUAL,
-                                               func,
-                                               value_expr)
-
-        batch = Batch(frames=frames)
-        output = expression_tree.evaluate(batch)
-        self.assertEqual([True, False], output)
-
     def test_if_expr_tree_is_equal(self):
         const_exp1 = ConstantValueExpression(0)
         const_exp2 = ConstantValueExpression(0)
