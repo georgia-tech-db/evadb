@@ -390,6 +390,7 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
 
+    @unittest.skip('Skip mat operator test cases')
     def test_materialized_view(self):
         select_query = '''SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
                         WHERE id<5; '''
