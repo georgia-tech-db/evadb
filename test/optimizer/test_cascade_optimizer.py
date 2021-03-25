@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import os
+import pandas as pd
+
 from src.optimizer.operators import LogicalProject, LogicalGet, \
     LogicalFilter
 from src.optimizer.plan_generator import PlanGenerator
@@ -22,11 +25,10 @@ from src.expression.function_expression import FunctionExpression
 from src.expression.abstract_expression import ExpressionType
 from src.expression.logical_expression import LogicalExpression
 from src.catalog.catalog_manager import CatalogManager
-from test.util import create_sample_video, NUM_FRAMES
 from src.server.command_handler import execute_query_fetch_all
 from src.models.storage.batch import Batch
-import os
-import pandas as pd
+
+from test.util import create_sample_video, NUM_FRAMES
 
 
 class CascadeOptimizer(unittest.TestCase):
@@ -76,8 +78,10 @@ class CascadeOptimizer(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            WHERE Classification(data).label = 'person';"
+        select_query = """SELECT id, DummyObjectDetector(data)
+                    FROM MyVideo
+                    WHERE DummyObjectDetector(data).label = 'person';
+        """
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected = [{'id': i * 2, 'label': 'person'}
