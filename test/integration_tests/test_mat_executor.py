@@ -32,7 +32,7 @@ class MaterializedViewTest(unittest.TestCase):
         super(MaterializedViewTest, cls).setUpClass()
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-            
+
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
 
@@ -48,6 +48,7 @@ class MaterializedViewTest(unittest.TestCase):
     def tearDownClass(cls):
         os.remove('dummy.avi')
 
+    @unittest.skip('Skip mat operator test cases')
     def test_should_mat_view_with_dummy(self):
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
@@ -64,7 +65,7 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-
+    @unittest.skip('Skip mat operator test cases')
     def test_should_mat_view_to_the_same_table(self):
         materialized_query = """CREATE MATERIALIZED VIEW IF NOT EXISTS
             dummy_view2 (id, label)
@@ -89,7 +90,7 @@ class MaterializedViewTest(unittest.TestCase):
                     for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
-        
+
 
     @unittest.skip('Too slow when no GPU')
     def test_should_mat_view_with_fastrcnn(self):
