@@ -122,7 +122,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -194,7 +194,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -238,7 +238,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -258,14 +258,11 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt.limit_count, ConstantValueExpression(3))
 
     def test_select_statement_sample_class(self):
-        '''Testing limit clause in select statement
-        Class: SelectStatement'''
+        '''Testing sample frequency '''
 
         parser = Parser()
 
-        select_query = "SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5\
-                    WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
-                    ORDER BY CLASS, REDNESS DESC LIMIT 3;"
+        select_query = "SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5;"
 
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
@@ -286,28 +283,11 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
-
-        # where_clause
-        self.assertIsNotNone(select_stmt.where_clause)
-
-        # orderby_clause
-        self.assertIsNotNone(select_stmt.orderby_list)
-        self.assertEqual(len(select_stmt.orderby_list), 2)
-        self.assertEqual(select_stmt.orderby_list[0][0].col_name, 'CLASS')
-        self.assertEqual(
-            select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
-        self.assertEqual(select_stmt.orderby_list[1][0].col_name, 'REDNESS')
-        self.assertEqual(
-            select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
-
-        # limit_count
-        self.assertIsNotNone(select_stmt.limit_count)
-        self.assertEqual(select_stmt.limit_count, ConstantValueExpression(3))
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # sample_freq
-        self.assertIsNotNone(select_stmt.sample_freq)
-        self.assertEqual(select_stmt.sample_freq, ConstantValueExpression(5))
+        self.assertEqual(select_stmt.from_table.sample_freq,
+                         ConstantValueExpression(5))
 
     def test_table_ref(self):
         ''' Testing table info in TableRef
@@ -318,13 +298,13 @@ class ParserTests(unittest.TestCase):
         select_stmt_new = SelectStatement()
         select_stmt_new.from_table = table_ref_obj
         self.assertEqual(
-            select_stmt_new.from_table.table_info.table_name,
+            select_stmt_new.from_table.table.table_name,
             'TAIPAI')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.schema_name,
+            select_stmt_new.from_table.table.schema_name,
             'Schema')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.database_name,
+            select_stmt_new.from_table.table.database_name,
             'Database')
 
     def test_insert_statement(self):
@@ -402,7 +382,7 @@ class ParserTests(unittest.TestCase):
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
         self.assertEqual(actual_stmt.target_list[0].col_name, 'ID')
-        self.assertEqual(actual_stmt.from_table, parsed_sub_query)
+        self.assertEqual(actual_stmt.from_table, TableRef(parsed_sub_query))
 
         sub_query = """SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
                               WHERE Yolo(frame).label = 'vehicle'"""
@@ -418,7 +398,7 @@ class ParserTests(unittest.TestCase):
         query_stmt = parser.parse(query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         sub_query_stmt = parser.parse(sub_query)[0]
-        self.assertEqual(actual_stmt.from_table, sub_query_stmt)
+        self.assertEqual(actual_stmt.from_table, TableRef(sub_query_stmt))
         self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
         self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
 
@@ -439,3 +419,7 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(insert_stmt, load_stmt)
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
+
+
+if __name__ == '__main__':
+    unittest.main()

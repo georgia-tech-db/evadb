@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+from typing import Union
 from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
@@ -40,9 +42,8 @@ class SelectStatement(AbstractStatement):
     """
 
     def __init__(self, target_list: List[AbstractExpression] = None,
-                 from_table=None,
+                 from_table: Union[TableRef, SelectStatement] = None,
                  where_clause: AbstractExpression = None,
-                 sample_freq = None,
                  **kwargs):
         super().__init__(StatementType.SELECT)
         self._from_table = from_table
@@ -52,8 +53,7 @@ class SelectStatement(AbstractStatement):
         self._union_all = False
         self._orderby_list = kwargs.get("orderby_clause_list", None)
         self._limit_count = kwargs.get("limit_count", None)
-        self._sample_freq = sample_freq
-        
+
     @property
     def union_link(self):
         return self._union_link
@@ -93,14 +93,6 @@ class SelectStatement(AbstractStatement):
     @from_table.setter
     def from_table(self, table: TableRef):
         self._from_table = table
-    
-    @property
-    def sample_freq(self):
-        return self._sample_freq
-
-    @sample_freq.setter
-    def sample_freq(self, sample_freq):
-        self._sample_freq = sample_freq
 
     @property
     def orderby_list(self):
@@ -120,9 +112,8 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {}".format(self._target_list, self._from_table)
-        if self._sample_freq is not None:
-            print_str += " SAMPLE " + str(self._sample_freq)
+        print_str = "SELECT {} FROM {}".format(
+            self._target_list, self._from_table)
         print_str += " WHERE " + str(self._where_clause)
         if self._union_link is not None:
             if not self._union_all:
@@ -147,5 +138,4 @@ class SelectStatement(AbstractStatement):
                 and self.union_link == other.union_link
                 and self.union_all == other.union_all
                 and self.orderby_list == other.orderby_list
-                and self.limit_count == other.limit_count
-                and self.sample_freq == other.sample_freq)
+                and self.limit_count == other.limit_count)

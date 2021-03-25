@@ -206,11 +206,11 @@ tableSources
     ;
 
 tableSource
-    : tableSourceJoined sampleClause?
+    : tableSourceItemWithSample joinPart*                #tableSourceBase
     ;
 
-tableSourceJoined
-    : tableSourceItem joinPart*                #tableSourceBase
+tableSourceItemWithSample
+    : tableSourceItem sampleClause?
     ;
 
 tableSourceItem
@@ -227,7 +227,7 @@ sampleClause
 
 
 joinPart
-    : JOIN tableSourceItem
+    : JOIN tableSourceItemWithSample
       (
         ON expression
         | USING '(' uidList ')'

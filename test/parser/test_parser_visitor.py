@@ -56,7 +56,7 @@ class ParserVisitorTests(unittest.TestCase):
 
     @mock.patch.object(ParserVisitor, 'visit')
     def test_from_clause_visitor(self, mock_visit):
-        mock_visit.side_effect = [("tables", "sample_freqs"), "predicates"]
+        mock_visit.side_effect = ["tables", "predicates"]
 
         ctx = MagicMock()
         tableSources = MagicMock()
