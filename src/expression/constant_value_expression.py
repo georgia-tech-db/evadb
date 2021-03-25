@@ -27,7 +27,7 @@ class ConstantValueExpression(AbstractExpression):
         super().__init__(ExpressionType.CONSTANT_VALUE)
         self._value = value
 
-    def evaluate(self, *args):
+    def evaluate(self, *args, **kwargs):
         return Batch(pd.DataFrame([self._value]))
 
     @property
