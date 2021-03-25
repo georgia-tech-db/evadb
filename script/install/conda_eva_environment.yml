@@ -22,7 +22,7 @@ dependencies:
   - tensorflow
   - tensorboard
   - pillow=6.1
-  - sqlalchemy
+  - sqlalchemy<1.4.0
   - pymysql
   - sqlalchemy-utils
   - mock
