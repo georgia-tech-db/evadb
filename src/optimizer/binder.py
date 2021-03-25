@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import copy
 import itertools
 
 from src.optimizer.rules.pattern import Pattern
@@ -23,7 +21,8 @@ from src.optimizer.operators import Operator, OperatorType
 
 
 class Binder:
-    def __init__(self, grp_expr: GroupExpression, pattern: Pattern, memo: Memo):
+    def __init__(self, grp_expr: GroupExpression, pattern: Pattern,
+                 memo: Memo):
         self._grp_expr = grp_expr
         self._pattern = pattern
         self._memo = memo
@@ -31,7 +30,6 @@ class Binder:
     @staticmethod
     def _grp_binder(id: int, pattern: Pattern, memo: Memo):
         grp = memo.groups[id]
-        grp_exprs = grp.logical_exprs
 
         for expr in grp.logical_exprs:
             yield from Binder._binder(expr, pattern, memo)
@@ -65,7 +63,9 @@ class Binder:
                 # remove old children
                 opr_tree.children.clear()
                 for child in pre_order_repr[1:]:
-                    opr_tree.append_child(Binder.build_opr_tree_from_pre_order_repr(child))
+                    opr_tree.append_child(
+                        Binder.build_opr_tree_from_pre_order_repr(child)
+                    )
             return opr_tree
 
     def __iter__(self):

@@ -1,10 +1,8 @@
 import unittest
-import copy
 
 from mock import MagicMock
 
 from src.optimizer.binder import Binder
-from src.optimizer.group_expression import GroupExpression
 from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     OperatorType, LogicalFilter, LogicalGet, Dummy)
@@ -24,12 +22,12 @@ class TestBinder(unittest.TestCase):
         Opr Tree:
                          LogicalFilter
                          /           \
-                  LogicalGet      LogicalGet 
+                  LogicalGet      LogicalGet
 
         Pattern:
                          LogicalFilter
                          /           \
-                  LogicalGet      LogicalGet 
+                  LogicalGet      LogicalGet
         """
         child1_opr = LogicalGet(MagicMock(), MagicMock())
         child2_opr = LogicalGet(MagicMock(), MagicMock())

@@ -18,7 +18,6 @@ from enum import IntFlag, auto
 
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
-from src.optimizer.optimizer_context import OptimizerContext
 from src.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
@@ -33,7 +32,6 @@ from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
-from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.expression.abstract_expression import (
     AbstractExpression, ExpressionType)
 from src.expression.function_expression import FunctionExpression
@@ -131,7 +129,7 @@ class Rule(ABC):
     @classmethod
     def _compare_expr_with_pattern(cls,
                                    grp_id,
-                                   context: OptimizerContext,
+                                   context: 'OptimizerContext',
                                    pattern) -> bool:
         """check if the logical tree of the expression matches the
             provided pattern
@@ -204,7 +202,7 @@ class EmbedFilterIntoGet(Rule):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
+    def apply(self, before: LogicalFilter, context: 'OptimizerContext'):
         predicate = before.predicate
         # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
@@ -225,7 +223,7 @@ class EmbedProjectIntoGet(Rule):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalProject, context: OptimizerContext):
+    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
         select_list = before.target_list
         # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
@@ -250,7 +248,7 @@ class EmbedFilterIntoDerivedGet(Rule):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
+    def apply(self, before: LogicalFilter, context: 'OptimizerContext'):
         predicate = before.predicate
         # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
@@ -273,7 +271,7 @@ class EmbedProjectIntoDerivedGet(Rule):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalProject, context: OptimizerContext):
+    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
         select_list = before.target_list
         # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
@@ -331,7 +329,7 @@ class LogicalUdfFilterToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_UDF_FILTER_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
     def _bind_udf(self, expr: FunctionExpression):
@@ -365,7 +363,7 @@ class LogicalUdfFilterToPhysical(Rule):
         for child in predicate.children:
             self._convert_logical_udfs_to_physical(child)
 
-    def apply(self, before: LogicalGet, context: OptimizerContext):
+    def apply(self, before: LogicalGet, context: 'OptimizerContext'):
         self._convert_logical_udfs_to_physical(
             before.predicate)
         return before
@@ -388,10 +386,10 @@ class LogicalCreateToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_CREATE_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalCreate, context: OptimizerContext):
+    def apply(self, before: LogicalCreate, context: 'OptimizerContext'):
         after = CreatePlan(before.video, before.column_list,
                            before.if_not_exists)
         return after
@@ -406,10 +404,10 @@ class LogicalCreateUDFToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
+    def apply(self, before: LogicalCreateUDF, context: 'OptimizerContext'):
         after = CreateUDFPlan(before.name,
                               before.if_not_exists,
                               before.inputs,
@@ -428,10 +426,10 @@ class LogicalInsertToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_INSERT_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalInsert, context: OptimizerContext):
+    def apply(self, before: LogicalInsert, context: 'OptimizerContext'):
         after = InsertPlan(before.video_catalog_id,
                            before.column_list, before.value_list)
         return after
@@ -446,10 +444,10 @@ class LogicalLoadToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_LOAD_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalLoadData, context: OptimizerContext):
+    def apply(self, before: LogicalLoadData, context: 'OptimizerContext'):
         after = LoadDataPlan(before.table_metainfo, before.path)
         return after
 
@@ -463,10 +461,10 @@ class LogicalGetToSeqScan(Rule):
     def promise(self):
         return Promise.LOGICAL_GET_TO_SEQSCAN
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalGet, context: OptimizerContext):
+    def apply(self, before: LogicalGet, context: 'OptimizerContext'):
         after = SeqScanPlan(before.predicate, before.target_list)
         after.append_child(StoragePlan(before.dataset_metadata))
         return after
@@ -481,10 +479,10 @@ class LogicalProjectToSeqScan(Rule):
     def promise(self):
         return Promise.LOGICAL_PROJECT_TO_SEQSCAN
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalProject, context: OptimizerContext):
+    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
         after = SeqScanPlan(None, before.target_list)
         return after
 
@@ -498,10 +496,10 @@ class LogicalFilterToSeqScan(Rule):
     def promise(self):
         return Promise.LOGICAL_FILTER_TO_SEQSCAN
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalProject, context: OptimizerContext):
+    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
         after = SeqScanPlan(before.predicate, None)
         return after
 
@@ -515,10 +513,11 @@ class LogicalDerivedGetToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalQueryDerivedGet, context: OptimizerContext):
+    def apply(self, before: LogicalQueryDerivedGet,
+              context: 'OptimizerContext'):
         after = SeqScanPlan(before.predicate, before.target_list)
         return after
 
@@ -534,10 +533,10 @@ class LogicalUnionToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_UNION_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalUnion, context: OptimizerContext):
+    def apply(self, before: LogicalUnion, context: 'OptimizerContext'):
         after = UnionPlan(before.all)
         return after
 
@@ -551,10 +550,10 @@ class LogicalOrderByToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_ORDERBY_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalOrderBy, context: OptimizerContext):
+    def apply(self, before: LogicalOrderBy, context: 'OptimizerContext'):
         after = OrderByPlan(before.orderby_list)
         return after
 
@@ -568,10 +567,10 @@ class LogicalLimitToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_LIMIT_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
-    def apply(self, before: LogicalLimit, context: OptimizerContext):
+    def apply(self, before: LogicalLimit, context: 'OptimizerContext'):
         after = LimitPlan(before.limit_count)
         return after
 
@@ -586,11 +585,11 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
 
-    def check(self, before: Operator, context: OptimizerContext):
+    def check(self, before: Operator, context: 'OptimizerContext'):
         return True
 
     def apply(self, before: LogicalCreateMaterializedView,
-              context: OptimizerContext):
+              context: 'OptimizerContext'):
         after = CreateMaterializedViewPlan(
             before.view, before.col_list, before.if_not_exists)
         return after

@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from src.optimizer.operators import OperatorType
-from typing import List
 
 
 class Pattern:

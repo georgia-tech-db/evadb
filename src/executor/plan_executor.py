@@ -27,8 +27,6 @@ from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.load_executor import LoadDataExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
-from src.executor.create_mat_view_executor import \
-    CreateMaterializedViewExecutor
 from src.executor.orderby_executor import OrderByExecutor
 
 
@@ -77,8 +75,6 @@ class PlanExecutor:
             executor_node = CreateUDFExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LOAD_DATA:
             executor_node = LoadDataExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
-            executor_node = CreateMaterializedViewExecutor(node=plan)
         elif plan_opr_type == PlanOprType.ORDER_BY:
             executor_node = OrderByExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LIMIT:

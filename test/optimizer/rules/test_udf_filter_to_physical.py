@@ -4,7 +4,7 @@ from mock import MagicMock
 
 from src.catalog.catalog_manager import CatalogManager
 from src.optimizer.rules.rules import LogicalUdfFilterToPhysical
-from src.optimizer.operators import LogicalFilter, Dummy
+from src.optimizer.operators import LogicalFilter
 from src.expression.abstract_expression import ExpressionType
 from src.server.command_handler import execute_query_fetch_all
 from src.catalog.column_type import ColumnType
