@@ -209,7 +209,7 @@ class ParserVisitorTests(unittest.TestCase):
     # UDFs
     ##################################################################
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor.FunctionExpression')
+    @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):
         ctx = MagicMock()
         udf_name = 'name'
@@ -251,7 +251,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(actual, [1, 2])
 
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor.CreateUDFStatement')
+    @mock.patch('src.parser.parser_visitor._functions.CreateUDFStatement')
     def test_visit_create_udf(self, create_udf_mock, visit_mock):
         ctx = MagicMock()
         ctx.children = [MagicMock() for i in range(5)]
@@ -300,7 +300,7 @@ class ParserVisitorTests(unittest.TestCase):
     # LOAD DATA Statement
     ##################################################################
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor.LoadDataStatement')
+    @mock.patch('src.parser.parser_visitor._load_statement.LoadDataStatement')
     def test_visit_load_statement(self, mock_load, mock_visit):
         ctx = MagicMock()
         table = 'myVideo'

@@ -39,7 +39,6 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         self.assertEqual(actual_batch.batch_size, 5)
 
     @unittest.skip('SSD gives data on multiple GPU error')
