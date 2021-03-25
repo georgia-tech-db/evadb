@@ -15,7 +15,6 @@
 
 from src.optimizer.group_expression import GroupExpression
 from src.optimizer.group import Group, INVALID_GROUP_ID
-from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class Memo:

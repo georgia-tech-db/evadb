@@ -392,16 +392,16 @@ class ParserTests(unittest.TestCase):
 
     @unittest.skip('Skip mat operator test cases')
     def test_materialized_view(self):
-        select_query = '''SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
-                        WHERE id<5; '''
-        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}'.format(
-            select_query)
+        select_query = '''SELECT id, FastRCNNObjectDetector(frame).labels FROM
+                          MyVideo WHERE id<5; '''
+        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels)'\
+            ' AS {}'.format(select_query)
         parser = Parser()
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)
-        expected_stmt = CreateMaterializedViewStatement(TableRef(
-            TableInfo('uadtrac_fastRCNN')), [
-                ColumnDefinition('id', None, None),
-                ColumnDefinition('labels', None, None)
-                ], False, select_stmt[0])
+        expected_stmt = CreateMaterializedViewStatement(
+            TableRef(TableInfo('uadtrac_fastRCNN')),
+            [ColumnDefinition('id', None, None),
+             ColumnDefinition('labels', None, None)], False, select_stmt[0]
+        )
         self.assertEqual(mat_view_stmt[0], expected_stmt)

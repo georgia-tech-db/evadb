@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Dict
+from typing import Dict
 
-from src.optimizer.operators import Operator
-from src.optimizer.property import Property, PropertyType
-from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.optimizer.property import Property
+from src.utils.logging_manager import LoggingManager
 
 INVALID_GROUP_ID = -1
+
 
 class Winner:
     def __init__(self, grp_expr: 'GroupExpression', cost: float):
