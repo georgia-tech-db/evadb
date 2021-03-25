@@ -41,7 +41,7 @@ class PlanNodeTests(unittest.TestCase):
         dummy_plan_node = CreatePlan(dummy_table, columns, False)
         self.assertEqual(dummy_plan_node.node_type, PlanNodeType.CREATE)
         self.assertEqual(dummy_plan_node.if_not_exists, False)
-        self.assertEqual(dummy_plan_node.video_ref.table_info.table_name,
+        self.assertEqual(dummy_plan_node.video_ref.table.table_name,
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
