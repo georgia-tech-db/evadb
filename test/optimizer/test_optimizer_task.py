@@ -5,7 +5,8 @@ from mock import MagicMock
 from src.optimizer.optimizer_tasks import (
     TopDownRewrite, BottomUpRewrite, OptimizeGroup)
 from src.optimizer.optimizer_context import OptimizerContext
-from src.optimizer.operators import (LogicalGet, LogicalFilter)
+from src.optimizer.operators import (
+    LogicalGet, LogicalFilter, LogicalProject, LogicalQueryDerivedGet)
 from src.optimizer.property import PropertyType
 from src.planner.seq_scan_plan import SeqScanPlan
 
@@ -52,44 +53,65 @@ class TestOptimizerTask(unittest.TestCase):
         self.assertEqual(grp_expr.opr.children, [])
 
     def test_nested_top_down_rewrite(self):
-        child1_predicate = MagicMock()
-        child2_predicate = MagicMock()
+        child_predicate = MagicMock()
         root_predicate = MagicMock()
 
-        child1_child_opr = LogicalGet(MagicMock(), MagicMock())
-        child2_child_opr = LogicalGet(MagicMock(), MagicMock())
-        child1_opr = LogicalFilter(child1_predicate, [child1_child_opr])
-        child2_opr = LogicalFilter(child2_predicate, [child2_child_opr])
-        root_opr = LogicalFilter(root_predicate, [child1_opr, child2_opr])
+        child_get_opr = LogicalGet(MagicMock(), MagicMock())
+        child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
+        child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
+        root_derived_get_opr = LogicalQueryDerivedGet([child_project_opr])
+        root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
+        root_project_opr = LogicalProject(MagicMock(), [root_filter_opr])
 
-        opt_cxt, root_grp_id = self.top_down_rewrite(root_opr)
+        opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
 
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
 
         # rewrite happens in a way that new expression is
         # inserted in a new group
-        self.assertEqual(type(grp_expr.opr), LogicalFilter)
-        self.assertEqual(len(grp_expr.opr.children), 2)
+        self.assertEqual(type(grp_expr.opr), LogicalProject)
+        self.assertEqual(len(grp_expr.opr.children), 1)
 
-        child1_opr = grp_expr.opr.children[0]
-        self.assertEqual(type(child1_opr), LogicalFilter)
-        self.assertEqual(child1_opr.predicate, child1_predicate)
+        test_child_opr = grp_expr.opr.children[0]
+        self.assertEqual(type(test_child_opr), LogicalFilter)
+        self.assertEqual(len(test_child_opr.children), 1)
+        self.assertEqual(test_child_opr.predicate, root_predicate)
 
-        child2_opr = grp_expr.opr.children[1]
-        self.assertEqual(type(child2_opr), LogicalFilter)
-        self.assertEqual(child2_opr.predicate, child2_predicate)
+        test_child_opr = test_child_opr.children[0]
+        self.assertEqual(type(test_child_opr), LogicalQueryDerivedGet)
+        self.assertEqual(len(test_child_opr.children), 1)
 
-        # check expression children
-        for child_id in grp_expr.children:
-            expr = opt_cxt.memo.groups[child_id].logical_exprs[0]
+        test_child_opr = test_child_opr.children[0]
+        self.assertEqual(type(test_child_opr), LogicalProject)
+        self.assertEqual(len(test_child_opr.children), 1)
 
-            # filter should have been already embedded in get
-            self.assertEqual(type(expr.opr), LogicalGet)
+        test_child_opr = test_child_opr.children[0]
+        self.assertEqual(type(test_child_opr), LogicalGet)
+        self.assertEqual(test_child_opr.predicate, child_predicate)
 
-            if child_id == 1:
-                self.assertEqual(expr.opr.predicate, child1_predicate)
-            else:
-                self.assertEqual(expr.opr.predicate, child2_predicate)
+    def test_nested_bottom_up_rewrite(self):
+        child_predicate = MagicMock()
+        root_predicate = MagicMock()
+
+        child_get_opr = LogicalGet(MagicMock(), MagicMock())
+        child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
+        child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
+        root_derived_get_opr = LogicalQueryDerivedGet([child_project_opr])
+        root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
+        root_project_opr = LogicalProject(MagicMock(), [root_filter_opr])
+
+        opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
+        opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
+
+        grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
+
+        self.assertEqual(type(grp_expr.opr), LogicalQueryDerivedGet)
+        self.assertEqual(len(grp_expr.opr.children), 1)
+        self.assertEqual(grp_expr.opr.predicate, root_predicate)
+
+        test_child_opr = grp_expr.opr.children[0]
+        self.assertEqual(type(test_child_opr), LogicalGet)
+        self.assertEqual(test_child_opr.predicate, child_predicate)
 
     def test_simple_implementation(self):
         predicate = MagicMock()
@@ -102,27 +124,35 @@ class TestOptimizerTask(unittest.TestCase):
 
         root_grp = opt_cxt.memo.groups[root_grp_id]
         best_root_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
-        
+
         self.assertEqual(type(best_root_grp_expr.opr), SeqScanPlan)
         self.assertEqual(best_root_grp_expr.opr.predicate, predicate)
 
     def test_nested_implementation(self):
-        child1_predicate = MagicMock()
-        child2_predicate = MagicMock()
+        child_predicate = MagicMock()
         root_predicate = MagicMock()
 
-        child1_child_opr = LogicalGet(MagicMock(), MagicMock())
-        child2_child_opr = LogicalGet(MagicMock(), MagicMock())
-        child1_opr = LogicalFilter(child1_predicate, [child1_child_opr])
-        child2_opr = LogicalFilter(child2_predicate, [child2_child_opr])
-        root_opr = LogicalFilter(root_predicate, [child1_opr, child2_opr])
+        child_get_opr = LogicalGet(MagicMock(), MagicMock())
+        child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
+        child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
+        root_derived_get_opr = LogicalQueryDerivedGet([child_project_opr])
+        root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
+        root_project_opr = LogicalProject(MagicMock(), [root_filter_opr])
 
-        opt_cxt, root_grp_id = self.top_down_rewrite(root_opr)
+        opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
         opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
         opt_cxt, root_grp_id = self.implement_group(root_grp_id, opt_cxt)
 
         root_grp = opt_cxt.memo.groups[root_grp_id]
         best_root_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
 
-        # TODO: nested implementation cannot pass, need to fix plan generator
-        self.assertTrue(False)
+        root_opr = best_root_grp_expr.opr
+        self.assertEqual(type(root_opr), SeqScanPlan)
+        self.assertEqual(root_opr.predicate, root_predicate)
+
+        child_grp_id = best_root_grp_expr.children[0]
+        child_grp = opt_cxt.memo.groups[child_grp_id]
+        best_child_grp_expr = child_grp.get_best_expr(PropertyType.DEFAULT)
+        child_opr = best_child_grp_expr.opr
+        self.assertEqual(type(child_opr), SeqScanPlan)
+        self.assertEqual(child_opr.predicate, child_predicate)
