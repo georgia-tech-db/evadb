@@ -46,17 +46,26 @@ class StatementToPlanConvertor:
         for column in dataset.columns:
             self._column_map[column.name.lower()] = column
 
-    def visit_table_ref(self, video: TableRef):
+    def visit_table_ref(self, table_ref: TableRef):
         """Bind table ref object and convert to Logical get operator
 
         Arguments:
-            video {TableRef} -- [Input table ref object created by the parser]
+            table {TableRef} -- [Input table ref object created by the parser]
         """
-        catalog_vid_metadata = bind_dataset(video.table_info)
+        if table_ref.is_select():
+            # NestedQuery
+            self.visit_select(table_ref.table)
+            child_plan = self._plan
+            self._plan = LogicalQueryDerivedGet()
+            self._plan.append_child(child_plan)
+        else:
+            # Table
+            catalog_vid_metadata = bind_dataset(table_ref.table)
+            self._populate_column_map(catalog_vid_metadata)
+            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
 
-        self._populate_column_map(catalog_vid_metadata)
-
-        self._plan = LogicalGet(video, catalog_vid_metadata)
+        if table_ref.sample_freq:
+            self._visit_sample(table_ref.sample_freq)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement
@@ -65,24 +74,13 @@ class StatementToPlanConvertor:
             statement {SelectStatement} -- [input select statement]
         """
 
-        video = statement.from_table
-        if video is None:
+        table_ref = statement.from_table
+        if table_ref is None:
             LoggingManager().log('From entry missing in select statement',
                                  LoggingLevel.ERROR)
             return None
 
-        if isinstance(video, SelectStatement):
-            # NestedQuery
-            self.visit_select(video)
-            child_plan = self._plan
-            self._plan = LogicalQueryDerivedGet()
-            self._plan.append_child(child_plan)
-        elif isinstance(video, TableRef):
-            # Table
-            self.visit_table_ref(video)
-
-        if statement.sample_freq is not None:
-            self._visit_sample(statement.sample_freq)
+        self.visit_table_ref(table_ref)
 
         # Filter Operator
         predicate = statement.where_clause
@@ -154,14 +152,14 @@ class StatementToPlanConvertor:
             statement {AbstractStatement} -- [input insert statement]
         """
         # Bind the table reference
-        video = statement.table
-        catalog_table_id = bind_table_ref(video.table_info)
+        table_ref = statement.table
+        catalog_table_id = bind_table_ref(table_ref.table)
 
         # Bind column_list
         col_list = statement.column_list
         for col in col_list:
             if col.table_name is None:
-                col.table_name = video.table_info.table_name
+                col.table_name = table_ref.table.table_name
             if col.table_metadata_id is None:
                 col.table_metadata_id = catalog_table_id
         bind_columns_expr(col_list, {})
@@ -172,7 +170,7 @@ class StatementToPlanConvertor:
 
         # Ready to create Logical node
         insert_opr = LogicalInsert(
-            video, catalog_table_id, col_list, value_list)
+            table_ref, catalog_table_id, col_list, value_list)
         self._plan = insert_opr
 
     def visit_create(self, statement: AbstractStatement):
@@ -218,11 +216,11 @@ class StatementToPlanConvertor:
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
-        table = statement.table
-        table_metainfo = bind_dataset(table.table_info)
+        table_ref = statement.table
+        table_metainfo = bind_dataset(table_ref.table)
         if table_metainfo is None:
             # Create a new metadata object
-            table_metainfo = create_video_metadata(table.table_info.table_name)
+            table_metainfo = create_video_metadata(table_ref.table.table_name)
 
         load_data_opr = LogicalLoadData(table_metainfo, statement.path)
         self._plan = load_data_opr

@@ -14,14 +14,15 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Union
+from typing import Union, List
+import typing
+if typing.TYPE_CHECKING:
+    from src.parser.table_ref import TableRef
 from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.parser.table_ref import TableRef
-from typing import List
 
 
 class SelectStatement(AbstractStatement):

@@ -15,10 +15,9 @@
 
 from __future__ import annotations
 from typing import Union
-import typing
 
-if typing.TYPE_CHECKING:
-    from src.parser.select_statement import SelectStatement
+
+from src.parser.select_statement import SelectStatement
 
 
 class TableInfo:
@@ -80,6 +79,9 @@ class TableRef:
     @property
     def sample_freq(self):
         return self._sample_freq
+
+    def is_select(self) -> bool:
+        return isinstance(self.table, SelectStatement)
 
     def __str__(self):
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
