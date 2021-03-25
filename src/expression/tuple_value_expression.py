@@ -66,11 +66,9 @@ class TupleValueExpression(AbstractExpression):
     def col_object(self, value: DataFrameColumn):
         self._col_object = value
 
-    def evaluate(self, batch: Batch, *args):
-        if args is None:
-            # error Handling
-            pass
-
+    def evaluate(self, batch: Batch, *args, **kwargs):
+        if "mask" in kwargs:
+            batch = batch[kwargs["mask"]]
         return batch.project([self.col_name])
 
     def __eq__(self, other):

@@ -95,9 +95,10 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
-    def evaluate(self, batch: Batch):
+    def evaluate(self, batch: Batch, **kwargs):
         new_batch = batch
-        child_batches = [child.evaluate(batch) for child in self.children]
+        child_batches = \
+            [child.evaluate(batch, **kwargs) for child in self.children]
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
 
@@ -117,7 +118,7 @@ class FunctionExpression(AbstractExpression):
             bool: true if not else false
         """
         return (self.function is None)
-    
+
     def _gpu_enabled_function(self):
         if isinstance(self._function, GPUCompatible):
             device = self._context.gpu_device()
