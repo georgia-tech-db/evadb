@@ -6,35 +6,34 @@ channels:
   - pytorch
 dependencies:
   - python=3.7.6
-  - pip
-  - numpy
-  - opencv
-  - scikit-learn
-  - pandas
-  - coveralls
-  - coverage
-  - pytest-cov
-  - autopep8
-  - autoflake
-  - pytorch::torchvision
-  - pytorch::pytorch
-  - tensorflow
-  - tensorboard
+  - pip=21.0.1
+  - numpy=1.20.1
+  - opencv=4.5.1
+  - scikit-learn=0.23.2
+  - pandas=1.2.3
+  - coveralls=3.0.1
+  - coverage=5.3
+  - pytest-cov=2.11.1
+  - autopep8=1.5.6
+  - autoflake=1.3
+  - pytorch::pytorch=1.6.0
+  - pytorch::torchvision=0.7.0
+  - cudatoolkit=10.2
+  - tensorflow=1.14.0
+  - tensorboard=1.14.0
   - pillow=6.1
-  - sqlalchemy
-  - pymysql
-  - sqlalchemy-utils
-  - mock
-  - pytest-asyncio
-  - flake8
-  - sphinx
-  - sphinx_rtd_theme
+  - sqlalchemy=1.3.20
+  - pymysql=0.10.1
+  - sqlalchemy-utils=0.36.6
+  - mock=4.0.3
+  - pytest-asyncio=0.14.0
+  - flake8=3.9.0
+  - sphinx=3.3.0
+  - sphinx_rtd_theme=0.5.0
   - pip:
     - antlr4-python3-runtime==4.8
     - pyspark==3.0.2
     - petastorm==0.9.8
-    - pre-commit
-    - flake8
-    - pytest
-    - coveralls
+    - pre-commit==2.8.2
+    - pytest==6.1.2
 prefix: eva

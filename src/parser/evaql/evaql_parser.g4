@@ -206,19 +206,28 @@ tableSources
     ;
 
 tableSource
-    : tableSourceItem joinPart*                                     #tableSourceBase
+    : tableSourceItemWithSample joinPart*                #tableSourceBase
+    ;
+
+tableSourceItemWithSample
+    : tableSourceItem sampleClause?
     ;
 
 tableSourceItem
-    : tableName                                                     #atomTableItem
+    : tableName                                  #atomTableItem
     | (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
       )                                                            #subqueryTableItem
     ;
 
+sampleClause
+    : SAMPLE decimalLiteral
+    ;
+
+
 joinPart
-    : JOIN tableSourceItem
+    : JOIN tableSourceItemWithSample
       (
         ON expression
         | USING '(' uidList ')'
