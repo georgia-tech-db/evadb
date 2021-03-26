@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from src.expression.constant_value_expression import ConstantValueExpression
 
 
@@ -31,7 +31,7 @@ class SamplePlan(AbstractPlan):
 
     def __init__(self, sample_freq: ConstantValueExpression):
         self._sample_freq = sample_freq
-        super().__init__(PlanNodeType.SAMPLE)
+        super().__init__(PlanOprType.SAMPLE)
 
     @property
     def sample_freq(self):
