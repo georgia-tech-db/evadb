@@ -15,7 +15,7 @@
 
 import unittest
 
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -29,13 +29,15 @@ class CatalogModelsTest(unittest.TestCase):
         df_col = DataFrameColumn('name', ColumnType.TEXT, is_nullable=False)
         df_col.array_dimensions = [1, 2]
         df_col.metadata_id = 1
+        self.assertEqual(df_col.array_type, None)
         self.assertEqual(df_col.array_dimensions, [1, 2])
         self.assertEqual(df_col.is_nullable, False)
         self.assertEqual(df_col.name, 'name')
         self.assertEqual(df_col.type, ColumnType.TEXT)
         self.assertEqual(df_col.metadata_id, 1)
         self.assertEqual(df_col.id, None)
-        self.assertEqual(str(df_col), 'Column: (name, TEXT, False, [1, 2])')
+        self.assertEqual(str(df_col),
+                         'Column: (name, TEXT, False, None[1, 2])')
 
     def test_df_equality(self):
         df_col = DataFrameColumn('name', ColumnType.TEXT, is_nullable=False)
@@ -121,27 +123,31 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(udf, udf4)
 
     def test_udf_io(self):
-        udf_io = UdfIO('name', ColumnType.FLOAT, True, [2, 3], True, 1)
+        udf_io = UdfIO('name', ColumnType.NDARRAY, True, NdArrayType.UINT8,
+                       [2, 3], True, 1)
         self.assertEqual(udf_io.id, None)
         self.assertEqual(udf_io.udf_id, 1)
         self.assertEqual(udf_io.is_input, True)
         self.assertEqual(udf_io.is_nullable, True)
+        self.assertEqual(udf_io.array_type, NdArrayType.UINT8)
         self.assertEqual(udf_io.array_dimensions, [2, 3])
         self.assertEqual(udf_io.name, 'name')
-        self.assertEqual(udf_io.type, ColumnType.FLOAT)
+        self.assertEqual(udf_io.type, ColumnType.NDARRAY)
 
     def test_udf_io_equality(self):
-        udf_io = UdfIO('name', ColumnType.FLOAT, True, [2, 3], True, 1)
+        udf_io = UdfIO('name', ColumnType.FLOAT, True, None, [2, 3], True, 1)
         self.assertEqual(udf_io, udf_io)
-        udf_io2 = UdfIO('name2', ColumnType.FLOAT, True, [2, 3], True, 1)
+        udf_io2 = UdfIO('name2', ColumnType.FLOAT, True, None, [2, 3], True, 1)
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO('name', ColumnType.INTEGER, True, [2, 3], True, 1)
+        udf_io2 = UdfIO('name', ColumnType.INTEGER, True, None, [2, 3], True,
+                        1)
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO('name', ColumnType.FLOAT, False, [2, 3], True, 1)
+        udf_io2 = UdfIO('name', ColumnType.FLOAT, False, None, [2, 3], True, 1)
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO('name', ColumnType.FLOAT, True, [2, 3, 4], True, 1)
+        udf_io2 = UdfIO('name', ColumnType.FLOAT, True, None, [2, 3, 4], True,
+                        1)
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO('name', ColumnType.FLOAT, True, [2, 3], False, 1)
+        udf_io2 = UdfIO('name', ColumnType.FLOAT, True, None, [2, 3], False, 1)
         self.assertNotEqual(udf_io, udf_io2)
-        udf_io2 = UdfIO('name', ColumnType.FLOAT, True, [2, 3], True, 2)
+        udf_io2 = UdfIO('name', ColumnType.FLOAT, True, None, [2, 3], True, 2)
         self.assertNotEqual(udf_io, udf_io2)

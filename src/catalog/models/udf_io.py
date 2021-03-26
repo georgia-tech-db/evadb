@@ -12,15 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
 from typing import List
 
 from sqlalchemy import Column, String, Integer, Boolean, UniqueConstraint, \
     ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
+from ast import literal_eval
 
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.models.base_model import BaseModel
 
 
@@ -30,6 +30,7 @@ class UdfIO(BaseModel):
     _name = Column('name', String(100))
     _type = Column('type', Enum(ColumnType), default=Enum)
     _is_nullable = Column('is_nullable', Boolean, default=False)
+    _array_type = Column('array_type', Enum(NdArrayType), nullable=True)
     _array_dimensions = Column('array_dimensions', String(100))
     _is_input = Column('is_input', Boolean, default=True)
     _udf_id = Column('udf_id', Integer,
@@ -44,13 +45,15 @@ class UdfIO(BaseModel):
                  name: str,
                  type: ColumnType,
                  is_nullable: bool = False,
+                 array_type: NdArrayType = None,
                  array_dimensions: List[int] = [],
                  is_input: bool = True,
                  udf_id: int = None):
         self._name = name
         self._type = type
         self._is_nullable = is_nullable
-        self._array_dimensions = str(array_dimensions)
+        self._array_type = array_type
+        self.array_dimensions = array_dimensions
         self._is_input = is_input
         self._udf_id = udf_id
 
@@ -71,11 +74,15 @@ class UdfIO(BaseModel):
         return self._is_nullable
 
     @property
+    def array_type(self):
+        return self._array_type
+
+    @property
     def array_dimensions(self):
-        return json.loads(self._array_dimensions)
+        return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
-    def array_dimensions(self, value):
+    def array_dimensions(self, value: List[int]):
         self._array_dimensions = str(value)
 
     @property
@@ -96,7 +103,7 @@ class UdfIO(BaseModel):
                                                     self._is_nullable,
                                                     self._is_input)
 
-        column_str += "["
+        column_str += "%s[" % self.array_type
         column_str += ', '.join(['%d'] * len(self.array_dimensions)) \
                       % tuple(self.array_dimensions)
         column_str += "] "
@@ -108,6 +115,7 @@ class UdfIO(BaseModel):
         return self.id == other.id and \
             self.is_input == other.is_input and \
             self.is_nullable == other.is_nullable and \
+            self.array_type == other.array_type and \
             self.array_dimensions == other.array_dimensions and \
             self.name == other.name and \
             self.udf_id == other.udf_id and \

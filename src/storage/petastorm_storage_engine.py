@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Iterator, List
+from pathlib import Path
 
 from src.spark.session import Session
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -22,8 +24,6 @@ from src.models.storage.batch import Batch
 
 from petastorm.unischema import dict_to_spark_row
 from petastorm.predicates import in_lambda
-from typing import Iterator, List
-from pathlib import Path
 
 
 class PetastormStorageEngine(AbstractStorageEngine):
