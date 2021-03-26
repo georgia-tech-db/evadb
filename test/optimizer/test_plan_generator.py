@@ -12,14 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from src.optimizer.plan_generator import PlanGenerator
 import unittest
 
 from mock import patch
 
 from src.optimizer.operators import LogicalProject, LogicalGet, \
     LogicalFilter, LogicalInsert, Operator, LogicalCreateUDF, \
-    LogicalLoadData, LogicalUnion, LogicalOrderBy, LogicalLimit
-from src.optimizer.plan_generator import PlanGenerator
+    LogicalLoadData, LogicalUnion, LogicalOrderBy, LogicalLimit, \
+    LogicalSample
 
 
 class PlanGeneratorTest(unittest.TestCase):
@@ -70,6 +71,14 @@ class PlanGeneratorTest(unittest.TestCase):
         l_limit = LogicalLimit(None)
         PlanGenerator().build(l_limit)
         mock_instance.build.assert_called_with(l_limit)
+
+    @patch("src.optimizer.plan_generator.ScanGenerator")
+    def test_should_return_use_scan_generator_for_logical_sample(self,
+                                                                 mock_class):
+        mock_instance = mock_class.return_value
+        l_sample = LogicalSample(None)
+        PlanGenerator().build(l_sample)
+        mock_instance.build.assert_called_with(l_sample)
 
     @patch("src.optimizer.plan_generator.ScanGenerator")
     def test_should_not_call_scan_generator_for_other_types(self,

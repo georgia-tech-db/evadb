@@ -18,7 +18,7 @@ from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 
 from src.expression.tuple_value_expression import TupleValueExpression
 
-from src.parser.table_ref import TableRef, TableInfo
+from src.parser.table_ref import TableInfo
 
 from src.parser.evaql.evaql_parser import evaql_parser
 
@@ -34,7 +34,7 @@ class CommonClauses(evaql_parserVisitor):
         table_name = self.visit(ctx.fullId())
         if table_name is not None:
             table_info = TableInfo(table_name=table_name)
-            return TableRef(table_info)
+            return table_info
         else:
             warnings.warn("Invalid from table", SyntaxWarning)
 
