@@ -9,8 +9,8 @@ SPACE:                               [ \t\r\n]+    -> channel(HIDDEN);
 SPEC_EVAQL_COMMENT:                  '/*!' .+? '*/' -> channel(EVAQLCOMMENT);
 COMMENT_INPUT:                       '/*' .*? '*/' -> channel(HIDDEN);
 LINE_COMMENT:                        (
-                                       ('-- ' | '#') ~[\r\n]* ('\r'? '\n' | EOF) 
-                                       | '--' ('\r'? '\n' | EOF) 
+                                       ('-- ' | '#') ~[\r\n]* ('\r'? '\n' | EOF)
+                                       | '--' ('\r'? '\n' | EOF)
                                      ) -> channel(HIDDEN);
 
 // Keywords
@@ -101,6 +101,18 @@ INTEGER:                             'INTEGER';
 FLOAT:                               'FLOAT';
 TEXT:                                'TEXT';
 NDARRAY:                             'NDARRAY';
+INT8:                                'INT8';
+UINT8:                               'UINT8';
+INT16:                               'INT16';
+INT32:                               'INT32';
+INT64:                               'INT64';
+UNICODE:                             'UNICODE';
+BOOL:                                'BOOL';
+FLOAT32:                             'FLOAT32';
+FLOAT64:                             'FLOAT64';
+DECIMAL:                             'DECIMAL'; 
+STR:                                 'STR';
+DATETIME:                            'DATETIME'; 
 
 // Group function Keywords
 
@@ -179,6 +191,8 @@ BIT_XOR_OP:                          '^';
 DOT:                                 '.';
 LR_BRACKET:                          '(';
 RR_BRACKET:                          ')';
+LR_SQ_BRACKET:                       '[';
+RR_SQ_BRACKET:                       ']';
 COMMA:                               ',';
 SEMI:                                ';';
 AT_SIGN:                             '@';
@@ -216,23 +230,23 @@ ID:                                  ID_LITERAL;
 // DOUBLE_QUOTE_ID:                  '"' ~'"'+ '"';
 REVERSE_QUOTE_ID:                    '`' ~'`'+ '`';
 STRING_USER_NAME:                    (
-                                       SQUOTA_STRING | DQUOTA_STRING 
+                                       SQUOTA_STRING | DQUOTA_STRING
                                        | BQUOTA_STRING | ID_LITERAL
-                                     ) '@' 
+                                     ) '@'
                                      (
-                                       SQUOTA_STRING | DQUOTA_STRING 
+                                       SQUOTA_STRING | DQUOTA_STRING
                                        | BQUOTA_STRING | ID_LITERAL
                                      );
 LOCAL_ID:                            '@'
                                 (
-                                  [A-Z0-9._$]+ 
+                                  [A-Z0-9._$]+
                                   | SQUOTA_STRING
                                   | DQUOTA_STRING
                                   | BQUOTA_STRING
                                 );
-GLOBAL_ID:                           '@' '@' 
+GLOBAL_ID:                           '@' '@'
                                 (
-                                  [A-Z0-9._$]+ 
+                                  [A-Z0-9._$]+
                                   | BQUOTA_STRING
                                 );
 

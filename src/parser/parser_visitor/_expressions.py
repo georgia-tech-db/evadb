@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import ast
+import numpy as np
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.expression.abstract_expression import ExpressionType
@@ -35,6 +37,12 @@ class Expressions(evaql_parserVisitor):
             return ConstantValueExpression(ctx.getText()[1:-1])
         # todo handle other types
         return self.visitChildren(ctx)
+
+    def visitArrayLiteral(self, ctx: evaql_parser.ArrayLiteralContext):
+        res = ConstantValueExpression(
+            np.array(ast.literal_eval(ctx.getText()))
+        )
+        return res
 
     def visitConstant(self, ctx: evaql_parser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
@@ -82,6 +90,10 @@ class Expressions(evaql_parserVisitor):
             return ExpressionType.COMPARE_LEQ
         elif op == '!=':
             return ExpressionType.COMPARE_NEQ
+        elif op == '@>':
+            return ExpressionType.COMPARE_CONTAINS
+        elif op == '<@':
+            return ExpressionType.COMPARE_IS_CONTAINED
         else:
             return ExpressionType.INVALID
 
