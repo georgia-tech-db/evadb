@@ -173,3 +173,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])
+
+
+if __name__ == '__main__':
+    unittest.main()

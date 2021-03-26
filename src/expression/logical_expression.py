@@ -43,7 +43,7 @@ class LogicalExpression(AbstractExpression):
                 kwargs["mask"] = left_values[~left_values[0]].index.tolist()
             right_values = self.get_child(
                 1).evaluate(*args, **kwargs).frames
-            left_values.iloc[kwargs["mask"]] = right_values.to_numpy()
+            left_values.iloc[kwargs["mask"]] = right_values
             return Batch(pd.DataFrame(left_values))
         else:
             values = self.get_child(0).evaluate(*args, **kwargs).frames
