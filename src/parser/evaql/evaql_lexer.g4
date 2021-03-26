@@ -62,6 +62,7 @@ OR:                                  'OR';
 ORDER:                               'ORDER';
 PRIMARY:                             'PRIMARY';
 REFERENCES:                          'REFERENCES';
+SAMPLE:                              'SAMPLE';
 SELECT:                              'SELECT';
 SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
