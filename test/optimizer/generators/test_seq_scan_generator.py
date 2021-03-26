@@ -81,6 +81,4 @@ class SequentialScanGeneratorTest(unittest.TestCase):
         plan = ScanGenerator().build(logical_plan)
 
         self.assertTrue(isinstance(plan, SamplePlan))
-        self.assertTrue(isinstance(
-            plan.sample_expression, ConstantValueExpression))
-        self.assertEqual(plan.sample_value, 5)
+        self.assertTrue(plan.sample_freq, ConstantValueExpression(5))
