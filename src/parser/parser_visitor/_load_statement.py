@@ -17,10 +17,12 @@ from src.parser.load_statement import LoadDataStatement
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 
+from src.parser.table_ref import TableRef
+
 
 class Load(evaql_parserVisitor):
     def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):
         file_path = self.visit(ctx.fileName()).value
-        table = self.visit(ctx.tableName())
+        table = TableRef(self.visit(ctx.tableName()))
         stmt = LoadDataStatement(table, file_path)
         return stmt

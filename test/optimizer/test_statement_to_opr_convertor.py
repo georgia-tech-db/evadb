@@ -29,7 +29,8 @@ from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
                                      LogicalLoadData, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit)
+                                     LogicalOrderBy, LogicalLimit,
+                                     LogicalSample)
 
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.constant_value_expression import ConstantValueExpression
@@ -47,7 +48,7 @@ class StatementToOprTest(unittest.TestCase):
         converter = StatementToPlanConvertor()
         table_ref = TableRef(TableInfo("test"))
         converter.visit_table_ref(table_ref)
-        mock.assert_called_with(table_ref.table_info)
+        mock.assert_called_with(table_ref.table)
         mock_lget.assert_called_with(table_ref, mock.return_value)
         self.assertEqual(mock_lget.return_value, converter._plan)
 
@@ -207,7 +208,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         table_ref = TableRef(TableInfo("test"))
         stmt = MagicMock(table=table_ref, path='path')
         StatementToPlanConvertor().visit_load_data(stmt)
-        mock_bind.assert_called_once_with(table_ref.table_info)
+        mock_bind.assert_called_once_with(table_ref.table)
         mock_load.assert_called_once_with(mock_bind.return_value, 'path')
         mock_create.assert_not_called()
 
@@ -220,8 +221,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         table_ref = TableRef(TableInfo("test"))
         stmt = MagicMock(table=table_ref, path='path')
         StatementToPlanConvertor().visit_load_data(stmt)
-        mock_create.assert_called_once_with(table_ref.table_info.table_name)
-        mock_bind.assert_called_with(table_ref.table_info)
+        mock_create.assert_called_once_with(table_ref.table.table_name)
+        mock_bind.assert_called_with(table_ref.table)
         mock_load.assert_called_with(mock_create.return_value, 'path')
 
     @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
@@ -345,6 +346,44 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         for plan in plans[1:]:
             wrong_plan.append_child(plan)
         self.assertNotEqual(wrong_plan, actual_plan)
+
+    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    def test_visit_select_sample(self, mock_p, mock_c, mock_d):
+        m = MagicMock()
+        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        stmt = Parser().parse(""" SELECT data, id FROM video SAMPLE 2 \
+                   WHERE id > 2 LIMIT 3;""")[0]
+
+        converter = StatementToPlanConvertor()
+        actual_plan = converter.visit(stmt)
+        plans = []
+
+        plans.append(LogicalLimit(ConstantValueExpression(3)))
+
+        plans.append(LogicalProject(
+            [TupleValueExpression('data'), TupleValueExpression('id')]))
+
+        plans.append(
+            LogicalFilter(
+                ComparisonExpression(
+                    ExpressionType.COMPARE_GREATER,
+                    TupleValueExpression('id'),
+                    ConstantValueExpression(2))))
+
+        plans.append(LogicalSample(ConstantValueExpression(2)))
+
+        plans.append(LogicalGet(TableRef(TableInfo('video'),
+                                         ConstantValueExpression(2)), m))
+
+        expected_plan = None
+        for plan in reversed(plans):
+            if expected_plan:
+                plan.append_child(expected_plan)
+            expected_plan = plan
+
+        self.assertEqual(expected_plan, actual_plan)
 
     @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')

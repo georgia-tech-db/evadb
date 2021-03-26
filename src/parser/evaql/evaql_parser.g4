@@ -72,7 +72,7 @@ createUdf
 
 // Create Materialized View
 createMaterializedView
-    : CREATE MATERIALIZED VIEW 
+    : CREATE MATERIALIZED VIEW
       ifNotExists?
       tableName ('(' columns=uidList ')')
       AS
@@ -215,19 +215,28 @@ tableSources
     ;
 
 tableSource
-    : tableSourceItem joinPart*                                     #tableSourceBase
+    : tableSourceItemWithSample joinPart*                #tableSourceBase
+    ;
+
+tableSourceItemWithSample
+    : tableSourceItem sampleClause?
     ;
 
 tableSourceItem
-    : tableName                                                     #atomTableItem
+    : tableName                                  #atomTableItem
     | (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
       )                                                            #subqueryTableItem
     ;
 
+sampleClause
+    : SAMPLE decimalLiteral
+    ;
+
+
 joinPart
-    : JOIN tableSourceItem
+    : JOIN tableSourceItemWithSample
       (
         ON expression
         | USING '(' uidList ')'
@@ -369,23 +378,36 @@ nullNotnull
     : NOT? (NULL_LITERAL | NULL_SPEC_LITERAL)
     ;
 
+arrayLiteral
+    : LR_SQ_BRACKET  constant (',' constant)* RR_SQ_BRACKET
+    | LR_SQ_BRACKET RR_SQ_BRACKET
+    ;
+
 constant
     : stringLiteral | decimalLiteral
     | '-' decimalLiteral
     | booleanLiteral
     | REAL_LITERAL
     | NOT? nullLiteral=(NULL_LITERAL | NULL_SPEC_LITERAL)
+    | arrayLiteral
     ;
 
 
 //    Data Types
+
+arrayType
+    : INT8 | UINT8 | INT16 | INT32 | INT64
+    | UNICODE | BOOL
+    | FLOAT32 | FLOAT64 | DECIMAL
+    | STR | DATETIME
+    ;
 
 dataType
     : BOOLEAN                                         #simpleDataType
     | TEXT lengthOneDimension?                        #dimensionDataType
     | INTEGER UNSIGNED?                               #integerDataType
     | FLOAT lengthTwoDimension? UNSIGNED?             #dimensionDataType
-    | NDARRAY lengthDimensionList                     #dimensionDataType
+    | NDARRAY arrayType lengthDimensionList           #arrayDataType
     ;
 
 lengthOneDimension
@@ -512,6 +534,7 @@ unaryOperator
 comparisonOperator
     : '=' | '>' | '<' | '<' '=' | '>' '='
     | '<' '>' | '!' '=' | '<' '=' '>'
+    | '@' '>' | '<' '@'
     ;
 
 logicalOperator

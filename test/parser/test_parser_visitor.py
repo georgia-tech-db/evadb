@@ -15,6 +15,7 @@
 
 import unittest
 import pandas as pd
+import numpy as np
 
 from unittest import mock
 from unittest.mock import MagicMock, call
@@ -24,6 +25,7 @@ from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
 from src.expression.function_expression import ExecutionMode
+from src.parser.table_ref import TableRef
 from antlr4 import TerminalNode
 
 
@@ -60,9 +62,9 @@ class ParserVisitorTests(unittest.TestCase):
 
         ctx = MagicMock()
         tableSources = MagicMock()
-        ctx.tableSources.return_value = tableSources
         whereExpr = MagicMock()
         ctx.whereExpr = whereExpr
+        ctx.tableSources.return_value = tableSources
 
         visitor = ParserVisitor()
         expected = visitor.visitFromClause(ctx)
@@ -95,22 +97,38 @@ class ParserVisitorTests(unittest.TestCase):
 
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.INVALID)
+            ExpressionType.INVALID
+        )
 
         ctx.getText.return_value = '='
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_EQUAL)
+            ExpressionType.COMPARE_EQUAL
+        )
 
         ctx.getText.return_value = '<'
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_LESSER)
+            ExpressionType.COMPARE_LESSER
+        )
 
         ctx.getText.return_value = '>'
         self.assertEqual(
             visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_GREATER)
+            ExpressionType.COMPARE_GREATER
+        )
+
+        ctx.getText.return_value = '@>'
+        self.assertEqual(
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_CONTAINS
+        )
+
+        ctx.getText.return_value = '<@'
+        self.assertEqual(
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_IS_CONTAINED
+        )
 
     # To be fixed
     # def test_visit_full_column_name_none(self):
@@ -186,6 +204,32 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(
             expected.evaluate(),
             Batch(pd.DataFrame([float(ctx.getText())])))
+
+    def test_visit_int_array_literal(self):
+        ''' Testing int array literal
+            Function: visitArrayLiteral
+        '''
+        ctx = MagicMock()
+        visitor = ParserVisitor()
+        ctx.getText.return_value = '[1,2,3,4]'
+        expected = visitor.visitArrayLiteral(ctx)
+        self.assertEqual(
+            expected.evaluate(),
+            Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
+        )
+
+    def test_visit_str_array_literal(self):
+        ''' Testing str array literal
+            Function: visitArrayLiteral
+        '''
+        ctx = MagicMock()
+        visitor = ParserVisitor()
+        ctx.getText.return_value = "['person', 'car']"
+        expected = visitor.visitArrayLiteral(ctx)
+        self.assertEqual(
+            expected.evaluate(),
+            Batch(pd.DataFrame({0: [np.array(['person', 'car'])]}))
+        )
 
     def test_visit_query_specification_base_exception(self):
         ''' Testing Base Exception error handling
@@ -318,4 +362,4 @@ class ParserVisitorTests(unittest.TestCase):
         mock_visit.assert_has_calls(
             [call(ctx.fileName()), call(ctx.tableName())])
         mock_load.assert_called_once()
-        mock_load.assert_called_with('myVideo', 'video.mp4')
+        mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4')

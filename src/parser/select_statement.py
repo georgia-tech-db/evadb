@@ -13,13 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+from typing import Union, List
+import typing
+if typing.TYPE_CHECKING:
+    from src.parser.table_ref import TableRef
 from src.parser.statement import AbstractStatement
 
 from src.parser.types import StatementType
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.parser.table_ref import TableRef
-from typing import List
 
 
 class SelectStatement(AbstractStatement):
@@ -40,7 +43,7 @@ class SelectStatement(AbstractStatement):
     """
 
     def __init__(self, target_list: List[AbstractExpression] = None,
-                 from_table=None,
+                 from_table: Union[TableRef, SelectStatement] = None,
                  where_clause: AbstractExpression = None,
                  **kwargs):
         super().__init__(StatementType.SELECT)
@@ -110,9 +113,9 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {} WHERE {}".format(self._target_list,
-                                                        self._from_table,
-                                                        self._where_clause)
+        print_str = "SELECT {} FROM {}".format(
+            self._target_list, self._from_table)
+        print_str += " WHERE " + str(self._where_clause)
         if self._union_link is not None:
             if not self._union_all:
                 print_str += "\nUNION\n" + str(self._union_link)

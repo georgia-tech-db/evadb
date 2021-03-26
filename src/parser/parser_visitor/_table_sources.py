@@ -14,11 +14,10 @@
 # limitations under the License.
 
 from src.parser.select_statement import SelectStatement
+from src.parser.table_ref import TableRef
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
-from src.parser.types import ParserOrderBySortType
-from src.expression.constant_value_expression import ConstantValueExpression
 
 ##################################################################
 # TABLE SOURCES
@@ -35,6 +34,14 @@ class TableSources(evaql_parserVisitor):
             table_list.append(table)
 
         return table_list
+
+    def visitTableSourceItemWithSample(
+            self, ctx: evaql_parser.TableSourceItemWithSampleContext):
+        sample_freq = None
+        table = self.visit(ctx.tableSourceItem())
+        if ctx.sampleClause():
+            sample_freq = self.visit(ctx.sampleClause())
+        return TableRef(table, sample_freq)
 
     # Nested sub query
     def visitSubqueryTableItem(
@@ -117,24 +124,3 @@ class TableSources(evaql_parserVisitor):
             where_clause = self.visit(ctx.whereExpr)
 
         return {"from": from_table, "where": where_clause}
-
-    def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
-        orderby_clause_data = []
-        # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
-        for expression in ctx.orderByExpression():
-            orderby_clause_data.append(self.visit(expression))
-
-        return orderby_clause_data
-
-    def visitOrderByExpression(
-            self, ctx: evaql_parser.OrderByExpressionContext):
-
-        if ctx.DESC():
-            sort_token = ParserOrderBySortType.DESC
-        else:
-            sort_token = ParserOrderBySortType.ASC
-
-        return self.visitChildren(ctx.expression()), sort_token
-
-    def visitLimitClause(self, ctx: evaql_parser.LimitClauseContext):
-        return ConstantValueExpression(self.visitChildren(ctx))

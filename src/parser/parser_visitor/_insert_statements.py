@@ -19,6 +19,7 @@ from antlr4 import TerminalNode
 from src.expression.tuple_value_expression import TupleValueExpression
 
 from src.parser.insert_statement import InsertTableStatement
+from src.parser.table_ref import TableRef
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
@@ -40,7 +41,7 @@ class Insert(evaql_parserVisitor):
                     rule_idx = child.getRuleIndex()
 
                     if rule_idx == evaql_parser.RULE_tableName:
-                        table_ref = self.visit(ctx.tableName())
+                        table_ref = TableRef(self.visit(ctx.tableName()))
 
                     elif rule_idx == evaql_parser.RULE_uidList:
                         column_list = self.visit(ctx.uidList())

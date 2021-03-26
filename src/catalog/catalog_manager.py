@@ -15,7 +15,7 @@
 
 from typing import List, Tuple
 
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.models.base_model import init_db, drop_db
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -195,8 +195,9 @@ class CatalogManager(object):
         return col_ids
 
     def create_column_metadata(
-            self, column_name: str, data_type: ColumnType,
-            dimensions: List[int]):
+        self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
+        dimensions: List[int]
+    ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
@@ -205,9 +206,10 @@ class CatalogManager(object):
         Arguments:
             column_name {str} -- column name to be created
             data_type {ColumnType} -- type of column created
+            array_type {NdArrayType} -- type of ndarray
             dimensions {List[int]} -- dimensions of the column created
         """
-        return DataFrameColumn(column_name, data_type,
+        return DataFrameColumn(column_name, data_type, array_type=array_type,
                                array_dimensions=dimensions)
 
     def get_dataset_metadata(self, database_name: str, dataset_name: str) -> \
@@ -233,7 +235,7 @@ class CatalogManager(object):
         return metadata
 
     def udf_io(
-            self, io_name: str, data_type: ColumnType,
+            self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
             dimensions: List[int], is_input: bool):
         """Constructs an in memory udf_io object with given info.
         This function won't commit this object in the catalog database.
@@ -243,10 +245,11 @@ class CatalogManager(object):
         Arguments:
             name(str): io name to be created
             data_type(ColumnType): type of io created
+            array_type(NdArrayType): type of array content
             dimensions(List[int]):dimensions of the io created
             is_input(bool): whether a input or output, if true it is an input
         """
-        return UdfIO(io_name, data_type,
+        return UdfIO(io_name, data_type, array_type=array_type,
                      array_dimensions=dimensions, is_input=is_input)
 
     def create_udf(self, name: str, impl_file_path: str,

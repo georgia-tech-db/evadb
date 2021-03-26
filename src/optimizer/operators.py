@@ -42,6 +42,7 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALLIMIT = auto()
+    LOGICALSAMPLE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -246,6 +247,24 @@ class LogicalLimit(Operator):
             return False
         return (is_subtree_equal
                 and self.limit_count == other.limit_count)
+
+
+class LogicalSample(Operator):
+    def __init__(self, sample_freq: ConstantValueExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALSAMPLE, children)
+        self._sample_freq = sample_freq
+
+    @property
+    def sample_freq(self):
+        return self._sample_freq
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalSample):
+            return False
+        return (is_subtree_equal
+                and self.sample_freq == other.sample_freq)
 
 
 class LogicalUnion(Operator):

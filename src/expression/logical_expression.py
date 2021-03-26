@@ -41,8 +41,7 @@ class LogicalExpression(AbstractExpression):
                 if left_values.all().bool():  # check if all are true
                     return Batch(left_values)
                 kwargs["mask"] = left_values[~left_values[0]].index.tolist()
-            right_values = self.get_child(
-                1).evaluate(*args, **kwargs).frames
+            right_values = self.get_child(1).evaluate(*args, **kwargs).frames
             left_values.iloc[kwargs["mask"]] = right_values
             return Batch(pd.DataFrame(left_values))
         else:

@@ -29,8 +29,8 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         create_udf_query = """CREATE UDF FastRCNNObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'src/udfs/fastrcnn_object_detector.py';
         """
@@ -48,8 +48,8 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         create_udf_query = """CREATE UDF SSDObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
                   IMPL  'src/udfs/ssd_object_detector.py';
         """
