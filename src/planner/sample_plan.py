@@ -34,9 +34,5 @@ class SamplePlan(AbstractPlan):
         super().__init__(PlanNodeType.SAMPLE)
 
     @property
-    def sample_expression(self):
+    def sample_freq(self):
         return self._sample_freq
-
-    @property
-    def sample_value(self):
-        return self._sample_freq.value
