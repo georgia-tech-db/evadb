@@ -15,6 +15,8 @@
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
+from src.parser.types import ParserOrderBySortType
+from src.expression.constant_value_expression import ConstantValueExpression
 
 
 ##################################################################
@@ -24,3 +26,24 @@ class Select(evaql_parserVisitor):
     def visitSimpleSelect(self, ctx: evaql_parser.SimpleSelectContext):
         select_stmt = self.visitChildren(ctx)
         return select_stmt
+
+    def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
+        orderby_clause_data = []
+        # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
+        for expression in ctx.orderByExpression():
+            orderby_clause_data.append(self.visit(expression))
+
+        return orderby_clause_data
+
+    def visitOrderByExpression(
+            self, ctx: evaql_parser.OrderByExpressionContext):
+
+        if ctx.DESC():
+            sort_token = ParserOrderBySortType.DESC
+        else:
+            sort_token = ParserOrderBySortType.ASC
+
+        return self.visitChildren(ctx.expression()), sort_token
+
+    def visitLimitClause(self, ctx: evaql_parser.LimitClauseContext):
+        return ConstantValueExpression(self.visitChildren(ctx))

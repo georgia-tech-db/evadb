@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.function_expression import FunctionExpression
 from src.parser.table_ref import TableInfo
 from src.catalog.catalog_manager import CatalogManager
-from src.catalog.column_type import ColumnType
-from typing import List
+from src.catalog.column_type import ColumnType, NdArrayType
 
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType, \
@@ -25,7 +26,6 @@ from src.expression.tuple_value_expression import ExpressionType, \
 
 from src.parser.create_statement import ColumnDefinition, \
     ColConstraintInfo
-from src.parser.types import ParserColumnDataType
 from src.utils.generic_utils import path_to_class, generate_file_path
 
 from src.utils.logging_manager import LoggingLevel
@@ -152,10 +152,11 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
                 "Empty column while creating column metadata",
                 LoggingLevel.ERROR)
             result_list.append(col)
-        col_type = xform_parser_column_type_to_catalog_type(col.type)
         result_list.append(
             CatalogManager().create_column_metadata(
-                col.name, col_type, col.dimension))
+                col.name, col.type, col.array_type, col.dimension
+            )
+        )
 
     return result_list
 
@@ -178,10 +179,11 @@ def column_definition_to_udf_io(
                 "Empty column definition while creating udf io",
                 LoggingLevel.ERROR)
             result_list.append(col)
-        col_type = xform_parser_column_type_to_catalog_type(col.type)
         result_list.append(
-            CatalogManager().udf_io(col.name, col_type,
-                                    col.dimension, is_input)
+            CatalogManager().udf_io(col.name, col.type,
+                                    array_type=col.array_type,
+                                    dimensions=col.dimension,
+                                    is_input=is_input)
         )
     return result_list
 
@@ -199,39 +201,18 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
         DataFrameMetadata:  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    columns = [ColumnDefinition('id', ParserColumnDataType.INTEGER, [],
-                                ColConstraintInfo(unique=True))]
+    columns = [ColumnDefinition('id', ColumnType.INTEGER, None,
+                                [], ColConstraintInfo(unique=True))]
     # the ndarray dimensions are set as None. We need to fix this as we
     # cannot assume. Either ask the user to provide this with load or
     # we infer this from the provided video.
     columns.append(
         ColumnDefinition(
-            'data', ParserColumnDataType.NDARRAY, [
-                None, None, None]))
+            'data', ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+        )
+    )
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
         name, uri, col_metadata, identifier_column='id')
     return metadata
-
-
-def xform_parser_column_type_to_catalog_type(
-        col_type: ParserColumnDataType) -> ColumnType:
-    """translate parser defined column type to the catalog type
-
-    Arguments:
-        col_type {ParserColumnDataType} -- input parser column type
-
-    Returns:
-        ColumnType -- catalog column type
-    """
-    if col_type == ParserColumnDataType.BOOLEAN:
-        return ColumnType.BOOLEAN
-    elif col_type == ParserColumnDataType.FLOAT:
-        return ColumnType.FLOAT
-    elif col_type == ParserColumnDataType.INTEGER:
-        return ColumnType.INTEGER
-    elif col_type == ParserColumnDataType.TEXT:
-        return ColumnType.TEXT
-    elif col_type == ParserColumnDataType.NDARRAY:
-        return ColumnType.NDARRAY

@@ -21,7 +21,6 @@ from src.parser.statement import AbstractStatement
 from src.parser.statement import StatementType
 
 from src.parser.select_statement import SelectStatement
-from src.parser.types import ParserColumnDataType
 from src.parser.create_statement import ColumnDefinition
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
@@ -35,6 +34,7 @@ from src.expression.constant_value_expression import ConstantValueExpression
 
 from src.parser.table_ref import TableRef, TableInfo
 from src.parser.types import ParserOrderBySortType
+from src.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
 
@@ -52,7 +52,7 @@ class ParserTests(unittest.TestCase):
                   Frame_ID INTEGER UNIQUE,
                   Frame_Data TEXT(10),
                   Frame_Value FLOAT(1000, 201),
-                  Frame_Array NDARRAY (5, 100, 2432, 4324, 100)
+                  Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
             );""")
 
         for query in single_queries:
@@ -124,7 +124,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -196,7 +196,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -240,7 +240,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -259,6 +259,38 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.limit_count)
         self.assertEqual(select_stmt.limit_count, ConstantValueExpression(3))
 
+    def test_select_statement_sample_class(self):
+        '''Testing sample frequency '''
+
+        parser = Parser()
+
+        select_query = "SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5;"
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 2)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(
+            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(
+            select_stmt.from_table.table.table_name, 'TAIPAI')
+
+        # sample_freq
+        self.assertEqual(select_stmt.from_table.sample_freq,
+                         ConstantValueExpression(5))
+
     def test_table_ref(self):
         ''' Testing table info in TableRef
             Class: TableInfo
@@ -268,13 +300,13 @@ class ParserTests(unittest.TestCase):
         select_stmt_new = SelectStatement()
         select_stmt_new.from_table = table_ref_obj
         self.assertEqual(
-            select_stmt_new.from_table.table_info.table_name,
+            select_stmt_new.from_table.table.table_name,
             'TAIPAI')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.schema_name,
+            select_stmt_new.from_table.table.schema_name,
             'Schema')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.database_name,
+            select_stmt_new.from_table.table.database_name,
             'Database')
 
     def test_insert_statement(self):
@@ -300,8 +332,8 @@ class ParserTests(unittest.TestCase):
     def test_create_udf_statement(self):
         parser = Parser()
         create_udf_query = """CREATE UDF FastRCNN
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (Labels NDARRAY (10), Bbox NDARRAY (10, 4))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
                   IMPL  'data/fastrcnn.py';
         """
@@ -309,12 +341,12 @@ class ParserTests(unittest.TestCase):
         expected_stmt = CreateUDFStatement(
             'FastRCNN', False, [
                 ColumnDefinition(
-                    'Frame_Array', ParserColumnDataType.NDARRAY, [
-                        3, 256, 256])], [
+                    'Frame_Array', ColumnType.NDARRAY, NdArrayType.UINT8,
+                    [3, 256, 256])], [
                 ColumnDefinition(
-                    'Labels', ParserColumnDataType.NDARRAY, [10]),
+                    'Labels', ColumnType.NDARRAY, NdArrayType.STR, [10]),
                 ColumnDefinition(
-                    'Bbox', ParserColumnDataType.NDARRAY, [10, 4])],
+                    'Bbox', ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4])],
             Path('data/fastrcnn.py'), 'Classification')
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
@@ -352,7 +384,7 @@ class ParserTests(unittest.TestCase):
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
         self.assertEqual(actual_stmt.target_list[0].col_name, 'ID')
-        self.assertEqual(actual_stmt.from_table, parsed_sub_query)
+        self.assertEqual(actual_stmt.from_table, TableRef(parsed_sub_query))
 
         sub_query = """SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
                               WHERE Yolo(frame).label = 'vehicle'"""
@@ -368,7 +400,7 @@ class ParserTests(unittest.TestCase):
         query_stmt = parser.parse(query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         sub_query_stmt = parser.parse(sub_query)[0]
-        self.assertEqual(actual_stmt.from_table, sub_query_stmt)
+        self.assertEqual(actual_stmt.from_table, TableRef(sub_query_stmt))
         self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
         self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
 
@@ -379,10 +411,10 @@ class ParserTests(unittest.TestCase):
         create_udf = CreateUDFStatement(
             'udf', False, [
                 ColumnDefinition(
-                    'frame', ParserColumnDataType.NDARRAY, [
-                        3, 256, 256])], [
+                    'frame', ColumnType.NDARRAY, NdArrayType.UINT8,
+                    [3, 256, 256])], [
                 ColumnDefinition(
-                    'labels', ParserColumnDataType.NDARRAY, [10])],
+                    'labels', ColumnType.NDARRAY, NdArrayType.STR, [10])],
             Path('data/fastrcnn.py'), 'Classification')
         select_stmt = SelectStatement()
         self.assertNotEqual(load_stmt, insert_stmt)
