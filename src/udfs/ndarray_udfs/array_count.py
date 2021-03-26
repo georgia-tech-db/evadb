@@ -25,4 +25,4 @@ class Array_Count(AbstractNdarrayUDF):
     def exec(self, inp: pd.DataFrame, **kwargs):
         print("input:", inp)
         print("name:", kwargs.get("name"))
-        return 1
+        return pd.DataFrame([{'count': 1}])
