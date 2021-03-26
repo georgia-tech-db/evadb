@@ -30,7 +30,7 @@ class SampleExecutor(AbstractExecutor):
 
     def __init__(self, node: SamplePlan):
         super().__init__(node)
-        self._sample_freq = node.sample_value
+        self._sample_freq = node.sample_freq.value
 
     def validate(self):
         pass
