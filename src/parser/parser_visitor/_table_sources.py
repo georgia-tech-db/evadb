@@ -91,11 +91,11 @@ class TableSources(evaql_parserVisitor):
                 elif rule_idx == evaql_parser.RULE_limitClause:
                     limit_count = self.visit(ctx.limitClause())
 
-            except Exception as e:
+            except BaseException as e:
                 # stop parsing something bad happened
                 LoggingManager().log('Error while parsing \
                                 visitQuerySpecification', LoggingLevel.ERROR)
-                raise Exception(str(e))
+                raise e
 
         # we don't support multiple table sources
         if from_clause is not None:
