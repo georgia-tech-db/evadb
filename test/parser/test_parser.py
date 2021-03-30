@@ -25,8 +25,6 @@ from src.parser.create_statement import ColumnDefinition
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
 from src.parser.insert_statement import InsertTableStatement
-from src.parser.create_mat_view_statement \
-    import CreateMaterializedViewStatement
 
 from src.expression.abstract_expression import ExpressionType
 from src.expression.tuple_value_expression import TupleValueExpression
@@ -421,19 +419,3 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(insert_stmt, load_stmt)
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
-
-    @unittest.skip('Skip mat operator test cases')
-    def test_materialized_view(self):
-        select_query = '''SELECT id, FastRCNNObjectDetector(frame).labels FROM
-                          MyVideo WHERE id<5; '''
-        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels)'\
-            ' AS {}'.format(select_query)
-        parser = Parser()
-        mat_view_stmt = parser.parse(query)
-        select_stmt = parser.parse(select_query)
-        expected_stmt = CreateMaterializedViewStatement(
-            TableRef(TableInfo('uadtrac_fastRCNN')),
-            [ColumnDefinition('id', None, None),
-             ColumnDefinition('labels', None, None)], False, select_stmt[0]
-        )
-        self.assertEqual(mat_view_stmt[0], expected_stmt)
