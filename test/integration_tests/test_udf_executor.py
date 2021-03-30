@@ -31,13 +31,6 @@ class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-
-    def tearDown(self):
-        os.remove('dummy.avi')
-
-    # integration test
-
-    def test_should_load_and_select_using_udf_video_in_table(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
 
@@ -49,6 +42,12 @@ class UDFExecutorTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
+    def tearDown(self):
+        os.remove('dummy.avi')
+
+    # integration test
+
+    def test_should_load_and_select_using_udf_video_in_table(self):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -59,17 +58,6 @@ class UDFExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_should_load_and_select_using_udf_video(self):
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        execute_query_fetch_all(load_query)
-
-        create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'test/util.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
         # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
@@ -114,3 +102,7 @@ class UDFExecutorTest(unittest.TestCase):
                          for i in range(2, NUM_FRAMES)
                          if i % 2 == 0]))[0]
         self.assertEqual(actual_batch, expected_batch)
+
+
+if __name__ == '__main__':
+    unittest.main()
