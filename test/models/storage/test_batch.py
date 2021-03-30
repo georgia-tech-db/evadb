@@ -93,7 +93,7 @@ class BatchTest(unittest.TestCase):
         self.assertEqual(batch_3, Batch.concat([batch_1, batch_2], copy=False))
 
     def test_concat_empty_batch_list_raise_exception(self):
-        self.assertRaises(ValueError, Batch.concat, [])
+        self.assertEqual(Batch(), Batch.concat([]))
 
     def test_project_batch_frame(self):
         batch_1 = Batch(frames=pd.DataFrame([{'id': 1,

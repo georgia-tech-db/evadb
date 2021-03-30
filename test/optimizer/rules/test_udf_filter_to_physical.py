@@ -35,7 +35,7 @@ class TestLogicalUdfFilterToPhysical(unittest.TestCase):
 
         # create udf in catalog manager
         create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label TEXT(10))
                   TYPE  Classification
                   IMPL  'test/util.py';
