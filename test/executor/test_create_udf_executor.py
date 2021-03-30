@@ -14,7 +14,6 @@
 # limitations under the License.
 import unittest
 
-from collections import deque
 from mock import patch, MagicMock
 from src.executor.create_udf_executor import CreateUDFExecutor
 
@@ -37,6 +36,6 @@ class CreateUdfExecutorTest(unittest.TestCase):
                      'udf_type': 'classification'})
 
         create_udf_executor = CreateUDFExecutor(plan)
-        deque(create_udf_executor.exec(), maxlen=0)
+        create_udf_executor.exec()
         catalog_instance.create_udf.assert_called_with(
             'udf', 'test.py', 'classification', ['inp', 'out'])
