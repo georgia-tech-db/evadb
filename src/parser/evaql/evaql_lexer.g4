@@ -140,9 +140,6 @@ OUTPUT:                         'OUTPUT';
 TYPE:                           'TYPE';
 IMPL:                           'IMPL';
 
-// MATERIALIZED
-MATERIALIZED:                   'MATERIALIZED';
-VIEW:                           'VIEW';
 // Common function names
 
 ABS:                                 'ABS';

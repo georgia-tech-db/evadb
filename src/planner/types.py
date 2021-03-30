@@ -26,7 +26,6 @@ class PlanOprType(IntEnum):
     LOAD_DATA = auto()
     UNION = auto()
     ORDER_BY = auto()
-    CREATE_MATERIALIZED_VIEW = auto()
     LIMIT = auto()
     SAMPLE = auto()
     # add other types

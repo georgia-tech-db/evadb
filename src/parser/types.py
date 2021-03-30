@@ -32,7 +32,6 @@ class StatementType(IntEnum):
     INSERT = 3,
     CREATE_UDF = 4,
     LOAD_DATA = 5,
-    CREATE_MATERIALIZED_VIEW = 6,
     # add other types
 
 

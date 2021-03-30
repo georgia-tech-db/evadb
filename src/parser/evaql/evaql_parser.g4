@@ -25,7 +25,7 @@ emptyStatement
     ;
 
 ddlStatement
-    : createDatabase | createTable | createIndex | createUdf | createMaterializedView
+    : createDatabase | createTable | createIndex | createUdf
     | dropDatabase | dropTable | dropIndex
     ;
 
@@ -70,14 +70,6 @@ createUdf
       IMPL   udfImpl
     ;
 
-// Create Materialized View
-createMaterializedView
-    : CREATE MATERIALIZED VIEW
-      ifNotExists?
-      tableName ('(' columns=uidList ')')
-      AS
-      selectStatement
-      ;
 
 // details
 udfName
