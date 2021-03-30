@@ -121,4 +121,4 @@ class Expressions(evaql_parserVisitor):
         return expr_list
 
     def visitSampleClause(self, ctx: evaql_parser.SampleClauseContext):
-        return self.visitChildren(ctx)
+        return ConstantValueExpression(self.visitChildren(ctx))
