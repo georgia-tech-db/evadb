@@ -248,7 +248,7 @@ class Batch:
         # if we convert ourselves.
         frame_list = list([batch.frames for batch in batch_list])
         if len(frame_list) == 0:
-            raise ValueError('No batch to concatenate')
+            return Batch()
         frame = pd.concat(frame_list, ignore_index=True, copy=copy)
 
         return Batch(frame)
