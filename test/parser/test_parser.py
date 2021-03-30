@@ -320,7 +320,7 @@ class ParserTests(unittest.TestCase):
                 TupleValueExpression('Frame_ID'),
                 TupleValueExpression('Frame_Path')], [
                 ConstantValueExpression(1),
-                ConstantValueExpression('/mnt/frames/1.png')])
+                ConstantValueExpression('/mnt/frames/1.png', ColumnType.TEXT)])
         eva_statement_list = parser.parse(insert_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
