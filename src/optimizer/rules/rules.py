@@ -13,16 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import IntFlag, auto
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.optimizer.optimizer_context import OptimizerContext
 
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
 from src.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion, LogicalOrderBy, LogicalLimit,
-    LogicalCreateMaterializedView, LogicalQueryDerivedGet)
+    LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
+    LogicalSample)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -32,6 +37,7 @@ from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
+from src.planner.sample_plan import SamplePlan
 from src.expression.abstract_expression import (
     AbstractExpression, ExpressionType)
 from src.expression.function_expression import FunctionExpression
@@ -49,6 +55,8 @@ class RuleType(IntFlag):
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
+    PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
+    PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
     UDF_LTOR = auto()
 
     REWRITE_DELIMETER = auto()
@@ -61,11 +69,9 @@ class RuleType(IntFlag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
-    # LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
-    LOGICAL_PROJECT_TO_SEQSCAN = auto()
-    LOGICAL_FILTER_TO_SEQSCAN = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
+    LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
@@ -86,10 +92,8 @@ class Promise(IntFlag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    # LOGICAL_PROJECT_TO_PHYSICAL = auto()
+    LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
-    LOGICAL_PROJECT_TO_SEQSCAN = auto()
-    LOGICAL_FILTER_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
 
@@ -98,6 +102,8 @@ class Promise(IntFlag):
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
+    PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
+    PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
     UDF_LTOR = auto()
 
 
@@ -129,7 +135,7 @@ class Rule(ABC):
     @classmethod
     def _compare_expr_with_pattern(cls,
                                    grp_id,
-                                   context: 'OptimizerContext',
+                                   context: OptimizerContext,
                                    pattern) -> bool:
         """check if the logical tree of the expression matches the
             provided pattern
@@ -162,7 +168,7 @@ class Rule(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def check(self, before: Operator, context: 'OptimizerContext') -> bool:
+    def check(self, before: Operator, context: OptimizerContext) -> bool:
         """Check whether the rule is applicable for the input_expr
 
         Args:
@@ -198,11 +204,11 @@ class EmbedFilterIntoGet(Rule):
     def promise(self):
         return Promise.EMBED_FILTER_INTO_GET
 
-    def check(self, before: Operator, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: OptimizerContext):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalFilter, context: 'OptimizerContext'):
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
@@ -219,11 +225,11 @@ class EmbedProjectIntoGet(Rule):
     def promise(self):
         return Promise.EMBED_PROJECT_INTO_GET
 
-    def check(self, before: Operator, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: OptimizerContext):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
+    def apply(self, before: LogicalProject, context: OptimizerContext):
         select_list = before.target_list
         # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
@@ -244,11 +250,11 @@ class EmbedFilterIntoDerivedGet(Rule):
     def promise(self):
         return Promise.EMBED_FILTER_INTO_DERIVED_GET
 
-    def check(self, before: Operator, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: OptimizerContext):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalFilter, context: 'OptimizerContext'):
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
@@ -267,16 +273,60 @@ class EmbedProjectIntoDerivedGet(Rule):
     def promise(self):
         return Promise.EMBED_PROJECT_INTO_DERIVED_GET
 
-    def check(self, before: Operator, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: OptimizerContext):
         # nothing else to check if logical match found return true
         return True
 
-    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
+    def apply(self, before: LogicalProject, context: OptimizerContext):
         select_list = before.target_list
         # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
         logical_derived_get.target_list = select_list
         return logical_derived_get
+
+
+class PushdownFilterThroughSample(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern_sample = Pattern(OperatorType.LOGICALSAMPLE)
+        pattern_sample.append_child(Pattern(OperatorType.LOGICALGET))
+        pattern.append_child(pattern_sample)
+        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_SAMPLE, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE
+
+    def check(self, before: Operator, context: OptimizerContext):
+        # nothing else to check if logical match found return true
+        return True
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        sample = before.children[0]
+        logical_get = sample.children[0]
+        logical_get.predicate = before.predicate
+        return sample
+
+
+class PushdownProjectThroughSample(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern_sample = Pattern(OperatorType.LOGICALSAMPLE)
+        pattern_sample.append_child(Pattern(OperatorType.LOGICALGET))
+        pattern.append_child(pattern_sample)
+        super().__init__(RuleType.PUSHDOWN_PROJECT_THROUGH_SAMPLE, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE
+
+    def check(self, before: Operator, context: OptimizerContext):
+        # nothing else to check if logical match found return true
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        sample = before.children[0]
+        logical_get = sample.children[0]
+        logical_get.target_list = before.target_list
+        return sample
 
 # class UdfLTOR(Rule):
 #     def __init__(self):
@@ -287,7 +337,7 @@ class EmbedProjectIntoDerivedGet(Rule):
 #     def promise(self):
 #         return Promise.UDF_LTOR
 
-#     def check(self, before: Operator, context: 'OptimizerContext'):
+#     def check(self, before: Operator, context: OptimizerContext):
 #         # nothing else to check if logical match found return true
 #         return True
 
@@ -320,6 +370,196 @@ class EmbedProjectIntoDerivedGet(Rule):
 #         return before
 
 
+# REWRITE RULES END
+##############################################
+
+
+##############################################
+# IMPLEMENTATION RULES START
+    # LOGICALQUERYDERIVEDGET = auto()
+
+
+class LogicalCreateToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATE)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_CREATE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreate, context: OptimizerContext):
+        after = CreatePlan(before.video, before.column_list,
+                           before.if_not_exists)
+        return after
+
+
+class LogicalCreateUDFToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEUDF)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_CREATE_UDF_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
+        after = CreateUDFPlan(before.name,
+                              before.if_not_exists,
+                              before.inputs,
+                              before.outputs,
+                              before.impl_path,
+                              before.udf_type)
+        return after
+
+
+class LogicalInsertToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALINSERT)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_INSERT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_INSERT_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalInsert, context: OptimizerContext):
+        after = InsertPlan(before.video_catalog_id,
+                           before.column_list, before.value_list)
+        return after
+
+
+class LogicalLoadToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLOADDATA)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_LOAD_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_LOAD_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLoadData, context: OptimizerContext):
+        after = LoadDataPlan(before.table_metainfo, before.path)
+        return after
+
+
+class LogicalGetToSeqScan(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGET)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_GET_TO_SEQSCAN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalGet, context: OptimizerContext):
+        after = SeqScanPlan(before.predicate, before.target_list)
+        after.append_child(StoragePlan(before.dataset_metadata))
+        return after
+
+
+class LogicalSampleToUniformSample(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALSAMPLE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalSample, context: OptimizerContext):
+        after = SamplePlan(before.sample_freq)
+        return after
+
+
+class LogicalDerivedGetToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_DERIVED_GET_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalQueryDerivedGet,
+              context: OptimizerContext):
+        after = SeqScanPlan(before.predicate, before.target_list)
+        return after
+
+
+class LogicalUnionToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALUNION)
+        # add 2 dummy children
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_UNION_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UNION_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalUnion, context: OptimizerContext):
+        after = UnionPlan(before.all)
+        return after
+
+
+class LogicalOrderByToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALORDERBY)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_ORDERBY_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_ORDERBY_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalOrderBy, context: OptimizerContext):
+        after = OrderByPlan(before.orderby_list)
+        return after
+
+
+class LogicalLimitToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_LIMIT_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_LIMIT_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        after = LimitPlan(before.limit_count)
+        return after
+
+
 class LogicalUdfFilterToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
@@ -329,7 +569,7 @@ class LogicalUdfFilterToPhysical(Rule):
     def promise(self):
         return Promise.LOGICAL_UDF_FILTER_TO_PHYSICAL
 
-    def check(self, before: Operator, context: 'OptimizerContext'):
+    def check(self, before: Operator, context: OptimizerContext):
         return True
 
     def _bind_udf(self, expr: FunctionExpression):
@@ -363,236 +603,11 @@ class LogicalUdfFilterToPhysical(Rule):
         for child in predicate.children:
             self._convert_logical_udfs_to_physical(child)
 
-    def apply(self, before: LogicalGet, context: 'OptimizerContext'):
+    def apply(self, before: LogicalGet, context: OptimizerContext):
         self._convert_logical_udfs_to_physical(
             before.predicate)
         return before
 
-# REWRITE RULES END
-##############################################
-
-
-##############################################
-# IMPLEMENTATION RULES START
-    # LOGICALQUERYDERIVEDGET = auto()
-
-
-class LogicalCreateToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALCREATE)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_CREATE_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_CREATE_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalCreate, context: 'OptimizerContext'):
-        after = CreatePlan(before.video, before.column_list,
-                           before.if_not_exists)
-        return after
-
-
-class LogicalCreateUDFToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALCREATEUDF)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_CREATE_UDF_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalCreateUDF, context: 'OptimizerContext'):
-        after = CreateUDFPlan(before.name,
-                              before.if_not_exists,
-                              before.inputs,
-                              before.outputs,
-                              before.impl_path,
-                              before.udf_type)
-        return after
-
-
-class LogicalInsertToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALINSERT)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_INSERT_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_INSERT_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalInsert, context: 'OptimizerContext'):
-        after = InsertPlan(before.video_catalog_id,
-                           before.column_list, before.value_list)
-        return after
-
-
-class LogicalLoadToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALLOADDATA)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_LOAD_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_LOAD_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalLoadData, context: 'OptimizerContext'):
-        after = LoadDataPlan(before.table_metainfo, before.path)
-        return after
-
-
-class LogicalGetToSeqScan(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALGET)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_GET_TO_SEQSCAN
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalGet, context: 'OptimizerContext'):
-        after = SeqScanPlan(before.predicate, before.target_list)
-        after.append_child(StoragePlan(before.dataset_metadata))
-        return after
-
-
-class LogicalProjectToSeqScan(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALPROJECT)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_PROJECT_TO_SEQSCAN, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_PROJECT_TO_SEQSCAN
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
-        after = SeqScanPlan(None, before.target_list)
-        return after
-
-
-class LogicalFilterToSeqScan(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_FILTER_TO_SEQSCAN, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_FILTER_TO_SEQSCAN
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalProject, context: 'OptimizerContext'):
-        after = SeqScanPlan(before.predicate, None)
-        return after
-
-
-class LogicalDerivedGetToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALQUERYDERIVEDGET)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_DERIVED_GET_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalQueryDerivedGet,
-              context: 'OptimizerContext'):
-        after = SeqScanPlan(before.predicate, before.target_list)
-        return after
-
-
-class LogicalUnionToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALUNION)
-        # add 2 dummy children
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_UNION_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_UNION_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalUnion, context: 'OptimizerContext'):
-        after = UnionPlan(before.all)
-        return after
-
-
-class LogicalOrderByToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALORDERBY)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_ORDERBY_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_ORDERBY_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalOrderBy, context: 'OptimizerContext'):
-        after = OrderByPlan(before.orderby_list)
-        return after
-
-
-class LogicalLimitToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALLIMIT)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_LIMIT_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_LIMIT_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalLimit, context: 'OptimizerContext'):
-        after = LimitPlan(before.limit_count)
-        return after
-
-
-class LogicalCreateMaterializedViewToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
-                         pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
-
-    def check(self, before: Operator, context: 'OptimizerContext'):
-        return True
-
-    def apply(self, before: LogicalCreateMaterializedView,
-              context: 'OptimizerContext'):
-        after = CreateMaterializedViewPlan(
-            before.view, before.col_list, before.if_not_exists)
-        return after
 
 # IMPLEMENTATION RULES END
 ##############################################
@@ -613,7 +628,9 @@ class RulesManager:
             EmbedFilterIntoGet(),
             EmbedProjectIntoGet(),
             EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoDerivedGet()
+            EmbedProjectIntoDerivedGet(),
+            PushdownFilterThroughSample(),
+            PushdownProjectThroughSample()
         ]
 
         #    UdfLTOR()]
@@ -622,14 +639,12 @@ class RulesManager:
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
+            LogicalSampleToUniformSample(),
             LogicalGetToSeqScan(),
-            LogicalProjectToSeqScan(),
-            LogicalFilterToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
-            LogicalCreateMaterializedViewToPhysical(),
             LogicalUdfFilterToPhysical()
         ]
 
