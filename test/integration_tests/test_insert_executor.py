@@ -59,7 +59,3 @@ class InsertExecutorTest(unittest.TestCase):
             batch.frames['data'][0],
             np.array([[[41, 41, 41], [41, 41, 41]],
                       [[41, 41, 41], [41, 41, 41]]])))
-
-
-if __name__ == '__main__':
-    unittest.main()
