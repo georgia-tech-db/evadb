@@ -102,5 +102,7 @@ class PlanExecutor:
         """execute the plan tree
         """
         execution_tree = self._build_execution_tree(self._plan)
-        yield from execution_tree.exec()
+        output = execution_tree.exec()
+        if output is not None:
+            yield from output
         self._clean_execution_tree(execution_tree)
