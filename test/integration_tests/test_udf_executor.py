@@ -102,7 +102,3 @@ class UDFExecutorTest(unittest.TestCase):
                          for i in range(2, NUM_FRAMES)
                          if i % 2 == 0]))[0]
         self.assertEqual(actual_batch, expected_batch)
-
-
-if __name__ == '__main__':
-    unittest.main()
