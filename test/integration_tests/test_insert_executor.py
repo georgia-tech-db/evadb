@@ -46,7 +46,7 @@ class InsertExecutorTest(unittest.TestCase):
                             [[41, 41, 41], [41, 41, 41]]]);"""
         execute_query_fetch_all(insert_query_2)
 
-        query = 'SELECT id, data FROM MyVideo WHERE id = 40 OR id = 1;'
+        query = 'SELECT id, data FROM MyVideo WHERE id = 40'
         batch = execute_query_fetch_all(query)
         self.assertIsNone(np.testing.assert_array_equal(
             batch.frames['data'][0],
