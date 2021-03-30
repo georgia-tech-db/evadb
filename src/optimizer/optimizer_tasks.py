@@ -18,6 +18,10 @@ from src.optimizer.group_expression import GroupExpression
 from src.optimizer.binder import Binder
 from src.optimizer.property import PropertyType
 from src.utils.logging_manager import LoggingManager, LoggingLevel
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.optimizer.optimizer_context import OptimizerContext
 
 
 class OptimizerTaskType(IntEnum):
@@ -64,7 +68,7 @@ class OptimizerTask:
 
 class TopDownRewrite(OptimizerTask):
     def __init__(self, root_expr: GroupExpression,
-                 optimizer_context: 'OptimizerContext'):
+                 optimizer_context: OptimizerContext):
         super().__init__(root_expr, root_expr.group_id,
                          optimizer_context, OptimizerTaskType.TOP_DOWN_REWRITE)
 
@@ -98,7 +102,6 @@ class TopDownRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                # Uncertain correctness
                 self.root_expr.mark_rule_explored(rule.rule_type)
                 LoggingManager().log('In TopDown, Rule {} matched for {}'
                                      .format(rule, self.root_expr),
@@ -126,7 +129,7 @@ class TopDownRewrite(OptimizerTask):
 
 class BottomUpRewrite(OptimizerTask):
     def __init__(self, root_expr: GroupExpression,
-                 optimizer_context: 'OptimizerContext',
+                 optimizer_context: OptimizerContext,
                  children_explored=False):
         super().__init__(root_expr, root_expr.group_id,
                          optimizer_context,
@@ -188,7 +191,7 @@ class BottomUpRewrite(OptimizerTask):
 
 
 class OptimizeExpression(OptimizerTask):
-    def __init__(self, root_expr, optimizer_context):
+    def __init__(self, root_expr, optimizer_context: OptimizerContext):
         super().__init__(root_expr, root_expr.group_id,
                          optimizer_context,
                          OptimizerTaskType.OPTIMIZE_EXPRESSION)

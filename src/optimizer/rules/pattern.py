@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
 from src.optimizer.operators import OperatorType
 
 
@@ -21,7 +22,7 @@ class Pattern:
         self._opr_type = opr_type
         self._chilren = []
 
-    def append_child(self, child: 'Pattern'):
+    def append_child(self, child: Pattern):
         self._chilren.append(child)
 
     @property
