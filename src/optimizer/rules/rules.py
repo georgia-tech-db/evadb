@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from enum import IntFlag, auto
+from enum import Flag, auto
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -40,10 +40,13 @@ from src.planner.limit_plan import LimitPlan
 from src.planner.sample_plan import SamplePlan
 
 
-class RuleType(IntFlag):
+class RuleType(Flag):
     """
     Manages enums for all the supported rules
     """
+    # Don't move this enum, else will break rule exploration logic
+    INVALID_RULE = 0
+
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
@@ -70,7 +73,7 @@ class RuleType(IntFlag):
     IMPLEMENTATION_DELIMETER = auto()
 
 
-class Promise(IntFlag):
+class Promise(Flag):
     """
     Manages order in which rules should be applied.
     Rule with a higher enum will be prefered in case of

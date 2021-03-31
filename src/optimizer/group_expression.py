@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
+from src.optimizer.rules.rules import RuleType
 from src.constants import INVALID_GROUP_ID
 from typing import List
 
@@ -26,7 +27,7 @@ class GroupExpression:
         self._opr = opr
         self._group_id = group_id
         self._children = children
-        self._rules_explored = 0
+        self._rules_explored = RuleType.INVALID_RULE
 
     @property
     def opr(self):
@@ -55,11 +56,11 @@ class GroupExpression:
     def rules_explored(self):
         return self._rules_explored
 
-    def mark_rule_explored(self, rule_id: int):
-        self._rules_explored |= (1 << rule_id)
+    def mark_rule_explored(self, rule_id: RuleType):
+        self._rules_explored |= rule_id
 
-    def is_rule_explored(self, rule_id: int):
-        return self._rules_explored & (1 << rule_id)
+    def is_rule_explored(self, rule_id: RuleType):
+        return (self._rules_explored & rule_id) == rule_id
 
     def __eq__(self, other: 'GroupExpression'):
         return (self.opr == other.opr and
