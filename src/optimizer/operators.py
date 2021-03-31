@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique, auto
+from enum import IntEnum, auto
 from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
@@ -24,11 +24,11 @@ from src.catalog.models.udf_io import UdfIO
 from pathlib import Path
 
 
-@unique
 class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
     """
+    DUMMY = auto()
     LOGICALGET = auto()
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
@@ -41,6 +41,7 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
+    LOGICALDELIMITER = auto()
 
 
 class Operator:
@@ -52,7 +53,7 @@ class Operator:
     """
 
     def __init__(self, op_type: OperatorType, children: List = None):
-        self._type = op_type
+        self._opr_type = op_type
         self._children = children if children is not None else []
 
     def append_child(self, child: 'Operator'):
@@ -63,9 +64,19 @@ class Operator:
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, children):
+        self._children = children
+
     @property
-    def type(self):
-        return self._type
+    def opr_type(self):
+        return self._opr_type
+
+    def __str__(self) -> str:
+        return '%s[%s](%s)' % (
+            type(self).__name__, hex(id(self)),
+            ', '.join('%s=%s' % item for item in vars(self).items())
+        )
 
     def __eq__(self, other):
         is_subtree_equal = True
@@ -77,6 +88,14 @@ class Operator:
             is_subtree_equal = is_subtree_equal and (child1 == child2)
         return is_subtree_equal
 
+    def is_logical(self):
+        return self._opr_type < OperatorType.LOGICALDELIMITER
+
+
+class Dummy(Operator):
+    def __init__(self):
+        super().__init__(OperatorType.DUMMY, None)
+
 
 class LogicalGet(Operator):
     def __init__(self, video: TableRef, dataset_metadata: DataFrameMetadata,
@@ -84,6 +103,8 @@ class LogicalGet(Operator):
         super().__init__(OperatorType.LOGICALGET, children)
         self._video = video
         self._dataset_metadata = dataset_metadata
+        self._predicate = None
+        self._target_list = None
 
     @property
     def video(self):
@@ -93,13 +114,31 @@ class LogicalGet(Operator):
     def dataset_metadata(self):
         return self._dataset_metadata
 
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):
             return False
         return (is_subtree_equal
                 and self.video == other.video
-                and self.dataset_metadata == other.dataset_metadata)
+                and self.dataset_metadata == other.dataset_metadata
+                and self.predicate == other.predicate
+                and self.target_list == other.target_list)
 
 
 class LogicalQueryDerivedGet(Operator):
@@ -109,12 +148,32 @@ class LogicalQueryDerivedGet(Operator):
         # `TODO` We need to store the alias information here
         # We need construct the map using the target list of the
         # subquery to validate the overall query
+        self.predicate = None
+        self.target_list = None
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalQueryDerivedGet):
             return False
-        return is_subtree_equal
+        return (is_subtree_equal
+                and self.predicate == other.predicate
+                and self.target_list == other.target_list)
 
 
 class LogicalFilter(Operator):

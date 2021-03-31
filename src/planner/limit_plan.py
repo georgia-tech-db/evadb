@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from src.expression.constant_value_expression import ConstantValueExpression
 
 
@@ -31,7 +31,7 @@ class LimitPlan(AbstractPlan):
 
     def __init__(self, limit_count: ConstantValueExpression):
         self._limit_count = limit_count
-        super().__init__(PlanNodeType.LIMIT)
+        super().__init__(PlanOprType.LIMIT)
 
     @property
     def limit_expression(self):

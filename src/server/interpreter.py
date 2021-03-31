@@ -30,7 +30,7 @@ class EvaCommandInterpreter(Cmd):
         self._protocol = protocol
 
     def do_greet(self, line):
-        print("greeting")
+        print("greeting %s" % line)
 
     def emptyline(self):
         print("Enter a valid query.")

@@ -14,7 +14,7 @@
 # limitations under the License.
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class StoragePlan(AbstractPlan):
@@ -35,7 +35,7 @@ class StoragePlan(AbstractPlan):
     def __init__(self, video: DataFrameMetadata, batch_size: int = 1,
                  skip_frames: int = 0, offset: int = None, limit: int = None,
                  total_shards: int = 0, curr_shard: int = 0):
-        super().__init__(PlanNodeType.STORAGE_PLAN)
+        super().__init__(PlanOprType.STORAGE_PLAN)
         self._video = video
         self._batch_size = batch_size
         self._skip_frames = skip_frames

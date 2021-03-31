@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from typing import List
 from src.parser.table_ref import TableRef
 from src.catalog.models.df_column import DataFrameColumn
@@ -33,7 +33,7 @@ class CreatePlan(AbstractPlan):
     def __init__(self, video_ref: TableRef,
                  column_list: List[DataFrameColumn],
                  if_not_exists: bool = False):
-        super().__init__(PlanNodeType.CREATE)
+        super().__init__(PlanOprType.CREATE)
         self._video_ref = video_ref
         self._column_list = column_list
         self._if_not_exists = if_not_exists

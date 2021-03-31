@@ -12,16 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-from src.optimizer.operators import LogicalLoadData
-from src.optimizer.plan_generator import PlanGenerator
-from src.planner.load_data_plan import LoadDataPlan
+from enum import IntEnum, auto
 
 
-class LoadDataGeneratorTest(unittest.TestCase):
-    def test_should_return_correct_plan_tree_for_input_logical_tree(self):
-        logical_plan = LogicalLoadData('metainfo', 'path')
-        plan = PlanGenerator().build(logical_plan)
-        self.assertIsInstance(plan, LoadDataPlan)
-        self.assertEqual(plan.table_metainfo, 'metainfo')
-        self.assertEqual(plan.file_path, 'path')
+class PropertyType(IntEnum):
+    # We don't have specific properties right now
+    # default is a proxy to represent no specific properties
+    DEFAULT = auto()
+
+
+class Property:
+    def __init__(self, property_type):
+        self._property_type = property_type
+
+    def property_type(self):
+        return self._property_type
+
+    def __eq__(self, other):
+        return self.property_type == other.property_type
+
+    def __hash__(self):
+        return hash(self._property_type)

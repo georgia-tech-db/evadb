@@ -14,7 +14,7 @@
 # limitations under the License.
 from src.expression.abstract_expression import AbstractExpression
 from src.planner.abstract_scan_plan import AbstractScan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class PPScanPlan(AbstractScan):
@@ -28,4 +28,4 @@ class PPScanPlan(AbstractScan):
     """
 
     def __init__(self, predicate: AbstractExpression):
-        super().__init__(PlanNodeType.PP_FILTER, predicate)
+        super().__init__(PlanOprType.PP_FILTER, predicate)

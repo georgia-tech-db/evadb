@@ -12,23 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
-
-from src.optimizer.operators import Operator
-from src.planner.abstract_plan import AbstractPlan
+from collections import deque
+from src.optimizer.optimizer_tasks import OptimizerTask
 
 
-class Generator(ABC):
+class OptimizerTaskStack():
+    def __init__(self):
+        self._task_stack = deque()
 
-    @abstractmethod
-    def build(self, operator: Operator) -> AbstractPlan:
-        """
-        Generates the physical plan from the Logical plan (Operator tree)
+    def push(self, task: OptimizerTask):
+        self._task_stack.append(task)
 
-        Arguments:
-            operator (Operator): the logical operator tree.
+    def pop(self) -> OptimizerTask:
+        return self._task_stack.pop()
 
-        Returns:
-            `AbstractPlan`: the plan constructed by traversing the Operator
-            tree.
-        """
+    def empty(self) -> bool:
+        return not self._task_stack

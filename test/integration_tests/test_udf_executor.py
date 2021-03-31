@@ -18,8 +18,10 @@ import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
-from test.util import create_sample_video, create_dummy_batches, perform_query
-from test.util import DummyObjectDetector
+from src.server.command_handler import execute_query_fetch_all
+
+from test.util import create_sample_video, create_dummy_batches, \
+    DummyObjectDetector
 
 NUM_FRAMES = 10
 
@@ -29,6 +31,16 @@ class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
+        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        execute_query_fetch_all(load_query)
+
+        create_udf_query = """CREATE UDF DummyObjectDetector
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        execute_query_fetch_all(create_udf_query)
 
     def tearDown(self):
         os.remove('dummy.avi')
@@ -36,20 +48,9 @@ class UDFExecutorTest(unittest.TestCase):
     # integration test
 
     def test_should_load_and_select_using_udf_video_in_table(self):
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
-
-        create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'test/util.py';
-        """
-        perform_query(create_udf_query)
-
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             ORDER BY id;"
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         labels = DummyObjectDetector().labels
         expected = [{'id': i, 'label': [labels[1 + i % 2]]}
                     for i in range(NUM_FRAMES)]
@@ -57,21 +58,10 @@ class UDFExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_should_load_and_select_using_udf_video(self):
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(load_query)
-
-        create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'test/util.py';
-        """
-        perform_query(create_udf_query)
-
         # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         expected = [{'id': i * 2, 'label': ['person']}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -80,7 +70,7 @@ class UDFExecutorTest(unittest.TestCase):
         # Contain test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch, expected_batch)
 
         # Mutli element contain test
@@ -88,7 +78,7 @@ class UDFExecutorTest(unittest.TestCase):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label <@ ['person', 'bicycle'] \
             ORDER BY id;"
-        actual_batch = perform_query(select_query)
+        actual_batch = execute_query_fetch_all(select_query)
         expected = [{'id': i * 2, 'label': ['person']}
                     for i in range(NUM_FRAMES // 2)]
         expected += [{'id': i, 'label': ['bicycle']}
@@ -104,7 +94,7 @@ class UDFExecutorTest(unittest.TestCase):
             )
             WHERE ['person'] <@ label;
             """
-        actual_batch = perform_query(nested_select_query)
+        actual_batch = execute_query_fetch_all(nested_select_query)
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
