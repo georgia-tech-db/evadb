@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from enum import Flag, auto
+from enum import Flag, auto, IntEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,7 +73,7 @@ class RuleType(Flag):
     IMPLEMENTATION_DELIMETER = auto()
 
 
-class Promise(Flag):
+class Promise(IntEnum):
     """
     Manages order in which rules should be applied.
     Rule with a higher enum will be prefered in case of

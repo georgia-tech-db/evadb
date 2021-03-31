@@ -36,7 +36,10 @@ class OptimizerTaskType(IntEnum):
 
 
 class OptimizerTask:
-    def __init__(self, root_expr, root_id, optimizer_context,
+    def __init__(self,
+                 root_expr: GroupExpression,
+                 root_id: int,
+                 optimizer_context: OptimizerContext,
                  task_type: OptimizerTaskType):
         self._root_expr = root_expr
         self._root_id = root_id
@@ -60,7 +63,7 @@ class OptimizerTask:
         return self._optimizer_context
 
     @root_expr.setter
-    def root_expr(self, expr):
+    def root_expr(self, expr: GroupExpression):
         self.root_expr = expr
 
     def execute(self):
@@ -78,7 +81,7 @@ class TopDownRewrite(OptimizerTask):
         return self._root_expr
 
     @root_expr.setter
-    def root_expr(self, expr):
+    def root_expr(self, expr: GroupExpression):
         self._root_expr = expr
 
     def execute(self):
@@ -142,7 +145,7 @@ class BottomUpRewrite(OptimizerTask):
         return self._root_expr
 
     @root_expr.setter
-    def root_expr(self, expr):
+    def root_expr(self, expr: GroupExpression):
         self._root_expr = expr
 
     def execute(self):
@@ -192,7 +195,9 @@ class BottomUpRewrite(OptimizerTask):
 
 
 class OptimizeExpression(OptimizerTask):
-    def __init__(self, root_expr, optimizer_context: OptimizerContext):
+    def __init__(self,
+                 root_expr: GroupExpression,
+                 optimizer_context: OptimizerContext):
         super().__init__(root_expr, root_expr.group_id,
                          optimizer_context,
                          OptimizerTaskType.OPTIMIZE_EXPRESSION)
@@ -234,7 +239,7 @@ class OptimizeExpression(OptimizerTask):
 
 
 class OptimizeGroup(OptimizerTask):
-    def __init__(self, root_id, optimizer_context):
+    def __init__(self, root_id: int, optimizer_context: OptimizerContext):
         super().__init__(None, root_id,
                          optimizer_context, OptimizerTaskType.OPTIMIZE_GROUP)
 
@@ -252,7 +257,9 @@ class OptimizeGroup(OptimizerTask):
 
 
 class OptimizeInputs(OptimizerTask):
-    def __init__(self, root_expr, optimizer_context):
+    def __init__(self,
+                 root_expr: GroupExpression,
+                 optimizer_context: OptimizerContext):
         super().__init__(root_expr, root_expr.group_id,
                          optimizer_context, OptimizerTaskType.OPTIMIZE_INPUTS)
 
