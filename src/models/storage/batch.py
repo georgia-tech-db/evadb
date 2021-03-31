@@ -221,9 +221,6 @@ class Batch:
         Returns:
             Batch
         """
-        def _unique_keys(dict1, dict2):
-            return set(list(dict1.keys()) + list(dict2.keys()))
-
         if not isinstance(other, Batch):
             raise TypeError("Input should be of type Batch")
 
