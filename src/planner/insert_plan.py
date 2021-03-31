@@ -15,7 +15,7 @@
 from typing import List
 from src.planner.abstract_plan import AbstractPlan
 from src.expression.abstract_expression import AbstractExpression
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class InsertPlan(AbstractPlan):
@@ -32,7 +32,7 @@ class InsertPlan(AbstractPlan):
 
     def __init__(self, video_id: int, column_list: List[AbstractExpression],
                  value_list: List[AbstractExpression]):
-        super().__init__(PlanNodeType.INSERT)
+        super().__init__(PlanOprType.INSERT)
         self._video_id = video_id
         self._columns_list = column_list
         self._value_list = value_list

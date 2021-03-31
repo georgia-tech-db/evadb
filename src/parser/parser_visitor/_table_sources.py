@@ -18,6 +18,7 @@ from src.parser.table_ref import TableRef
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
+from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 ##################################################################
 # TABLE SOURCES
@@ -90,9 +91,11 @@ class TableSources(evaql_parserVisitor):
                 elif rule_idx == evaql_parser.RULE_limitClause:
                     limit_count = self.visit(ctx.limitClause())
 
-            except BaseException:
+            except BaseException as e:
                 # stop parsing something bad happened
-                return None
+                LoggingManager().log('Error while parsing \
+                                visitQuerySpecification', LoggingLevel.ERROR)
+                raise e
 
         # we don't support multiple table sources
         if from_clause is not None:

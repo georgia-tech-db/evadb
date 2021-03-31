@@ -12,20 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum
+from enum import unique, IntEnum, auto
 
 
 @unique
-class PlanNodeType(IntEnum):
-    SEQUENTIAL_SCAN = 1
-    STORAGE_PLAN = 2
-    PP_FILTER = 3
-    INSERT = 4
-    CREATE = 5
-    CREATE_UDF = 6
-    LOAD_DATA = 7
-    UNION = 8
-    ORDER_BY = 9
-    LIMIT = 10
-    SAMPLE = 11
+class PlanOprType(IntEnum):
+    SEQUENTIAL_SCAN = auto()
+    STORAGE_PLAN = auto()
+    PP_FILTER = auto()
+    INSERT = auto()
+    CREATE = auto()
+    CREATE_UDF = auto()
+    LOAD_DATA = auto()
+    UNION = auto()
+    ORDER_BY = auto()
+    LIMIT = auto()
+    SAMPLE = auto()
     # add other types

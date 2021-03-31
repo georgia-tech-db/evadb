@@ -17,6 +17,7 @@ import unittest
 from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
+from src.catalog.column_type import ColumnType
 
 
 class ComparisonExpressionsTest(unittest.TestCase):
@@ -113,9 +114,9 @@ class ComparisonExpressionsTest(unittest.TestCase):
         self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_contains(self):
-        const_exp1 = ConstantValueExpression([1, 2])
-        const_exp2 = ConstantValueExpression([1, 5])
-        const_exp3 = ConstantValueExpression([1, 2, 3, 4])
+        const_exp1 = ConstantValueExpression([1, 2], ColumnType.NDARRAY)
+        const_exp2 = ConstantValueExpression([1, 5], ColumnType.NDARRAY)
+        const_exp3 = ConstantValueExpression([1, 2, 3, 4], ColumnType.NDARRAY)
 
         cmpr_exp1 = ComparisonExpression(
             ExpressionType.COMPARE_CONTAINS,
@@ -134,9 +135,9 @@ class ComparisonExpressionsTest(unittest.TestCase):
         self.assertEqual([False], cmpr_exp2.evaluate(None).frames[0].tolist())
 
     def test_comparison_compare_is_contained(self):
-        const_exp1 = ConstantValueExpression([1, 2])
-        const_exp2 = ConstantValueExpression([1, 5])
-        const_exp3 = ConstantValueExpression([1, 2, 3, 4])
+        const_exp1 = ConstantValueExpression([1, 2], ColumnType.NDARRAY)
+        const_exp2 = ConstantValueExpression([1, 5], ColumnType.NDARRAY)
+        const_exp3 = ConstantValueExpression([1, 2, 3, 4], ColumnType.NDARRAY)
 
         cmpr_exp1 = ComparisonExpression(
             ExpressionType.COMPARE_IS_CONTAINED,

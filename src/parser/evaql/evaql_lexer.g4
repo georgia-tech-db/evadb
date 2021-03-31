@@ -110,9 +110,9 @@ UNICODE:                             'UNICODE';
 BOOL:                                'BOOL';
 FLOAT32:                             'FLOAT32';
 FLOAT64:                             'FLOAT64';
-DECIMAL:                             'DECIMAL'; 
+DECIMAL:                             'DECIMAL';
 STR:                                 'STR';
-DATETIME:                            'DATETIME'; 
+DATETIME:                            'DATETIME';
 
 // Group function Keywords
 
@@ -139,7 +139,6 @@ INPUT:                          'INPUT';
 OUTPUT:                         'OUTPUT';
 TYPE:                           'TYPE';
 IMPL:                           'IMPL';
-
 
 // Common function names
 

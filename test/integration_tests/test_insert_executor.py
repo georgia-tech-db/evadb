@@ -17,7 +17,8 @@ import os
 import numpy as np
 
 from src.catalog.catalog_manager import CatalogManager
-from test.util import create_sample_video, perform_query
+from src.server.command_handler import execute_query_fetch_all
+from test.util import create_sample_video
 
 
 class InsertExecutorTest(unittest.TestCase):
@@ -33,27 +34,27 @@ class InsertExecutorTest(unittest.TestCase):
     # integration test
     def test_should_load_video_in_table(self):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-        perform_query(query)
+        execute_query_fetch_all(query)
 
         insert_query = """ INSERT INTO MyVideo (id, data) VALUES (40,
                             [[[40, 40, 40] , [40, 40, 40]],
                             [[40, 40, 40], [40, 40, 40]]]);"""
-        perform_query(insert_query)
+        execute_query_fetch_all(insert_query)
 
         insert_query_2 = """ INSERT INTO MyVideo (id, data) VALUES (41,
                             [[[41, 41, 41] , [41, 41, 41]],
                             [[41, 41, 41], [41, 41, 41]]]);"""
-        perform_query(insert_query_2)
+        execute_query_fetch_all(insert_query_2)
 
-        query = 'SELECT id, data FROM MyVideo WHERE id = 40;'
-        batch = perform_query(query)
+        query = 'SELECT id, data FROM MyVideo WHERE id = 40'
+        batch = execute_query_fetch_all(query)
         self.assertIsNone(np.testing.assert_array_equal(
             batch.frames['data'][0],
             np.array([[[40, 40, 40], [40, 40, 40]],
                       [[40, 40, 40], [40, 40, 40]]])))
 
         query = 'SELECT id, data FROM MyVideo WHERE id = 41;'
-        batch = perform_query(query)
+        batch = execute_query_fetch_all(query)
         self.assertIsNone(np.testing.assert_array_equal(
             batch.frames['data'][0],
             np.array([[[41, 41, 41], [41, 41, 41]],

@@ -70,6 +70,7 @@ createUdf
       IMPL   udfImpl
     ;
 
+
 // details
 udfName
     : uid
@@ -391,7 +392,7 @@ arrayType
     | UNICODE | BOOL
     | FLOAT32 | FLOAT64 | DECIMAL
     | STR | DATETIME
-    ; 
+    ;
 
 dataType
     : BOOLEAN                                         #simpleDataType
