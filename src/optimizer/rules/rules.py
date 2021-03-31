@@ -54,7 +54,6 @@ class RuleType(Flag):
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
-    UDF_LTOR = auto()
 
     REWRITE_DELIMETER = auto()
 
@@ -69,7 +68,6 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
-    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -90,7 +88,7 @@ class Promise(IntEnum):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
-    LOGICAL_UDF_FILTER_TO_PHYSICAL = auto()
+    IMPLEMENTATION_DELIMETER = auto()
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
@@ -99,7 +97,6 @@ class Promise(IntEnum):
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
-    UDF_LTOR = auto()
 
 
 class Rule(ABC):
