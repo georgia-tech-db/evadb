@@ -17,7 +17,7 @@ from src.optimizer.optimizer_task_stack import OptimizerTaskStack
 from src.optimizer.memo import Memo
 from src.optimizer.operators import Operator
 from src.optimizer.group_expression import GroupExpression
-from src.optimizer.group import INVALID_GROUP_ID
+from src.constants import INVALID_GROUP_ID
 
 
 class OptimizerContext:

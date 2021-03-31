@@ -13,16 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
 from typing import Dict
 
 from src.optimizer.property import Property
+from src.optimizer.group_expression import GroupExpression
 from src.utils.logging_manager import LoggingManager
-
-INVALID_GROUP_ID = -1
+from src.constants import INVALID_GROUP_ID
 
 
 class Winner:
-    def __init__(self, grp_expr: 'GroupExpression', cost: float):
+    def __init__(self, grp_expr: GroupExpression, cost: float):
         self._cost = cost
         self._grp_expr = grp_expr
 
@@ -61,7 +62,7 @@ class Group:
             ', '.join('%s=%s' % item for item in vars(self).items())
         )
 
-    def add_expr(self, expr: 'GroupExpression'):
+    def add_expr(self, expr: GroupExpression):
         if expr.group_id == INVALID_GROUP_ID:
             expr.group_id = self.group_id
 
@@ -75,7 +76,7 @@ class Group:
         else:
             self._add_physical_expr(expr)
 
-    def get_best_expr(self, property: Property) -> 'GroupExpression':
+    def get_best_expr(self, property: Property) -> GroupExpression:
         winner = self._winner_exprs.get(property, None)
         if winner:
             return winner.grp_expr
@@ -89,7 +90,7 @@ class Group:
         else:
             return None
 
-    def add_expr_cost(self, expr: 'GroupExpression', property, cost):
+    def add_expr_cost(self, expr: GroupExpression, property, cost):
         existing_winner = self._winner_exprs.get(property, None)
         if not existing_winner or existing_winner.cost > cost:
             self._winner_exprs[property] = Winner(expr, cost)
@@ -98,8 +99,8 @@ class Group:
         self._logical_exprs.clear()
         self._physical_exprs.clear()
 
-    def _add_logical_expr(self, expr: 'GroupExpression'):
+    def _add_logical_expr(self, expr: GroupExpression):
         self._logical_exprs.append(expr)
 
-    def _add_physical_expr(self, expr: 'GroupExpression'):
+    def _add_physical_expr(self, expr: GroupExpression):
         self._physical_exprs.append(expr)

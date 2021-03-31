@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.optimizer.operators import Operator
-from src.optimizer.group import INVALID_GROUP_ID
+from src.constants import INVALID_GROUP_ID
 from typing import List
 
 
