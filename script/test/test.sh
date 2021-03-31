@@ -4,8 +4,7 @@
 # linter fails or the pytest fails. This is important for the Travis.
 
 # Run linter (checks code style)
-# Ignore F821 for type annotations
-flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql --ignore F821
+flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
 linter_code=$?
 # Run unit tests
 PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
