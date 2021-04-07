@@ -20,6 +20,7 @@ from src.expression.abstract_expression import ExpressionType
 from src.expression.comparison_expression import ComparisonExpression
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.expression.logical_expression import LogicalExpression
+from src.catalog.column_type import ColumnType
 
 
 from src.parser.evaql.evaql_parser import evaql_parser
@@ -34,22 +35,24 @@ class Expressions(evaql_parserVisitor):
         # Multiple quotes should be removed
 
         if ctx.STRING_LITERAL() is not None:
-            return ConstantValueExpression(ctx.getText()[1:-1])
+            return ConstantValueExpression(ctx.getText()[1:-1],
+                                           ColumnType.TEXT)
         # todo handle other types
         return self.visitChildren(ctx)
 
     def visitArrayLiteral(self, ctx: evaql_parser.ArrayLiteralContext):
         res = ConstantValueExpression(
-            np.array(ast.literal_eval(ctx.getText()))
-        )
+            np.array(ast.literal_eval(ctx.getText())), ColumnType.NDARRAY)
         return res
 
     def visitConstant(self, ctx: evaql_parser.ConstantContext):
         if ctx.REAL_LITERAL() is not None:
-            return ConstantValueExpression(float(ctx.getText()))
+            return ConstantValueExpression(float(ctx.getText()),
+                                           ColumnType.FLOAT)
 
         if ctx.decimalLiteral() is not None:
-            return ConstantValueExpression(self.visit(ctx.decimalLiteral()))
+            return ConstantValueExpression(self.visit(ctx.decimalLiteral()),
+                                           ColumnType.INTEGER)
         return self.visitChildren(ctx)
 
     def visitLogicalExpression(
@@ -116,3 +119,6 @@ class Expressions(evaql_parserVisitor):
             expr_list.append(expression)
 
         return expr_list
+
+    def visitSampleClause(self, ctx: evaql_parser.SampleClauseContext):
+        return ConstantValueExpression(self.visitChildren(ctx))

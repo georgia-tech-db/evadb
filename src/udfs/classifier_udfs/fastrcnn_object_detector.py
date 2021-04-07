@@ -35,7 +35,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
     def name(self) -> str:
         return "fastrcnn"
 
-    def __init__(self, threshold=0.5):
+    def __init__(self, threshold=0.85):
         super().__init__()
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(

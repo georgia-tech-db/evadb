@@ -12,23 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
 
-from src.optimizer.operators import Operator
 from src.planner.abstract_plan import AbstractPlan
+from src.planner.types import PlanOprType
+from src.expression.constant_value_expression import ConstantValueExpression
 
 
-class Generator(ABC):
+class SamplePlan(AbstractPlan):
+    """
+    This plan is used for storing information required for sample
+    operations.
 
-    @abstractmethod
-    def build(self, operator: Operator) -> AbstractPlan:
-        """
-        Generates the physical plan from the Logical plan (Operator tree)
+    Arguments:
+        sample_freq: ConstantValueExpression
+            A ConstantValueExpression which is the count of the
+            gap between frames sampled.
+    """
 
-        Arguments:
-            operator (Operator): the logical operator tree.
+    def __init__(self, sample_freq: ConstantValueExpression):
+        self._sample_freq = sample_freq
+        super().__init__(PlanOprType.SAMPLE)
 
-        Returns:
-            `AbstractPlan`: the plan constructed by traversing the Operator
-            tree.
-        """
+    @property
+    def sample_freq(self):
+        return self._sample_freq

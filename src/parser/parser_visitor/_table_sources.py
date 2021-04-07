@@ -14,14 +14,11 @@
 # limitations under the License.
 
 from src.parser.select_statement import SelectStatement
-from src.parser.table_ref import JoinNode
 from src.parser.table_ref import TableRef
 
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
-from src.parser.types import ParserOrderBySortType
-from src.parser.types import JoinType
-from src.expression.constant_value_expression import ConstantValueExpression
+from src.utils.logging_manager import LoggingLevel, LoggingManager
 
 ##################################################################
 # TABLE SOURCES
@@ -33,37 +30,24 @@ class TableSources(evaql_parserVisitor):
 
         table_list = []
         table_sources_count = len(ctx.tableSource())
-
         for table_sources_index in range(table_sources_count):
             table = self.visit(ctx.tableSource(table_sources_index))
             table_list.append(table)
 
-        # Join Nodes
-        if table_sources_count > 1:
-            # merge join nodes
-            # table, join_node1, join_node2 -> join_node_1, join_node_2
-            for i in range(table_sources_count - 1):
-                table_list[i + 1].join.left = table_list[i]
-            table_list = table_list[1:]
-
         return table_list
 
+    def visitTableSourceItemWithSample(
+            self, ctx: evaql_parser.TableSourceItemWithSampleContext):
+        sample_freq = None
+        table = self.visit(ctx.tableSourceItem())
+        if ctx.sampleClause():
+            sample_freq = self.visit(ctx.sampleClause())
+        return TableRef(table, sample_freq)
+
+    # Nested sub query
     def visitSubqueryTableItem(
             self, ctx: evaql_parser.SubqueryTableItemContext):
-        table_ref = self.visit(ctx.subqueryTableSourceItem())
-        # Lateral Join
-        if ctx.LATERAL():
-            return TableRef(join=JoinNode(right=table_ref,
-                                          join_type=JoinType.LATERAL_JOIN))
-
-        return table_ref
-
-    def visitSubqueryTableSourceItem(
-            self, ctx: evaql_parser.SubqueryTableSourceItemContext):
-        if ctx.selectStatement():
-            return self.visit(ctx.selectStatement())
-        else:
-            return self.visit(ctx.functionCall())
+        return self.visit(ctx.selectStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
         left_selectStatement = self.visit(ctx.left)
@@ -107,9 +91,11 @@ class TableSources(evaql_parserVisitor):
                 elif rule_idx == evaql_parser.RULE_limitClause:
                     limit_count = self.visit(ctx.limitClause())
 
-            except BaseException:
+            except BaseException as e:
                 # stop parsing something bad happened
-                return None
+                LoggingManager().log('Error while parsing \
+                                visitQuerySpecification', LoggingLevel.ERROR)
+                raise e
 
         # we don't support multiple table sources
         if from_clause is not None:
@@ -141,24 +127,3 @@ class TableSources(evaql_parserVisitor):
             where_clause = self.visit(ctx.whereExpr)
 
         return {"from": from_table, "where": where_clause}
-
-    def visitOrderByClause(self, ctx: evaql_parser.OrderByClauseContext):
-        orderby_clause_data = []
-        # [(TupleValueExpression #1, ASC), (TVE #2, DESC), ...]
-        for expression in ctx.orderByExpression():
-            orderby_clause_data.append(self.visit(expression))
-
-        return orderby_clause_data
-
-    def visitOrderByExpression(
-            self, ctx: evaql_parser.OrderByExpressionContext):
-
-        if ctx.DESC():
-            sort_token = ParserOrderBySortType.DESC
-        else:
-            sort_token = ParserOrderBySortType.ASC
-
-        return self.visitChildren(ctx.expression()), sort_token
-
-    def visitLimitClause(self, ctx: evaql_parser.LimitClauseContext):
-        return ConstantValueExpression(self.visitChildren(ctx))

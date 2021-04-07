@@ -123,14 +123,15 @@ def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
 def bind_function_expr(expr: FunctionExpression, column_mapping):
     catalog = CatalogManager()
     udf_obj = catalog.get_udf_by_name(expr.name)
-    if expr.output:
-        expr.output_obj = catalog.get_udf_io_by_name(expr.output)
-        if expr.output_obj is None:
-            LoggingManager().log(
-                'Invalid output {} selected for UDF {}'.format(
-                    expr.output, expr.name), LoggingLevel().ERROR)
-    expr.function = path_to_class(udf_obj.impl_file_path,
-                                  udf_obj.name)()
+    # bind if the user queried a physical functional expression
+    if udf_obj:
+        if expr.output:
+            expr.output_obj = catalog.get_udf_io_by_name(expr.output)
+            if expr.output_obj is None:
+                LoggingManager().log(
+                    'Invalid output {} selected for UDF {}'.format(
+                        expr.output, expr.name), LoggingLevel().ERROR)
+        expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
 
 
 def create_column_metadata(col_list: List[ColumnDefinition]):
@@ -180,7 +181,9 @@ def column_definition_to_udf_io(
             result_list.append(col)
         result_list.append(
             CatalogManager().udf_io(col.name, col.type,
-                                    col.dimension, is_input)
+                                    array_type=col.array_type,
+                                    dimensions=col.dimension,
+                                    is_input=is_input)
         )
     return result_list
 

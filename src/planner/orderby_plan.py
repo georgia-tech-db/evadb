@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class OrderByPlan(AbstractPlan):
@@ -29,7 +29,7 @@ class OrderByPlan(AbstractPlan):
 
     def __init__(self, orderby_list):
         self._orderby_list = orderby_list
-        super().__init__(PlanNodeType.ORDER_BY)
+        super().__init__(PlanOprType.ORDER_BY)
 
     @property
     def columns(self):

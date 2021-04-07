@@ -25,6 +25,7 @@ from src.parser.parser_visitor import ParserVisitor
 from src.parser.evaql.evaql_parser import evaql_parser
 from src.expression.abstract_expression import ExpressionType
 from src.expression.function_expression import ExecutionMode
+from src.parser.table_ref import TableRef
 from antlr4 import TerminalNode
 
 
@@ -60,9 +61,9 @@ class ParserVisitorTests(unittest.TestCase):
 
         ctx = MagicMock()
         tableSources = MagicMock()
-        ctx.tableSources.return_value = tableSources
         whereExpr = MagicMock()
         ctx.whereExpr = whereExpr
+        ctx.tableSources.return_value = tableSources
 
         visitor = ParserVisitor()
         expected = visitor.visitFromClause(ctx)
@@ -237,11 +238,11 @@ class ParserVisitorTests(unittest.TestCase):
         child_1 = MagicMock()
         child_2 = MagicMock()
         ctx.children = [None, child_1, child_2]
-        child_1.getRuleIndex.side_effect = BaseException()
+        child_1.getRuleIndex.side_effect = BaseException
 
-        expected = visitor.visitQuerySpecification(ctx)
+        # expected = visitor.visitQuerySpecification(ctx)
 
-        self.assertEqual(expected, None)
+        self.assertRaises(BaseException, visitor.visitQuerySpecification, ctx)
 
     ##################################################################
     # UDFs
@@ -356,4 +357,4 @@ class ParserVisitorTests(unittest.TestCase):
         mock_visit.assert_has_calls(
             [call(ctx.fileName()), call(ctx.tableName())])
         mock_load.assert_called_once()
-        mock_load.assert_called_with('myVideo', 'video.mp4')
+        mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4')

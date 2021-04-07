@@ -121,7 +121,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -193,7 +193,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -237,7 +237,7 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.from_table)
         self.assertIsInstance(select_stmt.from_table, TableRef)
         self.assertEqual(
-            select_stmt.from_table.table_info.table_name, 'TAIPAI')
+            select_stmt.from_table.table.table_name, 'TAIPAI')
 
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
@@ -256,6 +256,38 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.limit_count)
         self.assertEqual(select_stmt.limit_count, ConstantValueExpression(3))
 
+    def test_select_statement_sample_class(self):
+        '''Testing sample frequency '''
+
+        parser = Parser()
+
+        select_query = "SELECT CLASS, REDNESS FROM TAIPAI SAMPLE 5;"
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 2)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(
+            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(
+            select_stmt.from_table.table.table_name, 'TAIPAI')
+
+        # sample_freq
+        self.assertEqual(select_stmt.from_table.sample_freq,
+                         ConstantValueExpression(5))
+
     def test_table_ref(self):
         ''' Testing table info in TableRef
             Class: TableInfo
@@ -265,13 +297,13 @@ class ParserTests(unittest.TestCase):
         select_stmt_new = SelectStatement()
         select_stmt_new.from_table = table_ref_obj
         self.assertEqual(
-            select_stmt_new.from_table.table_info.table_name,
+            select_stmt_new.from_table.table.table_name,
             'TAIPAI')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.schema_name,
+            select_stmt_new.from_table.table.schema_name,
             'Schema')
         self.assertEqual(
-            select_stmt_new.from_table.table_info.database_name,
+            select_stmt_new.from_table.table.database_name,
             'Database')
 
     def test_insert_statement(self):
@@ -285,7 +317,7 @@ class ParserTests(unittest.TestCase):
                 TupleValueExpression('Frame_ID'),
                 TupleValueExpression('Frame_Path')], [
                 ConstantValueExpression(1),
-                ConstantValueExpression('/mnt/frames/1.png')])
+                ConstantValueExpression('/mnt/frames/1.png', ColumnType.TEXT)])
         eva_statement_list = parser.parse(insert_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -349,7 +381,7 @@ class ParserTests(unittest.TestCase):
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
         self.assertEqual(actual_stmt.target_list[0].col_name, 'ID')
-        self.assertEqual(actual_stmt.from_table, parsed_sub_query)
+        self.assertEqual(actual_stmt.from_table, TableRef(parsed_sub_query))
 
         sub_query = """SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
                               WHERE Yolo(frame).label = 'vehicle'"""
@@ -365,7 +397,7 @@ class ParserTests(unittest.TestCase):
         query_stmt = parser.parse(query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         sub_query_stmt = parser.parse(sub_query)[0]
-        self.assertEqual(actual_stmt.from_table, sub_query_stmt)
+        self.assertEqual(actual_stmt.from_table, TableRef(sub_query_stmt))
         self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
         self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
 

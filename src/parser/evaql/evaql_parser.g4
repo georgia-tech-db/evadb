@@ -70,6 +70,7 @@ createUdf
       IMPL   udfImpl
     ;
 
+
 // details
 udfName
     : uid
@@ -206,26 +207,28 @@ tableSources
     ;
 
 tableSource
-    : tableSourceItem joinPart*                                     #tableSourceBase
+    : tableSourceItemWithSample joinPart*                #tableSourceBase
+    ;
+
+tableSourceItemWithSample
+    : tableSourceItem sampleClause?
     ;
 
 tableSourceItem
-    : tableName                                                     #atomTableItem
-    | (LATERAL)? subqueryTableSourceItem                            #subqueryTableItem
-    ;
-
-subqueryTableSourceItem
-    : (
+    : tableName                                  #atomTableItem
+    | (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )
-      |
-      functionCall
+      )                                                            #subqueryTableItem
+    ;
+
+sampleClause
+    : SAMPLE decimalLiteral
     ;
 
 
 joinPart
-    : JOIN tableSourceItem
+    : JOIN tableSourceItemWithSample
       (
         ON expression
         | USING '(' uidList ')'
@@ -389,7 +392,7 @@ arrayType
     | UNICODE | BOOL
     | FLOAT32 | FLOAT64 | DECIMAL
     | STR | DATETIME
-    ; 
+    ;
 
 dataType
     : BOOLEAN                                         #simpleDataType

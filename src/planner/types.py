@@ -16,7 +16,7 @@ from enum import unique, IntEnum, auto
 
 
 @unique
-class PlanNodeType(IntEnum):
+class PlanOprType(IntEnum):
     SEQUENTIAL_SCAN = auto()
     STORAGE_PLAN = auto()
     PP_FILTER = auto()
@@ -27,6 +27,5 @@ class PlanNodeType(IntEnum):
     UNION = auto()
     ORDER_BY = auto()
     LIMIT = auto()
-    JOIN = auto()
-    FUNCTION_SCAN = auto()
+    SAMPLE = auto()
     # add other types

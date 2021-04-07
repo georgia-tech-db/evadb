@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.parser.types import TableRefType
-from src.parser.types import JoinType
-from src.expression.abstract_expression import AbstractExpression
+from __future__ import annotations
+from typing import Union
+
+
+from src.parser.select_statement import SelectStatement
 
 
 class TableInfo:
@@ -53,63 +55,41 @@ class TableInfo:
                 and self.database_name == other.database_name)
 
 
-class JoinNode:
-    def __init__(self,
-                 left: 'TableRef' = None,
-                 right: 'TableRef' = None,
-                 predicate: AbstractExpression = None,
-                 join_type: JoinType = None):
-        self.left = left
-        self.right = right
-        self.predicate = predicate
-        self.join_type = join_type
-
-    def __eq__(self, other):
-        if not isinstance(other, JoinNode):
-            return False
-        return (self.left == other.left
-                and self.right == other.right
-                and self.predicate == other.predicate
-                and self.join_type == other.join_type)
-
-
 class TableRef:
     """
-    TableRef: Can be table, subquery, or join
-    TODO: port subquery code
+    dummy class right now need to handle join expression
     Attributes:
-    table_info: expression of table name and database name
+        table: can be one of the following based on the query type:
+            TableInfo: expression of table name and database name,
+            SelectStatement: select statement in case of nested queries,
+            JoinDefinition: join statement in case of join queries #TODO
+        sample_freq: sampling frequency for the table reference
     """
 
-    def __init__(self, table_info: TableInfo = None, join: JoinNode = None):
-        self._table_info = table_info
-        self._join = join
-        self._table_ref_type = TableRefType.TABLEATOM
-
-        if join is not None:
-            self._table_ref_type = TableRefType.JOIN
+    def __init__(self,
+                 table: Union[TableInfo, SelectStatement] = None,
+                 sample_freq: float = None):
+        self._table = table
+        self._sample_freq = sample_freq
 
     @property
-    def table_info(self):
-        return self._table_info
+    def table(self):
+        return self._table
 
     @property
-    def join(self):
-        return self._join
+    def sample_freq(self):
+        return self._sample_freq
 
-    @property
-    def table_ref_type(self):
-        return self._table_ref_type
+    def is_select(self) -> bool:
+        return isinstance(self.table, SelectStatement)
 
     def __str__(self):
-        if self._table_ref_type is TableRefType.TABLEATOM:
-            return str(self._table_info)
-        elif self._table_ref_type is TableRefType.JOIN:
-            return str(self._join)
+        table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
+            str(self.table), str(self.sample_freq))
+        return table_ref_str
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
             return False
-        return (self.table_info == other.table_info
-                and self.join == other.join
-                and self.table_ref_type == other.table_ref_type)
+        return (self.table == other.table
+                and self.sample_freq == other.sample_freq)

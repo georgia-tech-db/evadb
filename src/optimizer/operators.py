@@ -12,24 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique, auto
+from enum import IntEnum, auto
 from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.parser.table_ref import TableRef
-from src.parser.types import JoinType
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.udf_io import UdfIO
 from pathlib import Path
 
 
-@unique
 class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
     """
+    DUMMY = auto()
     LOGICALGET = auto()
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
@@ -41,8 +40,8 @@ class OperatorType(IntEnum):
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
-    LOGICALJOIN = auto()
-    LOGICAL_FUNCTION_SCAN = auto()
+    LOGICALSAMPLE = auto()
+    LOGICALDELIMITER = auto()
 
 
 class Operator:
@@ -54,7 +53,7 @@ class Operator:
     """
 
     def __init__(self, op_type: OperatorType, children: List = None):
-        self._type = op_type
+        self._opr_type = op_type
         self._children = children if children is not None else []
 
     def append_child(self, child: 'Operator'):
@@ -65,9 +64,19 @@ class Operator:
     def children(self):
         return self._children
 
+    @children.setter
+    def children(self, children):
+        self._children = children
+
     @property
-    def type(self):
-        return self._type
+    def opr_type(self):
+        return self._opr_type
+
+    def __str__(self) -> str:
+        return '%s[%s](%s)' % (
+            type(self).__name__, hex(id(self)),
+            ', '.join('%s=%s' % item for item in vars(self).items())
+        )
 
     def __eq__(self, other):
         is_subtree_equal = True
@@ -79,6 +88,14 @@ class Operator:
             is_subtree_equal = is_subtree_equal and (child1 == child2)
         return is_subtree_equal
 
+    def is_logical(self):
+        return self._opr_type < OperatorType.LOGICALDELIMITER
+
+
+class Dummy(Operator):
+    def __init__(self):
+        super().__init__(OperatorType.DUMMY, None)
+
 
 class LogicalGet(Operator):
     def __init__(self, video: TableRef, dataset_metadata: DataFrameMetadata,
@@ -86,6 +103,8 @@ class LogicalGet(Operator):
         super().__init__(OperatorType.LOGICALGET, children)
         self._video = video
         self._dataset_metadata = dataset_metadata
+        self._predicate = None
+        self._target_list = None
 
     @property
     def video(self):
@@ -95,13 +114,31 @@ class LogicalGet(Operator):
     def dataset_metadata(self):
         return self._dataset_metadata
 
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):
             return False
         return (is_subtree_equal
                 and self.video == other.video
-                and self.dataset_metadata == other.dataset_metadata)
+                and self.dataset_metadata == other.dataset_metadata
+                and self.predicate == other.predicate
+                and self.target_list == other.target_list)
 
 
 class LogicalQueryDerivedGet(Operator):
@@ -111,12 +148,32 @@ class LogicalQueryDerivedGet(Operator):
         # `TODO` We need to store the alias information here
         # We need construct the map using the target list of the
         # subquery to validate the overall query
+        self.predicate = None
+        self.target_list = None
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalQueryDerivedGet):
             return False
-        return is_subtree_equal
+        return (is_subtree_equal
+                and self.predicate == other.predicate
+                and self.target_list == other.target_list)
 
 
 class LogicalFilter(Operator):
@@ -188,6 +245,24 @@ class LogicalLimit(Operator):
             return False
         return (is_subtree_equal
                 and self.limit_count == other.limit_count)
+
+
+class LogicalSample(Operator):
+    def __init__(self, sample_freq: ConstantValueExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALSAMPLE, children)
+        self._sample_freq = sample_freq
+
+    @property
+    def sample_freq(self):
+        return self._sample_freq
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalSample):
+            return False
+        return (is_subtree_equal
+                and self.sample_freq == other.sample_freq)
 
 
 class LogicalUnion(Operator):
@@ -404,70 +479,3 @@ class LogicalLoadData(Operator):
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
                 and self.path == other.path)
-
-
-class LogicalJoin(Operator):
-    """
-    Logical node for join operators
-
-    Attributes:
-        join_type: JoinType
-            Join type provided by the user - Lateral, Inner, Outer
-        left: TableRef
-            Left join table
-        right: TableRef
-            Right join table
-        join_predicate: AbstractExpression
-            condition/predicate expression used to join the tables
-    """
-
-    def __init__(self,
-                 join_type: JoinType,
-                 join_predicate: AbstractExpression = None,
-                 children: List = None):
-        super().__init__(OperatorType.LOGICALJOIN, children)
-        self._join_type = join_type
-        self._join_predicate = join_predicate
-
-    @property
-    def join_type(self):
-        return self._join_type
-
-    @property
-    def join_predicate(self):
-        return self._join_predicate
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalJoin):
-            return False
-        return (is_subtree_equal
-                and self.join_type == other.join_type
-                and self.join_predicate == other.join_predicate)
-
-
-class LogicalFunctionScan(Operator):
-    """
-    Logical node for function table scans
-
-    Attributes:
-        func_expr: AbstractExpression
-            function_expression that yield a table like output
-    """
-
-    def __init__(self,
-                 func_expr: AbstractExpression,
-                 children: List = None):
-        super().__init__(OperatorType.LOGICAL_FUNCTION_SCAN, children)
-        self._func_expr = func_expr
-
-    @property
-    def func_expr(self):
-        return self._func_expr
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalFunctionScan):
-            return False
-        return (is_subtree_equal
-                and self.func_expr == other.func_expr)

@@ -12,3 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from collections import deque
+from src.optimizer.optimizer_tasks import OptimizerTask
+
+
+class OptimizerTaskStack():
+    def __init__(self):
+        self._task_stack = deque()
+
+    def push(self, task: OptimizerTask):
+        self._task_stack.append(task)
+
+    def pop(self) -> OptimizerTask:
+        return self._task_stack.pop()
+
+    def empty(self) -> bool:
+        return not self._task_stack
