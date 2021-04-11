@@ -42,8 +42,10 @@ def execute_query_fetch_all(query) -> Optional[Batch]:
     Execute the query and fetch all results into one Batch object.
     """
     output = execute_query(query)
+    print("output:", output)
     if output:
-        batch_list = list(execute_query(query))
+        # batch_list = list(execute_query(query))
+        batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
 
 

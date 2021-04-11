@@ -23,6 +23,24 @@ class Array_Count(AbstractNdarrayUDF):
         return 'Array_Count'
 
     def exec(self, inp: pd.DataFrame, **kwargs):
-        print("input:", inp)
-        print("name:", kwargs.get("name"))
-        return pd.DataFrame([{'count': 1}])
+        # print("input:", inp)
+        # print("name:", kwargs.get("name"))
+
+        # input should just be a single column (Data Series or DF with one column)
+
+        # iterate over rows and see if match with search element
+
+        # inp:   col
+        #   0: [["A"], ["A"], ["B"]] size: (0,3)
+        #   1: [["A"], ["B"], ["B"]] label: ["A"]
+        # return: [[0, 2],
+        #          [1, 1]]
+
+        name = kwargs.get("name")
+
+        count = 0
+        if name:
+            df = inp[inp['label'].astype(str).str.contains(name)]
+            count = df.shape[0]
+
+        return pd.DataFrame([{'count': count}])

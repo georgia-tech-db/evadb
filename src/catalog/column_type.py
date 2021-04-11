@@ -15,12 +15,17 @@
 from enum import Enum, auto
 
 
+class Dimension(Enum):
+    ANY = -1
+
+
 class ColumnType(Enum):
     BOOLEAN = 1
     INTEGER = 2
     FLOAT = 3
     TEXT = 4
     NDARRAY = 5
+    ANY = 6
 
 
 class NdArrayType(Enum):
@@ -36,6 +41,7 @@ class NdArrayType(Enum):
     DECIMAL = auto()
     STR = auto()
     DATETIME = auto()
+    ANY = auto()
 
     @classmethod
     def to_numpy_type(cls, t):
