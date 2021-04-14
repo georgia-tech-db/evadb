@@ -16,6 +16,7 @@ from typing import List
 
 import pandas as pd
 import torchvision
+import numpy as np
 
 from torch import Tensor
 from src.models.catalog.frame_info import FrameInfo
@@ -100,14 +101,14 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
             pred_t = \
                 [pred_score.index(x) for x in pred_score if
                  x > self.threshold][-1]
-            pred_boxes = list(pred_boxes[:pred_t + 1])
-            pred_class = list(pred_class[:pred_t + 1])
-            pred_score = list(pred_score[:pred_t + 1])
+            pred_boxes = np.array(pred_boxes[:pred_t + 1])
+            pred_class = np.array(pred_class[:pred_t + 1])
+            pred_score = np.array(pred_score[:pred_t + 1])
             outcome = outcome.append(
                 {
-                    "label": pred_class,
-                    "pred_score": pred_score,
-                    "pred_boxes": pred_boxes
+                    "labels": pred_class,
+                    "scores": pred_score,
+                    "boxes": pred_boxes
                 },
                 ignore_index=True)
         return outcome
