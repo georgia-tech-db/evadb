@@ -62,7 +62,8 @@ class Batch:
     @frames.setter
     def frames(self, values):
         if isinstance(values, DataFrame):
-            self._frames = values[sorted(values.columns)]
+            # self._frames = values[sorted(values.columns)]
+            self._frames = values
         else:
             LoggingManager().log('Batch constructor not properly called!',
                                  LoggingLevel.DEBUG)

@@ -43,7 +43,7 @@ def execute_query_fetch_all(query) -> Optional[Batch]:
     """
     output = execute_query(query)
     if output:
-        batch_list = list(execute_query(query))
+        batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
 
 
