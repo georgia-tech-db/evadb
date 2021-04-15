@@ -37,9 +37,8 @@ class CNNFilter(PytorchAbstractFilter):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
         # TODO: don't hardcode this
-
-    def get_device(self):
-        return next(self.parameters()).device
+        self.threshold = 0.6194
+        self.load_state_dict("car_filter.pt")
 
     @property
     def name(self) -> str:
@@ -49,5 +48,14 @@ class CNNFilter(PytorchAbstractFilter):
     def input_format(self) -> FrameInfo:
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
-    def classify(self, frames: pd.DataFrame) -> pd.DataFrame:
-        pass
+    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+        """
+        Returns:
+            pd.DataFrame: predictions of presence or absence of
+            object of a specified class.
+        """
+        X = self.relu(self.pool(self.conv1(X)))
+        X = self.relu(self.pool(self.conv2(X)))
+        X = self.relu(self.linear1(X.reshape(X.shape[0], -1)))
+        X = self.sigmoid(self.linear2(X))
+        return pd.DataFrame(X.flatten() > self.threshold)
