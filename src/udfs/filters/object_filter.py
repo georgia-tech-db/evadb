@@ -29,7 +29,7 @@ class ObjectFilter(AbstractFilter):
     def __init__(self):
         AbstractFilter.__init__(self)
         # TODO: don't hardcode this
-        self.avg_frame = np.load("src/udfs/filters/m30.npy")
+        self.avg_frame = np.load("data/m30.npy")
         self.threshold = 1464.2065
 
     @property
@@ -41,7 +41,7 @@ class ObjectFilter(AbstractFilter):
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     def classify(self, frames: pd.DataFrame) -> pd.DataFrame:
-        # TODO: is there a better way to do this?
+        # TODO: is there a better way to do this (line below)?
         frames = np.stack(frames.to_numpy()[:, 0])
         distances = np.sqrt(
             np.sum((frames - self.avg_frame) ** 2, axis=(1, 2, 3)))

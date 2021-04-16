@@ -14,16 +14,18 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
+from typing import List
 
+import numpy as np
 import pandas as pd
-from torch import nn
+import torch
+from torch import nn, Tensor
 from PIL import Image
 from torchvision import transforms
 
-from src.models.catalog.frame_info import FrameInfo
-from src.models.catalog.properties import ColorSpace
 from src.udfs.filters.abstract_filter import AbstractFilter
 from src.udfs.gpu_compatible import GPUCompatible
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 class PytorchAbstractFilter(AbstractFilter, nn.Module, GPUCompatible, ABC):
@@ -39,12 +41,13 @@ class PytorchAbstractFilter(AbstractFilter, nn.Module, GPUCompatible, ABC):
         return next(self.parameters()).device
 
     @property
-    def transforms(self) -> Compose:
+    def transforms(self) -> transforms.Compose:
         return transforms.Compose([
             transforms.Lambda(lambda x: Image.fromarray(x[:, :, ::-1])),
-            transforms.ToTensor(),
             transforms.Resize((224, 224)),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), 
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[
+                                 0.229, 0.224, 0.225]),
             transforms.Lambda(lambda x: x.unsqueeze(0))
         ])
 
@@ -56,7 +59,7 @@ class PytorchAbstractFilter(AbstractFilter, nn.Module, GPUCompatible, ABC):
             .to(self.get_device())
         return self.classify(tens_batch)
 
-    @abstractmethod 
+    @abstractmethod
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Abstract method to work with tensors.

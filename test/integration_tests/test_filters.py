@@ -49,9 +49,22 @@ class FiltersTest(unittest.TestCase):
         select_query = """SELECT id FROM MyVideo WHERE ColorFilter(data);"""
         execute_query_fetch_all(select_query)
 
+    def test_cnn_filtering(self):
+        create_udf_query = """CREATE UDF CNNFilter
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (hasCar BOOLEAN)
+                  TYPE  Filter
+                  IMPL  'src/udfs/filters/cnn_filter.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT id FROM MyVideo WHERE CNNFilter(data);"""
+        execute_query_fetch_all(select_query)
+
 
 if __name__ == "__main__":
     test = FiltersTest()
     test.setUp()
     test.test_object_filtering()
     test.test_color_filtering()
+    test.test_cnn_filtering()

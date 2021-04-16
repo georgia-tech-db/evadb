@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import torch  # TODO: remove me
 import pandas as pd
-from torch import nn
+from torch import nn, Tensor
 
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
@@ -38,7 +39,8 @@ class CNNFilter(PytorchAbstractFilter):
         self.sigmoid = nn.Sigmoid()
         # TODO: don't hardcode this
         self.threshold = 0.6194
-        self.load_state_dict("car_filter.pt")
+        self.load_state_dict(torch.load(
+            "data/car_filter.pt", map_location=torch.device('cpu')))
 
     @property
     def name(self) -> str:
@@ -54,8 +56,8 @@ class CNNFilter(PytorchAbstractFilter):
             pd.DataFrame: predictions of presence or absence of
             object of a specified class.
         """
-        X = self.relu(self.pool(self.conv1(X)))
-        X = self.relu(self.pool(self.conv2(X)))
-        X = self.relu(self.linear1(X.reshape(X.shape[0], -1)))
-        X = self.sigmoid(self.linear2(X))
-        return pd.DataFrame(X.flatten() > self.threshold)
+        frames = self.relu(self.pool(self.conv1(frames)))
+        frames = self.relu(self.pool(self.conv2(frames)))
+        frames = self.relu(self.linear1(frames.reshape(frames.shape[0], -1)))
+        frames = self.sigmoid(self.linear2(frames))
+        return pd.DataFrame(frames.flatten() > self.threshold)
