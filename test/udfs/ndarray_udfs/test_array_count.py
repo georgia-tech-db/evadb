@@ -32,41 +32,43 @@ NUM_FRAMES = 10
 
 class ArrayCountTests(unittest.TestCase):
 
-    # def setUp(self):
-    #     CatalogManager().reset()
-    #     populate_catalog_with_built_in_udfs()
-    #
-    #     load_query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
-    #                     INTO MyVideo;"""
-    #     perform_query(load_query)
-
     def setUp(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
 
-        # create_udf_query = """CREATE UDF DummyObjectDetector
-        #           INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-        #           OUTPUT (label NDARRAY STR(10))
-        #           TYPE  Classification
-        #           IMPL  'test/util.py';
-        # """
-        execute_query_fetch_all(DummyObjectDetector_udf_query)
+        create_udf_query = """CREATE UDF DummyObjectDetector
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        execute_query_fetch_all(create_udf_query)
 
-        # create_udf_query = """CREATE UDF Array_Count
-        #             INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10))
-        #             OUTPUT(count INTEGER)
-        #             TYPE Ndarray
-        #             IMPL "src/udfs/ndarray_udfs/array_count.py";
-        # """
+        ArrayCount_udf_query = """CREATE UDF Array_Count
+                    INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10))
+                    OUTPUT(count INTEGER)
+                    TYPE Ndarray
+                    IMPL "src/udfs/ndarray_udfs/array_count.py";
+        """
 
         execute_query_fetch_all(ArrayCount_udf_query)
 
-        print()
+        fastrcnn_udf = """CREATE UDF FastRCNNObjectDetector
+                      INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(10),
+                                scores NDARRAY FLOAT3   2(10))
+                      TYPE  Classification
+                      IMPL  'src/udfs/fastrcnn_object_detector.py';
+                      """
+        execute_query_fetch_all(fastrcnn_udf)
+
 
     def tearDown(self):
         os.remove('dummy.avi')
+
+    # integration test
 
     def test_should_load_and_select_using_udf_video_in_table(self):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
@@ -78,51 +80,25 @@ class ArrayCountTests(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    # def test_should_load_and_select_using_udf_video(self):
-    #     # Equality test
-    #     select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-    #         WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
-    #     actual_batch = execute_query_fetch_all(select_query)
-    #     expected = [{'id': i * 2, 'label': ['person']}
-    #                 for i in range(NUM_FRAMES // 2)]
-    #     expected_batch = Batch(frames=pd.DataFrame(expected))
-    #     self.assertEqual(actual_batch, expected_batch)
-
-    def test_should_return_count(self):
+    def test_should_load_and_select_using_udf_video(self):
+        # Equality test
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-                      WHERE Array_Count(DummyObjectDetector(data).label, 'Person') > 0;"
+            WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
+        expected = [{'id': i * 2, 'label': ['person']}
+                    for i in range(NUM_FRAMES // 2)]
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        self.assertEqual(actual_batch, expected_batch)
 
-        print(actual_batch)
+        # Contain test
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+            WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_array_count(self):
+        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
+        actual_batch = execute_query_fetch_all(select_query)
+        print(actual_batch.frames)
         print(actual_batch.frames.shape)
-
-        # select_query = "SELECT id, DummyObjectDetector(data) FROM MyVideo \
-        #     WHERE Array_Count(DummyObjectDetector(data).label, 'person') > 3;"
-        # actual_batch = execute_query_fetch_all(select_query)
-        #
-        # # expected_batch = Batch(Array_Count().exec(actual_batch.frames, name="person"))
-        #
-        # print(actual_batch)
-
-        # query = """SELECT FastRCNNObjectDetector(data).labels FROM MyVideo WHERE id < 2;"""
-        # obj_det_batch = perform_query(query)
-        #
-        # print(obj_det_batch.frames.shape)
-        #
-        # # ac = Array_Count(obj_det_batch.frames, "car")
-        # # print(ac.name)
-        # # print(ac.exec(obj_det_batch.frames))
-        #
-        # query = """SELECT Array_Count(FastRCNNObjectDetector(data).labels, "car") FROM MyVideo WHERE id < 2;"""
-        #
-        # array_count_result = perform_query(query)
-        # print(array_count_result)
-        #
-        # select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo WHERE id < 5;"""
-        # actual_batch = perform_query(select_query)
-        # self.assertEqual(actual_batch.batch_size, 5)
-        print("yo")
-
-
-if __name__ == "__main__":
-    unittest.main()
+        print(actual_batch.frames.dtypes)
