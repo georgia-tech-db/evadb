@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
+import numpy as np
 from src.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
 
 
@@ -22,28 +23,68 @@ class Array_Count(AbstractNdarrayUDF):
     def name(self) -> str:
         return 'Array_Count'
 
-    def exec(self, inp: pd.DataFrame, **kwargs):
-        # print("input:", inp)
-        # print("name:", kwargs.get("name"))
-
+    def exec(self, inp: pd.DataFrame, *argv):
         # input should just be a single column (Data Series or DF with one column)
         # check if its just one column. If not check if other column is 'id'. else throw
 
-        # iterate over rows and see if match with search element
+        # pre conditions: ##########################################################
+        # check if numpy array, else throw
+        # check number of dimensions of numpy array
+        # check number of dimensions of searchElement if array
+        # if number of dimensions of searchElement not less by 1 than numpy array throw
 
-        # inp:   col
-        #   0: [["A"], ["A"], ["B"]] size: (0,3)
-        #   1: [["A"], ["B"], ["B"]] label: ["A"]
+        # loop over and append counts to an array
+        # convert to pd data frame and then add index as a column
+
+        # inp (1 column), label: ["A"]
+        # row 0: [["A"], ["A"], ["B"]]
+        # row 1: [["A"], ["B"], ["B"]]
         # return: [[0, 2],
         #          [1, 1]]
+        # ##########################################################################
 
-        name = kwargs.get("name")
+        # search_element = argv[0]
+        search_element = "person"
+        # check number of columns?
+        # if len(inp.columns) != 1:
+        #     raise ValueError('input contains more than one column')
 
-        print("inp:", inp)
+        # print("yerrr")
+        # print("search_element:", search_element)
+        # print(inp.columns)
+        # print(inp)
 
-        # count = 0
-        # if name:
-        #     df = inp[inp['label'].astype(str).str.contains(name)]
-        #     count = df.shape[0]
+        count_results = []
 
-        return inp
+        for row in inp.itertuples(index=True):
+            # print(row[0], row[-1])
+            value = row[-1]
+            count_results.append([row[0], self.count_in_row(value, search_element)])
+
+        # for index, row in inp.iterrows():
+        #     # print(row)
+        #     value = row[1]
+        #     count_results.append([index, self.count_in_row(value, search_element)])
+
+        return pd.DataFrame(np.array(count_results), columns=["id", "count"])
+
+    def count_in_row(self, row_val, search_element):
+        # checks that if search_element is a string or int, then row array should be one dimension
+        if isinstance(row_val, list) and isinstance(search_element, (str, int)):
+            if np.array(row_val).ndim > 1:
+                raise ValueError('inconsistent dimensions for row value and search element')
+            return row_val.count(search_element)
+        # if row_val is a np.ndarray then search_element should be one too
+        if isinstance(row_val, np.ndarray) and isinstance(search_element, (str, int)):
+            raise ValueError('inconsistent dimensions for row value and search element')
+        # checks that if row_val and search_element are numpy arrays then dimension diff is one
+        if isinstance(row_val, np.ndarray) and isinstance(search_element, (np.ndarray, list)):
+            nd_search_element = search_element
+            # if search_element is a list convert to ndarray
+            if isinstance(nd_search_element, list):
+                nd_search_element = np.array(nd_search_element)
+            if row_val.ndim - nd_search_element.ndim != 1:
+                raise ValueError('inconsistent dimensions for row value and search element')
+            # vectorized approach for searching elements
+            return np.sum(row_val == nd_search_element.all(1))
+        raise ValueError('failed to recognize dimensions')

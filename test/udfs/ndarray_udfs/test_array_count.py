@@ -55,14 +55,14 @@ class ArrayCountTests(unittest.TestCase):
 
         execute_query_fetch_all(ArrayCount_udf_query)
 
-        fastrcnn_udf = """CREATE UDF FastRCNNObjectDetector
-                      INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(10),
-                                scores NDARRAY FLOAT3   2(10))
-                      TYPE  Classification
-                      IMPL  'src/udfs/fastrcnn_object_detector.py';
-                      """
-        execute_query_fetch_all(fastrcnn_udf)
+        # fastrcnn_udf = """CREATE UDF FastRCNNObjectDetector
+        #               INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+        #               OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(10),
+        #                         scores NDARRAY FLOAT32(10))
+        #               TYPE  Classification
+        #               IMPL  'src/udfs/fastrcnn_object_detector.py';
+        #               """
+        # execute_query_fetch_all(fastrcnn_udf)
 
 
     def tearDown(self):
@@ -70,35 +70,40 @@ class ArrayCountTests(unittest.TestCase):
 
     # integration test
 
-    def test_should_load_and_select_using_udf_video_in_table(self):
-        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
-        labels = DummyObjectDetector().labels
-        expected = [{'id': i, 'label': [labels[1 + i % 2]]}
-                    for i in range(NUM_FRAMES)]
-        expected_batch = Batch(frames=pd.DataFrame(expected))
-        self.assertEqual(actual_batch, expected_batch)
-
-    def test_should_load_and_select_using_udf_video(self):
-        # Equality test
-        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i * 2, 'label': ['person']}
-                    for i in range(NUM_FRAMES // 2)]
-        expected_batch = Batch(frames=pd.DataFrame(expected))
-        self.assertEqual(actual_batch, expected_batch)
-
-        # Contain test
-        select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch, expected_batch)
+    # def test_should_load_and_select_using_udf_video_in_table(self):
+    #     select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+    #         ORDER BY id;"
+    #     actual_batch = execute_query_fetch_all(select_query)
+    #     labels = DummyObjectDetector().labels
+    #     expected = [{'id': i, 'label': [labels[1 + i % 2]]}
+    #                 for i in range(NUM_FRAMES)]
+    #     expected_batch = Batch(frames=pd.DataFrame(expected))
+    #     self.assertEqual(actual_batch, expected_batch)
+    #
+    # def test_should_load_and_select_using_udf_video(self):
+    #     # Equality test
+    #     select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+    #         WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
+    #     actual_batch = execute_query_fetch_all(select_query)
+    #     expected = [{'id': i * 2, 'label': ['person']}
+    #                 for i in range(NUM_FRAMES // 2)]
+    #     expected_batch = Batch(frames=pd.DataFrame(expected))
+    #     self.assertEqual(actual_batch, expected_batch)
+    #
+    #     # Contain test
+    #     select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+    #         WHERE DummyObjectDetector(data).label @> ['person'] ORDER BY id;"
+    #     actual_batch = execute_query_fetch_all(select_query)
+    #     self.assertEqual(actual_batch, expected_batch)
 
     def test_array_count(self):
+        print()
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         print(actual_batch.frames)
-        print(actual_batch.frames.shape)
-        print(actual_batch.frames.dtypes)
+        # print(actual_batch.frames.shape)
+        # print(actual_batch.frames.dtypes)
+        # select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
+        #                WHERE Array_Count(DummyObjectDetector(data), 'yerr') = 1;"
+        # actual_batch = execute_query_fetch_all(select_query)
+        print(Array_Count().exec(actual_batch.frames, "person"))
