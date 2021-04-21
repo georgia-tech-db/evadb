@@ -108,7 +108,8 @@ class Batch:
                % (self._frames, self._batch_size, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
-        return self.frames.equals(other.frames)
+        # return self.frames.equals(other.frames)
+        return self.frames[sorted(self.frames.columns)].equals(other.frames[sorted(other.frames.columns)])
 
     def __getitem__(self, indices) -> 'Batch':
         """
