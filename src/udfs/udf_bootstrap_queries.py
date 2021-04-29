@@ -16,6 +16,7 @@
 # this file is to list out all the ndarray udf create queries in one place
 # as constants
 
+
 DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
@@ -25,8 +26,22 @@ DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
 
 
 ArrayCount_udf_query = """CREATE UDF Array_Count
-                    INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10)) 
-                    OUTPUT(count INTEGER)
-                    TYPE Ndarray
-                    IMPL "src/udfs/ndarray_udfs/array_count.py";
+            INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10)) 
+            OUTPUT(count INTEGER)
+            TYPE Ndarray
+            IMPL "src/udfs/ndarray_udfs/array_count.py";
         """
+Unnest_udf_query = """CREATE UDF Unnest
+                INPUT  (inp NDARRAY UINT8(10, 10, 10))
+                OUTPUT (out NDARRAY UINT8(10, 10, 10))
+                TYPE  Ndarray
+                IMPL  "src/udfs/ndarray_udfs/unnest.py";
+        """
+
+Fastrcnn_udf_query = """CREATE UDF FastRCNNObjectDetector
+      INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(10),
+                scores NDARRAY FLOAT32(10))
+      TYPE  Classification
+      IMPL  'src/udfs/fastrcnn_object_detector.py';
+      """

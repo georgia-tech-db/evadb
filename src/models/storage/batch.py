@@ -62,7 +62,6 @@ class Batch:
     @frames.setter
     def frames(self, values):
         if isinstance(values, DataFrame):
-            # self._frames = values[sorted(values.columns)]
             self._frames = values
         else:
             LoggingManager().log('Batch constructor not properly called!',
@@ -108,8 +107,8 @@ class Batch:
                % (self._frames, self._batch_size, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
-        # return self.frames.equals(other.frames)
-        return self.frames[sorted(self.frames.columns)].equals(other.frames[sorted(other.frames.columns)])
+        return self.frames[sorted(self.frames.columns)]\
+            .equals(other.frames[sorted(other.frames.columns)])
 
     def __getitem__(self, indices) -> 'Batch':
         """
