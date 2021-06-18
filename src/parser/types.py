@@ -36,12 +36,9 @@ class StatementType(IntEnum):
 
 
 @unique
-class ParserColumnDataType(IntEnum):
+class ParserOrderBySortType(IntEnum):
     """
-    Manages enums for all column data types
+    Manages enums for all order by sort types
     """
-    BOOLEAN = 1
-    INTEGER = 2
-    FLOAT = 3
-    TEXT = 4
-    NDARRAY = 5
+    ASC = 1
+    DESC = 2

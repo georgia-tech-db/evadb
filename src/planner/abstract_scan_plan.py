@@ -21,7 +21,7 @@ https://www.postgresql.org/docs/9.5/runtime-config-query.html
 from src.expression.abstract_expression import AbstractExpression
 from src.planner.abstract_plan import AbstractPlan
 
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class AbstractScan(AbstractPlan):
@@ -31,8 +31,8 @@ class AbstractScan(AbstractPlan):
         predicate (AbstractExpression): An expression used for filtering
     """
 
-    def __init__(self, node_type: PlanNodeType, predicate: AbstractExpression):
-        super(AbstractScan, self).__init__(node_type)
+    def __init__(self, opr_type: PlanOprType, predicate: AbstractExpression):
+        super(AbstractScan, self).__init__(opr_type)
         self._predicate = predicate
 
     @property

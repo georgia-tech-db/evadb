@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from typing import List
 from src.catalog.models.udf_io import UdfIO
 from pathlib import Path
@@ -48,7 +48,7 @@ class CreateUDFPlan(AbstractPlan):
                  outputs: List[UdfIO],
                  impl_file_path: Path,
                  udf_type: str = None):
-        super().__init__(PlanNodeType.CREATE_UDF)
+        super().__init__(PlanOprType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
         self._inputs = inputs

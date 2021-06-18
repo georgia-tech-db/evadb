@@ -30,18 +30,22 @@ class LogicalExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
                          children=children)
 
-    def evaluate(self, *args):
+    def evaluate(self, *args, **kwargs):
         if self.get_children_count() == 2:
-            left_values = self.get_child(0).evaluate(*args).frames
-            right_values = self.get_child(1).evaluate(*args).frames
+            left_values = self.get_child(0).evaluate(*args, **kwargs).frames
             if self.etype == ExpressionType.LOGICAL_AND:
-                return Batch(pd.DataFrame(left_values & right_values))
+                if (~left_values).all().bool():  # check if all are false
+                    return Batch(left_values)
+                kwargs["mask"] = left_values[left_values[0]].index.tolist()
             elif self.etype == ExpressionType.LOGICAL_OR:
-                return Batch(pd.DataFrame(left_values | right_values))
-
+                if left_values.all().bool():  # check if all are true
+                    return Batch(left_values)
+                kwargs["mask"] = left_values[~left_values[0]].index.tolist()
+            right_values = self.get_child(1).evaluate(*args, **kwargs).frames
+            left_values.iloc[kwargs["mask"]] = right_values
+            return Batch(pd.DataFrame(left_values))
         else:
-            values = self.get_child(0).evaluate(*args).frames
-
+            values = self.get_child(0).evaluate(*args, **kwargs).frames
             if self.etype == ExpressionType.LOGICAL_NOT:
                 return Batch(pd.DataFrame(~values))
 

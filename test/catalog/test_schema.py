@@ -19,8 +19,9 @@ from petastorm.codecs import ScalarCodec
 from petastorm.unischema import UnischemaField
 from pyspark.sql.types import IntegerType, FloatType, StringType
 
+from decimal import Decimal
 from unittest.mock import MagicMock, call, patch
-from src.catalog.column_type import ColumnType
+from src.catalog.column_type import ColumnType, NdArrayType
 from src.catalog.df_schema import DataFrameSchema
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.schema_utils import SchemaUtils
@@ -46,18 +47,31 @@ class SchemaTests(unittest.TestCase):
 
         col = DataFrameColumn(col_name, ColumnType.TEXT, False)
         petastorm_col = UnischemaField(
-            col_name, np.string_, (), ScalarCodec(
+            col_name, np.str_, (), ScalarCodec(
                 StringType()), False)
-        self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
-
-        col = DataFrameColumn(col_name, ColumnType.NDARRAY, True, [10, 10])
-        petastorm_col = UnischemaField(
-            col_name, np.uint8, [
-                10, 10], NdarrayCodec(), True)
         self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
 
         col = DataFrameColumn(col_name, None, True, [10, 10])
         self.assertEqual(SchemaUtils.get_petastorm_column(col), None)
+
+    def test_get_petastorm_column_ndarray(self):
+        expected_type = [np.int8, np.uint8, np.int16, np.int32, np.int64,
+                         np.unicode_, np.bool_, np.float32, np.float64,
+                         Decimal, np.str_, np.datetime64]
+        col_name = 'frame_id'
+        for array_type, np_type in zip(NdArrayType, expected_type):
+            col = DataFrameColumn(col_name, ColumnType.NDARRAY, True,
+                                  array_type, [10, 10])
+            petastorm_col = UnischemaField(col_name, np_type, [10, 10],
+                                           NdarrayCodec(), True)
+            self.assertEqual(SchemaUtils.get_petastorm_column(col),
+                             petastorm_col)
+
+    def test_raise_exception_when_unkown_array_type(self):
+        col_name = 'frame_id'
+        col = DataFrameColumn(col_name, ColumnType.NDARRAY, True,
+                              ColumnType.TEXT, [10, 10])
+        self.assertRaises(ValueError, SchemaUtils.get_petastorm_column, col)
 
     @patch('src.catalog.schema_utils.Unischema')
     @patch('src.catalog.schema_utils.SchemaUtils.get_petastorm_column')
@@ -77,7 +91,7 @@ class SchemaTests(unittest.TestCase):
         schema_name = "foo"
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False,
-                                   [28, 28])
+                                   NdArrayType.UINT8, [28, 28])
         column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]
         schema = DataFrameSchema(schema_name, col_list)
@@ -99,7 +113,7 @@ class SchemaTests(unittest.TestCase):
         schema_name = "foo"
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_data", ColumnType.NDARRAY, False,
-                                   [28, 28])
+                                   NdArrayType.UINT8, [28, 28])
         column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]
         schema1 = DataFrameSchema(schema_name, col_list)
