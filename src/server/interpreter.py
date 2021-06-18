@@ -1,6 +1,6 @@
 from cmd import Cmd
 from contextlib import ExitStack
-from src.server.eva_db_api import connect
+from src.server.db_api import connect
 from src.models.server.response import Response
 
 from src.utils.logging_manager import LoggingManager
@@ -53,10 +53,10 @@ def handle_user_input(connection):
 
     prompt.set_connection(connection)
 
-    prompt.cmdloop('Welcome to EVA Server')
+    prompt.cmdloop('Welcome to EVA Command Line')
 
 
-def start_client(host: str, port: int):
+def start_cmd_client(host: str, port: int):
     """
         Wait for the connection to open and the task to be processed.
 

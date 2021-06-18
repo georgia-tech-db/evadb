@@ -12,32 +12,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from src.server.interpreter import start_client
+import argparse
 
-from src.configuration.configuration_manager import ConfigurationManager
-
-from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
+from src.server.interpreter import start_cmd_client
+from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 
-def eva_client():
+def eva_client(host='0.0.0.0', port=5432):
     """
         Start the eva system
     """
 
-    # Get the hostname and port information from the configuration file
-    config = ConfigurationManager()
-    host = config.get_value('server', 'host')
-    port = config.get_value('server', 'port')
-
     # Launch server
     try:
-        start_client(host=host, port=port)
+        start_cmd_client(host=host, port=port)
     except Exception as e:
         raise e
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
 if __name__ == '__main__':
-    # execute only if run as the entry point into the program
-    eva_client()
+    parser = argparse.ArgumentParser(description='')
+    parser.add_argument('-H', '--host', dest='host', type=str,
+                        help='Host address for EVA server', default='0.0.0.0')
+    parser.add_argument('-P', '--port', dest='port', type=int,
+                        help='Port for EVA server', default=5432)
+    args = parser.parse_args()
+
+    eva_client(host=args.host, port=args.port)

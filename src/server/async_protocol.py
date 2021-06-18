@@ -13,13 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import socket
 
 from src.server.networking_utils import set_socket_io_timeouts
 from src.utils.logging_manager import LoggingManager
 
 
 class EvaProtocolBuffer:
+    """
+    Buffer to handle arbitrary length of message.
+    Data chunk sent back by EVA Server starts with the length of the data,
+    a delimiter `|`, and the actual data.
+    """
 
     def __init__(self):
         self.empty()
@@ -52,15 +56,11 @@ class EvaProtocolBuffer:
 
 class EvaClient(asyncio.Protocol):
     """
-        Sends data to server and get results back.
-
-        - It never creates any asynchronous tasks itself
-        - So it does not know anything about any event loops
-        - It tracks completion of workload with the `done` future
-        - It tracks its progress via the class-level counters
+        Eva asyncio protocol to send data to server and get results back.
+        `send_message` to send query to EVA server and results are stored in
+        `self.queue`.
     """
 
-    # These counters are used for realtime server monitoring
     __connections__ = 0
     __errors__ = 0
 
