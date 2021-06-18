@@ -18,10 +18,6 @@ import cv2
 import os
 
 from src.models.storage.batch import Batch
-from src.parser.parser import Parser
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.optimizer.plan_generator import PlanGenerator
-from src.executor.plan_executor import PlanExecutor
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.udfs.abstract_udfs import AbstractClassifierUDF
@@ -92,13 +88,6 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         yield Batch(pd.DataFrame(data))
 
 
-def perform_query(query):
-    stmt = Parser().parse(query)[0]
-    l_plan = StatementToPlanConvertor().visit(stmt)
-    p_plan = PlanGenerator().build(l_plan)
-    return PlanExecutor(p_plan).execute_plan()
-
-
 class DummyObjectDetector(AbstractClassifierUDF):
 
     @property
@@ -125,4 +114,4 @@ class DummyObjectDetector(AbstractClassifierUDF):
         # odd are labeled bicycle and even person
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 2 + 1]
-        return label
+        return [label]

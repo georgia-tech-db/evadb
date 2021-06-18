@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from src.planner.abstract_plan import AbstractPlan
 
 
@@ -28,7 +28,7 @@ class UnionPlan(AbstractPlan):
 
     def __init__(self, all: bool):
         self._all = all
-        super().__init__(PlanNodeType.UNION)
+        super().__init__(PlanOprType.UNION)
 
     @property
     def all(self):

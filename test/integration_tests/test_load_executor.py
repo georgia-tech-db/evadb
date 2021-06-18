@@ -19,8 +19,8 @@ import pandas as pd
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.storage.storage_engine import StorageEngine
-
-from test.util import create_sample_video, create_dummy_batches, perform_query
+from src.server.command_handler import execute_query_fetch_all
+from test.util import create_sample_video, create_dummy_batches
 
 
 class LoadExecutorTest(unittest.TestCase):
@@ -36,13 +36,11 @@ class LoadExecutorTest(unittest.TestCase):
     # integration test
     def test_should_load_video_in_table(self):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
-
-        perform_query(query)
+        execute_query_fetch_all(query)
 
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
         actual_batch = Batch(pd.DataFrame())
-        for batch in StorageEngine.read(metadata):
-            actual_batch += batch
+        actual_batch = Batch.concat(StorageEngine.read(metadata), copy=False)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)
