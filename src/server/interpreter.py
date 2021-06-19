@@ -1,9 +1,6 @@
 from cmd import Cmd
 from contextlib import ExitStack
 from src.server.db_api import connect
-from src.models.server.response import Response
-
-from src.utils.logging_manager import LoggingManager
 
 
 class EvaCommandInterpreter(Cmd):
@@ -39,6 +36,7 @@ class EvaCommandInterpreter(Cmd):
 
         return False
 
+
 def handle_user_input(connection):
     """
         Reads from stdin in separate thread
@@ -65,6 +63,6 @@ def start_cmd_client(host: str, port: int):
         - Socket will be automatically closed by the exit stack.
     """
 
-    with ExitStack() as stack:
+    with ExitStack() as _:
         connection = connect(host, port)
         handle_user_input(connection)

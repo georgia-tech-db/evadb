@@ -1,7 +1,6 @@
 import asyncio
 import random
 
-from typing import List
 from src.server.async_protocol import EvaClient
 from src.models.server.response import Response
 
@@ -86,40 +85,3 @@ async def connect_async(host: str, port: int,
 def connect(host: str, port: int, max_retry_count: int = 3):
     loop = asyncio.get_event_loop()
     return loop.run_until_complete(connect_async(host, port, max_retry_count))
-
-
-"""
-Example Uasge:
-
-async def run_async(query: List[str]):
-    hostname = '0.0.0.0'
-    port = 5432
-
-    connection = await connect_async(hostname, port)
-    cursor = connection.cursor()
-    for onequery in query:
-        await cursor.execute_async(onequery)
-        response = await cursor.fetch_one_async()
-        print('Query: %s' % onequery)
-        print(response)
-
-def run(query: List[str]):
-    hostname = '0.0.0.0'
-    port = 5432
-
-    connection = connect(hostname, port)
-    cursor = connection.cursor()
-    for onequery in query:
-        cursor.execute(onequery)
-        response = cursor.fetch_one()
-        print('Query: %s' % onequery)
-        print(response)
-
-if __name__ == '__main__':
-    asyncio.run(run_async(['INVALID QUERY',
-                           'LOAD DATA INFILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;',
-                           'SELECT id,data FROM MyVideo WHERE id < 5;']))
-    run(['INVALID QUERY',
-         'LOAD DATA INFILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;',
-         'SELECT id,data FROM MyVideo WHERE id < 5;'])
-"""
