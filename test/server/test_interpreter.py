@@ -25,15 +25,6 @@ class InterpreterTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_run_event_loop(self):
-        prompt = EvaCommandInterpreter()
-        prompt.prompt = '> '
-        
-        with io.StringIO() as buf:
-            with contextlib.redirect_stdout(buf):
-                prompt.do_greet('test')
-                self.assertTrue('greeting test' in buf.getvalue())
-
     def test_cmd_emptyline_should_return_false(self):
         prompt = EvaCommandInterpreter()
         prompt.prompt = '> '
@@ -46,9 +37,8 @@ class InterpreterTests(unittest.TestCase):
     def test_cmd_exit_should_return_true(self):
         prompt = EvaCommandInterpreter()
 
-        self.assertTrue(prompt.do_quit(None))
-        self.assertTrue(prompt.do_exit(None))
-        self.assertTrue(prompt.do_EOF(None))
+        self.assertEqual(SystemExit, prompt.do_quit(None))
+        self.assertEqual(SystemExit, prompt.do_exit(None))
 
     @patch('src.server.interpreter.EvaCommandInterpreter.emptyline')
     def test_onecmd_with_emptyline(self, mock_emptyline):
@@ -61,7 +51,7 @@ class InterpreterTests(unittest.TestCase):
     def test_onecmd_with_exit(self):
         prompt = EvaCommandInterpreter()
         self.assertEqual(SystemExit, prompt.onecmd('exit'))
-        self.assertEqual(SystemExit, prompt.onecmd('EXIT'))
+        self.assertEqual(SystemExit, prompt.onecmd('quit'))
 
     @patch('src.server.interpreter.EvaCommandInterpreter.do_query')
     def test_onecmd_with_do_query(self, mock_do_query):
