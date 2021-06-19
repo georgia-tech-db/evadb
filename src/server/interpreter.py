@@ -21,11 +21,11 @@ class EvaCommandInterpreter(Cmd):
 
     def do_quit(self, args):
         """Quits the program."""
-        return True
+        return SystemExit
 
     def do_exit(self, args):
         """Quits the program."""
-        return True
+        return SystemExit
 
     def default(self, line):
         """Considers the input as a query"""
