@@ -9,6 +9,7 @@ class ResponseStatus(str, Enum):
     SUCCESS = 0
     MORE = 1
 
+
 class ResponseEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Batch):
