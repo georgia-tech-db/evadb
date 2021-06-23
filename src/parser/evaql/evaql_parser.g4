@@ -31,7 +31,7 @@ ddlStatement
 
 dmlStatement
     : selectStatement | insertStatement | updateStatement
-    | deleteStatement | loadStatement
+    | deleteStatement | loadStatement | uploadStatement
     ;
 
 utilityStatement
@@ -160,9 +160,20 @@ loadStatement
       INTO tableName
     ;
 
+uploadStatement
+    : UPLOAD
+      INFILE fileName
+      PATH srvPath
+    ;
+
 fileName
     : stringLiteral
     ;
+
+srvPath
+    : stringLiteral
+    ;
+
 // details
 
 insertStatementValue

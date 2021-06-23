@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
 from src.optimizer.operators import (
-    LogicalCreate, LogicalInsert, LogicalLoadData,
+    LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample)
@@ -32,6 +32,7 @@ from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.load_data_plan import LoadDataPlan
+from src.planner.upload_plan import UploadPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
@@ -63,6 +64,7 @@ class RuleType(Flag):
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
+    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
@@ -83,6 +85,7 @@ class Promise(IntEnum):
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
+    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
@@ -404,6 +407,23 @@ class LogicalLoadToPhysical(Rule):
         return after
 
 
+class LogicalUploadToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALUPLOAD)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_UPLOAD_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UPLOAD_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalUpload, context: OptimizerContext):
+        after = UploadPlan(before.path)
+        return after
+
+
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
@@ -539,6 +559,7 @@ class RulesManager:
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
+            LogicalUploadToPhysical(),
             LogicalSampleToUniformSample(),
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
