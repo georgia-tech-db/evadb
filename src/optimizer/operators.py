@@ -36,6 +36,7 @@ class OperatorType(IntEnum):
     LOGICALCREATE = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
+    LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
@@ -478,4 +479,32 @@ class LogicalLoadData(Operator):
             return False
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
+                and self.path == other.path)
+
+
+class LogicalUpload(Operator):
+    """Logical node for load data operation
+
+    Arguments:
+        table_metainfo(DataFrameMetadata): table to load data into
+        path(Path): file path from where we are loading data
+    """
+
+    def __init__(self, path: Path, children=None):
+        super().__init__(OperatorType.LOGICALUPLOAD, children=children)
+        self._path = path
+
+    @property
+    def path(self):
+        return self._path
+
+    def __str__(self):
+        return 'LogicalUpload(path: {})'.format(
+            self.path)
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalUpload):
+            return False
+        return (is_subtree_equal
                 and self.path == other.path)
