@@ -420,7 +420,7 @@ class LogicalUploadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalUpload, context: OptimizerContext):
-        after = UploadPlan(before.path)
+        after = UploadPlan(before.path, before.video_blob)
         return after
 
 

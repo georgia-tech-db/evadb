@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.storage.storage_engine import StorageEngine
@@ -42,6 +44,7 @@ class LoadDataExecutor(AbstractExecutor):
         # We currently use create to empty exsiting table.
         StorageEngine.create(self.node.table_metainfo)
 
-        video_reader = OpenCVReader(self.node.file_path)
+        video_reader = OpenCVReader(
+            os.path.join('/tmp', self.node.file_path))
         for batch in video_reader.read():
             StorageEngine.write(self.node.table_metainfo, batch)

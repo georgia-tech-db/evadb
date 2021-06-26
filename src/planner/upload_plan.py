@@ -27,15 +27,20 @@ class UploadPlan(AbstractPlan):
         file_path(Path): file path from where we will load the data
         """
 
-    def __init__(self, file_path: Path):
+    def __init__(self, file_path: Path, video_blob: str):
         super().__init__(PlanOprType.UPLOAD)
         self._file_path = file_path
+        self._video_blob = video_blob
 
     @property
     def file_path(self):
         return self._file_path
 
+    @property
+    def video_blob(self):
+        return self._video_blob
+
     def __str__(self):
-        print_str = 'LoadDataPlan(srv_path={})'.format(
-            self.file_path)
+        print_str = 'LoadDataPlan(srv_path={} blob={})'.format(
+            self.file_path, "string of video blob")
         return print_str

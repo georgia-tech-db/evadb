@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+import base64
 
 from src.planner.upload_plan import UploadPlan
 from src.executor.abstract_executor import AbstractExecutor
@@ -27,15 +29,14 @@ class UploadExecutor(AbstractExecutor):
 
     def exec(self):
         """
-        Read the input video using opencv and persist data
-        using storage engine
+        Upload the video blob into the location defined by 'path'
+        on the server. The video blob is in base64 format, so
+        it will first be decoded by the executor and then saved
+        at the specified path, prefixed by '/tmp'
         """
 
-        # videos are persisted using (id, data) schema where id = frame_id
-        # and data = frame_data. Current logic supports loading a video into
-        # storage with the assumption that frame_id starts from 0. In case
-        # we want to append to the existing store we have to figure out the
-        # correct frame_id. It can also be a parameter based by the user.
-
-        # We currently use create to empty existing table.
-        print("Write data to disk here")
+        video_blob = self.node.video_blob
+        path = self.node.file_path
+        video_bytes = base64.b64decode(video_blob[1:])
+        with open(os.path.join('/tmp', path), 'wb') as f:
+            f.write(video_bytes)
