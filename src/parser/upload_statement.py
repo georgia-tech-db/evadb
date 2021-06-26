@@ -28,22 +28,26 @@ class UploadStatement(AbstractStatement):
     path (str): path from where data needs to be loaded
     """
 
-    def __init__(self, infile: str, path: str):
+    def __init__(self, path: str, video_blob: str):
         super().__init__(StatementType.UPLOAD)
-        self._infile = Path(infile)
         self._path = Path(path)
+        self._video_blob = video_blob
 
     def __str__(self) -> str:
-        print_str = "UPLOAD INFILE {} PATH {}".format(
-            self._infile.name, self._path.name)
+        print_str = "UPLOAD PATH {} BLOB {}".format(
+            self._path, "string of video blob")
         return print_str
 
     @property
     def path(self) -> Path:
         return self._path
 
+    @property
+    def video_blob(self) -> str:
+        return self._video_blob
+
     def __eq__(self, other):
         if not isinstance(other, UploadStatement):
             return False
-        return (self._infile == other.infile and
-                self.path == other.path)
+        return (self.path == other.path and
+                self.video_blob == other.video_blob)

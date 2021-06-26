@@ -162,15 +162,15 @@ loadStatement
 
 uploadStatement
     : UPLOAD
-      INFILE fileName
-      PATH srvPath
+      PATH fileName
+      BLOB videoBlob
     ;
 
 fileName
     : stringLiteral
     ;
 
-srvPath
+videoBlob
     : stringLiteral
     ;
 
