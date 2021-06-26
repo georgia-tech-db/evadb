@@ -22,6 +22,7 @@ AND:                                 'AND';
 ANY:                                 'ANY';
 AS:                                  'AS';
 ASC:                                 'ASC';
+BLOB:                                'BLOB';
 BY:                                  'BY';
 COLUMN:                              'COLUMN';
 CREATE:                              'CREATE';

@@ -235,7 +235,7 @@ class StatementToPlanConvertor:
             statement(LoadDataStatement): [Load data statement]
         """
 
-        upload_opr = LogicalUpload(statement.path)
+        upload_opr = LogicalUpload(statement.path, statement.video_blob)
         self._plan = upload_opr
 
     def visit(self, statement: AbstractStatement):

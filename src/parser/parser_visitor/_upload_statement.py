@@ -20,7 +20,7 @@ from src.parser.evaql.evaql_parser import evaql_parser
 
 class Upload(evaql_parserVisitor):
     def visitUploadStatement(self, ctx: evaql_parser.UploadStatementContext):
-        file_name = self.visit(ctx.fileName()).value
-        srv_path = self.visit(ctx.srvPath()).value
-        stmt = UploadStatement(file_name, srv_path)
+        srv_path = self.visit(ctx.fileName()).value
+        video_blob = self.visit(ctx.videoBlob()).value
+        stmt = UploadStatement(srv_path, video_blob)
         return stmt

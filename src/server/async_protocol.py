@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import base64
 
 from src.server.networking_utils import set_socket_io_timeouts
 from src.utils.logging_manager import LoggingManager
@@ -134,6 +135,17 @@ class EvaClient(asyncio.Protocol):
                              " Request to server: --|" + str(message) + "|--"
                              )
 
+        if 'UPLOAD' in message:
+            file_path = message.split()[2][1:-1]
+            dst_path = message.split()[-1][1:-2]
+            with open(file_path, "rb") as f:
+                bytes_read = f.read()
+                b64_string = str(base64.b64encode(bytes_read))
+                message = 'UPLOAD PATH ' + \
+                          '\'' + dst_path + '\'' + \
+                          ' BLOB ' + \
+                          '\"' + b64_string + '\";'
+
+        request_chunk = (str(len(message)) + '|' + message).encode('ascii')
         # Send request
-        request_chunk = message.encode('ascii')
         self.transport.write(request_chunk)
