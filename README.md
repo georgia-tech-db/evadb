@@ -61,13 +61,18 @@ Please refer to [official doc](https://docs.docker.com/engine/install/).
 
 - Launch EVA database Server: `python eva.py`
 
-- Launch CLI: `python eva_client.py`
+- Launch CLI: `python eva_cmd_client.py`
 
-2. Run the `LOAD` command in the client terminal: (may take a while)
+2. Run the `UPLOAD` command in the client terminal:
 ```mysql
-LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;
+UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```
-3. Below is a basic query that should work on the client
+
+3. Run the `LOAD` command in the client terminal: (may take a while)
+```mysql
+LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
+```
+4. Below is a basic query that should work on the client
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
