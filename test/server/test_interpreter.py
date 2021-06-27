@@ -18,7 +18,8 @@ import io
 import contextlib
 
 from mock import patch
-from src.server.interpreter import EvaCommandInterpreter
+from unittest.mock import MagicMock
+from src.server.interpreter import EvaCommandInterpreter, start_cmd_client
 
 
 class InterpreterTests(unittest.TestCase):
@@ -53,14 +54,34 @@ class InterpreterTests(unittest.TestCase):
         self.assertEqual(SystemExit, prompt.onecmd('exit'))
         self.assertEqual(SystemExit, prompt.onecmd('quit'))
 
-    @patch('src.server.interpreter.EvaCommandInterpreter.do_query')
-    def test_onecmd_with_do_query(self, mock_do_query):
+    def test_onecmd_with_do_query(self):
         prompt = EvaCommandInterpreter()
-        mock_do_query.return_value = False
+        prompt.cursor = MagicMock()
+        prompt.cursor.fetch_all.return_value = '123'
 
         query = 'SELECT id FROM MyVIdeo'
-        prompt.onecmd(query)
-        mock_do_query.assert_called_once_with(query)
+        with io.StringIO() as buf:
+            with contextlib.redirect_stdout(buf):
+                self.assertFalse(prompt.onecmd(query))
+                prompt.cursor.execute.assert_called_once_with(query)
+                prompt.cursor.fetch_all.assert_called_once_with()
+                self.assertTrue('123' in buf.getvalue())
+        
+    # We are mocking the connect funciton call that gets imported into
+    # interpreter instead of the one in db_api.
+    @patch('src.server.interpreter.connect')
+    @patch('src.server.interpreter.EvaCommandInterpreter.cmdloop')
+    def test_start_cmd_client(self, mock_cmdloop, mock_connect):
+        class MOCKCONNECTION:
+            def cursor(self):
+                return None
 
+        mock_connect.return_value = MOCKCONNECTION()
 
+        host = '0.0.0.0'
+        port = 5432
+        start_cmd_client(host, port)
+
+        mock_connect.assert_called_once_with(host, port)
+        mock_cmdloop.assert_called_once()
 
