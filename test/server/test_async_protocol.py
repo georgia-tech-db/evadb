@@ -15,7 +15,9 @@
 
 import unittest
 
-from src.server.async_protocol import EvaProtocolBuffer
+from mock import patch
+from unittest.mock import MagicMock
+from src.server.async_protocol import EvaProtocolBuffer, EvaClient
 
 
 class AsyncProtocolTests(unittest.TestCase):
@@ -73,4 +75,51 @@ class AsyncProtocolTests(unittest.TestCase):
         self.assertEqual('56', buf.read_message())
         self.assertEqual('', buf.buf)
         self.assertEqual(-1, buf.expected_length)
+
+    @patch('src.server.async_protocol.set_socket_io_timeouts')
+    def test_connection_made_time_out(self, mock_set):
+        client = EvaClient()
+        t = MagicMock()
+        mock_set.return_value = False
+
+        client.connection_made(t)
+        mock_set.assert_called_once_with(t, 60, 0)
+        t.abort.assert_called_once_with()
+
+    @patch('src.server.async_protocol.set_socket_io_timeouts')
+    def test_connection_made_no_time_out(self, mock_set):
+        client = EvaClient()
+        t = MagicMock()
+        mock_set.return_value = True
+
+        client.connection_made(t)
+        mock_set.assert_called_once_with(t, 60, 0)
+        t.abort.assert_not_called()
+
+    def test_connection_lost_no_exception(self):
+        client = EvaClient()
+        t = MagicMock()
+        client.transport = t
+
+        client.connection_lost(None)
+        t.abort.assert_called_once_with()
+        self.assertIsNone(client.transport)
+        self.assertIsNone(client.done.result())
+
+    def test_connection_lost_raise_exception(self):
+        client = EvaClient()
+        client.transport = MagicMock()
+        client.transport.abort = MagicMock(side_effect=Exception('Boom!'))
+
+        with self.assertRaises(Exception) as context:
+            client.connection_lost(None)
+            self.assertTrue('Boom!' in str(context.exception))
+
+    def test_data_received(self):
+        client = EvaClient()
+        client.queue = MagicMock()
+        
+        testdata = '4|1234'.encode('ascii')
+        client.data_received(testdata)
+        client.queue.put_nowait.assert_called_once_with('1234')
 
