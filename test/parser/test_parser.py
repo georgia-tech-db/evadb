@@ -24,6 +24,7 @@ from src.parser.select_statement import SelectStatement
 from src.parser.create_statement import ColumnDefinition
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.upload_statement import UploadStatement
 from src.parser.insert_statement import InsertTableStatement
 
 from src.expression.abstract_expression import ExpressionType
@@ -373,6 +374,22 @@ class ParserTests(unittest.TestCase):
 
         load_data_stmt = eva_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
+
+    def test_upload_statement(self):
+        parser = Parser()
+        upload_query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'";"""
+        expected_stmt = UploadStatement(
+            Path('data/video.mp4'),
+            "b'AAAA'")
+        eva_statement_list = parser.parse(upload_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.UPLOAD)
+
+        upload_stmt = eva_statement_list[0]
+        self.assertEqual(upload_stmt, expected_stmt)
 
     def test_nested_select_statement(self):
         parser = Parser()

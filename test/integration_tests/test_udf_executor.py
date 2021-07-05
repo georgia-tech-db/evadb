@@ -43,7 +43,7 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
     def tearDown(self):
-        os.remove('dummy.avi')
+        os.remove('/tmp/dummy.avi')
 
     # integration test
 

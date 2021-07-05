@@ -14,33 +14,26 @@
 # limitations under the License.
 import unittest
 import os
-import pandas as pd
+import base64
 
-from src.catalog.catalog_manager import CatalogManager
-from src.models.storage.batch import Batch
-from src.storage.storage_engine import StorageEngine
 from src.server.command_handler import execute_query_fetch_all
-from test.util import create_sample_video, create_dummy_batches
 
 
-class LoadExecutorTest(unittest.TestCase):
+class UploadExecutorTest(unittest.TestCase):
 
     def setUp(self):
         # reset the catalog manager before running each test
-        CatalogManager().reset()
-        create_sample_video()
+        pass
 
     def tearDown(self):
         os.remove('/tmp/dummy.avi')
 
     # integration test
-    def test_should_load_video_in_table(self):
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+    def test_should_upload_video_to_location(self):
+        query = """UPLOAD PATH 'dummy.avi' BLOB "b'AAAA'";"""
         execute_query_fetch_all(query)
-
-        metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-        actual_batch = Batch(pd.DataFrame())
-        actual_batch = Batch.concat(StorageEngine.read(metadata), copy=False)
-        actual_batch.sort()
-        expected_batch = list(create_dummy_batches())
-        self.assertEqual([actual_batch], expected_batch)
+        expected_blob = "b'AAAA'"
+        with open('/tmp/dummy.avi', 'rb') as f:
+            bytes_read = f.read()
+            actual_blob = str(base64.b64encode(bytes_read))
+        self.assertEqual(actual_blob, expected_blob)

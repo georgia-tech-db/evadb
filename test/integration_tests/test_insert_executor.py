@@ -29,7 +29,7 @@ class InsertExecutorTest(unittest.TestCase):
         create_sample_video()
 
     def tearDown(self):
-        os.remove('dummy.avi')
+        os.remove('/tmp/dummy.avi')
 
     # integration test
     def test_should_load_video_in_table(self):

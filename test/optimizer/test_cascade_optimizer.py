@@ -29,7 +29,7 @@ class CascadeOptimizer(unittest.TestCase):
         create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
-        os.remove('dummy.avi')
+        os.remove('/tmp/dummy.avi')
 
     def test_logical_to_physical_udf(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
