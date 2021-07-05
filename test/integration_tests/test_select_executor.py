@@ -39,7 +39,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        os.remove('dummy.avi')
+        os.remove('/tmp/dummy.avi')
 
     def test_sort_on_nonprojected_column(self):
         """ This tests doing an order by on a column

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import os
 
 from mock import patch, MagicMock, call
 from src.executor.load_executor import LoadDataExecutor
@@ -35,7 +36,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         load_executor.exec()
-        cv_mock.assert_called_once_with(file_path)
+        cv_mock.assert_called_once_with(os.path.join('/tmp', file_path))
         create_mock.assert_called_once_with(table_metainfo)
         write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
             table_metainfo, batch_frames[1]))

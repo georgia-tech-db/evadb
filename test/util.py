@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import os
+import shutil
 
 from src.models.storage.batch import Batch
 from src.models.catalog.frame_info import FrameInfo
@@ -57,17 +58,21 @@ def custom_list_of_dicts_equal(one, two):
 
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
-        os.remove('dummy.avi')
+        os.remove('/tmp/dummy.avi')
     except FileNotFoundError:
         pass
 
-    out = cv2.VideoWriter('dummy.avi',
+    out = cv2.VideoWriter('/tmp/dummy.avi',
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
     for i in range(num_frames):
         frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25,
                          dtype=np.uint8)
         out.write(frame)
+
+
+def copy_sample_video_to_tmp():
+    shutil.copyfile('data/ua_detrac/ua_detrac.mp4', '/tmp/ua_detrac.mp4')
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES,

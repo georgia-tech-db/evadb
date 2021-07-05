@@ -41,6 +41,6 @@ class UploadPlan(AbstractPlan):
         return self._video_blob
 
     def __str__(self):
-        print_str = 'LoadDataPlan(srv_path={} blob={})'.format(
+        print_str = 'UploadPlan(file_path={} video_blob={})'.format(
             self.file_path, "string of video blob")
         return print_str

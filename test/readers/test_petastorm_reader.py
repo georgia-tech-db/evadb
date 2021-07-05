@@ -45,24 +45,25 @@ class PetastormLoaderTest(unittest.TestCase):
     @patch("src.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_correct_params(self,
                                                                    mock):
-        petastorm_reader = PetastormReader(file_url='dummy.avi', cur_shard=2,
-                                           shard_count=3, predicate='pred')
+        petastorm_reader = PetastormReader(file_url='/tmp/dummy.avi',
+                                           cur_shard=2, shard_count=3,
+                                           predicate='pred')
         list(petastorm_reader._read())
         mock.assert_called_once_with(
-            'dummy.avi', shard_count=3, cur_shard=2, predicate='pred')
+            '/tmp/dummy.avi', shard_count=3, cur_shard=2, predicate='pred')
 
     @patch("src.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_negative_shards(self,
                                                                     mock):
-        petastorm_reader = PetastormReader(file_url='dummy.avi', cur_shard=-1,
-                                           shard_count=-2)
+        petastorm_reader = PetastormReader(file_url='/tmp/dummy.avi',
+                                           cur_shard=-1, shard_count=-2)
         list(petastorm_reader._read())
         mock.assert_called_once_with(
-            'dummy.avi', shard_count=None, cur_shard=None, predicate=None)
+            '/tmp/dummy.avi', shard_count=None, cur_shard=None, predicate=None)
 
     @patch("src.readers.petastorm_reader.make_reader")
     def test_should_read_data_using_petastorm_reader(self, mock):
-        petastorm_reader = PetastormReader(file_url='dummy.avi')
+        petastorm_reader = PetastormReader(file_url='/tmp/dummy.avi')
         dummy_values = map(lambda i: self.DummyRow(
             i, np.ones((2, 2, 3)) * i), range(3))
         mock.return_value = self.DummyReader(dummy_values)
