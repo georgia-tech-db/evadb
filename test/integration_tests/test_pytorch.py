@@ -13,18 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import os
 
 from src.catalog.catalog_manager import CatalogManager
 from src.server.command_handler import execute_query_fetch_all
+
+from test.util import copy_sample_video_to_tmp
 
 
 class PytorchTest(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
+        copy_sample_video_to_tmp()
+
+    def tearDown(self):
+        os.remove('/tmp/ua_detrac.mp4')
 
     def test_should_run_pytorch_and_fastrcnn(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
+        query = """LOAD DATA INFILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
 
@@ -42,7 +49,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(actual_batch.batch_size, 5)
 
     def test_should_run_pytorch_and_ssd(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
+        query = """LOAD DATA INFILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
 
