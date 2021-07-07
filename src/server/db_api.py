@@ -1,5 +1,6 @@
 import asyncio
 import random
+import base64
 
 from src.server.async_protocol import EvaClient
 from src.models.server.response import Response
@@ -24,6 +25,10 @@ class EVACursor(object):
         self._protocol = protocol
 
     async def execute_async(self, query: str):
+        """
+        Send query to the EVA server.
+        """
+        query = self._upload_transformation(query) 
         await self._protocol.send_message(query)
 
     async def fetch_one_async(self) -> Response:
@@ -42,6 +47,24 @@ class EVACursor(object):
         fetch_all is the same as fetch_one for now.
         """
         return await self.fetch_one_async()
+
+    def _upload_transformation(self, query: str) -> str:
+        """
+        Special case:
+         - UPLOAD: the client read the file and uses base64 to encode
+         the content into a string.
+        """
+        if 'UPLOAD' in query:
+            file_path = query.split()[2][1:-1]
+            dst_path = query.split()[-1][1:-2]
+            with open(file_path, "rb") as f:
+                bytes_read = f.read()
+                b64_string = str(base64.b64encode(bytes_read))
+                query = 'UPLOAD PATH ' + \
+                        '\'' + dst_path + '\'' + \
+                        ' BLOB ' + \
+                        '\"' + b64_string + '\";'
+        return query
 
     def __getattr__(self, name):
         """
