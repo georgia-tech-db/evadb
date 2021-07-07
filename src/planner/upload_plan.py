@@ -19,12 +19,13 @@ from pathlib import Path
 
 class UploadPlan(AbstractPlan):
     """
-    This plan is used for storing information required for load data
+    This plan is used for storing information required for upload
     operations.
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table metadata info to load into
-        file_path(Path): file path from where we will load the data
+        file_path(Path): file path within /tmp where
+                    the data is uploaded
+        video_blob(str): base64 encoded video string
         """
 
     def __init__(self, file_path: Path, video_blob: str):
