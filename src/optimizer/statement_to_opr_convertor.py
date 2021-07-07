@@ -227,12 +227,9 @@ class StatementToPlanConvertor:
         self._plan = load_data_opr
 
     def visit_upload(self, statement: UploadStatement):
-        """Convertor for parsed load data statement
-        If the input table already exists we return its
-        metadata. Else we will create a new metadata object for this
-        table name.
+        """Convertor for parsed upload statement
         Arguments:
-            statement(LoadDataStatement): [Load data statement]
+            statement(UploadStatement): [Upload statement]
         """
 
         upload_opr = LogicalUpload(statement.path, statement.video_blob)

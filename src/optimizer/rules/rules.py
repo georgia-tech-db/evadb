@@ -410,7 +410,6 @@ class LogicalLoadToPhysical(Rule):
 class LogicalUploadToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALUPLOAD)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_UPLOAD_TO_PHYSICAL, pattern)
 
     def promise(self):

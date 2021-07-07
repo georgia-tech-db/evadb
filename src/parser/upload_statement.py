@@ -21,11 +21,12 @@ from pathlib import Path
 
 class UploadStatement(AbstractStatement):
     """
-    Load Data Statement constructed after parsing the input query
+    Upload Statement constructed after parsing the input query
 
     Arguments:
-    table (TableRef): table reference to load into
-    path (str): path from where data needs to be loaded
+        path(Path): file path within /tmp where
+                    the data is uploaded
+        video_blob(str): base64 encoded video string
     """
 
     def __init__(self, path: str, video_blob: str):

@@ -483,11 +483,12 @@ class LogicalLoadData(Operator):
 
 
 class LogicalUpload(Operator):
-    """Logical node for load data operation
+    """Logical node for upload operation
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to load data into
-        path(Path): file path from where we are loading data
+        path(Path): file path within /tmp where
+                    the data is uploaded
+        video_blob(str): base64 encoded video string
     """
 
     def __init__(self, path: Path, video_blob: str, children=None):
