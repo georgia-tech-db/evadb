@@ -76,7 +76,7 @@ class RuleType(Flag):
 class Promise(IntEnum):
     """
     Manages order in which rules should be applied.
-    Rule with a higher enum will be prefered in case of
+    Rule with a higher enum will be preferred in case of
     conflict
     """
     # IMPLEMENTATION RULES
@@ -107,7 +107,7 @@ class Rule(ABC):
 
     Arguments:
         rule_type(RuleType): type of the rule, can be rewrite,
-            logical->phyical
+            logical->physical
         pattern: the match pattern for the rule
     """
 
@@ -231,7 +231,7 @@ class EmbedProjectIntoGet(Rule):
         logical_get.target_list = select_list
         return logical_get
 
-# For nestes queries
+# For nested queries
 
 
 class EmbedFilterIntoDerivedGet(Rule):
