@@ -7,7 +7,6 @@ from src.models.storage.batch import Batch
 class ResponseStatus(str, Enum):
     FAIL = -1
     SUCCESS = 0
-    MORE = 1
 
 
 class ResponseEncoder(json.JSONEncoder):

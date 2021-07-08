@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from typing import List
-from src.server.eva_db_api import connect, connect_async
+from src.server.db_api import connect, connect_async
 
 async def run_async(query: List[str]):
     hostname = '0.0.0.0'
@@ -29,12 +29,14 @@ def run(query: List[str]):
         print(response)
 
 if __name__ == '__main__':
+    queries = ['INVALID QUERY',
+               'UPLOAD INFILE "data/ua_detrac/ua_detrac.mp4" \
+                       PATH "test_video.mp4";',
+               'LOAD DATA INFILE "test_video.mp4" INTO MyVideo;',
+               'SELECT id,data FROM MyVideo WHERE id < 5;']
+
     if sys.argv[1] != 'sync':
-        asyncio.run(run_async(['INVALID QUERY',
-                               'LOAD DATA INFILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;',
-                               'SELECT id,data FROM MyVideo WHERE id < 5;']))
+        asyncio.run(run_async(queries))
     else:
-        run(['INVALID QUERY',
-             'LOAD DATA INFILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;',
-             'SELECT id,data FROM MyVideo WHERE id < 5;'])
+        run([queries])
 
