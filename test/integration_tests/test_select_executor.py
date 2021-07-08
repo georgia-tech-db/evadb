@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import unittest
 
 import numpy as np
@@ -23,7 +22,7 @@ from src.models.storage.batch import Batch
 from src.readers.opencv_reader import OpenCVReader
 from src.server.command_handler import execute_query_fetch_all
 
-from test.util import create_sample_video, create_dummy_batches
+from test.util import create_sample_video, create_dummy_batches, file_remove
 
 NUM_FRAMES = 10
 
@@ -39,7 +38,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        os.remove('/tmp/dummy.avi')
+        file_remove('dummy.avi')
 
     def test_sort_on_nonprojected_column(self):
         """ This tests doing an order by on a column

@@ -13,22 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import os
 
 from src.catalog.catalog_manager import CatalogManager
 from src.server.command_handler import execute_query_fetch_all
 
-from test.util import copy_sample_video_to_tmp
+from test.util import copy_sample_video_to_prefix, file_remove
 
 
 class PytorchTest(unittest.TestCase):
 
     def setUp(self):
         CatalogManager().reset()
-        copy_sample_video_to_tmp()
+        copy_sample_video_to_prefix()
 
     def tearDown(self):
-        os.remove('/tmp/ua_detrac.mp4')
+        file_remove('ua_detrac.mp4')
 
     def test_should_run_pytorch_and_fastrcnn(self):
         query = """LOAD DATA INFILE 'ua_detrac.mp4'

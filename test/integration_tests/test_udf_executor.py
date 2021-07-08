@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import os
 import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
@@ -21,7 +20,7 @@ from src.models.storage.batch import Batch
 from src.server.command_handler import execute_query_fetch_all
 
 from test.util import create_sample_video, create_dummy_batches, \
-    DummyObjectDetector
+    DummyObjectDetector, file_remove
 
 NUM_FRAMES = 10
 
@@ -43,7 +42,7 @@ class UDFExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
     def tearDown(self):
-        os.remove('/tmp/dummy.avi')
+        file_remove('dummy.avi')
 
     # integration test
 
@@ -73,7 +72,7 @@ class UDFExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch, expected_batch)
 
-        # Mutli element contain test
+        # Multi element contain test
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label <@ ['person', 'bicycle'] \

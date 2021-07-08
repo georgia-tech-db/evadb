@@ -18,6 +18,8 @@ import base64
 
 from src.server.command_handler import execute_query_fetch_all
 
+from test.util import file_remove, PATH_PREFIX
+
 
 class UploadExecutorTest(unittest.TestCase):
 
@@ -26,14 +28,14 @@ class UploadExecutorTest(unittest.TestCase):
         pass
 
     def tearDown(self):
-        os.remove('/tmp/dummy.avi')
+        file_remove('dummy.avi')
 
     # integration test
     def test_should_upload_video_to_location(self):
         query = """UPLOAD PATH 'dummy.avi' BLOB "b'AAAA'";"""
         execute_query_fetch_all(query)
         expected_blob = "b'AAAA'"
-        with open('/tmp/dummy.avi', 'rb') as f:
+        with open(os.path.join(PATH_PREFIX, 'dummy.avi'), 'rb') as f:
             bytes_read = f.read()
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
