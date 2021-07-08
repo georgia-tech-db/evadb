@@ -486,7 +486,7 @@ class LogicalUpload(Operator):
     """Logical node for upload operation
 
     Arguments:
-        path(Path): file path within /tmp where
+        path(Path): file path (with prefix prepended) where
                     the data is uploaded
         video_blob(str): base64 encoded video string
     """

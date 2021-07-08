@@ -18,8 +18,11 @@ import os
 from mock import patch, MagicMock, call
 from src.executor.load_executor import LoadDataExecutor
 
+from test.util import PATH_PREFIX
+
 
 class LoadExecutorTest(unittest.TestCase):
+
     @patch('src.executor.load_executor.OpenCVReader')
     @patch('src.executor.load_executor.StorageEngine.create')
     @patch('src.executor.load_executor.StorageEngine.write')
@@ -36,7 +39,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         load_executor.exec()
-        cv_mock.assert_called_once_with(os.path.join('/tmp', file_path))
+        cv_mock.assert_called_once_with(os.path.join(PATH_PREFIX, file_path))
         create_mock.assert_called_once_with(table_metainfo)
         write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
             table_metainfo, batch_frames[1]))

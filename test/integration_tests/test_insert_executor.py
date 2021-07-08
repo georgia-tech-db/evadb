@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import os
 import numpy as np
 
 from src.catalog.catalog_manager import CatalogManager
 from src.server.command_handler import execute_query_fetch_all
-from test.util import create_sample_video
+
+from test.util import create_sample_video, file_remove
 
 
 class InsertExecutorTest(unittest.TestCase):
@@ -29,7 +29,7 @@ class InsertExecutorTest(unittest.TestCase):
         create_sample_video()
 
     def tearDown(self):
-        os.remove('/tmp/dummy.avi')
+        file_remove('dummy.avi')
 
     # integration test
     def test_should_load_video_in_table(self):

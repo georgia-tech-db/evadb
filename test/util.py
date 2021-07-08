@@ -22,8 +22,11 @@ from src.models.storage.batch import Batch
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.configuration.configuration_manager import ConfigurationManager
 
 NUM_FRAMES = 10
+CONFIG = ConfigurationManager()
+PATH_PREFIX = CONFIG.get_value('storage', 'path_prefix')
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
@@ -58,11 +61,11 @@ def custom_list_of_dicts_equal(one, two):
 
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
-        os.remove('/tmp/dummy.avi')
+        os.remove(os.path.join(PATH_PREFIX, 'dummy.avi'))
     except FileNotFoundError:
         pass
 
-    out = cv2.VideoWriter('/tmp/dummy.avi',
+    out = cv2.VideoWriter(os.path.join(PATH_PREFIX, 'dummy.avi'),
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
     for i in range(num_frames):
@@ -71,8 +74,13 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
 
-def copy_sample_video_to_tmp():
-    shutil.copyfile('data/ua_detrac/ua_detrac.mp4', '/tmp/ua_detrac.mp4')
+def copy_sample_video_to_prefix():
+    shutil.copyfile('data/ua_detrac/ua_detrac.mp4',
+                    os.path.join(PATH_PREFIX, 'ua_detrac.mp4'))
+
+
+def file_remove(path):
+    os.remove(os.path.join(PATH_PREFIX, path))
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES,
