@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 from src.optimizer.rules.pattern import Pattern
 from src.optimizer.operators import OperatorType, Operator
 from src.optimizer.operators import (
-    LogicalCreate, LogicalInsert, LogicalLoadData,
+    LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample)
@@ -32,6 +32,7 @@ from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.load_data_plan import LoadDataPlan
+from src.planner.upload_plan import UploadPlan
 from src.planner.seq_scan_plan import SeqScanPlan
 from src.planner.storage_plan import StoragePlan
 from src.planner.union_plan import UnionPlan
@@ -63,6 +64,7 @@ class RuleType(Flag):
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
+    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
@@ -74,7 +76,7 @@ class RuleType(Flag):
 class Promise(IntEnum):
     """
     Manages order in which rules should be applied.
-    Rule with a higher enum will be prefered in case of
+    Rule with a higher enum will be preferred in case of
     conflict
     """
     # IMPLEMENTATION RULES
@@ -83,6 +85,7 @@ class Promise(IntEnum):
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
+    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
@@ -104,7 +107,7 @@ class Rule(ABC):
 
     Arguments:
         rule_type(RuleType): type of the rule, can be rewrite,
-            logical->phyical
+            logical->physical
         pattern: the match pattern for the rule
     """
 
@@ -228,7 +231,7 @@ class EmbedProjectIntoGet(Rule):
         logical_get.target_list = select_list
         return logical_get
 
-# For nestes queries
+# For nested queries
 
 
 class EmbedFilterIntoDerivedGet(Rule):
@@ -404,6 +407,22 @@ class LogicalLoadToPhysical(Rule):
         return after
 
 
+class LogicalUploadToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALUPLOAD)
+        super().__init__(RuleType.LOGICAL_UPLOAD_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UPLOAD_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalUpload, context: OptimizerContext):
+        after = UploadPlan(before.path, before.video_blob)
+        return after
+
+
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
@@ -539,6 +558,7 @@ class RulesManager:
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
+            LogicalUploadToPhysical(),
             LogicalSampleToUniformSample(),
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),

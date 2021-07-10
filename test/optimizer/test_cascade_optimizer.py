@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import os
 import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.server.command_handler import execute_query_fetch_all
 from src.models.storage.batch import Batch
 
-from test.util import create_sample_video, NUM_FRAMES
+from test.util import create_sample_video, NUM_FRAMES, file_remove
 
 
 class CascadeOptimizer(unittest.TestCase):
@@ -29,7 +28,7 @@ class CascadeOptimizer(unittest.TestCase):
         create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
-        os.remove('dummy.avi')
+        file_remove('dummy.avi')
 
     def test_logical_to_physical_udf(self):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""

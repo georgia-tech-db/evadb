@@ -17,15 +17,16 @@ from src.expression.abstract_expression import AbstractExpression
 from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalInsert, LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
-                                     LogicalQueryDerivedGet, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit,
-                                     LogicalSample)
+                                     LogicalUpload, LogicalQueryDerivedGet,
+                                     LogicalUnion, LogicalOrderBy,
+                                     LogicalLimit, LogicalSample)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.upload_statement import UploadStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
@@ -225,6 +226,15 @@ class StatementToPlanConvertor:
         load_data_opr = LogicalLoadData(table_metainfo, statement.path)
         self._plan = load_data_opr
 
+    def visit_upload(self, statement: UploadStatement):
+        """Convertor for parsed upload statement
+        Arguments:
+            statement(UploadStatement): [Upload statement]
+        """
+
+        upload_opr = LogicalUpload(statement.path, statement.video_blob)
+        self._plan = upload_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -243,6 +253,8 @@ class StatementToPlanConvertor:
             self.visit_create_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
+        elif isinstance(statement, UploadStatement):
+            self.visit_upload(statement)
         return self._plan
 
     @property

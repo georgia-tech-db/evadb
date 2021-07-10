@@ -22,6 +22,7 @@ from src.planner.create_plan import CreatePlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
+from src.planner.upload_plan import UploadPlan
 from src.planner.union_plan import UnionPlan
 from src.planner.types import PlanOprType
 
@@ -85,6 +86,17 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
+        self.assertEqual(str(plan), plan_str)
+
+    def test_upload_plan(self):
+        file_path = 'test.mp4'
+        video_blob = "b'AAAA'"
+        plan_str = 'UploadPlan(file_path={} video_blob={})'.format(
+            file_path, "string of video blob")
+        plan = UploadPlan(file_path, video_blob)
+        self.assertEqual(plan.opr_type, PlanOprType.UPLOAD)
+        self.assertEqual(plan.file_path, file_path)
+        self.assertEqual(plan.video_blob, video_blob)
         self.assertEqual(str(plan), plan_str)
 
     def test_union_plan(self):
