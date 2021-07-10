@@ -12,21 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum, auto
+
+from src.parser.upload_statement import UploadStatement
+from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from src.parser.evaql.evaql_parser import evaql_parser
 
 
-@unique
-class PlanOprType(IntEnum):
-    SEQUENTIAL_SCAN = auto()
-    STORAGE_PLAN = auto()
-    PP_FILTER = auto()
-    INSERT = auto()
-    CREATE = auto()
-    CREATE_UDF = auto()
-    LOAD_DATA = auto()
-    UPLOAD = auto()
-    UNION = auto()
-    ORDER_BY = auto()
-    LIMIT = auto()
-    SAMPLE = auto()
-    # add other types
+class Upload(evaql_parserVisitor):
+    def visitUploadStatement(self, ctx: evaql_parser.UploadStatementContext):
+        srv_path = self.visit(ctx.fileName()).value
+        video_blob = self.visit(ctx.videoBlob()).value
+        stmt = UploadStatement(srv_path, video_blob)
+        return stmt

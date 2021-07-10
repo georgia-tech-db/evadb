@@ -27,6 +27,8 @@ from src.utils.logging_manager import LoggingManager, LoggingLevel
 
 from src.server.command_handler import handle_request
 
+from src.server.async_protocol import EvaProtocolBuffer
+
 
 class EvaServer(asyncio.Protocol):
 
@@ -46,6 +48,7 @@ class EvaServer(asyncio.Protocol):
     def __init__(self, socket_timeout):
         self.transport = None
         self._socket_timeout = socket_timeout
+        self.buffer = EvaProtocolBuffer()
 
     def connection_made(self, transport):
         self.transport = transport
@@ -72,19 +75,24 @@ class EvaServer(asyncio.Protocol):
         EvaServer.__connections__ -= 1
 
     def data_received(self, data):
-        request_message = data.decode()
+
+        message = data.decode()
         LoggingManager().log('Request from client: --|' +
-                             str(request_message) +
+                             str(message) +
                              '|--')
 
-        if request_message in ["quit", "exit"]:
-            LoggingManager().log('Close client socket')
-            return self.transport.close()
-        else:
-            LoggingManager().log('Handle request')
-            asyncio.create_task(
-                handle_request(self.transport, request_message)
-            )
+        self.buffer.feed_data(message)
+        while self.buffer.has_complete_message():
+            request_message = self.buffer.read_message()
+
+            if request_message in ["quit", "exit"]:
+                LoggingManager().log('Close client socket')
+                return self.transport.close()
+            else:
+                LoggingManager().log('Handle request')
+                asyncio.create_task(
+                    handle_request(self.transport, request_message)
+                )
 
 
 def start_server(host: string,

@@ -36,6 +36,7 @@ class OperatorType(IntEnum):
     LOGICALCREATE = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
+    LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
     LOGICALORDERBY = auto()
@@ -479,3 +480,38 @@ class LogicalLoadData(Operator):
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
                 and self.path == other.path)
+
+
+class LogicalUpload(Operator):
+    """Logical node for upload operation
+
+    Arguments:
+        path(Path): file path (with prefix prepended) where
+                    the data is uploaded
+        video_blob(str): base64 encoded video string
+    """
+
+    def __init__(self, path: Path, video_blob: str, children=None):
+        super().__init__(OperatorType.LOGICALUPLOAD, children=children)
+        self._path = path
+        self._video_blob = video_blob
+
+    @property
+    def path(self):
+        return self._path
+
+    @property
+    def video_blob(self):
+        return self._video_blob
+
+    def __str__(self):
+        return 'LogicalUpload(path: {} blob: {})'.format(
+            self.path, "string of video blob")
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalUpload):
+            return False
+        return (is_subtree_equal
+                and self.path == other.path
+                and self.video_blob == other.video_blob)

@@ -36,7 +36,6 @@ class PlanGenerator:
         physical_plan = None
         root_grp = optimizer_context.memo.groups[root_grp_id]
         best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
-
         physical_plan = best_grp_expr.opr
 
         for child_grp_id in best_grp_expr.children:
@@ -54,6 +53,7 @@ class PlanGenerator:
             copy_opr=False
         )
         root_grp_id = grp_expr.group_id
+
         """
         for g in optimizer_context.memo._groups:
             for expr in g._logical_exprs:

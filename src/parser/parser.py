@@ -73,7 +73,7 @@ class Parser(object):
         stream = CommonTokenStream(lexer)
 
         parser = evaql_parser(stream)
-        # Attach error listener for debugging parser errrors
+        # Attach error listener for debugging parser errors
         # parser._listeners = [self._error_listener]
 
         tree = parser.root()
