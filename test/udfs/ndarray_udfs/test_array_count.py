@@ -72,7 +72,7 @@ class ArrayCountTests(unittest.TestCase):
 
     def test_array_count(self):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-                       WHERE Array_Count(DummyObjectDetector(data), 'person') = 1;"
+           WHERE Array_Count(DummyObjectDetector(data), 'person') = 1;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [{'id': i * 2, 'label': ['person']}
                     for i in range(NUM_FRAMES // 2)]
@@ -80,7 +80,7 @@ class ArrayCountTests(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
-                               WHERE Array_Count(DummyObjectDetector(data), 'bicycle') = 1;"
+            WHERE Array_Count(DummyObjectDetector(data), 'bicycle') = 1;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [{'id': i, 'label': ['bicycle']}
                     for i in range(1, NUM_FRAMES, 2)]

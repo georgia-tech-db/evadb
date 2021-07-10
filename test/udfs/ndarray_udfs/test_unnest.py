@@ -23,6 +23,7 @@ from src.udfs.udf_bootstrap_queries import Unnest_udf_query, Fastrcnn_udf_query
 class UnnestTests(unittest.TestCase):
 
     def setUp(self):
+        return
         CatalogManager().reset()
         load_query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                         INTO MyVideo;"""
@@ -32,16 +33,15 @@ class UnnestTests(unittest.TestCase):
 
         execute_query_fetch_all(Fastrcnn_udf_query)
 
-
     def test_should_unnest_dataframe(self):
         query = """SELECT FastRCNNObjectDetector(data).labels FROM
-                    MyVideo WHERE id < 2;"""
+                    MyVideo WHERE id < 2 LIMIT 2;"""
         without_unnest_batch = execute_query_fetch_all(query)
         query = """SELECT Unnest(FastRCNNObjectDetector(data).labels) FROM
-                    MyVideo WHERE id < 2;"""
+                    MyVideo WHERE id < 2 LIMIT 2;"""
         unnest_batch = execute_query_fetch_all(query)
         expected = Batch(Unnest().exec(without_unnest_batch.frames))
-        self.assertEqual(unnest_batch, unnest_batch)
+        self.assertEqual(unnest_batch, expected)
 
 
 if __name__ == "__main__":

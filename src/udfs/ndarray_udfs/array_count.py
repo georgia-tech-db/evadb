@@ -27,11 +27,12 @@ class Array_Count(AbstractNdarrayUDF):
         # input should just be a single column
         # (Data Series or DF with one column)
 
-        # pre conditions: ##########################################################
+        # pre conditions: #####################################################
         # check if numpy array, else throw
         # check number of dimensions of numpy array
         # check number of dimensions of searchElement if array
-        # if number of dimensions of searchElement not less by 1 than numpy array throw
+        # if number of dimensions of searchElement not less by 1 than numpy
+        # array throw
 
         # loop over and apply count function
         # convert to pd data frame and then add index as a column (optional)
@@ -50,30 +51,41 @@ class Array_Count(AbstractNdarrayUDF):
         search_element = inp[inp.columns[-1]][0]
         values = pd.DataFrame(inp[inp.columns[0]])
 
-        count_result = values.apply(lambda x: self.count_in_row(x[0], search_element), axis=1)
+        count_result = values.apply(
+            lambda x: self.count_in_row(
+                x[0], search_element), axis=1)
 
         return pd.DataFrame({'count': count_result.values})
-        # return pd.DataFrame({'id': count_result.index, 'count': count_result.values})
+        # return pd.DataFrame({'id': count_result.index, 'count':
+        # count_result.values})
 
     def count_in_row(self, row_val, search_element):
-        # checks that if search_element is a string or int, then row array should be one dimension
-        if isinstance(row_val, list) and isinstance(search_element, (str, int)):
+        # checks that if search_element is a string or int, then row array
+        # should be one dimension
+        if isinstance(row_val, list) and isinstance(
+                search_element, (str, int)):
             if np.array(row_val).ndim > 1:
-                raise ValueError('inconsistent dimensions for row value and search element')
+                raise ValueError(
+                    'inconsistent dimensions for row value and search element')
             return row_val.count(search_element)
 
         # if row_val is a np.ndarray then search_element should be one too
-        if isinstance(row_val, np.ndarray) and isinstance(search_element, (str, int)):
-            raise ValueError('inconsistent dimensions for row value and search element')
+        if isinstance(row_val, np.ndarray) and isinstance(
+                search_element, (str, int)):
+            raise ValueError(
+                'inconsistent dimensions for row value and search element')
 
-        # checks that if row_val and search_element are numpy arrays then dimension diff is one
-        if isinstance(row_val, np.ndarray) and isinstance(search_element, (np.ndarray, list)):
+        # checks that if row_val and search_element are numpy arrays then
+        # dimension diff is one
+        if isinstance(row_val, np.ndarray) and isinstance(
+                search_element, (np.ndarray, list)):
             nd_search_element = search_element
             # if search_element is a list convert to ndarray
             if isinstance(nd_search_element, list):
                 nd_search_element = np.array(nd_search_element)
             if row_val.ndim - nd_search_element.ndim != 1:
-                raise ValueError('inconsistent dimensions for row value and search element')
+                raise ValueError(
+                    'inconsistent dimensions for row value and search element')
             # vectorized approach for searching elements
             return np.sum(row_val == nd_search_element.all(1))
 

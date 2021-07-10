@@ -26,7 +26,7 @@ DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
 
 
 ArrayCount_udf_query = """CREATE UDF Array_Count
-            INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10)) 
+            INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10))
             OUTPUT(count INTEGER)
             TYPE Ndarray
             IMPL "src/udfs/ndarray_udfs/array_count.py";

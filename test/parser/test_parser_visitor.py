@@ -179,7 +179,6 @@ class ParserVisitorTests(unittest.TestCase):
 
     @mock.patch.object(ParserVisitor, 'visitChildren')
     def test_visit_string_literal_none(self, mock_visit):
-    # def test_visit_string_literal_none(self):
         ''' Testing when string literal is None
             Function: visitStringLiteral
         '''
@@ -236,9 +235,6 @@ class ParserVisitorTests(unittest.TestCase):
         ''' Testing Base Exception error handling
             Function: visitQuerySpecification
         '''
-        # ParserVisitor.visit = MagicMock()
-        # ParserVisitor.visit
-
         visitor = ParserVisitor()
         ctx = MagicMock()
         child_1 = MagicMock()
@@ -250,10 +246,10 @@ class ParserVisitorTests(unittest.TestCase):
 
         self.assertRaises(BaseException, visitor.visitQuerySpecification, ctx)
 
-
     ##################################################################
     # UDFs
     ##################################################################
+    
     @mock.patch.object(ParserVisitor, 'visit')
     @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):

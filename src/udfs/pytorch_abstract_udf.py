@@ -55,7 +55,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
             .to(self.get_device())
         return self.classify(tens_batch)
 
-    @abstractmethod 
+    @abstractmethod
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Abstract method to work with tensors.
