@@ -249,7 +249,7 @@ class ParserVisitorTests(unittest.TestCase):
     ##################################################################
     # UDFs
     ##################################################################
-    
+
     @mock.patch.object(ParserVisitor, 'visit')
     @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):
