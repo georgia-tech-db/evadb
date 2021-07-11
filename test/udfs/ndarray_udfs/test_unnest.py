@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pandas as pd
+
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.server.command_handler import execute_query_fetch_all
@@ -35,14 +37,18 @@ class UnnestTests(unittest.TestCase):
 
     def test_should_unnest_dataframe(self):
         query = """SELECT FastRCNNObjectDetector(data).labels FROM
-                    MyVideo WHERE id < 2 LIMIT 2;"""
+                    MyVideo WHERE id < 2;"""
         without_unnest_batch = execute_query_fetch_all(query)
+        query = """SELECT Unnest(FastRCNNObjectDetector(data).labels) FROM
+                    MyVideo WHERE id < 2;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(Unnest().exec(without_unnest_batch.frames))
+        expected.reset_index()
+        self.assertEqual(unnest_batch, expected)
+
+    def test_should_unnest_dataframe_manual(self):
         query = """SELECT Unnest(FastRCNNObjectDetector(data).labels) FROM
                     MyVideo WHERE id < 2 LIMIT 2;"""
         unnest_batch = execute_query_fetch_all(query)
-        expected = Batch(Unnest().exec(without_unnest_batch.frames))
+        expected = Batch(pd.DataFrame({'labels': ['person', 'car']}))
         self.assertEqual(unnest_batch, expected)
-
-
-if __name__ == "__main__":
-    unittest.main()
