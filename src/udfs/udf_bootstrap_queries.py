@@ -16,6 +16,8 @@
 # this file is to list out all the ndarray udf create queries in one place
 # as constants
 
+from src.server.command_handler import execute_query_fetch_all
+
 
 DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
@@ -24,6 +26,12 @@ DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
                   IMPL  'test/util.py';
         """
 
+DummyMultiObjectDetector_udf_query = """CREATE UDF DummyMultiObjectDetector
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (labels NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
 
 ArrayCount_udf_query = """CREATE UDF Array_Count
             INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10))
@@ -45,3 +53,20 @@ Fastrcnn_udf_query = """CREATE UDF FastRCNNObjectDetector
       TYPE  Classification
       IMPL  'src/udfs/fastrcnn_object_detector.py';
       """
+
+
+def init_builtin_udfs(mode='debug'):
+    """
+    Loads the builtin udfs into the system.
+    This should be called when the system bootstraps.
+    In debug mode, it also loads udfs used in the test suite.
+    Arguments:
+        mode (str): 'debug' or 'release'
+    """
+    queries = [Fastrcnn_udf_query, Unnest_udf_query, ArrayCount_udf_query]
+    if mode == 'debug':
+        queries.extend([DummyObjectDetector_udf_query,
+                        DummyMultiObjectDetector_udf_query])
+
+    for query in queries:
+        execute_query_fetch_all(query)

@@ -19,7 +19,6 @@ from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.server.command_handler import execute_query_fetch_all
 from src.udfs.ndarray_udfs.unnest import Unnest
-from src.udfs.udf_bootstrap_queries import Unnest_udf_query, Fastrcnn_udf_query
 
 
 class UnnestTests(unittest.TestCase):
@@ -30,10 +29,6 @@ class UnnestTests(unittest.TestCase):
         load_query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
                         INTO MyVideo;"""
         execute_query_fetch_all(load_query)
-
-        execute_query_fetch_all(Unnest_udf_query)
-
-        execute_query_fetch_all(Fastrcnn_udf_query)
 
     def test_should_unnest_dataframe(self):
         query = """SELECT FastRCNNObjectDetector(data).labels FROM

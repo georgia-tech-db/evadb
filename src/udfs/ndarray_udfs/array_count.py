@@ -56,37 +56,19 @@ class Array_Count(AbstractNdarrayUDF):
                 x[0], search_element), axis=1)
 
         return pd.DataFrame({'count': count_result.values})
-        # return pd.DataFrame({'id': count_result.index, 'count':
-        # count_result.values})
 
     def count_in_row(self, row_val, search_element):
-        # checks that if search_element is a string or int, then row array
-        # should be one dimension
-        if isinstance(row_val, list) and isinstance(
-                search_element, (str, int)):
-            if np.array(row_val).ndim > 1:
-                raise ValueError(
-                    'inconsistent dimensions for row value and search element')
-            return row_val.count(search_element)
+        # change the row and search element to numpy array
+        row_val = np.array(row_val)
+        search_element = np.array(search_element)
 
-        # if row_val is a np.ndarray then search_element should be one too
-        if isinstance(row_val, np.ndarray) and isinstance(
-                search_element, (str, int)):
+        # checks if dimension diff is one between
+        # row_val and search_element
+        if row_val.ndim - search_element.ndim != 1:
             raise ValueError(
                 'inconsistent dimensions for row value and search element')
 
-        # checks that if row_val and search_element are numpy arrays then
-        # dimension diff is one
-        if isinstance(row_val, np.ndarray) and isinstance(
-                search_element, (np.ndarray, list)):
-            nd_search_element = search_element
-            # if search_element is a list convert to ndarray
-            if isinstance(nd_search_element, list):
-                nd_search_element = np.array(nd_search_element)
-            if row_val.ndim - nd_search_element.ndim != 1:
-                raise ValueError(
-                    'inconsistent dimensions for row value and search element')
-            # vectorized approach for searching elements
-            return np.sum(row_val == nd_search_element.all(1))
-
-        raise ValueError('failed to recognize dimensions')
+        result = row_val == search_element
+        # reshape along the first dimension and then
+        # check how many time search element exists
+        return result.reshape(result.shape[0], -1).all(axis=1).sum()

@@ -58,11 +58,9 @@ class CatalogManager(object):
 
     def _bootstrap_catalog(self):
         """Bootstraps catalog.
-
         This method runs all tasks required for using catalog. Currently,
         it includes only one task ie. initializing database. It creates the
         catalog database and tables if they do not exist.
-
         """
         LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
