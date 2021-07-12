@@ -20,7 +20,6 @@ from src.models.storage.batch import Batch
 from src.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, load_inbuilt_udfs, file_remove
 
-
 NUM_FRAMES = 10
 
 
