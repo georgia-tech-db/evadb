@@ -15,6 +15,7 @@ pyspark:
   property: {'spark.logConf': 'true',
              'spark.driver.memory': '1g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true'}
+  coalesce: 4
 
 server:
   host: "0.0.0.0"
