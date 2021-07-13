@@ -175,4 +175,4 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         # Sample needs order by support
-        #self.assertEqual(actual_batch, expected_batch[0])
+        # self.assertEqual(actual_batch, expected_batch[0])
