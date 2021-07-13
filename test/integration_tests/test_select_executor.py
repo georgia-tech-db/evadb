@@ -167,7 +167,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     @unittest.skip('ORDER BY support is required')
     def test_select_and_sample(self):
-        select_query = "SELECT id,data FROM MyVideo SAMPLE 7;"
+        select_query = "SELECT id,data FROM MyVideo SAMPLE 7 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
 
