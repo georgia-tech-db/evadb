@@ -20,36 +20,36 @@ from src.server.command_handler import execute_query_fetch_all
 
 
 DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label NDARRAY STR(10))
+                  INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
 
 DummyMultiObjectDetector_udf_query = """CREATE UDF DummyMultiObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (labels NDARRAY STR(10))
+                  INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
 
 ArrayCount_udf_query = """CREATE UDF Array_Count
-            INPUT(frame_data NDARRAY UINT8(3, 256, 256), label TEXT(10))
+            INPUT(Input NDARRAY ANYTYPE, Key ANYTYPE)
             OUTPUT(count INTEGER)
             TYPE Ndarray
             IMPL "src/udfs/ndarray_udfs/array_count.py";
         """
 Unnest_udf_query = """CREATE UDF Unnest
-                INPUT  (inp NDARRAY UINT8(10, 10, 10))
-                OUTPUT (out NDARRAY UINT8(10, 10, 10))
+                INPUT  (inp NDARRAY ANYTYPE)
+                OUTPUT (out ANYTYPE)
                 TYPE  Ndarray
                 IMPL  "src/udfs/ndarray_udfs/unnest.py";
         """
 
 Fastrcnn_udf_query = """CREATE UDF FastRCNNObjectDetector
-      INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(10),
-                scores NDARRAY FLOAT32(10))
+      INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
       IMPL  'src/udfs/fastrcnn_object_detector.py';
       """

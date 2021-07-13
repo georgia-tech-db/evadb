@@ -20,6 +20,7 @@ ALL:                                 'ALL';
 ALTER:                               'ALTER';
 AND:                                 'AND';
 ANY:                                 'ANY';
+ANYDIM:                              'ANYDIM';
 AS:                                  'AS';
 ASC:                                 'ASC';
 BLOB:                                'BLOB';
@@ -116,6 +117,7 @@ FLOAT64:                             'FLOAT64';
 DECIMAL:                             'DECIMAL';
 STR:                                 'STR';
 DATETIME:                            'DATETIME';
+ANYTYPE:                             'ANYTYPE';
 
 // Group function Keywords
 

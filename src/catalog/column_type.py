@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum, auto
+from enum import Enum, auto, IntEnum
 
 
-class Dimension(Enum):
-    ANY_DIM = -1
+class Dimension(IntEnum):
+    ANYDIM = -1
 
 
 class ColumnType(Enum):
@@ -41,7 +41,7 @@ class NdArrayType(Enum):
     DECIMAL = auto()
     STR = auto()
     DATETIME = auto()
-    ANY = auto()
+    ANYTYPE = auto()
 
     @classmethod
     def to_numpy_type(cls, t):
@@ -72,7 +72,7 @@ class NdArrayType(Enum):
             np_type = np.str_
         elif t == cls.DATETIME:
             np_type = np.datetime64
-        elif t == cls.ANY:
+        elif t == cls.ANYTYPE:
             np_type = np.dtype(object)
         else:
             raise ValueError('Can not auto convert %s to numpy type' % t)
