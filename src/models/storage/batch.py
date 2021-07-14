@@ -129,6 +129,8 @@ class Batch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
+        else:
+            raise TypeError('Invalid argument type: {}'.format(type(indices)))
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
