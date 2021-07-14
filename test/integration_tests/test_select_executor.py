@@ -174,5 +174,6 @@ class SelectExecutorTest(unittest.TestCase):
             filters=range(0, NUM_FRAMES, 7)))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
-        # Sample needs order by support
+        # Since frames are fetched in random order, this test case might be flaky
+        # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
