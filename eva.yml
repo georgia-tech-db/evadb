@@ -14,7 +14,7 @@ storage:
 
 pyspark:
   property: {'spark.logConf': 'true',
-             'spark.driver.memory': '1g',
+             'spark.driver.memory': '10g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true'}
 
 server:
