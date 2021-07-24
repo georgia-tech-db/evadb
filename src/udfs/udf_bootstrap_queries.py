@@ -19,34 +19,34 @@
 from src.server.command_handler import execute_query_fetch_all
 
 
-DummyObjectDetector_udf_query = """CREATE UDF DummyObjectDetector
+DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
 
-DummyMultiObjectDetector_udf_query = """CREATE UDF DummyMultiObjectDetector
+DummyMultiObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
 
-ArrayCount_udf_query = """CREATE UDF Array_Count
+ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
             INPUT(Input NDARRAY ANYTYPE, Key ANYTYPE)
             OUTPUT(count INTEGER)
             TYPE Ndarray
             IMPL "src/udfs/ndarray_udfs/array_count.py";
         """
-Unnest_udf_query = """CREATE UDF Unnest
+Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
                 TYPE  Ndarray
                 IMPL  "src/udfs/ndarray_udfs/unnest.py";
         """
 
-Fastrcnn_udf_query = """CREATE UDF FastRCNNObjectDetector
+Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                 scores NDARRAY FLOAT32(ANYDIM))
