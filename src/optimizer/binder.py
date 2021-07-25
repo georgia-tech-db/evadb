@@ -72,4 +72,3 @@ class Binder:
         # the iterator only returns one match, which stems from the root node
         for match in Binder._binder(self._grp_expr, self._pattern, self._memo):
             yield Binder.build_opr_tree_from_pre_order_repr(match)
-

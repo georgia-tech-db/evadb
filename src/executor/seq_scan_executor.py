@@ -51,4 +51,5 @@ class SequentialScanExecutor(AbstractExecutor):
                 batches = [expr.evaluate(batch) for expr in self.project_expr]
                 batch = Batch.merge_column_wise(batches)
 
-            yield batch
+            if not batch.empty():
+                yield batch

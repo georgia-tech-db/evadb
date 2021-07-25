@@ -40,7 +40,7 @@ class ConstantValueExpression(AbstractExpression):
     @property
     def v_type(self):
         return self._v_type
-    # ToDo implement other functinalities like maintaining hash
+    # ToDo implement other functionalities like maintaining hash
     # comparing two objects of this class(==)
 
     def __eq__(self, other):

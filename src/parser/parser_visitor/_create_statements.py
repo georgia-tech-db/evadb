@@ -19,7 +19,7 @@ from src.parser.evaql.evaql_parser import evaql_parser
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
 
-from src.catalog.column_type import ColumnType, NdArrayType
+from src.catalog.column_type import ColumnType, NdArrayType, Dimension
 
 
 ##################################################################
@@ -143,9 +143,16 @@ class CreateTable(evaql_parserVisitor):
 
     def visitArrayDataType(self, ctx: evaql_parser.ArrayDataTypeContext):
         data_type = ColumnType.NDARRAY
-        array_type = self.visit(ctx.arrayType())
-        dimensions = self.visit(ctx.lengthDimensionList())
+        array_type = None
+        dimensions = None
+        if ctx.arrayType():
+            array_type = self.visit(ctx.arrayType())
+        if ctx.lengthDimensionList():
+            dimensions = self.visit(ctx.lengthDimensionList())
         return data_type, array_type, dimensions
+
+    def visitAnyDataType(self, ctx: evaql_parser.AnyDataTypeContext):
+        return ColumnType.ANY, None, []
 
     def visitArrayType(self, ctx: evaql_parser.ArrayTypeContext):
         array_type = None
@@ -174,7 +181,8 @@ class CreateTable(evaql_parserVisitor):
             array_type = NdArrayType.STR
         elif ctx.DATETIME() is not None:
             array_type = NdArrayType.DATETIME
-
+        elif ctx.ANYTYPE() is not None:
+            array_type = NdArrayType.ANYTYPE
         return array_type
 
     def visitLengthOneDimension(
@@ -216,5 +224,6 @@ class CreateTable(evaql_parserVisitor):
             decimal = int(str(ctx.TWO_DECIMAL()))
         elif ctx.ZERO_DECIMAL() is not None:
             decimal = int(str(ctx.ZERO_DECIMAL()))
-
+        elif ctx.ANYDIM() is not None:
+            decimal = Dimension.ANYDIM
         return decimal
