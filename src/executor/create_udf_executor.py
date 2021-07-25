@@ -31,13 +31,15 @@ class CreateUDFExecutor(AbstractExecutor):
 
         Calls the catalog to create udf metadata.
         """
+        catalog_manager = CatalogManager()
         if (self.node.if_not_exists):
             # check catalog if it already has this udf entry
-            return
+            if catalog_manager.get_udf_by_name(self.node.name):
+                return
         io_list = []
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         impl_path = self.node.impl_path.absolute().as_posix()
-        CatalogManager().create_udf(
+        catalog_manager.create_udf(
             self.node.name, impl_path, self.node.udf_type,
             io_list)

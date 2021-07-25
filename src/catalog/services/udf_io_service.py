@@ -49,15 +49,16 @@ class UdfIOService(BaseService):
         for io in io_list:
             io.save()
 
-    def udf_io_by_name(self, name: str):
+    def udf_io_by_name(self, udf_id: int, name: str):
         """return the udf_io entry that matches the name provided.
-           None if no such entry found.
+        None if no such entry found.
 
         Arguments:
-            name (str): name to be searched
+        name(str): name to be searched
         """
 
         try:
-            return self.model.query.filter(self.model._name == name).one()
+            return self.model.query.filter(self.model._udf_id == udf_id,
+                                           self.model._name == name).one()
         except NoResultFound:
             return None

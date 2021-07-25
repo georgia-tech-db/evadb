@@ -2,6 +2,7 @@ core:
   location: "eva_datasets"
   sqlalchemy_database_uri: 'mysql+pymysql://root@localhost/eva_catalog'
   application: "eva"
+  mode: "debug" #release
 
 executor:
   batch_size: 50
@@ -13,7 +14,7 @@ storage:
 
 pyspark:
   property: {'spark.logConf': 'true',
-             'spark.driver.memory': '1g',
+             'spark.driver.memory': '10g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true'}
   coalesce: 2
 

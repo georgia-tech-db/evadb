@@ -16,9 +16,8 @@
 import asyncio
 
 from src.server.server import start_server
-
+from src.udfs.udf_bootstrap_queries import init_builtin_udfs
 from src.configuration.configuration_manager import ConfigurationManager
-
 from src.utils.logging_manager import LoggingManager
 from src.utils.logging_manager import LoggingLevel
 
@@ -51,4 +50,6 @@ def eva():
 
 if __name__ == '__main__':
     # execute only if run as the entry point into the program
+    mode = ConfigurationManager().get_value('core', 'mode')
+    init_builtin_udfs(mode=mode)
     eva()

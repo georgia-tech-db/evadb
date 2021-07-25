@@ -51,7 +51,7 @@ class Session(object):
         """
 
         eva_spark_conf = SparkConf()
-        pyspark_config = self._config.get_value('pyspark', 'property') 
+        pyspark_config = self._config.get_value('pyspark', 'property')
         for key, value in pyspark_config.items():
             eva_spark_conf.set(key, value)
 

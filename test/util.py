@@ -22,7 +22,9 @@ from src.models.storage.batch import Batch
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.udfs.udf_bootstrap_queries import init_builtin_udfs
 from src.configuration.configuration_manager import ConfigurationManager
+
 
 NUM_FRAMES = 10
 CONFIG = ConfigurationManager()
@@ -101,11 +103,16 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         yield Batch(pd.DataFrame(data))
 
 
+def load_inbuilt_udfs():
+    mode = ConfigurationManager().get_value('core', 'mode')
+    init_builtin_udfs(mode=mode)
+
+
 class DummyObjectDetector(AbstractClassifierUDF):
 
     @property
     def name(self) -> str:
-        return "dummyObjectDetector"
+        return "DummyObjectDetector"
 
     def __init__(self):
         super().__init__()
@@ -128,3 +135,34 @@ class DummyObjectDetector(AbstractClassifierUDF):
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 2 + 1]
         return [label]
+
+
+class DummyMultiObjectDetector(AbstractClassifierUDF):
+    """
+        Returns multiple objects for each frame
+    """
+    @property
+    def name(self) -> str:
+        return "DummyMultiObjectDetector"
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return ['__background__', 'person', 'bicycle', 'car']
+
+    def classify(self, df: pd.DataFrame):
+        ret = pd.DataFrame()
+        ret['labels'] = df.apply(self.classify_one, axis=1)
+        return ret
+
+    def classify_one(self, frames: np.ndarray):
+        # odd are labeled bicycle and even person
+        i = int(frames[0][0][0][0] * 25) - 1
+        label = self.labels[i % 3 + 1]
+        return np.array([label, label])
