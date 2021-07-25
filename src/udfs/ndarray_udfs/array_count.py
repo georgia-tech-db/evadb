@@ -24,26 +24,26 @@ class Array_Count(AbstractNdarrayUDF):
         return 'Array_Count'
 
     def exec(self, inp: pd.DataFrame):
-        # input should just be a single column
-        # (Data Series or DF with one column)
+        """
+        It will return a count of search element for each tuple.
+        The idea is to flatten the input array along the first dimension and
+        count the search element in this flattened array.
+        For example,
+        a tuple of shape (3,4,5) will be flattened into three (4,5) elements.
+        And the search key is expected to be of shape (4,5),
+        else we throw an error.
 
-        # pre conditions: #####################################################
-        # check if numpy array, else throw
-        # check number of dimensions of numpy array
-        # check number of dimensions of searchElement if array
-        # if number of dimensions of searchElement not less by 1 than numpy
-        # array throw
+        inp: DataFrame
+            col1        col2
+        0   ndarray1    search_key
+        1   ndarray2    search_key
 
-        # loop over and apply count function
-        # convert to pd data frame and then add index as a column (optional)
+        out: DataFrame
+            count
+        0   int
+        1   int
 
-        # inp (1 column), label: ["A"]
-        # row 0: [["A"], ["A"], ["B"]]
-        # row 1: [["A"], ["B"], ["B"]]
-        # return: [2,
-        #          1]
-        # ##########################################################################
-
+        """
         # sanity check
         if len(inp.columns) != 2:
             raise ValueError('input contains more than one column')
