@@ -53,5 +53,3 @@ if __name__ == '__main__':
     mode = ConfigurationManager().get_value('core', 'mode')
     init_builtin_udfs(mode=mode)
     eva()
-    mode = ConfigurationManager().get_value('core', 'mode')
-    init_builtin_udfs(mode=mode)

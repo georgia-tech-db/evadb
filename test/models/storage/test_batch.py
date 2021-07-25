@@ -47,6 +47,12 @@ class BatchTest(unittest.TestCase):
         expected = Batch(frames=create_dataframe())
         self.assertEqual(expected, batch[[0]])
 
+    def test_fetching_frames_by_index_should_raise(self):
+        batch = Batch(
+            frames=create_dataframe_same(2))
+        with self.assertRaises(TypeError):
+            batch[1.0]
+
     def test_slicing_on_batched_should_return_new_batch_frame(self):
         batch = Batch(
             frames=create_dataframe(2))
