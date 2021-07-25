@@ -23,13 +23,15 @@ class EVACursor(object):
 
     def __init__(self, protocol):
         self._protocol = protocol
+        self._pending_query = False
 
     async def execute_async(self, query: str):
         """
         Send query to the EVA server.
         """
-        query = self._upload_transformation(query) 
+        query = self._upload_transformation(query)
         await self._protocol.send_message(query)
+        self._pending_query = True
 
     async def fetch_one_async(self) -> Response:
         """
@@ -40,6 +42,7 @@ class EVACursor(object):
             response = await asyncio.coroutine(Response.from_json)(message)
         except Exception as e:
             raise e
+        self._pending_query = False
         return response
 
     async def fetch_all_async(self) -> Response:
