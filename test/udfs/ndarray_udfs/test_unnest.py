@@ -40,11 +40,12 @@ class UnnestTests(unittest.TestCase):
         query = """SELECT id, DummyMultiObjectDetector(data).labels FROM MyVideo \
                     ORDER BY id;"""
         without_unnest_batch = execute_query_fetch_all(query)
-        query = """SELECT id, Unnest(DummyMultiObjectDetector(data).labels) \
-                    FROM MyVideo ORDER BY id;"""
+        query = """SELECT Unnest(DummyMultiObjectDetector(data).labels) \
+                    FROM MyVideo ORDER BY id"""
         unnest_batch = execute_query_fetch_all(query)
         expected = Batch(Unnest().exec(without_unnest_batch.frames))
         expected.reset_index()
+        print(unnest_batch, expected)
         self.assertEqual(unnest_batch, expected)
 
     def test_should_unnest_dataframe_manual(self):
@@ -52,5 +53,8 @@ class UnnestTests(unittest.TestCase):
                     MyVideo WHERE id < 2 ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(query)
         expected = Batch(pd.DataFrame(
-            {'labels': np.array(['person', 'person', 'bicycle', 'bicycle'])}))
+            {'id': np.array([0, 0, 1, 1]), 'labels': np.array(['person',
+                                                               'person',
+                                                               'bicycle',
+                                                               'bicycle'])}))
         self.assertEqual(unnest_batch, expected)
