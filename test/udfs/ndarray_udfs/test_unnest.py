@@ -48,8 +48,8 @@ class UnnestTests(unittest.TestCase):
         self.assertEqual(unnest_batch, expected)
 
     def test_should_unnest_dataframe_manual(self):
-        query = """SELECT Unnest(DummyMultiObjectDetector(data).labels) FROM
-                    MyVideo WHERE id < 2;"""
+        query = """SELECT id, Unnest(DummyMultiObjectDetector(data).labels) FROM
+                    MyVideo WHERE id < 2 ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(query)
         expected = Batch(pd.DataFrame(
             {'labels': np.array(['person', 'person', 'bicycle', 'bicycle'])}))
