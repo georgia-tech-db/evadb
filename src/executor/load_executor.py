@@ -14,12 +14,13 @@
 # limitations under the License.
 
 import os
+import pandas as pd
 
 from src.planner.load_data_plan import LoadDataPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.storage.storage_engine import StorageEngine
 from src.readers.opencv_reader import OpenCVReader
-
+from src.models.storage.batch import Batch
 from src.configuration.configuration_manager import ConfigurationManager
 
 
@@ -47,8 +48,13 @@ class LoadDataExecutor(AbstractExecutor):
 
         # We currently use create to empty existing table.
         StorageEngine.create(self.node.table_metainfo)
-
+        num_loaded_frames = 0
         video_reader = OpenCVReader(
             os.path.join(self.path_prefix, self.node.file_path))
         for batch in video_reader.read():
             StorageEngine.write(self.node.table_metainfo, batch)
+            num_loaded_frames += len(batch)
+
+        yield Batch(pd.DataFrame({'Video': str(self.node.file_path),
+                                  'Num Loaded Frames': num_loaded_frames},
+                                 index=[0]))
