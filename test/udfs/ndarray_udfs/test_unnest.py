@@ -37,10 +37,11 @@ class UnnestTests(unittest.TestCase):
         file_remove('dummy.avi')
 
     def test_should_unnest_dataframe(self):
-        query = """SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"""
+        query = """SELECT id, DummyMultiObjectDetector(data).labels FROM MyVideo \
+                    ORDER BY id;"""
         without_unnest_batch = execute_query_fetch_all(query)
-        query = """SELECT Unnest(DummyMultiObjectDetector(data).labels) \
-                    FROM MyVideo;"""
+        query = """SELECT id, Unnest(DummyMultiObjectDetector(data).labels) \
+                    FROM MyVideo ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(query)
         expected = Batch(Unnest().exec(without_unnest_batch.frames))
         expected.reset_index()
