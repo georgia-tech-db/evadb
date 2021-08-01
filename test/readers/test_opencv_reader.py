@@ -42,7 +42,7 @@ class VideoLoaderTest(unittest.TestCase):
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_loader = OpenCVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_size=1)
+            batch_mem_size=1)
         batches = list(video_loader.read())
         expected = list(create_dummy_batches(batch_size=1))
         self.assertTrue(batches, expected)
@@ -50,7 +50,7 @@ class VideoLoaderTest(unittest.TestCase):
     def test_should_return_one_batches_for_negative_size(self):
         video_loader = OpenCVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_size=-1)
+            batch_mem_size=-1)
         batches = list(video_loader.read())
         expected = list(create_dummy_batches())
         self.assertTrue(batches, expected)
@@ -69,7 +69,7 @@ class VideoLoaderTest(unittest.TestCase):
             self):
         video_loader = OpenCVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_size=NUM_FRAMES,
+            batch_mem_size=NUM_FRAMES,
             offset=2)
         batches = list(video_loader.read())
         expected = list(create_dummy_batches(
@@ -79,7 +79,7 @@ class VideoLoaderTest(unittest.TestCase):
     def test_should_start_frame_number_from_two(self):
         video_loader = OpenCVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_size=NUM_FRAMES,
+            batch_mem_size=NUM_FRAMES,
             start_frame_id=2)
         batches = list(video_loader.read())
         expected = list(create_dummy_batches(
@@ -89,7 +89,7 @@ class VideoLoaderTest(unittest.TestCase):
     def test_should_start_frame_number_from_two_and_offset_from_one(self):
         video_loader = OpenCVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_size=NUM_FRAMES,
+            batch_mem_size=NUM_FRAMES,
             offset=1,
             start_frame_id=2)
         batches = list(video_loader.read())
@@ -98,11 +98,11 @@ class VideoLoaderTest(unittest.TestCase):
         self.assertTrue(batches, expected)
 
     @patch('src.readers.abstract_reader.ConfigurationManager.get_value')
-    def test_should_work_if_batch_size_not_in_config(self, get_val_mock):
+    def test_should_work_if_batch_mem_size_not_in_config(self, get_val_mock):
+        get_val_mock.return_value = None
         video_loader = OpenCVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'))
-        get_val_mock.return_value = None
         batches = list(video_loader.read())
         expected = list(create_dummy_batches())
         self.assertTrue(batches, expected)
-        get_val_mock.assert_called_once_with("executor", "batch_size")
+        get_val_mock.assert_called_once_with("executor", "batch_mem_size")

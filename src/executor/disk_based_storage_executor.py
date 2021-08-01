@@ -33,7 +33,7 @@ class DiskStorageExecutor(AbstractStorageExecutor):
     def __init__(self, node: StoragePlan):
         super().__init__(node)
         self.storage = OpenCVReader(node.video,
-                                    batch_size=node.batch_size,
+                                    batch_mem_size=node.batch_mem_size,
                                     offset=node.offset)
 
     def validate(self):
