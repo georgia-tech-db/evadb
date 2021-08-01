@@ -7,7 +7,7 @@ core:
 executor:
   # batch_mem_size configures the number of rows processed by the execution engine in one iteration
   # #rows = max(1, row_mem_size / batch_mem_size)
-  batch_mem_size: 300000000 # 300mb
+  batch_mem_size: 30000000 # 30mb
 
   # batch size used for gpu_operations
   gpu_batch_size: 1
@@ -19,7 +19,7 @@ storage:
   # https://petastorm.readthedocs.io/en/latest/api.html#module-petastorm.reader
   petastorm: {'cache_type' : 'local-disk',
               'cache_location' : '.cache',
-              'cache_size_limit' : 10000000000, #10gb
+              'cache_size_limit' : 4000000000, #4gb
               'cache_row_size_estimate' : 512}
 
 pyspark:
