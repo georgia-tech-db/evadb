@@ -36,7 +36,8 @@ class DiskStorageExecutorTest(unittest.TestCase):
         actual = list(executor.exec())
 
         mock_class.assert_called_once_with(video_info,
-                                           batch_size=storage_plan.batch_size,
+                                           batch_mem_size=(
+                                               storage_plan.batch_mem_size),
                                            limit=storage_plan.limit,
                                            offset=storage_plan.offset,
                                            skip_frames=(
