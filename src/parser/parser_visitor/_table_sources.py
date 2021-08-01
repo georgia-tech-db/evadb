@@ -22,6 +22,7 @@ from src.parser.evaql.evaql_parser import evaql_parser
 from src.utils.logging_manager import LoggingLevel, LoggingManager
 from src.parser.types import JoinType
 
+
 ##################################################################
 # TABLE SOURCES
 ##################################################################
@@ -39,12 +40,22 @@ class TableSources(evaql_parserVisitor):
 
         # Join Nodes
         if table_sources_count > 1:
-            # merge join nodes
-            # table, join_node1, join_node2 -> join_node_1, join_node_2
-            for i in range(table_sources_count - 1):
-                table_list[i + 1].join.left = table_list[i]
-            table_list = table_list[1:]
-
+            # Add Join nodes -> left deep tree
+            # t1, t2, t3 -> j2 ( j1 ( t1, t2 ), t3 )
+            join_nodes = []
+            left_child = table_list[0]
+            for i in range(1, table_sources_count):
+                if table_list[i].is_func_expr():
+                    left_child = TableRef(
+                        JoinNode(left_child,
+                                 table_list[i],
+                                 join_type=JoinType.LATERAL_JOIN))
+                else:
+                    raise SystemError(
+                        'Query not supported. EVA supports only lateral joins \
+                        with UDFs')
+                join_nodes.append(left_child)
+            return join_nodes
         return table_list
 
     def visitTableSourceItemWithSample(
@@ -58,20 +69,15 @@ class TableSources(evaql_parserVisitor):
     # Nested sub query
     def visitSubqueryTableItem(
             self, ctx: evaql_parser.SubqueryTableItemContext):
-        table_ref = self.visit(ctx.subqueryTableSourceItem())
-        # Lateral Join
-        if ctx.LATERAL():
-            return TableRef(join=JoinNode(right=table_ref,
-                                          join_type=JoinType.LATERAL_JOIN))
+        return self.visit(ctx.subqueryTableSourceItem())
 
-        return table_ref
+    def visitLateralFunctionCallItem(
+            self, ctx: evaql_parser.LateralFunctionCallItemContext):
+        return self.visit(ctx.functionCall())
 
     def visitSubqueryTableSourceItem(
             self, ctx: evaql_parser.SubqueryTableSourceItemContext):
-        if ctx.selectStatement():
-            return self.visit(ctx.selectStatement())
-        else:
-            return self.visit(ctx.functionCall())
+        return self.visit(ctx.selectStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
         left_selectStatement = self.visit(ctx.left)

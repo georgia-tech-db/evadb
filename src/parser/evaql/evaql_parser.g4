@@ -226,8 +226,9 @@ tableSourceItemWithSample
     ;
 
 tableSourceItem
-    : tableName                                                     #atomTableItem
-    | (LATERAL)? subqueryTableSourceItem                            #subqueryTableItem
+    : tableName                                           #atomTableItem
+    | subqueryTableSourceItem                             #subqueryTableItem
+    | LATERAL functionCall                                #lateralFunctionCallItem
     ;
 
 subqueryTableSourceItem
@@ -235,8 +236,6 @@ subqueryTableSourceItem
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
       )
-      |
-      functionCall
     ;
 
 sampleClause

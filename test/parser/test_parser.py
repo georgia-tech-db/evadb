@@ -445,8 +445,9 @@ class ParserTests(unittest.TestCase):
         child = FunctionExpression(func=None, name='ObjDet')
         child.append_child(TupleValueExpression('frame'))
         right.append_child(child)
+        right = TableRef(right)
         left = TableRef(TableInfo('DETRAC'))
-        expected_from_clause = TableRef(join=JoinNode(
+        expected_from_clause = TableRef(JoinNode(
             left=left, right=right, join_type=JoinType.LATERAL_JOIN))
         query_stmt = parser.parse(query)[0]
         self.assertEqual(query_stmt.from_table, expected_from_clause)

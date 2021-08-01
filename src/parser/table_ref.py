@@ -14,9 +14,11 @@
 # limitations under the License.
 
 from __future__ import annotations
+from typing import Union
 from src.parser.select_statement import SelectStatement
-from src.parser.types import TableRefType, JoinType
+from src.parser.types import JoinType
 from src.expression.abstract_expression import AbstractExpression
+from src.expression.function_expression import FunctionExpression
 
 
 class TableInfo:
@@ -42,7 +44,7 @@ class TableInfo:
         return self._database_name
 
     def __str__(self):
-        table_info_str = "TABLE INFO:: (" + self._table_name + ")"
+        table_info_str = self._table_name
 
         return table_info_str
 
@@ -73,6 +75,11 @@ class JoinNode:
                 and self.predicate == other.predicate
                 and self.join_type == other.join_type)
 
+    def __str__(self):
+        return "JOIN {} ({}, {}) ON {}".format(self.join_type,
+                                               self.left, self.right,
+                                               self.predicate)
+
 
 class TableRef:
     """
@@ -81,22 +88,18 @@ class TableRef:
     Attributes:
         table: can be one of the following based on the query type:
             TableInfo: expression of table name and database name,
+            FunctionExpression: lateral function calls
             SelectStatement: select statement in case of nested queries,
-            JoinDefinition: join statement in case of join queries #TODO
+            JoinNode: join node in case of join queries
         sample_freq: sampling frequency for the table reference
     """
 
     def __init__(self,
-                 table_info: TableInfo = None,
-                 join: JoinNode = None,
+                 table: Union[TableInfo, FunctionExpression,
+                              SelectStatement, JoinNode],
                  sample_freq: float = None):
-        self._table_info = table_info
+        self._table = table
         self._sample_freq = sample_freq
-        self._join = join
-        self._table_ref_type = TableRefType.TABLEATOM
-
-        if join is not None:
-            self._table_ref_type = TableRefType.JOIN
 
     @property
     def table(self):
@@ -106,31 +109,25 @@ class TableRef:
     def sample_freq(self):
         return self._sample_freq
 
+    def is_table_atom(self) -> bool:
+        return isinstance(self.table, TableInfo)
+
+    def is_func_expr(self) -> bool:
+        return isinstance(self.table, FunctionExpression)
+
     def is_select(self) -> bool:
         return isinstance(self.table, SelectStatement)
 
-    @property
-    def join(self):
-        return self._join
-
-    @property
-    def table_ref_type(self):
-        return self._table_ref_type
+    def is_join(self) -> bool:
+        return isinstance(self.table, JoinNode)
 
     def __str__(self):
-        table_ref = None
-        if self._table_ref_type is TableRefType.TABLEATOM:
-            table_ref = str(self._table_info)
-        elif self._table_ref_type is TableRefType.JOIN:
-            table_ref = str(self._join)
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            table_ref, str(self.sample_freq))
+            str(self.table), str(self.sample_freq))
         return table_ref_str
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
             return False
-        return (self.table_info == other.table_info
-                and self.join == other.join
-                and self.table_ref_type == other.table_ref_type
+        return (self.table == other.table
                 and self.sample_freq == other.sample_freq)
