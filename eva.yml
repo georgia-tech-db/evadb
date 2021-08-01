@@ -16,12 +16,18 @@ executor:
 storage:
   engine: "src.storage.petastorm_storage_engine.PetastormStorageEngine"
   path_prefix: "/tmp"
+  # https://petastorm.readthedocs.io/en/latest/api.html#module-petastorm.reader
+  petastorm: {'cache_type' : 'local-disk',
+              'cache_location' : '.cache',
+              'cache_size_limit' : 10000000000, #10gb
+              'cache_row_size_estimate' : 512}
 
 pyspark:
   property: {'spark.logConf': 'true',
              'spark.driver.memory': '10g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true'}
   coalesce: 2
+
 
 server:
   host: "0.0.0.0"
