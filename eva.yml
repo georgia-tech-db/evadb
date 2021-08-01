@@ -10,7 +10,7 @@ executor:
   batch_mem_size: 300000000 # 300mb
 
   # batch size used for gpu_operations
-  gpu_batch_size: 20
+  gpu_batch_size: 1
 
   gpus: {'130.207.125.60': [0]}
 storage:
