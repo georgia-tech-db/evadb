@@ -80,12 +80,16 @@ class PlanNodeTests(unittest.TestCase):
     def test_load_data_plan(self):
         table_metainfo = 'meta_info'
         file_path = 'test.mp4'
-        plan_str = 'LoadDataPlan(table_id={},file_path={})'.format(
-            table_metainfo, file_path)
-        plan = LoadDataPlan(table_metainfo, file_path)
+        batch_mem_size = 3000
+        plan_str = 'LoadDataPlan(table_id={}, file_path={}, \
+            batch_mem_size={})'.format(table_metainfo,
+                                       file_path,
+                                       batch_mem_size)
+        plan = LoadDataPlan(table_metainfo, file_path, batch_mem_size)
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
+        self.assertEqual(plan.batch_mem_size, batch_mem_size)
         self.assertEqual(str(plan), plan_str)
 
     def test_upload_plan(self):

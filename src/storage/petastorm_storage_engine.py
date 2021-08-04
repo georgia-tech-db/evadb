@@ -92,15 +92,19 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .mode('append') \
                 .parquet(self._spark_url(table))
 
-    def read(self, table: DataFrameMetadata, columns: List[
-            str] = None, predicate_func=None) -> Iterator[Batch]:
+    def read(self,
+             table: DataFrameMetadata,
+             batch_mem_size: int,
+             columns: List[str] = None,
+             predicate_func=None) -> Iterator[Batch]:
         """
         Reads the table and return a batch iterator for the
         tuples that passes the predicate func.
 
         Argument:
             table: table metadata object to write into
-            columns List[str]: A list of column names to be
+            batch_mem_size (int): memory size of the batch read from storage
+            columns (List[str]): A list of column names to be
                 considered in predicate_func
             predicate_func: customized predicate function returns bool
 
@@ -114,7 +118,9 @@ class PetastormStorageEngine(AbstractStorageEngine):
         # ToDo: Handle the sharding logic. We might have to maintain a
         # context for deciding which shard to read
         petastorm_reader = PetastormReader(
-            self._spark_url(table), predicate=predicate)
+            self._spark_url(table),
+            batch_mem_size=batch_mem_size,
+            predicate=predicate)
         for batch in petastorm_reader.read():
             yield batch
 
