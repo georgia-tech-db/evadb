@@ -15,7 +15,6 @@
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanOprType
-from src.configuration.configuration_manager import ConfigurationManager
 
 
 class StoragePlan(AbstractPlan):
@@ -25,7 +24,7 @@ class StoragePlan(AbstractPlan):
 
     Arguments:
         video (DataFrameMetadata): Required meta-data for fetching data
-        batch_mem_size (int): memory size of the batch retreived
+        batch_mem_size (int): memory size of the batch read from disk
         skip_frames (int): skip frequency
         offset (int): storage offset for retrieving data
         limit (int): limit on data records to be retrieved
@@ -33,17 +32,16 @@ class StoragePlan(AbstractPlan):
         curr_shard (int): current curr_shard if data is sharded
     """
 
-    def __init__(self, video: DataFrameMetadata, batch_mem_size: int = None,
-                 skip_frames: int = 0, offset: int = None, limit: int = None,
-                 total_shards: int = 0, curr_shard: int = 0):
+    def __init__(self, video: DataFrameMetadata,
+                 batch_mem_size: int,
+                 skip_frames: int = 0,
+                 offset: int = None,
+                 limit: int = None,
+                 total_shards: int = 0,
+                 curr_shard: int = 0):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._video = video
         self._batch_mem_size = batch_mem_size
-        if self._batch_mem_size is None:
-            self._batch_mem_size = ConfigurationManager(
-            ).get_value("executor", "batch_mem_size")
-            if self._batch_mem_size is None:
-                self._batch_mem_size = 300000000  # 300mb
         self._skip_frames = skip_frames
         self._offset = offset
         self._limit = limit

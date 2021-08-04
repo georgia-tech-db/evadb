@@ -28,7 +28,8 @@ class DiskStorageExecutorTest(unittest.TestCase):
         class_instance = mock_class.return_value
 
         video_info = DataFrameMetadata('dataset', 'dummy.avi')
-        storage_plan = StoragePlan(video_info)
+        batch_mem_size = 3000
+        storage_plan = StoragePlan(video_info, batch_mem_size)
 
         executor = DiskStorageExecutor(storage_plan)
 
