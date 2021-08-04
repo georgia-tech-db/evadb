@@ -48,45 +48,39 @@ class StatementToPlanConvertor:
         for column in dataset.columns:
             self._column_map[column.name.lower()] = column
 
-    def visit_table_ref(self, video: TableRef):
-        """Bind table ref object and convert to Logical Get
-            or Logical Join
+    def visit_table_ref(self, table_ref: TableRef):
+        """Bind table ref object and convert to LogicalGet, LogicalJoin,
+            LogicalFunctionScan, or LogicalQueryDerivedGet
 
         Arguments:
             table {TableRef} - - [Input table ref object created by the parser]
         """
-        if video.is_select():
+        if table_ref.is_table_atom():
+            catalog_vid_metadata = bind_dataset(table_ref.table)
+            self._populate_column_map(catalog_vid_metadata)
+            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
+
+        if table_ref.is_func_expr():
+            self._plan = LogicalFunctionScan(func_expr=table_ref.table)
+
+        if table_ref.is_select():
             # NestedQuery
-            self.visit_select(video.table)
+            self.visit_select(table_ref.table)
             child_plan = self._plan
             self._plan = LogicalQueryDerivedGet()
             self._plan.append_child(child_plan)
 
-        if (video.table_info):
-            catalog_vid_metadata = bind_dataset(video.table_info)
-            self._populate_column_map(catalog_vid_metadata)
-            self._plan = LogicalGet(video, catalog_vid_metadata)
+        if table_ref.is_join():
+            join_plan = LogicalJoin(join_type=table_ref.table.join_type,
+                                    join_predicate=table_ref.table.predicate)
+            self.visit_table_ref(table_ref.table.left)
+            join_plan.append_child(self._plan)
+            self.visit_table_ref(table_ref.table.right)
+            join_plan.append_child(self._plan)
+            self._plan = join_plan
 
-        if (video.join):
-            if isinstance(video.join.left, TableRef):
-                self.visit_table_ref(video.join.left)
-            if isinstance(video.join.left, AbstractExpression):
-                self._plan = LogicalFunctionScan(func_expr=video.join.left)
-            left_child_plan = self._plan
-
-            if isinstance(video.join.right, TableRef):
-                self.visit_table_ref(video.join.right)
-            if isinstance(video.join.right, AbstractExpression):
-                self._plan = LogicalFunctionScan(func_expr=video.join.right)
-            right_child_plan = self._plan
-
-            self._plan = LogicalJoin(join_type=video.join.join_type,
-                                     join_predicate=video.join.predicate)
-            self._plan.append_child(left_child_plan)
-            self._plan.append_child(right_child_plan)
-
-        if video.sample_freq:
-            self._visit_sample(video.sample_freq)
+        if table_ref.sample_freq:
+            self._visit_sample(table_ref.sample_freq)
 
     def visit_select(self, statement: SelectStatement):
         """converter for select statement

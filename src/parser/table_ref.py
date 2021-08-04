@@ -83,8 +83,6 @@ class JoinNode:
 
 class TableRef:
     """
-    TableRef: Can be table, subquery, or join
-    TODO: port subquery code
     Attributes:
         table: can be one of the following based on the query type:
             TableInfo: expression of table name and database name,

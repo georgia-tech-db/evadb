@@ -480,3 +480,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         expected_plan = LogicalProject([TupleValueExpression('id')])
         expected_plan.append_child(filter)
         self.assertEqual(actual_plan, expected_plan)
+
+
+if __name__ == '__main__':
+    unittest.main()

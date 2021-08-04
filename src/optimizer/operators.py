@@ -527,10 +527,6 @@ class LogicalJoin(Operator):
     Attributes:
         join_type: JoinType
             Join type provided by the user - Lateral, Inner, Outer
-        left: TableRef
-            Left join table
-        right: TableRef
-            Right join table
         join_predicate: AbstractExpression
             condition/predicate expression used to join the tables
     """
