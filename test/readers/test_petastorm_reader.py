@@ -51,6 +51,7 @@ class PetastormLoaderTest(unittest.TestCase):
                                                                    mock):
         petastorm_reader = PetastormReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
+            batch_mem_size=3000,
             cur_shard=2,
             shard_count=3,
             predicate='pred')
@@ -70,6 +71,7 @@ class PetastormLoaderTest(unittest.TestCase):
                                                                     mock):
         petastorm_reader = PetastormReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
+            batch_mem_size=3000,
             cur_shard=-1,
             shard_count=-2)
         list(petastorm_reader._read())
@@ -89,7 +91,8 @@ class PetastormLoaderTest(unittest.TestCase):
     @patch("src.readers.petastorm_reader.make_reader")
     def test_should_read_data_using_petastorm_reader(self, mock):
         petastorm_reader = PetastormReader(
-            file_url=os.path.join(PATH_PREFIX, 'dummy.avi'))
+            file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
+            batch_mem_size=3000)
         dummy_values = map(lambda i: self.DummyRow(
             i, np.ones((2, 2, 3)) * i), range(3))
         mock.return_value = self.DummyReader(dummy_values)

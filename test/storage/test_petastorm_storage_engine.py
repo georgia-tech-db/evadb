@@ -51,7 +51,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
     def test_should_create_empty_table(self):
         petastorm = PetastormStorageEngine()
         petastorm.create(self.table)
-        records = list(petastorm.read(self.table))
+        records = list(petastorm.read(self.table, batch_mem_size=3000))
         self.assertEqual(records, [])
 
     def test_should_write_rows_to_table(self):
@@ -62,7 +62,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
         for batch in dummy_batches:
             petastorm.write(self.table, batch)
 
-        read_batch = list(petastorm.read(self.table))
+        read_batch = list(petastorm.read(self.table, batch_mem_size=3000))
         self.assertTrue(read_batch, dummy_batches)
 
     def test_should_return_even_frames(self):
@@ -76,8 +76,9 @@ class PetastormStorageEngineTest(unittest.TestCase):
         read_batch = list(
             petastorm.read(
                 self.table,
-                ["id"],
-                lambda id: id %
+                batch_mem_size=3000,
+                columns=["id"],
+                predicate_func=lambda id: id %
                 2 == 0))
         expected_batch = list(create_dummy_batches(
             filters=[

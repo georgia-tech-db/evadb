@@ -26,12 +26,16 @@ class LoadDataPlan(AbstractPlan):
     Arguments:
         table_metainfo(DataFrameMetadata): table metadata info to load into
         file_path(Path): file path from where we will load the data
+        batch_mem_size(int): memory size of the batch loaded from disk
         """
 
-    def __init__(self, table_metainfo: DataFrameMetadata, file_path: Path):
+    def __init__(self,
+                 table_metainfo: DataFrameMetadata,
+                 file_path: Path, batch_mem_size: int):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
         self._file_path = file_path
+        self._batch_mem_size = batch_mem_size
 
     @property
     def table_metainfo(self):
@@ -41,7 +45,13 @@ class LoadDataPlan(AbstractPlan):
     def file_path(self):
         return self._file_path
 
+    @property
+    def batch_mem_size(self):
+        return self._batch_mem_size
+
     def __str__(self):
-        print_str = 'LoadDataPlan(table_id={},file_path={})'.format(
-            self.table_metainfo, self.file_path)
+        print_str = 'LoadDataPlan(table_id={}, file_path={}, \
+            batch_mem_size={})'.format(self.table_metainfo,
+                                       self.file_path,
+                                       self.batch_mem_size)
         return print_str

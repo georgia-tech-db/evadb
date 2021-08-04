@@ -16,10 +16,8 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Iterator, Dict
 import pandas as pd
-import sys
 
 from src.models.storage.batch import Batch
-from src.configuration.configuration_manager import ConfigurationManager
 
 
 class AbstractReader(metaclass=ABCMeta):
@@ -30,25 +28,18 @@ class AbstractReader(metaclass=ABCMeta):
 
     Attributes:
         file_url (str): path to read data from
-        batch_mem_size (int, optional): used to compute the #frames to
+        batch_mem_size (int): used to compute the #frames to
                                             read in batch from video
         offset (int, optional): Start frame location in video
         """
 
-    def __init__(self, file_url: str, batch_mem_size=None,
+    def __init__(self, file_url: str, batch_mem_size: int,
                  offset=None):
         # Opencv doesn't support pathlib.Path so convert to raw str
         if isinstance(file_url, Path):
             file_url = str(file_url)
-
         self.file_url = file_url
         self.batch_mem_size = batch_mem_size
-        if self.batch_mem_size is None or self.batch_mem_size < 0:
-            self.batch_mem_size = ConfigurationManager().get_value(
-                "executor",
-                "batch_mem_size")
-            if self.batch_mem_size is None:
-                self.batch_mem_size = 300000000  # 300mb
         self.offset = offset
 
     def read(self) -> Iterator[Batch]:
@@ -58,14 +49,12 @@ class AbstractReader(metaclass=ABCMeta):
         """
 
         data_batch = []
-        # Fetch batch_mem_size from Config if not provided
-
         row_size = None
         for data in self._read():
             if row_size is None:
-                row_size = sys.getsizeof(pd.DataFrame([data]))
+                row_size = data['data'].nbytes
             data_batch.append(data)
-            if len(data_batch) * row_size > self.batch_mem_size:
+            if len(data_batch) * row_size >= self.batch_mem_size:
                 yield Batch(pd.DataFrame(data_batch))
                 data_batch = []
         if data_batch:
