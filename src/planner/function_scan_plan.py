@@ -14,21 +14,23 @@
 # limitations under the License.
 
 from src.planner.types import PlanNodeType
-from src.planner.abstract_join_plan import AbstractJoin
-from src.expression.abstract_expression import AbstractExpression
-from src.parser.types import JoinType
+from src.planner.abstract_plan import AbstractPlan
+from src.expression.function_expression import FunctionExpression
 
 
-class NestedLoopJoin(AbstractJoin):
+class FunctionScanPlan(AbstractPlan):
     """
-    This plan is used for storing information required for nested loop join.
+    This plan used to store metadata to perform function table scan.
 
     Arguments:
-        join_type: JoinType
-        join_predicate: AbstractExpression
+        func_expr(FunctionExpression): parameterized function expression that
+            reference columns from a table expression that precedes it.
     """
 
-    def __init__(self,
-                 join_type: JoinType,
-                 join_predicate: AbstractExpression):
-        super().__init__(PlanNodeType.JOIN, join_type, join_predicate)
+    def __init__(self, func_expr: FunctionExpression):
+        self._func_expr = func_expr
+        super().__init__(PlanNodeType.FUNCTION_SCAN)
+
+    @property
+    def func_expr(self):
+        return self._func_expr

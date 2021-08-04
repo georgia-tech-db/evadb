@@ -27,7 +27,7 @@ from src.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalJoin, LogicalFunctionScan)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -39,6 +39,8 @@ from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
 from src.planner.sample_plan import SamplePlan
+from src.planner.hash_join_plan import HashJoinPlan
+from src.planner.function_scan_plan import FunctionScanPlan
 
 
 class RuleType(Flag):
@@ -70,6 +72,8 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_JOIN_TO_HASHJOIN = auto()
+    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -80,6 +84,8 @@ class Promise(IntEnum):
     conflict
     """
     # IMPLEMENTATION RULES
+    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
+    LOGICAL_JOIN_TO_HASHJOIN = auto()
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
@@ -529,6 +535,40 @@ class LogicalLimitToPhysical(Rule):
         return after
 
 
+class LogicalJoinToHashJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_JOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+
+        super().__init__(RuleType.LOGICAL_JOIN_TO_NLJOIN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_JOIN_TO_NLJOIN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        after = HashJoinPlan(before.join_type, before.join_predicate)
+        return after
+
+
+class LogicalFunctionScanToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_FUNCTION_SCAN)
+        super().__init__(RuleType.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
+        after = FunctionScanPlan(before.func_expr)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -564,7 +604,9 @@ class RulesManager:
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()
+            LogicalLimitToPhysical(),
+            LogicalJoinToHashJoin(),
+            LogicalFunctionScanToPhysical()
         ]
 
     @property
