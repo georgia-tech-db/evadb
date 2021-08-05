@@ -534,18 +534,48 @@ class LogicalJoin(Operator):
     def __init__(self,
                  join_type: JoinType,
                  join_predicate: AbstractExpression = None,
+                 left_keys: List[DataFrameColumn] = None,
+                 right_keys: List[DataFrameColumn] = None,
                  children: List = None):
         super().__init__(OperatorType.LOGICALJOIN, children)
         self._join_type = join_type
-        self._join_predicate = join_predicate
+        self._predicate = join_predicate
+        self._left_keys = left_keys
+        self._right_keys = right_keys
 
     @property
     def join_type(self):
         return self._join_type
 
     @property
-    def join_predicate(self):
-        return self._join_predicate
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def left_keys(self):
+        return self._left_keys
+
+    @left_keys.setter
+    def left_keys(self, keys):
+        self._left_key = keys
+
+    @property
+    def right_keys(self):
+        return self._right_keys
+
+    @right_keys.setter
+    def right_keys(self, keys):
+        self._right_keys = keys
+
+    def lhs(self):
+        return self.children[0]
+
+    def rhs(self):
+        return self.children[1]
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -553,7 +583,9 @@ class LogicalJoin(Operator):
             return False
         return (is_subtree_equal
                 and self.join_type == other.join_type
-                and self.join_predicate == other.join_predicate)
+                and self.predicate == other.predicate
+                and self.left_keys == other.left_keys
+                and self.right_keys == other.right_keys)
 
 
 class LogicalFunctionScan(Operator):
