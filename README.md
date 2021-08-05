@@ -61,13 +61,18 @@ Please refer to [official doc](https://docs.docker.com/engine/install/).
 
 - Launch EVA database Server: `python eva.py`
 
-- Launch CLI: `python eva_client.py`
+- Launch CLI: `python eva_cmd_client.py`
 
-2. Run the `LOAD` command in the client terminal: (may take a while)
+2. Run the `UPLOAD` command in the client terminal:
 ```mysql
-LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;
+UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```
-3. Below is a basic query that should work on the client
+
+3. Run the `LOAD` command in the client terminal: (may take a while)
+```mysql
+LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
+```
+4. Below is a basic query that should work on the client
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
@@ -93,6 +98,41 @@ pre-commit install
 ```shell
 bash script/test/test.sh
 ```
+
+## Quickstart Tutorial
+
+### Configure GPU (Recommended)
+
+1. First, ensure your workstation has a torch-configured GPU. You can run the following code in a jupyter instance to verify the same. 
+
+    ```
+    import torch
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    print(device)
+    ```
+
+    Output of `cuda:0` indicates the presence of a GPU. (Note: 0 indicates the index of the GPU in system. Incase you have multiple GPUs, the index needs to be accordingly changed)
+
+2. Now configure the `executor` section in `eva.yml` as follows:
+
+    ```
+    gpus: {'127.0.1.1': [0]}
+    ```
+    
+    `127.0.1.1` is the loopback address on which the eva server is started. 0 refers to the GPU index to be used. 
+
+### Sample Notebook
+
+1. Open a terminal instance and start the server:
+    ```
+    python eva.py
+    ```
+
+2. Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to `tutorials/object_detection.ipynb`
+
+3. You might have to install ipywidgets to visualize the input video and output. Follow steps in `https://ipywidgets.readthedocs.io/en/latest/user_install.html` as per your jupyter environment. 
+
+4. Run each cell one by one. Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.  
 
 ## Architecture
 
