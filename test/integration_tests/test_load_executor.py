@@ -39,7 +39,9 @@ class LoadExecutorTest(unittest.TestCase):
 
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
         actual_batch = Batch(pd.DataFrame())
-        actual_batch = Batch.concat(StorageEngine.read(metadata), copy=False)
+        actual_batch = Batch.concat(StorageEngine.read(metadata,
+                                                       batch_mem_size=3000),
+                                    copy=False)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)

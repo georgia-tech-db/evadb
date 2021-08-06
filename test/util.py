@@ -27,6 +27,7 @@ from src.configuration.configuration_manager import ConfigurationManager
 
 
 NUM_FRAMES = 10
+FRAME_SIZE = 2 * 2 * 3
 CONFIG = ConfigurationManager()
 PATH_PREFIX = CONFIG.get_value('storage', 'path_prefix')
 

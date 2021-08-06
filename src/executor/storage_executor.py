@@ -28,4 +28,4 @@ class StorageExecutor(AbstractExecutor):
         pass
 
     def exec(self) -> Iterator[Batch]:
-        return StorageEngine.read(self.node.video)
+        return StorageEngine.read(self.node.video, self.node.batch_mem_size)
