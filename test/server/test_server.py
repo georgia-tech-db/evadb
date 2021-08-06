@@ -103,13 +103,13 @@ class ServerTests(unittest.TestCase):
 
         # data received
         data = mock.Mock()
-        data.decode = MagicMock(return_value="quit")
+        data.decode = MagicMock(return_value="4|quit")
         self.assertEqual(eva_server.data_received(data), "closed",
                          "transport not closed")
 
         asyncio.set_event_loop(None)
 
         with self.assertRaises(RuntimeError):
-            data.decode = MagicMock(return_value="query")
+            data.decode = MagicMock(return_value="5|query")
             # error due to lack of asyncio loop
             eva_server.data_received(data)

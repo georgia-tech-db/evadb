@@ -14,6 +14,7 @@ from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        LogicalCreateUDFToPhysical,
                                        LogicalInsertToPhysical,
                                        LogicalLoadToPhysical,
+                                       LogicalUploadToPhysical,
                                        LogicalSampleToUniformSample,
                                        LogicalGetToSeqScan,
                                        LogicalDerivedGetToPhysical,
@@ -59,6 +60,8 @@ class TestRules(unittest.TestCase):
                         Promise.IMPLEMENTATION_DELIMETER)
         self.assertTrue(Promise.LOGICAL_LOAD_TO_PHYSICAL <
                         Promise.IMPLEMENTATION_DELIMETER)
+        self.assertTrue(Promise.LOGICAL_UPLOAD_TO_PHYSICAL <
+                        Promise.IMPLEMENTATION_DELIMETER)
         self.assertTrue(Promise.LOGICAL_UNION_TO_PHYSICAL <
                         Promise.IMPLEMENTATION_DELIMETER)
 
@@ -82,6 +85,7 @@ class TestRules(unittest.TestCase):
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
+            LogicalUploadToPhysical(),
             LogicalSampleToUniformSample(),
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),

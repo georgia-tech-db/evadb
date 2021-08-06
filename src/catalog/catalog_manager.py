@@ -58,11 +58,9 @@ class CatalogManager(object):
 
     def _bootstrap_catalog(self):
         """Bootstraps catalog.
-
         This method runs all tasks required for using catalog. Currently,
         it includes only one task ie. initializing database. It creates the
         catalog database and tables if they do not exist.
-
         """
         LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
         init_db()
@@ -313,13 +311,12 @@ class CatalogManager(object):
         """
         return self._udf_service.delete_udf_by_name(udf_name)
 
-    def get_udf_io_by_name(self, udf_io_name: str) -> UdfIO:
+    def get_udf_io_by_name(self, udf: UdfMetadata, udf_io_name: str) -> UdfIO:
         """Returns the catalog object for the input udfio name
-
         Args:
+            udf (UDF): corresponding udf object
             udf_io_name (str): name to query the UDFIO catalog table
-
         Returns:
             UdfIO: catalog object found
         """
-        return self._udf_io_service.udf_io_by_name(udf_io_name)
+        return self._udf_io_service.udf_io_by_name(udf.id, udf_io_name)

@@ -20,8 +20,10 @@ ALL:                                 'ALL';
 ALTER:                               'ALTER';
 AND:                                 'AND';
 ANY:                                 'ANY';
+ANYDIM:                              'ANYDIM';
 AS:                                  'AS';
 ASC:                                 'ASC';
+BLOB:                                'BLOB';
 BY:                                  'BY';
 COLUMN:                              'COLUMN';
 CREATE:                              'CREATE';
@@ -60,6 +62,7 @@ OFFSET:                              'OFFSET';
 ON:                                  'ON';
 OR:                                  'OR';
 ORDER:                               'ORDER';
+PATH:                                'PATH';
 PRIMARY:                             'PRIMARY';
 REFERENCES:                          'REFERENCES';
 SAMPLE:                              'SAMPLE';
@@ -75,6 +78,7 @@ UNKNOWN:                             'UNKNOWN';
 UNLOCK:                              'UNLOCK';
 UNSIGNED:                            'UNSIGNED';
 UPDATE:                              'UPDATE';
+UPLOAD:                              'UPLOAD';
 USING:                               'USING';
 VALUES:                              'VALUES';
 WHERE:                               'WHERE';
@@ -113,6 +117,7 @@ FLOAT64:                             'FLOAT64';
 DECIMAL:                             'DECIMAL';
 STR:                                 'STR';
 DATETIME:                            'DATETIME';
+ANYTYPE:                             'ANYTYPE';
 
 // Group function Keywords
 

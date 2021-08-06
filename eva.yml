@@ -2,6 +2,7 @@ core:
   location: "eva_datasets"
   sqlalchemy_database_uri: 'mysql+pymysql://root@localhost/eva_catalog'
   application: "eva"
+  mode: "debug" #release
 
 executor:
   batch_size: 50
@@ -9,11 +10,13 @@ executor:
   gpus: {'130.207.125.60': [0]}
 storage:
   engine: "src.storage.petastorm_storage_engine.PetastormStorageEngine"
+  path_prefix: "/tmp"
 
 pyspark:
   property: {'spark.logConf': 'true',
-             'spark.driver.memory': '1g',
+             'spark.driver.memory': '10g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true'}
+  coalesce: 2
 
 server:
   host: "0.0.0.0"

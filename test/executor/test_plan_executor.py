@@ -27,7 +27,9 @@ from src.planner.insert_plan import InsertPlan
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
+from src.planner.upload_plan import UploadPlan
 from src.executor.load_executor import LoadDataExecutor
+from src.executor.upload_executor import UploadExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.executor.create_executor import CreateExecutor
 from src.executor.create_udf_executor import CreateUDFExecutor
@@ -110,6 +112,10 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, LoadDataExecutor)
 
+        plan = UploadPlan(MagicMock(), MagicMock())
+        executor = PlanExecutor(plan)._build_execution_tree(plan)
+        self.assertIsInstance(executor, UploadExecutor)
+
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_seq_scan_plan(
@@ -155,7 +161,7 @@ class PlanExecutorTest(unittest.TestCase):
 
     @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
     @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_create_insert_load_plans(
+    def test_execute_plan_for_create_insert_load_upload_plans(
             self, mock_clean, mock_build):
 
         # CreateExecutor
@@ -193,6 +199,17 @@ class PlanExecutorTest(unittest.TestCase):
         mock_build.reset_mock()
         mock_clean.reset_mock()
         tree = MagicMock(node=LoadDataPlan(None, None))
+        mock_build.return_value = tree
+        actual = list(PlanExecutor(None).execute_plan())
+        tree.exec.assert_called_once()
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+        # UploadExecutor
+        mock_build.reset_mock()
+        mock_clean.reset_mock()
+        tree = MagicMock(node=UploadPlan(None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()

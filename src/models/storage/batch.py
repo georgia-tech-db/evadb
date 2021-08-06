@@ -62,7 +62,7 @@ class Batch:
     @frames.setter
     def frames(self, values):
         if isinstance(values, DataFrame):
-            self._frames = values[sorted(values.columns)]
+            self._frames = values
         else:
             LoggingManager().log('Batch constructor not properly called!',
                                  LoggingLevel.DEBUG)
@@ -107,7 +107,8 @@ class Batch:
                % (self._frames, self._batch_size, self.identifier_column)
 
     def __eq__(self, other: 'Batch'):
-        return self.frames.equals(other.frames)
+        return self.frames[sorted(self.frames.columns)]\
+            .equals(other.frames[sorted(other.frames.columns)])
 
     def __getitem__(self, indices) -> 'Batch':
         """
@@ -128,6 +129,10 @@ class Batch:
                 end = len(self.frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
+        elif isinstance(indices, int):
+            return self._get_frames_from_indices([indices])
+        else:
+            raise TypeError('Invalid argument type: {}'.format(type(indices)))
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]

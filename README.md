@@ -73,6 +73,7 @@ UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```mysql
 LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```
+
 4. Below is a basic query that should work on the client
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;

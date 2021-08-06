@@ -31,7 +31,7 @@ ddlStatement
 
 dmlStatement
     : selectStatement | insertStatement | updateStatement
-    | deleteStatement | loadStatement
+    | deleteStatement | loadStatement | uploadStatement
     ;
 
 utilityStatement
@@ -160,9 +160,20 @@ loadStatement
       INTO tableName
     ;
 
+uploadStatement
+    : UPLOAD
+      PATH fileName
+      BLOB videoBlob
+    ;
+
 fileName
     : stringLiteral
     ;
+
+videoBlob
+    : stringLiteral
+    ;
+
 // details
 
 insertStatementValue
@@ -356,7 +367,7 @@ dottedId
 //    Literals
 
 decimalLiteral
-    : DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL
+    : DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL | ANYDIM
     ;
 
 stringLiteral
@@ -391,7 +402,7 @@ arrayType
     : INT8 | UINT8 | INT16 | INT32 | INT64
     | UNICODE | BOOL
     | FLOAT32 | FLOAT64 | DECIMAL
-    | STR | DATETIME
+    | STR | DATETIME | ANYTYPE
     ;
 
 dataType
@@ -399,7 +410,8 @@ dataType
     | TEXT lengthOneDimension?                        #dimensionDataType
     | INTEGER UNSIGNED?                               #integerDataType
     | FLOAT lengthTwoDimension? UNSIGNED?             #dimensionDataType
-    | NDARRAY arrayType lengthDimensionList           #arrayDataType
+    | NDARRAY arrayType? lengthDimensionList?         #arrayDataType
+    | ANYTYPE                                         #anyDataType
     ;
 
 lengthOneDimension
@@ -411,7 +423,7 @@ lengthTwoDimension
     ;
 
 lengthDimensionList
-    : '(' (decimalLiteral ',')* decimalLiteral ')'
+    : '(' ( decimalLiteral  ',')* decimalLiteral ')'
     ;
 
 //    Common Lists

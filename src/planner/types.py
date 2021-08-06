@@ -24,6 +24,7 @@ class PlanOprType(IntEnum):
     CREATE = auto()
     CREATE_UDF = auto()
     LOAD_DATA = auto()
+    UPLOAD = auto()
     UNION = auto()
     ORDER_BY = auto()
     LIMIT = auto()

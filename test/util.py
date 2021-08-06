@@ -16,13 +16,19 @@ import numpy as np
 import pandas as pd
 import cv2
 import os
+import shutil
 
 from src.models.storage.batch import Batch
 from src.models.catalog.frame_info import FrameInfo
 from src.models.catalog.properties import ColorSpace
 from src.udfs.abstract_udfs import AbstractClassifierUDF
+from src.udfs.udf_bootstrap_queries import init_builtin_udfs
+from src.configuration.configuration_manager import ConfigurationManager
+
 
 NUM_FRAMES = 10
+CONFIG = ConfigurationManager()
+PATH_PREFIX = CONFIG.get_value('storage', 'path_prefix')
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
@@ -57,17 +63,26 @@ def custom_list_of_dicts_equal(one, two):
 
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
-        os.remove('dummy.avi')
+        os.remove(os.path.join(PATH_PREFIX, 'dummy.avi'))
     except FileNotFoundError:
         pass
 
-    out = cv2.VideoWriter('dummy.avi',
+    out = cv2.VideoWriter(os.path.join(PATH_PREFIX, 'dummy.avi'),
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
     for i in range(num_frames):
         frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25,
                          dtype=np.uint8)
         out.write(frame)
+
+
+def copy_sample_video_to_prefix():
+    shutil.copyfile('data/ua_detrac/ua_detrac.mp4',
+                    os.path.join(PATH_PREFIX, 'ua_detrac.mp4'))
+
+
+def file_remove(path):
+    os.remove(os.path.join(PATH_PREFIX, path))
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES,
@@ -88,11 +103,16 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         yield Batch(pd.DataFrame(data))
 
 
+def load_inbuilt_udfs():
+    mode = ConfigurationManager().get_value('core', 'mode')
+    init_builtin_udfs(mode=mode)
+
+
 class DummyObjectDetector(AbstractClassifierUDF):
 
     @property
     def name(self) -> str:
-        return "dummyObjectDetector"
+        return "DummyObjectDetector"
 
     def __init__(self):
         super().__init__()
@@ -115,3 +135,34 @@ class DummyObjectDetector(AbstractClassifierUDF):
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 2 + 1]
         return [label]
+
+
+class DummyMultiObjectDetector(AbstractClassifierUDF):
+    """
+        Returns multiple objects for each frame
+    """
+    @property
+    def name(self) -> str:
+        return "DummyMultiObjectDetector"
+
+    def __init__(self):
+        super().__init__()
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return ['__background__', 'person', 'bicycle', 'car']
+
+    def classify(self, df: pd.DataFrame):
+        ret = pd.DataFrame()
+        ret['labels'] = df.apply(self.classify_one, axis=1)
+        return ret
+
+    def classify_one(self, frames: np.ndarray):
+        # odd are labeled bicycle and even person
+        i = int(frames[0][0][0][0] * 25) - 1
+        label = self.labels[i % 3 + 1]
+        return np.array([label, label])

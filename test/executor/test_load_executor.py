@@ -13,12 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import os
+import pandas as pd
 
 from mock import patch, MagicMock, call
 from src.executor.load_executor import LoadDataExecutor
+from src.models.storage.batch import Batch
+
+from test.util import PATH_PREFIX
 
 
 class LoadExecutorTest(unittest.TestCase):
+
     @patch('src.executor.load_executor.OpenCVReader')
     @patch('src.executor.load_executor.StorageEngine.create')
     @patch('src.executor.load_executor.StorageEngine.write')
@@ -34,8 +40,10 @@ class LoadExecutorTest(unittest.TestCase):
                 'file_path': file_path, 'table_metainfo': table_metainfo})
 
         load_executor = LoadDataExecutor(plan)
-        load_executor.exec()
-        cv_mock.assert_called_once_with(file_path)
+        batch = next(load_executor.exec())
+        cv_mock.assert_called_once_with(os.path.join(PATH_PREFIX, file_path))
         create_mock.assert_called_once_with(table_metainfo)
         write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
             table_metainfo, batch_frames[1]))
+        self.assertEqual(batch, Batch(pd.DataFrame(
+            [{'Video': file_path, 'Num Loaded Frames': 10}])))

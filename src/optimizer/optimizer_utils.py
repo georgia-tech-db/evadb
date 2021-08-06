@@ -126,7 +126,7 @@ def bind_function_expr(expr: FunctionExpression, column_mapping):
     # bind if the user queried a physical functional expression
     if udf_obj:
         if expr.output:
-            expr.output_obj = catalog.get_udf_io_by_name(expr.output)
+            expr.output_obj = catalog.get_udf_io_by_name(udf_obj, expr.output)
             if expr.output_obj is None:
                 LoggingManager().log(
                     'Invalid output {} selected for UDF {}'.format(

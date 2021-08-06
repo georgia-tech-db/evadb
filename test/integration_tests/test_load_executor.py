@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import os
 import pandas as pd
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.storage.storage_engine import StorageEngine
 from src.server.command_handler import execute_query_fetch_all
-from test.util import create_sample_video, create_dummy_batches
+from test.util import create_sample_video, create_dummy_batches, file_remove
 
 
 class LoadExecutorTest(unittest.TestCase):
@@ -31,7 +30,7 @@ class LoadExecutorTest(unittest.TestCase):
         create_sample_video()
 
     def tearDown(self):
-        os.remove('dummy.avi')
+        file_remove('dummy.avi')
 
     # integration test
     def test_should_load_video_in_table(self):

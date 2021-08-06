@@ -33,9 +33,8 @@ class ParserVisitorTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_should_query_specification_visitor(self):
-        ParserVisitor.visit = MagicMock()
-        mock_visit = ParserVisitor.visit
+    @mock.patch.object(ParserVisitor, 'visit')
+    def test_should_query_specification_visitor(self, mock_visit):
         mock_visit.side_effect = ["columns",
                                   {"from": ["tables"], "where": "predicates"}]
 
@@ -178,7 +177,8 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitLogicalExpression(ctx)
         self.assertEqual(expected, None)
 
-    def test_visit_string_literal_none(self):
+    @mock.patch.object(ParserVisitor, 'visitChildren')
+    def test_visit_string_literal_none(self, mock_visit):
         ''' Testing when string literal is None
             Function: visitStringLiteral
         '''
@@ -186,8 +186,8 @@ class ParserVisitorTests(unittest.TestCase):
         ctx = MagicMock()
         ctx.STRING_LITERAL.return_value = None
 
-        ParserVisitor.visitChildren = MagicMock()
-        mock_visit = ParserVisitor.visitChildren
+        # ParserVisitor.visitChildren = MagicMock()
+        # mock_visit = ParserVisitor.visitChildren
 
         visitor.visitStringLiteral(ctx)
         mock_visit.assert_has_calls([call(ctx)])
@@ -235,9 +235,6 @@ class ParserVisitorTests(unittest.TestCase):
         ''' Testing Base Exception error handling
             Function: visitQuerySpecification
         '''
-        ParserVisitor.visit = MagicMock()
-        ParserVisitor.visit
-
         visitor = ParserVisitor()
         ctx = MagicMock()
         child_1 = MagicMock()
@@ -252,6 +249,7 @@ class ParserVisitorTests(unittest.TestCase):
     ##################################################################
     # UDFs
     ##################################################################
+
     @mock.patch.object(ParserVisitor, 'visit')
     @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):

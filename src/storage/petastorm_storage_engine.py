@@ -21,6 +21,7 @@ from petastorm.etl.dataset_metadata import materialize_dataset
 from src.storage.abstract_storage_engine import AbstractStorageEngine
 from src.readers.petastorm_reader import PetastormReader
 from src.models.storage.batch import Batch
+from src.configuration.configuration_manager import ConfigurationManager
 
 from petastorm.unischema import dict_to_spark_row
 from petastorm.predicates import in_lambda
@@ -35,6 +36,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         self._spark = Session()
         self.spark_session = self._spark.get_session()
         self.spark_context = self._spark.get_context()
+        self.coalesce = ConfigurationManager().get_value('pyspark', 'coalesce')
 
     def _spark_url(self, table: DataFrameMetadata) -> str:
         """
@@ -54,7 +56,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
 
             self.spark_session.createDataFrame(empty_rdd,
                                                table.schema.pyspark_schema) \
-                .coalesce(1) \
+                .coalesce(self.coalesce) \
                 .write \
                 .mode('overwrite') \
                 .parquet(self._spark_url(table))
@@ -85,7 +87,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
                                                  x))
             self.spark_session.createDataFrame(rows_rdd,
                                                table.schema.pyspark_schema) \
-                .coalesce(1) \
+                .coalesce(self.coalesce) \
                 .write \
                 .mode('append') \
                 .parquet(self._spark_url(table))
