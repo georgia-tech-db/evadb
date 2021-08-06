@@ -18,7 +18,6 @@ from typing import Iterator, Dict
 import pandas as pd
 
 from src.models.storage.batch import Batch
-from src.configuration.configuration_manager import ConfigurationManager
 
 
 class AbstractReader(metaclass=ABCMeta):
@@ -29,18 +28,18 @@ class AbstractReader(metaclass=ABCMeta):
 
     Attributes:
         file_url (str): path to read data from
-        batch_size (int, optional): No. of frames to read in batch from video
+        batch_mem_size (int): used to compute the #frames to
+                                            read in batch from video
         offset (int, optional): Start frame location in video
         """
 
-    def __init__(self, file_url: str, batch_size=None,
+    def __init__(self, file_url: str, batch_mem_size: int,
                  offset=None):
         # Opencv doesn't support pathlib.Path so convert to raw str
         if isinstance(file_url, Path):
             file_url = str(file_url)
-
         self.file_url = file_url
-        self.batch_size = batch_size
+        self.batch_mem_size = batch_mem_size
         self.offset = offset
 
     def read(self) -> Iterator[Batch]:
@@ -50,16 +49,12 @@ class AbstractReader(metaclass=ABCMeta):
         """
 
         data_batch = []
-        # Fetch batch_size from Config if not provided
-        if self.batch_size is None or self.batch_size < 0:
-            self.batch_size = ConfigurationManager().get_value(
-                "executor", "batch_size")
-            if self.batch_size is None:
-                self.batch_size = 50
-
+        row_size = None
         for data in self._read():
+            if row_size is None:
+                row_size = data['data'].nbytes
             data_batch.append(data)
-            if len(data_batch) % self.batch_size == 0:
+            if len(data_batch) * row_size >= self.batch_mem_size:
                 yield Batch(pd.DataFrame(data_batch))
                 data_batch = []
         if data_batch:
