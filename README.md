@@ -105,7 +105,19 @@ bash script/test/test.sh
 
 ### Configure GPU (Recommended)
 
-1. First, ensure your workstation has a torch-configured GPU. You can run the following code in a jupyter instance to verify the same. 
+1. If your workstation has a GPU, you need to first set it up and configure it. You can run the following command first to check your hardware capabilities. 
+
+    ```
+    ubuntu-drivers devices
+    ```
+
+    If you do have an NVIDIA GPU, and its not been configured yet, follow all the steps in this link carefully. `https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31`. 
+
+    Some pointers:
+    - When installing NVIDIA drivers, check the correct driver version for your GPU to avoid compatibiility issues. 
+    - When installing cuDNN, you will have to create an account. Make sure you get the correct deb files for your OS and architecture. 
+
+2. You can run the following code in a jupyter instance to verify your GPU is working well along with PyTorch.
 
     ```
     import torch
