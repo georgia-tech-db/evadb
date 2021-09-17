@@ -40,24 +40,24 @@ class MidasDepthEstimator(PytorchAbstractUDF):
 
     def __init__(self, threshold=0.85):
         super().__init__()
+
+        # load model
         self.model_type = "MiDaS_small" # "DPT_Large", "DPT_Hybrid"
         self.model = torch.hub.load("intel-isl/MiDaS", self.model_type)
         self.model.eval()
+
+        # load the midas specific transforms
+        midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
+        self.midas_transforms = midas_transforms.small_transform
 
     @property
     def input_format(self) -> FrameInfo:
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
-    @property
-    def transforms(self) -> Compose:
-        midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
-        transform = midas_transforms.small_transform
-
-        return transform
-
-    def transform(self, images: np.ndarray):
-        print(f"[Ani] Inside overriden transform")
-        return self.transforms(images)
+    def forward(self, frames: List[np.ndarray]):
+        self.frame_shape = frames[0].shape[:2]
+        tens_batch = torch.cat([self.midas_transforms(x) for x in frames]).to(self.get_device())
+        return self.classify(tens_batch)
 
     @property
     def labels(self) -> List[str]:
@@ -101,38 +101,26 @@ class MidasDepthEstimator(PytorchAbstractUDF):
             predicted_scores (List[List[float]])
 
         """
-        print("[Ani] in function _get_predictions of MidasDepthEstimator")
-        print(f"[Ani] frames shape: {frames.shape}")
+        
+        # result dataframe to be returned
+        outcome = pd.DataFrame()
 
+        # TODO: EVA crashes when size is given as frames.shape[:2] (540, 960). Need to see why.
+        # for now giving a reduced size in same scale
         prediction = self.model(frames)
-        print("[Ani] forward pass done")
-        print(f"[Ani] prediction shape before interpolate {prediction.shape}")
-        print(f'[Ani] frames.shape[:2]: {frames.shape[:2]}')
-
-        # TODO: There seems to be a problem if I enter a bigger size. Need to see why. 
         prediction = torch.nn.functional.interpolate(
             prediction.unsqueeze(1),
-            size=(90, 160),
+            size=(180, 320),
             mode="bicubic",
             align_corners=False,
         ).squeeze()
 
-        print("[Ani] end predictions")
-        print(f"[Ani] prediction shape {prediction.shape}")
-
-        outcome = pd.DataFrame()
         output_frames = prediction.detach().cpu().numpy()
-
-        print(f"[Ani] output_frames shape {output_frames.shape}")
-        print("[Ani] cumulate results")
-
         outcome = outcome.append(
             {
                 'frames' : output_frames
             }, 
             ignore_index=True
         )
-
-        print(f"[Ani] outcome shape: {outcome.shape}")
 
         return outcome
