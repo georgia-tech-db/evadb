@@ -13,19 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-from src.models.storage.batch import Batch
+
+from src.planner.function_scan import FunctionScanPlan
 from src.executor.abstract_executor import AbstractExecutor
-from src.planner.storage_plan import StoragePlan
-from src.storage.storage_engine import StorageEngine
+from src.models.storage.batch import Batch
 
 
-class StorageExecutor(AbstractExecutor):
+class FunctionScanExecutor(AbstractExecutor):
+    """
+    Executes functional expression which yields a table of rows
+    Arguments:
+        node (AbstractPlan): FunctionScanPlan
 
-    def __init__(self, node: StoragePlan):
+    """
+
+    def __init__(self, node: FunctionScanPlan):
         super().__init__(node)
+        self.func_expr = node.func_expr
 
     def validate(self):
         pass
 
-    def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        return StorageEngine.read(self.node.video)
+    def exec(self, lateral_input: Batch, *args, **kwargs) -> Iterator[Batch]:
+        # this should be the leaf node in the execution plan
+        assert(len(self.children) != 0)
+        batch = kwargs.pop(lateral_input, Batch())
+
+        if not batch.empty():
+            res = self.func_expr.evaluate(batch)
+            yield res

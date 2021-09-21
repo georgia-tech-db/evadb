@@ -28,7 +28,7 @@ class CreateExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """Create table executor
 
         Calls the catalog to create metadata corresponding to the table.

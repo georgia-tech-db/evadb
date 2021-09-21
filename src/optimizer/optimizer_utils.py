@@ -23,10 +23,11 @@ from src.catalog.column_type import ColumnType, NdArrayType
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType, \
     TupleValueExpression
-
+from src.expression.expression_utils import get_columns_in_expression
 from src.parser.create_statement import ColumnDefinition, \
     ColConstraintInfo
 from src.utils.generic_utils import path_to_class, generate_file_path
+from src.optimizer.operators import Operator, OperatorType
 
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
@@ -216,3 +217,42 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     metadata = catalog.create_metadata(
         name, uri, col_metadata, identifier_column='id')
     return metadata
+
+
+def get_columns_in_subtree(opr: Operator) -> List['DataFrameColumn']:
+    columns = []
+    for child in opr.children:
+        if child.opr_type is OperatorType.LOGICAL_GET:
+            columns.extend(CatalogManager().get_columns_in_table(
+                child.table_metadata))
+        elif child.opr_type is OperatorType.LOGICAL_FUNCTION_SCAN:
+            columns.extend(get_columns_in_expression(child.func_expr))
+        else:
+            columns.extend(get_columns_in_subtree(child))
+    return columns
+
+
+def is_predicate_subset_of_opr_tree(expr: AbstractExpression, opr: Operator) -> bool:
+    """
+    Verify if the `expr` only assesses the columns which are subset of the
+    subtree rooted at `opr`
+    Arguments:
+        expr (AbstractExpression): the expression to verify
+        opr (Operator): the root opr of the subtree
+    """
+    columns = set(get_columns_in_expression(expr))
+    subtree_columns = set(get_columns_in_subtree(opr))
+    if columns.isubset(subtree_columns):
+        return True
+    else:
+        return False
+
+
+def extract_join_keys(tables: List[Union[LogicalGet, LogicalFunctionScan, LogicalQueryDerivedGet], predicates: List[AbstractExpression]=None):
+    # we do not support join with subqueries therefore skipping it
+    left_keys = right_keys = []
+    # if no equi-join predicates, we assume cartesian product
+    if predicates is None:
+        # lateral join
+        if right.opr_type == LOGICAL_FUNCTION_SCAN:
+            left_keys = right_keys = get_columns_in_expression(right.func_expr)

@@ -26,7 +26,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """Create udf executor
 
         Calls the catalog to create udf metadata.

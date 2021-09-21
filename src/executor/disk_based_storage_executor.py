@@ -39,6 +39,6 @@ class DiskStorageExecutor(AbstractStorageExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
         for batch in self.storage.read():
             yield batch

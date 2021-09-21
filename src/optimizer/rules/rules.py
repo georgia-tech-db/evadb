@@ -39,8 +39,13 @@ from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
 from src.planner.sample_plan import SamplePlan
-from src.planner.hash_join_plan import HashJoinPlan
+from src.planner.hash_join_build_plan import HashJoinBuildPlan
+from src.planner.hash_join_probe_plan import HashJoinProbePlan
 from src.planner.function_scan_plan import FunctionScanPlan
+from src.optimizer.optimizer_utils import is_predicate_subset_of_opr_tree
+from src.expression.expression_utils import \
+    (split_expr_tree_into_list_of_conjunct_exprs,
+     create_expr_tree_from_conjunct_exprs)
 
 
 class RuleType(Flag):
@@ -55,6 +60,7 @@ class RuleType(Flag):
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
 
@@ -100,6 +106,7 @@ class Promise(IntEnum):
     IMPLEMENTATION_DELIMETER = auto()
 
     # REWRITE RULES
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
@@ -330,6 +337,96 @@ class PushdownProjectThroughSample(Rule):
         return sample
 
 
+class PushDownFilterThroughJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern_join = Pattern(OperatorType.LOGICAL_JOIN)
+        pattern.append_child(pattern_join)
+        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_FILTER_THROUGH_JOIN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        # nothing else to check if logical match found return true
+        return True
+
+    def _extract_tuple_valued_exprs(self, expr, tuple_list):
+        if isinstance(expr, TupleValueExpression):
+            tuple_list.append(expr.col_name.lower())
+
+        for child in expr.children:
+            self._extract_tuple_valued_exprs(child, tuple_list)
+
+    def _is_subset(self, expr, table):
+        req_cols = []
+        self._extract_tuple_valued_exprs(expr, req_cols)
+        if isinstance(table, LogicalGet):
+            columns = []
+            for column in table.dataset_metadata.columns:
+                columns.append(column.name.lower())
+            return all(i in columns for i in req_cols)
+        elif isinstance(table, LogicalFunctionScan):
+            # Hard coding udf outputs label, bbox, score
+            columns = ['labels', 'bboxes', 'scores']
+            return all(i in columns for i in req_cols)
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        predicate = before.predicate
+        join = before.children[0]
+        left = join.children.lhs()
+        right = join.children.rhs()
+
+        conjunction_exprs = []
+        conjunction_exprs = split_expr_tree_into_list_of_conjunct_exprs(
+            predicate)
+        left_predicates = []
+        right_predicates = []
+        join_predicates = []
+
+        # extract the exprs that only access the left or right columns
+        for expr in conjunction_exprs:
+            if is_predicate_subset_of_opr_tree(expr, left):
+                left_predicates.append(expr)
+            elif is_predicate_subset_of_opr_tree(expr, right):
+                right_predicates.append(expr)
+            else:
+                join_predicates.append(expr)
+
+        # push down the predicates through join
+        #      LogicalJoin                 LogicalJoin
+        #    /          \        ->       /         \
+        #   Left        Right          Filter      Filter
+        #                             /                 \
+        #                           Left                Right
+
+        if len(left_predicates):
+            filter = LogicalFilter(create_expr_tree_from_conjunct_exprs(
+                left_predicates))
+            filter.append_child(left)
+            left = filter
+        if len(right_predicates):
+            filter = LogicalFilter(create_expr_tree_from_conjunct_exprs(
+                right_predicates))
+            filter.append_child(right)
+            right = filter
+
+        # If there is no join_predicates, we extract the overlapping columns
+        # to assign the left and right join_keys. In case, there is no
+        # common key, we assume cartesian product and set
+        # the join_keys to empty list.
+        if join_predicates is None:
+            join.left_keys, join.right_keys = extract_join_keys(tables=[
+                                                                left, right])
+        else:
+            join.left_keys, join.right_keys = extract_join_keys(
+                tables=[left, right], predicates=join_predicates)
+
+        join.predicate = create_expr_tree_from_conjunct_exprs(join_predicates)
+
+        join.children = [left, right]
+        return join
+
 # REWRITE RULES END
 ##############################################
 
@@ -549,9 +646,27 @@ class LogicalJoinToHashJoin(Rule):
     def check(self, before: Operator, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalJoin, context: OptimizerContext):
-        after = HashJoinPlan(before.join_type, before.join_predicate)
-        return after
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        #          LogicalHashJoin                       HashJoinProbePlan
+        #          /           \     ->                  /               \
+        #        R1             R2        HashJoinBuildPlan               R2
+        #                                              /
+        #                                            R1
+
+        r1 = join_node.lhs
+        r2 = join_node.rhs
+
+        build_side = HashJoinBuildPlan(join_node.join_type,
+                                       join_node.left_keys)
+        build_side.append_child(r1)
+
+        probe_side = HashJoinProbePlan(join_node.join_type,
+                                       join_node.right_keys,
+                                       join_node.predicate)
+        probe_side.append_child(build_side)
+        probe_side.append_child(r2)
+
+        return probe_side
 
 
 class LogicalFunctionScanToPhysical(Rule):
@@ -590,7 +705,8 @@ class RulesManager:
             EmbedFilterIntoDerivedGet(),
             EmbedProjectIntoDerivedGet(),
             PushdownFilterThroughSample(),
-            PushdownProjectThroughSample()
+            PushdownProjectThroughSample(),
+            PushDownFilterThroughJoin(),
         ]
 
         self._implementation_rules = [

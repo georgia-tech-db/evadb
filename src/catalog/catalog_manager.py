@@ -192,6 +192,10 @@ class CatalogManager(object):
 
         return col_ids
 
+    def get_columns_in_table(self, table_metadata: DataFrameMetadata) -> List[DataFrameColumn]:
+        return self._column_service.columns_by_id_and_dataset_id(
+            table_metadata.id)
+
     def create_column_metadata(
         self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
         dimensions: List[int]

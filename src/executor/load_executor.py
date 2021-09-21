@@ -34,7 +34,7 @@ class LoadDataExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """
         Read the input video using opencv and persist data
         using storage engine

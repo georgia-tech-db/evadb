@@ -31,7 +31,7 @@ class UploadExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self):
+    def exec(self, *args, **kwargs):
         """
         Upload the video blob into the location defined by 'path'
         on the server. The video blob is in base64 format, so
