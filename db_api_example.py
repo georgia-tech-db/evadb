@@ -2,7 +2,8 @@ import asyncio
 import sys
 
 from typing import List
-from src.server.db_api import connect, connect_async
+from eva.server.db_api import connect, connect_async
+
 
 async def run_async(query: List[str]):
     hostname = '0.0.0.0'
@@ -16,6 +17,7 @@ async def run_async(query: List[str]):
         print('Query: %s' % onequery)
         print(response)
 
+
 def run(query: List[str]):
     hostname = '0.0.0.0'
     port = 5432
@@ -28,6 +30,7 @@ def run(query: List[str]):
         print('Query: %s' % onequery)
         print(response)
 
+
 if __name__ == '__main__':
     queries = ['INVALID QUERY',
                'UPLOAD INFILE "data/ua_detrac/ua_detrac.mp4" \
@@ -39,4 +42,3 @@ if __name__ == '__main__':
         asyncio.run(run_async(queries))
     else:
         run([queries])
-

@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from src.models.storage.batch import Batch
-from src.models.server.response import ResponseStatus, Response
+from eva.models.storage.batch import Batch
+from eva.models.server.response import ResponseStatus, Response
 from test.util import create_dataframe
 
 
@@ -27,7 +27,3 @@ class ResponseTest(unittest.TestCase):
                             batch=batch)
         response2 = Response.from_json(response.to_json())
         self.assertEqual(response, response2)
-
-
-
-

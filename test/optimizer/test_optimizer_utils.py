@@ -16,21 +16,22 @@ import unittest
 
 from mock import patch, MagicMock, call
 
-from src.expression.function_expression import FunctionExpression
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.optimizer.optimizer_utils import (bind_dataset,
+                                           bind_tuple_value_expr,
                                            column_definition_to_udf_io,
                                            bind_function_expr,
                                            bind_predicate_expr,
                                            bind_columns_expr,
                                            create_video_metadata)
-from src.parser.create_statement import ColumnDefinition
-from src.catalog.column_type import ColumnType, NdArrayType
+from eva.parser.create_statement import ColumnDefinition
+from eva.catalog.column_type import ColumnType, NdArrayType
 
 
 class OptimizerUtilsTest(unittest.TestCase):
 
-    @patch('src.optimizer.optimizer_utils.CatalogManager')
+    @patch('eva.optimizer.optimizer_utils.CatalogManager')
     def test_bind_dataset(self, mock):
         video = MagicMock()
         catalog = mock.return_value
@@ -45,8 +46,8 @@ class OptimizerUtilsTest(unittest.TestCase):
         bind_tuple_value_expr(tuple_expr, column_map)
         self.assertEqual(tuple_expr.col_object, column_map['col1'])
 
-    @patch('src.optimizer.optimizer_utils.CatalogManager')
-    @patch('src.optimizer.optimizer_utils.path_to_class')
+    @patch('eva.optimizer.optimizer_utils.CatalogManager')
+    @patch('eva.optimizer.optimizer_utils.path_to_class')
     def test_bind_function_value_expr(self, mock_str_path, mock_catalog):
         func_expr = FunctionExpression(None, name='temp')
         mock_output = MagicMock()
@@ -85,25 +86,25 @@ class OptimizerUtilsTest(unittest.TestCase):
             self.assertEqual(io.is_input, True)
             self.assertEqual(io.udf_id, None)
 
-    @patch('src.optimizer.optimizer_utils.bind_function_expr')
+    @patch('eva.optimizer.optimizer_utils.bind_function_expr')
     def test_bind_predicate_calls_bind_func_expr_if_type_functional(self,
                                                                     mock_bind):
         func_expr = FunctionExpression(None, name='temp')
         bind_predicate_expr(func_expr, {})
         mock_bind.assert_called_with(func_expr, {})
 
-    @patch('src.optimizer.optimizer_utils.bind_function_expr')
+    @patch('eva.optimizer.optimizer_utils.bind_function_expr')
     def test_bind_columns_calls_bind_func_expr_if_type_functional(self,
                                                                   mock_bind):
         func_expr = FunctionExpression(None, name='temp')
         bind_columns_expr([func_expr], {})
         mock_bind.assert_called_with(func_expr, {})
 
-    @patch('src.optimizer.optimizer_utils.CatalogManager')
-    @patch('src.optimizer.optimizer_utils.ColumnDefinition')
-    @patch('src.optimizer.optimizer_utils.ColConstraintInfo')
-    @patch('src.optimizer.optimizer_utils.create_column_metadata')
-    @patch('src.optimizer.optimizer_utils.generate_file_path')
+    @patch('eva.optimizer.optimizer_utils.CatalogManager')
+    @patch('eva.optimizer.optimizer_utils.ColumnDefinition')
+    @patch('eva.optimizer.optimizer_utils.ColConstraintInfo')
+    @patch('eva.optimizer.optimizer_utils.create_column_metadata')
+    @patch('eva.optimizer.optimizer_utils.generate_file_path')
     def test_create_video_metadata(self, m_gfp, m_ccm, m_cci, m_cd, m_cm):
         catalog_ins = MagicMock()
         expected = 'video_metadata'

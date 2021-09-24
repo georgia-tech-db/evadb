@@ -1,10 +1,10 @@
 # EVA (Exploratory Video Analytics)
 
-[![Build Status](https://travis-ci.org/georgia-tech-db/eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/eva)
+<!-- [![Build Status](https://travis-ci.org/georgia-tech-db/eva.svg?branch=master)](https://travis-ci.com/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evagatech.readthedocs.io/en/latest/index.html)
-
+[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evagatech.readthedocs.io/en/latest/index.html) [![Join the chat at https://gitter.im/georgia-tech-db/eva](https://badges.gitter.im/georgia-tech-db/eva.svg)](https://gitter.im/georgia-tech-db/eva?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+ -->
 ## What is EVA?
 
 EVA is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
@@ -30,10 +30,11 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 Installation of EVA involves setting a virtual environment using [miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and configuring git hooks.
 
 1. Clone the repository
+<!-- 
 ```shell
 git clone https://github.com/georgia-tech-db/eva.git
 ```
-
+ -->
 2. Install the dependencies.
 ```shell
 sh script/install/before_install.sh
@@ -53,8 +54,8 @@ mysql -u root
 ```
 refer to [askubuntu](https://askubuntu.com/questions/766334/cant-login-as-mysql-user-root-from-normal-user-account-in-ubuntu-16-04)
 
-4. Install `docker` and `docker-compose`.
-Please refer to [official doc](https://docs.docker.com/engine/install/).
+<!-- 4. Install `docker` and `docker-compose`.
+Please refer to [official doc](https://docs.docker.com/engine/install/). -->
 
 ## Client Testing
 
@@ -81,11 +82,11 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
 
 
-## Docker
+<!-- ## Docker
 
 1. Standup EVA testing for CPU/GPU hardware.
 ```shell
-docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up -->
 ```
 
 ## Development
@@ -161,10 +162,10 @@ EVA consists of four core components:
 
 To file a bug or request a feature, please file a GitHub issue. Pull requests are welcome.
 
-## Contributors
+<!-- ## Contributors
 
 See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
 ## License
 Copyright (c) 2018-2020 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
-Licensed under the [Apache License](LICENSE).
+Licensed under the [Apache License](LICENSE). -->

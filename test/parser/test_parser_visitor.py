@@ -20,12 +20,12 @@ import numpy as np
 from unittest import mock
 from unittest.mock import MagicMock, call
 
-from src.models.storage.batch import Batch
-from src.parser.parser_visitor import ParserVisitor
-from src.parser.evaql.evaql_parser import evaql_parser
-from src.expression.abstract_expression import ExpressionType
-from src.expression.function_expression import ExecutionMode
-from src.parser.table_ref import TableRef
+from eva.models.storage.batch import Batch
+from eva.parser.parser_visitor import ParserVisitor
+from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.function_expression import ExecutionMode
+from eva.parser.table_ref import TableRef
 from antlr4 import TerminalNode
 
 
@@ -251,7 +251,7 @@ class ParserVisitorTests(unittest.TestCase):
     ##################################################################
 
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
+    @mock.patch('eva.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):
         ctx = MagicMock()
         udf_name = 'name'
@@ -293,7 +293,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(actual, [1, 2])
 
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor._functions.CreateUDFStatement')
+    @mock.patch('eva.parser.parser_visitor._functions.CreateUDFStatement')
     def test_visit_create_udf(self, create_udf_mock, visit_mock):
         ctx = MagicMock()
         ctx.children = [MagicMock() for i in range(5)]
@@ -342,7 +342,7 @@ class ParserVisitorTests(unittest.TestCase):
     # LOAD DATA Statement
     ##################################################################
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor._load_statement.LoadDataStatement')
+    @mock.patch('eva.parser.parser_visitor._load_statement.LoadDataStatement')
     def test_visit_load_statement(self, mock_load, mock_visit):
         ctx = MagicMock()
         table = 'myVideo'

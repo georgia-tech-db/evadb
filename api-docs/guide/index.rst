@@ -5,6 +5,8 @@ Guide
 
 .. toctree::
     overview
-    setup
+    Get Started<getstarted>
+    Tutorials<tutorials>
+    User-Defined Functions (UDFs)<udf>
     contributing
     license

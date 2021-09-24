@@ -2,9 +2,9 @@ import unittest
 
 from mock import patch, MagicMock
 
-from src.optimizer.optimizer_context import OptimizerContext
-from src.optimizer.group_expression import GroupExpression
-from src.optimizer.group import INVALID_GROUP_ID
+from eva.optimizer.optimizer_context import OptimizerContext
+from eva.optimizer.group_expression import GroupExpression
+from eva.optimizer.group import INVALID_GROUP_ID
 
 
 class TestOptimizerContext(unittest.TestCase):
@@ -25,10 +25,10 @@ class TestOptimizerContext(unittest.TestCase):
         opt_ctxt.xform_opr_to_group_expr(fake_opr, 0, True)
         self.assertEqual(opt_ctxt.memo.get_group_id(fake_opr), 0)
 
-    @patch('src.optimizer.operators.Operator')
-    @patch('src.optimizer.operators.Operator')
-    @patch('src.optimizer.operators.Operator')
-    @patch('src.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
     def test_opr_to_group_expr(self,
                                child1_opr,
                                child2_opr,
