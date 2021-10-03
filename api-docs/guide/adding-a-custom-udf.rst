@@ -16,7 +16,7 @@ Implementing your own UDF
 
     During each step you can use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/src/udfs/fastrcnn_object_detector.py>`_  as reference. 
     
-    1. Create a new file under `src/udfs/` and give it a descriptive name. eg: `fastrcnn_object_detector.py`, `midas_depth_estimator.py`. 
+    1. Create a new file under `udfs/` and give it a descriptive name. eg: `fastrcnn_object_detector.py`, `midas_depth_estimator.py`. (Note that, UDFs packaged along with EVA are present inside `src/udfs/`)
     
     2. Here, you need to create and implement a class that derives from `PytorchAbstractUDF`.  
 
