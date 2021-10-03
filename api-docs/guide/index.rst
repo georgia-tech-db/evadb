@@ -5,6 +5,7 @@ Guide
 
 .. toctree::
     overview
-    setup
+    Get Started<getstarted>
+    Tutorials<tutorials>
     contributing
     license
