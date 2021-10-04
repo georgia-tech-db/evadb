@@ -1,18 +1,18 @@
-.. _guide-adding-a-custom-udf:
+.. _guide-udf:
 
-Adding a custom UDF 
+User-Defined Functions
 ===================
 
     This section is an overview of how you can create and execute a custom UDF. 
 
 Introduction to UDFs
-=====================
+-------
 
     * UDFs are user-defined functions, used to achieve a specific functionality on any video loaded to EVA. 
     * As the name suggests, these functions are defined and implemented by users. Once the UDFs are registered, you can 'call' these functions in your queries. 
 
 Implementing your own UDF
-=========================
+-------
 
     During each step you can use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/src/udfs/fastrcnn_object_detector.py>`_  as reference. 
     
@@ -89,7 +89,7 @@ Implementing your own UDF
 
 
 Registering and executing the UDF
-=================================
+-------
 
 Now that you have implemented your UDF we need to register it into EVA and execute it. 
 
