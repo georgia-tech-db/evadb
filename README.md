@@ -161,10 +161,10 @@ EVA consists of four core components:
 
 To file a bug or request a feature, please file a GitHub issue. Pull requests are welcome.
 
-## Contributors
+<!-- ## Contributors
 
 See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
 ## License
 Copyright (c) 2018-2020 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
-Licensed under the [Apache License](LICENSE).
+Licensed under the [Apache License](LICENSE). -->
