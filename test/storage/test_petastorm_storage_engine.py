@@ -15,10 +15,10 @@
 import shutil
 import unittest
 
-from src.catalog.models.df_metadata import DataFrameMetadata
-from src.storage.petastorm_storage_engine import PetastormStorageEngine
-from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.storage.petastorm_storage_engine import PetastormStorageEngine
+from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.column_type import ColumnType, NdArrayType
 
 from test.util import create_dummy_batches
 from test.util import NUM_FRAMES

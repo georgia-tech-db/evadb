@@ -15,8 +15,8 @@
 import unittest
 import pandas as pd
 
-from src.executor.seq_scan_executor import SequentialScanExecutor
-from src.models.storage.batch import Batch
+from eva.executor.seq_scan_executor import SequentialScanExecutor
+from eva.models.storage.batch import Batch
 from test.util import create_dataframe
 from test.executor.utils import DummyExecutor
 

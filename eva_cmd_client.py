@@ -14,8 +14,8 @@
 # limitations under the License.
 import argparse
 
-from src.server.interpreter import start_cmd_client
-from src.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.server.interpreter import start_cmd_client
+from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 def eva_client(host='0.0.0.0', port=5432):

@@ -18,8 +18,8 @@ import unittest
 import cv2
 import pandas as pd
 
-from src.models.storage.batch import Batch
-from src.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
+from eva.models.storage.batch import Batch
+from eva.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
 NUM_FRAMES = 10
 

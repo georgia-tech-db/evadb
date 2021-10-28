@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from src.catalog.catalog_manager import CatalogManager
-from src.server.command_handler import execute_query_fetch_all
+from eva.catalog.catalog_manager import CatalogManager
+from eva.server.command_handler import execute_query_fetch_all
 
 from test.util import copy_sample_video_to_prefix, file_remove
 

@@ -19,7 +19,7 @@ import contextlib
 
 from mock import patch
 from unittest.mock import MagicMock
-from src.server.interpreter import EvaCommandInterpreter, start_cmd_client
+from eva.server.interpreter import EvaCommandInterpreter, start_cmd_client
 
 
 class InterpreterTests(unittest.TestCase):
@@ -41,7 +41,7 @@ class InterpreterTests(unittest.TestCase):
         self.assertEqual(SystemExit, prompt.do_quit(None))
         self.assertEqual(SystemExit, prompt.do_exit(None))
 
-    @patch('src.server.interpreter.EvaCommandInterpreter.emptyline')
+    @patch('eva.server.interpreter.EvaCommandInterpreter.emptyline')
     def test_onecmd_with_emptyline(self, mock_emptyline):
         prompt = EvaCommandInterpreter()
         mock_emptyline.return_value = False
@@ -66,11 +66,11 @@ class InterpreterTests(unittest.TestCase):
                 prompt.cursor.execute.assert_called_once_with(query)
                 prompt.cursor.fetch_all.assert_called_once_with()
                 self.assertTrue('123' in buf.getvalue())
-        
+
     # We are mocking the connect funciton call that gets imported into
     # interpreter instead of the one in db_api.
-    @patch('src.server.interpreter.connect')
-    @patch('src.server.interpreter.EvaCommandInterpreter.cmdloop')
+    @patch('eva.server.interpreter.connect')
+    @patch('eva.server.interpreter.EvaCommandInterpreter.cmdloop')
     def test_start_cmd_client(self, mock_cmdloop, mock_connect):
         class MOCKCONNECTION:
             def cursor(self):
@@ -84,4 +84,3 @@ class InterpreterTests(unittest.TestCase):
 
         mock_connect.assert_called_once_with(host, port)
         mock_cmdloop.assert_called_once()
-
