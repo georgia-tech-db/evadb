@@ -20,7 +20,7 @@ from src.expression.abstract_expression import AbstractExpression
 from src.planner.abstract_plan import AbstractPlan
 from src.parser.types import JoinType
 
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 
 
 class AbstractJoin(AbstractPlan):
@@ -34,7 +34,7 @@ class AbstractJoin(AbstractPlan):
     """
 
     def __init__(self,
-                 node_type: PlanNodeType,
+                 node_type: PlanOprType,
                  join_type: JoinType,
                  join_predicate: AbstractExpression):
         super().__init__(node_type)

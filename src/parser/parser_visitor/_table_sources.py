@@ -71,13 +71,13 @@ class TableSources(evaql_parserVisitor):
             self, ctx: evaql_parser.SubqueryTableItemContext):
         return self.visit(ctx.subqueryTableSourceItem())
 
-    def visitLateralFunctionCallItem(
-            self, ctx: evaql_parser.LateralFunctionCallItemContext):
-        return self.visit(ctx.functionCall())
+    # def visitLateralFunctionCallItem(
+    #         self, ctx: evaql_parser.LateralFunctionCallItemContext):
+    #     return self.visit(ctx.functionCall())
 
-    def visitSubqueryTableSourceItem(
-            self, ctx: evaql_parser.SubqueryTableSourceItemContext):
-        return self.visit(ctx.selectStatement())
+    # def visitSubqueryTableSourceItem(
+    #         self, ctx: evaql_parser.SubqueryTableSourceItemContext):
+    #     return self.visit(ctx.selectStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
         left_selectStatement = self.visit(ctx.left)

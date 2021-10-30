@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.planner.types import PlanNodeType
+from src.planner.types import PlanOprType
 from src.planner.abstract_plan import AbstractPlan
 from src.expression.function_expression import FunctionExpression
 
@@ -29,7 +29,7 @@ class FunctionScanPlan(AbstractPlan):
 
     def __init__(self, func_expr: FunctionExpression):
         self._func_expr = func_expr
-        super().__init__(PlanNodeType.FUNCTION_SCAN)
+        super().__init__(PlanOprType.FUNCTION_SCAN)
 
     @property
     def func_expr(self):

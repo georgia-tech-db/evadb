@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
 from src.expression.abstract_expression import AbstractExpression, ExpressionType
 from src.expression.tuple_value_expression import TupleValueExpression
 from src.expression.logical_expression import LogicalExpression
@@ -69,6 +71,6 @@ def create_expr_tree_from_conjunct_exprs(self, conjunct_exprs: List[AbstractExpr
             return conjunct_exprs.pop()
 
         right = conjunct_exprs.pop()
-        left = self.combine_expr_list_using_conjunction(conjunct_exprs))
+        left = self.combine_expr_list_using_conjunction(conjunct_exprs)
         root=LogicalExpression(ExpressionType.LOGICAL_AND, left, right)
         return root

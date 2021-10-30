@@ -23,7 +23,7 @@ from src.catalog.column_type import ColumnType, NdArrayType
 from src.expression.abstract_expression import AbstractExpression
 from src.expression.tuple_value_expression import ExpressionType, \
     TupleValueExpression
-from src.expression.expression_utils import get_columns_in_expression
+from src.expression.expression_utils import get_columns_in_predicate
 from src.parser.create_statement import ColumnDefinition, \
     ColConstraintInfo
 from src.utils.generic_utils import path_to_class, generate_file_path
@@ -248,11 +248,11 @@ def is_predicate_subset_of_opr_tree(expr: AbstractExpression, opr: Operator) -> 
         return False
 
 
-def extract_join_keys(tables: List[Union[LogicalGet, LogicalFunctionScan, LogicalQueryDerivedGet], predicates: List[AbstractExpression]=None):
-    # we do not support join with subqueries therefore skipping it
-    left_keys = right_keys = []
-    # if no equi-join predicates, we assume cartesian product
-    if predicates is None:
-        # lateral join
-        if right.opr_type == LOGICAL_FUNCTION_SCAN:
-            left_keys = right_keys = get_columns_in_expression(right.func_expr)
+# def extract_join_keys(tables: List[Union[LogicalGet, LogicalFunctionScan, LogicalQueryDerivedGet], predicates: List[AbstractExpression]=None):
+#     # we do not support join with subqueries therefore skipping it
+#     left_keys = right_keys = []
+#     # if no equi-join predicates, we assume cartesian product
+#     if predicates is None:
+#         # lateral join
+#         if right.opr_type == LOGICAL_FUNCTION_SCAN:
+#             left_keys = right_keys = get_columns_in_expression(right.func_expr)

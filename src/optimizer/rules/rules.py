@@ -340,7 +340,7 @@ class PushdownProjectThroughSample(Rule):
 class PushDownFilterThroughJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern_join = Pattern(OperatorType.LOGICAL_JOIN)
+        pattern_join = Pattern(OperatorType.LOGICALJOIN)
         pattern.append_child(pattern_join)
         super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
 
@@ -634,14 +634,14 @@ class LogicalLimitToPhysical(Rule):
 
 class LogicalJoinToHashJoin(Rule):
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICAL_JOIN)
+        pattern = Pattern(OperatorType.LOGICALJOIN)
         pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern.append_child(Pattern(OperatorType.DUMMY))
 
-        super().__init__(RuleType.LOGICAL_JOIN_TO_NLJOIN, pattern)
+        super().__init__(RuleType.LOGICAL_JOIN_TO_HASHJOIN, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_JOIN_TO_NLJOIN
+        return Promise.LOGICAL_JOIN_TO_HASHJOIN
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
