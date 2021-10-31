@@ -108,7 +108,7 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertIsInstance(executor, CreateUDFExecutor)
 
         # LoadDataExecutor
-        plan = LoadDataPlan(MagicMock(), MagicMock())
+        plan = LoadDataPlan(MagicMock(), MagicMock(), MagicMock())
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, LoadDataExecutor)
 
@@ -198,7 +198,7 @@ class PlanExecutorTest(unittest.TestCase):
         # LoadDataExecutor
         mock_build.reset_mock()
         mock_clean.reset_mock()
-        tree = MagicMock(node=LoadDataPlan(None, None))
+        tree = MagicMock(node=LoadDataPlan(None, None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
@@ -234,7 +234,7 @@ class PlanExecutorTest(unittest.TestCase):
             batch_1,
             batch_2])
 
-        storage_plan = StoragePlan(video)
+        storage_plan = StoragePlan(video, batch_mem_size=3000)
         seq_scan = SeqScanPlan(predicate=dummy_expr, column_ids=[])
         seq_scan.append_child(storage_plan)
 

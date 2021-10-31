@@ -50,7 +50,8 @@ class LoadDataExecutor(AbstractExecutor):
         StorageEngine.create(self.node.table_metainfo)
         num_loaded_frames = 0
         video_reader = OpenCVReader(
-            os.path.join(self.path_prefix, self.node.file_path))
+            os.path.join(self.path_prefix, self.node.file_path),
+            batch_mem_size=self.node.batch_mem_size)
         for batch in video_reader.read():
             StorageEngine.write(self.node.table_metainfo, batch)
             num_loaded_frames += len(batch)

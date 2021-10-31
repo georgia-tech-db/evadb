@@ -46,6 +46,7 @@ from src.optimizer.optimizer_utils import is_predicate_subset_of_opr_tree
 from src.expression.expression_utils import \
     (split_expr_tree_into_list_of_conjunct_exprs,
      create_expr_tree_from_conjunct_exprs)
+from src.configuration.configuration_manager import ConfigurationManager
 
 
 class RuleType(Flag):
@@ -506,7 +507,17 @@ class LogicalLoadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalLoadData, context: OptimizerContext):
-        after = LoadDataPlan(before.table_metainfo, before.path)
+        # Configure the batch_mem_size.
+        # We assume the optimizer decides the batch_mem_size.
+        # ToDO: Experiment heuristics.
+
+        batch_mem_size = 30000000  # 30mb
+        config_batch_mem_size = ConfigurationManager().get_value(
+            "executor", "batch_mem_size")
+        if config_batch_mem_size:
+            batch_mem_size = config_batch_mem_size
+        after = LoadDataPlan(before.table_metainfo,
+                             before.path, batch_mem_size)
         return after
 
 
@@ -539,8 +550,18 @@ class LogicalGetToSeqScan(Rule):
         return True
 
     def apply(self, before: LogicalGet, context: OptimizerContext):
+        # Configure the batch_mem_size. It decides the number of rows
+        # read in a batch from storage engine.
+        # ToDO: Experiment heuristics.
+
+        batch_mem_size = 30000000  # 30mb
+        config_batch_mem_size = ConfigurationManager().get_value(
+            "executor", "batch_mem_size")
+        if config_batch_mem_size:
+            batch_mem_size = config_batch_mem_size
         after = SeqScanPlan(before.predicate, before.target_list)
-        after.append_child(StoragePlan(before.dataset_metadata))
+        after.append_child(StoragePlan(
+            before.dataset_metadata, batch_mem_size=batch_mem_size))
         return after
 
 

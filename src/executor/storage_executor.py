@@ -27,5 +27,5 @@ class StorageExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        return StorageEngine.read(self.node.video)
+    def exec(self) -> Iterator[Batch]:
+        return StorageEngine.read(self.node.video, self.node.batch_mem_size)

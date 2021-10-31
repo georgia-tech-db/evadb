@@ -17,7 +17,6 @@ from typing import Iterator
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
 from src.planner.limit_plan import LimitPlan
-from src.configuration.configuration_manager import ConfigurationManager
 
 
 class LimitExecutor(AbstractExecutor):
@@ -32,8 +31,6 @@ class LimitExecutor(AbstractExecutor):
     def __init__(self, node: LimitPlan):
         super().__init__(node)
         self._limit_count = node.limit_value
-        self.BATCH_MAX_SIZE = ConfigurationManager().get_value(
-            "executor", "batch_size")
 
     def validate(self):
         pass

@@ -35,13 +35,17 @@ class LoadExecutorTest(unittest.TestCase):
         cv_mock.return_value = MagicMock(**attrs)
         file_path = 'video'
         table_metainfo = 'info'
+        batch_mem_size = 3000
         plan = type(
             "LoadDataPlan", (), {
-                'file_path': file_path, 'table_metainfo': table_metainfo})
+                'file_path': file_path,
+                'table_metainfo': table_metainfo,
+                'batch_mem_size': batch_mem_size})
 
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
-        cv_mock.assert_called_once_with(os.path.join(PATH_PREFIX, file_path))
+        cv_mock.assert_called_once_with(os.path.join(PATH_PREFIX, file_path),
+                                        batch_mem_size=batch_mem_size)
         create_mock.assert_called_once_with(table_metainfo)
         write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
             table_metainfo, batch_frames[1]))
