@@ -43,9 +43,9 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
-    LOGICALDELIMITER = auto()
     LOGICALJOIN = auto()
     LOGICAL_FUNCTION_SCAN = auto()
+    LOGICALDELIMITER = auto()
 
 
 class Operator:
@@ -542,6 +542,7 @@ class LogicalJoin(Operator):
         self._predicate = join_predicate
         self._left_keys = left_keys
         self._right_keys = right_keys
+        self._target_list = None
 
     @property
     def join_type(self):

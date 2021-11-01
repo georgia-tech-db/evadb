@@ -30,7 +30,7 @@ def get_columns_in_predicate(expr: AbstractExpression) -> List[DataFrameColumn]:
     return columns
 
 
-def split_expr_tree_into_list_of_conjunct_exprs(self, expr: AbstractExpression) -> List[AbstractExpression]:
+def split_expr_tree_into_list_of_conjunct_exprs(expr: AbstractExpression) -> List[AbstractExpression]:
     """
     Split the input expr into a list of conjunctive sub-exprs.
     Eg:

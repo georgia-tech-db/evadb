@@ -64,6 +64,7 @@ class RuleType(Flag):
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
+    PUSHDOWN_PROJECT_THROUGH_JOIN = auto()
 
     REWRITE_DELIMETER = auto()
 
@@ -108,6 +109,7 @@ class Promise(IntEnum):
 
     # REWRITE RULES
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
+    PUSHDOWN_PROJECT_THROUGH_JOIN = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
@@ -337,11 +339,36 @@ class PushdownProjectThroughSample(Rule):
         logical_get.target_list = before.target_list
         return sample
 
-
+class PushdownProjectThroughJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern_join = Pattern(OperatorType.LOGICALJOIN)
+        pattern_join_get = Pattern(OperatorType.LOGICALGET)
+        pattern_join_functionscan = Pattern(OperatorType.LOGICAL_FUNCTION_SCAN)
+        pattern_join.append_child(pattern_join_get)
+        pattern_join.append_child(pattern_join_functionscan)
+        pattern.append_child(pattern_join)
+        super().__init__(RuleType.PUSHDOWN_PROJECT_THROUGH_JOIN, pattern)
+    
+    def promise(self):
+        return Promise.PUSHDOWN_PROJECT_THROUGH_JOIN
+    
+    def check(self, before: Operator, context: OptimizerContext):
+        return True 
+    
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        join = before.children[0]
+        join.target_list = before.target_list
+        return join 
+    
 class PushDownFilterThroughJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
         pattern_join = Pattern(OperatorType.LOGICALJOIN)
+        pattern_join_get = Pattern(OperatorType.LOGICALGET)
+        pattern_join_functionscan = Pattern(OperatorType.LOGICAL_FUNCTION_SCAN)
+        pattern_join.append_child(pattern_join_get)
+        pattern_join.append_child(pattern_join_functionscan)
         pattern.append_child(pattern_join)
         super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
 
@@ -375,8 +402,14 @@ class PushDownFilterThroughJoin(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         join = before.children[0]
-        left = join.children.lhs()
-        right = join.children.rhs()
+        left = join.children[0]
+        right = join.children[1]
+
+        left.predicate = predicate
+        right.predicate = predicate
+
+        join.children = [left, right]
+        return join 
 
         conjunction_exprs = []
         conjunction_exprs = split_expr_tree_into_list_of_conjunct_exprs(
@@ -674,15 +707,15 @@ class LogicalJoinToHashJoin(Rule):
         #                                              /
         #                                            R1
 
-        r1 = join_node.lhs
-        r2 = join_node.rhs
+        r1 = join_node.children[0]
+        r2 = join_node.children[1]
 
         build_side = HashJoinBuildPlan(join_node.join_type,
-                                       join_node.left_keys)
+                                       [])
         build_side.append_child(r1)
 
         probe_side = HashJoinProbePlan(join_node.join_type,
-                                       join_node.right_keys,
+                                       [],
                                        join_node.predicate)
         probe_side.append_child(build_side)
         probe_side.append_child(r2)
@@ -728,6 +761,7 @@ class RulesManager:
             PushdownFilterThroughSample(),
             PushdownProjectThroughSample(),
             PushDownFilterThroughJoin(),
+            PushdownProjectThroughJoin(),
         ]
 
         self._implementation_rules = [

@@ -39,8 +39,8 @@ class HashJoinProbePlan(AbstractJoin):
                  probe_keys: List[DataFrameColumn],
                  predicate: AbstractExpression
                  ):
-        super().__init__(PlanOprType.HASH_JOIN,
+        self.predicate = predicate
+        super().__init__(PlanOprType.JOIN,
                          join_type,
-                         probe_keys,
-                         predicate
+                         probe_keys
                          )
