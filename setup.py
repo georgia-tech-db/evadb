@@ -19,7 +19,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'eva=eva.eva_server:main',
+            'eva=eva_server:main',
         ],
     },
 )
