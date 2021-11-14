@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import asyncio
+import argparse
 
 from eva.server.server import start_server
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
@@ -49,7 +50,17 @@ def eva():
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--db', help='foo help')
+    args = parser.parse_args()
+
+    db_uri = 'sqlite:///eva_catalog.db'
+    if args.db:
+        db_uri = 'mysql+pymysql://{}/eva_catalog'.format(args.db)
+
     mode = ConfigurationManager().get_value('core', 'mode')
+    ConfigurationManager().update_value('core',
+                                        'sqlalchemy_database_uri', db_uri)
     init_builtin_udfs(mode=mode)
     eva()
 

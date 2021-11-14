@@ -42,3 +42,9 @@ class ConfigurationManager(object):
         if category_data is not None:
             value = category_data.get(key, None)
             return value
+
+    def update_value(self, category, key, value):
+        category_data = self._cfg.get(category, None)
+
+        if category_data:
+            category_data[key] = value

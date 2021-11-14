@@ -97,8 +97,7 @@ class CustomModel:
 # Custom Base Model to be inherited by all models
 BaseModel = declarative_base(
     cls=CustomModel,
-    constructor=None,
-    bind=SQLConfig().engine)
+    constructor=None)
 
 
 def init_db():
@@ -109,7 +108,7 @@ def init_db():
                              LoggingLevel.INFO)
         create_database(engine.url)
     LoggingManager().log("Creating tables", LoggingLevel.INFO)
-    BaseModel.metadata.create_all()
+    BaseModel.metadata.create_all(bind=engine)
 
 
 def drop_db():
@@ -118,5 +117,5 @@ def drop_db():
     engine = SQLConfig().engine
     if database_exists(engine.url):
         db_session.commit()
-        BaseModel.metadata.drop_all()
+        BaseModel.metadata.drop_all(bind=engine)
         drop_database(engine.url)
