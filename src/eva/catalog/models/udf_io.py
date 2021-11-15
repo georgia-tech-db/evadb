@@ -79,6 +79,8 @@ class UdfIO(BaseModel):
 
     @property
     def array_dimensions(self):
+        if (self._array_dimensions == "[<Dimension.ANYDIM: -1>]"):
+            return None
         return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter

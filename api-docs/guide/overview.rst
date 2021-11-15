@@ -3,13 +3,17 @@
 Overview
 ============
 
-EVA is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
+EVA brings structure the power of SQL to your video data.
 
-- EVA **enables querying of visual data** in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models.
-- EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
-- EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+- Build **super apps** over your video data by leveraging EVA’s simple SQL-like interface.
+- Trying to find a tradeoff between throughput and accuracy on your video models? EVA can give you both:
+    - EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
+    - EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+- EVA offers seamless integration into your existing model workflows with the power of EVA UDF’s. (Need to change wording from UDF to something else).
+
 
 EVA consists of four core components:
+
 - EVAQL Query Parser
 - Query Optimizer
 - Query Execution Engine (Filters + Deep Learning Models)

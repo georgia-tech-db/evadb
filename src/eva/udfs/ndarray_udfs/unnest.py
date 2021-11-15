@@ -43,7 +43,8 @@ class Unnest(AbstractNdarrayUDF):
         explode = []
         dummy_idx = 'dummy_idx'
         for col in inp.columns:
-            if isinstance(first_row[col], np.ndarray):
+            if isinstance(first_row[col], np.ndarray) or \
+                    isinstance(first_row[col], list):
                 explode.append(col)
         inp[dummy_idx] = inp.index
         res = self.xplode(inp, explode)
