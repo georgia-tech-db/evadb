@@ -3,7 +3,6 @@ setuptools.setup(
     install_requires=[
         "numpy==1.20.1",
         "opencv-python==4.5.1.48",
-        # "scikit-learn==0.23.2",
         "pandas==1.2.3",
         "torch==1.7.1",
         "torchvision==0.8.2",
@@ -19,7 +18,11 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'eva=eva_server:main',
+            'eva_server=eva.eva_server:main',
+            'eva_client=eva.eva_cmd_client:main'
         ],
     },
+    package_data={
+        "": ["*.yml", ],
+    }
 )

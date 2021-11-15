@@ -16,6 +16,6 @@ import os
 
 import eva
 
-EVA_DIR = os.path.join(os.path.dirname(eva.__file__), os.path.pardir)
+EVA_DIR = os.path.dirname(eva.__file__)
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"
