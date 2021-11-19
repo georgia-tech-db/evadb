@@ -84,7 +84,7 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT OpticalCharacterRecognition4(data) FROM MyVideo
+        select_query = """SELECT OpticalCharacterRecognition(data) FROM MyVideo
                         WHERE id <100;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 42)
