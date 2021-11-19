@@ -21,8 +21,8 @@ import asyncio
 
 from unittest.mock import MagicMock
 
-from eva.server.server import start_server
-from eva.server.server import EvaServer
+from src.eva.server.server import start_server
+from src.eva.server.server import EvaServer
 
 
 from concurrent.futures import CancelledError

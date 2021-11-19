@@ -16,28 +16,29 @@ import unittest
 
 from mock import patch, MagicMock
 
-from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.create_statement import CreateTableStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.parser import Parser
+from src.eva.optimizer.statement_to_opr_convertor import \
+    StatementToPlanConvertor
+from src.eva.parser.select_statement import SelectStatement
+from src.eva.parser.table_ref import TableRef, TableInfo
+from src.eva.parser.create_udf_statement import CreateUDFStatement
+from src.eva.parser.insert_statement import InsertTableStatement
+from src.eva.parser.create_statement import CreateTableStatement
+from src.eva.parser.load_statement import LoadDataStatement
+from src.eva.parser.parser import Parser
+from src.eva.optimizer.operators import (LogicalProject,
+                                         LogicalGet, LogicalFilter,
+                                         LogicalQueryDerivedGet, LogicalCreate,
+                                         LogicalCreateUDF, LogicalInsert,
+                                         LogicalLoadData, LogicalUnion,
+                                         LogicalOrderBy, LogicalLimit,
+                                         LogicalSample)
+from src.eva.expression.tuple_value_expression import TupleValueExpression
+from src.eva.expression.constant_value_expression import \
+    ConstantValueExpression
+from src.eva.expression.comparison_expression import ComparisonExpression
+from src.eva.expression.abstract_expression import ExpressionType
 
-from eva.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
-                                     LogicalQueryDerivedGet, LogicalCreate,
-                                     LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit,
-                                     LogicalSample)
-
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.abstract_expression import ExpressionType
-
-from eva.parser.types import ParserOrderBySortType
+from src.eva.parser.types import ParserOrderBySortType
 
 
 class StatementToOprTest(unittest.TestCase):

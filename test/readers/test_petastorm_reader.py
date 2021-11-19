@@ -17,8 +17,8 @@ from unittest.mock import patch
 import os
 import numpy as np
 
-from eva.readers.petastorm_reader import PetastormReader
-from eva.configuration.configuration_manager import ConfigurationManager
+from src.eva.readers.petastorm_reader import PetastormReader
+from src.eva.configuration.configuration_manager import ConfigurationManager
 
 from test.util import PATH_PREFIX
 

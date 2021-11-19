@@ -14,10 +14,11 @@
 # limitations under the License.
 import unittest
 
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.catalog.column_type import ColumnType
+from src.eva.expression.abstract_expression import ExpressionType
+from src.eva.expression.comparison_expression import ComparisonExpression
+from src.eva.expression.constant_value_expression import \
+    ConstantValueExpression
+from src.eva.catalog.column_type import ColumnType
 
 
 class ComparisonExpressionsTest(unittest.TestCase):

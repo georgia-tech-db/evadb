@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from eva.configuration.configuration_manager import ConfigurationManager
+from src.eva.configuration.configuration_manager import ConfigurationManager
 
 
 class ConfigurationManagerTests(unittest.TestCase):

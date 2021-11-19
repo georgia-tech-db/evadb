@@ -18,12 +18,12 @@ import cv2
 import os
 import shutil
 
-from eva.models.storage.batch import Batch
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.configuration.configuration_manager import ConfigurationManager
+from src.eva.models.storage.batch import Batch
+from src.eva.models.catalog.frame_info import FrameInfo
+from src.eva.models.catalog.properties import ColorSpace
+from src.eva.udfs.abstract_udfs import AbstractClassifierUDF
+from src.eva.udfs.udf_bootstrap_queries import init_builtin_udfs
+from src.eva.configuration.configuration_manager import ConfigurationManager
 
 
 NUM_FRAMES = 10

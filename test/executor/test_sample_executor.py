@@ -2,11 +2,12 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from eva.executor.sample_executor import SampleExecutor
-from eva.models.storage.batch import Batch
+from src.eva.executor.sample_executor import SampleExecutor
+from src.eva.models.storage.batch import Batch
 from test.executor.utils import DummyExecutor
-from eva.planner.sample_plan import SamplePlan
-from eva.expression.constant_value_expression import ConstantValueExpression
+from src.eva.planner.sample_plan import SamplePlan
+from src.eva.expression.constant_value_expression import \
+    ConstantValueExpression
 
 
 class SampleExecutorTest(unittest.TestCase):

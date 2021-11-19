@@ -21,10 +21,10 @@ from pyspark.sql.types import IntegerType, FloatType, StringType
 
 from decimal import Decimal
 from unittest.mock import MagicMock, call, patch
-from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.df_schema import DataFrameSchema
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.schema_utils import SchemaUtils
+from src.eva.catalog.column_type import ColumnType, NdArrayType
+from src.eva.catalog.df_schema import DataFrameSchema
+from src.eva.catalog.models.df_column import DataFrameColumn
+from src.eva.catalog.schema_utils import SchemaUtils
 
 
 class SchemaTests(unittest.TestCase):

@@ -2,26 +2,28 @@ import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
-                                     LogicalQueryDerivedGet, LogicalSample,
-                                     Dummy)
-from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
-                                       EmbedFilterIntoDerivedGet,
-                                       EmbedProjectIntoDerivedGet,
-                                       PushdownFilterThroughSample,
-                                       PushdownProjectThroughSample,
-                                       LogicalCreateToPhysical,
-                                       LogicalCreateUDFToPhysical,
-                                       LogicalInsertToPhysical,
-                                       LogicalLoadToPhysical,
-                                       LogicalUploadToPhysical,
-                                       LogicalSampleToUniformSample,
-                                       LogicalGetToSeqScan,
-                                       LogicalDerivedGetToPhysical,
-                                       LogicalUnionToPhysical,
-                                       LogicalOrderByToPhysical,
-                                       LogicalLimitToPhysical)
-from eva.optimizer.rules.rules import Promise, RulesManager
+from src.eva.optimizer.operators import (LogicalGet, LogicalProject,
+                                         LogicalFilter, LogicalQueryDerivedGet,
+                                         LogicalSample,
+                                         Dummy)
+from src.eva.optimizer.rules.rules import (EmbedProjectIntoGet,
+                                           EmbedFilterIntoGet,
+                                           EmbedFilterIntoDerivedGet,
+                                           EmbedProjectIntoDerivedGet,
+                                           PushdownFilterThroughSample,
+                                           PushdownProjectThroughSample,
+                                           LogicalCreateToPhysical,
+                                           LogicalCreateUDFToPhysical,
+                                           LogicalInsertToPhysical,
+                                           LogicalLoadToPhysical,
+                                           LogicalUploadToPhysical,
+                                           LogicalSampleToUniformSample,
+                                           LogicalGetToSeqScan,
+                                           LogicalDerivedGetToPhysical,
+                                           LogicalUnionToPhysical,
+                                           LogicalOrderByToPhysical,
+                                           LogicalLimitToPhysical)
+from src.eva.optimizer.rules.rules import Promise, RulesManager
 
 
 class TestRules(unittest.TestCase):

@@ -15,9 +15,9 @@
 import unittest
 from unittest.mock import patch
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.executor.disk_based_storage_executor import DiskStorageExecutor
-from eva.planner.storage_plan import StoragePlan
+from src.eva.catalog.models.df_metadata import DataFrameMetadata
+from src.eva.executor.disk_based_storage_executor import DiskStorageExecutor
+from src.eva.planner.storage_plan import StoragePlan
 
 
 class DiskStorageExecutorTest(unittest.TestCase):

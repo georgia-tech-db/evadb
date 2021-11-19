@@ -2,13 +2,13 @@ import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.optimizer_tasks import (
+from src.eva.optimizer.optimizer_tasks import (
     TopDownRewrite, BottomUpRewrite, OptimizeGroup)
-from eva.optimizer.optimizer_context import OptimizerContext
-from eva.optimizer.operators import (
+from src.eva.optimizer.optimizer_context import OptimizerContext
+from src.eva.optimizer.operators import (
     LogicalGet, LogicalFilter, LogicalProject, LogicalQueryDerivedGet)
-from eva.optimizer.property import PropertyType
-from eva.planner.seq_scan_plan import SeqScanPlan
+from src.eva.optimizer.property import PropertyType
+from src.eva.planner.seq_scan_plan import SeqScanPlan
 
 
 class TestOptimizerTask(unittest.TestCase):
