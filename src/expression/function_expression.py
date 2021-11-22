@@ -115,7 +115,7 @@ class FunctionExpression(AbstractExpression):
         if isinstance(self._function, GPUCompatible):
             device = self._context.gpu_device()
             if device != NO_GPU:
-                return self._function.to_device(device)
+                return self._function.assign_device(device)
         return self._function
 
     def __eq__(self, other):

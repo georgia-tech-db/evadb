@@ -38,8 +38,8 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         AbstractClassifierUDF.__init__(self)
         nn.Module.__init__(self)
 
-    def get_device(self):
-        return next(self.parameters()).device
+    #def get_device(self):
+        #return next(self.parameters()).device
 
     @property
     def transforms(self) -> Compose:
@@ -52,7 +52,7 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
 
     def forward(self, frames: List[np.ndarray]):
         tens_batch = torch.cat([self.transform(x) for x in frames])\
-            .to(self.get_device())
+            .to(f"cuda:{self.device}")
         return self.classify(tens_batch)
 
     @abstractmethod

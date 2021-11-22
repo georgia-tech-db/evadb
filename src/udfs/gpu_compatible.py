@@ -13,9 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import abstractmethod, ABC
-
+from src.constants import NO_GPU
 
 class GPUCompatible(ABC):
+
+    def __init__(self):
+        self._device = NO_GPU
+
+    @property
+    def device(self,):
+        return self._device
+
+    def assign_device(self, device: str):
+        '''
+        Assigning the device passed by the UDF to the member variable of the class
+        Returns after enabling GPU for the device
+        '''
+        self._device = device
+        return self.to_device(device)
+
     @abstractmethod
     def to_device(self, device: str):
         """

@@ -62,7 +62,7 @@ class FunctionExpressionTest(unittest.TestCase):
         gpu_mock_function = Mock(return_value=pd.DataFrame())
         gpu_device_id = '2'
 
-        mock_function.to_device.return_value = gpu_mock_function
+        mock_function.assign_device.return_value = gpu_mock_function
         context_instance.gpu_device.return_value = gpu_device_id
 
         expression = FunctionExpression(mock_function,
@@ -71,7 +71,7 @@ class FunctionExpressionTest(unittest.TestCase):
 
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
-        mock_function.to_device.assert_called_with(gpu_device_id)
+        mock_function.assign_device.assert_called_with(gpu_device_id)
         gpu_mock_function.assert_called()
 
     def test_should_use_the_same_function_if_not_gpu_compatible(self):
