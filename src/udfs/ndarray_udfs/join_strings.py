@@ -14,10 +14,10 @@
 # limitations under the License.
 from src.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
 
-class Join(AbstractNdarrayUDF):
+class Join_Strings(AbstractNdarrayUDF):
 
     def name(self):
-        return 'join'
+        return 'Join_Strings'
 
     def exec(self, input, delimiter):
 

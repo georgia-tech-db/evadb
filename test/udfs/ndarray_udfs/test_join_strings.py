@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from src.udfs.ndarray_udfs.join import Join
+from src.udfs.ndarray_udfs.join_strings import Join_Strings
 
 class JoinTests(unittest.TestCase):
 
@@ -28,7 +28,7 @@ class JoinTests(unittest.TestCase):
                 ["House", "of", "cards"]]
               }
         delimiter = " "
-        concatenated_result = Join().exec(inp["words"], delimiter)
+        concatenated_result = Join_Strings().exec(inp["words"], delimiter)
 
         expected_result = [
                         ["I am a girl"],
