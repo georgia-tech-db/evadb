@@ -17,7 +17,7 @@ import unittest
 
 import numpy as np
 
-from src.eva.models.storage.batch import Batch
+from eva.models.storage.batch import Batch
 from test.util import create_dataframe_same, create_dataframe
 
 

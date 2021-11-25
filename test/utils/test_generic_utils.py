@@ -17,9 +17,9 @@ import unittest
 from mock import patch, MagicMock
 from pathlib import Path
 
-from src.eva.utils.generic_utils import (str_to_class, path_to_class,
-                                         is_gpu_available, generate_file_path)
-from src.eva.readers.opencv_reader import OpenCVReader
+from eva.utils.generic_utils import (str_to_class, path_to_class,
+                                     is_gpu_available, generate_file_path)
+from eva.readers.opencv_reader import OpenCVReader
 
 
 class ModulePathTest(unittest.TestCase):

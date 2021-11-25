@@ -16,13 +16,13 @@ import unittest
 import pandas as pd
 from mock import Mock
 
-from src.eva.expression.abstract_expression import ExpressionType
-from src.eva.expression.comparison_expression import ComparisonExpression
-from src.eva.expression.logical_expression import LogicalExpression
-from src.eva.expression.constant_value_expression import \
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.logical_expression import LogicalExpression
+from eva.expression.constant_value_expression import \
     ConstantValueExpression
-from src.eva.expression.tuple_value_expression import TupleValueExpression
-from src.eva.models.storage.batch import Batch
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.models.storage.batch import Batch
 
 
 class LogicalExpressionsTest(unittest.TestCase):

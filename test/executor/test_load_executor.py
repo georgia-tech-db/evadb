@@ -17,8 +17,8 @@ import os
 import pandas as pd
 
 from mock import patch, MagicMock, call
-from src.eva.executor.load_executor import LoadDataExecutor
-from src.eva.models.storage.batch import Batch
+from eva.executor.load_executor import LoadDataExecutor
+from eva.models.storage.batch import Batch
 
 from test.util import PATH_PREFIX
 

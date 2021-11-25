@@ -16,7 +16,7 @@ from unittest import TestCase
 
 from mock import patch
 from mock import MagicMock
-from src.eva.catalog.services.udf_io_service import UdfIOService
+from eva.catalog.services.udf_io_service import UdfIOService
 
 UDF_TYPE = 'classification'
 UDF_IMPL_PATH = 'file1'

@@ -15,7 +15,7 @@
 import unittest
 
 from mock import patch, MagicMock
-from src.eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.create_udf_executor import CreateUDFExecutor
 
 
 class CreateUdfExecutorTest(unittest.TestCase):

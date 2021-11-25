@@ -15,26 +15,26 @@
 
 import unittest
 
-from src.eva.parser.parser import Parser
-from src.eva.parser.statement import AbstractStatement
+from eva.parser.parser import Parser
+from eva.parser.statement import AbstractStatement
 
-from src.eva.parser.statement import StatementType
+from eva.parser.statement import StatementType
 
-from src.eva.parser.select_statement import SelectStatement
-from src.eva.parser.create_statement import ColumnDefinition
-from src.eva.parser.create_udf_statement import CreateUDFStatement
-from src.eva.parser.load_statement import LoadDataStatement
-from src.eva.parser.upload_statement import UploadStatement
-from src.eva.parser.insert_statement import InsertTableStatement
+from eva.parser.select_statement import SelectStatement
+from eva.parser.create_statement import ColumnDefinition
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.upload_statement import UploadStatement
+from eva.parser.insert_statement import InsertTableStatement
 
-from src.eva.expression.abstract_expression import ExpressionType
-from src.eva.expression.tuple_value_expression import TupleValueExpression
-from src.eva.expression.constant_value_expression import \
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.constant_value_expression import \
     ConstantValueExpression
 
-from src.eva.parser.table_ref import TableRef, TableInfo
-from src.eva.parser.types import ParserOrderBySortType
-from src.eva.catalog.column_type import ColumnType, NdArrayType
+from eva.parser.table_ref import TableRef, TableInfo
+from eva.parser.types import ParserOrderBySortType
+from eva.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
 

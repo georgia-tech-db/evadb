@@ -16,7 +16,7 @@ import unittest
 import os
 import base64
 
-from src.eva.server.command_handler import execute_query_fetch_all
+from eva.server.command_handler import execute_query_fetch_all
 
 from test.util import file_remove, PATH_PREFIX
 

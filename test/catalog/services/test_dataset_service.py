@@ -16,7 +16,7 @@ import unittest
 
 from mock import patch
 
-from src.eva.catalog.services.df_service import DatasetService
+from eva.catalog.services.df_service import DatasetService
 
 
 DATASET_ID = 123

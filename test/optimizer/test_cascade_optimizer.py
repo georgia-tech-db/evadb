@@ -15,9 +15,9 @@
 import unittest
 import pandas as pd
 
-from src.eva.catalog.catalog_manager import CatalogManager
-from src.eva.server.command_handler import execute_query_fetch_all
-from src.eva.models.storage.batch import Batch
+from eva.catalog.catalog_manager import CatalogManager
+from eva.server.command_handler import execute_query_fetch_all
+from eva.models.storage.batch import Batch
 
 from test.util import create_sample_video, NUM_FRAMES, file_remove
 

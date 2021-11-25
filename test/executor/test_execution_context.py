@@ -16,8 +16,8 @@ import unittest
 
 from mock import patch
 
-from src.eva.constants import NO_GPU
-from src.eva.executor.execution_context import Context
+from eva.constants import NO_GPU
+from eva.executor.execution_context import Context
 
 
 class ExecutionContextTest(unittest.TestCase):

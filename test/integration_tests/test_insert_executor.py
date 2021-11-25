@@ -15,8 +15,8 @@
 import unittest
 import numpy as np
 
-from src.eva.catalog.catalog_manager import CatalogManager
-from src.eva.server.command_handler import execute_query_fetch_all
+from eva.catalog.catalog_manager import CatalogManager
+from eva.server.command_handler import execute_query_fetch_all
 
 from test.util import create_sample_video, file_remove
 

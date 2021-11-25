@@ -19,7 +19,7 @@ import contextlib
 
 from mock import patch
 from unittest.mock import MagicMock
-from src.eva.server.interpreter import EvaCommandInterpreter, start_cmd_client
+from eva.server.interpreter import EvaCommandInterpreter, start_cmd_client
 
 
 class InterpreterTests(unittest.TestCase):

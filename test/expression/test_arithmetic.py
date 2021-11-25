@@ -14,10 +14,10 @@
 # limitations under the License.
 import unittest
 
-from src.eva.expression.abstract_expression import ExpressionType
-from src.eva.expression.constant_value_expression import \
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.constant_value_expression import \
     ConstantValueExpression
-from src.eva.expression.arithmetic_expression import ArithmeticExpression
+from eva.expression.arithmetic_expression import ArithmeticExpression
 
 
 class ArithmeticExpressionsTest(unittest.TestCase):

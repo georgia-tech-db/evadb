@@ -16,7 +16,7 @@ import unittest
 
 from mock import patch, MagicMock
 
-from src.eva.catalog.services.df_column_service import DatasetColumnService
+from eva.catalog.services.df_column_service import DatasetColumnService
 
 
 class DatasetColumnServiceTest(unittest.TestCase):

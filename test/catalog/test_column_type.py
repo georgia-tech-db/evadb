@@ -16,7 +16,7 @@ import unittest
 import numpy as np
 
 from decimal import Decimal
-from src.eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.column_type import ColumnType, NdArrayType
 
 
 class ColumnTypeTests(unittest.TestCase):

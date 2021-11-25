@@ -15,10 +15,10 @@
 import unittest
 import pandas as pd
 
-from src.eva.catalog.catalog_manager import CatalogManager
-from src.eva.models.storage.batch import Batch
-from src.eva.storage.storage_engine import StorageEngine
-from src.eva.server.command_handler import execute_query_fetch_all
+from eva.catalog.catalog_manager import CatalogManager
+from eva.models.storage.batch import Batch
+from eva.storage.storage_engine import StorageEngine
+from eva.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, create_dummy_batches, file_remove
 
 

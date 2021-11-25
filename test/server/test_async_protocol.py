@@ -17,7 +17,7 @@ import unittest
 
 from mock import patch
 from unittest.mock import MagicMock
-from src.eva.server.async_protocol import EvaProtocolBuffer, EvaClient
+from eva.server.async_protocol import EvaProtocolBuffer, EvaClient
 
 
 class AsyncProtocolTests(unittest.TestCase):

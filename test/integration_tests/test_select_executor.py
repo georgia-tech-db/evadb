@@ -17,10 +17,10 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from src.eva.catalog.catalog_manager import CatalogManager
-from src.eva.models.storage.batch import Batch
-from src.eva.readers.opencv_reader import OpenCVReader
-from src.eva.server.command_handler import execute_query_fetch_all
+from eva.catalog.catalog_manager import CatalogManager
+from eva.models.storage.batch import Batch
+from eva.readers.opencv_reader import OpenCVReader
+from eva.server.command_handler import execute_query_fetch_all
 
 from test.util import create_sample_video, create_dummy_batches, file_remove
 

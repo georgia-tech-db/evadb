@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from src.eva.models.storage.batch import Batch
-from src.eva.models.server.response import ResponseStatus, Response
+from eva.models.storage.batch import Batch
+from eva.models.server.response import ResponseStatus, Response
 from test.util import create_dataframe
 
 

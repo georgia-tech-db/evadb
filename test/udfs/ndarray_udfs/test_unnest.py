@@ -16,10 +16,10 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from src.eva.catalog.catalog_manager import CatalogManager
-from src.eva.models.storage.batch import Batch
-from src.eva.server.command_handler import execute_query_fetch_all
-from src.eva.udfs.ndarray_udfs.unnest import Unnest
+from eva.catalog.catalog_manager import CatalogManager
+from eva.models.storage.batch import Batch
+from eva.server.command_handler import execute_query_fetch_all
+from eva.udfs.ndarray_udfs.unnest import Unnest
 from test.util import create_sample_video, load_inbuilt_udfs, file_remove
 from test.util import NUM_FRAMES
 

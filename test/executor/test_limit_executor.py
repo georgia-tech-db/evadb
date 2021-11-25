@@ -2,15 +2,15 @@ import unittest
 import pandas as pd
 import numpy as np
 
-from src.eva.executor.orderby_executor import OrderByExecutor
-from src.eva.executor.limit_executor import LimitExecutor
-from src.eva.expression.tuple_value_expression import TupleValueExpression
-from src.eva.models.storage.batch import Batch
-from src.eva.parser.types import ParserOrderBySortType
+from eva.executor.orderby_executor import OrderByExecutor
+from eva.executor.limit_executor import LimitExecutor
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.models.storage.batch import Batch
+from eva.parser.types import ParserOrderBySortType
 from test.executor.utils import DummyExecutor
-from src.eva.planner.orderby_plan import OrderByPlan
-from src.eva.planner.limit_plan import LimitPlan
-from src.eva.expression.constant_value_expression import\
+from eva.planner.orderby_plan import OrderByPlan
+from eva.planner.limit_plan import LimitPlan
+from eva.expression.constant_value_expression import\
     ConstantValueExpression
 
 
