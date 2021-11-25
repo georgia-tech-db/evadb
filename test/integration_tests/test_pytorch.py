@@ -38,7 +38,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
-                  IMPL  'src/udfs/fastrcnn_object_detector.py';
+                  IMPL  'eva/udfs/fastrcnn_object_detector.py';
         """
         execute_query_fetch_all(create_udf_query)
 
@@ -56,7 +56,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
-                  IMPL  'src/udfs/ssd_object_detector.py';
+                  IMPL  'eva/udfs/ssd_object_detector.py';
         """
         execute_query_fetch_all(create_udf_query)
 

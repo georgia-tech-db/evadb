@@ -1,5 +1,8 @@
-import setuptools
-setuptools.setup(
+from setuptools import find_packages, setup
+
+setup(
+    packages=find_packages(exclude=("test*",)),
+    python_requires=">=3.6",
     install_requires=[
         "numpy==1.20.1",
         "opencv-python==4.5.1.48",
