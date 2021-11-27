@@ -54,8 +54,8 @@ mysql -u root
 ```
 refer to [askubuntu](https://askubuntu.com/questions/766334/cant-login-as-mysql-user-root-from-normal-user-account-in-ubuntu-16-04)
 
-4. Install `docker` and `docker-compose`.
-Please refer to [official doc](https://docs.docker.com/engine/install/).
+<!-- 4. Install `docker` and `docker-compose`.
+Please refer to [official doc](https://docs.docker.com/engine/install/). -->
 
 ## Client Testing
 
@@ -82,11 +82,11 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
 
 
-## Docker
+<!-- ## Docker
 
 1. Standup EVA testing for CPU/GPU hardware.
 ```shell
-docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up -->
 ```
 
 ## Development
