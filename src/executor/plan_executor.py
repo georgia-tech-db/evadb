@@ -30,6 +30,8 @@ from src.executor.upload_executor import UploadExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
 from src.executor.orderby_executor import OrderByExecutor
+from src.executor.hash_join_executor import HashJoinExecutor
+from src.executor.join_build_executor import BuildJoinExecutor
 
 
 class PlanExecutor:
@@ -61,7 +63,7 @@ class PlanExecutor:
         # Get plan node type
         plan_opr_type = plan.opr_type
 
-        if plan_opr_type == PlanOprType.SEQUENTIAL_SCAN:
+        if plan_opr_type == PlanOprType.SEQUENTIAL_SCAN or plan_opr_type == PlanOprType.FUNCTION_SCAN:
             executor_node = SequentialScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.UNION:
             executor_node = UnionExecutor(node=plan)
@@ -85,6 +87,10 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.JOIN:
+            executor_node = HashJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.BUILD_JOIN:
+            executor_node = BuildJoinExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:

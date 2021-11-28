@@ -29,6 +29,7 @@ class PlanOprType(IntEnum):
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
-    JOIN = auto()
     FUNCTION_SCAN = auto()
+    JOIN = auto()
+    BUILD_JOIN = auto()
     # add other types

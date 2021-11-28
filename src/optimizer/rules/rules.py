@@ -707,18 +707,19 @@ class LogicalJoinToHashJoin(Rule):
         #                                              /
         #                                            R1
 
-        r1 = join_node.children[0]
-        r2 = join_node.children[1]
+        # r1 = join_node.children[0]
+        # r2 = join_node.children[1]
 
-        build_side = HashJoinBuildPlan(join_node.join_type,
-                                       [])
-        build_side.append_child(r1)
+        # build_side = HashJoinBuildPlan(join_node.join_type,
+        #                                [])
+                                       
+        # build_side.append_child(r1)
 
         probe_side = HashJoinProbePlan(join_node.join_type,
                                        [],
                                        join_node.predicate)
-        probe_side.append_child(build_side)
-        probe_side.append_child(r2)
+        # probe_side.append_child(build_side)
+        # probe_side.append_child(r2)
 
         return probe_side
 

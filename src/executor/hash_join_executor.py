@@ -16,11 +16,12 @@ from typing import Iterator
 
 from src.models.storage.batch import Batch
 from src.executor.abstract_executor import AbstractExecutor
-from src.executor.abstract_executor import UPSTREAM_BATCH
-from src.planner.nested_loop_join_plan import NestedLoopJoin
+# from src.executor.abstract_executor import UPSTREAM_BATCH
+# from src.planner.nested_loop_join_plan import NestedLoopJoin
 from src.parser.types import JoinType
+from src.planner.hash_join_probe_plan import HashJoinProbePlan
 
-from src.utils.metrics import Metrics
+# from src.utils.metrics import Metrics
 
 
 class HashJoinExecutor(AbstractExecutor):
@@ -35,11 +36,11 @@ class HashJoinExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: NestedLoopJoin):
+    def __init__(self, node: HashJoinProbePlan):
         super().__init__(node)
         self.predicate = node.join_predicate
         self.join_type = node.join_type
-        self.join_keys = node.join_keys
+        # self.join_keys = node.join_keys
 
     def validate(self):
         pass
@@ -49,51 +50,53 @@ class HashJoinExecutor(AbstractExecutor):
         outer = self.children[0]
         inner = self.children[1]
 
-        for outer_batch in outer.exec():
-            cumm_inner_batches = []
-            if self.join_type == JoinType.LATERAL_JOIN:
-                self.join_keys =
-                for inner_batch in inner.exec(lateral_input=outer_batch):
-                    cumm_inner_batches.append(inner_batch)
-            else:
-                for inner_batch in inner.exec():
-                    cumm_inner_batches.append(inner_batch)
+        return []
 
-            cumm_inner_batch = Batch.concat(cumm_inner_batches)
-            # build hash for the inner table
-            cumm_inner_batch.frames.index = cumm_inner_batch.frames[self.join_keys].apply(
-                lambda x: hash(tuple(x)), axis=1)
-            # print('Mat size: ', cumm_inner_batch.batch_size)
-            # build hash for the outer table
-            outer_batch.frames.index = outer_batch.frames[self.join_on].apply(
-                lambda x: hash(tuple(x)), axis=1)
-            # print(outer_batch.frames.id)
-            if self.join_type == JoinType.LEFT_JOIN:
-                join_batch = outer_batch.frames.merge(
-                    cumm_inner_batch.frames, left_index=True, right_index=True, how='left')
-            else:
-                join_batch = outer_batch.frames.merge(
-                    cumm_inner_batch.frames, left_index=True, right_index=True)
-            print('Join size: ', len(join_batch))
-            join_batch = join_batch.loc[:, ~
-                                        join_batch.columns.str.endswith('_y')]
-            join_batch.columns = join_batch.columns.str.rstrip('_x')
+        # for outer_batch in outer.exec():
+        #     cumm_inner_batches = []
+        #     if self.join_type == JoinType.LATERAL_JOIN:
+        #         self.join_keys =
+        #         for inner_batch in inner.exec(lateral_input=outer_batch):
+        #             cumm_inner_batches.append(inner_batch)
+        #     else:
+        #         for inner_batch in inner.exec():
+        #             cumm_inner_batches.append(inner_batch)
 
-            # print('hash join ', len(join_batch))
-            join_batch.reset_index(drop=True, inplace=True)
-            join_batch = Batch(join_batch)
-            if not join_batch.empty() and self.predicate is not None:
-                outcomes = self.predicate.evaluate(join_batch).frames
-                # print(cumm_join_batch.frames[cumm_join_batch.frames['labels']=='person'])
-                join_batch = Batch(
-                    join_batch.frames[(outcomes > 0).to_numpy()].reset_index(
-                        drop=True))
-            # Then do project
-            if not join_batch.empty() and self.join_project is not None:
-                batches = [expr.evaluate(join_batch)
-                           for expr in self.join_project]
-                join_batch = Batch.merge_column_wise(batches)
+        #     cumm_inner_batch = Batch.concat(cumm_inner_batches)
+        #     # build hash for the inner table
+        #     cumm_inner_batch.frames.index = cumm_inner_batch.frames[self.join_keys].apply(
+        #         lambda x: hash(tuple(x)), axis=1)
+        #     # print('Mat size: ', cumm_inner_batch.batch_size)
+        #     # build hash for the outer table
+        #     outer_batch.frames.index = outer_batch.frames[self.join_on].apply(
+        #         lambda x: hash(tuple(x)), axis=1)
+        #     # print(outer_batch.frames.id)
+        #     if self.join_type == JoinType.LEFT_JOIN:
+        #         join_batch = outer_batch.frames.merge(
+        #             cumm_inner_batch.frames, left_index=True, right_index=True, how='left')
+        #     else:
+        #         join_batch = outer_batch.frames.merge(
+        #             cumm_inner_batch.frames, left_index=True, right_index=True)
+        #     print('Join size: ', len(join_batch))
+        #     join_batch = join_batch.loc[:, ~
+        #                                 join_batch.columns.str.endswith('_y')]
+        #     join_batch.columns = join_batch.columns.str.rstrip('_x')
 
-            Metrics().stop_perf(f'HASH JOIN')
+        #     # print('hash join ', len(join_batch))
+        #     join_batch.reset_index(drop=True, inplace=True)
+        #     join_batch = Batch(join_batch)
+        #     if not join_batch.empty() and self.predicate is not None:
+        #         outcomes = self.predicate.evaluate(join_batch).frames
+        #         # print(cumm_join_batch.frames[cumm_join_batch.frames['labels']=='person'])
+        #         join_batch = Batch(
+        #             join_batch.frames[(outcomes > 0).to_numpy()].reset_index(
+        #                 drop=True))
+        #     # Then do project
+        #     if not join_batch.empty() and self.join_project is not None:
+        #         batches = [expr.evaluate(join_batch)
+        #                    for expr in self.join_project]
+        #         join_batch = Batch.merge_column_wise(batches)
 
-            yield join_batch
+        #     Metrics().stop_perf(f'HASH JOIN')
+
+        #     yield join_batch

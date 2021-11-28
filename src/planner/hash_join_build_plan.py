@@ -36,7 +36,7 @@ class HashJoinBuildPlan(AbstractJoin):
                  join_type: JoinType,
                  build_keys: List[DataFrameColumn],
                  ):
-        super().__init__(PlanOprType.JOIN,
+        super().__init__(PlanOprType.BUILD_JOIN,
                          join_type,
                          build_keys,
                          )
