@@ -29,8 +29,6 @@ class FunctionScanPlan(AbstractPlan):
 
     def __init__(self, func_expr: FunctionExpression):
         self._func_expr = func_expr
-        self.predicate = None
-        self.columns = None
         super().__init__(PlanOprType.FUNCTION_SCAN)
 
     @property

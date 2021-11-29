@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
-from src.planner.function_scan import FunctionScanPlan
+from src.planner.function_scan_plan import FunctionScanPlan
 from src.executor.abstract_executor import AbstractExecutor
 from src.models.storage.batch import Batch
 
@@ -36,9 +36,12 @@ class FunctionScanExecutor(AbstractExecutor):
 
     def exec(self, lateral_input: Batch, *args, **kwargs) -> Iterator[Batch]:
         # this should be the leaf node in the execution plan
-        assert(len(self.children) != 0)
-        batch = kwargs.pop(lateral_input, Batch())
+        # assert(len(self.self.func_exprchildren) == 0)
+        # batch = kwargs.pop(lateral_input, Batch())
 
-        if not batch.empty():
-            res = self.func_expr.evaluate(batch)
-            yield res
+        if not lateral_input.empty():
+            res = self.func_expr.evaluate(lateral_input)
+            batch = Batch.merge_column_wise([res])
+            
+            if not batch.empty():
+                yield batch

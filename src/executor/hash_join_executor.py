@@ -50,7 +50,11 @@ class HashJoinExecutor(AbstractExecutor):
         outer = self.children[0]
         inner = self.children[1]
 
-        return []
+        for outer_batch in outer.exec():
+            for inner_batch in inner.exec(lateral_input=outer_batch):
+                join_result = inner_batch 
+                return join_result
+
 
         # for outer_batch in outer.exec():
         #     cumm_inner_batches = []

@@ -61,6 +61,7 @@ class StatementToPlanConvertor:
             self._plan = LogicalGet(table_ref, catalog_vid_metadata)
 
         if table_ref.is_func_expr():
+            bind_columns_expr([table_ref.table], self._column_map)
             self._plan = LogicalFunctionScan(func_expr=table_ref.table)
 
         if table_ref.is_select():
