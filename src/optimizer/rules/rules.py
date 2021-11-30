@@ -405,10 +405,11 @@ class PushDownFilterThroughJoin(Rule):
         left = join.children[0]
         right = join.children[1]
 
-        left.predicate = predicate
-        right.predicate = predicate
+        # left.predicate = predicate
+        # right.predicate = predicate
 
         join.children = [left, right]
+        join.predicate = predicate
         return join 
 
         conjunction_exprs = []

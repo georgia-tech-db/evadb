@@ -38,7 +38,7 @@ class HashJoinExecutor(AbstractExecutor):
 
     def __init__(self, node: HashJoinProbePlan):
         super().__init__(node)
-        self.predicate = node.join_predicate
+        self.predicate = node.predicate
         self.join_type = node.join_type
         # self.join_keys = node.join_keys
 
@@ -51,9 +51,14 @@ class HashJoinExecutor(AbstractExecutor):
         inner = self.children[1]
 
         for outer_batch in outer.exec():
-            for inner_batch in inner.exec(lateral_input=outer_batch):
-                join_result = inner_batch 
-                return join_result
+            for result_batch in inner.exec(lateral_input=outer_batch):
+                if not result_batch.empty() and self.predicate is not None:
+                    outcomes = self.predicate.evaluate(result_batch).frames
+                    result_batch = Batch(
+                        result_batch.frames[(outcomes > 0).to_numpy()].reset_index(
+                            drop=True))
+                if not result_batch.empty():
+                    yield result_batch
 
 
         # for outer_batch in outer.exec():
