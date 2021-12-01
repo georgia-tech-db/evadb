@@ -50,6 +50,11 @@ class TableSources(evaql_parserVisitor):
                         JoinNode(left_child,
                                  table_list[i],
                                  join_type=JoinType.LATERAL_JOIN))
+                elif table_list[i].is_table_atom():
+                    left_child = TableRef(
+                        JoinNode(left_child,
+                                 table_list[i],
+                                 join_type=JoinType.HASH_JOIN))                    
                 else:
                     raise SystemError(
                         'Query not supported. EVA supports only lateral joins \

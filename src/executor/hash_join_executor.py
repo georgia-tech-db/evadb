@@ -58,7 +58,7 @@ class HashJoinExecutor(AbstractExecutor):
                         result_batch.frames[(outcomes > 0).to_numpy()].reset_index(
                             drop=True))
                 if not result_batch.empty():
-                    yield result_batch
+                    return result_batch
 
 
         # for outer_batch in outer.exec():

@@ -48,3 +48,4 @@ class ParserOrderBySortType(Enum):
 @unique
 class JoinType(Enum):
     LATERAL_JOIN = auto()
+    HASH_JOIN = auto()

@@ -343,10 +343,10 @@ class PushdownProjectThroughJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
         pattern_join = Pattern(OperatorType.LOGICALJOIN)
-        pattern_join_get = Pattern(OperatorType.LOGICALGET)
-        pattern_join_functionscan = Pattern(OperatorType.LOGICAL_FUNCTION_SCAN)
-        pattern_join.append_child(pattern_join_get)
-        pattern_join.append_child(pattern_join_functionscan)
+        pattern_join_left = Pattern(OperatorType.DUMMY)
+        pattern_join_right = Pattern(OperatorType.DUMMY)
+        pattern_join.append_child(pattern_join_left)
+        pattern_join.append_child(pattern_join_right)
         pattern.append_child(pattern_join)
         super().__init__(RuleType.PUSHDOWN_PROJECT_THROUGH_JOIN, pattern)
     
@@ -365,10 +365,10 @@ class PushDownFilterThroughJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
         pattern_join = Pattern(OperatorType.LOGICALJOIN)
-        pattern_join_get = Pattern(OperatorType.LOGICALGET)
-        pattern_join_functionscan = Pattern(OperatorType.LOGICAL_FUNCTION_SCAN)
-        pattern_join.append_child(pattern_join_get)
-        pattern_join.append_child(pattern_join_functionscan)
+        pattern_join_left = Pattern(OperatorType.DUMMY)
+        pattern_join_right = Pattern(OperatorType.DUMMY)
+        pattern_join.append_child(pattern_join_left)
+        pattern_join.append_child(pattern_join_right)
         pattern.append_child(pattern_join)
         super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
 
