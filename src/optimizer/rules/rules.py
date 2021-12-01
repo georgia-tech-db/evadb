@@ -18,6 +18,7 @@ from abc import ABC, abstractmethod
 from enum import Flag, auto, IntEnum
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
     from src.optimizer.optimizer_context import OptimizerContext
 
@@ -39,9 +40,10 @@ from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
 from src.planner.sample_plan import SamplePlan
-from src.planner.hash_join_build_plan import HashJoinBuildPlan
 from src.planner.hash_join_probe_plan import HashJoinProbePlan
+from src.planner.lateral_join_build_plan import LateralJoinBuildPlan
 from src.planner.function_scan_plan import FunctionScanPlan
+from src.parser.types import JoinType
 from src.optimizer.optimizer_utils import is_predicate_subset_of_opr_tree
 from src.expression.expression_utils import \
     (split_expr_tree_into_list_of_conjunct_exprs,
@@ -715,6 +717,11 @@ class LogicalJoinToHashJoin(Rule):
         #                                [])
                                        
         # build_side.append_child(r1)
+        if join_node.join_type == JoinType.LATERAL_JOIN:
+            lateral_join_plan = LateralJoinBuildPlan(join_node.join_type,
+            [],
+            join_node.predicate)
+            return lateral_join_plan
 
         probe_side = HashJoinProbePlan(join_node.join_type,
                                        [],

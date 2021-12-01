@@ -32,4 +32,5 @@ class PlanOprType(IntEnum):
     FUNCTION_SCAN = auto()
     JOIN = auto()
     BUILD_JOIN = auto()
+    LATERAL_JOIN = auto()
     # add other types

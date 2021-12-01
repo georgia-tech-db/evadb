@@ -19,6 +19,7 @@ from src.executor.limit_executor import LimitExecutor
 from src.executor.sample_executor import SampleExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
 from src.models.storage.batch import Batch
+from src.parser.types import JoinType
 from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanOprType
 from src.executor.pp_executor import PPExecutor
@@ -31,6 +32,7 @@ from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
 from src.executor.orderby_executor import OrderByExecutor
 from src.executor.hash_join_executor import HashJoinExecutor
+from src.executor.lateral_join_executor import LateralJoinExecutor
 from src.executor.join_build_executor import BuildJoinExecutor
 from src.executor.function_scan_executor import FunctionScanExecutor
 
@@ -89,7 +91,10 @@ class PlanExecutor:
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
         elif plan_opr_type == PlanOprType.JOIN:
-            executor_node = HashJoinExecutor(node=plan)
+            if plan.join_type == JoinType.HASH_JOIN:
+                executor_node = HashJoinExecutor(node=plan)
+            elif plan.join_type == JoinType.LATERAL_JOIN:
+                executor_node = LateralJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.BUILD_JOIN:
             executor_node = BuildJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
