@@ -70,9 +70,9 @@ def handle_request(transport, request_message):
     # Send data length, because response can be very large
     data = (str(len(responseData)) + '|' + responseData).encode('ascii')
 
-    LoggingManager().log('Response to client: --|' +
-                         str(response) + '|--\n' +
-                         'Length: ' + str(len(responseData)))
+    # LoggingManager().log('Response to client: --|' +
+    #                      str(response) + '|--\n' +
+    #                      'Length: ' + str(len(responseData)))
 
     transport.write(data)
 

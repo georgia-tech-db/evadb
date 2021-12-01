@@ -16,8 +16,8 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, auto, IntEnum
+from posixpath import join
 from typing import TYPE_CHECKING
-
 
 if TYPE_CHECKING:
     from src.optimizer.optimizer_context import OptimizerContext
@@ -44,6 +44,7 @@ from src.planner.hash_join_probe_plan import HashJoinProbePlan
 from src.planner.lateral_join_build_plan import LateralJoinBuildPlan
 from src.planner.function_scan_plan import FunctionScanPlan
 from src.parser.types import JoinType
+from src.catalog.models.df_metadata import DataFrameMetadata
 from src.optimizer.optimizer_utils import is_predicate_subset_of_opr_tree
 from src.expression.expression_utils import \
     (split_expr_tree_into_list_of_conjunct_exprs,
@@ -412,6 +413,7 @@ class PushDownFilterThroughJoin(Rule):
 
         join.children = [left, right]
         join.predicate = predicate
+        join.target_list = before.target_list
         return join 
 
         conjunction_exprs = []
@@ -703,6 +705,22 @@ class LogicalJoinToHashJoin(Rule):
     def check(self, before: Operator, context: OptimizerContext):
         return True
 
+    def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
+        cols = set()
+        for col in dataset_metadata.columns:
+            if not col.array_type:
+                cols.add(col.name)
+        return cols
+
+    def extract_join_keys(self, join_node: LogicalJoin):
+        # Assuming both sources are tables
+        left_table_metadata = join_node.lhs().dataset_metadata
+        left_columns = self.get_columns_of_table(left_table_metadata)
+        right_table_metadata = join_node.rhs().dataset_metadata
+        right_columns = self.get_columns_of_table(right_table_metadata)
+        return left_columns.intersection(right_columns)
+
+
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         #          LogicalHashJoin                       HashJoinProbePlan
         #          /           \     ->                  /               \
@@ -717,19 +735,20 @@ class LogicalJoinToHashJoin(Rule):
         #                                [])
                                        
         # build_side.append_child(r1)
+        # probe_side.append_child(build_side)
+        # probe_side.append_child(r2)
         if join_node.join_type == JoinType.LATERAL_JOIN:
             lateral_join_plan = LateralJoinBuildPlan(join_node.join_type,
             [],
             join_node.predicate)
             return lateral_join_plan
 
-        probe_side = HashJoinProbePlan(join_node.join_type,
-                                       [],
-                                       join_node.predicate)
-        # probe_side.append_child(build_side)
-        # probe_side.append_child(r2)
-
-        return probe_side
+        elif join_node.join_type == JoinType.HASH_JOIN:
+            probe_side = HashJoinProbePlan(join_node.join_type,
+                                        self.extract_join_keys(join_node),
+                                        join_node.predicate,
+                                        join_node.target_list)
+            return probe_side
 
 
 class LogicalFunctionScanToPhysical(Rule):

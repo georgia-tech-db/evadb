@@ -572,6 +572,14 @@ class LogicalJoin(Operator):
     def right_keys(self, keys):
         self._right_keys = keys
 
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
+
     def lhs(self):
         return self.children[0]
 
