@@ -54,6 +54,12 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       IMPL  'src/udfs/fastrcnn_object_detector.py';
       """
 
+Count_udf_query = """CREATE UDF IF NOT EXISTS Color
+                INPUT  (frame NDARRAY ANYTYPE, bbox NDARRAY ANYTYPE)
+                OUTPUT (out ANYTYPE)
+                TYPE  Ndarray
+                IMPL  "src/udfs/ndarray_udfs/color.py";
+        """
 
 def init_builtin_udfs(mode='debug'):
     """
@@ -63,7 +69,7 @@ def init_builtin_udfs(mode='debug'):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, Unnest_udf_query, ArrayCount_udf_query]
+    queries = [Fastrcnn_udf_query, Unnest_udf_query, ArrayCount_udf_query, Count_udf_query]
     if mode == 'debug':
         queries.extend([DummyObjectDetector_udf_query,
                         DummyMultiObjectDetector_udf_query])

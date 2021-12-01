@@ -40,6 +40,7 @@ class LateralJoinExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
         self.join_type = node.join_type
+        self.join_project = node.join_project
         # self.join_keys = node.join_keys
 
     def validate(self):
@@ -57,8 +58,14 @@ class LateralJoinExecutor(AbstractExecutor):
                     result_batch = Batch(
                         result_batch.frames[(outcomes > 0).to_numpy()].reset_index(
                             drop=True))
-                if not result_batch.empty():
-                    return result_batch
+            # Then do project
+            if not result_batch.empty() and self.join_project is not None:
+                batches = [expr.evaluate(result_batch)
+                        for expr in self.join_project]
+                result_batch = Batch.merge_column_wise(batches)
+            
+            if not result_batch.empty():
+                return result_batch
 
 
         # for outer_batch in outer.exec():

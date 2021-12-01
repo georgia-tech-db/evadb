@@ -413,7 +413,7 @@ class PushDownFilterThroughJoin(Rule):
 
         join.children = [left, right]
         join.predicate = predicate
-        join.target_list = before.target_list
+        # join.target_list = before.target_list
         return join 
 
         conjunction_exprs = []
@@ -740,7 +740,8 @@ class LogicalJoinToHashJoin(Rule):
         if join_node.join_type == JoinType.LATERAL_JOIN:
             lateral_join_plan = LateralJoinBuildPlan(join_node.join_type,
             [],
-            join_node.predicate)
+            join_node.predicate,
+            join_node.target_list)
             return lateral_join_plan
 
         elif join_node.join_type == JoinType.HASH_JOIN:
