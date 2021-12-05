@@ -3,27 +3,36 @@ import time
 
 class MetricsManager(object):
     _timers = {}
-    _order = []  # helps with nesting
+    _current = ""  # helps with nesting
 
     def start(self, context):
-        if context in self._timers:
-            raise Exception(
-                f"context: '{context}' already exists in MetricsManager")
+        if self._current != "":
+            self._current += f".{context}"
+        else:
+            self._current = context
 
-        self._timers[context] = {"start": time.time(), "children": {}}
-        self._order.append(context)
+        if self._current in self._timers:
+            raise Exception(
+                f"context: '{self._current}' already exists in MetricsManager")
+
+        self._timers[self._current] = {"start": time.time(), "children": {}}
 
     def end(self, context):
-        if context not in self._timers:
+        if not self._current.endswith(context):
             raise Exception(
-                f"context: '{context}' does not exist in MetricsManager")
+                f"invalid context: '{context},"
+                f" current context: '{self._current}")
 
-        self._timers[context]["end"] = time.time()
-        self._order.append(context)
+        if self._current not in self._timers:
+            raise Exception(
+                f"context: '{self._current}' does not exist in MetricsManager")
+
+        self._timers[self._current]["end"] = time.time()
+        self._current = self._current.split(".")[:-1]
 
     def print(self):
         # todo generate meaningful string output from timers
-        return self._timers
+        return self._timers, self._current
 
 
 def mm_start(mm: MetricsManager, context: str):
