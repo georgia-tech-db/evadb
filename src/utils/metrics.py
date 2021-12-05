@@ -2,6 +2,7 @@ import time
 
 
 class MetricsManager(object):
+    _last = ""  # track last started timer contex
     _timers = {}
     _current = ""  # helps with nesting
 
@@ -19,7 +20,7 @@ class MetricsManager(object):
             raise Exception(
                 f"context: '{self._current}' already exists in MetricsManager")
 
-        self._timers[self._current] = {"start": time.time(), "children": {}}
+        self._timers[self._current] = {"start": time.time_ns()}
 
     def end(self, context):
         if not self._current.endswith(context):
@@ -31,12 +32,18 @@ class MetricsManager(object):
             raise Exception(
                 f"context: '{self._current}' does not exist in MetricsManager")
 
-        self._timers[self._current]["end"] = time.time()
-        self._current = ".".join(self._current.split(".")[:-1])
+        self._timers[self._current]["end"] = time.time_ns()
+
+        self._current = self._current[:-len(context)]
+        if self._current.endswith("."):
+            self._current = self._current[:-1]
 
     def print(self):
-        # todo generate meaningful string output from timers
-        return self._timers, self._current
+        latency = {}
+        for k, v in self._timers.items():
+            latency[k] = v['end'] - v['start']
+
+        return {"latency (ns)": latency}
 
 
 def mm_start(mm: MetricsManager, context: str):
