@@ -17,13 +17,15 @@ from typing import List
 
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.constant_value_expression import ConstantValueExpression
-from src.parser.table_ref import TableRef
+from src.parser.table_ref import TableRef, TableInfo
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.udf_io import UdfIO
 from pathlib import Path
 
 
+# Modified, add LOGICALRENAME type and LogicalRename()
+# IMPORTANT: Add it before LOGICALDELIMITER !!
 class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
@@ -42,6 +44,9 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
+    LOGICALRENAME = auto()
+    LOGICALTRUNCATE = auto()
+    LOGICALDROP = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -515,3 +520,109 @@ class LogicalUpload(Operator):
         return (is_subtree_equal
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
+
+
+# Modified
+class LogicalRename(Operator):
+    """Logical node for rename table operations
+
+    Arguments:
+        old_table {TableRef}: [old table that is to be renamed]
+        catalog_table_id {int}: [catalog id for the old table]
+        new_name {TableInfo}: [new name for the old table]
+    """
+
+    def __init__(self, old_table_ref: TableRef,
+                 catalog_table_id: int,
+                 new_name: TableInfo, children=None):
+        super().__init__(OperatorType.LOGICALRENAME, children)
+        self._new_name = new_name
+        self._old_table_ref = old_table_ref
+        self._catalog_table_id = catalog_table_id
+
+    @property
+    def new_name(self):
+        return self._new_name
+
+    @property
+    def old_table_ref(self):
+        return self._old_table_ref
+
+    @property
+    def catalog_table_id(self):
+        return self._catalog_table_id
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalRename):
+            return False
+        return (is_subtree_equal
+                and self.new_name == other.new_name
+                and self.old_table == other.old_table
+                and self.catalog_table_id == other.catalog_table_id)
+
+
+class LogicalTruncate(Operator):
+    """Logical node for truncate table operations
+
+    Arguments:
+        table_ref {TableRef}: [old table that is to be renamed]
+        catalog_table_id {int}: [catalog id for the old table]
+    """
+
+    def __init__(self, table_ref: TableRef,
+                 catalog_table_id: int, children=None):
+        super().__init__(OperatorType.LOGICALTRUNCATE, children)
+        self._table_ref = table_ref
+        self._catalog_table_id = catalog_table_id
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def catalog_table_id(self):
+        return self._catalog_table_id
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalTruncate):
+            return False
+        return (is_subtree_equal
+                and self.table_ref == other.table_ref
+                and self.catalog_table_id == other.catalog_table_id)
+
+
+class LogicalDrop(Operator):
+    """
+        Logical node for drop table operations
+    """
+
+    def __init__(self, table_refs: List[TableRef],
+                 catalog_table_ids: List[int],
+                 if_exists: bool, children=None):
+        super().__init__(OperatorType.LOGICALDROP, children)
+        self._table_refs = table_refs
+        self._catalog_table_ids = catalog_table_ids
+        self._if_exists = if_exists
+
+    @property
+    def table_refs(self):
+        return self._table_refs
+
+    @property
+    def catalog_table_ids(self):
+        return self._catalog_table_ids
+
+    @property
+    def if_exists(self):
+        return self._if_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDrop):
+            return False
+        return (is_subtree_equal
+                and self.table_refs == other.table_refs
+                and self.if_exists == other.if_exists
+                and self.catalog_table_id == other.catalog_table_id)

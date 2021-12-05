@@ -19,6 +19,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.catalog.services.base_service import BaseService
 from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.utils.generic_utils import generate_file_path
+
+import time
 
 
 class DatasetService(BaseService):
@@ -108,3 +111,22 @@ class DatasetService(BaseService):
                 LoggingLevel.ERROR)
             return False
         return True
+    
+    def rename_dataset_by_id(self, new_name: str, metadata_id: int) -> bool:
+        try:
+            dataset = self.dataset_by_id(metadata_id)
+            dataset._name = new_name
+            dataset.save()
+            
+        except Exception:
+            LoggingManager().log(
+                "update dataset name with id {}".format(metadata_id),
+                LoggingLevel.ERROR)
+            return False
+        return True
+    
+    def truncate_table_new_metadata(self, metadata_id: int): # -> DataFrameMetadata:
+        dataset = self.dataset_by_id(metadata_id)
+        new_name=dataset._name+str(int(time.time()))
+        return dataset._name, new_name
+

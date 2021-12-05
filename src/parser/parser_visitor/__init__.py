@@ -25,16 +25,20 @@ from src.parser.parser_visitor._select_statement import Select
 from src.parser.parser_visitor._table_sources import TableSources
 from src.parser.parser_visitor._load_statement import Load
 from src.parser.parser_visitor._upload_statement import Upload
-
+from src.parser.parser_visitor._rename_statement import RenameTable
+from src.parser.parser_visitor._truncate_statement import TruncateTable
+from src.parser.parser_visitor._drop_statement import DropTable
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which
 # overloads the required visitors' functions.
 # Then make the new class as a parent class for ParserVisitor.
 
 
+# Modified, add RenameTable
 class ParserVisitor(CommonClauses, CreateTable, Expressions,
                     Functions, Insert, Select, TableSources,
-                    Load, Upload):
+                    Load, Upload, RenameTable, TruncateTable,
+                    DropTable):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
             if child is not TerminalNode:

@@ -4,7 +4,7 @@ from mock import MagicMock
 
 from src.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalSample,
-                                     Dummy)
+                                     LogicalRename, Dummy)
 from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
@@ -20,7 +20,9 @@ from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        LogicalDerivedGetToPhysical,
                                        LogicalUnionToPhysical,
                                        LogicalOrderByToPhysical,
-                                       LogicalLimitToPhysical)
+                                       LogicalLimitToPhysical,
+                                       LogicalRenameToPhysical,
+                                       LogicalTruncateToPhysical)
 from src.optimizer.rules.rules import Promise, RulesManager
 
 
@@ -64,6 +66,10 @@ class TestRules(unittest.TestCase):
                         Promise.IMPLEMENTATION_DELIMETER)
         self.assertTrue(Promise.LOGICAL_UNION_TO_PHYSICAL <
                         Promise.IMPLEMENTATION_DELIMETER)
+        self.assertTrue(Promise.LOGICAL_RENAME_TO_PHYSICAL <
+                        Promise.IMPLEMENTATION_DELIMETER)
+        self.assertTrue(Promise.LOGICAL_TRUNCATE_TO_PHYSICAL <
+                        Promise.IMPLEMENTATION_DELIMETER)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -91,7 +97,9 @@ class TestRules(unittest.TestCase):
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()]
+            LogicalLimitToPhysical(),
+            LogicalRenameToPhysical(),
+            LogicalTruncateToPhysical()]
         self.assertEqual(len(supported_implementation_rules),
                          len(RulesManager().implementation_rules))
 

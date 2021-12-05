@@ -251,7 +251,8 @@ class ParserVisitorTests(unittest.TestCase):
     ##################################################################
 
     @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('src.parser.parser_visitor._functions.FunctionExpression')
+    @mock.patch(
+        'src.parser.parser_visitor._functions.FunctionExpression')
     def test_visit_udf_function_call(self, func_mock, visit_mock):
         ctx = MagicMock()
         udf_name = 'name'
@@ -361,3 +362,77 @@ class ParserVisitorTests(unittest.TestCase):
             [call(ctx.fileName()), call(ctx.tableName())])
         mock_load.assert_called_once()
         mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4')
+
+    # Modified
+    ##################################################################
+    # RENAME TABLE
+    ##################################################################
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch(
+        'src.parser.parser_visitor._rename_statement.RenameTableStatement')
+    def test_visit_rename_statement(self, rename_mock, visit_mock):
+        ctx = MagicMock()
+        old_table = 'old_name'
+        new_table = 'new_name'
+        params = {ctx.oldtableName.return_value: old_table,
+                  ctx.newtableName.return_value: new_table}
+
+        def side_effect(arg):
+            return params[arg]
+
+        visit_mock.side_effect = side_effect
+        visitor = ParserVisitor()
+        visitor.visitRenameTable(ctx)
+        visit_mock.assert_has_calls(
+            [call(ctx.oldtableName()), call(ctx.newtableName())])
+        rename_mock.assert_called_once()
+        rename_mock.assert_called_with(TableRef(old_table), new_table)
+
+    ##################################################################
+    # TRUNCATE TABLE
+    ##################################################################
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch(
+        'src.parser.parser_visitor._truncate_statement.TruncateTableStatement')
+    def test_visit_truncate_statement(self, truncate_mock, visit_mock):
+        ctx = MagicMock()
+        table = 'table_name'
+        #if_exists = True
+        params = {ctx.tableName.return_value: table}
+        # ctx.if_exists.return_value: if_exists}
+
+        def side_effect(arg):
+            return params[arg]
+
+        visit_mock.side_effect = side_effect
+        visitor = ParserVisitor()
+        visitor.visitTruncateTable(ctx)
+        visit_mock.assert_has_calls(
+            [call(ctx.tableName())])
+        truncate_mock.assert_called_once()
+        truncate_mock.assert_called_with(TableRef(table))
+
+    ##################################################################
+    # DROP TABLE
+    ##################################################################
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch(
+        'src.parser.parser_visitor._drop_statement.DropTableStatement')
+    def test_visit_drop_statement(self, drop_mock, visit_mock):
+        ctx = MagicMock()
+        table = 'table_name'
+        if_exists = False
+        params = {ctx.tables.return_value: [table],
+                  ctx.if_exists.return_value: if_exists}
+        # ctx.if_exists.return_value: if_exists}
+
+        def side_effect(arg):
+            return params[arg]
+
+        visit_mock.side_effect = side_effect
+        visitor = ParserVisitor()
+        visitor.visitDropTable(ctx)
+        visit_mock.assert_has_calls(
+            [call(ctx.tables())])
+        drop_mock.assert_called_once()
+        drop_mock.assert_called_with([table], if_exists=if_exists)

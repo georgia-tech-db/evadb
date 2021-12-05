@@ -21,6 +21,9 @@ from src.catalog.catalog_manager import CatalogManager
 from src.planner.create_plan import CreatePlan
 from src.planner.insert_plan import InsertPlan
 from src.planner.create_udf_plan import CreateUDFPlan
+from src.planner.rename_plan import RenamePlan
+from src.planner.truncate_plan import TruncatePlan
+from src.planner.drop_plan import DropPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.upload_plan import UploadPlan
 from src.planner.union_plan import UnionPlan
@@ -46,6 +49,49 @@ class PlanNodeTests(unittest.TestCase):
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
+
+    def test_rename_plan(self):
+        dummy_old = TableRef('old')
+        dummy_new = TableInfo("new")
+        video_id = 0
+
+        CatalogManager().reset()
+        columns = [DataFrameColumn('id', ColumnType.INTEGER),
+                   DataFrameColumn('name', ColumnType.TEXT,
+                                   array_dimensions=50)]
+        dummy_plan_node = RenamePlan(dummy_old, video_id, dummy_new)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
+        self.assertEqual(dummy_plan_node.old_table.table,
+                         "old")
+        self.assertEqual(dummy_plan_node.new_name.table_name,
+                         "new")
+
+    def test_truncate_plan(self):
+        dummy_info = TableInfo('dummy')
+        dummy_table = TableRef(dummy_info)
+        video_id = 0
+
+        CatalogManager().reset()
+        columns = [DataFrameColumn('id', ColumnType.INTEGER),
+                   DataFrameColumn('name', ColumnType.TEXT,
+                                   array_dimensions=50)]
+        dummy_plan_node = TruncatePlan(dummy_table, video_id)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.TRUNCATE)
+        self.assertEqual(dummy_plan_node.table_ref.table.table_name,
+                         "dummy")
+
+    def test_drop_plan(self):
+        dummy_info = TableInfo('dummy')
+        dummy_table = TableRef(dummy_info)
+        video_id = 0
+
+        CatalogManager().reset()
+        dummy_plan_node = DropPlan([dummy_table], False, [video_id])
+
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
+        self.assertEqual(
+            dummy_plan_node.table_refs[0].table.table_name, "dummy")
+        self.assertEqual(dummy_plan_node.table_ids[0], video_id)
 
     def test_insert_plan(self):
         video_id = 0

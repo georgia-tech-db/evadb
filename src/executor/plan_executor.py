@@ -23,6 +23,9 @@ from src.planner.abstract_plan import AbstractPlan
 from src.planner.types import PlanOprType
 from src.executor.pp_executor import PPExecutor
 from src.executor.create_executor import CreateExecutor
+from src.executor.rename_executor import RenameExecutor
+from src.executor.truncate_executor import TruncateExecutor
+from src.executor.drop_executor import DropExecutor
 from src.executor.insert_executor import InsertExecutor
 from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.load_executor import LoadDataExecutor
@@ -85,6 +88,12 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.RENAME:
+            executor_node = RenameExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.TRUNCATE:
+            executor_node = TruncateExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.DROP:
+            executor_node = DropExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:

@@ -15,6 +15,7 @@
 from enum import unique, IntEnum, auto
 
 
+# Modified, add RENAME
 @unique
 class PlanOprType(IntEnum):
     SEQUENTIAL_SCAN = auto()
@@ -29,4 +30,7 @@ class PlanOprType(IntEnum):
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
+    RENAME = auto()
+    TRUNCATE = auto()
+    DROP = auto()
     # add other types

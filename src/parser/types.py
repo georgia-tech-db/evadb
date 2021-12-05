@@ -22,6 +22,7 @@ class ColumnConstraintEnum(IntEnum):
     UNIQUE = 4
 
 
+# Modified, add RENAME, add TRUNCATE
 @unique
 class StatementType(IntEnum):
     """
@@ -33,6 +34,9 @@ class StatementType(IntEnum):
     CREATE_UDF = 4,
     LOAD_DATA = 5,
     UPLOAD = 6,
+    RENAME = 7,
+    TRUNCATE = 8,
+    DROP = 9,
     # add other types
 
 

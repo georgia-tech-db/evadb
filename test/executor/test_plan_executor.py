@@ -28,6 +28,9 @@ from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.load_data_plan import LoadDataPlan
 from src.planner.upload_plan import UploadPlan
+from src.planner.rename_plan import RenamePlan
+from src.planner.truncate_plan import TruncatePlan
+from src.planner.drop_plan import DropPlan
 from src.executor.load_executor import LoadDataExecutor
 from src.executor.upload_executor import UploadExecutor
 from src.executor.seq_scan_executor import SequentialScanExecutor
@@ -35,6 +38,9 @@ from src.executor.create_executor import CreateExecutor
 from src.executor.create_udf_executor import CreateUDFExecutor
 from src.executor.insert_executor import InsertExecutor
 from src.executor.pp_executor import PPExecutor
+from src.executor.rename_executor import RenameExecutor
+from src.executor.truncate_executor import TruncateExecutor
+from src.executor.drop_executor import DropExecutor
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -210,6 +216,48 @@ class PlanExecutorTest(unittest.TestCase):
         mock_build.reset_mock()
         mock_clean.reset_mock()
         tree = MagicMock(node=UploadPlan(None, None))
+        mock_build.return_value = tree
+        actual = list(PlanExecutor(None).execute_plan())
+        tree.exec.assert_called_once()
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    def test_execute_plan_for_rename_plans(
+            self, mock_clean, mock_build):
+
+        # RenameExecutor
+        tree = MagicMock(node=RenamePlan(None, None, None))
+        mock_build.return_value = tree
+        actual = list(PlanExecutor(None).execute_plan())
+        tree.exec.assert_called_once()
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    def test_execute_plan_for_truncate_plans(
+            self, mock_clean, mock_build):
+
+        # TruncateExecutor
+        tree = MagicMock(node=TruncatePlan(None, None))
+        mock_build.return_value = tree
+        actual = list(PlanExecutor(None).execute_plan())
+        tree.exec.assert_called_once()
+        mock_build.assert_called_once_with(None)
+        mock_clean.assert_called_once()
+        self.assertEqual(actual, [])
+
+    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    def test_execute_plan_for_drop_plans(
+            self, mock_clean, mock_build):
+
+        # DropExecutor
+        tree = MagicMock(node=DropPlan(None, None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()

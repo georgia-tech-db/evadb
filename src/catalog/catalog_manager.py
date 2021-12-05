@@ -27,6 +27,7 @@ from src.catalog.services.udf_service import UdfService
 from src.catalog.services.udf_io_service import UdfIOService
 from src.utils.logging_manager import LoggingLevel
 from src.utils.logging_manager import LoggingManager
+from src.utils.generic_utils import generate_file_path
 
 
 class CatalogManager(object):
@@ -98,7 +99,22 @@ class CatalogManager(object):
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
         metadata.schema = column_list
+        print('catalog mng column list')
+        print(column_list)
         return metadata
+    
+    def rename_table(self, new_name: str, metadata_id: int):
+        return self._dataset_service.rename_dataset_by_id(new_name, 
+                                                            metadata_id)
+                                    
+    def truncate_table_metadata(self, metadata_id: int):
+        old_name, new_name=self._dataset_service.truncate_table_new_metadata(metadata_id)
+        new_metadata = self._dataset_service.create_dataset(
+            new_name, str(generate_file_path(new_name)), 'id')
+        df_columns = self._column_service.columns_by_id_and_dataset_id(
+            metadata_id)
+        new_metadata.schema=df_columns
+        return old_name, new_name, new_metadata
 
     def get_table_bindings(self, database_name: str, table_name: str,
                            column_names: List[str] = None) -> Tuple[int,
@@ -183,8 +199,9 @@ class CatalogManager(object):
         Returns:
             List[int] -- [list of columns ids for this table]
         """
-
+        print('a')
         col_ids = []
+        print('b')
         df_columns = self._column_service.columns_by_id_and_dataset_id(
             table_metadata_id)
         for col in df_columns:

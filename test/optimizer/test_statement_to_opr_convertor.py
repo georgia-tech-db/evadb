@@ -23,6 +23,9 @@ from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.insert_statement import InsertTableStatement
 from src.parser.create_statement import CreateTableStatement
 from src.parser.load_statement import LoadDataStatement
+from src.parser.rename_statement import RenameTableStatement
+from src.parser.truncate_statement import TruncateTableStatement
+from src.parser.drop_statement import DropTableStatement
 from src.parser.parser import Parser
 
 from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
@@ -185,6 +188,36 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock = MagicMock()
         convertor.visit_create = mock
 
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    # Modified
+    def test_visit_should_call_rename(self):
+        stmt = MagicMock(spec=RenameTableStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_rename = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_truncate(self):
+        stmt = MagicMock(spec=TruncateTableStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_truncate = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_drop(self):
+        stmt = MagicMock(spec=DropTableStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_drop = mock
         convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)

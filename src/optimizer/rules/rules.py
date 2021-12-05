@@ -27,7 +27,7 @@ from src.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalRename, LogicalTruncate, LogicalDrop)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -39,9 +39,13 @@ from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
 from src.planner.sample_plan import SamplePlan
+from src.planner.rename_plan import RenamePlan
+from src.planner.truncate_plan import TruncatePlan
+from src.planner.drop_plan import DropPlan
 from src.configuration.configuration_manager import ConfigurationManager
 
 
+# Modified
 class RuleType(Flag):
     """
     Manages enums for all the supported rules
@@ -71,6 +75,9 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_RENAME_TO_PHYSICAL = auto()
+    LOGICAL_TRUNCATE_TO_PHYSICAL = auto()
+    LOGICAL_DROP_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -85,6 +92,9 @@ class Promise(IntEnum):
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
+    LOGICAL_RENAME_TO_PHYSICAL = auto()
+    LOGICAL_TRUNCATE_TO_PHYSICAL = auto()
+    LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -351,6 +361,61 @@ class LogicalCreateToPhysical(Rule):
         return after
 
 
+# Modified
+class LogicalRenameToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALRENAME)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_RENAME_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_RENAME_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalRename, context: OptimizerContext):
+        after = RenamePlan(before.old_table_ref,
+                           before.catalog_table_id, before.new_name)
+        return after
+
+
+class LogicalTruncateToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALTRUNCATE)
+        # pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_TRUNCATE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_TRUNCATE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalTruncate, context: OptimizerContext):
+        after = TruncatePlan(before.table_ref,
+                             before.catalog_table_id)
+        return after
+
+
+class LogicalDropToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDROP)
+        super().__init__(RuleType.LOGICAL_DROP_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DROP_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDrop, context: OptimizerContext):
+        after = DropPlan(before.table_refs, before.if_exists,
+                         before.catalog_table_ids)
+        print('hi')
+        return after
+
+
 class LogicalCreateUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEUDF)
@@ -554,6 +619,7 @@ class LogicalLimitToPhysical(Rule):
 ##############################################
 
 
+# Modified
 class RulesManager:
     """Singelton class to manage all the rules in our system
     """
@@ -585,7 +651,10 @@ class RulesManager:
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()
+            LogicalLimitToPhysical(),
+            LogicalRenameToPhysical(),
+            LogicalTruncateToPhysical(),
+            LogicalDropToPhysical()
         ]
 
     @property
