@@ -28,7 +28,7 @@ class MetricsManager(object):
                 f"context: '{self._current}' does not exist in MetricsManager")
 
         self._timers[self._current]["end"] = time.time()
-        self._current = self._current.split(".")[:-1]
+        self._current = ".".join(self._current.split(".")[:-1])
 
     def print(self):
         # todo generate meaningful string output from timers
