@@ -24,17 +24,25 @@ from src.optimizer.plan_generator import PlanGenerator
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.parser.parser import Parser
 from src.utils.logging_manager import LoggingManager, LoggingLevel
-from src.utils.metrics import MetricsManager, mm_start, mm_end
+from src.utils.metrics import MetricsManager, mm_start, mm_end, mm_end_start
 
 
-def execute_query(query) -> Iterator[Batch]:
+def execute_query(query, mm: MetricsManager) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
     """
+    mm_start(mm, "parsing")
     stmt = Parser().parse(query)[0]
+
+    mm_end_start(mm, "parsing", "planning")
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
-    return PlanExecutor(p_plan).execute_plan()
+
+    mm_end_start(mm, "planning", "execution")
+    output = PlanExecutor(p_plan).execute_plan()
+
+    mm_end(mm, "execution")
+    return output
 
 
 def execute_query_fetch_all(query, mm: MetricsManager = None) -> Optional[
@@ -42,9 +50,7 @@ def execute_query_fetch_all(query, mm: MetricsManager = None) -> Optional[
     """
     Execute the query and fetch all results into one Batch object.
     """
-    mm_start(mm, "Execution")
-    output = execute_query(query)
-    mm_end(mm, "Execution")
+    output = execute_query(query, mm)
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

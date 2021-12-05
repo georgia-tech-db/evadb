@@ -5,6 +5,10 @@ class MetricsManager(object):
     _timers = {}
     _current = ""  # helps with nesting
 
+    def __init__(self):
+        self._timers = {}
+        self._current = ""
+
     def start(self, context):
         if self._current != "":
             self._current += f".{context}"
@@ -43,6 +47,12 @@ def mm_start(mm: MetricsManager, context: str):
 def mm_end(mm: MetricsManager, context: str):
     if mm is not None:
         mm.end(context)
+
+
+def mm_end_start(mm: MetricsManager, end: str, start: str):
+    if mm is not None:
+        mm.end(end)
+        mm.start(start)
 
 
 def mm_print(mm: MetricsManager):
