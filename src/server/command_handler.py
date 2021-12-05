@@ -13,18 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import pandas as pd
-
 from typing import Iterator, Optional
 
-from src.parser.parser import Parser
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.optimizer.plan_generator import PlanGenerator
+import pandas as pd
+
 from src.executor.plan_executor import PlanExecutor
 from src.models.server.response import ResponseStatus, Response
 from src.models.storage.batch import Batch
-
+from src.optimizer.plan_generator import PlanGenerator
+from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from src.parser.parser import Parser
 from src.utils.logging_manager import LoggingManager, LoggingLevel
+from src.utils.metrics import MetricsManager, mm_start, mm_end
 
 
 def execute_query(query) -> Iterator[Batch]:
@@ -37,11 +37,14 @@ def execute_query(query) -> Iterator[Batch]:
     return PlanExecutor(p_plan).execute_plan()
 
 
-def execute_query_fetch_all(query) -> Optional[Batch]:
+def execute_query_fetch_all(query, mm: MetricsManager = None) -> Optional[
+        Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
+    mm_start(mm, "Execution")
     output = execute_query(query)
+    mm_end(mm, "Execution")
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)
@@ -57,14 +60,17 @@ def handle_request(transport, request_message):
     """
     LoggingManager().log('Receive request: --|' + str(request_message) + '|--')
 
+    mm = MetricsManager()
+
     try:
-        output_batch = execute_query_fetch_all(request_message)
+        output_batch = execute_query_fetch_all(request_message, mm)
     except Exception as e:
         LoggingManager().log(e, LoggingLevel.WARNING)
         output_batch = Batch(pd.DataFrame([{'error': str(e)}]))
         response = Response(status=ResponseStatus.FAIL, batch=output_batch)
     else:
-        response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
+        response = Response(status=ResponseStatus.SUCCESS,
+                            batch=output_batch, metrics=mm.print())
 
     responseData = response.to_json()
     # Send data length, because response can be very large

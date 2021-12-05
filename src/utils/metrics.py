@@ -22,5 +22,20 @@ class MetricsManager(object):
         self._order.append(context)
 
     def print(self):
-        # todo
-        return
+        # todo generate meaningful string output from timers
+        return self._timers
+
+
+def mm_start(mm: MetricsManager, context: str):
+    if mm is not None:
+        mm.start(context)
+
+
+def mm_end(mm: MetricsManager, context: str):
+    if mm is not None:
+        mm.end(context)
+
+
+def mm_print(mm: MetricsManager):
+    if mm is not None:
+        mm.print()
