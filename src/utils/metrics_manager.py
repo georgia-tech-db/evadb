@@ -2,13 +2,9 @@ import time
 
 
 class MetricsManager(object):
-    _last = ""  # track last started timer contex
-    _timers = {}
-    _current = ""  # helps with nesting
-
     def __init__(self):
         self._timers = {}
-        self._current = ""
+        self._current = ""  # helps with nesting
 
     def start(self, context):
         if self._current != "":
