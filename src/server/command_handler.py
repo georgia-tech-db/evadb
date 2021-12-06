@@ -24,7 +24,7 @@ from src.optimizer.plan_generator import PlanGenerator
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.parser.parser import Parser
 from src.utils.logging_manager import LoggingManager, LoggingLevel
-from src.utils.metrics_manager import MetricsManager, mm_start,\
+from src.utils.metrics_manager import MetricsManager, mm_start, \
     mm_end, mm_end_start
 
 
@@ -82,6 +82,8 @@ def handle_request(transport, request_message):
         response = Response(status=ResponseStatus.SUCCESS,
                             batch=output_batch, metrics=mm.print())
 
+    mm_start(mm, "response.encoding")
+
     responseData = response.to_json()
     # Send data length, because response can be very large
     data = (str(len(responseData)) + '|' + responseData).encode('ascii')
@@ -89,6 +91,8 @@ def handle_request(transport, request_message):
     LoggingManager().log('Response to client: --|' +
                          str(response) + '|--\n' +
                          'Length: ' + str(len(responseData)))
+
+    mm_end(mm, "response.encoding")
 
     transport.write(data)
 
