@@ -67,49 +67,53 @@ class OpticalCharacterRecognition(AbstractClassifierUDF, GPUCompatible):
         
         frames_list = frames.values.tolist()
         frames = np.array(frames_list)
-
         outcome = pd.DataFrame()
+
+        final_batch_frames = frames[0]
+        for i in range(1,frames.shape[0]):
+            final_batch_frames = np.vstack((final_batch_frames,frames[i]))
         
-        for i in range(frames.shape[0]):
-            prediction = self.model.readtext_batched(frames[i])
+        prediction = self.model.readtext_batched(final_batch_frames)
             
-            prediction = np.array(prediction)
+        prediction = np.array(prediction)
 
-            pred_class = []
-            pred_boxes = []
-            pred_score = []
+        if prediction.size != 0:
+            for detection in prediction:
 
-            if prediction.size != 0:
-                for detection in prediction:
+                pred_class = []
+                pred_boxes = []
+                pred_score = []
+                if len(detection) != 0:
 
                     pred_class.append(detection[0][1])
                     pred_boxes.append([[detection[0][0][0], detection[0][0][1]],
-                            [detection[0][0][2], detection[0][0][3]]])
+                                [detection[0][0][2], detection[0][0][3]]])
                     pred_score.append(detection[0][2])
                 
-                pred_t = \
-                    [pred_score.index(x) for x in pred_score if
-                    x > self.threshold]
 
-                pred_t = np.array(pred_t)
-                
-                if pred_t.size != 0:
-                    pred_class = np.array(pred_class)
-                    pred_class = pred_class[pred_t]
+                    pred_t = \
+                        [pred_score.index(x) for x in pred_score if
+                        x > self.threshold]
+
+                    pred_t = np.array(pred_t)
                     
-                    pred_boxes = np.array(pred_boxes)
-                    pred_boxes = pred_boxes[pred_t]
+                    if pred_t.size != 0:
+                        pred_class = np.array(pred_class)
+                        pred_class = pred_class[pred_t]
 
-                    pred_score = np.array(pred_score)
-                    pred_score = pred_score[pred_t]
+                        pred_boxes = np.array(pred_boxes)
+                        pred_boxes = pred_boxes[pred_t]
 
-                    outcome = outcome.append(
-                        {
-                            "labels": list(pred_class),
-                            "scores": list(pred_score),
-                            "boxes": list(pred_boxes)
-                        },
-                        ignore_index=True)
+                        pred_score = np.array(pred_score)
+                        pred_score = pred_score[pred_t]
+
+                        outcome = outcome.append(
+                            {
+                                "labels": list(pred_class),
+                                "scores": list(pred_score),
+                                "boxes": list(pred_boxes)
+                            },
+                            ignore_index=True)
 
 
         return outcome

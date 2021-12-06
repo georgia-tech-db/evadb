@@ -24,10 +24,14 @@ class GPUCompatible(ABC):
     def device(self,):
         return self._device
 
-    def assign_device(self, device: str):
+    def assign_device(self, device: str) -> object:
         '''
         Assigning the device passed by the UDF to the member variable of the class
-        Returns after enabling GPU for the device
+        This is an internal function used by eva for device allocation.
+        Arguments:
+            device (str): device details
+        Returns:
+            A GPU compatible object
         '''
         self._device = device
         return self.to_device(device)
