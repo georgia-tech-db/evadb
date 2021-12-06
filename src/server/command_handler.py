@@ -43,7 +43,6 @@ def execute_query(query, mm: MetricsManager) -> Iterator[Batch]:
 
     mm_end_start(mm, "planning.optimizer", "executor")
     output = PlanExecutor(p_plan).execute_plan()
-    mm_end(mm, "executor")
 
     return output
 
@@ -56,6 +55,8 @@ def execute_query_fetch_all(query, mm: MetricsManager = None) -> Optional[
     output = execute_query(query, mm)
     if output:
         batch_list = list(output)
+        mm_end(mm, "executor")
+
         return Batch.concat(batch_list, copy=False)
 
 
