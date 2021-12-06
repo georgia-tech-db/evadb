@@ -101,6 +101,14 @@ pre-commit install
 ```shell
 bash script/test/test.sh
 ```
+## Extending new DDL command in EVA
+Now EVA support following DDL commands:
+* CREATE
+* RENAME
+* DROP
+* TRUNCATE
+
+For the tutorial of implementing a DDL command, please refer to  `tutorial_extend_ddl_cmd.md`.
 
 ## Quickstart Tutorial
 
