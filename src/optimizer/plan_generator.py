@@ -18,6 +18,7 @@ from src.optimizer.optimizer_tasks import (
     TopDownRewrite, OptimizeGroup, BottomUpRewrite)
 from src.optimizer.optimizer_task_stack import OptimizerTaskStack
 from src.optimizer.property import PropertyType
+from src.planner.abstract_plan import AbstractPlan
 
 
 class PlanGenerator:
@@ -86,7 +87,7 @@ class PlanGenerator:
             root_grp_id, optimizer_context)
         return optimal_plan
 
-    def build(self, logical_plan: Operator):
+    def build(self, logical_plan: Operator) -> AbstractPlan:
         # apply optimizations
 
         plan = self.optimize(logical_plan)

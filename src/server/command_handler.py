@@ -40,6 +40,7 @@ def execute_query(query, mm: MetricsManager) -> Iterator[Batch]:
 
     mm_end_start(mm, "planning.convertor", "planning.optimizer")
     p_plan = PlanGenerator().build(l_plan)
+    p_plan.set_metrics_manager(mm)
 
     mm_end_start(mm, "planning.optimizer", "executor")
     output = PlanExecutor(p_plan).execute_plan()

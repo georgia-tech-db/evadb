@@ -18,13 +18,20 @@ from abc import ABC
 from src.planner.types import PlanOprType
 from typing import List
 
+from src.utils.metrics_manager import MetricsManager
+
 
 class AbstractPlan(ABC):
+
+    metrics: MetricsManager
 
     def __init__(self, opr_type):
         self._children = []
         self._parent = None
         self._opr_type = opr_type
+
+    def set_metrics_manager(self, mm: MetricsManager):
+        self.metrics = mm
 
     def append_child(self, child):
         """append node to children list
