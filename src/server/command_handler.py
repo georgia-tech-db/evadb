@@ -24,7 +24,8 @@ from src.optimizer.plan_generator import PlanGenerator
 from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from src.parser.parser import Parser
 from src.utils.logging_manager import LoggingManager, LoggingLevel
-from src.utils.metrics import MetricsManager, mm_start, mm_end, mm_end_start
+from src.utils.metrics_manager import MetricsManager, mm_start,\
+    mm_end, mm_end_start
 
 
 def execute_query(query, mm: MetricsManager) -> Iterator[Batch]:
@@ -37,13 +38,13 @@ def execute_query(query, mm: MetricsManager) -> Iterator[Batch]:
     mm_end_start(mm, "parsing", "planning.convertor")
     l_plan = StatementToPlanConvertor().visit(stmt)
 
-    mm_end_start(mm, "planning.convertor", "planning.build")
+    mm_end_start(mm, "planning.convertor", "planning.optimizer")
     p_plan = PlanGenerator().build(l_plan)
 
-    mm_end_start(mm, "planning.build", "execution")
+    mm_end_start(mm, "planning.optimizer", "execution")
     output = PlanExecutor(p_plan).execute_plan()
-
     mm_end(mm, "execution")
+
     return output
 
 
