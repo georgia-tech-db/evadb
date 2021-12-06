@@ -32,18 +32,18 @@ def execute_query(query, mm: MetricsManager) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
     """
-    mm_start(mm, "parsing")
+    mm_start(mm, "parser")
     stmt = Parser().parse(query)[0]
 
-    mm_end_start(mm, "parsing", "planning.convertor")
+    mm_end_start(mm, "parser", "planning.convertor")
     l_plan = StatementToPlanConvertor().visit(stmt)
 
     mm_end_start(mm, "planning.convertor", "planning.optimizer")
     p_plan = PlanGenerator().build(l_plan)
 
-    mm_end_start(mm, "planning.optimizer", "execution")
+    mm_end_start(mm, "planning.optimizer", "executor")
     output = PlanExecutor(p_plan).execute_plan()
-    mm_end(mm, "execution")
+    mm_end(mm, "executor")
 
     return output
 

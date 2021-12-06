@@ -41,9 +41,9 @@ class MetricsManager(object):
     def print(self):
         latency = {}
         for k, v in self._timers.items():
-            latency[k] = v['end'] - v['start']
+            latency[k] = (v['end'] - v['start']) / 1000000  # convert ns to ms
 
-        return {"latency (ns)": latency}
+        return {"latency (ms)": latency}
 
 
 def mm_start(mm: MetricsManager, context: str):

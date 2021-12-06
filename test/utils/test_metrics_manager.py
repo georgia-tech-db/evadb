@@ -27,7 +27,7 @@ class MetricsManagerTests(unittest.TestCase):
         select_query = "SELECT id, data FROM MyVideo WHERE id < 5;"
         execute_query_fetch_all(select_query, mm)
 
-        self.assertEqual(mm.print().keys(), ["latency (ns)"])
+        self.assertEqual(mm.print().keys(), ["latency (ms)"])
         self.assertEqual(
-            mm.print().keys()["latency (ns)"].keys(),
-            ["parsing", "planning.convertor", "planning.build", "execution"])
+            mm.print().keys()["latency (ms)"].keys(),
+            ["parser", "planning.convertor", "planning.build", "executor"])
