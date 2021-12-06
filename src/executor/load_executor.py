@@ -52,7 +52,7 @@ class LoadDataExecutor(AbstractExecutor):
         StorageEngine.create(self.node.table_metainfo)
         num_loaded_frames = 0
 
-        mm_bw_start(self.node.metrics, str(self.node.file_path))
+        mm_bw_start(self.node, str(self.node.file_path))
 
         full_file_path = os.path.join(self.path_prefix, self.node.file_path)
         video_reader = OpenCVReader(
@@ -62,8 +62,8 @@ class LoadDataExecutor(AbstractExecutor):
             StorageEngine.write(self.node.table_metainfo, batch)
             num_loaded_frames += len(batch)
 
-        mm_bw_end(self.node.metrics, str(self.node.file_path),
-                  num_loaded_frames, os.path.getsize(full_file_path))
+        mm_bw_end(self.node, str(self.node.file_path),
+                  num_loaded_frames, full_file_path)
 
         yield Batch(pd.DataFrame({'Video': str(self.node.file_path),
                                   'Num Loaded Frames': num_loaded_frames},

@@ -23,12 +23,11 @@ from src.utils.metrics_manager import MetricsManager
 
 class AbstractPlan(ABC):
 
-    metrics: MetricsManager
-
     def __init__(self, opr_type):
         self._children = []
         self._parent = None
         self._opr_type = opr_type
+        self.metrics = None
 
     def set_metrics_manager(self, mm: MetricsManager):
         self.metrics = mm

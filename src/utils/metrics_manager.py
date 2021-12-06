@@ -1,3 +1,4 @@
+import os
 import time
 
 
@@ -91,14 +92,15 @@ def mm_end_start(mm: MetricsManager, end: str, start: str):
         mm.start(start)
 
 
-def mm_bw_start(mm: MetricsManager, context: str):
-    if mm is not None:
-        mm.bw_start(context)
+def mm_bw_start(p, context: str):
+    if hasattr(p, "metrics") and p.metrics is not None:
+        p.metrics.bw_start(context)
 
 
-def mm_bw_end(mm: MetricsManager, context: str, num_loaded_frames, file_size):
-    if mm is not None:
-        mm.bw_end(context, num_loaded_frames, file_size)
+def mm_bw_end(p, context: str, num_loaded_frames, full_file_path):
+    if hasattr(p, "metrics") and p.metrics is not None:
+        file_size = os.path.getsize(full_file_path)
+        p.metrics.bw_end(context, num_loaded_frames, file_size)
 
 
 def mm_print(mm: MetricsManager):
