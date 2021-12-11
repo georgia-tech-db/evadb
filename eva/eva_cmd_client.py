@@ -43,11 +43,4 @@ def main():
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-H', '--host', dest='host', type=str,
-                        help='Host address for EVA server', default='0.0.0.0')
-    parser.add_argument('-P', '--port', dest='port', type=int,
-                        help='Port for EVA server', default=5432)
-    args = parser.parse_args()
-
-    eva_client(host=args.host, port=args.port)
+    main()
