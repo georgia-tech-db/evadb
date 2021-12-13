@@ -23,5 +23,6 @@ class CMDClientTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     @mock.patch('eva.eva_cmd_client.eva_client')
-    def dummyTest(self):
-        main()
+    def test_dummyTest(self, dummyMockA):
+        with self.assertRaises(SystemExit):
+            main()

@@ -25,5 +25,6 @@ class EVAServerTest(unittest.TestCase):
 
     @mock.patch('eva.eva_server.eva')
     @mock.patch('eva.udfs.udf_bootstrap_queries.init_builtin_udfs')
-    def dummyTest(self):
-        main()
+    def test_dummyTest(self, dummyMockA, dummyMockB):
+        with self.assertRaises(SystemExit):
+            main()

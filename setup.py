@@ -17,7 +17,7 @@ setup(
         "pyspark==3.0.2",
         "petastorm==0.9.8",
         "antlr4-python3-runtime==4.8",
-        "pyyaml"
+        "pyyaml==5.1"
     ],
     entry_points={
         'console_scripts': [
