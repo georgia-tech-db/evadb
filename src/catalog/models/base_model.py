@@ -86,7 +86,8 @@ class CustomModel:
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
             db_session.commit()
-        except DatabaseError:
+        except DatabaseError as e:
+            print(e)
             db_session.rollback()
             LoggingManager().log(
                 "Exception occurred while committing to database.",

@@ -40,7 +40,11 @@ class DatasetService(BaseService):
             name=name,
             file_url=file_url,
             identifier_id=identifier_id)
-        metadata = metadata.save()
+        try:
+            metadata = metadata.save()
+        except Exception as e:
+            print(e)
+            raise
         return metadata
 
     def dataset_by_name(self, name: str) -> int:
