@@ -60,6 +60,8 @@ Please refer to [official doc](https://docs.docker.com/engine/install/). -->
 
 1. Set up the server and client
 
+- Activate the conda environment: `conda activate eva`
+
 - Launch EVA database Server: `python eva.py`
 
 - Launch CLI: `python eva_cmd_client.py`
