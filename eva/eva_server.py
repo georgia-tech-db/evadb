@@ -15,6 +15,7 @@
 
 import asyncio
 import argparse
+import sys
 
 from eva.server.server import start_server
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
@@ -49,11 +50,14 @@ def eva():
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
-def main():
+def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--db', help='foo help')
-    args = parser.parse_args()
+    return parser.parse_args(args)
 
+
+def main():
+    args = parse_args(sys.argv[1:])
     db_uri = 'sqlite:///eva_catalog.db'
     if args.db:
         db_uri = 'mysql+pymysql://{}/eva_catalog'.format(args.db)

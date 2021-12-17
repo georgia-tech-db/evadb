@@ -16,6 +16,7 @@
 import unittest
 import mock
 from eva.eva_cmd_client import main
+from eva.eva_cmd_client import parse_args
 
 
 class CMDClientTest(unittest.TestCase):
@@ -23,6 +24,11 @@ class CMDClientTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     @mock.patch('eva.eva_cmd_client.eva_client')
-    def test_dummyTest(self, dummyMockA):
-        with self.assertRaises(SystemExit):
-            main()
+    def test_main(self, mock_client):
+        main()
+        mock_client.called_once_with('0.0.0.0', 5432)
+
+    def test_parse_args(self):
+        args = parse_args(['-P', '2345', '-H', 'test'])
+        self.assertEqual(args.host, 'test')
+        self.assertEqual(args.port, 2345)

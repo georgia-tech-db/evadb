@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import sys
 
 from eva.server.interpreter import start_cmd_client
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
@@ -31,14 +32,17 @@ def eva_client(host='0.0.0.0', port=5432):
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
-def main():
+def parse_args(args):
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-H', '--host', dest='host', type=str,
                         help='Host address for EVA server', default='0.0.0.0')
     parser.add_argument('-P', '--port', dest='port', type=int,
                         help='Port for EVA server', default=5432)
-    args = parser.parse_args()
+    return parser.parse_args(args)
 
+
+def main():
+    args = parse_args(sys.argv[1:])
     eva_client(host=args.host, port=args.port)
 
 

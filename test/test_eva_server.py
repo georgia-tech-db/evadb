@@ -14,17 +14,34 @@
 # limitations under the License.
 
 import unittest
-import mock
+from mock import MagicMock, patch
 
 from eva.eva_server import main
+from eva.eva_server import parse_args
 
 
 class EVAServerTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @mock.patch('eva.eva_server.eva')
-    @mock.patch('eva.udfs.udf_bootstrap_queries.init_builtin_udfs')
-    def test_dummyTest(self, dummyMockA, dummyMockB):
-        with self.assertRaises(SystemExit):
-            main()
+    @patch('eva.eva_server.init_builtin_udfs')
+    @patch('eva.eva_server.eva')
+    @patch('eva.eva_server.ConfigurationManager')
+    def test_dummyTest(self, mock_config, mock_eva, mock_udfs):
+        db_uri = 'sqlite:///eva_catalog.db'
+        mock_obj_1 = MagicMock()
+        mock_obj_2 = MagicMock()
+        mock_config.return_value.get_value = mock_obj_1
+        mock_config.return_value.get_value.return_value = 'test'
+        mock_config.return_value.update_value = mock_obj_2
+        main()
+        mock_obj_1.assert_called_with('core', 'mode')
+        mock_obj_2.assert_called_with('core',
+                                      'sqlalchemy_database_uri', db_uri)
+        mock_udfs.assert_called_with(mode='test')
+        mock_eva.assert_called_once()
+
+    def test_parse_args(self):
+        args = parse_args(['--db', 'test'])
+        self.assertEqual(args.db, 'test')
+        self.assertIsNone(parse_args([]).db)
