@@ -15,6 +15,7 @@
 
 import unittest
 import mock
+import sys
 from eva.eva_cmd_client import main
 from eva.eva_cmd_client import parse_args
 
@@ -25,7 +26,8 @@ class CMDClientTest(unittest.TestCase):
 
     @mock.patch('eva.eva_cmd_client.eva_client')
     def test_main(self, mock_client):
-        main()
+        with mock.patch.object(sys, 'argv', ['test']):
+            main()
         mock_client.called_once_with('0.0.0.0', 5432)
 
     def test_parse_args(self):

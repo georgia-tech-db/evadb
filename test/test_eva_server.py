@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import unittest
+import sys
 from mock import MagicMock, patch
 
 from eva.eva_server import main
@@ -27,14 +28,15 @@ class EVAServerTest(unittest.TestCase):
     @patch('eva.eva_server.init_builtin_udfs')
     @patch('eva.eva_server.eva')
     @patch('eva.eva_server.ConfigurationManager')
-    def test_dummyTest(self, mock_config, mock_eva, mock_udfs):
+    def test_main(self, mock_config, mock_eva, mock_udfs):
         db_uri = 'sqlite:///eva_catalog.db'
         mock_obj_1 = MagicMock()
         mock_obj_2 = MagicMock()
         mock_config.return_value.get_value = mock_obj_1
         mock_config.return_value.get_value.return_value = 'test'
         mock_config.return_value.update_value = mock_obj_2
-        main()
+        with patch.object(sys, 'argv', ['test']):
+            main()
         mock_obj_1.assert_called_with('core', 'mode')
         mock_obj_2.assert_called_with('core',
                                       'sqlalchemy_database_uri', db_uri)
