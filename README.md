@@ -87,8 +87,8 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
 1. Standup EVA testing for CPU/GPU hardware.
 ```shell
-docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up -->
-```
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up 
+``` -->
 
 ## Development
 
