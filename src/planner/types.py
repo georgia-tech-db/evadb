@@ -29,4 +29,5 @@ class PlanOprType(IntEnum):
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
+    CREATE_MATERIALIZED_VIEW = auto()
     # add other types
