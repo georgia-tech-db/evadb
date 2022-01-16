@@ -16,8 +16,11 @@
 from src.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from src.parser.create_statement import CreateTableStatement, ColumnDefinition
 from src.parser.evaql.evaql_parser import evaql_parser
+from src.parser.table_ref import TableRef
 from src.parser.types import ColumnConstraintEnum
 from src.parser.create_statement import ColConstraintInfo
+from src.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 
 from src.catalog.column_type import ColumnType, NdArrayType, Dimension
 
@@ -227,3 +230,20 @@ class CreateTable(evaql_parserVisitor):
         elif ctx.ANYDIM() is not None:
             decimal = Dimension.ANYDIM
         return decimal
+
+    # MATERIALIZED VIEW
+    def visitCreateMaterializedView(
+            self, ctx: evaql_parser.CreateMaterializedViewContext):
+        view_name = self.visit(ctx.tableName())
+        view_ref = TableRef(view_name)
+        if_not_exists = False
+        if ctx.ifNotExists():
+            if_not_exists = self.visit(ctx.ifNotExists())
+        uid_list = self.visit(ctx.uidList())
+        # setting all other column definition attributes as None,
+        # need to figure from query
+        col_list = [ColumnDefinition(
+            uid.col_name, None, None, None) for uid in uid_list]
+        query = self.visit(ctx.selectStatement())
+        return CreateMaterializedViewStatement(view_ref, col_list,
+                                               if_not_exists, query)
