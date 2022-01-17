@@ -30,6 +30,8 @@ from src.executor.upload_executor import UploadExecutor
 from src.executor.storage_executor import StorageExecutor
 from src.executor.union_executor import UnionExecutor
 from src.executor.orderby_executor import OrderByExecutor
+from src.executor.create_mat_view_executor import \
+    CreateMaterializedViewExecutor
 
 
 class PlanExecutor:
@@ -85,7 +87,8 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
-
+        elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
+            executor_node = CreateMaterializedViewExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))
