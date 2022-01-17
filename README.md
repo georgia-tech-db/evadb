@@ -49,7 +49,7 @@ sh script/install/install.sh
 ```
 
 Solution to possible error:
-ERROR 1045 (28000): Access denied for user 'fhuang49'@'localhost' (using password: NO):
+ERROR 1045 (28000): Access denied for user 'YOUR_SYSTEM_USER'@'localhost' (using password: NO):
 ```shell
 sudo mysql -u root
 
