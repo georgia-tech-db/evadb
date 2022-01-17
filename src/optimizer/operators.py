@@ -18,6 +18,7 @@ from typing import List
 from src.catalog.models.df_metadata import DataFrameMetadata
 from src.expression.constant_value_expression import ConstantValueExpression
 from src.parser.table_ref import TableRef
+from src.parser.create_statement import ColumnDefinition
 from src.expression.abstract_expression import AbstractExpression
 from src.catalog.models.df_column import DataFrameColumn
 from src.catalog.models.udf_io import UdfIO
@@ -42,6 +43,7 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
+    LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -515,3 +517,41 @@ class LogicalUpload(Operator):
         return (is_subtree_equal
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
+
+
+class LogicalCreateMaterializedView(Operator):
+    """Logical node for create materiaziled view operations
+    Arguments:
+        view {TableRef}: [view table that is to be created]
+        col_list{List[ColumnDefinition]} -- column names in the view
+        if_not_exists {bool}: [whether to override if view exists]
+    """
+
+    def __init__(self, view: TableRef, col_list: List[ColumnDefinition],
+                 if_not_exists: bool = False, children=None):
+        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW,
+                         children)
+        self._view = view
+        self._col_list = col_list
+        self._if_not_exists = if_not_exists
+
+    @property
+    def view(self):
+        return self._view
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateMaterializedView):
+            return False
+        return (is_subtree_equal
+                and self.view == other.view
+                and self.col_list == other.col_list
+                and self.if_not_exists == other.if_not_exists)

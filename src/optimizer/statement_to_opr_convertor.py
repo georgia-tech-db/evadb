@@ -19,7 +19,8 @@ from src.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
-                                     LogicalLimit, LogicalSample)
+                                     LogicalLimit, LogicalSample,
+                                     LogicalCreateMaterializedView)
 from src.parser.statement import AbstractStatement
 from src.parser.select_statement import SelectStatement
 from src.parser.insert_statement import InsertTableStatement
@@ -27,6 +28,8 @@ from src.parser.create_statement import CreateTableStatement
 from src.parser.create_udf_statement import CreateUDFStatement
 from src.parser.load_statement import LoadDataStatement
 from src.parser.upload_statement import UploadStatement
+from src.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 from src.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
@@ -235,6 +238,21 @@ class StatementToPlanConvertor:
         upload_opr = LogicalUpload(statement.path, statement.video_blob)
         self._plan = upload_opr
 
+    def visit_materialized_view(self,
+                                statement: CreateMaterializedViewStatement):
+        if statement.view_ref is None:
+            LoggingManager().log("Missing View Name In Create Materialized \
+                                    View Statement", LoggingLevel.ERROR)
+        if statement.query is None:
+            LoggingManager().log("Missing query in Create Materialized \
+                                    View Statement", LoggingLevel.ERROR)
+        mat_view_opr = LogicalCreateMaterializedView(
+            statement.view_ref, statement.col_list, statement.if_not_exists)
+
+        self.visit_select(statement.query)
+        mat_view_opr.append_child(self._plan)
+        self._plan = mat_view_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -255,6 +273,8 @@ class StatementToPlanConvertor:
             self.visit_load_data(statement)
         elif isinstance(statement, UploadStatement):
             self.visit_upload(statement)
+        elif isinstance(statement, CreateMaterializedViewStatement):
+            self.visit_materialized_view(statement)
         return self._plan
 
     @property

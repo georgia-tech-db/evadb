@@ -27,7 +27,7 @@ from src.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalCreateMaterializedView)
 from src.planner.create_plan import CreatePlan
 from src.planner.create_udf_plan import CreateUDFPlan
 from src.planner.insert_plan import InsertPlan
@@ -39,6 +39,7 @@ from src.planner.union_plan import UnionPlan
 from src.planner.orderby_plan import OrderByPlan
 from src.planner.limit_plan import LimitPlan
 from src.planner.sample_plan import SamplePlan
+from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from src.configuration.configuration_manager import ConfigurationManager
 
 
@@ -68,6 +69,7 @@ class RuleType(Flag):
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
@@ -82,6 +84,7 @@ class Promise(IntEnum):
     """
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
@@ -550,6 +553,26 @@ class LogicalLimitToPhysical(Rule):
         return after
 
 
+class LogicalCreateMaterializedViewToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateMaterializedView,
+              context: OptimizerContext):
+        after = CreateMaterializedViewPlan(before.view,
+                                           col_list=before.col_list,
+                                           if_not_exists=before.if_not_exists)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -585,7 +608,8 @@ class RulesManager:
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()
+            LogicalLimitToPhysical(),
+            LogicalCreateMaterializedViewToPhysical()
         ]
 
     @property
