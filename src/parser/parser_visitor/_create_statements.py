@@ -238,7 +238,7 @@ class CreateTable(evaql_parserVisitor):
         view_ref = TableRef(view_name)
         if_not_exists = False
         if ctx.ifNotExists():
-            if_not_exists = self.visit(ctx.ifNotExists())
+            if_not_exists = True
         uid_list = self.visit(ctx.uidList())
         # setting all other column definition attributes as None,
         # need to figure from query

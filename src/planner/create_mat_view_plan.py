@@ -28,7 +28,6 @@ class CreateMaterializedViewPlan(AbstractPlan):
     Arguments:
         view {TableRef} -- table ref for view to be created in storage
         col_list{List[ColumnDefinition]} -- column names in the view
-        query{SelectStatement} -- query used to populate the created view
         if_not_exists {bool} -- Whether to override if there is existing view
     """
 
