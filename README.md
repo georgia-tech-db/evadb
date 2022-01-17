@@ -29,6 +29,12 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 Installation of EVA involves setting a virtual environment using [miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and configuring git hooks.
 
+0. (For Win10/Win11 user) Install WSL and ubuntu
+```shell
+wsl --install
+wsl --install -d ubuntu
+```
+
 1. Clone the repository
 ```shell
 git clone https://github.com/georgia-tech-db/eva.git
@@ -36,9 +42,25 @@ git clone https://github.com/georgia-tech-db/eva.git
 
 2. Install the dependencies.
 ```shell
+cd eva
 sh script/install/before_install.sh
 export PATH="$HOME/miniconda/bin:$PATH"
 sh script/install/install.sh
+```
+
+Solution to possible error:
+ERROR 1045 (28000): Access denied for user 'fhuang49'@'localhost' (using password: NO):
+```shell
+sudo mysql -u root
+
+mysql> USE mysql;
+mysql> CREATE USER 'YOUR_SYSTEM_USER'@'localhost' IDENTIFIED BY 'YOUR_PASSWD';
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'YOUR_SYSTEM_USER'@'localhost';
+mysql> UPDATE user SET plugin='auth_socket' WHERE User='YOUR_SYSTEM_USER';
+mysql> FLUSH PRIVILEGES;
+mysql> exit;
+
+sudo service mysql restart
 ```
 
 3. Connect mysql user root with normal account and no password
