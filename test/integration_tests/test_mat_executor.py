@@ -19,7 +19,7 @@ from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
 from src.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, file_remove, \
-    copy_sample_video_to_prefix
+    copy_sample_video_to_prefix, load_inbuilt_udfs
 from test.util import DummyObjectDetector
 
 NUM_FRAMES = 10
@@ -33,14 +33,7 @@ class MaterializedViewTest(unittest.TestCase):
         copy_sample_video_to_prefix()
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
-
-        create_udf_query = """CREATE UDF DummyObjectDetector
-                  INPUT  (Frame_Array NDARRAY (3, 256, 256))
-                  OUTPUT (label TEXT(10))
-                  TYPE  Classification
-                  IMPL  'test/util.py';
-        """
-        execute_query_fetch_all(create_udf_query)
+        load_inbuilt_udfs()
 
     def tearDown(self):
         file_remove('dummy.avi')
@@ -87,7 +80,7 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    # @unittest.skip('Too slow when no GPU')
+    @unittest.skip('Too slow when no GPU')
     def test_should_mat_view_with_aafastrcnn(self):
         query = """LOAD DATA INFILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
@@ -118,3 +111,7 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['labels'][idx])
+
+
+if __name__ == '__main__':
+    unittest.main()
