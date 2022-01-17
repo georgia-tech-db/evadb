@@ -16,7 +16,7 @@ from unittest import TestCase
 
 from mock import patch, MagicMock
 
-from src.catalog.services.udf_service import UdfService
+from eva.catalog.services.udf_service import UdfService
 
 UDF_TYPE = 'classification'
 UDF_IMPL_PATH = 'file1'

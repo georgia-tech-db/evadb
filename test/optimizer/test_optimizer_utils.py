@@ -16,16 +16,16 @@ import unittest
 
 from mock import patch, MagicMock, call
 
-from src.expression.function_expression import FunctionExpression
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
                                            column_definition_to_udf_io,
                                            bind_function_expr,
                                            bind_predicate_expr,
                                            bind_columns_expr,
                                            create_video_metadata)
-from src.parser.create_statement import ColumnDefinition
-from src.catalog.column_type import ColumnType, NdArrayType
+from eva.parser.create_statement import ColumnDefinition
+from eva.catalog.column_type import ColumnType, NdArrayType
 
 
 class OptimizerUtilsTest(unittest.TestCase):

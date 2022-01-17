@@ -20,12 +20,12 @@ import numpy as np
 from unittest import mock
 from unittest.mock import MagicMock, call
 
-from src.models.storage.batch import Batch
-from src.parser.parser_visitor import ParserVisitor
-from src.parser.evaql.evaql_parser import evaql_parser
-from src.expression.abstract_expression import ExpressionType
-from src.expression.function_expression import ExecutionMode
-from src.parser.table_ref import TableRef
+from eva.models.storage.batch import Batch
+from eva.parser.parser_visitor import ParserVisitor
+from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.function_expression import ExecutionMode
+from eva.parser.table_ref import TableRef
 from antlr4 import TerminalNode
 
 

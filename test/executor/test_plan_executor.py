@@ -17,24 +17,24 @@ import pandas as pd
 
 from unittest.mock import patch, MagicMock
 
-from src.catalog.models.df_metadata import DataFrameMetadata
-from src.executor.plan_executor import PlanExecutor
-from src.models.storage.batch import Batch
-from src.planner.seq_scan_plan import SeqScanPlan
-from src.planner.storage_plan import StoragePlan
-from src.planner.pp_plan import PPScanPlan
-from src.planner.insert_plan import InsertPlan
-from src.planner.create_plan import CreatePlan
-from src.planner.create_udf_plan import CreateUDFPlan
-from src.planner.load_data_plan import LoadDataPlan
-from src.planner.upload_plan import UploadPlan
-from src.executor.load_executor import LoadDataExecutor
-from src.executor.upload_executor import UploadExecutor
-from src.executor.seq_scan_executor import SequentialScanExecutor
-from src.executor.create_executor import CreateExecutor
-from src.executor.create_udf_executor import CreateUDFExecutor
-from src.executor.insert_executor import InsertExecutor
-from src.executor.pp_executor import PPExecutor
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.executor.plan_executor import PlanExecutor
+from eva.models.storage.batch import Batch
+from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.planner.storage_plan import StoragePlan
+from eva.planner.pp_plan import PPScanPlan
+from eva.planner.insert_plan import InsertPlan
+from eva.planner.create_plan import CreatePlan
+from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.planner.upload_plan import UploadPlan
+from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.upload_executor import UploadExecutor
+from eva.executor.seq_scan_executor import SequentialScanExecutor
+from eva.executor.create_executor import CreateExecutor
+from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.insert_executor import InsertExecutor
+from eva.executor.pp_executor import PPExecutor
 
 
 class PlanExecutorTest(unittest.TestCase):

@@ -2,9 +2,9 @@ import unittest
 
 from mock import patch, MagicMock
 
-from src.optimizer.optimizer_context import OptimizerContext
-from src.optimizer.group_expression import GroupExpression
-from src.optimizer.group import INVALID_GROUP_ID
+from eva.optimizer.optimizer_context import OptimizerContext
+from eva.optimizer.group_expression import GroupExpression
+from eva.optimizer.group import INVALID_GROUP_ID
 
 
 class TestOptimizerContext(unittest.TestCase):

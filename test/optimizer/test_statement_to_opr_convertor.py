@@ -16,28 +16,28 @@ import unittest
 
 from mock import patch, MagicMock
 
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.parser.select_statement import SelectStatement
-from src.parser.table_ref import TableRef, TableInfo
-from src.parser.create_udf_statement import CreateUDFStatement
-from src.parser.insert_statement import InsertTableStatement
-from src.parser.create_statement import CreateTableStatement
-from src.parser.load_statement import LoadDataStatement
-from src.parser.parser import Parser
+from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.parser.select_statement import SelectStatement
+from eva.parser.table_ref import TableRef, TableInfo
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.create_statement import CreateTableStatement
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.parser import Parser
 
-from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
+from eva.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
                                      LogicalLoadData, LogicalUnion,
                                      LogicalOrderBy, LogicalLimit,
                                      LogicalSample)
 
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.comparison_expression import ComparisonExpression
-from src.expression.abstract_expression import ExpressionType
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.abstract_expression import ExpressionType
 
-from src.parser.types import ParserOrderBySortType
+from eva.parser.types import ParserOrderBySortType
 
 
 class StatementToOprTest(unittest.TestCase):

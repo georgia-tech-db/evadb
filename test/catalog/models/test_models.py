@@ -15,12 +15,12 @@
 
 import unittest
 
-from src.catalog.column_type import ColumnType, NdArrayType
-from src.catalog.df_schema import DataFrameSchema
-from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.models.df_metadata import DataFrameMetadata
-from src.catalog.models.udf import UdfMetadata
-from src.catalog.models.udf_io import UdfIO
+from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.df_schema import DataFrameSchema
+from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.udf_io import UdfIO
 
 
 class CatalogModelsTest(unittest.TestCase):

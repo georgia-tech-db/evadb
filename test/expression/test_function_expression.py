@@ -17,11 +17,11 @@ import unittest
 import pandas as pd
 from mock import MagicMock, Mock, patch
 
-from src.constants import NO_GPU
-from src.expression.function_expression import FunctionExpression, \
+from eva.constants import NO_GPU
+from eva.expression.function_expression import FunctionExpression, \
     ExecutionMode
-from src.models.storage.batch import Batch
-from src.udfs.gpu_compatible import GPUCompatible
+from eva.models.storage.batch import Batch
+from eva.udfs.gpu_compatible import GPUCompatible
 
 
 class FunctionExpressionTest(unittest.TestCase):

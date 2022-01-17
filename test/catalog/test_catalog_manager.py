@@ -16,9 +16,9 @@ import unittest
 
 import mock
 from mock import MagicMock
-from src.catalog.catalog_manager import CatalogManager
-from src.catalog.column_type import ColumnType, NdArrayType
-from src.catalog.models.df_column import DataFrameColumn
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.models.df_column import DataFrameColumn
 
 
 class CatalogManagerTests(unittest.TestCase):
