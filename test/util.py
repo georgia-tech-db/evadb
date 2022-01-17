@@ -135,7 +135,7 @@ class DummyObjectDetector(AbstractClassifierUDF):
         # odd are labeled bicycle and even person
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 2 + 1]
-        return label
+        return np.array([label])
 
 
 class DummyMultiObjectDetector(AbstractClassifierUDF):

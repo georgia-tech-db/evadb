@@ -8,6 +8,7 @@ from src.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
 from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
+                                       LogicalCreateMaterializedViewToPhysical,
                                        PushdownFilterThroughSample,
                                        PushdownProjectThroughSample,
                                        LogicalCreateToPhysical,
@@ -20,7 +21,7 @@ from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        LogicalDerivedGetToPhysical,
                                        LogicalUnionToPhysical,
                                        LogicalOrderByToPhysical,
-                                       LogicalLimitToPhysical)
+                                       LogicalLimitToPhysical,)
 from src.optimizer.rules.rules import Promise, RulesManager
 
 
@@ -91,7 +92,8 @@ class TestRules(unittest.TestCase):
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()]
+            LogicalLimitToPhysical(),
+            LogicalCreateMaterializedViewToPhysical()]
         self.assertEqual(len(supported_implementation_rules),
                          len(RulesManager().implementation_rules))
 

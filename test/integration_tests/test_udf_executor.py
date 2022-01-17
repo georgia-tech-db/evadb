@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 import pandas as pd
+import numpy as np
 
 from src.catalog.catalog_manager import CatalogManager
 from src.models.storage.batch import Batch
@@ -51,7 +52,7 @@ class UDFExecutorTest(unittest.TestCase):
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         labels = DummyObjectDetector().labels
-        expected = [{'id': i, 'label': [labels[1 + i % 2]]}
+        expected = [{'id': i, 'label': np.array([labels[1 + i % 2]])}
                     for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -61,7 +62,7 @@ class UDFExecutorTest(unittest.TestCase):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i * 2, 'label': ['person']}
+        expected = [{'id': i * 2, 'label': np.array(['person'])}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -78,9 +79,9 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label <@ ['person', 'bicycle'] \
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i * 2, 'label': ['person']}
+        expected = [{'id': i * 2, 'label': np.array(['person'])}
                     for i in range(NUM_FRAMES // 2)]
-        expected += [{'id': i, 'label': ['bicycle']}
+        expected += [{'id': i, 'label': np.array(['bicycle'])}
                      for i in range(NUM_FRAMES)
                      if i % 2 + 1 == 2]
         expected_batch = Batch(frames=pd.DataFrame(expected))
