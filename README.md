@@ -62,6 +62,7 @@ mysql> exit;
 
 sudo service mysql restart
 ```
+Refer to [zetacu](https://stackoverflow.com/a/42742610)
 
 3. Connect mysql user root with normal account and no password
 ```mysql
