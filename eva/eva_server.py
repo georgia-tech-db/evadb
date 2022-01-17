@@ -16,6 +16,7 @@
 import asyncio
 import argparse
 import sys
+import os
 
 from eva.server.server import start_server
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
@@ -58,7 +59,7 @@ def parse_args(args):
 
 def main():
     args = parse_args(sys.argv[1:])
-    db_uri = 'sqlite:///eva_catalog.db'
+    db_uri = 'sqlite://{}/eva_catalog.db'.format(os.getcwd())
     if args.db:
         db_uri = 'mysql+pymysql://{}/eva_catalog'.format(args.db)
 
