@@ -12,7 +12,7 @@ executor:
   # batch size used for gpu_operations
   gpu_batch_size: 1
 
-  gpus: {'130.207.125.60': [0]}
+  gpus: {'127.0.0.1': [0]}
 storage:
   engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
   path_prefix: "/tmp"
