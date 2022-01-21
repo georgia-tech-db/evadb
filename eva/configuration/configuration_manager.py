@@ -40,21 +40,21 @@ class ConfigurationManager(object):
             with open(ymlpath, 'r') as ymlfile:
                 cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-            dataset_location = cls._instance.get_value("core", "location")
+            dataset_location = cls._instance.get_value("core", "datasets_dir")
             database_uri = cls._instance.get_value("core",
-                                                   "sqlalchemy_database_uri")
+                                                   "catalog_database_uri")
             if not dataset_location or not database_uri:
                 # create directory if doesn't exist
                 Path(EVA_DEFAULT_DIR).mkdir(parents=True, exist_ok=True)
 
                 if not dataset_location:
                     dataset_location = EVA_DEFAULT_DIR + EVA_DATASET_DIR
-                    cls._instance.update_value("core", "location",
+                    cls._instance.update_value("core", "datasets_dir",
                                                dataset_location)
                 if not database_uri:
                     database_uri = DB_DEFAULT_URI
                     cls._instance.update_value("core",
-                                               "sqlalchemy_database_uri",
+                                               "catalog_database_uri",
                                                database_uri)
 
                 # update config on disk

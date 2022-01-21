@@ -45,7 +45,7 @@ class SQLConfig:
         Retrieves the database uri for connection from ConfigurationManager.
         """
         uri = ConfigurationManager().get_value("core",
-                                               "sqlalchemy_database_uri")
+                                               "catalog_database_uri")
         # set echo=True to log SQL
         self.engine = create_engine(uri)
         # statements
