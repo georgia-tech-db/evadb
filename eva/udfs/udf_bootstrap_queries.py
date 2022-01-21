@@ -37,13 +37,13 @@ ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
             INPUT(Input NDARRAY ANYTYPE, Key ANYTYPE)
             OUTPUT(count INTEGER)
             TYPE Ndarray
-            IMPL "src/udfs/ndarray_udfs/array_count.py";
+            IMPL "eva/udfs/ndarray_udfs/array_count.py";
         """
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
                 TYPE  Ndarray
-                IMPL  "src/udfs/ndarray_udfs/unnest.py";
+                IMPL  "eva/udfs/ndarray_udfs/unnest.py";
         """
 
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
@@ -51,7 +51,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                 scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
-      IMPL  'src/udfs/fastrcnn_object_detector.py';
+      IMPL  'eva/udfs/fastrcnn_object_detector.py';
       """
 
 
