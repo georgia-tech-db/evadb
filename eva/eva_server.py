@@ -55,8 +55,12 @@ def eva():
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
-if __name__ == '__main__':
-    # execute only if run as the entry point into the program
+def main():
     mode = ConfigurationManager().get_value('core', 'mode')
     init_builtin_udfs(mode=mode)
     eva()
+
+
+if __name__ == '__main__':
+    # execute only if run as the entry point into the program
+    main()
