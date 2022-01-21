@@ -25,9 +25,9 @@ from test.util import PATH_PREFIX
 
 class LoadExecutorTest(unittest.TestCase):
 
-    @patch('src.executor.load_executor.OpenCVReader')
-    @patch('src.executor.load_executor.StorageEngine.create')
-    @patch('src.executor.load_executor.StorageEngine.write')
+    @patch('eva.executor.load_executor.OpenCVReader')
+    @patch('eva.executor.load_executor.StorageEngine.create')
+    @patch('eva.executor.load_executor.StorageEngine.write')
     def test_should_call_opencv_reader_and_storage_engine(
             self, write_mock, create_mock, cv_mock):
         batch_frames = [list(range(5))] * 2

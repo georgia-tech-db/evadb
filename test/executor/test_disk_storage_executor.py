@@ -23,7 +23,7 @@ from eva.planner.storage_plan import StoragePlan
 class DiskStorageExecutorTest(unittest.TestCase):
 
     @unittest.skip("disable test due to deprication")
-    @patch('src.executor.disk_based_storage_executor.Loader')
+    @patch('eva.executor.disk_based_storage_executor.Loader')
     def test_calling_storage_executor_should_return_batches(self, mock_class):
         class_instance = mock_class.return_value
 

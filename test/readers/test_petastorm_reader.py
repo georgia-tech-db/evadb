@@ -46,7 +46,7 @@ class PetastormLoaderTest(unittest.TestCase):
         def __exit__(self, exc_type, exc_val, exc_tb):
             pass
 
-    @patch("src.readers.petastorm_reader.make_reader")
+    @patch("eva.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_correct_params(self,
                                                                    mock):
         petastorm_reader = PetastormReader(
@@ -66,7 +66,7 @@ class PetastormLoaderTest(unittest.TestCase):
             cache_size_limit=None,
             cache_row_size_estimate=None)
 
-    @patch("src.readers.petastorm_reader.make_reader")
+    @patch("eva.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_negative_shards(self,
                                                                     mock):
         petastorm_reader = PetastormReader(
@@ -88,7 +88,7 @@ class PetastormLoaderTest(unittest.TestCase):
             cache_size_limit=petastorm_config.get('cache_size_limit', None),
             cache_type=petastorm_config.get('cache_type', None))
 
-    @patch("src.readers.petastorm_reader.make_reader")
+    @patch("eva.readers.petastorm_reader.make_reader")
     def test_should_read_data_using_petastorm_reader(self, mock):
         petastorm_reader = PetastormReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),

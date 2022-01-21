@@ -73,8 +73,8 @@ class SchemaTests(unittest.TestCase):
                               ColumnType.TEXT, [10, 10])
         self.assertRaises(ValueError, SchemaUtils.get_petastorm_column, col)
 
-    @patch('src.catalog.schema_utils.Unischema')
-    @patch('src.catalog.schema_utils.SchemaUtils.get_petastorm_column')
+    @patch('eva.catalog.schema_utils.Unischema')
+    @patch('eva.catalog.schema_utils.SchemaUtils.get_petastorm_column')
     def test_get_petastorm_schema(self, mock_get_pc, mock_uni):
         cols = [MagicMock() for i in range(2)]
         mock_get_pc.side_effect = [1, 2]

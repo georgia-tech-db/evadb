@@ -25,10 +25,10 @@ class TestOptimizerContext(unittest.TestCase):
         opt_ctxt.xform_opr_to_group_expr(fake_opr, 0, True)
         self.assertEqual(opt_ctxt.memo.get_group_id(fake_opr), 0)
 
-    @patch('src.optimizer.operators.Operator')
-    @patch('src.optimizer.operators.Operator')
-    @patch('src.optimizer.operators.Operator')
-    @patch('src.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
+    @patch('eva.optimizer.operators.Operator')
     def test_opr_to_group_expr(self,
                                child1_opr,
                                child2_opr,
