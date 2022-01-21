@@ -28,6 +28,6 @@ RUN ~/miniconda/bin/conda run -n eva python -c "import torch; torch.randn(1).cud
 
 # generate eva-ql parser
 RUN wget https://www.antlr.org/download/antlr-4.8-complete.jar -O ~/antlr.jar \
-    && java -jar ~/antlr.jar -Dlanguage=Python3 /app/src/parser/evaql/evaql_lexer.g4 \
-    && java -jar ~/antlr.jar -Dlanguage=Python3 -visitor /app/src/parser/evaql/evaql_parser.g4 \
+    && java -jar ~/antlr.jar -Dlanguage=Python3 /app/eva/parser/evaql/evaql_lexer.g4 \
+    && java -jar ~/antlr.jar -Dlanguage=Python3 -visitor /app/eva/parser/evaql/evaql_parser.g4 \
     && rm ~/antlr.jar

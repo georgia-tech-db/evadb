@@ -28,7 +28,7 @@ class UdfService(BaseService):
 
         Arguments:
             name (str): name of the udf
-            impl_path (str): path to the udf implementation relative to src/udf
+            impl_path (str): path to the udf implementation relative to eva/udf
             type (str): udf operator kind, classification or detection or etc
 
         Returns:

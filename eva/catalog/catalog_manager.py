@@ -258,7 +258,7 @@ class CatalogManager(object):
         Arguments:
             name(str): name of the udf to which this metdata corresponds
             impl_file_path(str): implementation path of the udf,
-                                 relative to src/udf
+                                 relative to eva/udf
             type(str): what kind of udf operator like classification,
                                                         detection etc
             udf_io_list(List[UdfIO]): input/output info of this udf

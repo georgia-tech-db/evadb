@@ -31,7 +31,7 @@ class ModulePathTest(unittest.TestCase):
     @unittest.skip('This returns opecv_reader.OpenCVReader \
                    instead of eva.readers.opencv_reader.OpenCVReader')
     def test_should_return_correct_class_for_path(self):
-        vl = path_to_class('src/readers/opencv_reader.py', 'OpenCVReader')
+        vl = path_to_class('eva/readers/opencv_reader.py', 'OpenCVReader')
         self.assertEqual(vl, OpenCVReader)
 
     @patch('eva.utils.generic_utils.torch')
