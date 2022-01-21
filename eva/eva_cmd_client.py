@@ -28,7 +28,6 @@ def eva_client(host='0.0.0.0', port=5432):
     try:
         start_cmd_client(host=host, port=port)
     except Exception as e:
-        raise e
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
