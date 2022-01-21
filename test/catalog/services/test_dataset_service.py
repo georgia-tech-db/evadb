@@ -28,7 +28,7 @@ IDENTIFIER = 'data_id'
 
 class DatasetServiceTest(unittest.TestCase):
 
-    @patch("src.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_create_dataset_should_create_model(self, mocked):
         service = DatasetService()
         service.create_dataset(
@@ -41,7 +41,7 @@ class DatasetServiceTest(unittest.TestCase):
             identifier_id=IDENTIFIER)
         mocked.return_value.save.assert_called_once()
 
-    @patch("src.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_dataset_by_id_should_query_model_with_id(self, mocked):
         service = DatasetService()
         service.dataset_by_id(DATASET_ID)
@@ -49,7 +49,7 @@ class DatasetServiceTest(unittest.TestCase):
             mocked._id == DATASET_ID)
         mocked.query.filter.return_value.one.assert_called_once()
 
-    @patch("src.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_dataset_by_name_queries_model_with_name_and_return_id(self,
                                                                    mocked):
         service = DatasetService()
@@ -65,7 +65,7 @@ class DatasetServiceTest(unittest.TestCase):
 
         self.assertEqual(result, expected_output)
 
-    @patch("src.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_dataset_object_by_name_queries_with_name_returns_model_object(
             self,
             mocked):
@@ -75,14 +75,14 @@ class DatasetServiceTest(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-    @patch('src.catalog.services.df_service.DatasetService.dataset_by_id')
+    @patch('eva.catalog.services.df_service.DatasetService.dataset_by_id')
     def test_delete_dataset_object_by_id(self, mock_id):
         service = DatasetService()
         self.assertTrue(service.delete_dataset_by_id(DATASET_ID))
         mock_id.assert_called_once_with(DATASET_ID)
         mock_id.return_value.delete.assert_called_once()
 
-    @patch('src.catalog.services.df_service.DatasetService.dataset_by_id')
+    @patch('eva.catalog.services.df_service.DatasetService.dataset_by_id')
     def test_delete_dataset_object_by_id_should_raise_exception(self, mock_id):
         service = DatasetService()
         mock_id.return_value.delete.side_effect = Exception()

@@ -76,7 +76,7 @@ class AsyncProtocolTests(unittest.TestCase):
         self.assertEqual('', buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
-    @patch('src.server.async_protocol.set_socket_io_timeouts')
+    @patch('eva.server.async_protocol.set_socket_io_timeouts')
     def test_connection_made_time_out(self, mock_set):
         client = EvaClient()
         t = MagicMock()
@@ -86,7 +86,7 @@ class AsyncProtocolTests(unittest.TestCase):
         mock_set.assert_called_once_with(t, 60, 0)
         t.abort.assert_called_once_with()
 
-    @patch('src.server.async_protocol.set_socket_io_timeouts')
+    @patch('eva.server.async_protocol.set_socket_io_timeouts')
     def test_connection_made_no_time_out(self, mock_set):
         client = EvaClient()
         t = MagicMock()

@@ -116,8 +116,8 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, UploadExecutor)
 
-    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_seq_scan_plan(
             self, mock_clean, mock_build):
 
@@ -138,8 +138,8 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_pp_scan_plan(
             self, mock_clean, mock_build):
 
@@ -159,8 +159,8 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_create_insert_load_upload_plans(
             self, mock_clean, mock_build):
 
@@ -218,7 +218,7 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, [])
 
     @unittest.skip("disk_based_storage_depricated")
-    @patch('src.executor.disk_based_storage_executor.Loader')
+    @patch('eva.executor.disk_based_storage_executor.Loader')
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value
 

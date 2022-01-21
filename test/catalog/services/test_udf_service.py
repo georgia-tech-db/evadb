@@ -26,14 +26,14 @@ UDF_ID = 123
 
 class UdfServiceTest(TestCase):
 
-    @patch("src.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfMetadata")
     def test_create_udf_should_create_model(self, mocked):
         service = UdfService()
         service.create_udf(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.return_value.save.assert_called_once()
 
-    @patch("src.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfMetadata")
     def test_udf_by_name_should_query_model_with_name(self, mocked):
         service = UdfService()
         expected = mocked.query.filter.return_value.one \
@@ -45,7 +45,7 @@ class UdfServiceTest(TestCase):
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
 
-    @patch("src.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfMetadata")
     def test_udf_by_id_should_query_model_with_id(self, mocked):
         service = UdfService()
         expected = mocked.query.filter.return_value.one \
@@ -56,7 +56,7 @@ class UdfServiceTest(TestCase):
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
 
-    @patch('src.catalog.services.udf_service.UdfService.udf_by_name')
+    @patch('eva.catalog.services.udf_service.UdfService.udf_by_name')
     def test_udf_delete_by_name(self, mock_udf_by_name):
         mock_udf_by_name.return_value = MagicMock()
         actual = UdfService().delete_udf_by_name(UDF_NAME)
