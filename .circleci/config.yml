@@ -19,12 +19,6 @@ jobs:
           command: | 
             export PATH="$HOME/miniconda/bin:$PATH"
             sh script/install/install.sh
-            # allow no-password connection for root
-            sudo mysql -u root -e "SELECT User,Host FROM mysql.user; 
-                                   DROP USER 'root'@'localhost'; 
-                                   CREATE USER 'root'@'%' IDENTIFIED BY ''; 
-                                   GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; 
-                                   FLUSH PRIVILEGES;" 
 
       - run:
           name: Test
