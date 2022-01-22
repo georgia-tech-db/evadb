@@ -40,25 +40,93 @@ Configure GPU (Recommended)
 
     `127.0.1.1` is the loopback address on which the eva server is started. 0 refers to the GPU index to be used.
 
-Quickstart Notebook
+Quickstart Tutorial
 --------------------
 
-1. Start server:
+1. **Start server**:
 
-    Open a terminal instance and start the server:
-    .. code-block:: bash
+    * Open a terminal instance and start the server:
 
-        python eva.py
+        .. code-block:: bash
 
-2. Start client:
+            python eva.py
+
+2. **Start client**:
 
     * Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to `tutorials/object_detection.ipynb`. 
     
     * You might have to install ipywidgets to visualize the input video and output. Follow steps `here <https://ipywidgets.readthedocs.io/en/latest/user_install.html>`_ as per your jupyter environment.
 
-3. Run cells:
+3. **Notebook walkthrough**:
 
-    * Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.
+    * Establish connection with the DB:
+
+        .. code-block:: python
+
+            import nest_asyncio
+            nest_asyncio.apply()
+            connection = connect(host = '0.0.0.0', port = 5432)
+            cursor = connection.cursor()
+
+        We use `nest_asyncio` to allow nested asyncio calls. This is required for the client to work with the server. `cursor` is a cursor object that allows us to execute queries on the database.
+
+    * Upload a video to be analyzed:
+
+        .. code-block:: python
+
+            cursor.execute('UPLOAD INFILE "../data/ua_detrac/ua_detrac.mp4" PATH "video.mp4";')
+            response = cursor.fetch_all()
+            print(response)
+
+        The `UPLOAD` command is used to upload a video to EVA. `INFILE` takes in the path of the video on filesystem and `PATH` is the path where the video is to be stored in the database.
+
+    * Visualize video:
+
+        .. code-block:: python
+
+            from ipywidgets import Video
+            Video.from_file("../data/ua_detrac/ua_detrac.mp4", embed=True)
+
+    * Load the video into EVA:
+
+        .. code-block:: python
+
+            cursor.execute('LOAD DATA INFILE "video.mp4" INTO MyVideo;')
+            response = cursor.fetch_all()
+            print(response)
+
+        The 'LOAD' command is used to load a video into EVA. `INFILE` is the path of the video in the database.
+
+    * Registering UDFs (User Defined Functions):
+
+        .. code-block:: python
+
+            cursor.execute("""CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
+                INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                            scores NDARRAY FLOAT32(ANYDIM))
+                TYPE  Classification
+                IMPL  'src/udfs/fastrcnn_object_detector.py';
+                """)
+            response = cursor.fetch_all()
+            print(response)
+
+        To learn more about UDFs, refer to `this <udf.html>`_.
+
+    * Run the UDF:
+
+        .. code-block:: python
+
+            cursor.execute("""SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo""")
+            response = cursor.fetch_all()
+
+        UDFs are typically used like sql functions along with the 'SELECT' command. The 'Unnest' function is used to unnest the output of the UDF.    
+
+    Shown above is a quickstart tutorial of how you can use EVA for your video analysis tasks. 
+    
+
+
+
 
 
 
