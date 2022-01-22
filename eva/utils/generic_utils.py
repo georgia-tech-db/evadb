@@ -96,7 +96,8 @@ def generate_file_path(name: str = '') -> Path:
             'Missing location key in eva.yml', LoggingLevel.ERROR)
         raise KeyError('Missing datasets_dir key in eva.yml')
 
-    dataset_location = Path(dataset_location).mkdir(parents=True, exist_ok=True)
+    dataset_location = Path(dataset_location)
+    dataset_location.mkdir(parents=True, exist_ok=True)
     salt = uuid.uuid4().hex
     file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
     path = dataset_location / file_name
