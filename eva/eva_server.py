@@ -24,11 +24,12 @@ THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.server.server import start_server
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.server.server import start_server  # noqa: E402
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
+from eva.configuration.configuration_manager import \
+    ConfigurationManager  # noqa: E402
+from eva.utils.logging_manager import LoggingManager  # noqa: E402
+from eva.utils.logging_manager import LoggingLevel  # noqa: E402
 
 
 def eva():
