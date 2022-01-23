@@ -2,8 +2,8 @@ version: 2.1
 
 jobs:
   build-and-test:
-    docker:
-      - image: cimg/python:3.7
+    machine:
+      image: cimg/python:3.7
     steps:
       - checkout
       - restore_cache:
