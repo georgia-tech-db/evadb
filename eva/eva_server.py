@@ -17,7 +17,9 @@ import asyncio
 import sys
 from os.path import dirname, abspath, join
 
-#To allow running eva_server from any location
+'''
+To allow running eva_server from any location
+'''
 THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
