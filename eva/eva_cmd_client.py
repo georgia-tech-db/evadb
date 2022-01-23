@@ -23,8 +23,9 @@ THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.server.interpreter import start_cmd_client
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.server.interpreter import start_cmd_client  # noqa: E402
+from eva.utils.logging_manager import LoggingManager, \
+    LoggingLevel  # noqa: E402
 
 
 def eva_client(host='0.0.0.0', port=5432):
