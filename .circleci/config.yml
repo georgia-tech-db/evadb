@@ -4,7 +4,7 @@ jobs:
   build-and-test:
     docker:
       - image: cimg/python:3.7
-    resource_class: medium
+    resource_class: large
     steps:
       - checkout
       - restore_cache:
