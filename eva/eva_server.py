@@ -36,7 +36,6 @@ def eva():
     """
         Start the eva system
     """
-
     # Get the hostname and port information from the configuration file
     config = ConfigurationManager()
     hostname = config.get_value('server', 'host')
