@@ -50,7 +50,8 @@ class ConfigurationManager(object):
                                                    "catalog_database_uri")
             if not dataset_location or not database_uri:
                 if not dataset_location:
-                    dataset_location = str(eva_home_directory / EVA_DATASET_DIR)
+                    dataset_location = str(\
+                        eva_home_directory / EVA_DATASET_DIR)
                     cls._instance.update_value("core", "datasets_dir",
                                                dataset_location)
                 if not database_uri:
