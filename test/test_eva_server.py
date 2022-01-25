@@ -18,7 +18,6 @@ import sys
 from mock import MagicMock, patch
 
 from eva.eva_server import main
-from eva.eva_server import parse_args
 
 
 class EVAServerTest(unittest.TestCase):
@@ -31,6 +30,7 @@ class EVAServerTest(unittest.TestCase):
     def test_main(self, mock_config, mock_eva, mock_udfs):
         mock_obj_1 = MagicMock()
         mock_config.return_value.get_value = mock_obj_1
+        main()
         mock_obj_1.assert_called_with('core', 'mode')
         mock_udfs.assert_called_with(mode='test')
         mock_eva.assert_called_once()
