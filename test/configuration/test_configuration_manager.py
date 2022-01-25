@@ -26,7 +26,7 @@ class ConfigurationManagerTests(unittest.TestCase):
 
         configuration_manager = ConfigurationManager()
 
-        value = configuration_manager.get_value("core", "location")
+        value = configuration_manager.get_value("core", "datasets_dir")
         self.assertNotEqual(value, None)
 
         value = configuration_manager.get_value("invalid", "")

@@ -17,6 +17,7 @@
 # as constants
 
 from eva.server.command_handler import execute_query_fetch_all
+from eva.configuration.dictionary import EVA_INSTALLATION_DIR
 
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
@@ -37,22 +38,23 @@ ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
             INPUT(Input NDARRAY ANYTYPE, Key ANYTYPE)
             OUTPUT(count INTEGER)
             TYPE Ndarray
-            IMPL "eva/udfs/ndarray_udfs/array_count.py";
-        """
+            IMPL "{}/udfs/ndarray_udfs/array_count.py";
+        """.format(EVA_INSTALLATION_DIR)
+
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
                 TYPE  Ndarray
-                IMPL  "eva/udfs/ndarray_udfs/unnest.py";
-        """
+                IMPL  "{}/udfs/ndarray_udfs/unnest.py";
+        """.format(EVA_INSTALLATION_DIR)
 
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                 scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
-      IMPL  'eva/udfs/fastrcnn_object_detector.py';
-      """
+      IMPL  '{}/udfs/fastrcnn_object_detector.py';
+      """.format(EVA_INSTALLATION_DIR)
 
 
 def init_builtin_udfs(mode='debug'):

@@ -16,13 +16,16 @@ import argparse
 import sys
 from os.path import dirname, abspath, join
 
-#To allow running eva_server from any location
+'''
+To allow running eva_server from any location
+'''
 THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.server.interpreter import start_cmd_client
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.server.interpreter import start_cmd_client  # noqa: E402
+from eva.utils.logging_manager import LoggingManager, \
+    LoggingLevel  # noqa: E402
 
 
 def eva_client(host='0.0.0.0', port=5432):
@@ -34,16 +37,22 @@ def eva_client(host='0.0.0.0', port=5432):
     try:
         start_cmd_client(host=host, port=port)
     except Exception as e:
-        raise e
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
-if __name__ == '__main__':
+def parse_args(args):
     parser = argparse.ArgumentParser(description='')
     parser.add_argument('-H', '--host', dest='host', type=str,
                         help='Host address for EVA server', default='0.0.0.0')
     parser.add_argument('-P', '--port', dest='port', type=int,
                         help='Port for EVA server', default=5432)
-    args = parser.parse_args()
+    return parser.parse_args(args)
 
+
+def main():
+    args = parse_args(sys.argv[1:])
     eva_client(host=args.host, port=args.port)
+
+
+if __name__ == '__main__':
+    main()

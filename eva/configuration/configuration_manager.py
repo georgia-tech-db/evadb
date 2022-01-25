@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-
 import yaml
 
-from eva.configuration.dictionary import EVA_DIR
+
+from eva.configuration.dictionary import EVA_DEFAULT_DIR, \
+    EVA_CONFIG_FILE
+from eva.configuration.config_utils import read_value_config, \
+    update_value_config
+from eva.configuration.bootstrap_environment import \
+    bootstrap_environment
 
 
 class ConfigurationManager(object):
@@ -28,17 +32,16 @@ class ConfigurationManager(object):
         if cls._instance is None:
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
 
-            with open(os.path.join(EVA_DIR, "eva.yml"), 'r') as ymlfile:
+            bootstrap_environment()  # Setup eva in home directory
+
+            ymlpath = EVA_DEFAULT_DIR + EVA_CONFIG_FILE
+            with open(ymlpath, 'r') as ymlfile:
                 cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         return cls._instance
 
     def get_value(self, category, key):
-        # get category information
-        category_data = self._cfg.get(category, None)
+        return read_value_config(self._cfg, category, key)
 
-        # get key information
-        value = None
-        if category_data is not None:
-            value = category_data.get(key, None)
-            return value
+    def update_value(self, category, key, value):
+        update_value_config(self._cfg, category, key, value)

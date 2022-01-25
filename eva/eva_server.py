@@ -17,23 +17,25 @@ import asyncio
 import sys
 from os.path import dirname, abspath, join
 
-#To allow running eva_server from any location
+'''
+To allow running eva_server from any location
+'''
 THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.server.server import start_server
-from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.server.server import start_server  # noqa: E402
+from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
+from eva.configuration.configuration_manager import \
+    ConfigurationManager  # noqa: E402
+from eva.utils.logging_manager import LoggingManager  # noqa: E402
+from eva.utils.logging_manager import LoggingLevel  # noqa: E402
 
 
 def eva():
     """
         Start the eva system
     """
-
     # Get the hostname and port information from the configuration file
     config = ConfigurationManager()
     hostname = config.get_value('server', 'host')
@@ -55,8 +57,12 @@ def eva():
         LoggingManager().log(e, LoggingLevel.CRITICAL)
 
 
-if __name__ == '__main__':
-    # execute only if run as the entry point into the program
+def main():
     mode = ConfigurationManager().get_value('core', 'mode')
     init_builtin_udfs(mode=mode)
     eva()
+
+
+if __name__ == '__main__':
+    # execute only if run as the entry point into the program
+    main()
