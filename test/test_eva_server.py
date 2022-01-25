@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import unittest
-import sys
 from mock import MagicMock, patch
 
 from eva.eva_server import main
