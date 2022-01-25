@@ -30,6 +30,7 @@ class EVAServerTest(unittest.TestCase):
     def test_main(self, mock_config, mock_eva, mock_udfs):
         mock_obj_1 = MagicMock()
         mock_config.return_value.get_value = mock_obj_1
+        main()
         mock_obj_1.assert_called_with('core', 'mode')
         mock_udfs.assert_called_with(mode=mock_obj_1)
         mock_eva.assert_called_once()
