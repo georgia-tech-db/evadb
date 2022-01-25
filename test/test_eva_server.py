@@ -16,7 +16,7 @@
 import unittest
 from mock import MagicMock, patch
 
-from eva.eva_server import main
+from eva.eva_server import main, eva
 
 
 class EVAServerTest(unittest.TestCase):
@@ -33,3 +33,21 @@ class EVAServerTest(unittest.TestCase):
         mock_obj_1.assert_called_with('core', 'mode')
         mock_udfs.assert_called_with(mode=mock_obj_1())
         mock_eva.assert_called_once()
+
+    @patch('eva.eva_server.ConfigurationManager')
+    @patch('asyncio.new_event_loop')
+    @patch('asyncio.run')
+    @patch('eva.server.server.start_server')
+    def test_eva(self, mock_start_server, 
+                mock_run, mock_new_event_loop, mock_config):
+        mock_obj_1 = MagicMock()
+        mock_obj_2 = MagicMock()
+        mock_config.return_value.get_value = mock_obj_1
+        mock_new_event_loop.return_value.create_future = mock_obj_2
+        eva()
+        self.assertEqual(mock_obj_1.call_count, 3)
+        mock_new_event_loop.assert_called_once()
+        mock_obj_2.assert_called_once()
+        mock_run.assert_called_once()
+        mock_start_server.assert_called_once()
+        
