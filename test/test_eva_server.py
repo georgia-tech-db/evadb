@@ -38,8 +38,7 @@ class EVAServerTest(unittest.TestCase):
     @patch('asyncio.new_event_loop')
     @patch('asyncio.run')
     @patch('eva.server.server.start_server')
-    def test_eva(self, mock_start_server, 
-                mock_run, mock_new_event_loop, mock_config):
+    def test_eva(self, mock_run, mock_new_event_loop, mock_config):
         mock_obj_1 = MagicMock()
         mock_obj_2 = MagicMock()
         mock_config.return_value.get_value = mock_obj_1
@@ -49,5 +48,3 @@ class EVAServerTest(unittest.TestCase):
         mock_new_event_loop.assert_called_once()
         mock_obj_2.assert_called_once()
         mock_run.assert_called_once()
-        mock_start_server.assert_called_once()
-        
