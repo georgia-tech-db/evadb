@@ -37,7 +37,6 @@ class EVAServerTest(unittest.TestCase):
     @patch('eva.eva_server.ConfigurationManager')
     @patch('asyncio.new_event_loop')
     @patch('asyncio.run')
-    @patch('eva.server.server.start_server')
     def test_eva(self, mock_run, mock_new_event_loop, mock_config):
         mock_obj_1 = MagicMock()
         mock_obj_2 = MagicMock()
