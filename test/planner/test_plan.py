@@ -13,18 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from src.parser.table_ref import TableRef, TableInfo
-from src.catalog.models.df_column import DataFrameColumn
-from src.catalog.column_type import ColumnType
-from src.catalog.catalog_manager import CatalogManager
+from eva.parser.table_ref import TableRef, TableInfo
+from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_manager import CatalogManager
 
-from src.planner.create_plan import CreatePlan
-from src.planner.insert_plan import InsertPlan
-from src.planner.create_udf_plan import CreateUDFPlan
-from src.planner.load_data_plan import LoadDataPlan
-from src.planner.upload_plan import UploadPlan
-from src.planner.union_plan import UnionPlan
-from src.planner.types import PlanOprType
+from eva.planner.create_plan import CreatePlan
+from eva.planner.insert_plan import InsertPlan
+from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.planner.upload_plan import UploadPlan
+from eva.planner.union_plan import UnionPlan
+from eva.planner.types import PlanOprType
 
 
 class PlanNodeTests(unittest.TestCase):

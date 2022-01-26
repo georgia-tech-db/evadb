@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from src.catalog.catalog_manager import CatalogManager
-from src.server.command_handler import execute_query_fetch_all
+from eva.catalog.catalog_manager import CatalogManager
+from eva.server.command_handler import execute_query_fetch_all
 
 from test.util import copy_sample_video_to_prefix, file_remove
 
@@ -38,7 +38,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
-                  IMPL  'src/udfs/fastrcnn_object_detector.py';
+                  IMPL  'eva/udfs/fastrcnn_object_detector.py';
         """
         execute_query_fetch_all(create_udf_query)
 
@@ -56,7 +56,7 @@ class PytorchTest(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
                   TYPE  Classification
-                  IMPL  'src/udfs/ssd_object_detector.py';
+                  IMPL  'eva/udfs/ssd_object_detector.py';
         """
         execute_query_fetch_all(create_udf_query)
 

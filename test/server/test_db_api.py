@@ -18,8 +18,8 @@ import mock
 import asyncio
 from unittest.mock import MagicMock
 
-from src.server.db_api import EVACursor
-from src.models.server.response import Response
+from eva.server.db_api import EVACursor
+from eva.models.server.response import Response
 
 
 class AsyncMock(MagicMock):
