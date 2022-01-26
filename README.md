@@ -53,7 +53,7 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
 ### Troubleshoot
 
-* PySpark's error: `java.io.IOException: Cannot run program "python":`. Set the Python location for Spark. For example, `export PYSPARK_PYTHON=/usr/bin/python3`. Then you need to clean the old DB and PySpark data by `rm eva_catalog.db && rm -rf ~/.eva/eva_datasets`.
+* PySpark's error: `java.io.IOException: Cannot run program "python":`. Set the Python location for Spark. For example, `export PYSPARK_PYTHON=/usr/bin/python3`. Then you need to clean the old DB and PySpark data by `rm ~/.eva/eva_catalog.db && rm -rf ~/.eva/eva_datasets`.
 
 ## Quickstart Tutorial
 
