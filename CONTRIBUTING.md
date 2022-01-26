@@ -70,7 +70,7 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
     Output of `cuda:0` indicates the presence of a GPU. (Note: 0 indicates the index of the GPU in system. Incase you have multiple GPUs, the index needs to be accordingly changed)
 
-2. Now configure the `executor` section in `eva.yml` as follows:
+2. Now configure the `executor` section in `eva/eva.yml` as follows:
 
     ```
     gpus: {'127.0.1.1': [0]}
