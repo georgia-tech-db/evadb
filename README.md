@@ -20,17 +20,31 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 ## Installation
 
 ### Dependency
-EVA requires Python 3.7 or 3.8 and JAVA 8. On Ubuntu, you can install the JAVA by `sudo -E apt install -y openjdk-8-jdk openjdk-8-jre`.
+EVA requires Python 3.7 or later and JAVA 8. On Ubuntu, you can install the JAVA by `sudo -E apt install -y openjdk-8-jdk openjdk-8-jre`.
 
 ### Recommended
-To install EVA, we recommend using pip:
+To install EVA, we recommend using virtual environment and pip:
 ```shell
-pip3 install evatestdb
+python3 -m venv env37
+. env37/bin/activate
+pip install --upgrade pip
+pip install evatestdb
+```
+
+### Install From Source
+```shell
+git clone https://github.com/georgia-tech-db/eva.git && cd eva
+python3 -m venv env37
+. env37/bin/activate
+pip install --upgrade pip
+sh script/antlr4/generate_parser.sh
+pip install .
 ```
 
 ## Verify Installation
 
 1. Set up the server and client
+- Activate the virtual environment: `. env37/bin/activate`
 
 - Launch EVA database Server: `eva_server`
 
