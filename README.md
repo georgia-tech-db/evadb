@@ -26,7 +26,6 @@ EVA requires Python 3.7 or 3.8 and JAVA 8. On Ubuntu, you can install the JAVA b
 To install EVA, we recommend using pip:
 ```shell
 pip3 install evatestdb
-export PYSPARK_PYTHON=/usr/bin/python3
 ```
 
 ## Verify Installation
@@ -51,6 +50,10 @@ LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
+
+### Troubleshoot
+
+* PySpark's error: `java.io.IOException: Cannot run program "python":`. Set the Python location for Spark. For example, `export PYSPARK_PYTHON=/usr/bin/python3`
 
 ## Quickstart Tutorial
 
