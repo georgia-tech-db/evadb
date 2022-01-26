@@ -17,56 +17,40 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 * EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
 
-## Table of Contents
-* [Installation](#installation)
-* [Client Testing](#client-testing)
-* [Docker](#docker)
-* [Development](#development)
-* [Architecture](#architecture)
-
-
 ## Installation
 
-Installation of EVA involves setting a virtual environment using [miniconda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) and configuring git hooks.
+### Dependency
+EVA requires Python 3.7 or later and JAVA 8. On Ubuntu, you can install the JAVA by `sudo -E apt install -y openjdk-8-jdk openjdk-8-jre`.
 
-1. Clone the repository
+### Recommended
+To install EVA, we recommend using virtual environment and pip:
 ```shell
-git clone https://github.com/georgia-tech-db/eva.git
+python3 -m venv env37
+. env37/bin/activate
+pip install --upgrade pip
+pip install evatestdb
 ```
 
-2. Install the dependencies.
+### Install From Source
 ```shell
-sh script/install/before_install.sh
-export PATH="$HOME/miniconda/bin:$PATH"
-sh script/install/install.sh
+git clone https://github.com/georgia-tech-db/eva.git && cd eva
+python3 -m venv env37
+. env37/bin/activate
+pip install --upgrade pip
+sh script/antlr4/generate_parser.sh
+pip install .
 ```
 
-3. Connect mysql user root with normal account and no password
-```mysql
-sudo mysql -u root
-> SELECT User,Host FROM mysql.user;
-> DROP USER 'root'@'localhost';
-> CREATE USER 'root'@'%' IDENTIFIED BY '';
-> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
-> FLUSH PRIVILEGES;
-mysql -u root
-```
-refer to [askubuntu](https://askubuntu.com/questions/766334/cant-login-as-mysql-user-root-from-normal-user-account-in-ubuntu-16-04)
-
-<!-- 4. Install `docker` and `docker-compose`.
-Please refer to [official doc](https://docs.docker.com/engine/install/). -->
-
-## Client Testing
+## Verify Installation
 
 1. Set up the server and client
+- Activate the virtual environment: `. env37/bin/activate`
 
-- Activate the conda environment: `conda activate eva`
+- Launch EVA database Server: `eva_server`
 
-- Launch EVA database Server: `python eva.py`
+- Launch CLI: `eva_client`
 
-- Launch CLI: `python eva_cmd_client.py`
-
-2. Run the `UPLOAD` command in the client terminal:
+2. Run the `UPLOAD` command in the client terminal (use the [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) as an example):
 ```mysql
 UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```
@@ -79,28 +63,6 @@ LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 4. Below is a basic query that should work on the client
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
-```
-
-
-
-<!-- ## Docker
-
-1. Standup EVA testing for CPU/GPU hardware.
-```shell
-docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up 
-``` -->
-
-## Development
-
-1. Install git hooks in your .git/ directory. [optional, but recommended]
-```shell
-conda activate eva
-pre-commit install
-```
-
-2. Ensure that all the unit test cases (including the ones you have added) run succesfully and the coding style conventions are followed.
-```shell
-bash script/test/test.sh
 ```
 
 ## Quickstart Tutorial
@@ -129,7 +91,7 @@ bash script/test/test.sh
 
     Output of `cuda:0` indicates the presence of a GPU. (Note: 0 indicates the index of the GPU in system. Incase you have multiple GPUs, the index needs to be accordingly changed)
 
-2. Now configure the `executor` section in `eva.yml` as follows:
+2. Now configure the `executor` section in `~/.eva/eva.yml` as follows:
 
     ```
     gpus: {'127.0.1.1': [0]}
@@ -141,27 +103,25 @@ bash script/test/test.sh
 
 1. Open a terminal instance and start the server:
     ```
-    python eva.py
+    eva_server
     ```
 
-2. Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to `tutorials/object_detection.ipynb`
+2. Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to [tutorials/object_detection.ipynb](tutorials/object_detection.ipynb)
 
 3. You might have to install ipywidgets to visualize the input video and output. Follow steps in `https://ipywidgets.readthedocs.io/en/latest/user_install.html` as per your jupyter environment. 
 
-4. Run each cell one by one. Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.  
+4. Run each cell one by one. Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.
 
-## Architecture
+## Documentation
 
-EVA consists of four core components:
-
-* EVAQL Query Parser
-* Query Optimizer
-* Query Execution Engine (Filters + Deep Learning Models)
-* Distributed Storage Engine
+You can find documentation and code snippets for EVA [here](https://evagatech.readthedocs.io/).
 
 ## Contributing
 
 To file a bug or request a feature, please file a GitHub issue. Pull requests are welcome.
+
+For information on installing from source and contributing to EVA, see our
+[contributing guidelines](./CONTRIBUTING.md).
 
 ## Contributors
 

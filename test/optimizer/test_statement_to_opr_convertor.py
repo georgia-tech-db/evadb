@@ -16,33 +16,33 @@ import unittest
 
 from mock import patch, MagicMock
 
-from src.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from src.parser.select_statement import SelectStatement
-from src.parser.table_ref import TableRef, TableInfo
-from src.parser.create_udf_statement import CreateUDFStatement
-from src.parser.insert_statement import InsertTableStatement
-from src.parser.create_statement import CreateTableStatement
-from src.parser.load_statement import LoadDataStatement
-from src.parser.parser import Parser
+from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.parser.select_statement import SelectStatement
+from eva.parser.table_ref import TableRef, TableInfo
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.create_statement import CreateTableStatement
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.parser import Parser
 
-from src.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
+from eva.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
                                      LogicalLoadData, LogicalUnion,
                                      LogicalOrderBy, LogicalLimit,
                                      LogicalSample)
 
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.comparison_expression import ComparisonExpression
-from src.expression.abstract_expression import ExpressionType
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.abstract_expression import ExpressionType
 
-from src.parser.types import ParserOrderBySortType
+from eva.parser.types import ParserOrderBySortType
 
 
 class StatementToOprTest(unittest.TestCase):
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalGet')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalGet')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     def test_visit_table_ref_should_create_logical_get_opr(self, mock,
                                                            mock_lget):
         converter = StatementToPlanConvertor()
@@ -52,8 +52,8 @@ class StatementToOprTest(unittest.TestCase):
         mock_lget.assert_called_with(table_ref, mock.return_value)
         self.assertEqual(mock_lget.return_value, converter._plan)
 
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalGet')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalGet')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     def test_visit_table_ref_populates_column_mapping(self, mock,
                                                       mock_lget):
         converter = StatementToPlanConvertor()
@@ -63,8 +63,8 @@ class StatementToOprTest(unittest.TestCase):
 
         converter._populate_column_map.assert_called_with(mock.return_value)
 
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalFilter')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalFilter')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_visit_select_predicate_should_add_logical_filter(self, mock,
                                                               mock_lfilter):
         converter = StatementToPlanConvertor()
@@ -76,8 +76,8 @@ class StatementToOprTest(unittest.TestCase):
         mock_lfilter.return_value.append_child.assert_called()
         self.assertEqual(mock_lfilter.return_value, converter._plan)
 
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalProject')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalProject')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
     def test_visit_projection_should_add_logical_predicate(self, mock,
                                                            mock_lproject):
         converter = StatementToPlanConvertor()
@@ -134,8 +134,8 @@ class StatementToOprTest(unittest.TestCase):
 
         self.assertEqual(converter._column_map, expected)
 
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalCreateUDF')
-    @patch('src.optimizer.\
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalCreateUDF')
+    @patch('eva.optimizer.\
 statement_to_opr_convertor.column_definition_to_udf_io')
     def test_visit_create_udf(self, mock, l_create_udf_mock):
         convertor = StatementToPlanConvertor()
@@ -199,9 +199,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalLoadData')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.create_video_metadata')
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.create_video_metadata')
     def test_visit_load_data_when_bind_returns_valid(
             self, mock_create, mock_bind, mock_load):
         mock_bind.return_value = MagicMock()
@@ -212,9 +212,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock_load.assert_called_once_with(mock_bind.return_value, 'path')
         mock_create.assert_not_called()
 
-    @patch('src.optimizer.statement_to_opr_convertor.LogicalLoadData')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.create_video_metadata')
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.create_video_metadata')
     def test_visit_load_data_when_bind_returns_None(
             self, mock_create, mock_bind, mock_load):
         mock_bind.return_value = None
@@ -225,9 +225,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock_bind.assert_called_with(table_ref.table)
         mock_load.assert_called_with(mock_create.return_value, 'path')
 
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_should_visit_select_if_nested_query(self, mock_p, mock_c, mock_d):
         m = MagicMock()
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
@@ -265,9 +265,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             wrong_plan.append_child(plan)
         self.assertNotEqual(wrong_plan, actual_plan)
 
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_visit_select_orderby(self, mock_p, mock_c, mock_d):
         m = MagicMock()
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
@@ -307,9 +307,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             wrong_plan.append_child(plan)
         self.assertNotEqual(wrong_plan, actual_plan)
 
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_visit_select_limit(self, mock_p, mock_c, mock_d):
         m = MagicMock()
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
@@ -347,9 +347,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             wrong_plan.append_child(plan)
         self.assertNotEqual(wrong_plan, actual_plan)
 
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_visit_select_sample(self, mock_p, mock_c, mock_d):
         m = MagicMock()
         mock_p.return_value = mock_c.return_value = mock_d.return_value = m
@@ -385,9 +385,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
 
         self.assertEqual(expected_plan, actual_plan)
 
-    @patch('src.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('src.optimizer.statement_to_opr_convertor.bind_predicate_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
     def test_should_visit_select_union_if_union_query(self, mock_p, mock_c,
                                                       mock_d):
         m = MagicMock()

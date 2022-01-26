@@ -18,7 +18,7 @@ import asyncio
 
 from unittest.mock import MagicMock
 
-from src.server.command_handler import handle_request
+from eva.server.command_handler import handle_request
 
 
 class CommandHandlerTests(unittest.TestCase):

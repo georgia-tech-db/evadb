@@ -16,14 +16,14 @@ import unittest
 
 from mock import patch
 
-from src.constants import NO_GPU
-from src.executor.execution_context import Context
+from eva.constants import NO_GPU
+from eva.executor.execution_context import Context
 
 
 class ExecutionContextTest(unittest.TestCase):
-    @patch('src.executor.execution_context.ConfigurationManager')
-    @patch('src.executor.execution_context.socket')
-    @patch('src.executor.execution_context.is_gpu_available')
+    @patch('eva.executor.execution_context.ConfigurationManager')
+    @patch('eva.executor.execution_context.socket')
+    @patch('eva.executor.execution_context.is_gpu_available')
     def test_gpu_devices_gets_populated_from_config(self, gpu_check, socket,
                                                     cfm):
         gpu_check.return_value = True
@@ -36,10 +36,10 @@ class ExecutionContextTest(unittest.TestCase):
 
         self.assertEqual(context.gpus, ['0', '1', '2'])
 
-    @patch('src.executor.execution_context.ConfigurationManager')
-    @patch('src.executor.execution_context.os')
-    @patch('src.executor.execution_context.socket')
-    @patch('src.executor.execution_context.is_gpu_available')
+    @patch('eva.executor.execution_context.ConfigurationManager')
+    @patch('eva.executor.execution_context.os')
+    @patch('eva.executor.execution_context.socket')
+    @patch('eva.executor.execution_context.is_gpu_available')
     def test_gpu_devices_gets_populated_from_environment_if_no_config(self,
                                                                       is_gpu,
                                                                       socket,
@@ -57,10 +57,10 @@ class ExecutionContextTest(unittest.TestCase):
 
         self.assertEqual(context.gpus, ['0', '1', '2'])
 
-    @patch('src.executor.execution_context.ConfigurationManager')
-    @patch('src.executor.execution_context.os')
-    @patch('src.executor.execution_context.socket')
-    @patch('src.executor.execution_context.is_gpu_available')
+    @patch('eva.executor.execution_context.ConfigurationManager')
+    @patch('eva.executor.execution_context.os')
+    @patch('eva.executor.execution_context.socket')
+    @patch('eva.executor.execution_context.is_gpu_available')
     def test_gpu_devices_should_be_empty_if_nothing_provided(self, gpu_check,
                                                              socket,
                                                              os, cfm):
@@ -76,10 +76,10 @@ class ExecutionContextTest(unittest.TestCase):
 
         self.assertEqual(context.gpus, [])
 
-    @patch('src.executor.execution_context.ConfigurationManager')
-    @patch('src.executor.execution_context.os')
-    @patch('src.executor.execution_context.socket')
-    @patch('src.executor.execution_context.is_gpu_available')
+    @patch('eva.executor.execution_context.ConfigurationManager')
+    @patch('eva.executor.execution_context.os')
+    @patch('eva.executor.execution_context.socket')
+    @patch('eva.executor.execution_context.is_gpu_available')
     def test_gpus_ignores_config_if_no_gpu_available(self, gpu_check,
                                                      socket,
                                                      os, cfm):
@@ -94,10 +94,10 @@ class ExecutionContextTest(unittest.TestCase):
 
         self.assertEqual(context.gpus, [])
 
-    @patch('src.executor.execution_context.ConfigurationManager')
-    @patch('src.executor.execution_context.os')
-    @patch('src.executor.execution_context.socket')
-    @patch('src.executor.execution_context.is_gpu_available')
+    @patch('eva.executor.execution_context.ConfigurationManager')
+    @patch('eva.executor.execution_context.os')
+    @patch('eva.executor.execution_context.socket')
+    @patch('eva.executor.execution_context.is_gpu_available')
     def test_gpu_device_should_return_NO_GPU_if_GPU_not_available(self,
                                                                   gpu_check,
                                                                   socket,
@@ -114,10 +114,10 @@ class ExecutionContextTest(unittest.TestCase):
 
         self.assertEqual(context.gpu_device(), NO_GPU)
 
-    @patch('src.executor.execution_context.ConfigurationManager')
-    @patch('src.executor.execution_context.socket')
-    @patch('src.executor.execution_context.is_gpu_available')
-    @patch('src.executor.execution_context.random')
+    @patch('eva.executor.execution_context.ConfigurationManager')
+    @patch('eva.executor.execution_context.socket')
+    @patch('eva.executor.execution_context.is_gpu_available')
+    @patch('eva.executor.execution_context.random')
     def test_should_return_random_gpu_ID_if_available(self, random,
                                                       gpu_check,
                                                       socket,

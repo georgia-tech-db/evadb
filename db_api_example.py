@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from typing import List
-from src.server.db_api import connect, connect_async
+from eva.server.db_api import connect, connect_async
 
 async def run_async(query: List[str]):
     hostname = '0.0.0.0'

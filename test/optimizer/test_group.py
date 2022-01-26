@@ -2,9 +2,9 @@ import unittest
 
 from mock import MagicMock
 
-from src.optimizer.group import Group
-from src.optimizer.group_expression import GroupExpression
-from src.optimizer.property import Property, PropertyType
+from eva.optimizer.group import Group
+from eva.optimizer.group_expression import GroupExpression
+from eva.optimizer.property import Property, PropertyType
 
 
 class TestGroup(unittest.TestCase):
