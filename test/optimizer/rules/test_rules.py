@@ -2,10 +2,10 @@ import unittest
 
 from mock import MagicMock
 
-from src.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
+from eva.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalSample,
                                      Dummy)
-from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
+from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
                                        LogicalCreateMaterializedViewToPhysical,
@@ -21,8 +21,8 @@ from src.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        LogicalDerivedGetToPhysical,
                                        LogicalUnionToPhysical,
                                        LogicalOrderByToPhysical,
-                                       LogicalLimitToPhysical,)
-from src.optimizer.rules.rules import Promise, RulesManager
+                                       LogicalLimitToPhysical)
+from eva.optimizer.rules.rules import Promise, RulesManager
 
 
 class TestRules(unittest.TestCase):

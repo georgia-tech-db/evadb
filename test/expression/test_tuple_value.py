@@ -15,8 +15,8 @@
 import unittest
 import pandas as pd
 
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.models.storage.batch import Batch
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.models.storage.batch import Batch
 
 
 class TupleValueExpressionsTest(unittest.TestCase):

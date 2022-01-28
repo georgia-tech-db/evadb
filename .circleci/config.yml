@@ -2,37 +2,41 @@ version: 2.1
 
 jobs:
   build-and-test:
-    machine:
-      image: ubuntu-1604:202007-01
+    docker:
+      - image: cimg/python:3.7
+    resource_class: large
     steps:
-      - checkout          
-
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "setup.cfg" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
-          name: Before Install
+          name: Install Package
           command: |
-            sh script/install/before_install.sh
-          environment:
-            DEBIAN_FRONTEND: noninteractive
+            python -m venv env37
+            . env37/bin/activate
+            pip install --upgrade pip
+            python setup.py install 
 
       - run:
-          name: Install
-          command: | 
-            export PATH="$HOME/miniconda/bin:$PATH"
-            sh script/install/install.sh
-            # allow no-password connection for root
-            sudo mysql -u root -e "SELECT User,Host FROM mysql.user; 
-                                   DROP USER 'root'@'localhost'; 
-                                   CREATE USER 'root'@'%' IDENTIFIED BY ''; 
-                                   GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; 
-                                   FLUSH PRIVILEGES;" 
+          name: Generate Parser Files
+          command: |
+            sudo add-apt-repository ppa:openjdk-r/ppa
+            sudo -E apt install -y openjdk-8-jdk openjdk-8-jre
+            sh script/antlr4/generate_parser.sh
+
+      - run:
+          name: Install Test Dependencies
+          command: |
+            . env37/bin/activate
+            pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1
 
       - run:
           name: Test
-          command: | 
-            export PATH="$HOME/miniconda/bin:$PATH"
-            conda init bash
-            source ~/.bashrc
-            conda activate eva
+          command: |
+            . env37/bin/activate
             sh script/test/test.sh
             coveralls
 

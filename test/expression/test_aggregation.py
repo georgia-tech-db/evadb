@@ -15,10 +15,10 @@
 import pandas as pd
 import unittest
 
-from src.expression.abstract_expression import ExpressionType
-from src.expression.aggregation_expression import AggregationExpression
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.models.storage.batch import Batch
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.aggregation_expression import AggregationExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.models.storage.batch import Batch
 
 
 class AggregationExpressionsTest(unittest.TestCase):

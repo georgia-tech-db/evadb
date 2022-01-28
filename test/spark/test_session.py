@@ -16,7 +16,7 @@ import unittest
 
 from pyspark.sql import SparkSession
 
-from src.spark.session import Session
+from eva.spark.session import Session
 
 
 class SparkSessionTest(unittest.TestCase):

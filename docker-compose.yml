@@ -26,8 +26,8 @@ services:
       - |
         cd /app
         sed -i "s/\broot@localhost\b/root@db/g" eva.yml
-        ~/miniconda/bin/conda run -n eva flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
-        ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
+        ~/miniconda/bin/conda run -n eva flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql
+        ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING
 
   eva-test-cpu:
     depends_on:
@@ -44,8 +44,8 @@ services:
       - |
         cd /app
         sed -i "s/\broot@localhost\b/root@db/g" eva.yml
-        ~/miniconda/bin/conda run -n eva flake8 --select E,F src/ test/ --exclude src/filters,src/parser/evaql
-        ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=src/ -s -v --log-level=WARNING
+        ~/miniconda/bin/conda run -n eva flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql
+        ~/miniconda/bin/conda run -n eva PYTHONPATH=./ pytest test/ --cov-report= --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING
 
 volumes:
   db_data: {}

@@ -15,7 +15,7 @@
 import os
 import unittest
 
-from src.readers.opencv_reader import OpenCVReader
+from eva.readers.opencv_reader import OpenCVReader
 
 from test.util import create_sample_video
 from test.util import create_dummy_batches
