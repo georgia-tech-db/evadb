@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from src.executor.pp_executor import PPExecutor
-from src.models.storage.batch import Batch
+from eva.executor.pp_executor import PPExecutor
+from eva.models.storage.batch import Batch
 from test.util import create_dataframe
 from ..executor.utils import DummyExecutor
 
