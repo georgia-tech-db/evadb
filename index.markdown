@@ -16,7 +16,7 @@ layout: default
 
 EVA is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
 
-![](https://github.com/georgia-tech-db/eva/blob/website/car.gif)
+![](Img/car.gif)
 
 ## What does EVA do?
 
