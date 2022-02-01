@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>Installation | EVA</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="Installation" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology." />
+<meta property="og:description" content="Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology." />
+<link rel="canonical" href="http://localhost:4000/eva/Installation.html" />
+<meta property="og:url" content="http://localhost:4000/eva/Installation.html" />
+<meta property="og:site_name" content="EVA" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Installation" />
+<script type="application/ld+json">
+{"headline":"Installation","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/eva/Logo.png"}},"@type":"WebPage","url":"http://localhost:4000/eva/Installation.html","description":"Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/eva/assets/css/style.css?v=c07f06695b68e2d03195d0575a313c3b7c2c6535">
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'EVA', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/eva/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/eva/Logo.png" alt="Logo" />
+        
+        
+        <p style="font-size:1px"></p>
+        <h1 style="color:black;">EVA</h1>
+
+        
+
+        <p>Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology.</p>
+
+        
+        <p class="view", style="font-size:14px"><a href="index.html">Home <small></a>
+        <class="view", style="font-size:14px"><a href="Installation.html">Installation <small></a>
+        <class="view", style="font-size:14px"><a href="Research.html">Research <small></a>
+        <class="view", style="font-size:14px"><a href="http://ada-00.cc.gatech.edu/eva">Beta Release <small></a></p>
+        
+
+        
+
+        
+        <ul class="downloads">
+          <li><a href="https://github.com/georgia-tech-db/eva/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/georgia-tech-db/eva/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/georgia-tech-db/eva">View On <strong>GitHub</strong></a></li>
+        </ul>
+        
+      </header>
+      <section>
+
+      <h2 id="installation"><font size="5">Installation</font></h2>
+
+<p>Installation of EVA involves setting a virtual environment using <a href="https://conda.io/projects/conda/en/latest/user-guide/install/index.html">miniconda</a> and configuring git hooks.</p>
+
+<ol>
+  <li>Clone the repository
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/georgia-tech-db/eva.git
+</code></pre></div>    </div>
+  </li>
+  <li>Install the dependencies.
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sh script/install/before_install.sh
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">"</span><span class="nv">$HOME</span><span class="s2">/miniconda/bin:</span><span class="nv">$PATH</span><span class="s2">"</span>
+sh script/install/install.sh
+</code></pre></div>    </div>
+  </li>
+  <li>Connect mysql user root with normal account and no password
+    <pre><code class="language-mysql">sudo mysql -u root
+&gt; SELECT User,Host FROM mysql.user;
+&gt; DROP USER 'root'@'localhost';
+&gt; CREATE USER 'root'@'%' IDENTIFIED BY '';
+&gt; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+&gt; FLUSH PRIVILEGES;
+mysql -u root
+</code></pre>
+    <p>refer to <a href="https://askubuntu.com/questions/766334/cant-login-as-mysql-user-root-from-normal-user-account-in-ubuntu-16-04">askubuntu</a></p>
+  </li>
+</ol>
+
+<!-- 4. Install `docker` and `docker-compose`.
+Please refer to [official doc](https://docs.docker.com/engine/install/). -->
+
+<h2 id="client-testing">Client Testing</h2>
+
+<ol>
+  <li>Set up the server and client</li>
+</ol>
+
+<ul>
+  <li>
+    <p>Activate the conda environment: <code class="language-plaintext highlighter-rouge">conda activate eva</code></p>
+  </li>
+  <li>
+    <p>Launch EVA database Server: <code class="language-plaintext highlighter-rouge">python eva.py</code></p>
+  </li>
+  <li>
+    <p>Launch CLI: <code class="language-plaintext highlighter-rouge">python eva_cmd_client.py</code></p>
+  </li>
+</ul>
+
+<ol>
+  <li>Run the <code class="language-plaintext highlighter-rouge">UPLOAD</code> command in the client terminal:
+    <pre><code class="language-mysql">UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
+</code></pre>
+  </li>
+  <li>Run the <code class="language-plaintext highlighter-rouge">LOAD</code> command in the client terminal: (may take a while)
+    <pre><code class="language-mysql">LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
+</code></pre>
+  </li>
+  <li>Below is a basic query that should work on the client
+    <pre><code class="language-mysql">SELECT id, data FROM MyVideo WHERE id &lt; 5;
+</code></pre>
+  </li>
+</ol>
+
+<!-- ## Docker
+
+1. Standup EVA testing for CPU/GPU hardware.
+```shell
+docker-compose -f docker-compose.yml eva-test-[cpu/gpu] up 
+``` -->
+
+<h2 id="development">Development</h2>
+
+<ol>
+  <li>Install git hooks in your .git/ directory. [optional, but recommended]
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>conda activate eva
+pre-commit <span class="nb">install</span>
+</code></pre></div>    </div>
+  </li>
+  <li>Ensure that all the unit test cases (including the ones you have added) run succesfully and the coding style conventions are followed.
+    <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bash script/test/test.sh
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="quickstart-tutorial">Quickstart Tutorial</h2>
+
+<h3 id="configure-gpu-recommended">Configure GPU (Recommended)</h3>
+
+<ol>
+  <li>
+    <p>If your workstation has a GPU, you need to first set it up and configure it. You can run the following command first to check your hardware capabilities.</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> ubuntu-drivers devices
+</code></pre></div>    </div>
+
+    <p>If you do have an NVIDIA GPU, and its not been configured yet, follow all the steps in this link carefully. <code class="language-plaintext highlighter-rouge">https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31</code>.</p>
+
+    <p>Some pointers:</p>
+    <ul>
+      <li>When installing NVIDIA drivers, check the correct driver version for your GPU to avoid compatibiility issues.</li>
+      <li>When installing cuDNN, you will have to create an account. Make sure you get the correct deb files for your OS and architecture.</li>
+    </ul>
+  </li>
+  <li>
+    <p>You can run the following code in a jupyter instance to verify your GPU is working well along with PyTorch.</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> import torch
+ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+ print(device)
+</code></pre></div>    </div>
+
+    <p>Output of <code class="language-plaintext highlighter-rouge">cuda:0</code> indicates the presence of a GPU. (Note: 0 indicates the index of the GPU in system. Incase you have multiple GPUs, the index needs to be accordingly changed)</p>
+  </li>
+  <li>
+    <p>Now configure the <code class="language-plaintext highlighter-rouge">executor</code> section in <code class="language-plaintext highlighter-rouge">eva.yml</code> as follows:</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> gpus: {'127.0.1.1': [0]}
+</code></pre></div>    </div>
+
+    <p><code class="language-plaintext highlighter-rouge">127.0.1.1</code> is the loopback address on which the eva server is started. 0 refers to the GPU index to be used.</p>
+  </li>
+</ol>
+
+<h3 id="sample-notebook">Sample Notebook</h3>
+
+<ol>
+  <li>Open a terminal instance and start the server:
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code> python eva.py
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to <code class="language-plaintext highlighter-rouge">tutorials/object_detection.ipynb</code></p>
+  </li>
+  <li>
+    <p>You might have to install ipywidgets to visualize the input video and output. Follow steps in <code class="language-plaintext highlighter-rouge">https://ipywidgets.readthedocs.io/en/latest/user_install.html</code> as per your jupyter environment.</p>
+  </li>
+  <li>Run each cell one by one. Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.</li>
+</ol>
+
+
+
+      </section>
+    </div>
+    <script src="/eva/assets/js/scale.fix.js"></script>
+  </body>
+</html>

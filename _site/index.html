@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Begin Jekyll SEO tag v2.7.1 -->
+<title>EVA (Exploratory Video Analytics) | EVA</title>
+<meta name="generator" content="Jekyll v3.9.0" />
+<meta property="og:title" content="EVA (Exploratory Video Analytics)" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology." />
+<meta property="og:description" content="Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology." />
+<link rel="canonical" href="http://localhost:4000/eva/" />
+<meta property="og:url" content="http://localhost:4000/eva/" />
+<meta property="og:site_name" content="EVA" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="EVA (Exploratory Video Analytics)" />
+<script type="application/ld+json">
+{"headline":"EVA (Exploratory Video Analytics)","publisher":{"@type":"Organization","logo":{"@type":"ImageObject","url":"http://localhost:4000/eva/Logo.png"}},"@type":"WebSite","url":"http://localhost:4000/eva/","description":"Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology.","name":"EVA","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+    <link rel="stylesheet" href="/eva/assets/css/style.css?v=c07f06695b68e2d03195d0575a313c3b7c2c6535">
+    <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
+    <!-- start custom head snippets, customize with your own _includes/head-custom.html file -->
+
+<!-- Setup Google Analytics -->
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'EVA', 'auto');
+    ga('send', 'pageview');
+  </script>
+
+
+
+<!-- You can set your favicon here -->
+<!-- link rel="shortcut icon" type="image/x-icon" href="/eva/favicon.ico" -->
+
+<!-- end custom head snippets -->
+
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+
+        
+          <img src="/eva/Logo.png" alt="Logo" />
+        
+        
+        <p style="font-size:1px"></p>
+        <h1 style="color:black;">EVA</h1>
+
+        
+
+        <p>Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology.</p>
+
+        
+        <p class="view", style="font-size:14px"><a href="index.html">Home <small></a>
+        <class="view", style="font-size:14px"><a href="Installation.html">Installation <small></a>
+        <class="view", style="font-size:14px"><a href="Research.html">Research <small></a>
+        <class="view", style="font-size:14px"><a href="http://ada-00.cc.gatech.edu/eva">Beta Release <small></a></p>
+        
+
+        
+
+        
+        <ul class="downloads">
+          <li><a href="https://github.com/georgia-tech-db/eva/zipball/gh-pages">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/georgia-tech-db/eva/tarball/gh-pages">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/georgia-tech-db/eva">View On <strong>GitHub</strong></a></li>
+        </ul>
+        
+      </header>
+      <section>
+
+      <h1 id="eva-exploratory-video-analytics">EVA (Exploratory Video Analytics)</h1>
+
+<p><a href="https://travis-ci.com/georgia-tech-db/eva"><img src="https://travis-ci.org/georgia-tech-db/eva.svg?branch=master" alt="Build Status" /></a>
+<a href="https://coveralls.io/github/georgia-tech-db/eva?branch=master"><img src="https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master" alt="Coverage Status" /></a>
+<a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License" /></a>
+<a href="https://evagatech.readthedocs.io/en/latest/index.html"><img src="https://readthedocs.org/projects/exvian/badge/?version=latest" alt="Documentation Status" /></a> <a href="https://gitter.im/georgia-tech-db/eva?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge&amp;utm_content=badge"><img src="https://badges.gitter.im/georgia-tech-db/eva.svg" alt="Join the chat at https://gitter.im/georgia-tech-db/eva" /></a></p>
+
+<h2 id="what-is-eva">What is EVA?</h2>
+
+<p>EVA is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.</p>
+
+<p><img src="https://github.com/georgia-tech-db/eva/blob/website/car.gif" alt="" /></p>
+
+<h2 id="what-does-eva-do">What does EVA do?</h2>
+
+<ul>
+  <li>
+    <p>EVA <strong>enables querying of visual data</strong> in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models.</p>
+  </li>
+  <li>
+    <p>EVA <strong>improves throughput</strong> by introducing sampling, filtering, and caching techniques.</p>
+  </li>
+  <li>
+    <p>EVA <strong>improves accuracy</strong> by introducing state-of-the-art model specialization and selection algorithms.</p>
+  </li>
+</ul>
+
+<h2 id="architecture">Architecture</h2>
+
+<p>EVA consists of four core components:</p>
+
+<ul>
+  <li>EVAQL Query Parser</li>
+  <li>Query Optimizer</li>
+  <li>Query Execution Engine (Filters + Deep Learning Models)</li>
+  <li>Distributed Storage Engine</li>
+</ul>
+
+<h2 id="contributing">Contributing</h2>
+
+<p>To file a bug or request a feature, please file a GitHub issue. Pull requests are welcome.</p>
+
+<h2 id="contributors">Contributors</h2>
+
+<p>See the <a href="https://github.com/georgia-tech-db/eva/graphs/contributors">people page</a> for the full listing of contributors.</p>
+
+<h2 id="license">License</h2>
+<p>Copyright (c) 2018-2020 <a href="http://db.cc.gatech.edu/">Georgia Tech Database Group</a>
+Licensed under the <a href="/eva/LICENSE">Apache License</a>.</p>
+
+
+      </section>
+    </div>
+    <script src="/eva/assets/js/scale.fix.js"></script>
+  </body>
+</html>
