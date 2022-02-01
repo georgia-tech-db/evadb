@@ -23,8 +23,8 @@ title: EVA
 blank: 
 description: Visual data management system. Features include declarative query language, storage management, deep learning, and hardware acceleration. Developed at Georgia Institute of Technology.
 
-baseurl: "/Trial" # the subpath of your site, e.g. /blog
-url: "edgahab.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/eva" # the subpath of your site, e.g. /blog
+url: "https://georgia-tech-db.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 show_downloads: true
 google_analytics: EVA
