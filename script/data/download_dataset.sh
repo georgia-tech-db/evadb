@@ -7,18 +7,18 @@ DATASET_NAME=$1
 SCRIPT_PATH=$(dirname "$0")
 
 # compute dataset path relative to script path
-DATASET_PATH=$SCRIPT_PATH/../../data/datasets
+DATASET_PATH=$HOME/.eva/data/datasets
 
 # check if the datasets folder exists, if not create it
 if [ ! -d "$DATASET_PATH" ]; then
-    mkdir $DATASET_PATH
+    mkdir -p $DATASET_PATH
 fi
 
 echo "Downloading dataset ${DATASET_NAME} into ${DATASET_PATH}"
 
 # check if the dataset folder already exists
 if [ -d "${DATASET_PATH}/${DATASET_NAME}" ]; then
-    echo "Dataset folder already exists"
+    echo "Dataset already exists"
 else
     # execute the python script to download the dataset
     python3 $SCRIPT_PATH/download_file.py $DATASET_NAME 

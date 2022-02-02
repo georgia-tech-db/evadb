@@ -7,11 +7,11 @@ MODEL_NAME=$1
 SCRIPT_PATH=$(dirname "$0")
 
 # compute model path relative to script path
-MODEL_PATH=$SCRIPT_PATH/../../data/models
+MODEL_PATH=$HOME/.eva/data/models
 
 # check if the models folder exists, if not create it
 if [ ! -d "$MODEL_PATH" ]; then
-    mkdir $MODEL_PATH
+    mkdir -p $MODEL_PATH
 fi
 
 echo "Downloading model ${MODEL_NAME} into ${MODEL_PATH}"
