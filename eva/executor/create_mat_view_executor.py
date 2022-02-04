@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.catalog.catalog_manager import CatalogManager
-from src.planner.create_mat_view_plan import CreateMaterializedViewPlan
-from src.planner.types import PlanOprType
-from src.executor.abstract_executor import AbstractExecutor
-from src.utils.generic_utils import generate_file_path
-from src.storage.storage_engine import StorageEngine
-from src.expression.abstract_expression import ExpressionType
+from eva.catalog.catalog_manager import CatalogManager
+from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.planner.types import PlanOprType
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.utils.generic_utils import generate_file_path
+from eva.storage.storage_engine import StorageEngine
+from eva.expression.abstract_expression import ExpressionType
 
-from src.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class CreateMaterializedViewExecutor(AbstractExecutor):

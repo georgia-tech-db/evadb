@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from src.planner.abstract_plan import AbstractPlan
-from src.planner.types import PlanOprType
-from src.parser.table_ref import TableRef
-from src.parser.create_statement import ColumnDefinition
+from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
+from eva.parser.table_ref import TableRef
+from eva.parser.create_statement import ColumnDefinition
 
 from typing import List
 

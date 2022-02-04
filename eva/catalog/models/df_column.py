@@ -20,8 +20,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 from ast import literal_eval
 
-from src.catalog.column_type import ColumnType, Dimension, NdArrayType
-from src.catalog.models.base_model import BaseModel
+from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
+from eva.catalog.models.base_model import BaseModel
 
 
 class DataFrameColumn(BaseModel):

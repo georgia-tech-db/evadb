@@ -15,9 +15,9 @@
 import unittest
 import pandas as pd
 
-from src.catalog.catalog_manager import CatalogManager
-from src.models.storage.batch import Batch
-from src.server.command_handler import execute_query_fetch_all
+from eva.catalog.catalog_manager import CatalogManager
+from eva.models.storage.batch import Batch
+from eva.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, file_remove, \
     copy_sample_video_to_prefix, load_inbuilt_udfs
 from test.util import DummyObjectDetector
@@ -92,7 +92,7 @@ class MaterializedViewTest(unittest.TestCase):
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
-                  IMPL  'src/udfs/fastrcnn_object_detector.py';
+                  IMPL  'eva/udfs/fastrcnn_object_detector.py';
         """
         execute_query_fetch_all(create_udf_query)
 
