@@ -14,10 +14,11 @@
 # limitations under the License.
 
 from eva.parser.statement import AbstractStatement
-
+from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.types import StatementType
 from eva.parser.table_ref import TableRef
 from pathlib import Path
+from typing import List
 
 
 class LoadDataStatement(AbstractStatement):
@@ -29,14 +30,20 @@ class LoadDataStatement(AbstractStatement):
     path (str): path from where data needs to be loaded
     """
 
-    def __init__(self, table: TableRef, path: str):
+    def __init__(self, 
+                 table: TableRef,
+                 path: str,
+                 column_list: List[AbstractExpression] = None,
+                 file_options: dict = None):
         super().__init__(StatementType.LOAD_DATA)
         self._table = table
         self._path = Path(path)
+        self._column_list = column_list
+        self._file_options = file_options
 
     def __str__(self) -> str:
-        print_str = "LOAD DATA INFILE {} INTO {}".format(
-            self._path.name, self._table)
+        print_str = "LOAD DATA INFILE {} INTO {}({})".format(
+            self._path.name, self._table, self._column_list)
         return print_str
 
     @property
@@ -47,8 +54,18 @@ class LoadDataStatement(AbstractStatement):
     def path(self) -> Path:
         return self._path
 
+    @property
+    def column_list(self) -> List[AbstractExpression]:
+        return self._column_list
+
+    @property
+    def file_options(self) -> dict:
+        return self._file_options
+
     def __eq__(self, other):
         if not isinstance(other, LoadDataStatement):
             return False
         return (self.table == other.table
-                and self.path == other.path)
+                and self.path == other.path
+                and self.column_list == other.column_list
+                and self.file_options == other.file_options)

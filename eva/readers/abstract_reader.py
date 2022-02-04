@@ -52,7 +52,10 @@ class AbstractReader(metaclass=ABCMeta):
         row_size = None
         for data in self._read():
             if row_size is None:
-                row_size = data['data'].nbytes
+                if 'data' in data:
+                    row_size = data['data'].nbytes
+                else:
+                    row_size = 1
             data_batch.append(data)
             if len(data_batch) * row_size >= self.batch_mem_size:
                 yield Batch(pd.DataFrame(data_batch))

@@ -12,10 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 from pathlib import Path
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from typing import List
 
 
 class LoadDataPlan(AbstractPlan):
@@ -30,12 +32,16 @@ class LoadDataPlan(AbstractPlan):
         """
 
     def __init__(self,
-                 table_metainfo: DataFrameMetadata,
-                 file_path: Path, batch_mem_size: int):
+                 table_metainfo: DataFrameMetadata, file_path: Path,
+                 batch_mem_size: int,
+                 column_list: List[AbstractExpression] = None,
+                 file_options: dict = None):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
         self._file_path = file_path
         self._batch_mem_size = batch_mem_size
+        self._column_list = column_list
+        self._file_options = file_options
 
     @property
     def table_metainfo(self):
@@ -49,9 +55,21 @@ class LoadDataPlan(AbstractPlan):
     def batch_mem_size(self):
         return self._batch_mem_size
 
+    @property
+    def column_list(self):
+        return self._column_list
+
+    @property
+    def file_options(self):
+        return self._file_options
+
     def __str__(self):
         print_str = 'LoadDataPlan(table_id={}, file_path={}, \
-            batch_mem_size={})'.format(self.table_metainfo,
-                                       self.file_path,
-                                       self.batch_mem_size)
+            batch_mem_size={}, \
+            column_list={}, \
+            file_options={})'.format(self.table_metainfo,
+                                     self.file_path,
+                                     self.batch_mem_size,
+                                     self.column_list,
+                                     self.file_options)
         return print_str
