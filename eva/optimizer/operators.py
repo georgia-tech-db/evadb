@@ -43,6 +43,7 @@ class OperatorType(IntEnum):
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
     LOGICALDELIMITER = auto()
+    LOGICAL_APPLY_BLUR = auto()
 
 
 class Operator:
@@ -515,3 +516,11 @@ class LogicalUpload(Operator):
         return (is_subtree_equal
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
+
+
+class LogicalApplyBlur(Operator):
+    def __init__(self, children=None):
+        super().__init__(OperatorType.LOGICAL_APPLY_BLUR, children)
+    
+    def __eq__(self, other):
+        return True

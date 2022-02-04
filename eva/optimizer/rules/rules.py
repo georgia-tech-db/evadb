@@ -27,7 +27,7 @@ from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalApplyBlur)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.insert_plan import InsertPlan
@@ -39,6 +39,7 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.sample_plan import SamplePlan
+from eva.planner.apply_blur_plan import ApplyBlurPlan
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -71,6 +72,7 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_APPLY_BLUR_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -92,6 +94,7 @@ class Promise(IntEnum):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_APPLY_BLUR_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # REWRITE RULES
