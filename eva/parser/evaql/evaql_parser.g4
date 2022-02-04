@@ -31,7 +31,7 @@ ddlStatement
 
 dmlStatement
     : selectStatement | insertStatement | updateStatement
-    | deleteStatement | loadStatement | uploadStatement
+    | deleteStatement | loadStatement | uploadStatement | applyBlur
     ;
 
 utilityStatement
@@ -185,6 +185,11 @@ insertStatementValue
 
 updatedElement
     : fullColumnName '=' (expression | DEFAULT)
+    ;
+
+applyBlur
+    : APPLY_BLUR AS
+    selectStatement
     ;
 
 

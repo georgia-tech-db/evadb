@@ -97,6 +97,7 @@ HASH:                                'HASH';
 
 OBJECT_DETECTION:                    'OBJECT_DETECTION';
 ACTION_CLASSICATION:                 'ACTION_CLASSICATION';
+APPLY_BLUR:                          'APPLY_BLUR';
 
 // DATA TYPE Keywords
 
