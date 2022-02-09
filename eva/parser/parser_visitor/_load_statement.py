@@ -18,11 +18,28 @@ from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
 
 from eva.parser.table_ref import TableRef
+from eva.parser.types import FileFormatType
 
 
 class Load(evaql_parserVisitor):
     def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):
         file_path = self.visit(ctx.fileName()).value
         table = TableRef(self.visit(ctx.tableName()))
-        stmt = LoadDataStatement(table, file_path)
+
+        # Set defualt as Video
+        file_format = FileFormatType.VIDEO
+        other_options = None
+        if ctx.fileOptions():
+            file_format, other_options = self.visit(ctx.fileOptions())
+        stmt = LoadDataStatement(table, file_path, file_format, other_options)
         return stmt
+
+    def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
+        file_format = FileFormatType.VIDEO
+        # Grab the file format
+        if ctx.fileFormat == evaql_parser.CSV:
+            file_format = FileFormatType.CSV
+
+        # parse and add more file options in future
+        other_options = None
+        return file_format, other_options

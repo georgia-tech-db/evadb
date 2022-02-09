@@ -18,6 +18,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.types import StatementType
 from eva.parser.table_ref import TableRef
 from pathlib import Path
+from eva.parser.types import FileFormatType
 
 
 class LoadDataStatement(AbstractStatement):
@@ -29,10 +30,15 @@ class LoadDataStatement(AbstractStatement):
     path (str): path from where data needs to be loaded
     """
 
-    def __init__(self, table: TableRef, path: str):
+    def __init__(self, table: TableRef,
+                 path: str,
+                 file_format: FileFormatType,
+                 file_options: dict = None):
         super().__init__(StatementType.LOAD_DATA)
         self._table = table
         self._path = Path(path)
+        self._file_format = file_format
+        self._file_options = file_options
 
     def __str__(self) -> str:
         print_str = "LOAD DATA INFILE {} INTO {}".format(
@@ -47,8 +53,18 @@ class LoadDataStatement(AbstractStatement):
     def path(self) -> Path:
         return self._path
 
+    @property
+    def file_format(self) -> FileFormatType:
+        return self._file_format
+
+    @property
+    def file_options(self) -> dict:
+        return self._file_options
+
     def __eq__(self, other):
         if not isinstance(other, LoadDataStatement):
             return False
         return (self.table == other.table
-                and self.path == other.path)
+                and self.path == other.path
+                and self.file_format == other.file_format
+                and self.file_options == other.file_options)

@@ -154,10 +154,16 @@ updateStatement
     : singleUpdateStatement
     ;
 
+
 loadStatement
     : LOAD DATA
       INFILE fileName
       INTO tableName
+      (WITH fileOptions)?
+    ;
+
+fileOptions
+    : FORMAT fileFormat=(CSV|VIDEO)
     ;
 
 uploadStatement
