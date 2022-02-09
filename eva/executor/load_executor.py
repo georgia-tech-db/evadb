@@ -16,13 +16,11 @@
 import os
 import pandas as pd
 
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import StorageEngine
-from eva.readers.opencv_reader import OpenCVReader
-from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
-
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.load_meta_executor import LoadMetaExecutor
+from eva.executor.load_video_executor import LoadVideoExecutor
+from eva.planner.load_data_plan import LoadDataPlan
 
 class LoadDataExecutor(AbstractExecutor):
 
@@ -36,26 +34,24 @@ class LoadDataExecutor(AbstractExecutor):
 
     def exec(self):
         """
-        Read the input video using opencv and persist data
-        using storage engine
+        Use TYPE to determine the type of data to load. 
         """
+        
+        print(f"AbstractLoadDataExecutor: inside exec")
 
-        # videos are persisted using (id, data) schema where id = frame_id
-        # and data = frame_data. Current logic supports loading a video into
-        # storage with the assumption that frame_id starts from 0. In case
-        # we want to append to the existing store we have to figure out the
-        # correct frame_id. It can also be a parameter based by the user.
+        # TODO: Currently using file extension to decide which executor to invoke. Figure out how to get TYPE from the query
+        video_exts = ['.mp4']
+        meta_exts = ['.csv']
+        file_ext = os.path.splitext(self.node.file_path)[1]
 
-        # We currently use create to empty existing table.
-        StorageEngine.create(self.node.table_metainfo)
-        num_loaded_frames = 0
-        video_reader = OpenCVReader(
-            os.path.join(self.path_prefix, self.node.file_path),
-            batch_mem_size=self.node.batch_mem_size)
-        for batch in video_reader.read():
-            StorageEngine.write(self.node.table_metainfo, batch)
-            num_loaded_frames += len(batch)
+        # invoke the appropriate executor
+        if file_ext in meta_exts:
+            executor = LoadMetaExecutor(self.node)
+        elif file_ext in video_exts:
+            executor = LoadVideoExecutor(self.node)
 
-        yield Batch(pd.DataFrame({'Video': str(self.node.file_path),
-                                  'Num Loaded Frames': num_loaded_frames},
-                                 index=[0]))
+        # for each batch, exec the executor
+        for batch in executor.exec():
+            yield batch
+
+
