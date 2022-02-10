@@ -14,13 +14,13 @@
 # limitations under the License.
 import unittest
 
-from src.expression.abstract_expression import ExpressionType
-from src.expression.comparison_expression import ComparisonExpression
-from src.expression.constant_value_expression import ConstantValueExpression
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.aggregation_expression import AggregationExpression
-from src.expression.function_expression import FunctionExpression
-from src.expression.logical_expression import LogicalExpression
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.aggregation_expression import AggregationExpression
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.logical_expression import LogicalExpression
 
 
 class ExpressionEvaluationTest(unittest.TestCase):

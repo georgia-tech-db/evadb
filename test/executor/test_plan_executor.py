@@ -17,24 +17,24 @@ import pandas as pd
 
 from unittest.mock import patch, MagicMock
 
-from src.catalog.models.df_metadata import DataFrameMetadata
-from src.executor.plan_executor import PlanExecutor
-from src.models.storage.batch import Batch
-from src.planner.seq_scan_plan import SeqScanPlan
-from src.planner.storage_plan import StoragePlan
-from src.planner.pp_plan import PPScanPlan
-from src.planner.insert_plan import InsertPlan
-from src.planner.create_plan import CreatePlan
-from src.planner.create_udf_plan import CreateUDFPlan
-from src.planner.load_data_plan import LoadDataPlan
-from src.planner.upload_plan import UploadPlan
-from src.executor.load_executor import LoadDataExecutor
-from src.executor.upload_executor import UploadExecutor
-from src.executor.seq_scan_executor import SequentialScanExecutor
-from src.executor.create_executor import CreateExecutor
-from src.executor.create_udf_executor import CreateUDFExecutor
-from src.executor.insert_executor import InsertExecutor
-from src.executor.pp_executor import PPExecutor
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.executor.plan_executor import PlanExecutor
+from eva.models.storage.batch import Batch
+from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.planner.storage_plan import StoragePlan
+from eva.planner.pp_plan import PPScanPlan
+from eva.planner.insert_plan import InsertPlan
+from eva.planner.create_plan import CreatePlan
+from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.planner.upload_plan import UploadPlan
+from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.upload_executor import UploadExecutor
+from eva.executor.seq_scan_executor import SequentialScanExecutor
+from eva.executor.create_executor import CreateExecutor
+from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.insert_executor import InsertExecutor
+from eva.executor.pp_executor import PPExecutor
 
 
 class PlanExecutorTest(unittest.TestCase):
@@ -116,8 +116,8 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, UploadExecutor)
 
-    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_seq_scan_plan(
             self, mock_clean, mock_build):
 
@@ -138,8 +138,8 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_pp_scan_plan(
             self, mock_clean, mock_build):
 
@@ -159,8 +159,8 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch('src.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('src.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
+    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
     def test_execute_plan_for_create_insert_load_upload_plans(
             self, mock_clean, mock_build):
 
@@ -218,7 +218,7 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, [])
 
     @unittest.skip("disk_based_storage_depricated")
-    @patch('src.executor.disk_based_storage_executor.Loader')
+    @patch('eva.executor.disk_based_storage_executor.Loader')
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value
 

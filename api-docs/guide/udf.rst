@@ -14,9 +14,9 @@ Introduction to UDFs
 Implementing your own UDF
 -------
 
-    During each step you can use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/src/udfs/fastrcnn_object_detector.py>`_  as reference. 
+    During each step you can use `this UDF implementation <https://github.com/georgia-tech-db/eva/blob/master/eva/udfs/fastrcnn_object_detector.py>`_  as reference. 
     
-    1. Create a new file under `udfs/` and give it a descriptive name. eg: `fastrcnn_object_detector.py`, `midas_depth_estimator.py`. (Note that, UDFs packaged along with EVA are present inside `src/udfs/`)
+    1. Create a new file under `udfs/` and give it a descriptive name. eg: `fastrcnn_object_detector.py`, `midas_depth_estimator.py`. (Note that, UDFs packaged along with EVA are present inside `eva/udfs/`)
     
     2. Here, you need to create and implement a class that derives from `PytorchAbstractUDF`.  
 
@@ -122,7 +122,7 @@ Now that you have implemented your UDF we need to register it into EVA and execu
                 OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                         scores NDARRAY FLOAT32(ANYDIM))
                 TYPE  Classification
-                IMPL  'src/udfs/fastrcnn_object_detector.py';    
+                IMPL  'eva/udfs/fastrcnn_object_detector.py';    
 
         * Input is a frame of type NDARRAY with shape (3, ANYDIM, ANYDIM). 3 channels and any width or height. 
         * We return 3 variables for this UDF:

@@ -16,7 +16,7 @@ from unittest import TestCase
 
 from mock import patch
 from mock import MagicMock
-from src.catalog.services.udf_io_service import UdfIOService
+from eva.catalog.services.udf_io_service import UdfIOService
 
 UDF_TYPE = 'classification'
 UDF_IMPL_PATH = 'file1'
@@ -26,7 +26,7 @@ UDF_ID = 123
 
 class UdfServiceTest(TestCase):
 
-    @patch("src.catalog.services.udf_io_service.UdfIO")
+    @patch("eva.catalog.services.udf_io_service.UdfIO")
     def test_get_inputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOService()
 
@@ -40,7 +40,7 @@ class UdfServiceTest(TestCase):
             return_value.all.return_value
         self.assertEqual(actual, expected)
 
-    @patch('src.catalog.services.udf_io_service.UdfIO')
+    @patch('eva.catalog.services.udf_io_service.UdfIO')
     def test_get_outputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOService()
 

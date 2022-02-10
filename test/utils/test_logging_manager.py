@@ -14,8 +14,8 @@
 # limitations under the License.
 import unittest
 
-from src.utils.logging_manager import LoggingManager
-from src.utils.logging_manager import LoggingLevel
+from eva.utils.logging_manager import LoggingManager
+from eva.utils.logging_manager import LoggingLevel
 
 
 class LoggingManagerTests(unittest.TestCase):

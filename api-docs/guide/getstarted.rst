@@ -5,29 +5,32 @@ Get Started
 
 Installation
 -------
-If you haven't installed EVA yet, you can do so by following instructions `given here <https://github.com/georgia-tech-db/eva#installation>`_
+EVA requires Python 3.7 or later. To install EVA, we recommend using pip::
+
+    pip install evadb
+
 
 Running EVA Server
 -------
-EVA runs as a client-server architecture. So you need to start the server before you can connect to it via various interfaces::
+EVA runs as a client server architecture. So you need to start the server before you can connect to it via various interfaces:::
 
-    python eva.py
+    eva_server
 
 Querying EVA
 -------
 
 - Querying Via Command Line::
 
-You can use the CLI of EVA to do some quick testing or verifying if the installation was succesful::
+EVA offers a CLI interface to query the server for quick testing and debugging::
 
-    python eva_cmd_client.py
+    eva_client
     >>> UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
     >>> LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
     >>> SELECT id, data FROM MyVideo WHERE id < 5
 
-- Experimenting With Jupyter Notebook::
+- From Python/Jupyter Code::
 
-You can connect to the EVA server via a Jupyter Notebook as well, just copy paste the following snipped::
+EVA also provides an API to connect to the server using Python code::
 
     from src.server.db_api import connect
     import nest_asyncio
@@ -39,3 +42,5 @@ Once the connection is established, you can run queries using the cursor::
 
     cursor.execute("""SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo""")
     response = cursor.fetch_all()
+
+- A sample jupyter notebook the performs object detection using EVA can be found `here <https://github.com/georgia-tech-db/eva/blob/master/tutorials/object_detection.ipynb>`_.
