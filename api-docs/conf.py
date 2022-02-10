@@ -36,6 +36,7 @@ release = '0.0.1'
 master_doc = 'index'
 
 # html_theme = 'mps'
+
 html_sidebars = {
     '**': ['localtoc.html', 'relations.html', 'links.html', 'contact.html'],
 }
@@ -88,35 +89,51 @@ autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
                         "sqlalchemy.orm", "sqlalchemy.orm.exc",
                         "sqlalchemy.types",
                         "petastorm", "yaml", "pyspark", "torch",
-                        "pandas", "cv2"]
+                        "pandas", "cv2", "src.catalog"]
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-# html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_book_theme"
 
-# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-# html_theme_path = ['themes']
+# Theme options are theme-specific and customize the look and feel of a theme
+# further.  For a list of options available for each theme, see the
+# documentation.
+html_theme_options = {
+    "repository_url": "https://github.com/georgia-tech-db/Eva",
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_edit_page_button": True,
+    "path_to_docs": "api-docs",
+    "home_page_in_toc": True,
+    "show_navbar_depth": 0,
+}
 
+# Add any paths that contain custom themes here, relative to this directory.
+# html_theme_path = []
 
-# on_rtd is whether on readthedocs.org,
-# this line of code grabbed from docs.readthedocs.org...
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-# html_static_path = ['_static']
+html_static_path = ['_static']
+
+autodoc_default_flags = ['members', 'private-members', 'special-members',
+                         # 'undoc-members',
+                         'show-inheritance']
 
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
-    return False
+    # Ref: https://stackoverflow.com/a/21449475/
+    exclusions = ('__weakref__',  # special-members
+                  '__doc__', '__module__', '__dict__',  # undoc-members
+                  )
+    exclude = name in exclusions
+    return True if exclude else None
 
 
 def setup(app):
     app.connect('autodoc-skip-member', autodoc_skip_member)
+    app.add_css_file('custom.css')
