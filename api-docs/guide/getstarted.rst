@@ -32,7 +32,7 @@ EVA offers a CLI interface to query the server for quick testing and debugging::
 
 EVA also provides an API to connect to the server using Python code::
 
-    from src.server.db_api import connect
+    from eva.server.db_api import connect
     import nest_asyncio
     nest_asyncio.apply()
     connection = connect(host = '0.0.0.0', port = 5432) # hostname, port of the server where EVADB is running

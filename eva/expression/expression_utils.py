@@ -14,10 +14,10 @@
 # limitations under the License.
 from typing import List
 
-from src.expression.abstract_expression import AbstractExpression, ExpressionType
-from src.expression.tuple_value_expression import TupleValueExpression
-from src.expression.logical_expression import LogicalExpression
-from src.catalog.models.df_column import DataFrameColumn
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.logical_expression import LogicalExpression
+from eva.catalog.models.df_column import DataFrameColumn
 
 
 def get_columns_in_predicate(expr: AbstractExpression) -> List[DataFrameColumn]:
