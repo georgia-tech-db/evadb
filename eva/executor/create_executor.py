@@ -35,17 +35,20 @@ class CreateExecutor(AbstractExecutor):
         Calls the storage to create a spark dataframe from the metadata object.
         """
 
-        print(f"CreateExecutor: inside exec")
-        print(f"CreateExecutor: dir(node) = {dir(self.node)}")
-        print(f"CreateExecutor: node.if_not_exists = {self.node.if_not_exists}")
-
-        # TODO: Disabling the below code for now. Check what actually needs to be done here.
-        '''
         if (self.node.if_not_exists):
-            # check catalog if we already have this table
-            return
-        '''
+            
+            # check if the table exists
+            catalog_manager = CatalogManager()
 
+            # TODO: Due to the way get_table_bindings is written, an error will be logged here if the table does not exist. 
+            # But that is okay, since we are just checking if the table exists. 
+            metadata_id, column_id = catalog_manager.get_table_bindings("eva_catalog", self.node.video_ref.table_name)
+
+            # if the table exists, return
+            if metadata_id is not None:
+                return
+
+        # TODO: I had to comment out the following line because it was causing an error. table_name is in video_ref, and not in table_info.
         #table_name = self.node.video_ref.table_info.table_name
         table_name = self.node.video_ref.table_name
         file_url = str(generate_file_path(table_name))
