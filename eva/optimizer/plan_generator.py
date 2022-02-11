@@ -18,6 +18,8 @@ from eva.optimizer.optimizer_tasks import (
     TopDownRewrite, OptimizeGroup, BottomUpRewrite)
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.property import PropertyType
+from eva.planner.hash_join_build_plan import HashJoinBuildPlan
+from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 
 
 class PlanGenerator:
@@ -43,6 +45,16 @@ class PlanGenerator:
                 child_grp_id, optimizer_context)
             physical_plan.append_child(child_plan)
 
+        #          HashJoinProbePlan                       HashJoinProbePlan
+        #          /           \     ->                  /               \
+        #        P1             P2        HashJoinBuildPlan               P2
+        #                                              /
+        #                                            P1
+        if (type(physical_plan) == HashJoinProbePlan):
+            build_plan = HashJoinBuildPlan(physical_plan.join_type,[])
+            build_plan.append_child(physical_plan.children[0])
+            physical_plan._children[0] = build_plan
+        
         return physical_plan
 
     def optimize(self, logical_plan: Operator):

@@ -17,17 +17,19 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, auto, IntEnum
 from typing import TYPE_CHECKING
+from eva.catalog.models.df_metadata import DataFrameMetadata
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
+from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.operators import OperatorType, Operator
 from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalJoin, LogicalFunctionScan)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.insert_plan import InsertPlan
@@ -39,6 +41,9 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.sample_plan import SamplePlan
+from eva.planner.lateral_join_build_plan import LateralJoinBuildPlan
+from eva.planner.hash_join_probe_plan import HashJoinProbePlan
+from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -56,6 +61,8 @@ class RuleType(Flag):
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
+    PUSHDOWN_PROJECT_THROUGH_JOIN = auto()
 
     REWRITE_DELIMETER = auto()
 
@@ -71,6 +78,8 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_JOIN_TO_PHYSICAL = auto()
+    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -92,6 +101,8 @@ class Promise(IntEnum):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_JOIN_TO_PHYSICAL = auto()
+    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # REWRITE RULES
@@ -101,7 +112,8 @@ class Promise(IntEnum):
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
-
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
+    PUSHDOWN_PROJECT_THROUGH_JOIN = auto()
 
 class Rule(ABC):
     """Base class to define any optimization rule
@@ -324,6 +336,49 @@ class PushdownProjectThroughSample(Rule):
         logical_get.target_list = before.target_list
         return sample
 
+class PushdownProjectThroughJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern_join = Pattern(OperatorType.LOGICALJOIN)
+        pattern_join_left = Pattern(OperatorType.DUMMY)
+        pattern_join_right = Pattern(OperatorType.DUMMY)
+        pattern_join.append_child(pattern_join_left)
+        pattern_join.append_child(pattern_join_right)
+        pattern.append_child(pattern_join)
+        super().__init__(RuleType.PUSHDOWN_PROJECT_THROUGH_JOIN, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_PROJECT_THROUGH_JOIN
+    
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+    
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        join = before.children[0]
+        join.target_list = before.target_list 
+        return join 
+
+class PushdownFilterThroughJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern_join = Pattern(OperatorType.LOGICALJOIN)
+        pattern_join_left = Pattern(OperatorType.DUMMY)
+        pattern_join_right = Pattern(OperatorType.DUMMY)
+        pattern_join.append_child(pattern_join_left)
+        pattern_join.append_child(pattern_join_right)
+        pattern.append_child(pattern_join)
+        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
+    
+    def promise(self):
+        return Promise.PUSHDOWN_FILTER_THROUGH_JOIN
+    
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+    
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        join = before.children[0]
+        join.predicate = before.predicate
+        return join
 
 # REWRITE RULES END
 ##############################################
@@ -549,6 +604,61 @@ class LogicalLimitToPhysical(Rule):
         after = LimitPlan(before.limit_count)
         return after
 
+class LogicalFunctionScanToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFUNCTIONSCAN)
+        super().__init__(RuleType.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL
+    
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+    
+    def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
+        after = FunctionScanPlan(before.func_expr)
+        return after  
+
+class LogicalJoinToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL, pattern)
+    
+    def promise(self):
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL
+    
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+    
+    def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
+        cols = set()
+        for col in dataset_metadata.columns:
+            if not col.array_type:
+                cols.add(col.name)
+        return cols 
+    
+    def extract_join_keys(self, join_node: LogicalJoin):
+        left_table_metadata = join_node.lhs().dataset_metadata
+        left_columns = self.get_columns_of_table(left_table_metadata)
+        right_table_metadata = join_node.rhs().dataset_metadata
+        right_columns = self.get_columns_of_table(right_table_metadata)
+        return left_columns.intersection(right_columns)
+    
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        if join_node.join_type == JoinType.LATERAL_JOIN:
+            lateral_join_plan = LateralJoinBuildPlan(join_node.join_type, 
+                                                     [],
+                                                     join_node.predicate,
+                                                     join_node.target_list)
+            return lateral_join_plan
+        elif join_node.join_type == JoinType.HASH_JOIN:
+            probe_side = HashJoinProbePlan(join_node.join_type,
+                                           self.extract_join_keys(join_node),
+                                           join_node.predicate,
+                                           join_node.target_list)
+            return probe_side  
 
 # IMPLEMENTATION RULES END
 ##############################################
@@ -571,7 +681,9 @@ class RulesManager:
             EmbedFilterIntoDerivedGet(),
             EmbedProjectIntoDerivedGet(),
             PushdownFilterThroughSample(),
-            PushdownProjectThroughSample()
+            PushdownProjectThroughSample(),
+            PushdownFilterThroughJoin(),
+            PushdownProjectThroughJoin()
         ]
 
         self._implementation_rules = [
@@ -585,7 +697,9 @@ class RulesManager:
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()
+            LogicalLimitToPhysical(),
+            LogicalJoinToPhysical(),
+            LogicalFunctionScanToPhysical()
         ]
 
     @property

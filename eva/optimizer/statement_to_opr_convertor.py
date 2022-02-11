@@ -19,7 +19,8 @@ from eva.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
-                                     LogicalLimit, LogicalSample)
+                                     LogicalLimit, LogicalSample,
+                                     LogicalFunctionScan, LogicalJoin)
 from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
@@ -48,22 +49,36 @@ class StatementToPlanConvertor:
             self._column_map[column.name.lower()] = column
 
     def visit_table_ref(self, table_ref: TableRef):
-        """Bind table ref object and convert to Logical get operator
+        """Bind table ref object and convert to LogicalGet, LogicalJoin,
+            LogicalFunctionScan, or LogicalQueryDerivedGet
 
         Arguments:
-            table {TableRef} -- [Input table ref object created by the parser]
+            table {TableRef} - - [Input table ref object created by the parser]
         """
+        if table_ref.is_table_atom():
+            catalog_vid_metadata = bind_dataset(table_ref.table)
+            self._populate_column_map(catalog_vid_metadata)
+            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
+
+        if table_ref.is_func_expr():
+            bind_columns_expr([table_ref.table], self._column_map)
+            self._plan = LogicalFunctionScan(func_expr=table_ref.table)
+
         if table_ref.is_select():
             # NestedQuery
             self.visit_select(table_ref.table)
             child_plan = self._plan
             self._plan = LogicalQueryDerivedGet()
             self._plan.append_child(child_plan)
-        else:
-            # Table
-            catalog_vid_metadata = bind_dataset(table_ref.table)
-            self._populate_column_map(catalog_vid_metadata)
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
+
+        if table_ref.is_join():
+            join_plan = LogicalJoin(join_type=table_ref.table.join_type,
+                                    join_predicate=table_ref.table.predicate)
+            self.visit_table_ref(table_ref.table.left)
+            join_plan.append_child(self._plan)
+            self.visit_table_ref(table_ref.table.right)
+            join_plan.append_child(self._plan)
+            self._plan = join_plan
 
         if table_ref.sample_freq:
             self._visit_sample(table_ref.sample_freq)
@@ -72,7 +87,7 @@ class StatementToPlanConvertor:
         """converter for select statement
 
         Arguments:
-            statement {SelectStatement} -- [input select statement]
+            statement {SelectStatement} - - [input select statement]
         """
 
         table_ref = statement.from_table
@@ -150,7 +165,7 @@ class StatementToPlanConvertor:
         """Converter for parsed insert statement
 
         Arguments:
-            statement {AbstractStatement} -- [input insert statement]
+            statement {AbstractStatement} - - [input insert statement]
         """
         # Bind the table reference
         table_ref = statement.table
@@ -178,7 +193,7 @@ class StatementToPlanConvertor:
         """Convertor for parsed insert Statement
 
         Arguments:
-            statement {AbstractStatement} -- [Create statement]
+            statement {AbstractStatement} - - [Create statement]
         """
         video_ref = statement.table_ref
         if video_ref is None:
@@ -196,7 +211,7 @@ class StatementToPlanConvertor:
         """Convertor for parsed create udf statement
 
         Arguments:
-            statement {CreateUDFStatement} -- Create UDF Statement
+            statement {CreateUDFStatement} - - Create UDF Statement
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
         annotated_outputs = column_definition_to_udf_io(
@@ -241,7 +256,7 @@ class StatementToPlanConvertor:
            The logic is hidden from client.
 
         Arguments:
-            statement {AbstractStatement} -- [Input statement]
+            statement {AbstractStatement} - - [Input statement]
         """
         if isinstance(statement, SelectStatement):
             self.visit_select(statement)

@@ -12,34 +12,40 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique
+from enum import Enum, unique, auto
 
 
-class ColumnConstraintEnum(IntEnum):
-    NULLNOTNULL = 1
-    DEFAULT = 2
-    PRIMARY = 3
-    UNIQUE = 4
+class ColumnConstraintEnum(Enum):
+    NULLNOTNULL = auto()
+    DEFAULT = auto()
+    PRIMARY = auto()
+    UNIQUE = auto()
 
 
 @unique
-class StatementType(IntEnum):
+class StatementType(Enum):
     """
     Manages enums for all the sql-like statements supported
     """
-    SELECT = 1,
-    CREATE = 2,
-    INSERT = 3,
-    CREATE_UDF = 4,
-    LOAD_DATA = 5,
-    UPLOAD = 6,
+    SELECT = auto(),
+    CREATE = auto(),
+    INSERT = auto(),
+    CREATE_UDF = auto(),
+    LOAD_DATA = auto(),
+    UPLOAD = auto(),
     # add other types
 
 
 @unique
-class ParserOrderBySortType(IntEnum):
+class ParserOrderBySortType(Enum):
     """
     Manages enums for all order by sort types
     """
-    ASC = 1
-    DESC = 2
+    ASC = auto()
+    DESC = auto()
+
+
+@unique
+class JoinType(Enum):
+    LATERAL_JOIN = auto()
+    HASH_JOIN = auto()

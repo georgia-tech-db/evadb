@@ -14,14 +14,15 @@
 # limitations under the License.
 from enum import IntEnum, auto
 from typing import List
+from pathlib import Path
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.table_ref import TableRef
+from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.udf_io import UdfIO
-from pathlib import Path
 
 
 class OperatorType(IntEnum):
@@ -42,6 +43,8 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
+    LOGICALJOIN = auto()
+    LOGICALFUNCTIONSCAN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -515,3 +518,105 @@ class LogicalUpload(Operator):
         return (is_subtree_equal
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
+
+class LogicalFunctionScan(Operator):
+    """
+    Logical node for function table scans
+
+    Attributes:
+        func_expr: AbstractExpression
+            function_expression that yield a table like output
+    """
+
+    def __init__(self,
+                 func_expr: AbstractExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICAL_FUNCTION_SCAN, children)
+        self._func_expr = func_expr
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFunctionScan):
+            return False
+        return (is_subtree_equal
+                and self.func_expr == other.func_expr)
+
+class LogicalJoin(Operator):
+    """
+    Logical node for join operators
+
+    Attributes:
+        join_type: JoinType
+            Join type provided by the user - Lateral, Inner, Outer
+        join_predicate: AbstractExpression
+            condition/predicate expression used to join the tables
+    """
+
+    def __init__(self,
+                 join_type: JoinType,
+                 join_predicate: AbstractExpression = None,
+                 left_keys: List[DataFrameColumn] = None,
+                 right_keys: List[DataFrameColumn] = None,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALJOIN, children)
+        self._join_type = join_type
+        self._predicate = join_predicate
+        self._left_keys = left_keys
+        self._right_keys = right_keys
+        self._target_list = None
+
+    @property
+    def join_type(self):
+        return self._join_type
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    @predicate.setter
+    def predicate(self, predicate):
+        self._predicate = predicate
+
+    @property
+    def left_keys(self):
+        return self._left_keys
+
+    @left_keys.setter
+    def left_keys(self, keys):
+        self._left_key = keys
+
+    @property
+    def right_keys(self):
+        return self._right_keys
+
+    @right_keys.setter
+    def right_keys(self, keys):
+        self._right_keys = keys
+
+    @property
+    def target_list(self):
+        return self._target_list
+
+    @target_list.setter
+    def target_list(self, target_list):
+        self._target_list = target_list
+
+    def lhs(self):
+        return self.children[0]
+
+    def rhs(self):
+        return self.children[1]
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalJoin):
+            return False
+        return (is_subtree_equal
+                and self.join_type == other.join_type
+                and self.predicate == other.predicate
+                and self.left_keys == other.left_keys
+                and self.right_keys == other.right_keys)

@@ -14,11 +14,12 @@
 # limitations under the License.
 
 from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableRef, JoinNode
 
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.parser.types import JoinType
 
 ##################################################################
 # TABLE SOURCES
@@ -33,6 +34,20 @@ class TableSources(evaql_parserVisitor):
         for table_sources_index in range(table_sources_count):
             table = self.visit(ctx.tableSource(table_sources_index))
             table_list.append(table)
+        
+        #For Join Operator
+        if table_sources_count == 2: # Do Not Support More Than 2 Sources
+            left_child = table_list[0]
+            right_source = table_list[1]
+            
+            join_type = None 
+            if right_source.is_func_expr():
+                join_type = JoinType.LATERAL_JOIN
+            elif right_source.is_table_atom():
+                join_type = JoinType.HASH_JOIN
+            
+            right_child = JoinNode(left_child, right_source, join_type)
+            table_list = [left_child, right_child]
 
         return table_list
 
@@ -47,6 +62,12 @@ class TableSources(evaql_parserVisitor):
     # Nested sub query
     def visitSubqueryTableItem(
             self, ctx: evaql_parser.SubqueryTableItemContext):
+        return self.visit(ctx.subqueryTableSourceItem())
+    
+    def visitLateralFunctionCallItem(self, ctx: evaql_parser.LateralFunctionCallItemContext):
+        return self.visit(ctx.functionCall())
+    
+    def visitSubqueryTableSourceItem(self, ctx: evaql_parser.SubqueryTableSourceItemContext):
         return self.visit(ctx.selectStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):

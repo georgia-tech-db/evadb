@@ -19,6 +19,7 @@ from eva.executor.limit_executor import LimitExecutor
 from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.models.storage.batch import Batch
+from eva.parser.types import JoinType
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 from eva.executor.pp_executor import PPExecutor
@@ -30,6 +31,10 @@ from eva.executor.upload_executor import UploadExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.orderby_executor import OrderByExecutor
+from eva.executor.hash_join_executor import HashJoinExecutor
+from eva.executor.lateral_join_executor import LateralJoinExecutor
+from eva.executor.join_build_executor import BuildJoinExecutor
+from eva.executor.function_scan_executor import FunctionScanExecutor
 
 
 class PlanExecutor:
@@ -85,6 +90,15 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.JOIN:
+            if plan.join_type == JoinType.HASH_JOIN:
+                executor_node = HashJoinExecutor(node=plan)
+            elif plan.join_type == JoinType.LATERAL_JOIN:
+                executor_node = LateralJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.BUILD_JOIN:
+            executor_node = BuildJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
+            executor_node = FunctionScanExecutor(node=plan)
 
         # Build Executor Tree for children
         for children in plan.children:
