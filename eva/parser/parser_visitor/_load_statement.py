@@ -36,8 +36,8 @@ class Load(evaql_parserVisitor):
 
     def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
         file_format = FileFormatType.VIDEO
-        # Grab the file format
-        if ctx.fileFormat == evaql_parser.CSV:
+        # Check the file format 
+        if ctx.CSV() is not None:
             file_format = FileFormatType.CSV
 
         # parse and add more file options in future

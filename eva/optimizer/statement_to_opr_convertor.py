@@ -222,8 +222,7 @@ class StatementToPlanConvertor:
         if table_metainfo is None:
             # Create a new metadata object
             table_metainfo = create_video_metadata(table_ref.table.table_name)
-
-        load_data_opr = LogicalLoadData(table_metainfo, statement.path)
+        load_data_opr = LogicalLoadData(table_metainfo, statement.path, statement.file_format, statement.file_options)
         self._plan = load_data_opr
 
     def visit_upload(self, statement: UploadStatement):

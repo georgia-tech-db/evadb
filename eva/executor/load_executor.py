@@ -18,9 +18,10 @@ import pandas as pd
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.load_meta_executor import LoadMetaExecutor
+from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.parser.types import FileFormatType
 
 class LoadDataExecutor(AbstractExecutor):
 
@@ -36,20 +37,13 @@ class LoadDataExecutor(AbstractExecutor):
         """
         Use TYPE to determine the type of data to load. 
         """
-        
-        print(f"AbstractLoadDataExecutor: inside exec")
-
-        # TODO: Currently using file extension to decide which executor to invoke. Figure out how to get TYPE from the query
-        video_exts = ['.mp4']
-        meta_exts = ['.csv']
-        file_ext = os.path.splitext(self.node.file_path)[1]
 
         # invoke the appropriate executor
-        if file_ext in meta_exts:
-            executor = LoadMetaExecutor(self.node)
-        elif file_ext in video_exts:
+        if self.node.file_format == FileFormatType.VIDEO:
             executor = LoadVideoExecutor(self.node)
-
+        elif self.node.file_format == FileFormatType.CSV:
+            executor = LoadCSVExecutor(self.node)
+        
         # for each batch, exec the executor
         for batch in executor.exec():
             yield batch
