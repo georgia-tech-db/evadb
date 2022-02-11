@@ -39,9 +39,7 @@ class LoadVideoExecutor(AbstractExecutor):
         Read the input video using opencv and persist data
         using storage engine
         """
-
-        print(f"LoadVideoExecutor: loading video")
-
+        
         # We currently use create to empty existing table.
         StorageEngine.create(self.node.table_metainfo)
 
@@ -64,4 +62,4 @@ class LoadVideoExecutor(AbstractExecutor):
             },
         index=[0]))
 
-        return df_yield_result
+        yield df_yield_result

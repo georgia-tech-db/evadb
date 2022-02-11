@@ -23,9 +23,9 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.storage.storage_engine import StorageEngine
+from eva.readers.csv_reader import CSVReader
 
-
-class LoadMetaExecutor(AbstractExecutor):
+class LoadCSVExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
@@ -41,36 +41,32 @@ class LoadMetaExecutor(AbstractExecutor):
         using storage engine
         """
 
-        print(f"LoadDataExecutor: loading meta data")
-
-        # TODO: Move to utils? Create util.py here
-        # utility function to convert bbox to list of floats
+        # TODO: Should we move this to utils?
+        # utility function to convert bbox to lisst of floats
         def convert_bbox(bbox):
             return np.array([np.float32(coord) for coord in bbox.split(",")])
 
-        # Get the path to the CSV file
-        csv_file_path = os.path.join(self.path_prefix, self.node.file_path)
-        print(f"LoadDataExecutor: reading CSV file {csv_file_path}")
-
         # Read the CSV file
-        meta_df = pd.read_csv(csv_file_path, converters = {"bbox" : convert_bbox})
-        meta_df_len = len(meta_df)
-        print(meta_df)
-        print(f"LoadDataExecutor: read {meta_df_len} rows from CSV file")
+        # converters is a dictionary of functions that convert the values in the column to the desired type
+        # column_list is a list of columns to be read from the CSV file. This should match the table schema
+        csv_reader = CSVReader(
+            os.path.join(self.path_prefix, self.node.file_path),
+            converters = {"bbox" : convert_bbox},
+            column_list = ['id', 'frame_id', 'video_id', 'dataset_name', 'label', 'bbox', 'object_id'],
+            batch_mem_size=self.node.batch_mem_size
+        )
 
-        # Create a batch
-        batch = Batch(meta_df)
+        # write with storage engine in batches
+        num_loaded_frames = 0
+        for batch in csv_reader.read():
+            StorageEngine.write(self.node.table_metainfo, batch)
+            num_loaded_frames += len(batch)
 
-        # Store the batch
-        # TODO: Get the column types from the metadata
-        # Get "bbox" column name from the metadata
-        StorageEngine.write(self.node.table_metainfo, batch)
-
-        # Return the number of frames loaded
+        # yield result
         df_yield_result = Batch(pd.DataFrame({
-            'Meta': str(self.node.file_path),
-            'Number of Loaded Rows': meta_df_len,
-        }, index=[0]))
+            'CSV': str(self.node.file_path),
+            'Number of loaded frames' : num_loaded_frames
+            },
+        index = [0]))
 
         yield df_yield_result
-
