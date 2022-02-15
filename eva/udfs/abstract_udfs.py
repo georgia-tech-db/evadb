@@ -67,3 +67,50 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
 
     def __call__(self, *args, **kwargs):
         return self.classify(*args, **kwargs)
+
+
+class AbstractFilterUDF(metaclass=ABCMeta):
+    """
+    Abstract class for UDFs. All the UDFs which apply filters
+    inherit this calls.
+
+    Load and initialize the machine learning model in the __init__.
+
+    """
+
+    def __init__(self):
+        pass
+
+    @property
+    @abstractmethod
+    def input_format(self) -> FrameInfo:
+        pass
+
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        pass
+
+    @property
+    @abstractmethod
+    def labels(self) -> List[str]:
+        """
+        Returns:
+            List[str]: list of labels the classifier predicts
+        """
+
+    @abstractmethod
+    def apply(self, frames: np.ndarray) -> np.ndarray:
+        """
+        Takes as input a batch of frames and returns the frames with the 
+        filter applied to them.
+
+        Arguments:
+            frames (np.ndarray): Input batch of frames on which to apply filter
+        
+        Returns:
+            np.ndarray: The same frames with the filter applied
+        """
+
+    def __call__(self, *args, **kwargs):
+        return self.apply(*args, **kwargs)
