@@ -31,8 +31,9 @@ class LoadDataPlan(AbstractPlan):
         """
 
     def __init__(self,
-                 table_metainfo: DataFrameMetadata,
-                 file_path: Path, file_format: FileFormatType, file_options: dict, batch_mem_size: int):
+                 table_metainfo: DataFrameMetadata, file_path: Path,
+                 file_format: FileFormatType, file_options: dict, 
+                 batch_mem_size: int):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
         self._file_path = file_path

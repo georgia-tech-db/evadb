@@ -25,6 +25,7 @@ from eva.planner.load_data_plan import LoadDataPlan
 from eva.storage.storage_engine import StorageEngine
 from eva.readers.csv_reader import CSVReader
 
+
 class LoadCSVExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
@@ -47,12 +48,15 @@ class LoadCSVExecutor(AbstractExecutor):
             return np.array([np.float32(coord) for coord in bbox.split(",")])
 
         # Read the CSV file
-        # converters is a dictionary of functions that convert the values in the column to the desired type
-        # column_list is a list of columns to be read from the CSV file. This should match the table schema
+        # converters is a dictionary of functions that convert the values
+        # in the column to the desired type
+        # column_list is a list of columns to be read from the CSV file. 
+        # This should match the table schema
         csv_reader = CSVReader(
             os.path.join(self.path_prefix, self.node.file_path),
-            converters = {"bbox" : convert_bbox},
-            column_list = ['id', 'frame_id', 'video_id', 'dataset_name', 'label', 'bbox', 'object_id'],
+            converters={"bbox": convert_bbox},
+            column_list=['id', 'frame_id', 'video_id', 'dataset_name', 
+                         'label', 'bbox', 'object_id'],
             batch_mem_size=self.node.batch_mem_size
         )
 
@@ -63,10 +67,10 @@ class LoadCSVExecutor(AbstractExecutor):
             num_loaded_frames += len(batch)
 
         # yield result
-        df_yield_result = Batch(pd.DataFrame({
-            'CSV': str(self.node.file_path),
-            'Number of loaded frames' : num_loaded_frames
-            },
-        index = [0]))
+        df_yield_result = Batch(
+            pd.DataFrame({
+                'CSV': str(self.node.file_path),
+                'Number of loaded frames': num_loaded_frames
+            }, index=[0]))
 
         yield df_yield_result

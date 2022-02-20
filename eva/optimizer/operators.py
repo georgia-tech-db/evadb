@@ -457,7 +457,8 @@ class LogicalLoadData(Operator):
     """
 
     def __init__(self, table_metainfo: DataFrameMetadata,
-                 path: Path, file_format: FileFormatType, file_options: dict, children=None):
+                 path: Path, file_format: FileFormatType, 
+                 file_options: dict, children=None):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
         self._table_metainfo = table_metainfo
         self._path = path

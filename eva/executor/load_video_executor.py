@@ -46,8 +46,7 @@ class LoadVideoExecutor(AbstractExecutor):
         # read the video with opencv
         video_reader = OpenCVReader(
             os.path.join(self.path_prefix, self.node.file_path),
-            batch_mem_size=self.node.batch_mem_size
-        )
+            batch_mem_size=self.node.batch_mem_size)
 
         # write with storage engine in batches
         num_loaded_frames = 0
@@ -56,10 +55,10 @@ class LoadVideoExecutor(AbstractExecutor):
             num_loaded_frames += len(batch)
 
         # yield result
-        df_yield_result = Batch(pd.DataFrame({
+        df_yield_result = Batch(
+            pd.DataFrame({
                 'Video': str(self.node.file_path),
                 'Number of Loaded Frames': num_loaded_frames
-            },
-        index=[0]))
+            }, index=[0]))
 
         yield df_yield_result

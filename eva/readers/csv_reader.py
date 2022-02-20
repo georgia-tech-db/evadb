@@ -28,8 +28,10 @@ class CSVReader(AbstractReader):
             Reads a CSV file and yields frame data.
 
             Attributes:
-                converters (dict): dictionary of converters to be used while loading the CSV file.
-                column_list (list): list of columns to be read from the CSV file.
+                converters (dict): dictionary of converters to be used
+                                    while loading the CSV file.
+                column_list (list): list of columns to be read 
+                                    from the CSV file.
         """
 
         self._converters = converters

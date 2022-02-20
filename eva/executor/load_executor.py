@@ -13,15 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import pandas as pd
-
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.parser.types import FileFormatType
+
 
 class LoadDataExecutor(AbstractExecutor):
 
