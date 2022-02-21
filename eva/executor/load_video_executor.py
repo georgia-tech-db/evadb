@@ -58,7 +58,7 @@ class LoadVideoExecutor(AbstractExecutor):
         df_yield_result = Batch(
             pd.DataFrame({
                 'Video': str(self.node.file_path),
-                'Number of Loaded Frames': num_loaded_frames
+                'Num Loaded Frames': num_loaded_frames
             }, index=[0]))
 
         yield df_yield_result

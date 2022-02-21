@@ -37,7 +37,7 @@ from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.abstract_expression import ExpressionType
 
-from eva.parser.types import ParserOrderBySortType
+from eva.parser.types import ParserOrderBySortType, FileFormatType
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -206,10 +206,14 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             self, mock_create, mock_bind, mock_load):
         mock_bind.return_value = MagicMock()
         table_ref = TableRef(TableInfo("test"))
-        stmt = MagicMock(table=table_ref, path='path')
+        file_format = FileFormatType.VIDEO
+        file_options = {}
+        stmt = MagicMock(table=table_ref, path='path', 
+                         file_format=file_format, file_options=file_options)
         StatementToPlanConvertor().visit_load_data(stmt)
         mock_bind.assert_called_once_with(table_ref.table)
-        mock_load.assert_called_once_with(mock_bind.return_value, 'path')
+        mock_load.assert_called_once_with(mock_bind.return_value, 'path',
+                                          file_format, file_options)
         mock_create.assert_not_called()
 
     @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
@@ -219,12 +223,16 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             self, mock_create, mock_bind, mock_load):
         mock_bind.return_value = None
         table_ref = TableRef(TableInfo("test"))
-        stmt = MagicMock(table=table_ref, path='path')
+        file_format = FileFormatType.VIDEO
+        file_options = {}
+        stmt = MagicMock(table=table_ref, path='path', 
+                         file_format=FileFormatType.VIDEO, file_options={})
         StatementToPlanConvertor().visit_load_data(stmt)
         mock_create.assert_called_once_with(table_ref.table.table_name)
         mock_bind.assert_called_with(table_ref.table)
-        mock_load.assert_called_with(mock_create.return_value, 'path')
-
+        mock_load.assert_called_with(mock_create.return_value, 'path',
+                                     file_format, file_options)
+    
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
@@ -439,7 +447,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                 MagicMock()], [
                 MagicMock()])
         query_derived_plan = LogicalQueryDerivedGet()
-        load_plan = LogicalLoadData(MagicMock(), MagicMock())
+        load_plan = LogicalLoadData(MagicMock(), MagicMock(), 
+                                    MagicMock(), MagicMock())
         self.assertEqual(create_plan, create_plan)
         self.assertEqual(create_udf_plan, create_udf_plan)
         self.assertNotEqual(create_plan, create_udf_plan)

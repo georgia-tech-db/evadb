@@ -26,6 +26,7 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.function_expression import ExecutionMode
 from eva.parser.table_ref import TableRef
+from eva.parser.types import FileFormatType
 from antlr4 import TerminalNode
 
 
@@ -348,8 +349,12 @@ class ParserVisitorTests(unittest.TestCase):
         table = 'myVideo'
         path = MagicMock()
         path.value = 'video.mp4'
+        file_format = FileFormatType.VIDEO
+        other_options = {}
+        file_options = file_format, other_options
         params = {ctx.fileName.return_value: path,
-                  ctx.tableName.return_value: table}
+                  ctx.tableName.return_value: table,
+                  ctx.fileOptions.return_value: file_options}
 
         def side_effect(arg):
             return params[arg]
@@ -357,7 +362,8 @@ class ParserVisitorTests(unittest.TestCase):
         mock_visit.side_effect = side_effect
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
-        mock_visit.assert_has_calls(
-            [call(ctx.fileName()), call(ctx.tableName())])
+        mock_visit.assert_has_calls([call(ctx.fileName()), 
+                                     call(ctx.tableName())])
         mock_load.assert_called_once()
-        mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4')
+        mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4',
+                                     file_format, other_options)

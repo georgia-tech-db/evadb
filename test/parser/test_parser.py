@@ -32,7 +32,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 
 from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.types import ParserOrderBySortType
+from eva.parser.types import ParserOrderBySortType, FileFormatType
 from eva.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
@@ -360,11 +360,13 @@ class ParserTests(unittest.TestCase):
 
     def test_load_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD DATA INFILE 'data/video.mp4' INTO MyVideo;"""
+        load_data_query = """LOAD DATA INFILE 'data/video.mp4'
+                             INTO MyVideo WITH FORMAT VIDEO;"""
         expected_stmt = LoadDataStatement(
             TableRef(
                 TableInfo('MyVideo')),
-            Path('data/video.mp4'))
+            Path('data/video.mp4'),
+            FileFormatType.VIDEO)
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -421,7 +423,9 @@ class ParserTests(unittest.TestCase):
 
     def test_should_return_false_for_unequal_expression(self):
         table = TableRef(TableInfo('MyVideo'))
-        load_stmt = LoadDataStatement(table, Path('data/video.mp4'))
+        load_stmt = LoadDataStatement(
+            table, Path('data/video.mp4'), 
+            FileFormatType.VIDEO)
         insert_stmt = InsertTableStatement(table)
         create_udf = CreateUDFStatement(
             'udf', False, [

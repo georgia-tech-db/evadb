@@ -63,7 +63,10 @@ class LoadDataPlan(AbstractPlan):
 
     def __str__(self):
         print_str = 'LoadDataPlan(table_id={}, file_path={}, \
+            file_format={}, file_options={}, \
             batch_mem_size={})'.format(self.table_metainfo,
                                        self.file_path,
+                                       self.file_format,
+                                       self.file_options,
                                        self.batch_mem_size)
         return print_str

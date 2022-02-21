@@ -19,6 +19,7 @@ from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.parser.types import FileFormatType
+from eva.storage.storage_engine import StorageEngine
 
 
 class LoadDataExecutor(AbstractExecutor):

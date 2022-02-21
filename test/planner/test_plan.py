@@ -25,6 +25,7 @@ from eva.planner.load_data_plan import LoadDataPlan
 from eva.planner.upload_plan import UploadPlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.types import PlanOprType
+from eva.parser.types import FileFormatType
 
 
 class PlanNodeTests(unittest.TestCase):
@@ -80,12 +81,18 @@ class PlanNodeTests(unittest.TestCase):
     def test_load_data_plan(self):
         table_metainfo = 'meta_info'
         file_path = 'test.mp4'
+        file_format = FileFormatType.VIDEO
+        file_options = {}
         batch_mem_size = 3000
         plan_str = 'LoadDataPlan(table_id={}, file_path={}, \
+            file_format={}, file_options={}, \
             batch_mem_size={})'.format(table_metainfo,
                                        file_path,
+                                       file_format,
+                                       file_options,
                                        batch_mem_size)
-        plan = LoadDataPlan(table_metainfo, file_path, batch_mem_size)
+        plan = LoadDataPlan(table_metainfo, file_path, file_format,
+                            file_options, batch_mem_size)
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
