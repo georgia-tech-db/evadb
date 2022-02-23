@@ -91,14 +91,6 @@ class AbstractFilterUDF(metaclass=ABCMeta):
     def name(self) -> str:
         pass
 
-    @property
-    @abstractmethod
-    def labels(self) -> List[str]:
-        """
-        Returns:
-            List[str]: list of labels the classifier predicts
-        """
-
     @abstractmethod
     def apply(self, frames: np.ndarray) -> np.ndarray:
         """
