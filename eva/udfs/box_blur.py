@@ -19,7 +19,7 @@ from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractFilterUDF
 
-class GaussianBlur(PytorchAbstractEffectUDF):
+class BoxBlur(PytorchAbstractFilterUDF):
     """
     A pytorch based classifier. Used to make sure we make maximum
     utilization of features provided by pytorch without reinventing the wheel.
@@ -47,13 +47,5 @@ class GaussianBlur(PytorchAbstractEffectUDF):
         return FrameInfo(-1, -1, 3, ColorSpace.RGC)
 
     def _get_frames(self, frames: Tensor) -> Tensor:
-
-        model = nn.Conv2d(frames[1], frames[1],
-                          stride=self.stride,
-                          kernel_size=self.ksize,
-                          padding=self.padding,
-                          padding_mode=self.padding_mode)
-
-        return model(frames)
-
+        pass
 

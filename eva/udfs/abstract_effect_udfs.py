@@ -21,9 +21,9 @@ import pandas as pd
 from eva.models.catalog.frame_info import FrameInfo
 
 
-class AbstractClassifierUDF(metaclass=ABCMeta):
+class AbstractEffectUDF(metaclass=ABCMeta):
     """
-    Abstract class for UDFs. All the UDFs which perform classification
+    Abstract class for UDFs. All the UDFs which apply filters
     inherit this calls.
 
     Load and initialize the machine learning model in the __init__.
@@ -43,28 +43,19 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
     def name(self) -> str:
         pass
 
-    @property
     @abstractmethod
-    def labels(self) -> List[str]:
+    def apply(self, frames: np.ndarray) -> np.ndarray:
         """
-        Returns:
-            List[str]: list of labels the classifier predicts
-        """
-
-    @abstractmethod
-    def classify(self, frames: np.ndarray) -> pd.DataFrame:
-        """
-        Takes as input a batch of frames and returns the predictions by
-        applying the classification model.
+        Takes as input a batch of frames and returns the frames with the 
+        filter applied to them.
 
         Arguments:
-            frames (np.ndarray): Input batch of frames on which prediction
-            needs to be made
-
+            frames (np.ndarray): Input batch of frames on which to apply filter
+        
         Returns:
-            DataFrame: The predictions made by the classifier
+            np.ndarray: The same frames with the filter applied
         """
 
     def __call__(self, *args, **kwargs):
-        return self.classify(*args, **kwargs)
+        return self.apply(*args, **kwargs)
 
