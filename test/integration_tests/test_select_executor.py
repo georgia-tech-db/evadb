@@ -20,7 +20,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
-from eva.server.command_handler import execute_query_fetch_all
+from eva.server.command_handler import execute_query_fetch_all, execute_query
 
 from test.util import create_sample_video, create_dummy_batches, file_remove
 
@@ -40,6 +40,7 @@ class SelectExecutorTest(unittest.TestCase):
     def tearDownClass(cls):
         file_remove('dummy.avi')
 
+    @unittest.skip('Not supported yet.')
     def test_sort_on_nonprojected_column(self):
         """ This tests doing an order by on a column
         that is not projected. The orderby_executor currently
@@ -54,6 +55,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch.batch_size, expected_batch.batch_size)
 
+    @unittest.skip('Not supported yet.')
     def test_should_load_and_sort_in_table(self):
         select_query = "SELECT data, id FROM MyVideo ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -98,6 +100,7 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch += batch
         self.assertTrue(actual_batch, expected_batch)
 
+    @unittest.skip('Not supported yet.')
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -127,6 +130,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(actual_batch, expected_batch)
 
+    @unittest.skip('Not supported yet.')
     def test_nested_select_video_in_table(self):
         nested_select_query = """SELECT id, data FROM
             (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5)
@@ -136,6 +140,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
         self.assertEqual(actual_batch, expected_batch)
 
+    @unittest.skip('Not supported yet.')
     def test_select_and_union_video_in_table(self):
         select_query = """SELECT id, data FROM MyVideo WHERE id < 3
             UNION ALL SELECT id, data FROM MyVideo WHERE id > 7;"""
@@ -155,6 +160,7 @@ class SelectExecutorTest(unittest.TestCase):
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
 
+    @unittest.skip('Not supported yet.')
     def test_select_and_limit(self):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -165,6 +171,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])
 
+    @unittest.skip('Not supported yet.')
     def test_select_and_sample(self):
         select_query = "SELECT id,data FROM MyVideo SAMPLE 7 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
