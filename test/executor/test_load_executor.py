@@ -23,8 +23,8 @@ from eva.parser.types import FileFormatType
 
 class LoadExecutorTest(unittest.TestCase):
 
-    @patch('eva.executor.load_executor.StorageEngine.create')
-    @patch('eva.executor.load_executor.StorageEngine.write')
+    @patch('eva.storage.storage_engine.StorageEngine.create')
+    @patch('eva.storage.storage_engine.StorageEngine.write')
     def test_should_call_opencv_reader_and_storage_engine(
             self, write_mock, create_mock):
         batch_frames = [list(range(5))] * 2
