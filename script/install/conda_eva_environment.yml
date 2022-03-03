@@ -36,4 +36,5 @@ dependencies:
     - petastorm==0.9.8
     - pre-commit==2.8.2
     - pytest==6.1.2
+    - ray==1.10.0
 prefix: eva

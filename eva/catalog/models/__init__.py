@@ -12,3 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.udf_io import UdfIO
