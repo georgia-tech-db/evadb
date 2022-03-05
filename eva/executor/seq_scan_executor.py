@@ -12,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+import ray
+
+from typing import Iterator, List, Callable
+from ray.data.dataset_pipeline import DatasetPipeline
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -31,6 +34,7 @@ class SequentialScanExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
         self.project_expr = node.columns
+        self.window_size = 4
 
     def validate(self):
         pass
@@ -53,6 +57,18 @@ class SequentialScanExecutor(AbstractExecutor):
             # Due to map, we need to return even when the batch is empty
             return batch
 
-        child_pipe = self.children[0].exec()
-        return child_pipe.map(seq_scan_ray_row)
+        window = []
+        for batch in self.children[0].exec():
+            window.append(batch)
+            if len(window) >= self.window_size:
+                pipe = ray.data.from_items(window).window(blocks_per_window=1)
+                pipe = pipe.map(seq_scan_ray_row)
+                pipe = pipe.filter(lambda b: not b.empty())
+                yield from pipe.iter_rows()
+                window = []
+        if len(window) > 0:
+                pipe = ray.data.from_items(window).window(blocks_per_window=1)
+                pipe = pipe.map(seq_scan_ray_row)
+                pipe = pipe.filter(lambda b: not b.empty())
+                yield from pipe.iter_rows()
 

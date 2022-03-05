@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-from ray.data.dataset_pipeline import DatasetPipeline
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.limit_executor import LimitExecutor
@@ -107,9 +106,7 @@ class PlanExecutor:
         """
         execution_tree = self._build_execution_tree(self._plan)
         output = execution_tree.exec()
-        if isinstance(output, DatasetPipeline):
-            yield from output.iter_rows()
-        elif output is not None:
+        if output is not None:
             # How to check output is Iterator[Batch]
             yield from output
         self._clean_execution_tree(execution_tree)
