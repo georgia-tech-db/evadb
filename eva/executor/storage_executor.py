@@ -12,9 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ray
 from typing import Iterator
-from ray.data.dataset_pipeline import DatasetPipeline
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -30,15 +28,8 @@ class StorageExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> DatasetPipeline:
-        batchIter = StorageEngine.read(self.node.video,
-                                       self.node.batch_mem_size)
-        # This is a hack to fit the input requirements of from_iterable
-        def rayDatasetIter():
-            for batch in batchIter:
-                rayfunc = lambda: ray.data.from_items([batch])
-                yield rayfunc
-
-        return DatasetPipeline.from_iterable(rayDatasetIter())
+    def exec(self) -> Iterator[Batch]:
+        return StorageEngine.read(self.node.video,
+                                  self.node.batch_mem_size)
 
 

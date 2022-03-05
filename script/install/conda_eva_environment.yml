@@ -33,7 +33,7 @@ dependencies:
   - pip:
     - antlr4-python3-runtime==4.8
     - pyspark==3.0.2
-    - petastorm==0.9.8
+    - petastorm==0.11.4
     - pre-commit==2.8.2
     - pytest==6.1.2
     - ray==1.10.0
