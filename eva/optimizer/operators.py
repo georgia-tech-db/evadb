@@ -42,6 +42,7 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
+    LOGICALUPDATE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -515,3 +516,43 @@ class LogicalUpload(Operator):
         return (is_subtree_equal
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
+
+class LogicalUpdate(Operator):
+    """Logical node for upload operation
+
+    Arguments:
+        path(Path): file path (with prefix prepended) where
+                    the data is uploaded
+        video_blob(str): base64 encoded video string
+    """
+
+    def __init__(self, path: Path, video_blob: str, children=None):
+        super().__init__(OperatorType.LOGICALUPDATE, children=children)
+        self._table_name = table_name
+        self._updated_element = updated_element
+        self._condition_expression = condition_expression
+
+    @property
+    def table_name(self) -> str:
+        return self._table_name
+
+    @property
+    def updated_element(self) -> str:
+        return self._updated_element
+
+    @property
+    def condition_expression(self) -> str:
+        return self._condition_expression
+
+    def __str__(self) -> str:
+        print_str = "UPDATE {} SET {} WHERE {}".format(
+            self._table_name, self._updated_element, self._condition_expression)
+        return print_str
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, UpdateStatement):
+            return False
+        return (self.table_name == other.table_name and
+                self.updated_element == other.updated_element and
+                self.condition_expression == other.condition_expression)

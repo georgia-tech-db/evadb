@@ -19,7 +19,7 @@ from eva.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
-                                     LogicalLimit, LogicalSample)
+                                     LogicalLimit, LogicalSample, LogicalUpdate)
 from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
@@ -27,6 +27,7 @@ from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.update_statement import UpdateStatement
 from eva.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            bind_predicate_expr,
                                            create_column_metadata,
@@ -235,6 +236,15 @@ class StatementToPlanConvertor:
         upload_opr = LogicalUpload(statement.path, statement.video_blob)
         self._plan = upload_opr
 
+    def visit_update(self, statement: UpdateStatement):
+        """Convertor for parsed update statement
+        Arguments:
+            statement(UpdateStatement): [Update statement]
+        """
+
+        update_opr = LogicalUpdate(statement.table_name, statement.updated_element, statement.condition_expression)
+        self._plan = update_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -255,6 +265,8 @@ class StatementToPlanConvertor:
             self.visit_load_data(statement)
         elif isinstance(statement, UploadStatement):
             self.visit_upload(statement)
+        elif isinstance(statement, UpdateStatement):
+            self.visit_update(statement)
         return self._plan
 
     @property

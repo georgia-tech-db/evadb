@@ -27,7 +27,7 @@ from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalUpdate)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.insert_plan import InsertPlan
@@ -39,6 +39,7 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.sample_plan import SamplePlan
+from eva.planner.ipdate_plan import UpdatePlan
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -71,6 +72,7 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_UPDATE_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
 
@@ -92,6 +94,7 @@ class Promise(IntEnum):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_UPDATE_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # REWRITE RULES
@@ -549,6 +552,23 @@ class LogicalLimitToPhysical(Rule):
         after = LimitPlan(before.limit_count)
         return after
 
+class LogicalUpdateToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALUPDATE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_UPDATE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_UPDATE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalRename, context: OptimizerContext):
+        after = UpdatePlan(before.table_name,
+                           before.updated_element, before.condition_expression)
+        return after
+
 
 # IMPLEMENTATION RULES END
 ##############################################
@@ -585,7 +605,8 @@ class RulesManager:
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()
+            LogicalLimitToPhysical(),
+            LogicalUpdateToPhysical()
         ]
 
     @property

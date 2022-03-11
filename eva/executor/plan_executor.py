@@ -27,6 +27,7 @@ from eva.executor.insert_executor import InsertExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.load_executor import LoadDataExecutor
 from eva.executor.upload_executor import UploadExecutor
+from eva.executor.update_executor import UpdateExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.orderby_executor import OrderByExecutor
@@ -79,6 +80,8 @@ class PlanExecutor:
             executor_node = LoadDataExecutor(node=plan)
         elif plan_opr_type == PlanOprType.UPLOAD:
             executor_node = UploadExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.UPDATE:
+            executor_node = UpdateExecutor(node=plan)
         elif plan_opr_type == PlanOprType.ORDER_BY:
             executor_node = OrderByExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LIMIT:

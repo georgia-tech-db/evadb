@@ -23,4 +23,4 @@ class Upload(evaql_parserVisitor):
         srv_path = self.visit(ctx.fileName()).value
         video_blob = self.visit(ctx.videoBlob()).value
         stmt = UploadStatement(srv_path, video_blob)
-        return stmt
+        return stmt 

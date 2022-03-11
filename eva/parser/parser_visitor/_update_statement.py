@@ -12,35 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import IntEnum, unique
+
+from eva.parser.update_statement import UpdateStatement
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from eva.parser.evaql.evaql_parser import evaql_parser
 
 
-class ColumnConstraintEnum(IntEnum):
-    NULLNOTNULL = 1
-    DEFAULT = 2
-    PRIMARY = 3
-    UNIQUE = 4
-
-
-@unique
-class StatementType(IntEnum):
-    """
-    Manages enums for all the sql-like statements supported
-    """
-    SELECT = 1,
-    CREATE = 2,
-    INSERT = 3,
-    CREATE_UDF = 4,
-    LOAD_DATA = 5,
-    UPLOAD = 6,
-    UPDATE = 7,
-    # add other types
-
-
-@unique
-class ParserOrderBySortType(IntEnum):
-    """
-    Manages enums for all order by sort types
-    """
-    ASC = 1
-    DESC = 2
+class Update(evaql_parserVisitor):
+    def visitUpdateStatement(self, ctx: evaql_parser.UpdateStatementContext):
+        table_name = self.visit(ctx.tableName()).value
+        updated_element = self.visit(ctx.updatedElement()).value
+        condition_expression = self.visit(ctx.expression()).value
+        stmt = UpdateStatement(table_name, updated_element, condition_expression)
+        return stmt
