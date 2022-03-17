@@ -35,6 +35,7 @@ from eva.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
                                            create_video_metadata)
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class StatementToPlanConvertor:
@@ -222,9 +223,30 @@ class StatementToPlanConvertor:
         if table_metainfo is None:
             # Create a new metadata object
             table_metainfo = create_video_metadata(table_ref.table.table_name)
-            
+
+        # populate self._column_map
+        self._populate_column_map(table_metainfo)
+        
+        # if query had columns specified, we just copy them
+        if statement.column_list is not None:
+            column_list = statement.column_list
+        
+        # else we curate the column list from the metadata
+        else:
+            column_list = []
+            for column in table_metainfo.columns:
+                column_list.append(
+                    TupleValueExpression(
+                        col_name=column.name,
+                        table_name=table_metainfo.name, 
+                        col_object=column))
+        
+        # bind the columns
+        bind_columns_expr(column_list, self._column_map)
+        
         load_data_opr = LogicalLoadData(table_metainfo, 
                                         statement.path, 
+                                        column_list,
                                         statement.file_options)
         self._plan = load_data_opr
 

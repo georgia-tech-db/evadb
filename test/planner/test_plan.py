@@ -84,19 +84,27 @@ class PlanNodeTests(unittest.TestCase):
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options['file_format'] = file_format
+        column_list = None
         batch_mem_size = 3000
         plan_str = 'LoadDataPlan(table_id={}, file_path={}, \
-            file_options={}, \
-            batch_mem_size={})'.format(table_metainfo,
-                                       file_path,
-                                       file_options,
-                                       batch_mem_size)
+            batch_mem_size={}, \
+            column_list={}, \
+            file_options={})'.format(table_metainfo,
+                                     file_path,
+                                     batch_mem_size,
+                                     column_list,
+                                     file_options)
         plan = LoadDataPlan(table_metainfo, file_path,
-                            file_options, batch_mem_size)
+                            batch_mem_size, column_list,
+                            file_options)
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_metainfo, table_metainfo)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(plan.batch_mem_size, batch_mem_size)
+
+        print(f"plan: {str(plan)}")
+        print(f"plan_str: {plan_str}")
+
         self.assertEqual(str(plan), plan_str)
 
     def test_upload_plan(self):

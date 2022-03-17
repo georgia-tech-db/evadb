@@ -20,6 +20,7 @@ from eva.executor.load_executor import LoadDataExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 from test.util import create_sample_csv, file_remove
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class LoadExecutorTest(unittest.TestCase):
@@ -34,12 +35,14 @@ class LoadExecutorTest(unittest.TestCase):
         batch_mem_size = 3000
         file_options = {}
         file_options['file_format'] = FileFormatType.VIDEO
+        column_list = None
         plan = type(
             "LoadDataPlan", (), {
                 'table_metainfo': table_metainfo,
                 'file_path': file_path,
-                'file_options': file_options,
-                'batch_mem_size': batch_mem_size})
+                'batch_mem_size': batch_mem_size,
+                'column_list': column_list,
+                'file_options': file_options})
 
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
@@ -63,12 +66,18 @@ class LoadExecutorTest(unittest.TestCase):
         batch_mem_size = 3000
         file_options = {}
         file_options['file_format'] = FileFormatType.CSV
+        column_list = [
+            TupleValueExpression(col_name='id', table_name='dummy'),
+            TupleValueExpression(col_name='frame_id', table_name='dummy'),
+            TupleValueExpression(col_name='video_id', table_name='dummy')
+        ]
         plan = type(
             "LoadDataPlan", (), {
                 'table_metainfo': table_metainfo,
                 'file_path': file_path,
-                'file_options': file_options,
-                'batch_mem_size': batch_mem_size})
+                'batch_mem_size': batch_mem_size,
+                'column_list': column_list,
+                'file_options': file_options})
 
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())

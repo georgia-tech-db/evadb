@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import pandas as pd
 from typing import Iterator, Dict
 
@@ -23,29 +24,49 @@ from eva.utils.logging_manager import LoggingManager
 
 class CSVReader(AbstractReader):
 
-    def __init__(self, *args, converters, column_list, **kwargs):
+    def __init__(self, *args, column_list, **kwargs):
         """
             Reads a CSV file and yields frame data.
-
-            Attributes:
-                converters (dict): dictionary of converters to be used
-                                    while loading the CSV file.
-                column_list (list): list of columns to be read 
-                                    from the CSV file.
+            Args:
+                column_list: list of columns (TupleValueExpression) 
+                to read from the CSV file
         """
 
-        self._converters = converters
         self._column_list = column_list
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
         
+        # TODO: What is a good location to put this code?
+        def convert_csv_string_to_ndarray(row_string):
+            """
+            Conver a string of comma seperated values to a numpy 
+            float array
+            """
+            return np.array(
+                [np.float32(val) for val in row_string.split(",")])
+        
         LoggingManager().log("Reading CSV frames", LoggingLevel.INFO)
 
-        df = pd.read_csv(self.file_url, converters=self._converters)
-        for index, row in df.iterrows():
-            result = {}
-            for column in self._column_list:
-                result[column] = row[column]
+        # TODO: Need to add strong sanity checks on the columns.
 
-            yield result
+        # read the csv in chunks, and only keep the columns we need
+        col_list_names = [col.col_name for col in self._column_list]
+        col_map = {col.col_name: col for col in self._column_list}
+        for chunk in pd.read_csv(self.file_url, chunksize=512,
+                                 usecols=col_list_names):
+
+            # apply the required conversions
+            for col in chunk.columns:
+
+                # TODO: Is there a better way to do this?
+                if (isinstance(chunk[col].iloc[0], str) and 
+                        col_map[col].col_object.type.name == 'NDARRAY'):
+
+                    # convert the string to a numpy array
+                    chunk[col] =\
+                        chunk[col].apply(convert_csv_string_to_ndarray)
+
+            # yield the chunk
+            for chunk_index, chunk_row in chunk.iterrows():
+                yield chunk_row

@@ -159,6 +159,9 @@ loadStatement
     : LOAD DATA
       INFILE fileName
       INTO tableName
+        (
+            ('(' columns=uidList ')')
+        )?
       (WITH fileOptions)?
     ;
 

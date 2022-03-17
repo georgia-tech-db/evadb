@@ -456,10 +456,13 @@ class LogicalLoadData(Operator):
     """
 
     def __init__(self, table_metainfo: DataFrameMetadata,
-                 path: Path, file_options: dict, children=None):
+                 path: Path, 
+                 column_list: List[AbstractExpression] = None,
+                 file_options: dict = None, children=None):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
         self._table_metainfo = table_metainfo
         self._path = path
+        self._column_list = column_list
         self._file_options = file_options
 
     @property
@@ -471,12 +474,20 @@ class LogicalLoadData(Operator):
         return self._path
 
     @property
+    def column_list(self):
+        return self._column_list
+
+    @property
     def file_options(self):
         return self._file_options
 
     def __str__(self):
-        return 'LogicalLoadData(table: {}, path: {})'.format(
-            self.table_metainfo, self.path)
+        return "LogicalLoadData(table: {}, path: {}, \
+                column_list: {}, \
+                file_options: {})".format(self.table_metainfo, 
+                                          self.path, 
+                                          self.column_list, 
+                                          self.file_options)
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -484,7 +495,9 @@ class LogicalLoadData(Operator):
             return False
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
-                and self.path == other.path)
+                and self.path == other.path
+                and self.column_list == other.column_list
+                and self.file_options == other.file_options)
 
 
 class LogicalUpload(Operator):

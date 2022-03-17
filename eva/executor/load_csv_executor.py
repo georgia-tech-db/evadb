@@ -15,7 +15,6 @@
 
 import os
 
-import numpy as np
 import pandas as pd
 
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -42,21 +41,12 @@ class LoadCSVExecutor(AbstractExecutor):
         using storage engine
         """
 
-        # TODO: Should we move this to utils?
-        # utility function to convert bbox to lisst of floats
-        def convert_bbox(bbox):
-            return np.array([np.float32(coord) for coord in bbox.split(",")])
-
         # Read the CSV file
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
-        # column_list is a list of columns to be read from the CSV file. 
-        # This should match the table schema
         csv_reader = CSVReader(
             os.path.join(self.path_prefix, self.node.file_path),
-            converters={"bbox": convert_bbox},
-            column_list=['id', 'frame_id', 'video_id', 'dataset_name', 
-                         'label', 'bbox', 'object_id'],
+            column_list=self.node.column_list,
             batch_mem_size=self.node.batch_mem_size
         )
 

@@ -98,7 +98,8 @@ def create_sample_csv(num_frames=NUM_FRAMES):
 
 
 def create_dummy_csv_batches():
-    df = pd.read_csv(os.path.join(PATH_PREFIX, 'dummy.csv'))
+    df = pd.read_csv(os.path.join(PATH_PREFIX, 'dummy.csv'), 
+                     converters={'bbox': convert_bbox})
     return Batch(df)
 
 

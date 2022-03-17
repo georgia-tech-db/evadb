@@ -19,9 +19,9 @@ from eva.readers.csv_reader import CSVReader
 
 from test.util import create_sample_csv 
 from test.util import file_remove
-from test.util import convert_bbox
 from test.util import NUM_FRAMES, PATH_PREFIX, FRAME_SIZE
 from test.util import create_dummy_csv_batches
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class CSVLoaderTest(unittest.TestCase):
@@ -33,13 +33,17 @@ class CSVLoaderTest(unittest.TestCase):
         file_remove('dummy.csv')
         
     def test_should_return_one_batch(self):
+
+        column_list = [
+            TupleValueExpression(col_name='id', table_name='dummy'),
+            TupleValueExpression(col_name='frame_id', table_name='dummy'),
+            TupleValueExpression(col_name='video_id', table_name='dummy')
+        ]
         
         # call the CSVReader
         csv_loader = CSVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.csv'),
-            converters={"bbox": convert_bbox},
-            column_list=['id', 'frame_id', 'video_id', 'dataset_name', 
-                         'label', 'bbox', 'object_id'],
+            column_list=column_list,
             batch_mem_size=NUM_FRAMES * FRAME_SIZE)
 
         # get the batches

@@ -349,12 +349,14 @@ class ParserVisitorTests(unittest.TestCase):
         table = 'myVideo'
         path = MagicMock()
         path.value = 'video.mp4'
+        column_list = None
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options['file_format'] = file_format
         params = {ctx.fileName.return_value: path,
                   ctx.tableName.return_value: table,
-                  ctx.fileOptions.return_value: file_options}
+                  ctx.fileOptions.return_value: file_options,
+                  ctx.uidList.return_value: column_list}
 
         def side_effect(arg):
             return params[arg]
@@ -362,8 +364,11 @@ class ParserVisitorTests(unittest.TestCase):
         mock_visit.side_effect = side_effect
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
-        mock_visit.assert_has_calls([call(ctx.fileName()), 
-                                     call(ctx.tableName())])
+        mock_visit.assert_has_calls([call(ctx.fileName()),
+                                     call(ctx.tableName()), 
+                                     call(ctx.fileOptions()),
+                                     call(ctx.uidList())])
         mock_load.assert_called_once()
         mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4',
+                                     column_list,
                                      file_options)

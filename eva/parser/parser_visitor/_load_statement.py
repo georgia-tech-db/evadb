@@ -26,7 +26,7 @@ class Load(evaql_parserVisitor):
         file_path = self.visit(ctx.fileName()).value
         table = TableRef(self.visit(ctx.tableName()))
 
-        # Set defualt as Video
+        # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options['file_format'] = file_format
@@ -34,7 +34,13 @@ class Load(evaql_parserVisitor):
         if ctx.fileOptions():
             file_options = self.visit(ctx.fileOptions())
 
-        stmt = LoadDataStatement(table, file_path, file_options)
+        # set default for column_list as None
+        column_list = None
+        if ctx.uidList():
+            column_list = self.visit(ctx.uidList())
+
+        stmt = LoadDataStatement(table, file_path, column_list, 
+                                 file_options)
         return stmt
 
     def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):

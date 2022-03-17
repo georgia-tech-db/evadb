@@ -206,15 +206,17 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             self, mock_create, mock_bind, mock_load):
         mock_bind.return_value = MagicMock()
         table_ref = TableRef(TableInfo("test"))
+        column_list = []
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options['file_format'] = file_format
         stmt = MagicMock(table=table_ref, path='path', 
+                         column_list=column_list, 
                          file_options=file_options)
         StatementToPlanConvertor().visit_load_data(stmt)
         mock_bind.assert_called_once_with(table_ref.table)
         mock_load.assert_called_once_with(mock_bind.return_value, 'path',
-                                          file_options)
+                                          column_list, file_options)
         mock_create.assert_not_called()
 
     @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
@@ -224,16 +226,18 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             self, mock_create, mock_bind, mock_load):
         mock_bind.return_value = None
         table_ref = TableRef(TableInfo("test"))
+        column_list = []
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options['file_format'] = file_format
-        stmt = MagicMock(table=table_ref, path='path', 
+        stmt = MagicMock(table=table_ref, path='path',
+                         column_list=column_list, 
                          file_options=file_options)
         StatementToPlanConvertor().visit_load_data(stmt)
         mock_create.assert_called_once_with(table_ref.table.table_name)
         mock_bind.assert_called_with(table_ref.table)
         mock_load.assert_called_with(mock_create.return_value, 'path',
-                                     file_options)
+                                     column_list, file_options)
     
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')

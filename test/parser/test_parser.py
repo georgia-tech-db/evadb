@@ -358,16 +358,45 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(create_udf_stmt, expected_stmt)
 
-    def test_load_data_statement(self):
+    def test_load_video_data_statement(self):
         parser = Parser()
         load_data_query = """LOAD DATA INFILE 'data/video.mp4'
                              INTO MyVideo WITH FORMAT VIDEO;"""
         file_options = {}
         file_options['file_format'] = FileFormatType.VIDEO
+        column_list = None
         expected_stmt = LoadDataStatement(
             TableRef(
                 TableInfo('MyVideo')),
             Path('data/video.mp4'),
+            column_list,
+            file_options)
+        eva_statement_list = parser.parse(load_data_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.LOAD_DATA)
+
+        load_data_stmt = eva_statement_list[0]
+        self.assertEqual(load_data_stmt, expected_stmt)
+
+    def test_load_csv_data_statement(self):
+        parser = Parser()
+        load_data_query = """LOAD DATA INFILE 'data/meta.csv'
+                             INTO 
+                             MyMeta (id, frame_id, video_id, label)
+                             WITH FORMAT CSV;"""
+        file_options = {}
+        file_options['file_format'] = FileFormatType.CSV
+        expected_stmt = LoadDataStatement(
+            TableRef(
+                TableInfo('MyMeta')),
+            Path('data/meta.csv'), [
+                TupleValueExpression('id'),
+                TupleValueExpression('frame_id'),
+                TupleValueExpression('video_id'),
+                TupleValueExpression('label')],
             file_options)
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
