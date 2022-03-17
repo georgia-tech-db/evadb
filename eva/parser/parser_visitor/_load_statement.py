@@ -28,10 +28,13 @@ class Load(evaql_parserVisitor):
 
         # Set defualt as Video
         file_format = FileFormatType.VIDEO
-        other_options = None
+        file_options = {}
+        file_options['file_format'] = file_format
+
         if ctx.fileOptions():
-            file_format, other_options = self.visit(ctx.fileOptions())
-        stmt = LoadDataStatement(table, file_path, file_format, other_options)
+            file_options = self.visit(ctx.fileOptions())
+
+        stmt = LoadDataStatement(table, file_path, file_options)
         return stmt
 
     def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
@@ -41,5 +44,7 @@ class Load(evaql_parserVisitor):
             file_format = FileFormatType.CSV
 
         # parse and add more file options in future
-        other_options = None
-        return file_format, other_options
+        file_options = {}
+        file_options['file_format'] = file_format
+
+        return file_options

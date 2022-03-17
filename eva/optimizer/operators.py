@@ -21,7 +21,6 @@ from eva.parser.table_ref import TableRef
 from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.udf_io import UdfIO
-from eva.parser.types import FileFormatType
 from pathlib import Path
 
 
@@ -457,12 +456,10 @@ class LogicalLoadData(Operator):
     """
 
     def __init__(self, table_metainfo: DataFrameMetadata,
-                 path: Path, file_format: FileFormatType, 
-                 file_options: dict, children=None):
+                 path: Path, file_options: dict, children=None):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
         self._table_metainfo = table_metainfo
         self._path = path
-        self._file_format = file_format
         self._file_options = file_options
 
     @property
@@ -472,10 +469,6 @@ class LogicalLoadData(Operator):
     @property
     def path(self):
         return self._path
-
-    @property
-    def file_format(self):
-        return self._file_format
 
     @property
     def file_options(self):

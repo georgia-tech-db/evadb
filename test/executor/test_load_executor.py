@@ -32,12 +32,13 @@ class LoadExecutorTest(unittest.TestCase):
         file_path = 'video'
         table_metainfo = 'info'
         batch_mem_size = 3000
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
         plan = type(
             "LoadDataPlan", (), {
                 'table_metainfo': table_metainfo,
                 'file_path': file_path,
-                'file_format': FileFormatType.VIDEO,
-                'file_options': {},
+                'file_options': file_options,
                 'batch_mem_size': batch_mem_size})
 
         load_executor = LoadDataExecutor(plan)
@@ -60,12 +61,13 @@ class LoadExecutorTest(unittest.TestCase):
         file_path = 'dummy.csv'
         table_metainfo = 'info'
         batch_mem_size = 3000
+        file_options = {}
+        file_options['file_format'] = FileFormatType.CSV
         plan = type(
             "LoadDataPlan", (), {
                 'table_metainfo': table_metainfo,
                 'file_path': file_path,
-                'file_format': FileFormatType.CSV,
-                'file_options': {},
+                'file_options': file_options,
                 'batch_mem_size': batch_mem_size})
 
         load_executor = LoadDataExecutor(plan)

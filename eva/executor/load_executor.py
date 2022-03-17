@@ -37,9 +37,9 @@ class LoadDataExecutor(AbstractExecutor):
         """
 
         # invoke the appropriate executor
-        if self.node.file_format == FileFormatType.VIDEO:
+        if self.node.file_options['file_format'] == FileFormatType.VIDEO:
             executor = LoadVideoExecutor(self.node)
-        elif self.node.file_format == FileFormatType.CSV:
+        elif self.node.file_options['file_format'] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
 
         # for each batch, exec the executor

@@ -350,8 +350,8 @@ class ParserVisitorTests(unittest.TestCase):
         path = MagicMock()
         path.value = 'video.mp4'
         file_format = FileFormatType.VIDEO
-        other_options = {}
-        file_options = file_format, other_options
+        file_options = {}
+        file_options['file_format'] = file_format
         params = {ctx.fileName.return_value: path,
                   ctx.tableName.return_value: table,
                   ctx.fileOptions.return_value: file_options}
@@ -366,4 +366,4 @@ class ParserVisitorTests(unittest.TestCase):
                                      call(ctx.tableName())])
         mock_load.assert_called_once()
         mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4',
-                                     file_format, other_options)
+                                     file_options)

@@ -225,7 +225,6 @@ class StatementToPlanConvertor:
             
         load_data_opr = LogicalLoadData(table_metainfo, 
                                         statement.path, 
-                                        statement.file_format, 
                                         statement.file_options)
         self._plan = load_data_opr
 

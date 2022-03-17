@@ -83,15 +83,15 @@ class PlanNodeTests(unittest.TestCase):
         file_path = 'test.mp4'
         file_format = FileFormatType.VIDEO
         file_options = {}
+        file_options['file_format'] = file_format
         batch_mem_size = 3000
         plan_str = 'LoadDataPlan(table_id={}, file_path={}, \
-            file_format={}, file_options={}, \
+            file_options={}, \
             batch_mem_size={})'.format(table_metainfo,
                                        file_path,
-                                       file_format,
                                        file_options,
                                        batch_mem_size)
-        plan = LoadDataPlan(table_metainfo, file_path, file_format,
+        plan = LoadDataPlan(table_metainfo, file_path,
                             file_options, batch_mem_size)
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
         self.assertEqual(plan.table_metainfo, table_metainfo)

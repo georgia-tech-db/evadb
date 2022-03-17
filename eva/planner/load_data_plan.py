@@ -16,7 +16,6 @@ from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 from pathlib import Path
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.parser.types import FileFormatType
 
 
 class LoadDataPlan(AbstractPlan):
@@ -32,12 +31,10 @@ class LoadDataPlan(AbstractPlan):
 
     def __init__(self,
                  table_metainfo: DataFrameMetadata, file_path: Path,
-                 file_format: FileFormatType, file_options: dict, 
-                 batch_mem_size: int):
+                 file_options: dict, batch_mem_size: int):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
         self._file_path = file_path
-        self._file_format = file_format
         self._file_options = file_options
         self._batch_mem_size = batch_mem_size
 
@@ -50,10 +47,6 @@ class LoadDataPlan(AbstractPlan):
         return self._file_path
 
     @property
-    def file_format(self):
-        return self._file_format
-
-    @property
     def file_options(self):
         return self._file_options
 
@@ -63,10 +56,9 @@ class LoadDataPlan(AbstractPlan):
 
     def __str__(self):
         print_str = 'LoadDataPlan(table_id={}, file_path={}, \
-            file_format={}, file_options={}, \
+            file_options={}, \
             batch_mem_size={})'.format(self.table_metainfo,
                                        self.file_path,
-                                       self.file_format,
                                        self.file_options,
                                        self.batch_mem_size)
         return print_str

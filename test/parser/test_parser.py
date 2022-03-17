@@ -362,11 +362,13 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
         load_data_query = """LOAD DATA INFILE 'data/video.mp4'
                              INTO MyVideo WITH FORMAT VIDEO;"""
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
         expected_stmt = LoadDataStatement(
             TableRef(
                 TableInfo('MyVideo')),
             Path('data/video.mp4'),
-            FileFormatType.VIDEO)
+            file_options)
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
