@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Boolean
 from sqlalchemy.orm import relationship
 
 from eva.catalog.df_schema import DataFrameSchema
@@ -25,16 +25,18 @@ class DataFrameMetadata(BaseModel):
     _name = Column('name', String(100), unique=True)
     _file_url = Column('file_url', String(100))
     _unique_identifier_column = Column('identifier_column', String(100))
-
+    _is_video = Column('is_video', Boolean)
     _columns = relationship('DataFrameColumn',
                             back_populates="_dataset",
                             cascade='all, delete, delete-orphan')
 
-    def __init__(self, name: str, file_url: str, identifier_id='id'):
+    def __init__(self, name: str, file_url: str, identifier_id='id',
+                 is_video=False):
         self._name = name
         self._file_url = file_url
         self._schema = None
         self._unique_identifier_column = identifier_id
+        self._is_video = is_video
 
     @property
     def schema(self):
@@ -64,9 +66,14 @@ class DataFrameMetadata(BaseModel):
     def identifier_column(self):
         return self._unique_identifier_column
 
+    @property
+    def is_video(self):
+        return self._is_video
+
     def __eq__(self, other):
         return self.id == other.id and \
             self.file_url == other.file_url and \
             self.schema == other.schema and \
             self.identifier_column == other.identifier_column and \
-            self.name == other.name
+            self.name == other.name and \
+            self.is_video == other.is_video
