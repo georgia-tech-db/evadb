@@ -13,12 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.insert_plan import InsertPlan
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import StorageEngine
-from eva.models.storage.batch import Batch
-from eva.catalog.schema_utils import SchemaUtils
 
 
 class InsertExecutor(AbstractExecutor):
@@ -35,6 +31,7 @@ class InsertExecutor(AbstractExecutor):
         provided.
         Right now we assume there are no missing values
         """
+        """
         table_id = self.node.video_id
         data_tuple = []
         for col, val in zip(self.node.column_list, self.node.value_list):
@@ -49,3 +46,5 @@ class InsertExecutor(AbstractExecutor):
         batch.frames = SchemaUtils.petastorm_type_cast(
             metadata.schema.petastorm_schema, batch.frames)
         StorageEngine.write(metadata, batch)
+        """
+        assert NotImplemented
