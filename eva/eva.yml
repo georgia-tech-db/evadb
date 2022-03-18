@@ -15,7 +15,10 @@ executor:
   gpus: {'127.0.0.1': [0]}
 storage:
   engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
+  video_engine: "eva.storage.video_storage_engine.VideoStorageEngine"
+  video_engine_version: 0
   path_prefix: "/tmp"
+
   # https://petastorm.readthedocs.io/en/latest/api.html#module-petastorm.reader
   petastorm: {'cache_type' : 'local-disk',
               'cache_location' : '.cache',
