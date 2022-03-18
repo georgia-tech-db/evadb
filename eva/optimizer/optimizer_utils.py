@@ -81,28 +81,7 @@ def bind_columns_expr(target_columns: List[AbstractExpression],
 
 
 def bind_tuple_value_expr(expr: TupleValueExpression, column_mapping):
-    if not column_mapping:
-        # TODO: Remove this and bring uniform interface throughout the system.
-        _old_bind_tuple_value_expr(expr)
-        return
-
     expr.col_object = column_mapping.get(expr.col_name.lower(), None)
-
-
-def _old_bind_tuple_value_expr(expr):
-    """
-    NOTE: No tests for this  should be combined with latest interface
-    """
-    catalog = CatalogManager()
-    table_id, column_ids = catalog.get_table_bindings(None,
-                                                      expr.table_name,
-                                                      [expr.col_name])
-    expr.table_metadata_id = table_id
-    if not isinstance(column_ids, list) or len(column_ids) == 0:
-        LoggingManager().log(
-            "Optimizer Utils:: bind_tuple_expr: \
-            Cannot bind column name provided", LoggingLevel.ERROR)
-    expr.col_metadata_id = column_ids.pop()
 
 
 def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
