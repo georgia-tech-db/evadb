@@ -13,26 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import os
 import pandas as pd
 
-from mock import patch, MagicMock, call
+from mock import patch
 from eva.executor.load_executor import LoadDataExecutor
 from eva.models.storage.batch import Batch
-
-from test.util import PATH_PREFIX
 
 
 class LoadExecutorTest(unittest.TestCase):
 
-    @patch('eva.executor.load_executor.OpenCVReader')
-    @patch('eva.executor.load_executor.StorageEngine.create')
-    @patch('eva.executor.load_executor.StorageEngine.write')
+    @patch('eva.executor.load_executor.VideoStorageEngine.create')
     def test_should_call_opencv_reader_and_storage_engine(
-            self, write_mock, create_mock, cv_mock):
-        batch_frames = [list(range(5))] * 2
-        attrs = {'read.return_value': batch_frames}
-        cv_mock.return_value = MagicMock(**attrs)
+            self, create_mock):
         file_path = 'video'
         table_metainfo = 'info'
         batch_mem_size = 3000
@@ -44,10 +36,6 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
-        cv_mock.assert_called_once_with(os.path.join(PATH_PREFIX, file_path),
-                                        batch_mem_size=batch_mem_size)
-        create_mock.assert_called_once_with(table_metainfo)
-        write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
-            table_metainfo, batch_frames[1]))
+        create_mock.assert_called_once_with(table_metainfo, file_path)
         self.assertEqual(batch, Batch(pd.DataFrame(
-            [{'Video': file_path, 'Num Loaded Frames': 10}])))
+            [{'Video': file_path}])))
