@@ -5,17 +5,19 @@ import torch
 import pandas as pd
 import numpy as np
 import time
+import types
 
 from ray.util.queue import Queue
 from torchvision.transforms import Compose, transforms
 from PIL import Image
+from abc import ABCMeta, abstractmethod
 
 ray.init()
 
 class QueueStopSignal: pass
 
 @ray.remote
-class RayStageSink:
+class RayStage:
 
     def __init__(self, funcs):
         self.funcs = []
@@ -24,9 +26,31 @@ class RayStageSink:
                 f.prepare()
             self.funcs.append(f)
 
-    def run(self, input_queue):
+
+    def run_as_source(self, output_queue):
+        if len(output_queue) > 1:
+            raise NotImplemented
+
+        if len(self.funcs) == 0:
+            return
+       
+        first = self.funcs[0]()
+        if not isinstance(first, types.GeneratorType):
+            raise TypeError('The first function in the stage needs to return a generator')
+        
+        for next_item in first:
+            for f in self.funcs[1:]:
+                next_item = f(next_item)
+            output_queue[0].put(next_item)
+        output_queue[0].put(QueueStopSignal)
+        
+
+    def run_as_sink(self, input_queue):
         if len(input_queue) > 1:
             raise NotImplemented
+
+        if len(self.funcs) == 0:
+            return
 
         self.execution_count = 0
         while True:
@@ -42,7 +66,7 @@ class RayStageSink:
         return self.execution_count
 
 
-def read(batch_size=1):
+def read(batch_size=1, limit=-1):
     video = cv2.VideoCapture('5-detrac.mp4')
 
     batch = []
@@ -51,7 +75,7 @@ def read(batch_size=1):
     while frame is not None:
         batch.append(frame)
         count += 1
-        if count > 100:
+        if limit > 0 and count > limit:
             break
         if len(batch) >= batch_size:
             yield batch
@@ -153,8 +177,6 @@ def post_process(outcome):
     return list([(c, b) for c, b, s in outcome])
 
 s = time.perf_counter()
-it = read(1)
-count = 0
 """
 for frame in it:
     res = f(frame)
@@ -190,16 +212,22 @@ queue = Queue(maxsize=100)
 consumers = []
 for _ in range(2):
     fast = FastRCNN()
-    consumers.append(RayStageSink.options(num_gpus=1).remote([fast, post_process]))
+    consumers.append(RayStage.options(num_gpus=1).remote([fast, post_process]))
 
 tasks = []
 for c in consumers:
-    tasks.append(c.run.remote([queue]))
+    tasks.append(c.run_as_sink.remote([queue]))
 
+BATCH_SIZE = 20
+LIMIT = -1
+read_video_gen = lambda: read(BATCH_SIZE, LIMIT)
+producer = RayStage.remote([read_video_gen])
+producer.run_as_source.remote([queue])
 
-for batch in it:
-    queue.put(batch)
-queue.put(QueueStopSignal)
+#it = read_video_gen()
+#for batch in it:
+#    queue.put(batch)
+#queue.put(QueueStopSignal)
 
 ray.wait(tasks)
 e = time.perf_counter()
