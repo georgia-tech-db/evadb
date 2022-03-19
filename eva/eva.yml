@@ -26,7 +26,7 @@ pyspark:
   property: {'spark.logConf': 'true',
              'spark.driver.memory': '10g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true'}
-  coalesce: 2
+  coalesce: 10
 
 
 server:
