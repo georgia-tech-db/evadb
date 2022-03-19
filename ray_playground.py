@@ -12,6 +12,8 @@ from PIL import Image
 
 ray.init()
 
+class QueueStopSignal: pass
+
 @ray.remote
 class RayStageSink:
 
@@ -29,8 +31,8 @@ class RayStageSink:
         self.execution_count = 0
         while True:
             next_item = input_queue[0].get(block=True)
-            if next_item is None:
-                input_queue[0].put(None)
+            if next_item is QueueStopSignal:
+                input_queue[0].put(QueueStopSignal)
                 break
             for f in self.funcs:
                 next_item = f(next_item)
@@ -45,12 +47,12 @@ def read(batch_size=1):
 
     batch = []
     _, frame = video.read()
-    #count = 0
+    count = 0
     while frame is not None:
         batch.append(frame)
-        #count += 1
-        #if count > 100:
-        #    break
+        count += 1
+        if count > 100:
+            break
         if len(batch) >= batch_size:
             yield batch
             batch =[]
@@ -147,7 +149,7 @@ class FastRCNN:
         return outcome
 
 s = time.perf_counter()
-it = read(20)
+it = read(10)
 count = 0
 """
 for frame in it:
@@ -193,7 +195,7 @@ for c in consumers:
 
 for batch in it:
     queue.put(batch)
-queue.put(None)
+queue.put(QueueStopSignal)
 
 ray.wait(tasks)
 e = time.perf_counter()
