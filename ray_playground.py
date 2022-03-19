@@ -145,11 +145,15 @@ class FastRCNN:
             pred_boxes = np.array(pred_boxes[:pred_t + 1])
             pred_class = np.array(pred_class[:pred_t + 1])
             pred_score = np.array(pred_score[:pred_t + 1])
-            outcome.append(pred_class)
+            outcome.append((pred_class, pred_boxes, pred_score))
         return outcome
 
+
+def post_process(outcome):
+    return list([(c, b) for c, b, s in outcome])
+
 s = time.perf_counter()
-it = read(10)
+it = read(1)
 count = 0
 """
 for frame in it:
@@ -186,7 +190,7 @@ queue = Queue(maxsize=100)
 consumers = []
 for _ in range(2):
     fast = FastRCNN()
-    consumers.append(RayStageSink.options(num_gpus=1).remote([fast]))
+    consumers.append(RayStageSink.options(num_gpus=1).remote([fast, post_process]))
 
 tasks = []
 for c in consumers:
