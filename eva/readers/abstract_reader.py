@@ -16,9 +16,9 @@ from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Iterator, Dict
 import pandas as pd
-import sys
 
 from eva.models.storage.batch import Batch
+from eva.utils.generic_utils import get_size
 
 
 class AbstractReader(metaclass=ABCMeta):
@@ -54,9 +54,7 @@ class AbstractReader(metaclass=ABCMeta):
         for data in self._read():
             if row_size is None:
                 row_size = 0
-                for val in data.values():
-                    # getsizeof isn't accurate (add fix if required)
-                    row_size += sys.getsizeof(val)
+                row_size = get_size(data)
             data_batch.append(data)
             if len(data_batch) * row_size >= self.batch_mem_size:
                 yield Batch(pd.DataFrame(data_batch))
