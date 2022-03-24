@@ -14,22 +14,43 @@
 # limitations under the License.
 
 import pandas as pd
+from pathlib import Path
 
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import VideoStorageEngine
 from eva.models.storage.batch import Batch
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.utils.logging_manager import LoggingManager
+from eva.utils.logging_manager import LoggingLevel
 
 
 class LoadDataExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
+        self.upload_path = Path(
+            ConfigurationManager().get_value('storage', 'path_prefix'))
 
     def validate(self):
         pass
 
     def exec(self):
+        found = False
+        # Validate file_path
+        if Path(self.node.file_path).exists():
+            found = True
+        # check in the upload directory
+        else:
+            video_path = Path(self.upload_path / self.node.file_path)
+            if video_path.exists():
+                found = True
+        if not found:
+            error = 'Failed to find the video file {}'.format(
+                self.node.file_path)
+            LoggingManager().log(error, LoggingLevel.ERROR)
+            raise RuntimeError(error)
+
         success = VideoStorageEngine.create(
             self.node.table_metainfo, self.node.file_path)
 

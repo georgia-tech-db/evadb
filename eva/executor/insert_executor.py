@@ -47,4 +47,4 @@ class InsertExecutor(AbstractExecutor):
             metadata.schema.petastorm_schema, batch.frames)
         StorageEngine.write(metadata, batch)
         """
-        assert NotImplemented
+        raise NotImplementedError

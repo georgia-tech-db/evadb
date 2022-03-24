@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import Iterator
 from pathlib import Path
-import shutil
 import struct
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -30,8 +29,6 @@ class VideoStorageEngine(AbstractStorageEngine):
 
     def __init__(self):
         self.metadata = 'metadata'
-        self.upload_path = Path(
-            ConfigurationManager().get_value('storage', 'path_prefix'))
         self.curr_version = ConfigurationManager().get_value(
             'storage', 'video_engine_version')
 
@@ -41,26 +38,13 @@ class VideoStorageEngine(AbstractStorageEngine):
         try:
             Path.mkdir(dir_path, parents=True)
         except FileExistsError:
-            LoggingManager().log('Failed to load the video as directory \
+            error = 'Failed to load the video as directory \
                                 already exists {}'.format(
-                dir_path), LoggingLevel.ERROR)
-        found = False
-        # copy video from the provided path to eva datasets
-        if Path(video_file).exists():
-            shutil.copy2(video_file, str(dir_path))
-            found = True
-        # check in the upload directory
-        else:
-            video_path = Path(self.upload_path / video_file)
-            if video_path.exists():
-                shutil.copy2(str(video_path), str(dir_path))
-                found = True
-        if not found:
-            LoggingManager().log('Failed to find the video file {}'.format(
-                video_file), LoggingLevel.ERROR)
-            return False
+                dir_path)
+            LoggingManager().log(error, LoggingLevel.ERROR)
+            raise FileExistsError(error)
         self._create_video_metadata(dir_path, video_file.name)
-        return found
+        return True
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         pass
@@ -81,9 +65,9 @@ class VideoStorageEngine(AbstractStorageEngine):
         with open(metadata_file, 'rb') as f:
             (version, ) = struct.unpack('!H', f.read(struct.calcsize('!H')))
             if version > self.curr_version:
-                LoggingManager().log('Invalid metadata version {}'
-                                     .format(version), LoggingLevel.ERROR)
-                return False
+                error = 'Invalid metadata version {}'.format(version)
+                LoggingManager().log(error, LoggingLevel.ERROR)
+                raise RuntimeError(error)
             (length,) = struct.unpack('!H', f.read(struct.calcsize('!H')))
             path = f.read(length)
             return Path(path.decode())
