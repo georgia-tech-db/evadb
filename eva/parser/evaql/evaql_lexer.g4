@@ -84,6 +84,12 @@ VALUES:                              'VALUES';
 WHERE:                               'WHERE';
 XOR:                                 'XOR';
 
+// File Formats
+WITH:                 'WITH';
+FORMAT:               'FORMAT';
+CSV:                  'CSV';
+VIDEO:                'VIDEO';
+
 // EVAQL keywords
 
 ERROR_BOUNDS:						 'ERROR_WITHIN';

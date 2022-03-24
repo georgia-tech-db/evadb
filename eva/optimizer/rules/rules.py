@@ -417,7 +417,10 @@ class LogicalLoadToPhysical(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(before.table_metainfo,
-                             before.path, batch_mem_size)
+                             before.path,
+                             batch_mem_size,
+                             before.column_list,
+                             before.file_options)
         return after
 
 
