@@ -15,6 +15,7 @@
 from typing import Iterator
 from pathlib import Path
 import shutil
+import struct
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -78,12 +79,12 @@ class VideoStorageEngine(AbstractStorageEngine):
 
     def _get_video_file_path(self, metadata_file):
         with open(metadata_file, 'rb') as f:
-            version = int.from_bytes(f.read(4), byteorder='big')
+            (version, ) = struct.unpack('!H', f.read(struct.calcsize('!H')))
             if version > self.curr_version:
                 LoggingManager().log('Invalid metadata version {}'
                                      .format(version), LoggingLevel.ERROR)
                 return False
-            length = int.from_bytes(f.read(4), byteorder='big')
+            (length,) = struct.unpack('!H', f.read(struct.calcsize('!H')))
             path = f.read(length)
             return Path(path.decode())
 
@@ -92,10 +93,10 @@ class VideoStorageEngine(AbstractStorageEngine):
         # <version> <length> <file_name>
         with open(dir_path / self.metadata, 'wb') as f:
             # write version number
-            f.write((self.curr_version).to_bytes(4, byteorder='big'))
+            f.write(struct.pack('!H', self.curr_version))
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)
-            f.write((length).to_bytes(4, byteorder='big'))
+            f.write(struct.pack('!H', length))
             f.write(file_path_bytes)
 
     def _open(self, table):
