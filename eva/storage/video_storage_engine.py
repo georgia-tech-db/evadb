@@ -15,6 +15,7 @@
 from typing import Iterator
 from pathlib import Path
 import struct
+import shutil
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -37,6 +38,7 @@ class VideoStorageEngine(AbstractStorageEngine):
         dir_path = Path(table.file_url)
         try:
             Path.mkdir(dir_path, parents=True)
+            shutil.copy2(str(video_file), str(dir_path))
         except FileExistsError:
             error = 'Failed to load the video as directory \
                                 already exists {}'.format(

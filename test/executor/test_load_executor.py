@@ -14,10 +14,11 @@
 # limitations under the License.
 import unittest
 import pandas as pd
-
+from pathlib import Path
 from mock import patch
 from eva.executor.load_executor import LoadDataExecutor
 from eva.models.storage.batch import Batch
+from eva.configuration.configuration_manager import ConfigurationManager
 
 
 class LoadExecutorTest(unittest.TestCase):
@@ -35,7 +36,49 @@ class LoadExecutorTest(unittest.TestCase):
                 'batch_mem_size': batch_mem_size})
 
         load_executor = LoadDataExecutor(plan)
-        batch = next(load_executor.exec())
-        create_mock.assert_called_once_with(table_metainfo, file_path)
-        self.assertEqual(batch, Batch(pd.DataFrame(
-            [{'Video': file_path}])))
+        with patch.object(Path, 'exists') as mock_exists:
+            mock_exists.return_value = True
+            batch = next(load_executor.exec())
+            create_mock.assert_called_once_with(table_metainfo, file_path)
+            self.assertEqual(batch, Batch(pd.DataFrame(
+                [{'Video': file_path}])))
+
+    @patch('eva.executor.load_executor.VideoStorageEngine.create')
+    def test_should_search_in_upload_directory(
+            self, create_mock):
+        self.upload_path = Path(
+            ConfigurationManager().get_value('storage', 'path_prefix'))
+        file_path = 'video'
+        table_metainfo = 'info'
+        batch_mem_size = 3000
+        plan = type(
+            "LoadDataPlan", (), {
+                'file_path': file_path,
+                'table_metainfo': table_metainfo,
+                'batch_mem_size': batch_mem_size})
+
+        load_executor = LoadDataExecutor(plan)
+        with patch.object(Path, 'exists') as mock_exists:
+            mock_exists.side_effect = [False, True]
+            batch = next(load_executor.exec())
+            create_mock.assert_called_once_with(
+                table_metainfo, self.upload_path / file_path)
+            self.assertEqual(batch, Batch(pd.DataFrame(
+                [{'Video': file_path}])))
+
+    @patch('eva.executor.load_executor.VideoStorageEngine.create')
+    def test_should_fail_to_find_file(self, create_mock):
+        file_path = 'video'
+        table_metainfo = 'info'
+        batch_mem_size = 3000
+        plan = type(
+            "LoadDataPlan", (), {
+                'file_path': file_path,
+                'table_metainfo': table_metainfo,
+                'batch_mem_size': batch_mem_size})
+
+        load_executor = LoadDataExecutor(plan)
+        with patch.object(Path, 'exists') as mock_exists:
+            mock_exists.side_effect = [False, False]
+            with self.assertRaises(RuntimeError):
+                next(load_executor.exec())

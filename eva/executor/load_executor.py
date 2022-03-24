@@ -36,23 +36,24 @@ class LoadDataExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        found = False
+        video_file_path = None
         # Validate file_path
         if Path(self.node.file_path).exists():
-            found = True
+            video_file_path = self.node.file_path
         # check in the upload directory
         else:
             video_path = Path(self.upload_path / self.node.file_path)
             if video_path.exists():
-                found = True
-        if not found:
+                video_file_path = video_path
+
+        if video_file_path is None:
             error = 'Failed to find the video file {}'.format(
                 self.node.file_path)
             LoggingManager().log(error, LoggingLevel.ERROR)
             raise RuntimeError(error)
 
         success = VideoStorageEngine.create(
-            self.node.table_metainfo, self.node.file_path)
+            self.node.table_metainfo, video_file_path)
 
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek

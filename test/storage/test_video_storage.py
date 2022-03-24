@@ -54,8 +54,7 @@ class VideoStorageEngineTest(unittest.TestCase):
             self.video_engine.create(self.table, 'sample')
 
     def test_invalid_metadata(self):
-        corrupt_metadata = struct.pack('!H', self.curr_version + 1)
-        m = mock_open(read_data=corrupt_metadata)
-        with mock.patch('builtins.open', m):
+        corrupt_meta = struct.pack('!H', self.curr_version + 1)
+        with mock.patch('builtins.open', mock_open(read_data=corrupt_meta)):
             with self.assertRaises(RuntimeError):
                 self.video_engine._get_video_file_path('metadata')
