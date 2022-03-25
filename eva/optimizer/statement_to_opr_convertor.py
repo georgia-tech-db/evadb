@@ -16,7 +16,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
-                                     LogicalInsert, LogicalCreate,
+                                     LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
@@ -156,6 +156,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} -- [input insert statement]
         """
+        '''
         table_ref = statement.table
         table_metainfo = bind_dataset(table_ref.table)
         if table_metainfo is None:
@@ -176,6 +177,7 @@ class StatementToPlanConvertor:
         insert_opr = LogicalInsert(
             table_ref, table_metainfo, statement.column_list, value_list)
         self._plan = insert_opr
+        '''
 
     def visit_create(self, statement: AbstractStatement):
         """Convertor for parsed insert Statement
