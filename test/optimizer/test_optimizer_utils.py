@@ -23,7 +23,8 @@ from eva.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
                                            bind_function_expr,
                                            bind_predicate_expr,
                                            bind_columns_expr,
-                                           create_video_metadata)
+                                           create_video_metadata,
+                                           check_table_exists)
 from eva.parser.create_statement import ColumnDefinition
 from eva.catalog.column_type import ColumnType, NdArrayType
 
@@ -129,3 +130,14 @@ class OptimizerUtilsTest(unittest.TestCase):
         catalog_ins.create_metadata.assert_called_with(
             name, uri, 'col_metadata', identifier_column='id', is_video=True)
         self.assertEqual(actual, expected)
+
+    @patch('eva.optimizer.optimizer_utils.CatalogManager.check_table_exists')
+    def test_check_table_exists_raises_error(self, check_mock):
+        check_mock.return_value = True
+        with self.assertRaises(RuntimeError):
+            check_table_exists(check_mock, False)
+
+    @patch('eva.optimizer.optimizer_utils.CatalogManager.check_table_exists')
+    def test_check_table_exists_return_True(self, check_mock):
+        check_mock.return_value = True
+        self.assertTrue(check_table_exists(check_mock, True))

@@ -210,8 +210,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options['file_format'] = file_format
-        stmt = MagicMock(table=table_ref, path='path', 
-                         column_list=column_list, 
+        stmt = MagicMock(table=table_ref, path='path',
+                         column_list=column_list,
                          file_options=file_options)
         StatementToPlanConvertor().visit_load_data(stmt)
         mock_bind.assert_called_once_with(table_ref.table)
@@ -231,20 +231,36 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         file_options = {}
         file_options['file_format'] = file_format
         stmt = MagicMock(table=table_ref, path='path',
-                         column_list=column_list, 
+                         column_list=column_list,
                          file_options=file_options)
         StatementToPlanConvertor().visit_load_data(stmt)
         mock_create.assert_called_once_with(table_ref.table.table_name)
         mock_bind.assert_called_with(table_ref.table)
         mock_load.assert_called_with(mock_create.return_value, 'path',
                                      column_list, file_options)
-    
+
+    @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
+    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
+    @patch('eva.optimizer.statement_to_opr_convertor.create_video_metadata')
+    def test_visit_load_data_when_bind_returns_None_raises(
+            self, mock_create, mock_bind, mock_load):
+        mock_bind.return_value = None
+        table_ref = TableRef(TableInfo("test"))
+        column_list = []
+        file_format = FileFormatType.CSV
+        file_options = {}
+        file_options['file_format'] = file_format
+        stmt = MagicMock(table=table_ref, path='path',
+                         column_list=column_list,
+                         file_options=file_options)
+        with self.assertRaises(RuntimeError):
+            StatementToPlanConvertor().visit_load_data(stmt)
+
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_should_visit_select_if_nested_query(self, mock_p, mock_c, mock_d):
+    def test_should_visit_select_if_nested_query(self, mock_c, mock_d):
         m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT id FROM (SELECT data, id FROM video \
             WHERE data > 2) WHERE id>3;""")[0]
         converter = StatementToPlanConvertor()
@@ -453,7 +469,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                 MagicMock()], [
                 MagicMock()])
         query_derived_plan = LogicalQueryDerivedGet()
-        load_plan = LogicalLoadData(MagicMock(), MagicMock(), 
+        load_plan = LogicalLoadData(MagicMock(), MagicMock(),
                                     MagicMock(), MagicMock())
         self.assertEqual(create_plan, create_plan)
         self.assertEqual(create_udf_plan, create_udf_plan)

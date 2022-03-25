@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 from ast import literal_eval
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
 
 
@@ -81,7 +81,22 @@ class DataFrameColumn(BaseModel):
 
     @array_dimensions.setter
     def array_dimensions(self, value: List[int]):
-        self._array_dimensions = str(value)
+        # backward compatibility
+        if not isinstance(value, list):
+            self._array_dimensions = str(value)
+        else:
+            # This tranformation converts the ANYDIM enum to
+            # None which is expected by petastorm.
+            # Before adding data, petastorm verifies _is_compliant_shape
+            # and any unknown dimension is expected to be None
+            # https://petastorm.readthedocs.io/en/latest/_modules/petastorm/codecs.html#DataframeColumnCodec.encode
+            dimensions = []
+            for dim in value:
+                if dim == Dimension.ANYDIM:
+                    dimensions.append(None)
+                else:
+                    dimensions.append(dim)
+            self._array_dimensions = str(dimensions)
 
     @property
     def metadata_id(self):

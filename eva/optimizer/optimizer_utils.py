@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-
+from eva.parser.table_ref import TableRef, TableInfo
 from eva.catalog.models.df_metadata import DataFrameMetadata
+
 from eva.expression.function_expression import FunctionExpression
-from eva.parser.table_ref import TableInfo
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
 
@@ -45,23 +45,6 @@ def bind_dataset(video_info: TableInfo) -> DataFrameMetadata:
     catalog = CatalogManager()
     return catalog.get_dataset_metadata(video_info.database_name,
                                         video_info.table_name)
-
-
-def bind_table_ref(video_info: TableInfo) -> int:
-    """Grab the metadata id from the catalog for
-    input video
-
-    Arguments:
-        video_info {TableInfo} -- [input parsed video info]
-    Return:
-        catalog_entry for input table
-    """
-
-    catalog = CatalogManager()
-    catalog_entry_id, _ = catalog.get_table_bindings(video_info.database_name,
-                                                     video_info.table_name,
-                                                     None)
-    return catalog_entry_id
 
 
 def bind_columns_expr(target_columns: List[AbstractExpression],
@@ -195,3 +178,29 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     metadata = catalog.create_metadata(
         name, uri, col_metadata, identifier_column='id', is_video=True)
     return metadata
+
+
+def create_table_metadata(table_ref: TableRef,
+                          columns: List[ColumnDefinition])\
+        -> DataFrameMetadata:
+    table_name = table_ref.table.table_name
+    column_metadata_list = create_column_metadata(columns)
+    file_url = str(generate_file_path(table_name))
+    metadata = CatalogManager().create_metadata(table_name,
+                                                file_url,
+                                                column_metadata_list)
+    return metadata
+
+
+def check_table_exists(table_ref: TableRef, if_not_exist=False):
+    if CatalogManager().check_table_exists(table_ref.table.database_name,
+                                           table_ref.table.table_name):
+        err_msg = 'Table: {} already exsits'.format(table_ref)
+        if if_not_exist:
+            LoggingManager().log(err_msg, LoggingLevel.WARNING)
+            return True
+        else:
+            LoggingManager().log(err_msg, LoggingLevel.ERROR)
+            raise RuntimeError(err_msg)
+    else:
+        return False

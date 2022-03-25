@@ -31,20 +31,4 @@ class InsertExecutor(AbstractExecutor):
         provided.
         Right now we assume there are no missing values
         """
-        """
-        table_id = self.node.video_id
-        data_tuple = []
-        for col, val in zip(self.node.column_list, self.node.value_list):
-            val = val.evaluate()
-            val.frames.columns = [col.col_name]
-            data_tuple.append(val)
-
-        batch = Batch.merge_column_wise(data_tuple)
-        metadata = CatalogManager().get_metadata(table_id)
-        # verify value types are consistent
-
-        batch.frames = SchemaUtils.petastorm_type_cast(
-            metadata.schema.petastorm_schema, batch.frames)
-        StorageEngine.write(metadata, batch)
-        """
         raise NotImplementedError
