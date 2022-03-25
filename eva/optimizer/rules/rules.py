@@ -131,34 +131,6 @@ class Rule(ABC):
     def pattern(self, pattern):
         self._pattern = pattern
 
-    @classmethod
-    def _compare_expr_with_pattern(cls,
-                                   grp_id,
-                                   context: OptimizerContext,
-                                   pattern) -> bool:
-        """check if the logical tree of the expression matches the
-            provided pattern
-        Args:
-            input_expr ([type]): expr to match
-            pattern: pattern to match with
-        Returns:
-            bool: If rule pattern matches, return true, else false
-        """
-        is_equal = True
-        grp = context.memo.groups[grp_id]
-        grp_expr = grp.get_logical_expr()
-        if grp_expr is None:
-            return False
-        if (grp_expr.opr.opr_type != pattern.opr_type or
-                (len(grp_expr.children) != len(pattern.children))):
-            return False
-        # recursively compare pattern and input_expr
-        for child_id, pattern_child in zip(grp_expr.children,
-                                           pattern.children):
-            is_equal &= cls._compare_expr_with_pattern(
-                child_id, context, pattern_child)
-        return is_equal
-
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type
 

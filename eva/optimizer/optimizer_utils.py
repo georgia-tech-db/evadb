@@ -47,23 +47,6 @@ def bind_dataset(video_info: TableInfo) -> DataFrameMetadata:
                                         video_info.table_name)
 
 
-def bind_table_ref(video_info: TableInfo) -> int:
-    """Grab the metadata id from the catalog for
-    input video
-
-    Arguments:
-        video_info {TableInfo} -- [input parsed video info]
-    Return:
-        catalog_entry for input table
-    """
-
-    catalog = CatalogManager()
-    catalog_entry_id, _ = catalog.get_table_bindings(video_info.database_name,
-                                                     video_info.table_name,
-                                                     None)
-    return catalog_entry_id
-
-
 def bind_columns_expr(target_columns: List[AbstractExpression],
                       column_mapping):
     if target_columns is None:
@@ -81,28 +64,7 @@ def bind_columns_expr(target_columns: List[AbstractExpression],
 
 
 def bind_tuple_value_expr(expr: TupleValueExpression, column_mapping):
-    if not column_mapping:
-        # TODO: Remove this and bring uniform interface throughout the system.
-        _old_bind_tuple_value_expr(expr)
-        return
-
     expr.col_object = column_mapping.get(expr.col_name.lower(), None)
-
-
-def _old_bind_tuple_value_expr(expr):
-    """
-    NOTE: No tests for this  should be combined with latest interface
-    """
-    catalog = CatalogManager()
-    table_id, column_ids = catalog.get_table_bindings(None,
-                                                      expr.table_name,
-                                                      [expr.col_name])
-    expr.table_metadata_id = table_id
-    if not isinstance(column_ids, list) or len(column_ids) == 0:
-        LoggingManager().log(
-            "Optimizer Utils:: bind_tuple_expr: \
-            Cannot bind column name provided", LoggingLevel.ERROR)
-    expr.col_metadata_id = column_ids.pop()
 
 
 def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
@@ -235,11 +197,10 @@ def check_table_exists(table_ref: TableRef, if_not_exist=False):
                                            table_ref.table.table_name):
         err_msg = 'Table: {} already exsits'.format(table_ref)
         if if_not_exist:
-            error = 'Table: {} already exsits'.format(table_ref)
             LoggingManager().log(err_msg, LoggingLevel.WARNING)
             return True
         else:
             LoggingManager().log(err_msg, LoggingLevel.ERROR)
-            raise RuntimeError(error)
+            raise RuntimeError(err_msg)
     else:
         return False

@@ -35,6 +35,20 @@ class CreateMaterializedExecutorTest(unittest.TestCase):
                 continue
             child = MagicMock()
             child.node.opr_type = child_opr_type
+            with self.assertRaises(RuntimeError):
+                create_udf_executor = CreateMaterializedViewExecutor(plan)
+                create_udf_executor.append_child(child)
+                create_udf_executor.exec()
+
+    @patch('eva.optimizer.optimizer_utils.check_table_exists')
+    def test_raises_mismatch_columns(self, mock_check):
+        mock_check.side_effect = True
+        dummy_view = TableRef(TableInfo('dummy'))
+        columns = ['id', 'id2']
+        plan = CreateMaterializedViewPlan(dummy_view, columns)
+        child = MagicMock()
+        child.node.opr_type = PlanOprType.SEQUENTIAL_SCAN
+        child.project_expr.__len__.return_value = 3
         with self.assertRaises(RuntimeError):
             create_udf_executor = CreateMaterializedViewExecutor(plan)
             create_udf_executor.append_child(child)
