@@ -44,15 +44,15 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
                 LoggingManager().log(err_msg, LoggingLevel.ERROR)
                 raise RuntimeError(err_msg)
-            if len(self.node.col_list) != len(child.project_expr):
+            if len(self.node.columns) != len(child.project_expr):
                 err_msg = '# projected columns mismatch, expected {} found {}\
-                '.format(len(self.node.col_list), len(child.project_expr))
+                '.format(len(self.node.columns), len(child.project_expr))
                 LoggingManager().log(err_msg, LoggingLevel.ERROR)
                 raise RuntimeError(err_msg)
 
             # Copy column type info from child columns
             for idx, child_col in child.project_expr:
-                col = self.node.col_list[idx]
+                col = self.node.columns[idx]
                 col_obj = None
                 if child_col.etype == ExpressionType.TUPLE_VALUE:
                     col_obj = child_col.col_object
