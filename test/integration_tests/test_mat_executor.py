@@ -39,7 +39,7 @@ class MaterializedViewTest(unittest.TestCase):
         file_remove('dummy.avi')
         file_remove('ua_detrac.mp4')
 
-    def _test_should_mat_view_with_dummy(self):
+    def test_should_mat_view_with_dummy(self):
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
         """
@@ -55,7 +55,7 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def _test_should_mat_view_to_the_same_table(self):
+    def test_should_mat_view_to_the_same_table(self):
         materialized_query = """CREATE MATERIALIZED VIEW IF NOT EXISTS
             dummy_view2 (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo
@@ -82,7 +82,7 @@ class MaterializedViewTest(unittest.TestCase):
 
     def test_should_mat_view_with_afastrcnn(self):
         query = """LOAD DATA INFILE 'ua_detrac.mp4'
-                   INTO MyVideo;"""
+                   INTO Video;"""
         execute_query_fetch_all(query)
 
         create_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
@@ -96,7 +96,7 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(create_udf_query)
 
         select_query = """SELECT id, FastRCNNObjectDetector(data).labels
-                            FROM MyVideo WHERE id < 5;"""
+                            FROM Video WHERE id < 5;"""
         query = '''CREATE MATERIALIZED VIEW IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
         AS {}'''.format(select_query)
         execute_query_fetch_all(query)

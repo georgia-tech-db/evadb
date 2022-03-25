@@ -33,7 +33,7 @@ from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
 from eva.optimizer.optimizer_utils import (bind_columns_expr,
                                            bind_predicate_expr,
-                                           bind_dataset,
+                                           bind_dataset, check_table_exists,
                                            column_definition_to_udf_io,
                                            create_video_metadata)
 from eva.parser.table_ref import TableRef
@@ -220,13 +220,20 @@ class StatementToPlanConvertor:
             statement(LoadDataStatement): [Load data statement]
         """
         table_ref = statement.table
-        table_metainfo = bind_dataset(table_ref.table)
-        if table_metainfo is None:
-            if statement.file_options['file_format'] == FileFormatType.VIDEO:
+        table_metainfo = None
+        if statement.file_options['file_format'] == FileFormatType.VIDEO:
+            if not check_table_exists(table_ref):
                 # Create a new metadata object
                 table_metainfo = create_video_metadata(
                     table_ref.table.table_name)
             else:
+                error = '{} already exists'.format(table_ref.table.table_name)
+                LoggingManager().log(error, LoggingLevel.ERROR)
+                raise RuntimeError(error)
+
+        else:
+            table_metainfo = bind_dataset(table_ref.table)
+            if table_metainfo is None:
                 error = '{} does not exists. Create the table using \
                             CREATE TABLE.'.format(table_ref.table.table_name)
                 LoggingManager().log(error, LoggingLevel.ERROR)

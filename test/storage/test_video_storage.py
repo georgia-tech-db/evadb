@@ -39,7 +39,7 @@ class VideoStorageEngineTest(unittest.TestCase):
         return table_info
 
     def setUp(self):
-        self.video_engine = VideoStorageEngine()
+        self.video_engine = VideoStorageEngine
         self.table = self.create_sample_table()
         self.curr_version = ConfigurationManager().get_value(
             'storage', 'video_engine_version')

@@ -35,9 +35,12 @@ class VideoStorageEngine(AbstractStorageEngine):
 
     def create(self, table: DataFrameMetadata, video_file: Path):
         # Create directory to store video and metadata related to the video
+        print('Lol')
         dir_path = Path(table.file_url)
+        print(dir_path)
+        print(dir_path.exists())
         try:
-            Path.mkdir(dir_path, parents=True)
+            dir_path.mkdir(parents=True)
             shutil.copy2(str(video_file), str(dir_path))
         except FileExistsError:
             error = 'Failed to load the video as directory \
