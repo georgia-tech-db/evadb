@@ -34,7 +34,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def exec(self):
         """Create materialized view executor
         """
-        if not check_table_exists(self.node.table_ref,
+        if not check_table_exists(self.node.view,
                                   self.node.if_not_exists):
             child = self.children[0]
             # only support seq scan based materialization
