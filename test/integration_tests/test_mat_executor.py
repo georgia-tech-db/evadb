@@ -26,20 +26,25 @@ NUM_FRAMES = 10
 
 
 class MaterializedViewTest(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
         copy_sample_video_to_prefix()
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
+        query = """LOAD DATA INFILE 'ua_detrac.mp4'
+                   INTO UATRAC;"""
+        execute_query_fetch_all(query)
         load_inbuilt_udfs()
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         file_remove('dummy.avi')
         file_remove('ua_detrac.mp4')
 
-    def _test_should_mat_view_with_dummy(self):
+    def test_should_mat_view_with_dummy(self):
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo;
         """
@@ -55,7 +60,7 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def _test_should_mat_view_to_the_same_table(self):
+    def test_should_mat_view_to_the_same_table(self):
         materialized_query = """CREATE MATERIALIZED VIEW IF NOT EXISTS
             dummy_view2 (id, label)
             AS SELECT id, DummyObjectDetector(data).label FROM MyVideo
@@ -80,23 +85,9 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_should_mat_view_with_afastrcnn(self):
-        query = """LOAD DATA INFILE 'ua_detrac.mp4'
-                   INTO MyVideo;"""
-        execute_query_fetch_all(query)
-
-        create_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
-                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (labels NDARRAY STR(ANYDIM),
-                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                          scores NDARRAY FLOAT32(ANYDIM))
-                  TYPE  Classification
-                  IMPL  'eva/udfs/fastrcnn_object_detector.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
+    def test_should_mat_view_with_fastrcnn(self):
         select_query = """SELECT id, FastRCNNObjectDetector(data).labels
-                            FROM MyVideo WHERE id < 5;"""
+                            FROM UATRAC WHERE id < 5;"""
         query = '''CREATE MATERIALIZED VIEW IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
         AS {}'''.format(select_query)
         execute_query_fetch_all(query)

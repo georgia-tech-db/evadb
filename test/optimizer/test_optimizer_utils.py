@@ -24,7 +24,7 @@ from eva.optimizer.optimizer_utils import (bind_dataset, bind_tuple_value_expr,
                                            bind_predicate_expr,
                                            bind_columns_expr,
                                            create_video_metadata,
-                                           check_table_exists)
+                                           handle_if_not_exists)
 from eva.parser.create_statement import ColumnDefinition
 from eva.catalog.column_type import ColumnType, NdArrayType
 
@@ -132,12 +132,12 @@ class OptimizerUtilsTest(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     @patch('eva.optimizer.optimizer_utils.CatalogManager.check_table_exists')
-    def test_check_table_exists_raises_error(self, check_mock):
+    def test_handle_if_not_exists_raises_error(self, check_mock):
         check_mock.return_value = True
         with self.assertRaises(RuntimeError):
-            check_table_exists(check_mock, False)
+            handle_if_not_exists(check_mock, False)
 
     @patch('eva.optimizer.optimizer_utils.CatalogManager.check_table_exists')
-    def test_check_table_exists_return_True(self, check_mock):
+    def test_handle_if_not_exists_return_True(self, check_mock):
         check_mock.return_value = True
-        self.assertTrue(check_table_exists(check_mock, True))
+        self.assertTrue(handle_if_not_exists(check_mock, True))

@@ -20,7 +20,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine
 from eva.expression.abstract_expression import ExpressionType
 from eva.optimizer.optimizer_utils import (create_table_metadata,
-                                           check_table_exists)
+                                           handle_if_not_exists)
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 
@@ -35,8 +35,8 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def exec(self):
         """Create materialized view executor
         """
-        if not check_table_exists(self.node.view,
-                                  self.node.if_not_exists):
+        if not handle_if_not_exists(self.node.view,
+                                    self.node.if_not_exists):
             child = self.children[0]
             # only support seq scan based materialization
             if child.node.opr_type != PlanOprType.SEQUENTIAL_SCAN:

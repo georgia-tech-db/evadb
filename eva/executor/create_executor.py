@@ -17,7 +17,7 @@ from eva.planner.create_plan import CreatePlan
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine
 from eva.optimizer.optimizer_utils import (create_table_metadata,
-                                           check_table_exists)
+                                           handle_if_not_exists)
 
 
 class CreateExecutor(AbstractExecutor):
@@ -29,8 +29,8 @@ class CreateExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        if not check_table_exists(self.node.table_ref,
-                                  self.node.if_not_exists):
+        if not handle_if_not_exists(self.node.table_ref,
+                                    self.node.if_not_exists):
             metadata = create_table_metadata(
                 self.node.table_ref, self.node.column_list)
             StorageEngine.create(table=metadata)

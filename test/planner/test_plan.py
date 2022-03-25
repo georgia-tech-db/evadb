@@ -40,7 +40,7 @@ class PlanNodeTests(unittest.TestCase):
         CatalogManager().reset()
         columns = [DataFrameColumn('id', ColumnType.INTEGER),
                    DataFrameColumn('name', ColumnType.TEXT,
-                                   array_dimensions=50)]
+                                   array_dimensions=[50])]
         dummy_plan_node = CreatePlan(dummy_table, columns, False)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.CREATE)
         self.assertEqual(dummy_plan_node.if_not_exists, False)
