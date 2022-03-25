@@ -38,7 +38,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo 
+        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
 
@@ -53,9 +53,9 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for csv
     def test_should_load_csv_in_table(self):
-        
+
         # loading a csv requires a table to be created first
-        create_table_query = """ 
+        create_table_query = """
 
             CREATE TABLE IF NOT EXISTS MyVideoCSV (
                 id INTEGER UNIQUE,
@@ -66,7 +66,7 @@ class LoadExecutorTest(unittest.TestCase):
                 bbox NDARRAY FLOAT32(4),
                 object_id INTEGER
             );
-            
+
             """
         execute_query_fetch_all(create_table_query)
 
@@ -77,13 +77,13 @@ class LoadExecutorTest(unittest.TestCase):
 
         # execute a select query
         select_query = """SELECT id, frame_id, video_id,
-                          dataset_name, label, bbox, 
+                          dataset_name, label, bbox,
                           object_id
                           FROM MyVideoCSV;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        
+
         # assert the batches are equal
         expected_batch = create_dummy_csv_batches()
         self.assertEqual(actual_batch, expected_batch)

@@ -81,7 +81,7 @@ class MaterializedViewTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     @unittest.skip('Too slow when no GPU')
-    def test_should_mat_view_with_aafastrcnn(self):
+    def test_should_mat_view_with_afastrcnn(self):
         query = """LOAD DATA INFILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
@@ -111,7 +111,3 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['labels'][idx])
-
-
-if __name__ == '__main__':
-    unittest.main()

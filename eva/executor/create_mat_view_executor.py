@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from eva.parser.create_statement import ColumnDefinition
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType
 from eva.executor.abstract_executor import AbstractExecutor
@@ -50,6 +51,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 LoggingManager().log(err_msg, LoggingLevel.ERROR)
                 raise RuntimeError(err_msg)
 
+            col_defs = []
             # Copy column type info from child columns
             for idx, child_col in enumerate(child.project_expr):
                 col = self.node.columns[idx]
@@ -59,12 +61,14 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
                     col_obj = child_col.output_obj
 
-                col.type = col_obj.type
-                col.array_type = col_obj.array_type
-                col.array_dimensions = col_obj.array_dimensions
+                col_defs.append(ColumnDefinition(
+                    col.name,
+                    col_obj.type,
+                    col_obj.array_type,
+                    col_obj.array_dimensions))
 
             view_metainfo = create_table_metadata(
-                self.node.table_ref, self.node.columns)
+                self.node.view, col_defs)
             StorageEngine.create(table=view_metainfo)
 
             # Populate the view
