@@ -51,7 +51,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 raise RuntimeError(err_msg)
 
             # Copy column type info from child columns
-            for idx, child_col in child.project_expr:
+            for idx, child_col in enumerate(child.project_expr):
                 col = self.node.columns[idx]
                 col_obj = None
                 if child_col.etype == ExpressionType.TUPLE_VALUE:
