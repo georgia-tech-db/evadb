@@ -29,6 +29,7 @@ from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
 from eva.optimizer.optimizer_utils import (bind_columns_expr,
                                            bind_predicate_expr,
@@ -38,7 +39,6 @@ from eva.optimizer.optimizer_utils import (bind_columns_expr,
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.types import FileFormatType
 
 
 class StatementToPlanConvertor:
