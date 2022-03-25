@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.utils.generic_utils import generate_file_path
 from eva.storage.storage_engine import StorageEngine
 from eva.expression.abstract_expression import ExpressionType
-
+from eva.optimizer.optimizer_utils import (create_table_metadata,
+                                           check_table_exists)
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 
@@ -35,53 +34,39 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
     def exec(self):
         """Create materialized view executor
         """
-        # Create the view table
-        table_name = self.node.view.table.table_name
-        file_url = str(generate_file_path(table_name))
-        # Extract the column types from the child node
-        child = self.children[0]
-        # only support seq scan based materialization
-        if child.node.opr_type != PlanOprType.SEQUENTIAL_SCAN:
-            LoggingManager().log('Invalid query {}, expected {}',
-                                 child.node.opr_type,
-                                 PlanOprType.SEQUENTIAL_SCAN,
-                                 LoggingLevel.ERROR)
-        if len(self.node.col_list) != len(child.project_expr):
-            LoggingManager().log('# projected columns mismatch, expected {} \
-            found {}'.format(len(self.node.col_list),
-                             len(child.project_expr)),
-                LoggingLevel.ERROR)
+        if not check_table_exists(self.node.table_ref,
+                                  self.node.if_not_exists):
+            child = self.children[0]
+            # only support seq scan based materialization
+            if child.node.opr_type != PlanOprType.SEQUENTIAL_SCAN:
+                err_msg = 'Invalid query {}, expected {}'.format(
+                    child.node.opr_type, PlanOprType.SEQUENTIAL_SCAN)
 
-        col_metainfo_list = []
-        catalog = CatalogManager()
-        for col_def, child_col in zip(self.node.col_list, child.project_expr):
-            col_obj = None
-            if child_col.etype == ExpressionType.TUPLE_VALUE:
-                col_obj = child_col.col_object
-            elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
-                col_obj = child_col.output_obj
+                LoggingManager().log(err_msg, LoggingLevel.ERROR)
+                raise RuntimeError(err_msg)
+            if len(self.node.col_list) != len(child.project_expr):
+                err_msg = '# projected columns mismatch, expected {} found {}\
+                '.format(len(self.node.col_list), len(child.project_expr))
+                LoggingManager().log(err_msg, LoggingLevel.ERROR)
+                raise RuntimeError(err_msg)
 
-            col_metainfo_list.append(
-                catalog.create_column_metadata(col_def.name,
-                                               col_obj.type,
-                                               col_obj.array_type,
-                                               col_obj.array_dimensions))
+            # Copy column type info from child columns
+            for idx, child_col in child.project_expr:
+                col = self.node.col_list[idx]
+                col_obj = None
+                if child_col.etype == ExpressionType.TUPLE_VALUE:
+                    col_obj = child_col.col_object
+                elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
+                    col_obj = child_col.output_obj
 
-        view_metainfo = catalog.get_dataset_metadata(None, table_name)
-        err_msg = '''Table: {} already exsits.
-                    Writing to the existing table.'''.format(table_name)
+                col.type = col_obj.type
+                col.array_type = col_obj.array_type
+                col.array_dimensions = col_obj.array_dimensions
 
-        if view_metainfo and self.node.if_not_exists:
-            LoggingManager().log(err_msg, LoggingLevel.WARNING)
-            return
-        if view_metainfo and self.node.if_not_exists is False:
-            LoggingManager().log(err_msg, LoggingLevel.ERROR)
-            raise Exception(err_msg)
+            view_metainfo = create_table_metadata(
+                self.node.table_ref, self.node.columns)
+            StorageEngine.create(table=view_metainfo)
 
-        view_metainfo = CatalogManager().create_metadata(table_name,
-                                                         file_url,
-                                                         col_metainfo_list)
-        StorageEngine.create(view_metainfo)
-        # Populate the view
-        for batch in child.exec():
-            StorageEngine.write(view_metainfo, batch)
+            # Populate the view
+            for batch in child.exec():
+                StorageEngine.write(view_metainfo, batch)

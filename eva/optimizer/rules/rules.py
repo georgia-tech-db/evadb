@@ -389,7 +389,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.video_catalog_id,
+        after = InsertPlan(before.table_metainfo,
                            before.column_list, before.value_list)
         return after
 

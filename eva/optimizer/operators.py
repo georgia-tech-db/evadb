@@ -20,7 +20,6 @@ from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef
 from eva.expression.abstract_expression import AbstractExpression
-from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.udf_io import UdfIO
 from pathlib import Path
 
@@ -288,33 +287,25 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        video {TableRef}:
-            [TableRef object copied from parsed statement]
-        video_catalog_id{int}:
-            [catalog id for the video table]
+        table_metainfo(DataFrameMetadata): table to intert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
             [value list to insert]
     """
 
-    def __init__(self, video: TableRef, video_catalog_id: int,
+    def __init__(self, table_metainfo: DataFrameMetadata,
                  column_list: List[AbstractExpression],
                  value_list: List[AbstractExpression],
                  children: List = None):
         super().__init__(OperatorType.LOGICALINSERT, children)
-        self._video = video
-        self._video_catalog_id = video_catalog_id
+        self._table_metainfo = table_metainfo
         self._column_list = column_list
         self._value_list = value_list
 
     @property
-    def video(self):
-        return self._video
-
-    @property
-    def video_catalog_id(self):
-        return self._video_catalog_id
+    def table_metainfo(self):
+        return self._table_metainfo
 
     @property
     def value_list(self):
@@ -329,8 +320,7 @@ class LogicalInsert(Operator):
         if not isinstance(other, LogicalInsert):
             return False
         return (is_subtree_equal
-                and self.video == other.video
-                and self.video_catalog_id == other.video_catalog_id
+                and self.table_metainfo == other.table_metainfo
                 and self.value_list == other.value_list
                 and self.column_list == other.column_list)
 
@@ -340,13 +330,12 @@ class LogicalCreate(Operator):
 
     Arguments:
         video {TableRef}: [video table that is to be created]
-        column_list {List[DataFrameColumn]}:
-            [After binding annotated column_list]
+        column_list {List[ColumnDefinition]}:
         if_not_exists {bool}: [create table if exists]
 
     """
 
-    def __init__(self, video: TableRef, column_list: List[DataFrameColumn],
+    def __init__(self, video: TableRef, column_list: List[ColumnDefinition],
                  if_not_exists: bool = False, children=None):
         super().__init__(OperatorType.LOGICALCREATE, children)
         self._video = video
