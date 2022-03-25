@@ -39,7 +39,7 @@ class LoadVideoExecutor(AbstractExecutor):
         Read the input video using opencv and persist data
         using storage engine
         """
-        
+
         # We currently use create to empty existing table.
         StorageEngine.create(self.node.table_metainfo)
 
