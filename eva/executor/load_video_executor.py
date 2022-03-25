@@ -29,8 +29,9 @@ class LoadVideoExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.path_prefix = config.get_value('storage', 'path_prefix')
+        self.path_prefix = ConfigurationManager().get_value(
+            'storage',
+            'path_prefix')
 
     def validate(self):
         pass
