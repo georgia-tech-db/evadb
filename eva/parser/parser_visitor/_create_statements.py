@@ -41,7 +41,7 @@ class CreateTable(evaql_parserVisitor):
                 rule_idx = child.getRuleIndex()
 
                 if rule_idx == evaql_parser.RULE_tableName:
-                    table_ref = self.visit(ctx.tableName())
+                    table_ref = TableRef(self.visit(ctx.tableName()))
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
                     if_not_exists = True

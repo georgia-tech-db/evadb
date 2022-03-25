@@ -218,9 +218,10 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     return metadata
 
 
-def create_table_metadata(table: TableRef, columns: List[ColumnDefinition]) \
+def create_table_metadata(table_ref: TableRef,
+                          columns: List[ColumnDefinition])\
         -> DataFrameMetadata:
-    table_name = table.table_name
+    table_name = table_ref.table.table_name
     column_metadata_list = create_column_metadata(columns)
     file_url = str(generate_file_path(table_name))
     metadata = CatalogManager().create_metadata(table_name,

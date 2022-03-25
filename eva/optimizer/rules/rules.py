@@ -572,7 +572,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def apply(self, before: LogicalCreateMaterializedView,
               context: OptimizerContext):
         after = CreateMaterializedViewPlan(before.view,
-                                           col_list=before.col_list,
+                                           columns=before.col_list,
                                            if_not_exists=before.if_not_exists)
         return after
 

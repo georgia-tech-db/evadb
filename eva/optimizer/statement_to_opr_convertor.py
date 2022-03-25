@@ -184,7 +184,6 @@ class StatementToPlanConvertor:
             statement {AbstractStatement} -- [Create statement]
         """
         table_ref = statement.table_ref
-
         if table_ref is None:
             LoggingManager().log("Missing Table Name In Create Statement",
                                  LoggingLevel.ERROR)

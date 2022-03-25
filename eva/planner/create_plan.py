@@ -30,17 +30,17 @@ class CreatePlan(AbstractPlan):
         if_not_exists {bool} -- Whether to override if there is existing table
     """
 
-    def __init__(self, video_ref: TableRef,
+    def __init__(self, table_ref: TableRef,
                  column_list: List[DataFrameColumn],
                  if_not_exists: bool = False):
         super().__init__(PlanOprType.CREATE)
-        self._video_ref = video_ref
+        self._table_ref = table_ref
         self._column_list = column_list
         self._if_not_exists = if_not_exists
 
     @property
-    def video_ref(self):
-        return self._video_ref
+    def table_ref(self):
+        return self._table_ref
 
     @property
     def if_not_exists(self):
