@@ -283,7 +283,6 @@ class LogicalUnion(Operator):
         return (is_subtree_equal and self.all == other.all)
 
 
-'''
 class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
@@ -324,7 +323,6 @@ class LogicalInsert(Operator):
                 and self.table_metainfo == other.table_metainfo
                 and self.value_list == other.value_list
                 and self.column_list == other.column_list)
-'''
 
 
 class LogicalCreate(Operator):
