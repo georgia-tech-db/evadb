@@ -13,50 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
-from pathlib import Path
-
-from eva.planner.load_data_plan import LoadDataPlan
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import VideoStorageEngine
-from eva.models.storage.batch import Batch
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.executor.load_csv_executor import LoadCSVExecutor
+from eva.executor.load_video_executor import LoadVideoExecutor
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.parser.types import FileFormatType
 
 
 class LoadDataExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        self.upload_path = Path(
-            ConfigurationManager().get_value('storage', 'path_prefix'))
 
     def validate(self):
         pass
 
     def exec(self):
-        video_file_path = None
-        # Validate file_path
-        if Path(self.node.file_path).exists():
-            video_file_path = self.node.file_path
-        # check in the upload directory
-        else:
-            video_path = Path(self.upload_path / self.node.file_path)
-            if video_path.exists():
-                video_file_path = video_path
+        """
+        Use TYPE to determine the type of data to load.
+        """
 
-        if video_file_path is None:
-            error = 'Failed to find the video file {}'.format(
-                self.node.file_path)
-            LoggingManager().log(error, LoggingLevel.ERROR)
-            raise RuntimeError(error)
+        # invoke the appropriate executor
+        if self.node.file_options['file_format'] == FileFormatType.VIDEO:
+            executor = LoadVideoExecutor(self.node)
+        elif self.node.file_options['file_format'] == FileFormatType.CSV:
+            executor = LoadCSVExecutor(self.node)
 
-        success = VideoStorageEngine.create(
-            self.node.table_metainfo, video_file_path)
-
-        # ToDo: Add logic for indexing the video file
-        # Create an index of I frames to speed up random video seek
-        if success:
-            yield Batch(pd.DataFrame({'Video': str(self.node.file_path)},
-                                     index=[0]))
+        # for each batch, exec the executor
+        for batch in executor.exec():
+            yield batch

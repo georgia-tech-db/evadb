@@ -15,10 +15,14 @@
 import unittest
 import pandas as pd
 from pathlib import Path
-from mock import patch
+from mock import patch, call
+
 from eva.executor.load_executor import LoadDataExecutor
 from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.parser.types import FileFormatType
+from test.util import create_sample_csv, file_remove
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class LoadExecutorTest(unittest.TestCase):
@@ -71,14 +75,57 @@ class LoadExecutorTest(unittest.TestCase):
         file_path = 'video'
         table_metainfo = 'info'
         batch_mem_size = 3000
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
+        column_list = None
         plan = type(
             "LoadDataPlan", (), {
-                'file_path': file_path,
                 'table_metainfo': table_metainfo,
-                'batch_mem_size': batch_mem_size})
+                'file_path': file_path,
+                'batch_mem_size': batch_mem_size,
+                'column_list': column_list,
+                'file_options': file_options})
 
         load_executor = LoadDataExecutor(plan)
         with patch.object(Path, 'exists') as mock_exists:
             mock_exists.side_effect = [False, False]
             with self.assertRaises(RuntimeError):
                 next(load_executor.exec())
+
+    @patch('eva.storage.storage_engine.StorageEngine.write')
+    def test_should_call_csv_reader_and_storage_engine(
+            self, write_mock):
+        batch_frames = [list(range(5))] * 2
+
+        # creates a dummy.csv
+        create_sample_csv()
+
+        file_path = 'dummy.csv'
+        table_metainfo = 'info'
+        batch_mem_size = 3000
+        file_options = {}
+        file_options['file_format'] = FileFormatType.CSV
+        column_list = [
+            TupleValueExpression(col_name='id', table_name='dummy'),
+            TupleValueExpression(col_name='frame_id', table_name='dummy'),
+            TupleValueExpression(col_name='video_id', table_name='dummy')
+        ]
+        plan = type(
+            "LoadDataPlan", (), {
+                'table_metainfo': table_metainfo,
+                'file_path': file_path,
+                'batch_mem_size': batch_mem_size,
+                'column_list': column_list,
+                'file_options': file_options})
+
+        load_executor = LoadDataExecutor(plan)
+        batch = next(load_executor.exec())
+        write_mock.has_calls(call(table_metainfo, batch_frames[0]), call(
+            table_metainfo, batch_frames[1]))
+
+        # Note: We call exec() from the child classes.
+        self.assertEqual(batch, Batch(pd.DataFrame(
+            [{'CSV': file_path, 'Number of loaded frames': 20}])))
+
+        # remove the dummy.csv
+        file_remove('dummy.csv')
