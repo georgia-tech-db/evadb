@@ -27,17 +27,20 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 
 class LoadExecutorTest(unittest.TestCase):
 
-    @patch('eva.executor.load_executor.VideoStorageEngine.create')
+    @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_call_opencv_reader_and_storage_engine(
             self, create_mock):
         file_path = 'video'
         table_metainfo = 'info'
         batch_mem_size = 3000
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
         plan = type(
             "LoadDataPlan", (), {
-                'file_path': file_path,
                 'table_metainfo': table_metainfo,
-                'batch_mem_size': batch_mem_size})
+                'file_path': file_path,
+                'batch_mem_size': batch_mem_size,
+                'file_options': file_options})
 
         load_executor = LoadDataExecutor(plan)
         with patch.object(Path, 'exists') as mock_exists:
@@ -47,7 +50,7 @@ class LoadExecutorTest(unittest.TestCase):
             self.assertEqual(batch, Batch(pd.DataFrame(
                 [{'Video': file_path}])))
 
-    @patch('eva.executor.load_executor.VideoStorageEngine.create')
+    @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_search_in_upload_directory(
             self, create_mock):
         self.upload_path = Path(
@@ -55,11 +58,14 @@ class LoadExecutorTest(unittest.TestCase):
         file_path = 'video'
         table_metainfo = 'info'
         batch_mem_size = 3000
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
         plan = type(
             "LoadDataPlan", (), {
-                'file_path': file_path,
                 'table_metainfo': table_metainfo,
-                'batch_mem_size': batch_mem_size})
+                'file_path': file_path,
+                'batch_mem_size': batch_mem_size,
+                'file_options': file_options})
 
         load_executor = LoadDataExecutor(plan)
         with patch.object(Path, 'exists') as mock_exists:
@@ -70,7 +76,7 @@ class LoadExecutorTest(unittest.TestCase):
             self.assertEqual(batch, Batch(pd.DataFrame(
                 [{'Video': file_path}])))
 
-    @patch('eva.executor.load_executor.VideoStorageEngine.create')
+    @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_fail_to_find_file(self, create_mock):
         file_path = 'video'
         table_metainfo = 'info'
