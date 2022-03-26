@@ -33,6 +33,7 @@ class StatementType(IntEnum):
     CREATE_UDF = 4,
     LOAD_DATA = 5,
     UPLOAD = 6,
+    CREATE_MATERIALIZED_VIEW = 7,
     # add other types
 
 

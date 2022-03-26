@@ -71,7 +71,7 @@ def create_sample_csv(num_frames=NUM_FRAMES):
         os.remove(os.path.join(PATH_PREFIX, 'dummy.csv'))
     except FileNotFoundError:
         pass
-    
+
     sample_meta = {}
 
     index = 0
@@ -83,22 +83,22 @@ def create_sample_csv(num_frames=NUM_FRAMES):
             sample_meta[index] = {
                 'id': index,
                 'frame_id': frame_id,
-                'video_id': video_id, 
+                'video_id': video_id,
                 'dataset_name': 'test_dataset',
                 'label': sample_labels[np.random.choice(len(sample_labels))],
                 'bbox': ",".join([str(coord) for coord in random_coords]),
                 'object_id': np.random.choice(3)
             }
-            
+
             index += 1
-            
+
     df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(os.path.join(PATH_PREFIX, 'dummy.csv'), 
+    df_sample_meta.to_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
                           index=False)
 
 
 def create_dummy_csv_batches():
-    df = pd.read_csv(os.path.join(PATH_PREFIX, 'dummy.csv'), 
+    df = pd.read_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
                      converters={'bbox': convert_bbox})
     return Batch(df)
 
@@ -176,7 +176,7 @@ class DummyObjectDetector(AbstractClassifierUDF):
         # odd are labeled bicycle and even person
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 2 + 1]
-        return [label]
+        return np.array([label])
 
 
 class DummyMultiObjectDetector(AbstractClassifierUDF):

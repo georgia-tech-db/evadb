@@ -16,9 +16,11 @@
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.create_statement import CreateTableStatement, ColumnDefinition
 from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.parser.create_statement import ColConstraintInfo
-
+from eva.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 from eva.catalog.column_type import ColumnType, NdArrayType, Dimension
 
 
@@ -39,7 +41,7 @@ class CreateTable(evaql_parserVisitor):
                 rule_idx = child.getRuleIndex()
 
                 if rule_idx == evaql_parser.RULE_tableName:
-                    table_ref = self.visit(ctx.tableName())
+                    table_ref = TableRef(self.visit(ctx.tableName()))
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
                     if_not_exists = True
@@ -227,3 +229,20 @@ class CreateTable(evaql_parserVisitor):
         elif ctx.ANYDIM() is not None:
             decimal = Dimension.ANYDIM
         return decimal
+
+    # MATERIALIZED VIEW
+    def visitCreateMaterializedView(
+            self, ctx: evaql_parser.CreateMaterializedViewContext):
+        view_name = self.visit(ctx.tableName())
+        view_ref = TableRef(view_name)
+        if_not_exists = False
+        if ctx.ifNotExists():
+            if_not_exists = True
+        uid_list = self.visit(ctx.uidList())
+        # setting all other column definition attributes as None,
+        # need to figure from query
+        col_list = [ColumnDefinition(
+            uid.col_name, None, None, None) for uid in uid_list]
+        query = self.visit(ctx.selectStatement())
+        return CreateMaterializedViewStatement(view_ref, col_list,
+                                               if_not_exists, query)

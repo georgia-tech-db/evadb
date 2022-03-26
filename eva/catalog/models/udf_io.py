@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 from ast import literal_eval
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
 
 
@@ -79,13 +79,21 @@ class UdfIO(BaseModel):
 
     @property
     def array_dimensions(self):
-        if (self._array_dimensions == "[<Dimension.ANYDIM: -1>]"):
-            return None
         return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
     def array_dimensions(self, value: List[int]):
-        self._array_dimensions = str(value)
+        # Refer df_column.py:array_dimensions
+        if not isinstance(value, list):
+            self._array_dimensions = str(value)
+        else:
+            dimensions = []
+            for dim in value:
+                if dim == Dimension.ANYDIM:
+                    dimensions.append(None)
+                else:
+                    dimensions.append(dim)
+            self._array_dimensions = str(dimensions)
 
     @property
     def is_input(self):

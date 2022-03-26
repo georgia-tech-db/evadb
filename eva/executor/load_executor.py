@@ -45,5 +45,3 @@ class LoadDataExecutor(AbstractExecutor):
         # for each batch, exec the executor
         for batch in executor.exec():
             yield batch
-
-

@@ -14,8 +14,9 @@
 # limitations under the License.
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
-from eva.optimizer.operators import (LogicalGet, LogicalFilter, LogicalProject,
-                                     LogicalInsert, LogicalCreate,
+from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
+                                     LogicalFilter, LogicalProject,
+                                     LogicalCreate,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
@@ -25,11 +26,13 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
-from eva.optimizer.optimizer_utils import (bind_table_ref, bind_columns_expr,
+from eva.optimizer.optimizer_utils import (bind_columns_expr,
                                            bind_predicate_expr,
-                                           create_column_metadata,
                                            bind_dataset,
                                            column_definition_to_udf_io,
                                            create_video_metadata)
@@ -153,18 +156,18 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} -- [input insert statement]
         """
-        # Bind the table reference
+        '''
         table_ref = statement.table
-        catalog_table_id = bind_table_ref(table_ref.table)
+        table_metainfo = bind_dataset(table_ref.table)
+        if table_metainfo is None:
+            # Create a new metadata object
+            table_metainfo = create_video_metadata(table_ref.table.table_name)
+
+        # populate self._column_map
+        self._populate_column_map(table_metainfo)
 
         # Bind column_list
-        col_list = statement.column_list
-        for col in col_list:
-            if col.table_name is None:
-                col.table_name = table_ref.table.table_name
-            if col.table_metadata_id is None:
-                col.table_metadata_id = catalog_table_id
-        bind_columns_expr(col_list, {})
+        bind_columns_expr(statement.column_list, self._column_map)
 
         # Nothing to be done for values as we add support for other variants of
         # insert we will handle them
@@ -172,8 +175,9 @@ class StatementToPlanConvertor:
 
         # Ready to create Logical node
         insert_opr = LogicalInsert(
-            table_ref, catalog_table_id, col_list, value_list)
+            table_ref, table_metainfo, statement.column_list, value_list)
         self._plan = insert_opr
+        '''
 
     def visit_create(self, statement: AbstractStatement):
         """Convertor for parsed insert Statement
@@ -181,16 +185,13 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} -- [Create statement]
         """
-        video_ref = statement.table_ref
-        if video_ref is None:
+        table_ref = statement.table_ref
+        if table_ref is None:
             LoggingManager().log("Missing Table Name In Create Statement",
                                  LoggingLevel.ERROR)
 
-        if_not_exists = statement.if_not_exists
-        column_metadata_list = create_column_metadata(statement.column_list)
-
         create_opr = LogicalCreate(
-            video_ref, column_metadata_list, if_not_exists)
+            table_ref, statement.column_list, statement.if_not_exists)
         self._plan = create_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):
@@ -221,16 +222,22 @@ class StatementToPlanConvertor:
         table_ref = statement.table
         table_metainfo = bind_dataset(table_ref.table)
         if table_metainfo is None:
-            # Create a new metadata object
-            table_metainfo = create_video_metadata(table_ref.table.table_name)
-
+            if statement.file_options['file_format'] == FileFormatType.VIDEO:
+                # Create a new metadata object
+                table_metainfo = create_video_metadata(
+                    table_ref.table.table_name)
+            else:
+                error = '{} does not exists. Create the table using \
+                            CREATE TABLE.'.format(table_ref.table.table_name)
+                LoggingManager().log(error, LoggingLevel.ERROR)
+                raise RuntimeError(error)
         # populate self._column_map
         self._populate_column_map(table_metainfo)
-        
+
         # if query had columns specified, we just copy them
         if statement.column_list is not None:
             column_list = statement.column_list
-        
+
         # else we curate the column list from the metadata
         else:
             column_list = []
@@ -238,14 +245,14 @@ class StatementToPlanConvertor:
                 column_list.append(
                     TupleValueExpression(
                         col_name=column.name,
-                        table_name=table_metainfo.name, 
+                        table_name=table_metainfo.name,
                         col_object=column))
-        
+
         # bind the columns
         bind_columns_expr(column_list, self._column_map)
-        
-        load_data_opr = LogicalLoadData(table_metainfo, 
-                                        statement.path, 
+
+        load_data_opr = LogicalLoadData(table_metainfo,
+                                        statement.path,
                                         column_list,
                                         statement.file_options)
         self._plan = load_data_opr
@@ -258,6 +265,15 @@ class StatementToPlanConvertor:
 
         upload_opr = LogicalUpload(statement.path, statement.video_blob)
         self._plan = upload_opr
+
+    def visit_materialized_view(self,
+                                statement: CreateMaterializedViewStatement):
+        mat_view_opr = LogicalCreateMaterializedView(
+            statement.view_ref, statement.col_list, statement.if_not_exists)
+
+        self.visit_select(statement.query)
+        mat_view_opr.append_child(self._plan)
+        self._plan = mat_view_opr
 
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
@@ -279,6 +295,8 @@ class StatementToPlanConvertor:
             self.visit_load_data(statement)
         elif isinstance(statement, UploadStatement):
             self.visit_upload(statement)
+        elif isinstance(statement, CreateMaterializedViewStatement):
+            self.visit_materialized_view(statement)
         return self._plan
 
     @property

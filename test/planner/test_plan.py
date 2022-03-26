@@ -17,6 +17,7 @@ from eva.parser.table_ref import TableRef, TableInfo
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.column_type import ColumnType
 from eva.catalog.catalog_manager import CatalogManager
+from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 
 from eva.planner.create_plan import CreatePlan
 from eva.planner.insert_plan import InsertPlan
@@ -39,11 +40,11 @@ class PlanNodeTests(unittest.TestCase):
         CatalogManager().reset()
         columns = [DataFrameColumn('id', ColumnType.INTEGER),
                    DataFrameColumn('name', ColumnType.TEXT,
-                                   array_dimensions=50)]
+                                   array_dimensions=[50])]
         dummy_plan_node = CreatePlan(dummy_table, columns, False)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.CREATE)
         self.assertEqual(dummy_plan_node.if_not_exists, False)
-        self.assertEqual(dummy_plan_node.video_ref.table.table_name,
+        self.assertEqual(dummy_plan_node.table_ref.table.table_name,
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
@@ -123,3 +124,11 @@ class PlanNodeTests(unittest.TestCase):
         plan = UnionPlan(all)
         self.assertEqual(plan.opr_type, PlanOprType.UNION)
         self.assertEqual(plan.all, all)
+
+    def test_create_materialized_view_plan(self):
+        dummy_view = TableRef(TableInfo('dummy'))
+        columns = ['id', 'id2']
+        plan = CreateMaterializedViewPlan(dummy_view, columns)
+        self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
+        self.assertEqual(plan.view, dummy_view)
+        self.assertEqual(plan.columns, columns)
