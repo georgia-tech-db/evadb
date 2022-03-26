@@ -15,7 +15,7 @@ executor:
   gpus: {'127.0.0.1': [0]}
 storage:
   engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
-  video_engine: "eva.storage.video_storage_engine.VideoStorageEngine"
+  video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
   video_engine_version: 0
   path_prefix: "/tmp"
 

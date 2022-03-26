@@ -26,7 +26,7 @@ from eva.utils.logging_manager import LoggingManager
 from eva.utils.logging_manager import LoggingLevel
 
 
-class VideoStorageEngine(AbstractStorageEngine):
+class OpenCVStorageEngine(AbstractStorageEngine):
 
     def __init__(self):
         self.metadata = 'metadata'
@@ -35,10 +35,7 @@ class VideoStorageEngine(AbstractStorageEngine):
 
     def create(self, table: DataFrameMetadata, video_file: Path):
         # Create directory to store video and metadata related to the video
-        print('Lol')
         dir_path = Path(table.file_url)
-        print(dir_path)
-        print(dir_path.exists())
         try:
             dir_path.mkdir(parents=True)
             shutil.copy2(str(video_file), str(dir_path))

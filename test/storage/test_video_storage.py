@@ -17,7 +17,7 @@ import unittest
 import mock
 from mock import mock_open
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.storage.video_storage_engine import VideoStorageEngine
+from eva.storage.storage_engine import VideoStorageEngine
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.configuration.configuration_manager import ConfigurationManager
