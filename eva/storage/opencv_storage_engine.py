@@ -82,7 +82,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)
             data = struct.pack('!HH%ds' % (length,), self.curr_version,
-                    length, file_path_bytes)
+                               length, file_path_bytes)
             f.write(data)
 
     def _open(self, table):
