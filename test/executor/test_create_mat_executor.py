@@ -24,7 +24,7 @@ from eva.planner.types import PlanOprType
 
 
 class CreateMaterializedExecutorTest(unittest.TestCase):
-    @patch('eva.executor.create_mat_view_executor.check_table_exists')
+    @patch('eva.executor.create_mat_view_executor.handle_if_not_exists')
     def test_support_only_seq_scan(self, mock_check):
         mock_check.return_value = False
         dummy_view = TableRef(TableInfo('dummy'))
@@ -40,7 +40,7 @@ class CreateMaterializedExecutorTest(unittest.TestCase):
                 create_udf_executor.append_child(child)
                 create_udf_executor.exec()
 
-    @patch('eva.executor.create_mat_view_executor.check_table_exists')
+    @patch('eva.executor.create_mat_view_executor.handle_if_not_exists')
     def test_raises_mismatch_columns(self, mock_check):
         mock_check.return_value = False
         dummy_view = TableRef(TableInfo('dummy'))

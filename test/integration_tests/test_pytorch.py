@@ -17,41 +17,31 @@ import unittest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
-from test.util import copy_sample_video_to_prefix, file_remove
+from test.util import (copy_sample_video_to_prefix,
+                       file_remove, load_inbuilt_udfs)
 
 
 class PytorchTest(unittest.TestCase):
-
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         CatalogManager().reset()
         copy_sample_video_to_prefix()
-
-    def tearDown(self):
-        file_remove('ua_detrac.mp4')
-
-    def test_should_run_pytorch_and_fastrcnn(self):
         query = """LOAD DATA INFILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
+        load_inbuilt_udfs()
 
-        create_udf_query = """CREATE UDF FastRCNNObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'eva/udfs/fastrcnn_object_detector.py';
-        """
-        execute_query_fetch_all(create_udf_query)
+    @classmethod
+    def tearDownClass(cls):
+        file_remove('ua_detrac.mp4')
 
+    def test_should_run_pytorch_and_fastrcnn(self):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
 
     def test_should_run_pytorch_and_ssd(self):
-        query = """LOAD DATA INFILE 'ua_detrac.mp4'
-                   INTO MyVideo;"""
-        execute_query_fetch_all(query)
-
         create_udf_query = """CREATE UDF SSDObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))

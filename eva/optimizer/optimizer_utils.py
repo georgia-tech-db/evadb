@@ -192,7 +192,7 @@ def create_table_metadata(table_ref: TableRef,
     return metadata
 
 
-def check_table_exists(table_ref: TableRef, if_not_exist=False):
+def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
     if CatalogManager().check_table_exists(table_ref.table.database_name,
                                            table_ref.table.table_name):
         err_msg = 'Table: {} already exsits'.format(table_ref)
