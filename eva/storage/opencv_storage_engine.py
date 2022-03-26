@@ -79,11 +79,11 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         # <version> <length> <file_name>
         with open(dir_path / self.metadata, 'wb') as f:
             # write version number
-            f.write(struct.pack('!H', self.curr_version))
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)
-            f.write(struct.pack('!H', length))
-            f.write(file_path_bytes)
+            data = struct.pack('!HH%ds' % (length,), self.curr_version,
+                    length, file_path_bytes)
+            f.write(data)
 
     def _open(self, table):
         pass
