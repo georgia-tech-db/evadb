@@ -17,7 +17,7 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
-from eva.storage.storage_engine import StorageEngine
+from eva.storage.storage_engine import VideoStorageEngine
 from eva.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, create_sample_csv
 from test.util import create_dummy_batches, create_dummy_csv_batches
@@ -44,9 +44,8 @@ class LoadExecutorTest(unittest.TestCase):
 
         metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
         actual_batch = Batch(pd.DataFrame())
-        actual_batch = Batch.concat(StorageEngine.read(metadata,
-                                                       batch_mem_size=3000),
-                                    copy=False)
+        actual_batch = Batch.concat(VideoStorageEngine.read(
+            metadata, batch_mem_size=3000), copy=False)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)

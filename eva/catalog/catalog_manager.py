@@ -75,7 +75,8 @@ class CatalogManager(object):
 
     def create_metadata(self, name: str, file_url: str,
                         column_list: List[DataFrameColumn],
-                        identifier_column='id') -> \
+                        identifier_column='id',
+                        is_video=False) -> \
             DataFrameMetadata:
         """Creates metadata object
 
@@ -87,13 +88,13 @@ class CatalogManager(object):
             file_url: #todo
             column_list: list of columns
             identifier_column (str):  A unique identifier column for each row
-
+            is_video (bool): True if the table is a video
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column)
+            name, file_url, identifier_id=identifier_column, is_video=is_video)
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)

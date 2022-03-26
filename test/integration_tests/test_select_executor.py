@@ -177,3 +177,7 @@ class SelectExecutorTest(unittest.TestCase):
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
+
+
+if __name__ == '__main__':
+    unittest.main()

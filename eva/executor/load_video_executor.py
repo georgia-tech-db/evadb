@@ -13,23 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import pandas as pd
+from pathlib import Path
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.readers.opencv_reader import OpenCVReader
-from eva.storage.storage_engine import StorageEngine
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.storage.storage_engine import VideoStorageEngine
+from eva.models.storage.batch import Batch
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.utils.logging_manager import LoggingManager
+from eva.utils.logging_manager import LoggingLevel
 
 
 class LoadVideoExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.path_prefix = config.get_value('storage', 'path_prefix')
+        self.upload_path = Path(ConfigurationManager().get_value(
+            'storage',
+            'path_prefix'))
 
     def validate(self):
         pass
@@ -40,25 +42,27 @@ class LoadVideoExecutor(AbstractExecutor):
         using storage engine
         """
 
-        # We currently use create to empty existing table.
-        StorageEngine.create(self.node.table_metainfo)
+        video_file_path = None
+        # Validate file_path
+        if Path(self.node.file_path).exists():
+            video_file_path = self.node.file_path
+        # check in the upload directory
+        else:
+            video_path = Path(self.upload_path / self.node.file_path)
+            if video_path.exists():
+                video_file_path = video_path
 
-        # read the video with opencv
-        video_reader = OpenCVReader(
-            os.path.join(self.path_prefix, self.node.file_path),
-            batch_mem_size=self.node.batch_mem_size)
+        if video_file_path is None:
+            error = 'Failed to find the video file {}'.format(
+                self.node.file_path)
+            LoggingManager().log(error, LoggingLevel.ERROR)
+            raise RuntimeError(error)
 
-        # write with storage engine in batches
-        num_loaded_frames = 0
-        for batch in video_reader.read():
-            StorageEngine.write(self.node.table_metainfo, batch)
-            num_loaded_frames += len(batch)
+        success = VideoStorageEngine.create(
+            self.node.table_metainfo, video_file_path)
 
-        # yield result
-        df_yield_result = Batch(
-            pd.DataFrame({
-                'Video': str(self.node.file_path),
-                'Num Loaded Frames': num_loaded_frames
-            }, index=[0]))
-
-        yield df_yield_result
+        # ToDo: Add logic for indexing the video file
+        # Create an index of I frames to speed up random video seek
+        if success:
+            yield Batch(pd.DataFrame({'Video': str(self.node.file_path)},
+                                     index=[0]))

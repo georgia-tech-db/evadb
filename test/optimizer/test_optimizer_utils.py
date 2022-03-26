@@ -128,7 +128,7 @@ class OptimizerUtilsTest(unittest.TestCase):
         m_cci.assert_called_once_with(unique=True)
         m_cd.assert_has_calls(calls)
         catalog_ins.create_metadata.assert_called_with(
-            name, uri, 'col_metadata', identifier_column='id')
+            name, uri, 'col_metadata', identifier_column='id', is_video=True)
         self.assertEqual(actual, expected)
 
     @patch('eva.optimizer.optimizer_utils.CatalogManager.check_table_exists')

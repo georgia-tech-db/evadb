@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
@@ -25,8 +24,6 @@ class LoadDataExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.path_prefix = config.get_value('storage', 'path_prefix')
 
     def validate(self):
         pass
