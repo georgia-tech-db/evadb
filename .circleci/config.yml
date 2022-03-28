@@ -40,6 +40,10 @@ jobs:
             sh script/test/test.sh
             coveralls
 
+      - store_test_results: 
+          path: test-results
+            
+
 workflows:
   main:
     jobs:
