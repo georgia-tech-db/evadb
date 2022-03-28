@@ -18,10 +18,10 @@ from pathlib import Path
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef
 from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
-from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.udf_io import UdfIO
 
 
@@ -45,6 +45,7 @@ class OperatorType(IntEnum):
     LOGICALSAMPLE = auto()
     LOGICALJOIN = auto()
     LOGICALFUNCTIONSCAN = auto()
+    LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -289,33 +290,25 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        video {TableRef}:
-            [TableRef object copied from parsed statement]
-        video_catalog_id{int}:
-            [catalog id for the video table]
+        table_metainfo(DataFrameMetadata): table to intert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
             [value list to insert]
     """
 
-    def __init__(self, video: TableRef, video_catalog_id: int,
+    def __init__(self, table_metainfo: DataFrameMetadata,
                  column_list: List[AbstractExpression],
                  value_list: List[AbstractExpression],
                  children: List = None):
         super().__init__(OperatorType.LOGICALINSERT, children)
-        self._video = video
-        self._video_catalog_id = video_catalog_id
+        self._table_metainfo = table_metainfo
         self._column_list = column_list
         self._value_list = value_list
 
     @property
-    def video(self):
-        return self._video
-
-    @property
-    def video_catalog_id(self):
-        return self._video_catalog_id
+    def table_metainfo(self):
+        return self._table_metainfo
 
     @property
     def value_list(self):
@@ -330,8 +323,7 @@ class LogicalInsert(Operator):
         if not isinstance(other, LogicalInsert):
             return False
         return (is_subtree_equal
-                and self.video == other.video
-                and self.video_catalog_id == other.video_catalog_id
+                and self.table_metainfo == other.table_metainfo
                 and self.value_list == other.value_list
                 and self.column_list == other.column_list)
 
@@ -341,13 +333,12 @@ class LogicalCreate(Operator):
 
     Arguments:
         video {TableRef}: [video table that is to be created]
-        column_list {List[DataFrameColumn]}:
-            [After binding annotated column_list]
+        column_list {List[ColumnDefinition]}:
         if_not_exists {bool}: [create table if exists]
 
     """
 
-    def __init__(self, video: TableRef, column_list: List[DataFrameColumn],
+    def __init__(self, video: TableRef, column_list: List[ColumnDefinition],
                  if_not_exists: bool = False, children=None):
         super().__init__(OperatorType.LOGICALCREATE, children)
         self._video = video
@@ -459,10 +450,14 @@ class LogicalLoadData(Operator):
     """
 
     def __init__(self, table_metainfo: DataFrameMetadata,
-                 path: Path, children=None):
+                 path: Path,
+                 column_list: List[AbstractExpression] = None,
+                 file_options: dict = None, children=None):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
         self._table_metainfo = table_metainfo
         self._path = path
+        self._column_list = column_list
+        self._file_options = file_options
 
     @property
     def table_metainfo(self):
@@ -472,9 +467,21 @@ class LogicalLoadData(Operator):
     def path(self):
         return self._path
 
+    @property
+    def column_list(self):
+        return self._column_list
+
+    @property
+    def file_options(self):
+        return self._file_options
+
     def __str__(self):
-        return 'LogicalLoadData(table: {}, path: {})'.format(
-            self.table_metainfo, self.path)
+        return "LogicalLoadData(table: {}, path: {}, \
+                column_list: {}, \
+                file_options: {})".format(self.table_metainfo,
+                                          self.path,
+                                          self.column_list,
+                                          self.file_options)
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -482,7 +489,9 @@ class LogicalLoadData(Operator):
             return False
         return (is_subtree_equal
                 and self.table_metainfo == other.table_metainfo
-                and self.path == other.path)
+                and self.path == other.path
+                and self.column_list == other.column_list
+                and self.file_options == other.file_options)
 
 
 class LogicalUpload(Operator):
@@ -620,3 +629,40 @@ class LogicalJoin(Operator):
                 and self.predicate == other.predicate
                 and self.left_keys == other.left_keys
                 and self.right_keys == other.right_keys)
+
+class LogicalCreateMaterializedView(Operator):
+    """Logical node for create materiaziled view operations
+    Arguments:
+        view {TableRef}: [view table that is to be created]
+        col_list{List[ColumnDefinition]} -- column names in the view
+        if_not_exists {bool}: [whether to override if view exists]
+    """
+
+    def __init__(self, view: TableRef, col_list: List[ColumnDefinition],
+                 if_not_exists: bool = False, children=None):
+        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW,
+                         children)
+        self._view = view
+        self._col_list = col_list
+        self._if_not_exists = if_not_exists
+
+    @property
+    def view(self):
+        return self._view
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateMaterializedView):
+            return False
+        return (is_subtree_equal
+                and self.view == other.view
+                and self.col_list == other.col_list
+                and self.if_not_exists == other.if_not_exists)

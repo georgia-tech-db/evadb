@@ -33,4 +33,5 @@ class PlanOprType(Enum):
     JOIN = auto()
     LATERAL_JOIN = auto()
     BUILD_JOIN = auto()
+    CREATE_MATERIALIZED_VIEW = auto()
     # add other types

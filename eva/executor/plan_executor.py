@@ -27,6 +27,8 @@ from eva.executor.pp_executor import PPExecutor
 from eva.executor.create_executor import CreateExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.create_mat_view_executor \
+    import CreateMaterializedViewExecutor
 from eva.executor.load_executor import LoadDataExecutor
 from eva.executor.upload_executor import UploadExecutor
 from eva.executor.storage_executor import StorageExecutor
@@ -100,7 +102,8 @@ class PlanExecutor:
             executor_node = BuildJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
             executor_node = FunctionScanExecutor(node=plan)
-
+        elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
+            executor_node = CreateMaterializedViewExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))

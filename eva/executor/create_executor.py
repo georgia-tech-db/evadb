@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.create_plan import CreatePlan
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.utils.generic_utils import generate_file_path
 from eva.storage.storage_engine import StorageEngine
+from eva.optimizer.optimizer_utils import (create_table_metadata,
+                                           handle_if_not_exists)
 
 
 class CreateExecutor(AbstractExecutor):
@@ -29,19 +29,8 @@ class CreateExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Create table executor
-
-        Calls the catalog to create metadata corresponding to the table.
-        Calls the storage to create a spark dataframe from the metadata object.
-        """
-        if (self.node.if_not_exists):
-            # check catalog if we already have this table
-            return
-
-        table_name = self.node.video_ref.table_info.table_name
-        file_url = str(generate_file_path(table_name))
-        metadata = CatalogManager().create_metadata(table_name,
-                                                    file_url,
-                                                    self.node.column_list)
-
-        StorageEngine.create(table=metadata)
+        if not handle_if_not_exists(self.node.table_ref,
+                                    self.node.if_not_exists):
+            metadata = create_table_metadata(
+                self.node.table_ref, self.node.column_list)
+            StorageEngine.create(table=metadata)

@@ -13,49 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import pandas as pd
-
-from eva.planner.load_data_plan import LoadDataPlan
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import StorageEngine
-from eva.readers.opencv_reader import OpenCVReader
-from eva.models.storage.batch import Batch
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.load_csv_executor import LoadCSVExecutor
+from eva.executor.load_video_executor import LoadVideoExecutor
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.parser.types import FileFormatType
 
 
 class LoadDataExecutor(AbstractExecutor):
 
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.path_prefix = config.get_value('storage', 'path_prefix')
 
     def validate(self):
         pass
 
     def exec(self):
         """
-        Read the input video using opencv and persist data
-        using storage engine
+        Use TYPE to determine the type of data to load.
         """
 
-        # videos are persisted using (id, data) schema where id = frame_id
-        # and data = frame_data. Current logic supports loading a video into
-        # storage with the assumption that frame_id starts from 0. In case
-        # we want to append to the existing store we have to figure out the
-        # correct frame_id. It can also be a parameter based by the user.
+        # invoke the appropriate executor
+        if self.node.file_options['file_format'] == FileFormatType.VIDEO:
+            executor = LoadVideoExecutor(self.node)
+        elif self.node.file_options['file_format'] == FileFormatType.CSV:
+            executor = LoadCSVExecutor(self.node)
 
-        # We currently use create to empty existing table.
-        StorageEngine.create(self.node.table_metainfo)
-        num_loaded_frames = 0
-        video_reader = OpenCVReader(
-            os.path.join(self.path_prefix, self.node.file_path),
-            batch_mem_size=self.node.batch_mem_size)
-        for batch in video_reader.read():
-            StorageEngine.write(self.node.table_metainfo, batch)
-            num_loaded_frames += len(batch)
-
-        yield Batch(pd.DataFrame({'Video': str(self.node.file_path),
-                                  'Num Loaded Frames': num_loaded_frames},
-                                 index=[0]))
+        # for each batch, exec the executor
+        for batch in executor.exec():
+            yield batch

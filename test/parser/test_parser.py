@@ -14,6 +14,8 @@
 # limitations under the License.
 
 import unittest
+from eva.parser.create_mat_view_statement \
+    import CreateMaterializedViewStatement
 
 from eva.parser.parser import Parser
 from eva.parser.statement import AbstractStatement
@@ -32,7 +34,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 
 from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.types import ParserOrderBySortType
+from eva.parser.types import ParserOrderBySortType, FileFormatType
 from eva.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
@@ -358,13 +360,46 @@ class ParserTests(unittest.TestCase):
 
         self.assertEqual(create_udf_stmt, expected_stmt)
 
-    def test_load_data_statement(self):
+    def test_load_video_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD DATA INFILE 'data/video.mp4' INTO MyVideo;"""
+        load_data_query = """LOAD DATA INFILE 'data/video.mp4'
+                             INTO MyVideo WITH FORMAT VIDEO;"""
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
+        column_list = None
         expected_stmt = LoadDataStatement(
             TableRef(
                 TableInfo('MyVideo')),
-            Path('data/video.mp4'))
+            Path('data/video.mp4'),
+            column_list,
+            file_options)
+        eva_statement_list = parser.parse(load_data_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.LOAD_DATA)
+
+        load_data_stmt = eva_statement_list[0]
+        self.assertEqual(load_data_stmt, expected_stmt)
+
+    def test_load_csv_data_statement(self):
+        parser = Parser()
+        load_data_query = """LOAD DATA INFILE 'data/meta.csv'
+                             INTO
+                             MyMeta (id, frame_id, video_id, label)
+                             WITH FORMAT CSV;"""
+        file_options = {}
+        file_options['file_format'] = FileFormatType.CSV
+        expected_stmt = LoadDataStatement(
+            TableRef(
+                TableInfo('MyMeta')),
+            Path('data/meta.csv'), [
+                TupleValueExpression('id'),
+                TupleValueExpression('frame_id'),
+                TupleValueExpression('video_id'),
+                TupleValueExpression('label')],
+            file_options)
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -421,7 +456,9 @@ class ParserTests(unittest.TestCase):
 
     def test_should_return_false_for_unequal_expression(self):
         table = TableRef(TableInfo('MyVideo'))
-        load_stmt = LoadDataStatement(table, Path('data/video.mp4'))
+        load_stmt = LoadDataStatement(
+            table, Path('data/video.mp4'),
+            FileFormatType.VIDEO)
         insert_stmt = InsertTableStatement(table)
         create_udf = CreateUDFStatement(
             'udf', False, [
@@ -436,3 +473,22 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(insert_stmt, load_stmt)
         self.assertNotEqual(create_udf, insert_stmt)
         self.assertNotEqual(select_stmt, create_udf)
+
+    def test_materialized_view(self):
+        select_query = '''SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+                        WHERE id<5; '''
+        query = 'CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}'\
+            .format(select_query)
+        parser = Parser()
+        mat_view_stmt = parser.parse(query)
+        select_stmt = parser.parse(select_query)
+        expected_stmt = CreateMaterializedViewStatement(TableRef(
+            TableInfo('uadtrac_fastRCNN')), [
+                ColumnDefinition('id', None, None, None),
+                ColumnDefinition('labels', None, None, None)
+        ], False, select_stmt[0])
+        self.assertEqual(mat_view_stmt[0], expected_stmt)
+
+
+if __name__ == '__main__':
+    unittest.main()

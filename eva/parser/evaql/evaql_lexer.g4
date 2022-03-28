@@ -85,6 +85,12 @@ VALUES:                              'VALUES';
 WHERE:                               'WHERE';
 XOR:                                 'XOR';
 
+// File Formats
+WITH:                 'WITH';
+FORMAT:               'FORMAT';
+CSV:                  'CSV';
+VIDEO:                'VIDEO';
+
 // EVAQL keywords
 
 ERROR_BOUNDS:						 'ERROR_WITHIN';
@@ -145,6 +151,10 @@ INPUT:                          'INPUT';
 OUTPUT:                         'OUTPUT';
 TYPE:                           'TYPE';
 IMPL:                           'IMPL';
+
+// MATERIALIZED
+MATERIALIZED:                   'MATERIALIZED';
+VIEW:                           'VIEW';
 
 // Common function names
 

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum, unique, auto
+from enum import IntEnum, unique, Enum, auto
 
 
 class ColumnConstraintEnum(Enum):
@@ -33,6 +33,7 @@ class StatementType(Enum):
     CREATE_UDF = auto(),
     LOAD_DATA = auto(),
     UPLOAD = auto(),
+    CREATE_MATERIALIZED_VIEW = auto(),
     # add other types
 
 
@@ -49,3 +50,14 @@ class ParserOrderBySortType(Enum):
 class JoinType(Enum):
     LATERAL_JOIN = auto()
     HASH_JOIN = auto()
+    ASC = 1
+    DESC = 2
+
+
+@unique
+class FileFormatType(Enum):
+    """
+    Manages enums for all order by sort types
+    """
+    VIDEO = auto()
+    CSV = auto()
