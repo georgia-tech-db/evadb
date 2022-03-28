@@ -50,8 +50,6 @@ class ParserOrderBySortType(Enum):
 class JoinType(Enum):
     LATERAL_JOIN = auto()
     HASH_JOIN = auto()
-    ASC = 1
-    DESC = 2
 
 
 @unique

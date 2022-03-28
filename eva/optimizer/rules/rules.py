@@ -29,7 +29,7 @@ from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample, LogicalJoin, LogicalFunctionScan
+    LogicalSample, LogicalJoin, LogicalFunctionScan,
     LogicalCreateMaterializedView)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
@@ -698,7 +698,7 @@ class RulesManager:
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalJoinToPhysical(),
-            LogicalFunctionScanToPhysical()
+            LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical()
         ]
 

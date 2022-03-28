@@ -37,8 +37,9 @@ class SequentialScanExecutor(AbstractExecutor):
 
     def exec(self) -> Iterator[Batch]:
 
-        def seq_scan_ray_row(batch: Batch) -> Batch:
-            # TODO The filter may be transformed into a ray filter for performance
+        child_executor = self.children[0]
+        for batch in child_executor.exec():
+            # We do the predicate first
             if not batch.empty() and self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch).frames
                 batch = Batch(
@@ -50,9 +51,5 @@ class SequentialScanExecutor(AbstractExecutor):
                 batches = [expr.evaluate(batch) for expr in self.project_expr]
                 batch = Batch.merge_column_wise(batches)
 
-            # Due to map, we need to return even when the batch is empty
-            return batch
-
-        child_pipe = self.children[0].exec()
-        return child_pipe.map(seq_scan_ray_row)
-
+            if not batch.empty():
+                yield batch
