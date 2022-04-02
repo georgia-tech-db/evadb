@@ -29,7 +29,7 @@ class RayStage:
 
     def run_as_source(self, output_queue):
         if len(output_queue) > 1:
-            raise NotImplemented
+            raise NotImplementedError
 
         if len(self.funcs) == 0:
             return
@@ -37,22 +37,39 @@ class RayStage:
         first = self.funcs[0]()
         if not isinstance(first, types.GeneratorType):
             raise TypeError('The first function in the stage needs to return a generator')
-        
+
         for next_item in first:
             for f in self.funcs[1:]:
                 next_item = f(next_item)
             output_queue[0].put(next_item)
         output_queue[0].put(QueueStopSignal)
         
+    def run_as_node(self, input_queue, output_queue):
+        if len(input_queue) > 1 or len(output_queue) > 1:
+            raise NotImplementedError
+
+        if len(self.funcs) == 0:
+            return
+    
+        while True:
+            next_item = input_queue[0].get(block=True)
+            if next_item is QueueStopSignal:
+                input_queue[0].put(QueueStopSignal)
+                # This is buggy. Need to rethink the design
+                output_queue[0].put(QueueStopSignal)
+                break
+            for f in self.funcs:
+                next_item = f(next_item)
+            output_queue[0].put(next_item) 
+        
 
     def run_as_sink(self, input_queue):
         if len(input_queue) > 1:
-            raise NotImplemented
+            raise NotImplementedError
 
         if len(self.funcs) == 0:
             return
 
-        self.execution_count = 0
         while True:
             next_item = input_queue[0].get(block=True)
             if next_item is QueueStopSignal:
@@ -60,10 +77,7 @@ class RayStage:
                 break
             for f in self.funcs:
                 next_item = f(next_item)
-            self.execution_count += 1
 
-    def get_execution_count(self):
-        return self.execution_count
 
 
 def read(batch_size=1, limit=-1):
@@ -73,6 +87,7 @@ def read(batch_size=1, limit=-1):
     _, frame = video.read()
     count = 0
     while frame is not None:
+        #batch.append(Image.fromarray(frame[:, :, ::-1]))
         batch.append(frame)
         count += 1
         if limit > 0 and count > limit:
@@ -90,6 +105,7 @@ class FastRCNN:
         pass
 
     def prepare(self):
+        #self.model = torchvision.models.resnet18(pretrained=True)
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
         self.model.eval()
         self.device = torch.device('cuda')
@@ -153,7 +169,9 @@ class FastRCNN:
     def __call__(self, frames):
         c = Compose([transforms.ToTensor()])
         tensor = torch.cat([c(Image.fromarray(x[:, :, ::-1])).unsqueeze(0) for x in frames]).to(self.device)
+        #tensor = torch.cat([c(x).unsqueeze(0) for x in frames]).to(self.device)
         predictions = self.model(tensor)
+        #predictions = predictions.cpu()
         outcome = []
         for prediction in predictions:
             pred_class = [str(self.labels[i]) for i in
@@ -175,17 +193,27 @@ class FastRCNN:
 
 def post_process(outcome):
     return list([(c, b) for c, b, s in outcome])
-
-s = time.perf_counter()
 """
+s = time.perf_counter()
+
+BATCH_SIZE = 20
+LIMIT = 1999
+count = 0
+it = read(BATCH_SIZE, LIMIT)
+f = FastRCNN()
+gpu_time = 0
+f.prepare()
 for frame in it:
+    s = time.perf_counter()
     res = f(frame)
+    gpu_time += (time.perf_counter() -s)
     count += 1
     if count % 100 == 0:
         print('Completed rows: %s' % count)
 print("Total row: %s" % count)
 e = time.perf_counter()
 
+print(gpu_time)
 print('Total cost: %.2f' % (e-s))
 
 window = []
@@ -207,16 +235,18 @@ e = time.perf_counter()
 print('Total cost: %.2f' % (e-s))
 """
 
+s = time.perf_counter()
 queue = Queue(maxsize=100)
+output_queue = Queue(maxsize=100)
 
 consumers = []
 for _ in range(2):
     fast = FastRCNN()
-    consumers.append(RayStage.options(num_gpus=1).remote([fast, post_process]))
+    consumers.append(RayStage.options(num_gpus=1).remote([fast]))
 
 tasks = []
 for c in consumers:
-    tasks.append(c.run_as_sink.remote([queue]))
+    tasks.append(c.run_as_node.remote([queue], [output_queue]))
 
 BATCH_SIZE = 20
 LIMIT = -1
@@ -228,9 +258,20 @@ producer.run_as_source.remote([queue])
 #for batch in it:
 #    queue.put(batch)
 #queue.put(QueueStopSignal)
+count = 0
+stop_count = 0
+while True:
+    res = output_queue.get(block=True)
+    if res is QueueStopSignal:
+        stop_count += 1
+    else:
+        count += len(res)
+        if count % 100 == 0:
+            print('Completed rows: %s' % count)
+    if stop_count == 2:
+        break
+print('Total rows: %s' % count)
 
 ray.wait(tasks)
 e = time.perf_counter()
-for c in consumers:
-    print('Total execution: %s' % ray.get(c.get_execution_count.remote()))
 print('Total cost: %.2f' % (e-s))
