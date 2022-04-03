@@ -243,12 +243,12 @@ tableSourceItemWithSample
     ;
 
 tableSourceItem
-    : tableName                                  #atomTableItem
-    | subqueryTableSourceItem                    #subqueryTableItem
-    | LATERAL functionCall                       #lateralFunctionCallItem
+    : tableName                                         #atomTableItem
+    | subqueryTableSourceItem                           #subqueryTableItem
+    | LATERAL functionCall                              #lateralFunctionCallItem
     ;
 
-subqueryTableSourceItem    
+subqueryTableSourceItem
     : (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET

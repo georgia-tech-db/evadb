@@ -541,7 +541,7 @@ class LogicalFunctionScan(Operator):
     def __init__(self,
                  func_expr: AbstractExpression,
                  children: List = None):
-        super().__init__(OperatorType.LOGICAL_FUNCTION_SCAN, children)
+        super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
         self._func_expr = func_expr
 
     @property

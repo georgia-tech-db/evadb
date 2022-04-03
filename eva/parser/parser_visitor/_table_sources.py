@@ -36,7 +36,7 @@ class TableSources(evaql_parserVisitor):
             table_list.append(table)
         
         #For Join Operator
-        if table_sources_count == 2: # Do Not Support More Than 2 Sources
+        if table_sources_count > 1: # Do Not Support More Than 2 Sources
             left_child = table_list[0]
             right_source = table_list[1]
             
@@ -46,8 +46,8 @@ class TableSources(evaql_parserVisitor):
             elif right_source.is_table_atom():
                 join_type = JoinType.HASH_JOIN
             
-            right_child = JoinNode(left_child, right_source, join_type)
-            table_list = [left_child, right_child]
+            right_child = TableRef(JoinNode(left=left_child, right=right_source, join_type=join_type))
+            table_list = [right_child]
 
         return table_list
 
