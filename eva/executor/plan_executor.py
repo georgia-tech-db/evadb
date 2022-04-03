@@ -124,9 +124,7 @@ class PlanExecutor:
         """
         execution_tree = self._build_execution_tree(self._plan)
         output = execution_tree.exec()
-        if isinstance(output, DatasetPipeline):
-            yield from output.iter_rows()
-        elif output is not None:
+        if output is not None:
             # How to check output is Iterator[Batch]
             yield from output
         self._clean_execution_tree(execution_tree)
