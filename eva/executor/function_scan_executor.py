@@ -37,7 +37,6 @@ class FunctionScanExecutor(AbstractExecutor):
     def exec(self, lateral_input: Batch, *args, **kwargs) -> Iterator[Batch]:
         if not lateral_input.empty():
             res = self.func_expr.evaluate(lateral_input)
-            batch = Batch.merge_column_wise([res, lateral_input])
-            
-            if not batch.empty():
-                yield batch
+
+            if not res.empty():
+                yield res

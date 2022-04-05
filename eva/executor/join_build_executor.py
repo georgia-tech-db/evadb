@@ -11,8 +11,10 @@ class BuildJoinExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.join_predicate
         self.join_type = node.join_type
+
     def validate(self):
         pass
+
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec():

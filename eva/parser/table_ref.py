@@ -57,25 +57,26 @@ class TableInfo:
                 and self.schema_name == other.schema_name
                 and self.database_name == other.database_name)
 
+
 class JoinNode:
     def __init__(self,
-                left: 'TableRef' = None,
-                right: 'TableRef' = None,
-                predicate: AbstractExpression = None,
-                join_type: JoinType = None) -> None:
+                 left: 'TableRef' = None,
+                 right: 'TableRef' = None,
+                 predicate: AbstractExpression = None,
+                 join_type: JoinType = None) -> None:
         self.left = left
         self.right = right
         self.predicate = predicate
         self.join_type = join_type
-    
+
     def __eq__(self, other):
         if not isinstance(other, JoinNode):
             return False
-        return (self.left == other.left 
+        return (self.left == other.left
                 and self.right == other.right
                 and self.predicate == other.predicate
                 and self.join_type == other.join_type)
-    
+
     def __str__(self) -> str:
         return "JOIN {} ({}, {}) ON {}".format(self.join_type,
                                                self.left, self.right,
@@ -95,7 +96,7 @@ class TableRef:
 
     def __init__(self,
                  table: Union[TableInfo, FunctionExpression,
-                 SelectStatement, JoinNode],
+                              SelectStatement, JoinNode],
                  sample_freq: float = None):
         self._table = table
         self._sample_freq = sample_freq
@@ -107,16 +108,16 @@ class TableRef:
     @property
     def sample_freq(self):
         return self._sample_freq
-    
+
     def is_table_atom(self) -> bool:
         return isinstance(self.table, TableInfo)
-    
+
     def is_func_expr(self) -> bool:
         return isinstance(self.table, FunctionExpression)
 
     def is_select(self) -> bool:
         return isinstance(self.table, SelectStatement)
-    
+
     def is_join(self) -> bool:
         return isinstance(self.table, JoinNode)
 

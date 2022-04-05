@@ -119,6 +119,7 @@ class Promise(IntEnum):
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     PUSHDOWN_PROJECT_THROUGH_JOIN = auto()
 
+
 class Rule(ABC):
     """Base class to define any optimization rule
 
@@ -312,6 +313,7 @@ class PushdownProjectThroughSample(Rule):
         logical_get.target_list = before.target_list
         return sample
 
+
 class PushdownProjectThroughJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
@@ -325,14 +327,15 @@ class PushdownProjectThroughJoin(Rule):
 
     def promise(self):
         return Promise.PUSHDOWN_PROJECT_THROUGH_JOIN
-    
+
     def check(self, before: Operator, context: OptimizerContext):
         return True
-    
+
     def apply(self, before: LogicalProject, context: OptimizerContext):
         join = before.children[0]
-        join.target_list = before.target_list 
-        return join 
+        join.target_list = before.target_list
+        return join
+
 
 class PushdownFilterThroughJoin(Rule):
     def __init__(self):
@@ -344,13 +347,13 @@ class PushdownFilterThroughJoin(Rule):
         pattern_join.append_child(pattern_join_right)
         pattern.append_child(pattern_join)
         super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
-    
+
     def promise(self):
         return Promise.PUSHDOWN_FILTER_THROUGH_JOIN
-    
+
     def check(self, before: Operator, context: OptimizerContext):
         return True
-    
+
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         join = before.children[0]
         join.predicate = before.predicate
@@ -583,6 +586,7 @@ class LogicalLimitToPhysical(Rule):
         after = LimitPlan(before.limit_count)
         return after
 
+
 class LogicalFunctionScanToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFUNCTIONSCAN)
@@ -590,13 +594,14 @@ class LogicalFunctionScanToPhysical(Rule):
 
     def promise(self):
         return Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL
-    
+
     def check(self, before: Operator, context: OptimizerContext):
         return True
-    
+
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
         after = FunctionScanPlan(before.func_expr)
-        return after  
+        return after
+
 
 class LogicalJoinToPhysical(Rule):
     def __init__(self):
@@ -604,30 +609,30 @@ class LogicalJoinToPhysical(Rule):
         pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL, pattern)
-    
+
     def promise(self):
         return Promise.LOGICAL_JOIN_TO_PHYSICAL
-    
+
     def check(self, before: Operator, context: OptimizerContext):
         return True
-    
+
     def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
         cols = set()
         for col in dataset_metadata.columns:
             if not col.array_type:
                 cols.add(col.name)
-        return cols 
-    
+        return cols
+
     def extract_join_keys(self, join_node: LogicalJoin):
         left_table_metadata = join_node.lhs().dataset_metadata
         left_columns = self.get_columns_of_table(left_table_metadata)
         right_table_metadata = join_node.rhs().dataset_metadata
         right_columns = self.get_columns_of_table(right_table_metadata)
         return left_columns.intersection(right_columns)
-    
+
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         if join_node.join_type == JoinType.LATERAL_JOIN:
-            lateral_join_plan = LateralJoinBuildPlan(join_node.join_type, 
+            lateral_join_plan = LateralJoinBuildPlan(join_node.join_type,
                                                      [],
                                                      join_node.predicate,
                                                      join_node.target_list)
@@ -637,7 +642,8 @@ class LogicalJoinToPhysical(Rule):
                                            self.extract_join_keys(join_node),
                                            join_node.predicate,
                                            join_node.target_list)
-            return probe_side  
+            return probe_side
+
 
 class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):

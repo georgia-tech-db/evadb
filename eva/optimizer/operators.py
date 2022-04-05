@@ -529,6 +529,7 @@ class LogicalUpload(Operator):
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
 
+
 class LogicalFunctionScan(Operator):
     """
     Logical node for function table scans
@@ -554,6 +555,7 @@ class LogicalFunctionScan(Operator):
             return False
         return (is_subtree_equal
                 and self.func_expr == other.func_expr)
+
 
 class LogicalJoin(Operator):
     """
@@ -630,6 +632,7 @@ class LogicalJoin(Operator):
                 and self.predicate == other.predicate
                 and self.left_keys == other.left_keys
                 and self.right_keys == other.right_keys)
+
 
 class LogicalCreateMaterializedView(Operator):
     """Logical node for create materiaziled view operations

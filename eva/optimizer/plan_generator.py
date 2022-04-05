@@ -51,10 +51,10 @@ class PlanGenerator:
         #                                              /
         #                                            P1
         if (type(physical_plan) == HashJoinProbePlan):
-            build_plan = HashJoinBuildPlan(physical_plan.join_type,[])
+            build_plan = HashJoinBuildPlan(physical_plan.join_type, [])
             build_plan.append_child(physical_plan.children[0])
             physical_plan._children[0] = build_plan
-        
+
         return physical_plan
 
     def optimize(self, logical_plan: Operator):

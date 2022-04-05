@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-from ray.data.dataset_pipeline import DatasetPipeline
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor

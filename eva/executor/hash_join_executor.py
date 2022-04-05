@@ -12,14 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from posixpath import join
 from typing import Iterator
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
 # from eva.executor.abstract_executor import UPSTREAM_BATCH
 # from eva.planner.nested_loop_join_plan import NestedLoopJoin
-from eva.parser.types import JoinType
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 
 # from eva.utils.metrics import Metrics
@@ -60,15 +58,18 @@ class HashJoinExecutor(AbstractExecutor):
 
             cumm_inner_batch = Batch.concat(cumm_inner_batches)
             # build hash for the inner table
-            cumm_inner_batch.frames.index = cumm_inner_batch.frames[self.join_keys].apply(
+            cumm_inner_batch.frames.index = cumm_inner_batch.frames[
+                self.join_keys].apply(
                 lambda x: hash(tuple(x)), axis=1)
             # print('Mat size: ', cumm_inner_batch.batch_size)
             # build hash for the outer table
-            outer_batch.frames.index = outer_batch.frames[self.join_keys].apply(
+            outer_batch.frames.index = outer_batch.frames[
+                self.join_keys].apply(
                 lambda x: hash(tuple(x)), axis=1)
             # print(outer_batch.frames.id)
             join_batch = outer_batch.frames.merge(
-                    cumm_inner_batch.frames, left_index=True, right_index=True, how='left')
+                cumm_inner_batch.frames, left_index=True,
+                right_index=True, how='left')
             join_batch = join_batch.loc[:, ~
                                         join_batch.columns.str.endswith('_y')]
             join_batch.columns = join_batch.columns.str.rstrip('_x')
@@ -84,7 +85,7 @@ class HashJoinExecutor(AbstractExecutor):
             # Then do project
             if not join_batch.empty() and self.join_project is not None:
                 batches = [expr.evaluate(join_batch)
-                        for expr in self.join_project]
+                           for expr in self.join_project]
                 join_batch = Batch.merge_column_wise(batches)
 
             return join_batch
