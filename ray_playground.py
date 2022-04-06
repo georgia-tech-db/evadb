@@ -32,6 +32,36 @@ class RayStage:
                 f.prepare()
             self.funcs.append(f)
 
+    def run(self, input_queue, output_queue):
+        if len(input_queue) > 1 or len(output_queue) > 1:
+            raise NotImplementedError
+
+        if len(self.funcs) == 0:
+            return
+
+        if len(input_queue) == 0:
+            # source node
+            first = self.funcs[0]()
+            if not isinstance(first, types.GeneratorType):
+                raise TypeError('The first function in the first stage needs to return a generator')
+        
+            for next_item in first:
+                for f in self.funcs[1:]:
+                    next_item = f(next_item)
+                for q in output_queue:
+                    q.put(next_item)
+        else:
+            while True:
+                next_item = input_queue[0].get(block=True)
+                if next_item is StageCompleteSignal:
+                    input_queue[0].put(StageCompleteSignal)
+                    break
+                for f in self.funcs:
+                    next_item = f(next_item)
+                for q in output_queue:
+                    q.put(next_item)
+            
+
     def run_as_source(self, output_queue):
         if len(output_queue) > 1:
             raise NotImplementedError
@@ -248,14 +278,14 @@ for _ in range(2):
 
 tasks = []
 for c in consumers:
-    tasks.append(c.run_as_node.remote([queue], [output_queue]))
+    tasks.append(c.run.remote([queue], [output_queue]))
 ray_stage_wait_and_alert.remote(tasks, [output_queue])
 
 BATCH_SIZE = 20
-LIMIT = -1
+LIMIT = 100
 read_video_gen = lambda: read(BATCH_SIZE, LIMIT)
 producer = RayStage.remote([read_video_gen])
-producer_task = producer.run_as_source.remote([queue])
+producer_task = producer.run.remote([], [queue])
 ray_stage_wait_and_alert.remote([producer_task], [queue])
 
 #it = read_video_gen()
