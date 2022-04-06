@@ -23,6 +23,43 @@ def ray_stage_wait_and_alert(tasks, output_queue):
         q.put(StageCompleteSignal)
 
 @ray.remote
+def ray_stage(funcs, input_queue, output_queue):
+    pfuncs = []
+    for f in funcs:
+        if hasattr(f, 'prepare'):
+            f.prepare()
+        pfuncs.append(f)
+
+    if len(input_queue) > 1 or len(output_queue) > 1:
+            raise NotImplementedError
+
+    if len(pfuncs) == 0:
+        return
+
+    if len(input_queue) == 0:
+        # source node
+        first = pfuncs[0]()
+        if not isinstance(first, types.GeneratorType):
+            raise TypeError('The first function in the first stage needs to return a generator')
+        
+        for next_item in first:
+            for f in pfuncs[1:]:
+                next_item = f(next_item)
+            for q in output_queue:
+                q.put(next_item)
+    else:
+        while True:
+            next_item = input_queue[0].get(block=True)
+            if next_item is StageCompleteSignal:
+                input_queue[0].put(StageCompleteSignal)
+                break
+            for f in pfuncs:
+                next_item = f(next_item)
+            for q in output_queue:
+                q.put(next_item)
+
+
+@ray.remote
 class RayStage:
 
     def __init__(self, funcs):
@@ -61,56 +98,6 @@ class RayStage:
                 for q in output_queue:
                     q.put(next_item)
             
-
-    def run_as_source(self, output_queue):
-        if len(output_queue) > 1:
-            raise NotImplementedError
-
-        if len(self.funcs) == 0:
-            return
-       
-        first = self.funcs[0]()
-        if not isinstance(first, types.GeneratorType):
-            raise TypeError('The first function in the stage needs to return a generator')
-
-        for next_item in first:
-            for f in self.funcs[1:]:
-                next_item = f(next_item)
-            output_queue[0].put(next_item)
-        
-    def run_as_node(self, input_queue, output_queue):
-        if len(input_queue) > 1 or len(output_queue) > 1:
-            raise NotImplementedError
-
-        if len(self.funcs) == 0:
-            return
-    
-        while True:
-            next_item = input_queue[0].get(block=True)
-            if next_item is StageCompleteSignal:
-                input_queue[0].put(StageCompleteSignal)
-                break
-            for f in self.funcs:
-                next_item = f(next_item)
-            output_queue[0].put(next_item) 
-        
-
-    def run_as_sink(self, input_queue):
-        if len(input_queue) > 1:
-            raise NotImplementedError
-
-        if len(self.funcs) == 0:
-            return
-
-        while True:
-            next_item = input_queue[0].get(block=True)
-            if next_item is StageCompleteSignal:
-                input_queue[0].put(StageCompleteSignal)
-                break
-            for f in self.funcs:
-                next_item = f(next_item)
-
-
 
 def read(batch_size=1, limit=-1):
     video = cv2.VideoCapture('5-detrac.mp4')
@@ -271,6 +258,7 @@ s = time.perf_counter()
 queue = Queue(maxsize=100)
 output_queue = Queue(maxsize=100)
 
+"""
 consumers = []
 for _ in range(2):
     fast = FastRCNN()
@@ -279,13 +267,18 @@ for _ in range(2):
 tasks = []
 for c in consumers:
     tasks.append(c.run.remote([queue], [output_queue]))
+"""
+
+tasks = []
+for _ in range(2):
+    fast = FastRCNN()
+    tasks.append(ray_stage.options(num_gpus=1).remote([fast], [queue], [output_queue]))
 ray_stage_wait_and_alert.remote(tasks, [output_queue])
 
 BATCH_SIZE = 20
-LIMIT = 100
+LIMIT = -1
 read_video_gen = lambda: read(BATCH_SIZE, LIMIT)
-producer = RayStage.remote([read_video_gen])
-producer_task = producer.run.remote([], [queue])
+producer_task = ray_stage.remote([read_video_gen], [], [queue])
 ray_stage_wait_and_alert.remote([producer_task], [queue])
 
 #it = read_video_gen()
