@@ -8,10 +8,8 @@ pipeline {
   stages {
     stage('Install Package') {
       steps {
-        sh '''apt install libjpeg8-dev zlib1g-dev
-python -m venv env37
+        sh '''python -m venv env37
 . env37/bin/activate
-pip install --upgrade pip
 python setup.py install '''
       }
     }
