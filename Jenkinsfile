@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'python:3.7.6'
+      image 'cimg/python:3.7'
     }
 
   }
@@ -11,8 +11,6 @@ pipeline {
         sh '''python -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
-pip install scikit-build
-pip install cmake
 python setup.py install '''
       }
     }
