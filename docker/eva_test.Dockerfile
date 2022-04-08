@@ -21,8 +21,6 @@ RUN apt-get -qq update \
         libavformat-dev \
         libpq-dev \
         bash \
-        openjdk-8-jdk \
-        openjdk-8-jre \
     && pip install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
