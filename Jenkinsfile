@@ -17,8 +17,8 @@ python setup.py install '''
 
     stage('Generate Parser Files') {
       steps {
-        sh '''add-apt-repository ppa:openjdk-r/ppa
-apt install -y openjdk-8-jdk openjdk-8-jre
+        sh '''sudo add-apt-repository ppa:openjdk-r/ppa
+sudo apt install -y openjdk-8-jdk openjdk-8-jre
 sh script/antlr4/generate_parser.sh'''
       }
     }
