@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'python:3.7.6-slim-buster'
+      image 'ubuntu:18.04'
     }
 
   }
