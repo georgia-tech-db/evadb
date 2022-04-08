@@ -1,7 +1,7 @@
 pipeline {
   agent {
-    docker {
-      image 'jjanzic/docker-python3-opencv'
+    dockerfile {
+      filename 'docker/eva_test.Dockerfile'
     }
 
   }
@@ -18,8 +18,7 @@ python setup.py install '''
 
     stage('Generate Parser Files') {
       steps {
-        sh '''apt-get install -y openjdk-8-jdk openjdk-8-jre
-sh script/antlr4/generate_parser.sh'''
+        sh 'sh script/antlr4/generate_parser.sh'
       }
     }
 
