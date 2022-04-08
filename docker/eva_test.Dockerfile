@@ -52,5 +52,6 @@ RUN apt-get -qq update \
     && apt-get -qq clean
 
 # install system-wide package
-RUN  add-apt-repository ppa:openjdk-r/ppa \
+RUN  apt-get -y install software-properties-common \
+     && add-apt-repository ppa:openjdk-r/ppa \
      && apt-get -y install openjdk-8-jdk openjdk-8-jre
