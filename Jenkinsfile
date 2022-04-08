@@ -2,7 +2,6 @@ pipeline {
   agent {
     docker {
       image 'ubuntu'
-      args 'PYTHON_VERSION=3.8'
     }
 
   }
