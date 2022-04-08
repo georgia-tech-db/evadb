@@ -3,7 +3,6 @@ FROM python:3.8
 ENV OPENCV_VERSION="4.5.1"
 
 RUN apt-get -qq update \
-    && add-apt-repository ppa:openjdk-r/ppa \
     && apt-get -qq install -y --no-install-recommends \
         build-essential \
         cmake \
@@ -22,6 +21,8 @@ RUN apt-get -qq update \
         libavformat-dev \
         libpq-dev \
         bash \
+    && add-apt-repository ppa:openjdk-r/ppa \
+    && apt-get --qq install -y \
         openjdk-8-jdk \
         openjdk-8-jre \
     && pip install numpy \
