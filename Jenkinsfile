@@ -1,7 +1,7 @@
 pipeline {
   agent {
-    docker {
-      image 'ubuntu:18.04'
+    dockerfile {
+      filename 'docker/eva_cpu.Dockerfile'
     }
 
   }
