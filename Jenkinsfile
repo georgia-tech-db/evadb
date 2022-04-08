@@ -1,7 +1,7 @@
 pipeline {
   agent {
     docker {
-      image 'cimg/python:3.7'
+      image 'python:3.7.6'
     }
 
   }
