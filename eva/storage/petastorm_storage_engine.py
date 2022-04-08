@@ -22,7 +22,6 @@ from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.readers.petastorm_reader import PetastormReader
 from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
-
 from petastorm.unischema import dict_to_spark_row
 from petastorm.predicates import in_lambda
 
@@ -44,7 +43,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         """
         return Path(table.file_url).resolve().as_uri()
 
-    def create(self, table: DataFrameMetadata):
+    def create(self, table: DataFrameMetadata, **kwargs):
         """
         Create an empty dataframe in petastorm.
         """
@@ -117,11 +116,11 @@ class PetastormStorageEngine(AbstractStorageEngine):
 
         # ToDo: Handle the sharding logic. We might have to maintain a
         # context for deciding which shard to read
-        petastorm_reader = PetastormReader(
+        reader = PetastormReader(
             self._spark_url(table),
             batch_mem_size=batch_mem_size,
             predicate=predicate)
-        for batch in petastorm_reader.read():
+        for batch in reader.read():
             yield batch
 
     def _open(self, table):

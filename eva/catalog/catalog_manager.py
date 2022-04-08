@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Tuple
+from typing import List
 
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.base_model import init_db, drop_db
@@ -75,7 +75,8 @@ class CatalogManager(object):
 
     def create_metadata(self, name: str, file_url: str,
                         column_list: List[DataFrameColumn],
-                        identifier_column='id') -> \
+                        identifier_column='id',
+                        is_video=False) -> \
             DataFrameMetadata:
         """Creates metadata object
 
@@ -87,45 +88,18 @@ class CatalogManager(object):
             file_url: #todo
             column_list: list of columns
             identifier_column (str):  A unique identifier column for each row
-
+            is_video (bool): True if the table is a video
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column)
+            name, file_url, identifier_id=identifier_column, is_video=is_video)
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
         metadata.schema = column_list
         return metadata
-
-    def get_table_bindings(self, database_name: str, table_name: str,
-                           column_names: List[str] = None) -> Tuple[int,
-                                                                    List[int]]:
-        """This method fetches bindings for strings.
-
-        Args:
-            database_name: currently not in use
-            table_name: the table that is being referred to
-            column_names: the column names of the table for which
-           bindings are required
-
-        Returns:
-            returns metadata_id of table and a list of column ids
-        """
-
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        column_ids = []
-        if column_names is not None:
-            if not isinstance(column_names, list):
-                LoggingManager().log(
-                    "CatalogManager::get_table_binding() expected list",
-                    LoggingLevel.WARNING)
-            column_ids = self._column_service.columns_by_dataset_id_and_names(
-                metadata_id,
-                column_names)
-        return metadata_id, column_ids
 
     def get_metadata(self, metadata_id: int,
                      col_id_list: List[int] = None) -> DataFrameMetadata:
@@ -144,53 +118,6 @@ class CatalogManager(object):
             metadata_id, col_id_list)
         metadata.schema = df_columns
         return metadata
-
-    def get_column_types(self, table_metadata_id: int,
-                         col_id_list: List[int]) -> List[ColumnType]:
-        """
-        This method consumes the input table_id and the input column_id_list
-        and
-        returns a list of ColumnType for each provided column_id.
-
-        Arguments:
-            table_metadata_id {int} -- [metadata_id of the table]
-            col_id_list {List[int]} -- [metadata ids of the columns; If list
-            = None, return type for all columns in the table]
-
-        Returns:
-            List[ColumnType] -- [list of required column type for each input
-            column]
-        """
-        metadata = self._dataset_service.dataset_by_id(table_metadata_id)
-        col_types = []
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata.id, col_id_list
-        )
-        for col in df_columns:
-            col_types.append(col.type)
-
-        return col_types
-
-    def get_column_ids(self, table_metadata_id: int) -> List[int]:
-        """
-        This method returns all the column_ids associated with the given
-        table_metadata_id
-
-        Arguments:
-            table_metadata_id {int} -- [table metadata id for which columns
-            are required]
-
-        Returns:
-            List[int] -- [list of columns ids for this table]
-        """
-
-        col_ids = []
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            table_metadata_id)
-        for col in df_columns:
-            col_ids.append(col[0])
-
-        return col_ids
 
     def create_column_metadata(
         self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
@@ -320,3 +247,11 @@ class CatalogManager(object):
             UdfIO: catalog object found
         """
         return self._udf_io_service.udf_io_by_name(udf.id, udf_io_name)
+
+    def check_table_exists(self, database_name: str, table_name: str):
+        metadata = self._dataset_service.dataset_object_by_name(
+            database_name, table_name)
+        if metadata is None:
+            return False
+        else:
+            return True

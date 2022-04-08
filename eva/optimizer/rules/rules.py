@@ -27,9 +27,10 @@ from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample)
+    LogicalSample, LogicalCreateMaterializedView)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.planner.upload_plan import UploadPlan
@@ -68,6 +69,7 @@ class RuleType(Flag):
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
@@ -82,6 +84,7 @@ class Promise(IntEnum):
     """
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
+    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
@@ -127,34 +130,6 @@ class Rule(ABC):
     @pattern.setter
     def pattern(self, pattern):
         self._pattern = pattern
-
-    @classmethod
-    def _compare_expr_with_pattern(cls,
-                                   grp_id,
-                                   context: OptimizerContext,
-                                   pattern) -> bool:
-        """check if the logical tree of the expression matches the
-            provided pattern
-        Args:
-            input_expr ([type]): expr to match
-            pattern: pattern to match with
-        Returns:
-            bool: If rule pattern matches, return true, else false
-        """
-        is_equal = True
-        grp = context.memo.groups[grp_id]
-        grp_expr = grp.get_logical_expr()
-        if grp_expr is None:
-            return False
-        if (grp_expr.opr.opr_type != pattern.opr_type or
-                (len(grp_expr.children) != len(pattern.children))):
-            return False
-        # recursively compare pattern and input_expr
-        for child_id, pattern_child in zip(grp_expr.children,
-                                           pattern.children):
-            is_equal &= cls._compare_expr_with_pattern(
-                child_id, context, pattern_child)
-        return is_equal
 
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type
@@ -386,7 +361,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.video_catalog_id,
+        after = InsertPlan(before.table_metainfo,
                            before.column_list, before.value_list)
         return after
 
@@ -414,7 +389,10 @@ class LogicalLoadToPhysical(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(before.table_metainfo,
-                             before.path, batch_mem_size)
+                             before.path,
+                             batch_mem_size,
+                             before.column_list,
+                             before.file_options)
         return after
 
 
@@ -550,6 +528,26 @@ class LogicalLimitToPhysical(Rule):
         return after
 
 
+class LogicalCreateMaterializedViewToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateMaterializedView,
+              context: OptimizerContext):
+        after = CreateMaterializedViewPlan(before.view,
+                                           columns=before.col_list,
+                                           if_not_exists=before.if_not_exists)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -585,7 +583,8 @@ class RulesManager:
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()
+            LogicalLimitToPhysical(),
+            LogicalCreateMaterializedViewToPhysical()
         ]
 
     @property

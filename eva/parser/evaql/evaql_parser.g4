@@ -25,7 +25,7 @@ emptyStatement
     ;
 
 ddlStatement
-    : createDatabase | createTable | createIndex | createUdf
+    : createDatabase | createTable | createIndex | createUdf | createMaterializedView
     | dropDatabase | dropTable | dropIndex
     ;
 
@@ -70,6 +70,14 @@ createUdf
       IMPL   udfImpl
     ;
 
+// Create Materialized View
+createMaterializedView
+    : CREATE MATERIALIZED VIEW
+      ifNotExists?
+      tableName ('(' columns=uidList ')')
+      AS
+      selectStatement
+      ;
 
 // details
 udfName
@@ -154,10 +162,19 @@ updateStatement
     : singleUpdateStatement
     ;
 
+
 loadStatement
     : LOAD DATA
       INFILE fileName
       INTO tableName
+        (
+            ('(' columns=uidList ')')
+        )?
+      (WITH fileOptions)?
+    ;
+
+fileOptions
+    : FORMAT fileFormat=(CSV|VIDEO)
     ;
 
 uploadStatement
