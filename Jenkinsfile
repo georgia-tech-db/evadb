@@ -1,7 +1,7 @@
 pipeline {
   agent {
-    docker {
-      image 'jjanzic/docker-python3-opencv'
+    dockerfile {
+      filename 'docker/eva_test.Dockerfile'
     }
 
   }
