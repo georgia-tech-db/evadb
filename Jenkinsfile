@@ -1,18 +1,14 @@
 pipeline {
   agent {
     dockerfile {
-      filename 'docker/eva_cpu.Dockerfile'
+      filename 'docker/eva_test.Dockerfile'
     }
 
   }
   stages {
     stage('Install Package') {
       steps {
-        sh '''apt-get update \\
-    && apt-get -y install sudo wget bash openjdk-8-jdk openjdk-8-jre \\
-    && apt-get -y install gcc python-dev python3-dev python3.7-dev python3.8-dev
-echo "root ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-python -m venv env37
+        sh '''python3.7 -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
 python setup.py install '''
