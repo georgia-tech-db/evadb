@@ -8,7 +8,8 @@ pipeline {
   stages {
     stage('Install Package') {
       steps {
-        sh '''python3.7 -m venv env37
+        sh '''apt-get install python3-venv
+python3.7 -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
 python setup.py install '''
