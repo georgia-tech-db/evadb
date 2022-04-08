@@ -1,14 +1,14 @@
 pipeline {
   agent {
-    dockerfile {
-      filename 'docker/eva_test.Dockerfile'
+    docker {
+      image 'jjanzic/docker-python3-opencv'
     }
 
   }
   stages {
     stage('Install Package') {
       steps {
-        sh '''python3.7 -m venv env37
+        sh '''python3 -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
 pip install scikit-build
