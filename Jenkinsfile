@@ -10,7 +10,7 @@ pipeline {
       steps {
         sh '''python -m venv env37
 . env37/bin/activate
-python -m pip install --upgrade pip
+pip install --upgrade pip
 python setup.py install '''
       }
     }
