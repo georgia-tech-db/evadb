@@ -8,7 +8,11 @@ pipeline {
   stages {
     stage('Install Package') {
       steps {
-        sh '''python -m venv env37
+        sh '''apt update
+apt install software-properties-common
+add-apt-repository ppa:deadsnakes/ppa
+apt install python3.7
+python -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
 python setup.py install '''
