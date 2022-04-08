@@ -1,14 +1,14 @@
 pipeline {
   agent {
-    dockerfile {
-      filename 'docker/eva_test.Dockerfile'
+    docker {
+      image 'jjanzic/docker-python3-opencv'
     }
 
   }
   stages {
     stage('Install Package') {
       steps {
-        sh '''python3.7 -m venv env37
+        sh '''python3 -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
 pip install scikit-build
@@ -18,8 +18,7 @@ python setup.py install '''
 
     stage('Generate Parser Files') {
       steps {
-        sh '''sudo add-apt-repository ppa:openjdk-r/ppa
-sudo apt install -y openjdk-8-jdk openjdk-8-jre
+        sh '''apt-get install -y openjdk-8-jdk openjdk-8-jre
 sh script/antlr4/generate_parser.sh'''
       }
     }
