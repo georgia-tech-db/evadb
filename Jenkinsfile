@@ -18,7 +18,8 @@ python setup.py install '''
 
     stage('Generate Parser Files') {
       steps {
-        sh '''apt-get update
+        sh '''sudo -s
+apt-get update
 apt install software-properties-common
 add-apt-repository ppa:openjdk-r/ppa
 apt install -y openjdk-8-jdk openjdk-8-jre
