@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'python:2-alpine'
+    }
+
+  }
   stages {
     stage('Install Package') {
       steps {
