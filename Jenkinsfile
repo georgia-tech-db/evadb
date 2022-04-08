@@ -11,6 +11,7 @@ pipeline {
         sh '''python3.7 -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
+pip install scikit-build
 python setup.py install '''
       }
     }
