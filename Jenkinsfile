@@ -1,18 +1,14 @@
 pipeline {
   agent {
     docker {
-      image 'ubuntu:18.04'
+      image 'python:3.7.6'
     }
 
   }
   stages {
     stage('Install Package') {
       steps {
-        sh '''sudo apt-get update
-sudo apt-get install software-properties-common
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt-get install python3.7
-python -m venv env37
+        sh '''python -m venv env37
 . env37/bin/activate
 pip install --upgrade pip
 python setup.py install '''
