@@ -20,6 +20,9 @@ RUN apt-get -qq update \
         libopenjp2-7-dev \
         libavformat-dev \
         libpq-dev \
+        bash \
+        openjdk-8-jdk \
+        openjdk-8-jre \
     && pip install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
@@ -34,7 +37,7 @@ RUN apt-get -qq update \
         -D WITH_TBB=ON \
         -D WITH_EIGEN=ON \
         -D WITH_V4L=ON \
-        -D BUILD_TESTS=OFF \
+        -D B bash openjdk-8-jdk openjdk-8-jreUILD_TESTS=OFF \
         -D BUILD_PERF_TESTS=OFF \
         -D CMAKE_BUILD_TYPE=RELEASE \
         -D CMAKE_INSTALL_PREFIX=$(python3.8 -c "import sys; print(sys.prefix)") \
@@ -49,9 +52,3 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get -qq autoremove \
     && apt-get -qq clean
-
-# install system-wide package
-RUN apt-get update \
-    && apt-get -y install sudo wget bash openjdk-8-jdk openjdk-8-jre \
-    && apt-get -y install gcc python-dev python3-dev python3.7-dev python3.7-venv zlib1g-dev \
-    && apt-get -y install build-essential cmake
