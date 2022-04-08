@@ -21,8 +21,6 @@ RUN apt-get -qq update \
         libavformat-dev \
         libpq-dev \
         bash \
-    && add-apt-repository ppa:openjdk-r/ppa \
-    && apt-get --qq install -y \
         openjdk-8-jdk \
         openjdk-8-jre \
     && pip install numpy \
@@ -54,3 +52,7 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get -qq autoremove \
     && apt-get -qq clean
+
+# install system-wide package
+RUN  add-apt-repository ppa:openjdk-r/ppa \
+     && apt-get -y install openjdk-8-jdk openjdk-8-jre
