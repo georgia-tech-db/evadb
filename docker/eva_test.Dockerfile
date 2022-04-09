@@ -50,9 +50,9 @@ RUN apt-get -qq update \
     && rm -rf /var/lib/apt/lists/*
 
 # install system-wide package
-RUN apt-get -qq update \
-    && apt-get -y install software-properties-common \
+RUN apt-get -y install software-properties-common \
     && add-apt-repository ppa:openjdk-r/ppa \
+    && apt-get update \
     && apt-get -y install openjdk-8-jdk openjdk-8-jre \
     && apt-get -qq autoremove \
     && apt-get -qq clean
