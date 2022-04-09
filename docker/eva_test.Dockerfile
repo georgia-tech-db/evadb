@@ -46,13 +46,13 @@ RUN apt-get -qq update \
     && make -j$(nproc) \
     && make install \
     && rm -rf /opt/build/* \
-    && rm -rf /opt/opencv-${OPENCV_VERSION} \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /opt/opencv-${OPENCV_VERSION}
 
 # install system-wide package
 RUN apt-get -y install software-properties-common \
     && add-apt-repository ppa:openjdk-r/ppa \
     && apt-get update \
     && apt-get -y install openjdk-8-jdk openjdk-8-jre \
+    && rm -rf /var/lib/apt/lists/* \
     && apt-get -qq autoremove \
     && apt-get -qq clean
