@@ -54,4 +54,4 @@ RUN apt-get -y install software-properties-common \
     && add-apt-repository ppa:openjdk-r/ppa \
     && apt-get -y install openjdk-8-jdk openjdk-8-jre \
     && apt-get -qq autoremove \
-    & apt-get -qq clean
+    && apt-get -qq clean
