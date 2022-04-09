@@ -1,4 +1,6 @@
-FROM python:3.8
+FROM ubuntu:18.04
+
+ARG PYTHON_VERSION=3.8
 
 ENV OPENCV_VERSION="4.5.1"
 
@@ -48,30 +50,8 @@ RUN apt-get -qq update \
     && rm -rf /opt/build/* \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# install system-wide package
-# RUN apt-get -y install software-properties-common \
-#     && add-apt-repository -u ppa:openjdk-r/ppa \
-#     && apt-get --allow-unauthenticated -y install openjdk-8-jdk openjdk-8-jre \
-#     && rm -rf /var/lib/apt/lists/* \
-#     && apt-get -qq autoremove \
-#     && apt-get -qq clean
-
-# To solve add-apt-repository : command not found
-RUN apt-get -y install software-properties-common
-
-# Install Java
-RUN \
-  apt-get install ca-certificates \
-  && echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer --allow-unauthenticated && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
-
-# Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
-RUN export JAVA_HOME
+# Install Java8
+RUN apt-get -y install openjdk-8-jdk
 
 # Give Permission To Home Directory
 RUN mkdir /.eva && chmod -R 777 /.eva
