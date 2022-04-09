@@ -51,7 +51,7 @@ RUN apt-get -qq update \
 # install system-wide package
 RUN apt-get -y install software-properties-common \
     && add-apt-repository ppa:openjdk-r/ppa \
-    && apt-get update  --allow-unauthenticated upgrade \
+    && apt-get --allow-unauthenticated upgrade update \
     && apt-get -y install openjdk-8-jdk openjdk-8-jre \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get -qq autoremove \
