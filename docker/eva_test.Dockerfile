@@ -73,4 +73,4 @@ ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 RUN export JAVA_HOME
 
 # Give Permission To Home Directory
-RUN mkdir /.eva && chmod -1777 /.eva
+RUN mkdir /.eva && chmod -R 777 /.eva
