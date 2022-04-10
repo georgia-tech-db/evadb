@@ -5,14 +5,22 @@ import pandas as pd
 from typing import List
 from math import sqrt
 
-import torch
-import torch.nn.functional as F
-from torch import Tensor
-from torchvision.transforms import Compose, transforms
-
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+
+
+try:
+    import torch
+    import torch.nn.functional as F
+    from torch import Tensor
+except ImportError as e:
+    raise ImportError(f"Failed to import with error {e}, please try `pip install torch`")
+
+try:
+    from torchvision.transforms import Compose, transforms
+except ImportError as e:
+    raise ImportError(f"Failed to import with error {e}, please try `pip install torchvision`")
 
 
 class SSDObjectDetector(PytorchAbstractUDF):
