@@ -57,12 +57,18 @@ RUN apt-get -qq update \
 #     && apt-get -qq clean
 
 # Install OpenJDK-8
-RUN apt-get -y install software-properties-common && \
-    apt-get --allow-releaseinfo-change update && \
-    add-apt-repository ppa:webupd8team/java && \
+# RUN apt-get -y install software-properties-common && \
+#     apt-get --allow-releaseinfo-change update && \
+#     add-apt-repository ppa:webupd8team/java && \
+#     apt-get update && \
+#     apt-get install -y oracle-java8-installer && \
+#     apt-get install -y ant
+
+RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
+    echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list && \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886 && \
     apt-get update && \
-    apt-get install -y oracle-java8-installer && \
-    apt-get install -y ant
+    apt-get install oracle-java8-installer
 
 # Fix certificate issues
 RUN apt-get install ca-certificates-java && \
