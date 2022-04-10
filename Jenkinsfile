@@ -11,7 +11,6 @@ pipeline {
         sh '''python3 -m venv env37
 . env37/bin/activate
 pip3 install --upgrade pip
-pip3 install numpy==1.20.1
 python3 setup.py install '''
       }
     }
