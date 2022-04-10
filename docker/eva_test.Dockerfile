@@ -58,7 +58,7 @@ RUN apt-get -qq update \
 
 # Install OpenJDK-8
 RUN apt-get -y install software-properties-common && \
-    sed -i "/^# deb.*universe/ s/^# //" /etc/apt/sources.list \
+    sed -i "/^# deb.*universe/ s/^# //" /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y openjdk-8-jdk && \
     apt-get install -y ant && \
