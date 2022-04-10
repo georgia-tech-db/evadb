@@ -23,6 +23,7 @@ RUN apt-get -qq update \
         libavformat-dev \
         libpq-dev \
         python3-dev \
+        python3-pip \
     && pip install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
