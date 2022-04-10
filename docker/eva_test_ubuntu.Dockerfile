@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-ARG PYTHON_VERSION=3.8
+ARG PYTHON_VERSION=3.7
 
 # install system-wide package
 RUN apt-get update \
