@@ -24,7 +24,7 @@ RUN apt-get update \
     libopenjp2-7-dev \
     libavformat-dev \
     libpq-dev \
-    && apt-get -y install gcc python-dev python3-dev python3.7-venv python3.7-dev python3.8-dev
+    && apt-get -y install gcc python3.7-dev python3.7-venv python3.7-dev python3.8-dev
 
 # Give Permission To Home Directory
 RUN mkdir /.eva && chmod -R 777 /.eva
