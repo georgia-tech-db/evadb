@@ -57,7 +57,9 @@ RUN apt-get -qq update \
 #     && apt-get -qq clean
 
 # Install OpenJDK-8
-RUN apt-get update && \
+RUN apt-get -y install software-properties-common && \
+    add-apt-repository universe && \
+    apt-get update && \
     apt-get install -y openjdk-8-jdk && \
     apt-get install -y ant && \
     apt-get clean;
