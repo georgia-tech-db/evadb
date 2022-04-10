@@ -1,6 +1,4 @@
-FROM ubuntu:18.04
-
-ARG PYTHON_VERSION=3.8
+FROM python:3.8
 
 ENV OPENCV_VERSION="4.5.1"
 
@@ -23,9 +21,7 @@ RUN apt-get -qq update \
         libavformat-dev \
         libpq-dev \
         python3-dev \
-        python3-pip
-
-RUN pip3 install numpy \
+    && pip install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
     && rm -rf opencv.zip \
@@ -52,8 +48,29 @@ RUN pip3 install numpy \
     && rm -rf /opt/build/* \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# Install Java8
-RUN apt-get -y install openjdk-8-jdk
+# install system-wide package
+# RUN apt-get -y install software-properties-common \
+#     && add-apt-repository -u ppa:openjdk-r/ppa \
+#     && apt-get --allow-unauthenticated -y install openjdk-8-jdk openjdk-8-jre \
+#     && rm -rf /var/lib/apt/lists/* \
+#     && apt-get -qq autoremove \
+#     && apt-get -qq clean
+
+# Install OpenJDK-8
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk && \
+    apt-get install -y ant && \
+    apt-get clean;
+
+# Fix certificate issues
+RUN apt-get update && \
+    apt-get install ca-certificates-java && \
+    apt-get clean && \
+    update-ca-certificates -f;
+
+# Setup JAVA_HOME -- useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+RUN export JAVA_HOME
 
 # Give Permission To Home Directory
 RUN mkdir /.eva && chmod -R 777 /.eva
