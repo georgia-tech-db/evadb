@@ -10,9 +10,9 @@ pipeline {
       steps {
         sh '''python3 -m venv env37
 . env37/bin/activate
-pip install --upgrade pip
-pip install scikit-build
-python setup.py install '''
+pip3 install --upgrade pip
+pip3 install scikit-build
+python3 setup.py install '''
       }
     }
 
