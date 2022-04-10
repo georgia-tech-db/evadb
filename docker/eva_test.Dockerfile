@@ -58,15 +58,13 @@ RUN apt-get -qq update \
 
 # Install OpenJDK-8
 RUN apt-get -y install software-properties-common && \
-    sed -i "/^# deb.*universe/ s/^# //" /etc/apt/sources.list && \
+    add-apt-repository ppa:webupd8team/java && \
     apt-get update && \
-    apt-get install -y openjdk-8-jdk && \
-    apt-get install -y ant && \
-    apt-get clean;
+    apt-get install -y oracle-java8-installer && \
+    apt-get install -y ant
 
 # Fix certificate issues
-RUN apt-get update && \
-    apt-get install ca-certificates-java && \
+RUN apt-get install ca-certificates-java && \
     apt-get clean && \
     update-ca-certificates -f;
 
