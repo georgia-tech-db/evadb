@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-slim
 
 ENV OPENCV_VERSION="4.5.1"
 
