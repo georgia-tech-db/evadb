@@ -22,10 +22,9 @@ RUN apt-get -qq update \
         libopenjp2-7-dev \
         libavformat-dev \
         libpq-dev \
-        python3-dev \
-        python3-pip
+        python3-dev
 
-RUN pip install numpy \
+RUN pip3 install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
     && rm -rf opencv.zip \
