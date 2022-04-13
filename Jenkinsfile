@@ -12,7 +12,7 @@ pipeline {
 . env37/bin/activate
 pip install --upgrade pip
 pip install scikit-build
-pip install opencv-python==4.5.1.48
+pip install cython
 python setup.py install '''
       }
     }
