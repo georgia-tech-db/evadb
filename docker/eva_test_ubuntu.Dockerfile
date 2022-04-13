@@ -9,7 +9,7 @@ ENV OPENCV_VERSION="4.5.1"
 RUN apt-get update
 
 # Install System Essentials
-RUN apt-get -qq install -y -no-install-recommends \
+RUN apt-get -qq install -y --no-install-recommends \
     build-essential \
     sudo \
     wget \
@@ -19,7 +19,7 @@ RUN apt-get -qq install -y -no-install-recommends \
     gcc
 
 # Install Python Necessary Stuff
-RUN apt-get -qq install -y -no-install-recommends \
+RUN apt-get -qq install -y --no-install-recommends \
     python3-venv \
     python3.7-venv \
     python3.7-dev
