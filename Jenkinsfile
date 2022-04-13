@@ -12,7 +12,7 @@ pipeline {
 . env37/bin/activate
 pip install --upgrade pip
 pip install scikit-build
-pip install opencv-python-headless
+pip install cython
 python setup.py install '''
       }
     }
