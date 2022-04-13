@@ -25,7 +25,7 @@ RUN apt-get -qq install -y --no-install-recommends \
     python3.7-dev
 
 # Install JAva
-RUN apt-get --qq install -y openjdk-8-jdk
+RUN apt-get -qq install -y openjdk-8-jdk
 
 # # install system-wide package
 # RUN apt-get update \
