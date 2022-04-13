@@ -24,6 +24,11 @@ RUN apt-get -qq install -y --no-install-recommends \
     python3.7-venv \
     python3.7-dev
 
+# Install OpenCV Specific Stuff
+RUN apt-get -qq install -y --no-install-recommends \
+    libgl1-mesa-dev \
+    libgtk2.0-dev
+
 # Install JAva
 RUN apt-get -qq install -y openjdk-8-jdk
 
