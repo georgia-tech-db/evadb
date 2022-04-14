@@ -36,5 +36,13 @@ RUN wget https://github.com/opencv/opencv/archive/4.5.1.zip \
     && make \
     && make install
 
+# Add Jenkins user
+RUN groupadd --gid 1000 jenkins && \
+    useradd --uid 1000 --gid jenkins --shell /bin/bash --home-dir /var/jenkins_home jenkins && \
+    mkdir /var/jenkins_home && \
+    chown 1000:1000 /var/jenkins_home && \
+    echo 'jenkins ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-jenkins && \
+    echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
+
 # Give Permission To Home Directory
 RUN mkdir /.eva && chmod -R 777 /.eva
