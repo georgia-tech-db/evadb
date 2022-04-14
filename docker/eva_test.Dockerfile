@@ -79,7 +79,10 @@ RUN apt-get -qq update \
 #     update-ca-certificates -f;
 
 # Install OpenJDK-8
-RUN apt-get -y install openjdk-11-jdk
+RUN apt-get -y install software-properties-common \
+    && add-apt-repository ppa:webupd8team/java \\
+    && apt-get update \
+    && apt-get install openjdk-8-jdk
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
