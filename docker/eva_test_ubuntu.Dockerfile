@@ -24,6 +24,10 @@ RUN apt-get -qq install -y --no-install-recommends \
     python3.7-venv \
     python3.7-dev
 
+# Add Required Repository for OpenCV
+RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
+    && apt-get update
+
 # Install OpenCV Specific Stuff
 RUN apt-get -qq install -y --no-install-recommends \
     libgl1-mesa-dev \
