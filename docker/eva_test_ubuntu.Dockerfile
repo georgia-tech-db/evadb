@@ -35,7 +35,11 @@ RUN apt-get -qq install -y --no-install-recommends \
     libavcodec-dev \
     libavformat-dev \
     libswscale-dev \
-    libv4l-dev
+    libv4l-dev \
+    libxvidcore-dev \
+    libx264-dev \
+    libatlas-base-dev \
+    gfortran
 
 # Install JAva
 RUN apt-get -qq install -y openjdk-8-jdk
