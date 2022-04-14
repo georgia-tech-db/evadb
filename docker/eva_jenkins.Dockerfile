@@ -2,6 +2,7 @@ FROM python:3.8
 
 ENV OPENCV_VERSION="4.5.1"
 
+# OpenCV Specific Installation
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends \
         build-essential \
@@ -52,13 +53,13 @@ RUN apt-get -qq update \
     && rm -rf /opt/build/* \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# Install Java.
+# Install Java8 (Direct Download) because java-8 is no longer supported
 RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
     mkdir /opt/jdk-16 && \
     tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
     update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
 
-# Add Jenkins user
+# Add Jenkins user, For Spark Authentication (cannot be done without user)
 RUN groupadd --gid 1000 jenkins && \
     useradd --uid 1000 --gid jenkins --shell /bin/bash --home-dir /var/jenkins_home jenkins && \
     mkdir /var/jenkins_home && \
@@ -66,9 +67,6 @@ RUN groupadd --gid 1000 jenkins && \
     echo 'jenkins ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-jenkins && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 
-# Setup JAVA_HOME -- useful for docker commandline
-# ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
-RUN echo JAVA_HOME
 
-# Give Permission To Home Directory
+# Give Permission To Home Directory To Create EVA
 RUN mkdir /.eva && chmod -R 777 /.eva
