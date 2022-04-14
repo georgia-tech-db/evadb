@@ -12,10 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ray
-
 from typing import Iterator, List, Callable
-from ray.data.dataset_pipeline import DatasetPipeline
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -34,15 +31,15 @@ class SequentialScanExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
         self.project_expr = node.columns
-        self.window_size = 4
 
     def validate(self):
         pass
 
     def exec(self) -> Iterator[Batch]:
 
-        def seq_scan_ray_row(batch: Batch) -> Batch:
-            # TODO The filter may be transformed into a ray filter for performance
+        child_executor = self.children[0]
+        for batch in child_executor.exec():
+            # We do the predicate first
             if not batch.empty() and self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch).frames
                 batch = Batch(
@@ -54,21 +51,21 @@ class SequentialScanExecutor(AbstractExecutor):
                 batches = [expr.evaluate(batch) for expr in self.project_expr]
                 batch = Batch.merge_column_wise(batches)
 
-            # Due to map, we need to return even when the batch is empty
-            return batch
+            if not batch.empty():
+                yield batch
 
-        window = []
-        for batch in self.children[0].exec():
-            window.append(batch)
-            if len(window) >= self.window_size:
-                pipe = ray.data.from_items(window).window(blocks_per_window=1)
-                pipe = pipe.map(seq_scan_ray_row)
-                pipe = pipe.filter(lambda b: not b.empty())
-                yield from pipe.iter_rows()
-                window = []
-        if len(window) > 0:
-                pipe = ray.data.from_items(window).window(blocks_per_window=1)
-                pipe = pipe.map(seq_scan_ray_row)
-                pipe = pipe.filter(lambda b: not b.empty())
-                yield from pipe.iter_rows()
+    def __call__(self, batch: Batch) -> Batch:
+        if not batch.empty() and self.predicate is not None:
+            outcomes = self.predicate.evaluate(batch).frames
+            batch = Batch(
+                    batch.frames[(outcomes > 0).to_numpy()].reset_index(
+                    drop=True))
+
+        # Then do project
+        if not batch.empty() and self.project_expr is not None:
+            batches = [expr.evaluate(batch) for expr in self.project_expr]
+            batch = Batch.merge_column_wise(batches)
+
+        return batch
+
 

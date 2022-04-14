@@ -32,7 +32,7 @@ from eva.executor.upload_executor import UploadExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.orderby_executor import OrderByExecutor
-
+from eva.executor.ray_stage import *
 
 class PlanExecutor:
     """
@@ -104,12 +104,43 @@ class PlanExecutor:
         # ToDo
         # clear all the nodes from the execution tree
 
+    def ray_execute_plan(self, execution_tree: AbstractExecutor) \
+            -> Iterator[Batch]:
+        from ray.util.queue import Queue
+        """
+        This is a hard-coded convertor now!!!
+        """
+        queue = Queue(maxsize=100)
+        output_queue = Queue(maxsize=100)
+        
+        consumer = execution_tree
+        producer = execution_tree.children[0]
+
+        consumer_task = ray_stage.options(num_gpus=1).remote([consumer],
+                [queue], [output_queue])
+        ray_stage_wait_and_alert.remote([consumer_task], [output_queue])
+
+        producer_task = ray_stage.remote([producer], [], [queue])
+        ray_stage_wait_and_alert.remote([producer_task], [queue])
+
+        while True:
+            res = output_queue.get(block=True)
+            if res is StageCompleteSignal:
+                break
+            else:
+                yield res
+
+
     def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree
         """
         execution_tree = self._build_execution_tree(self._plan)
-        output = execution_tree.exec()
-        if output is not None:
-            # How to check output is Iterator[Batch]
-            yield from output
+        if isinstance(execution_tree, SequentialScanExecutor) \
+                and isinstance(execution_tree.children[0], StorageExecutor):
+            yield from self.ray_execute_plan(execution_tree)
+        else:
+            output = execution_tree.exec()
+            if output is not None:
+                # How to check output is Iterator[Batch]
+                yield from output
         self._clean_execution_tree(execution_tree)
