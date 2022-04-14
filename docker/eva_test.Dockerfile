@@ -80,15 +80,20 @@ RUN apt-get -qq update \
 
 # Install OpenJDK-8
 # Install Java.
-RUN  apt-get -y install software-properties-common && \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get -o Acquire::Check-Valid-Until=false -o Acquire::AllowInsecureRepositories=true \
-  -o Acquire::AllowDowngradeToInsecureRepositories=true \
-  --allow-unauthenticated update && \
-  apt-get install -y oracle-java8-installer && \
-  rm -rf /var/lib/apt/lists/* && \
-  rm -rf /var/cache/oracle-jdk8-installer
+# RUN  apt-get -y install software-properties-common && \
+#   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
+#   add-apt-repository -y ppa:webupd8team/java && \
+#   apt-get -o Acquire::Check-Valid-Until=false -o Acquire::AllowInsecureRepositories=true \
+#   -o Acquire::AllowDowngradeToInsecureRepositories=true \
+#   --allow-unauthenticated update && \
+#   apt-get install -y oracle-java8-installer && \
+#   rm -rf /var/lib/apt/lists/* && \
+#   rm -rf /var/cache/oracle-jdk8-installer
+
+RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
+    mkdir /opt/jdk-16 && \
+    tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
+    update-alternatives --install /usr/bin/java java /opt/jdk-16/bin/java 100
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
