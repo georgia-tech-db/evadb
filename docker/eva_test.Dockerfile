@@ -80,7 +80,7 @@ RUN apt-get -qq update \
 
 # Install OpenJDK-8
 RUN apt-get -y install software-properties-common \
-    && add-apt-repository ppa:webupd8team/java \\
+    && add-apt-repository ppa:webupd8team/java \
     && apt-get update \
     && apt-get install openjdk-8-jdk
 
