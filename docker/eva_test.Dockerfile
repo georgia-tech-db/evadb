@@ -79,7 +79,7 @@ RUN apt-get -qq update \
 #     update-ca-certificates -f;
 
 # Install OpenJDK-8
-RUN apt-get install openjdk-11-jdk
+RUN apt-get -qq install -y openjdk-11-jdk
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
