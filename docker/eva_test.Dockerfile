@@ -1,4 +1,4 @@
-FROM python:3.8-buster
+FROM python:3.8-bullseye
 
 ENV OPENCV_VERSION="4.5.1"
 
