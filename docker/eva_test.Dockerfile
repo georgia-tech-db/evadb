@@ -83,7 +83,7 @@ RUN apt-get -qq update \
 RUN  apt-get -y install software-properties-common && \
   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
   add-apt-repository -y ppa:webupd8team/java && \
-  apt-get -o Acquire::Check-Valid-Until=false update && \
+  apt-get -o Acquire::Check-Valid-Until=false --allow-unauthenticated update && \
   apt-get install -y oracle-java8-installer && \
   rm -rf /var/lib/apt/lists/* && \
   rm -rf /var/cache/oracle-jdk8-installer
