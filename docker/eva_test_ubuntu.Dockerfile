@@ -26,54 +26,14 @@ RUN apt-get -qq install -y --no-install-recommends \
     python3.7-venv \
     python3.7-dev
 
-# Install OpenCV Directly
-RUN apt-get -qq install -y libopencv-dev python3-opencv
-
-# # Add Required Repository for OpenCV
-# RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
-#     && apt-get update
-
-# # Install OpenCV Specific Stuff
-# RUN apt-get -qq install -y --no-install-recommends \
-#     libgl1-mesa-dev \
-#     libgtk2.0-dev \
-#     libjpeg-dev \
-#     libtiff5-dev \
-#     libjasper-dev \
-#     libpng-dev \
-#     libavcodec-dev \
-#     libavformat-dev \
-#     libswscale-dev \
-#     libv4l-dev \
-#     libxvidcore-dev \
-#     libx264-dev \
-#     libatlas-base-dev \
-#     gfortran
-
-# Install JAva
-RUN apt-get -qq install -y openjdk-8-jdk
-
-# # install system-wide package
-# RUN apt-get update \
-#     && apt-get -y install sudo wget bash openjdk-8-jdk \
-#     && apt-get -qq install -y --no-install-recommends \
-#     build-essential \
-#     cmake \
-#     git \
-#     wget \
-#     unzip \
-#     yasm \
-#     pkg-config \
-#     libswscale-dev \
-#     libtbb2 \
-#     libtbb-dev \
-#     libjpeg-dev \
-#     libpng-dev \
-#     libtiff-dev \
-#     libopenjp2-7-dev \
-#     libavformat-dev \
-#     libpq-dev \
-#     && apt-get -y install gcc python3-venv python3.7-venv python3.7-dev python3.8-dev python3-opencv
+# Download OpenCV From Version
+RUN wget https://github.com/opencv/opencv/archive/4.5.1.zip \
+    && tar -xvf opencv-* \
+    && mkdir release \
+    && cd release \
+    && cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_NEW_PYTHON_SUPPORT=ON -D BUILD_EXAMPLES=ON .. \
+    && make \
+    && make install
 
 # Give Permission To Home Directory
 RUN mkdir /.eva && chmod -R 777 /.eva
