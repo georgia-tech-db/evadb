@@ -10,9 +10,9 @@ executor:
   batch_mem_size: 30000000 # 30mb
 
   # batch size used for gpu_operations
-  gpu_batch_size: 1
+  gpu_batch_size: 20
 
-  gpus: {'127.0.0.1': [0]}
+  gpus: {'130.207.125.60': [0]}
 storage:
   engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
   video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
