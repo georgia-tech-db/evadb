@@ -52,45 +52,7 @@ RUN apt-get -qq update \
     && rm -rf /opt/build/* \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# install system-wide package
-# RUN apt-get -y install software-properties-common \
-#     && add-apt-repository -u ppa:openjdk-r/ppa \
-#     && apt-get --allow-unauthenticated -y install openjdk-8-jdk openjdk-8-jre \
-#     && rm -rf /var/lib/apt/lists/* \
-#     && apt-get -qq autoremove \
-#     && apt-get -qq clean
-
-# Install OpenJDK-8
-# RUN apt-get -y install software-properties-common && \
-#     apt-get --allow-releaseinfo-change update && \
-#     add-apt-repository ppa:webupd8team/java && \
-#     apt-get update && \
-#     apt-get install -y oracle-java8-installer && \
-#     apt-get install -y ant
-
-# RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list && \
-#     echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list && \
-#     echo oracle-java8-installer shared/accepted-oracle-licence-v1-1 boolean true | /usr/bin/debconf-set-selections && \
-#     apt-get --allow-unauthenticated update && \
-#     apt-get --allow-unauthenticated update install oracle-java8-installer
-
-# Fix certificate issues
-# RUN apt-get install ca-certificates-java && \
-#     apt-get clean && \
-#     update-ca-certificates -f;
-
-# Install OpenJDK-8
 # Install Java.
-# RUN  apt-get -y install software-properties-common && \
-#   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
-#   add-apt-repository -y ppa:webupd8team/java && \
-#   apt-get -o Acquire::Check-Valid-Until=false -o Acquire::AllowInsecureRepositories=true \
-#   -o Acquire::AllowDowngradeToInsecureRepositories=true \
-#   --allow-unauthenticated update && \
-#   apt-get install -y oracle-java8-installer && \
-#   rm -rf /var/lib/apt/lists/* && \
-#   rm -rf /var/cache/oracle-jdk8-installer
-
 RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
     mkdir /opt/jdk-16 && \
     tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
