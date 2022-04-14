@@ -27,7 +27,15 @@ RUN apt-get -qq install -y --no-install-recommends \
 # Install OpenCV Specific Stuff
 RUN apt-get -qq install -y --no-install-recommends \
     libgl1-mesa-dev \
-    libgtk2.0-dev
+    libgtk2.0-dev \
+    libjpeg-dev \
+    libtiff5-dev \
+    libjasper-dev \
+    libpng12-dev \
+    libavcodec-dev \
+    libavformat-dev \
+    libswscale-dev \
+    libv4l-dev
 
 # Install JAva
 RUN apt-get -qq install -y openjdk-8-jdk
