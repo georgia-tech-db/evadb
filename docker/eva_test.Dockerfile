@@ -11,6 +11,9 @@ RUN apt-get -qq update \
         unzip \
         yasm \
         pkg-config \
+        ffmpeg \
+        libsm6 \
+        libxext6 \
         libswscale-dev \
         libtbb2 \
         libtbb-dev \
@@ -38,10 +41,10 @@ RUN apt-get -qq update \
         -D BUILD_TESTS=OFF \
         -D BUILD_PERF_TESTS=OFF \
         -D CMAKE_BUILD_TYPE=RELEASE \
-        -D CMAKE_INSTALL_PREFIX=$(python3.9 -c "import sys; print(sys.prefix)") \
-        -D PYTHON_EXECUTABLE=$(which python3.9) \
-        -D PYTHON_INCLUDE_DIR=$(python3.9 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
-        -D PYTHON_PACKAGES_PATH=$(python3.9 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
+        -D CMAKE_INSTALL_PREFIX=$(python3.8 -c "import sys; print(sys.prefix)") \
+        -D PYTHON_EXECUTABLE=$(which python3.8) \
+        -D PYTHON_INCLUDE_DIR=$(python3.8 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
+        -D PYTHON_PACKAGES_PATH=$(python3.8 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
         /opt/opencv-${OPENCV_VERSION} \
     && make -j$(nproc) \
     && make install \
