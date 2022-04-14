@@ -79,11 +79,7 @@ RUN apt-get -qq update \
 #     update-ca-certificates -f;
 
 # Install OpenJDK-8
-RUN apt-get -y install software-properties-common \
-    && apt-get --allow-releaseinfo-change update \
-    && add-apt-repository ppa:webupd8team/java \
-    && apt-get update \
-    && apt-get install openjdk-10-jdk
+RUN apt-get install openjdk-10-jdk
 
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-10-openjdk-amd64/
