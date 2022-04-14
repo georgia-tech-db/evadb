@@ -78,6 +78,9 @@ RUN apt-get -qq update \
 #     apt-get clean && \
 #     update-ca-certificates -f;
 
+# Install OpenJDK-8
+RUN apt-get -y install openjdk-8-jdk
+
 # Setup JAVA_HOME -- useful for docker commandline
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
 RUN export JAVA_HOME
