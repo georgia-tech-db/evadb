@@ -8,6 +8,7 @@ from eva.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
 from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
+                                       LogicalCreateMaterializedViewToPhysical,
                                        PushdownFilterThroughSample,
                                        PushdownProjectThroughSample,
                                        LogicalCreateToPhysical,
@@ -91,7 +92,8 @@ class TestRules(unittest.TestCase):
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical()]
+            LogicalLimitToPhysical(),
+            LogicalCreateMaterializedViewToPhysical()]
         self.assertEqual(len(supported_implementation_rules),
                          len(RulesManager().implementation_rules))
 

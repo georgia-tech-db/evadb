@@ -38,7 +38,8 @@ class DatasetServiceTest(unittest.TestCase):
         mocked.assert_called_with(
             name=DATASET_NAME,
             file_url=DATASET_URL,
-            identifier_id=IDENTIFIER)
+            identifier_id=IDENTIFIER,
+            is_video=False)
         mocked.return_value.save.assert_called_once()
 
     @patch("eva.catalog.services.df_service.DataFrameMetadata")

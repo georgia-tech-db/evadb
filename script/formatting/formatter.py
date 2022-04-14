@@ -36,7 +36,7 @@ EVA_DIR = functools.reduce(os.path.join,
                            [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir])
 
 # other directory paths used are relative to peloton_dir
-EVA_SRC_DIR = os.path.join(EVA_DIR, "src")
+EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
 EVA_TEST_DIR = os.path.join(EVA_DIR, "test")
 EVA_SCRIPT_DIR = os.path.join(EVA_DIR, "script")
 
@@ -49,7 +49,7 @@ DEFAULT_DIRS.append(EVA_SRC_DIR)
 DEFAULT_DIRS.append(EVA_TEST_DIR)
 
 IGNORE_FILES = [
-    "evaql_lexer.py",    
+    "evaql_lexer.py",
     "evaql_parser.py",
     "evaql_parserListener.py",
     "evaql_parserVisitor.py",
@@ -137,21 +137,21 @@ def format_file(file_path, add_header, strip_header, format_code):
             # AUTOPEP
             autopep_command = AUTOPEP_BINARY + \
                 " --in-place --aggressive " + file_path
-            #LOG.info(autopep_command)
+            # LOG.info(autopep_command)
             os.system(autopep_command)
 
             # AUTOFLAKE
             autoflake_command = AUTOFLAKE_BINARY + \
                 " --in-place --remove-all-unused-imports"\
                 " --remove-unused-variables " + file_path
-            #LOG.info(autoflake_command)
+            # LOG.info(autoflake_command)
             os.system(autoflake_command)
-            
-            #PYLINT
+
+            # PYLINT
             pylint_command = PYLINT_BINARY + \
                 " --rcfile=" + PYLINTRC + " " + file_path
-            #LOG.info(pylint_command)
-            #os.system(pylint_command)
+            # LOG.info(pylint_command)
+            # os.system(pylint_command)
 
     # END WITH
 
@@ -163,7 +163,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 def format_dir(dir_path, add_header, strip_header, format_code):
 
     for subdir, dir, files in os.walk(dir_path):
-                
+
         for file in files:
             if file in IGNORE_FILES:
                 continue

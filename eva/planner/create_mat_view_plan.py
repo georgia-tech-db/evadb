@@ -15,37 +15,38 @@
 
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from typing import List
 from eva.parser.table_ref import TableRef
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.parser.create_statement import ColumnDefinition
+
+from typing import List
 
 
-class CreatePlan(AbstractPlan):
+class CreateMaterializedViewPlan(AbstractPlan):
     """
-    This plan is used for storing information required for create table
-    operations.
+    This plan is used for storing information required for creating
+    materialized view.
     Arguments:
-        video_ref {TableRef} -- video ref for table to be created in storage
-        column_list {List[DataFrameColumn]} -- Columns to be added
-        if_not_exists {bool} -- Whether to override if there is existing table
+        view {TableRef} -- table ref for view to be created in storage
+        col_list{List[ColumnDefinition]} -- column names in the view
+        if_not_exists {bool} -- Whether to override if there is existing view
     """
 
-    def __init__(self, table_ref: TableRef,
-                 column_list: List[DataFrameColumn],
+    def __init__(self, view: TableRef,
+                 columns: List[ColumnDefinition],
                  if_not_exists: bool = False):
-        super().__init__(PlanOprType.CREATE)
-        self._table_ref = table_ref
-        self._column_list = column_list
+        super().__init__(PlanOprType.CREATE_MATERIALIZED_VIEW)
+        self._view = view
+        self._columns = columns
         self._if_not_exists = if_not_exists
 
     @property
-    def table_ref(self):
-        return self._table_ref
+    def view(self):
+        return self._view
 
     @property
     def if_not_exists(self):
         return self._if_not_exists
 
     @property
-    def column_list(self):
-        return self._column_list
+    def columns(self):
+        return self._columns

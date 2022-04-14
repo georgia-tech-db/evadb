@@ -89,7 +89,7 @@ autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
                         "sqlalchemy.orm", "sqlalchemy.orm.exc",
                         "sqlalchemy.types",
                         "petastorm", "yaml", "pyspark", "torch",
-                        "pandas", "cv2", "src.catalog"]
+                        "pandas", "cv2", "eva.catalog"]
 
 # -- Options for HTML output -------------------------------------------------
 
