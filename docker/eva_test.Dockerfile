@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.8-buster
 
 ENV OPENCV_VERSION="4.5.1"
 
