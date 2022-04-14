@@ -28,7 +28,8 @@ RUN apt-get -qq install -y --no-install-recommends \
 
 # Download OpenCV From Version
 RUN wget https://github.com/opencv/opencv/archive/4.5.1.zip \
-    && tar -xvf 4.5.1.zip \
+    && unzip 4.5.1.zip \
+    && cd opencv-4.5.1 \
     && mkdir release \
     && cd release \
     && cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_NEW_PYTHON_SUPPORT=ON -D BUILD_EXAMPLES=ON .. \
