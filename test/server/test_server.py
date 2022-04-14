@@ -24,7 +24,7 @@ from unittest.mock import MagicMock
 from eva.server.server import start_server
 from eva.server.server import EvaServer
 
-from asyncio.exceptions import CancelledError
+from asyncio import CancelledError
 
 
 class ServerTests(unittest.TestCase):
