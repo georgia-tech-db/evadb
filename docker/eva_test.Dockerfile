@@ -95,6 +95,14 @@ RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64
     tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
     update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
 
+# Add Jenkins user
+RUN groupadd --gid 1000 jenkins && \
+    useradd --uid 1000 --gid jenkins --shell /bin/bash --home-dir /var/jenkins_home jenkins && \
+    mkdir /var/jenkins_home && \
+    chown 1000:1000 /var/jenkins_home && \
+    echo 'jenkins ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-jenkins && \
+    echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
+
 # Setup JAVA_HOME -- useful for docker commandline
 # ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
 RUN echo JAVA_HOME
