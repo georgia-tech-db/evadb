@@ -17,6 +17,7 @@ RUN apt-get -qq install -y --no-install-recommends \
     base \
     unzip \
     gcc \
+    g++ \
     software-properties-common
 
 # Install Python Necessary Stuff
@@ -25,26 +26,29 @@ RUN apt-get -qq install -y --no-install-recommends \
     python3.7-venv \
     python3.7-dev
 
-# Add Required Repository for OpenCV
-RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
-    && apt-get update
+# Install OpenCV Directly
+RUN apt-get install libopencv-dev python3-opencv
 
-# Install OpenCV Specific Stuff
-RUN apt-get -qq install -y --no-install-recommends \
-    libgl1-mesa-dev \
-    libgtk2.0-dev \
-    libjpeg-dev \
-    libtiff5-dev \
-    libjasper-dev \
-    libpng-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
-    libv4l-dev \
-    libxvidcore-dev \
-    libx264-dev \
-    libatlas-base-dev \
-    gfortran
+# # Add Required Repository for OpenCV
+# RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
+#     && apt-get update
+
+# # Install OpenCV Specific Stuff
+# RUN apt-get -qq install -y --no-install-recommends \
+#     libgl1-mesa-dev \
+#     libgtk2.0-dev \
+#     libjpeg-dev \
+#     libtiff5-dev \
+#     libjasper-dev \
+#     libpng-dev \
+#     libavcodec-dev \
+#     libavformat-dev \
+#     libswscale-dev \
+#     libv4l-dev \
+#     libxvidcore-dev \
+#     libx264-dev \
+#     libatlas-base-dev \
+#     gfortran
 
 # Install JAva
 RUN apt-get -qq install -y openjdk-8-jdk
