@@ -29,7 +29,7 @@ pyspark:
   property: {'spark.logConf': 'true',
              'spark.driver.memory': '10g',
              'spark.sql.execution.arrow.pyspark.enabled': 'true',
-             'spark.jars.ivy' : /tmp/.ivy'}
+             'spark.jars.ivy' : '/tmp/.ivy'}
   coalesce: 2
 
 
