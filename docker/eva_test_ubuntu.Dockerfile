@@ -16,7 +16,8 @@ RUN apt-get -qq install -y --no-install-recommends \
     cmake \
     base \
     unzip \
-    gcc
+    gcc \
+    software-properties-common
 
 # Install Python Necessary Stuff
 RUN apt-get -qq install -y --no-install-recommends \
