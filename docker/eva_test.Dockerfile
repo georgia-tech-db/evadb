@@ -96,8 +96,8 @@ RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64
     update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
 
 # Setup JAVA_HOME -- useful for docker commandline
-ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
-RUN export JAVA_HOME
+# ENV JAVA_HOME /usr/lib/jvm/java-11-openjdk-amd64/
+RUN echo JAVA_HOME
 
 # Give Permission To Home Directory
 RUN mkdir /.eva && chmod -R 777 /.eva
