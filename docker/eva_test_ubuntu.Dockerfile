@@ -27,7 +27,7 @@ RUN apt-get -qq install -y --no-install-recommends \
     python3.7-dev
 
 # Install OpenCV Directly
-RUN apt-get install libopencv-dev python3-opencv
+RUN apt-get -qq install -y libopencv-dev python3-opencv
 
 # # Add Required Repository for OpenCV
 # RUN add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main" \
