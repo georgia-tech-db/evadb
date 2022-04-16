@@ -122,3 +122,6 @@ class DataFrameColumn(BaseModel):
             self.array_dimensions == other.array_dimensions and \
             self.name == other.name and \
             self.type == other.type
+
+    def __hash__(self):
+        return hash((self.id, self.metadata_id, self.is_nullable, self.array_type, tuple(self.array_dimensions), self.name, self.type))

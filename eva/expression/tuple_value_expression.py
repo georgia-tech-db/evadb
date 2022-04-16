@@ -81,3 +81,7 @@ class TupleValueExpression(AbstractExpression):
                 and self.col_metadata_id == other.col_metadata_id
                 and self.col_object == other.col_object
                 and self._col_idx == other._col_idx)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.table_metadata_id,
+        self.col_name, self.col_metadata_id, self.col_object, self._col_idx))
