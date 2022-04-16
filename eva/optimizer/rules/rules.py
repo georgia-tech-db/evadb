@@ -43,7 +43,7 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.sample_plan import SamplePlan
-from eva.planner.lateral_join_build_plan import LateralJoinBuildPlan
+from eva.planner.lateral_join_plan import LateralJoinPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -602,18 +602,36 @@ class LogicalFunctionScanToPhysical(Rule):
         after = FunctionScanPlan(before.func_expr)
         return after
 
+class LogicalLateralJoinToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
+    
+    def promise(self):
+        return Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL
+    
+    def check(self, before: Operator, context: OptimizerContext):
+        assert before.join_type == JoinType.LATERAL_JOIN
+        return True
 
-class LogicalJoinToPhysical(Rule):
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        lateral_join_plan = LateralJoinPlan(join_node.predicate)
+        return lateral_join_plan    
+
+
+class LogicalJoinToPhysicalHashJoin(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALJOIN)
         pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL, pattern)
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_JOIN_TO_PHYSICAL
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN
 
     def check(self, before: Operator, context: OptimizerContext):
+        assert before.join_type == JoinType.INNER_JOIN, "we only support inner joins"
         return True
 
     def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
@@ -631,13 +649,15 @@ class LogicalJoinToPhysical(Rule):
         return left_columns.intersection(right_columns)
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
-        if join_node.join_type == JoinType.LATERAL_JOIN:
-            lateral_join_plan = LateralJoinBuildPlan(join_node.join_type,
-                                                     [],
-                                                     join_node.predicate,
-                                                     join_node.target_list)
-            return lateral_join_plan
-        elif join_node.join_type == JoinType.HASH_JOIN:
+        #          HashJoinPlan                       HashJoinProbePlan
+        #          /           \     ->                  /               \
+        #        P1             P2        HashJoinBuildPlan               P2
+        #                                              /
+        #                                            P1
+        if (type(physical_plan) == HashJoinProbePlan):
+            build_plan = HashJoinBuildPlan(physical_plan.join_type, [])
+            build_plan.append_child(physical_plan.children[0])
+            physical_plan._children[0] = build_plan
             probe_side = HashJoinProbePlan(join_node.join_type,
                                            self.extract_join_keys(join_node),
                                            join_node.predicate,
