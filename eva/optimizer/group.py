@@ -43,6 +43,7 @@ class Group:
         self._logical_exprs = []
         self._physical_exprs = []
         self._winner_exprs: Dict[Property, Winner] = {}
+        self._is_explored = False
 
     @property
     def group_id(self):
@@ -55,6 +56,12 @@ class Group:
     @property
     def physical_exprs(self):
         return self._physical_exprs
+
+    def is_explored(self):
+        return self._is_explored
+
+    def mark_explored(self):
+        self._is_explored = True
 
     def __str__(self) -> str:
         return '%s(%s)' % (
