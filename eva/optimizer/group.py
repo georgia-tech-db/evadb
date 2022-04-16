@@ -19,7 +19,7 @@ from typing import Dict
 from eva.optimizer.property import Property
 from eva.optimizer.group_expression import GroupExpression
 from eva.utils.logging_manager import LoggingManager
-from eva.constants import INVALID_GROUP_ID
+from eva.constants import UNDEFINED_GROUP_ID
 
 
 class Winner:
@@ -70,7 +70,7 @@ class Group:
         )
 
     def add_expr(self, expr: GroupExpression):
-        if expr.group_id == INVALID_GROUP_ID:
+        if expr.group_id == UNDEFINED_GROUP_ID:
             expr.group_id = self.group_id
 
         if expr.group_id != self.group_id:

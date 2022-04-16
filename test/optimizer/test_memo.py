@@ -3,13 +3,13 @@ import unittest
 from mock import MagicMock
 
 from eva.optimizer.memo import Memo
-from eva.optimizer.group import INVALID_GROUP_ID
+from eva.optimizer.group import UNDEFINED_GROUP_ID
 
 
 class MemoTest(unittest.TestCase):
     def test_memo_add_with_no_forcing_id(self):
         group_expr = MagicMock()
-        group_expr.group_id = INVALID_GROUP_ID
+        group_expr.group_id = UNDEFINED_GROUP_ID
         memo = Memo()
         self.assertEqual(memo.add_group_expr(group_expr), group_expr)
 
@@ -22,7 +22,7 @@ class MemoTest(unittest.TestCase):
 
     def test_memo_add_existing_group_id_under_no_forcing_id(self):
         group_expr = MagicMock()
-        group_expr.group_id = INVALID_GROUP_ID
+        group_expr.group_id = UNDEFINED_GROUP_ID
 
         memo = Memo()
         memo.add_group_expr(group_expr)
@@ -32,7 +32,7 @@ class MemoTest(unittest.TestCase):
 
     def test_memo_add_existing_group_id_under_forcing_id(self):
         group_expr1 = MagicMock()
-        group_expr1.group_id = INVALID_GROUP_ID
+        group_expr1.group_id = UNDEFINED_GROUP_ID
         group_expr2 = MagicMock()
         group_expr2.group_id = 0
 

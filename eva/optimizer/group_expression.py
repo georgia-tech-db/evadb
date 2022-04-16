@@ -15,14 +15,14 @@
 
 from eva.optimizer.operators import Operator
 from eva.optimizer.rules.rules import RuleType
-from eva.constants import INVALID_GROUP_ID
+from eva.constants import UNDEFINED_GROUP_ID
 from typing import List
 
 
 class GroupExpression:
     def __init__(self,
                  opr: Operator,
-                 group_id: int = INVALID_GROUP_ID,
+                 group_id: int = UNDEFINED_GROUP_ID,
                  children: List[int] = []):
         self._opr = opr
         self._group_id = group_id
@@ -76,10 +76,4 @@ class GroupExpression:
         )
 
     def __hash__(self):
-        # correct this hash function.
-        # we are taking hash of just the opr type
-
-        curr_hash = id(self.opr)
-        for child_id in self.children:
-            curr_hash ^= hash(child_id)
-        return curr_hash
+        return hash((self.opr, tuple(self.children)))

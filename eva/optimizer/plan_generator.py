@@ -49,34 +49,25 @@ class PlanGenerator:
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
         memo = optimizer_context.memo
-        grp_expr = optimizer_context.xform_opr_to_group_expr(
+        grp_expr = optimizer_context.add_opr_to_group(
             opr=logical_plan
         )
         root_grp_id = grp_expr.group_id
-        root_group = optimizer_context.memo.get_group_by_id(root_grp_id)
-        """
-        for g in optimizer_context.memo._groups:
-            for expr in g._logical_exprs:
-                print(expr)
-        """
+        root_expr = memo.groups[root_grp_id].logical_exprs[0]
+        
         # TopDown Rewrite
         optimizer_context.task_stack.push(
-            TopDownRewrite(grp_expr, RulesManager().rewrite_rules, optimizer_context))
+            TopDownRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
-        # Update the group expression
-        grp_expr = memo.groups[root_grp_id].logical_exprs[0]
+        
         # BottomUp Rewrite
+        root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
-            BottomUpRewrite(grp_expr, RulesManager().logical_rules, optimizer_context))
+            BottomUpRewrite(root_expr, RulesManager().logical_rules, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
-        """
-        print('-------------------We are done logical rewriter-----------\n')
-        for g in optimizer_context.memo._groups:
-            for expr in g._logical_exprs:
-                print(expr)
-        """
         # Optimize Expression (logical -> physical transformation)
+        root_group = memo.get_group_by_id(root_grp_id)
         optimizer_context.task_stack.push(
             OptimizeGroup(root_group, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)

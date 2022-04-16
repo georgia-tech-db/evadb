@@ -121,7 +121,7 @@ class TestRules(unittest.TestCase):
         logi_filter = LogicalFilter(predicate, [logi_get])
 
         rewrite_opr = rule.apply(logi_filter, MagicMock())
-        self.assertEqual(rewrite_opr, logi_get)
+        self.assertNotEqual(rewrite_opr, logi_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
     # EmbedFilterIntoDerivedGet

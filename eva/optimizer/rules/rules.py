@@ -183,10 +183,10 @@ class EmbedFilterIntoGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        # logical_get = copy.deepcopy(before.children[0])
         logical_get = before.children[0]
-        logical_get.predicate = predicate
-        return logical_get
+        new_get_opr = LogicalGet(logical_get.video, logical_get.dataset_metadata, logical_get.children)
+        new_get_opr.predicate = predicate
+        return new_get_opr
 
 
 class EmbedProjectIntoGet(Rule):
@@ -229,10 +229,10 @@ class EmbedFilterIntoDerivedGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        # logical_derived_get = copy.deepcopy(before.children[0])
         logical_derived_get = before.children[0]
-        logical_derived_get.predicate = predicate
-        return logical_derived_get
+        new_opr = LogicalQueryDerivedGet(logical_derived_get.children)
+        new_opr.predicate = predicate
+        return new_opr
 
 
 class EmbedProjectIntoDerivedGet(Rule):

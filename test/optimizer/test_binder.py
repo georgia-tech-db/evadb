@@ -40,8 +40,8 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child2_ptn)
 
         opt_ctxt = OptimizerContext()
-        root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
-            root_opr, is_root=True)
+        root_grp_expr = opt_ctxt.add_opr_to_group(
+            root_opr)
 
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
 
@@ -85,15 +85,15 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(Pattern(OperatorType.DUMMY))
 
         opt_ctxt = OptimizerContext()
-        root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
-            root_opr_cpy, is_root=True)
+        root_grp_expr = opt_ctxt.add_opr_to_group(
+            root_opr_cpy)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
         for match in iter(binder):
             self.helper_pre_order_match(root_opr, match)
 
         opt_ctxt = OptimizerContext()
-        sub_root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
-            sub_root_opr_cpy, is_root=True)
+        sub_root_grp_expr = opt_ctxt.add_opr_to_group(
+            sub_root_opr_cpy)
         binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)
         for match in iter(binder):
             self.helper_pre_order_match(sub_root_opr, match)

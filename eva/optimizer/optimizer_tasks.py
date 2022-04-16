@@ -136,7 +136,7 @@ class BottomUpRewrite(OptimizerTask):
                 valid_rules.append(rule)
 
         # sort the rules by promise
-        sorted(valid_rules, key=lambda x: x.promise(), reverse=True)
+        sorted(valid_rules, key=lambda x: x.promise())
         for rule in valid_rules:
             binder = Binder(self.root_expr, rule.pattern,
                             self.optimizer_context.memo)
@@ -149,7 +149,7 @@ class BottomUpRewrite(OptimizerTask):
                                      .format(rule, self.root_expr),
                                      LoggingLevel.INFO)
                 after = rule.apply(match, self.optimizer_context)
-                new_expr = self.optimizer_context.xform_opr_to_group_expr(
+                new_expr = self.optimizer_context._xform_opr_to_group_expr(
                     opr=after,
                     root_group_id=self.root_expr.group_id,
                     is_root=True,
@@ -224,10 +224,8 @@ class ApplyRule(OptimizerTask):
             if not self.rule.check(match, self.optimizer_context):
                 continue
             after = self.rule.apply(match, self.optimizer_context)
-            new_expr = GroupExpression(
-                after, self.root_expr.group_id, self.root_expr.children)
-            self.optimizer_context.memo.add_group_expr(new_expr)
-
+            new_expr = self.optimizer_context.add_opr_to_group(after, self.root_expr.group_id)
+            
             if new_expr.is_logical():
                 # optimize expressions
                 self.optimizer_context.task_stack.push(OptimizeExpression(

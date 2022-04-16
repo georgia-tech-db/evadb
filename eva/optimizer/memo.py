@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.group import Group, INVALID_GROUP_ID
+from eva.optimizer.group import Group, UNDEFINED_GROUP_ID
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
 
 
@@ -75,14 +75,15 @@ class Memo:
         """
         Remove all the expr from the group_id
         """
-        for expr in self.groups[group_id].logical_expr:
+        group = self.groups[group_id]
+        for expr in group.logical_exprs:
             del self._group_exprs[expr]
-        for expr in self.groups[group_id].physical_exprs:
+        for expr in group.physical_exprs:
             del self._group_exprs[expr]
         
-        self.groups[group_id].clear_grp_exprs()
+        group.clear_grp_exprs()
 
-    def add_group_expr(self, expr: GroupExpression, group_id: int) -> GroupExpression:
+    def add_group_expr(self, expr: GroupExpression, group_id: int = UNDEFINED_GROUP_ID) -> GroupExpression:
         """
         Add an expression into the memo.
         If expr exists, we return it.
@@ -98,10 +99,10 @@ class Memo:
         expr.group_id = group_id
         self._group_exprs[expr] = expr
         
-        if expr.group_id == INVALID_GROUP_ID:
+        if expr.group_id == UNDEFINED_GROUP_ID:
             self._create_new_group(expr)
         else:
             self._insert_expr(expr, group_id)
         
-        assert expr.group_id is not INVALID_GROUP_ID, 'Expr should have a valid group id'
+        assert expr.group_id is not UNDEFINED_GROUP_ID, 'Expr should have a valid group id'
         return expr

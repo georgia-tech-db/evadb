@@ -20,9 +20,8 @@ class TestOptimizerTask(unittest.TestCase):
 
     def top_down_rewrite(self, opr):
         opt_cxt = OptimizerContext()
-        grp_expr = opt_cxt.xform_opr_to_group_expr(
-            opr,
-            copy_opr=False
+        grp_expr = opt_cxt.add_opr_to_group(
+            opr
         )
         root_grp_id = grp_expr.group_id
         opt_cxt.task_stack.push(TopDownRewrite(grp_expr, RulesManager().rewrite_rules, opt_cxt))
