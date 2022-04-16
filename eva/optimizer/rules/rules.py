@@ -52,12 +52,12 @@ class RuleType(Flag):
 
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
-
+    EMBED_PROJECT_INTO_DERIVED_GET = auto()
+    EMBED_PROJECT_INTO_GET = auto()
+    
     REWRITE_DELIMETER = auto()
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
@@ -74,6 +74,8 @@ class RuleType(Flag):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
+
+    NUM_RULES = auto()
 
 
 class Promise(IntEnum):
@@ -563,13 +565,16 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
+        self._logical_rules = [
+            EmbedProjectIntoGet(),
+            EmbedProjectIntoDerivedGet(),
+            PushdownProjectThroughSample()
+        ]
+        
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
-            EmbedProjectIntoGet(),
             EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoDerivedGet(),
-            PushdownFilterThroughSample(),
-            PushdownProjectThroughSample()
+            PushdownFilterThroughSample()
         ]
 
         self._implementation_rules = [
@@ -586,6 +591,7 @@ class RulesManager:
             LogicalLimitToPhysical(),
             LogicalCreateMaterializedViewToPhysical()
         ]
+        self._all_rules = self._rewrite_rules + self._logical_rules + self._implementation_rules
 
     @property
     def rewrite_rules(self):
@@ -594,3 +600,11 @@ class RulesManager:
     @property
     def implementation_rules(self):
         return self._implementation_rules
+
+    @property
+    def logical_rules(self):
+        return self._logical_rules
+    
+    @property
+    def all_rules(self):
+        return self._all_rules

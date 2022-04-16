@@ -93,6 +93,8 @@ class Operator:
     def is_logical(self):
         return self._opr_type < OperatorType.LOGICALDELIMITER
 
+    def __hash__(self) -> int:
+        return hash(self.opr_type)
 
 class Dummy(Operator):
     def __init__(self):
@@ -142,6 +144,8 @@ class LogicalGet(Operator):
                 and self.predicate == other.predicate
                 and self.target_list == other.target_list)
 
+    def __hash__(self) -> int:
+        return super().__hash__(hash(self.video, self.dataset_metadata, self.predicate, self.target_list))
 
 class LogicalQueryDerivedGet(Operator):
     def __init__(self, children: List = None):

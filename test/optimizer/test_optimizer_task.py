@@ -8,6 +8,7 @@ from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.operators import (
     LogicalGet, LogicalFilter, LogicalProject, LogicalQueryDerivedGet)
 from eva.optimizer.property import PropertyType
+from eva.optimizer.rules.rules import RulesManager
 from eva.planner.seq_scan_plan import SeqScanPlan
 
 
@@ -24,18 +25,20 @@ class TestOptimizerTask(unittest.TestCase):
             copy_opr=False
         )
         root_grp_id = grp_expr.group_id
-        opt_cxt.task_stack.push(TopDownRewrite(grp_expr, opt_cxt))
+        opt_cxt.task_stack.push(TopDownRewrite(grp_expr, RulesManager().rewrite_rules, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
     def bottom_up_rewrite(self, root_grp_id, opt_cxt):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
-        opt_cxt.task_stack.push(BottomUpRewrite(grp_expr, opt_cxt))
+        opt_cxt.task_stack.push(BottomUpRewrite(grp_expr, RulesManager().logical_rules, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
     def implement_group(self, root_grp_id, opt_cxt):
-        opt_cxt.task_stack.push(OptimizeGroup(root_grp_id, opt_cxt))
+        grp = opt_cxt.memo.groups[root_grp_id]
+        print('Here', grp)
+        opt_cxt.task_stack.push(OptimizeGroup(grp, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
@@ -156,3 +159,6 @@ class TestOptimizerTask(unittest.TestCase):
         child_opr = best_child_grp_expr.opr
         self.assertEqual(type(child_opr), SeqScanPlan)
         self.assertEqual(child_opr.predicate, child_predicate)
+
+if __name__ == '__main__':
+    unittest.main()

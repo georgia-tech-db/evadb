@@ -69,11 +69,8 @@ class TestRules(unittest.TestCase):
     def test_supported_rules(self):
         # adding/removing rules should update this test
         supported_rewrite_rules = [EmbedFilterIntoGet(),
-                                   EmbedProjectIntoGet(),
                                    EmbedFilterIntoDerivedGet(),
-                                   EmbedProjectIntoDerivedGet(),
-                                   PushdownFilterThroughSample(),
-                                   PushdownProjectThroughSample()]
+                                   PushdownFilterThroughSample()]
         self.assertEqual(len(supported_rewrite_rules),
                          len(RulesManager().rewrite_rules))
         # check all the rule instance exists
