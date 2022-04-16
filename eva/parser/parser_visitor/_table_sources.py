@@ -44,7 +44,8 @@ class TableSources(evaql_parserVisitor):
             if right_source.is_func_expr():
                 join_type = JoinType.LATERAL_JOIN
             elif right_source.is_table_atom():
-                join_type = JoinType.HASH_JOIN
+                # add support for other kind of joins
+                join_type = JoinType.INNER_JOIN
 
             right_child = TableRef(JoinNode(left=left_child,
                                             right=right_source,

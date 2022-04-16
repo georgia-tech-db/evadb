@@ -35,7 +35,7 @@ class LateralJoinExecutor(AbstractExecutor):
 
     """
 
-    def __init__(self, node: LateralJoinBuildPlan):
+    def __init__(self, node: LateralJoinPlan):
         super().__init__(node)
         self.predicate = node.predicate
         self.join_type = node.join_type

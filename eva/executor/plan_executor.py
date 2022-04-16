@@ -93,10 +93,10 @@ class PlanExecutor:
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
         elif plan_opr_type == PlanOprType.JOIN:
-            if plan.join_type == JoinType.HASH_JOIN:
-                executor_node = HashJoinExecutor(node=plan)
-            elif plan.join_type == JoinType.LATERAL_JOIN:
+            if plan.join_type == JoinType.LATERAL_JOIN:
                 executor_node = LateralJoinExecutor(node=plan)
+            else:
+                executor_node = HashJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.BUILD_JOIN:
             executor_node = BuildJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FUNCTION_SCAN:

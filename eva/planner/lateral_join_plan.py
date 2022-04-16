@@ -22,26 +22,15 @@ from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.abstract_expression import AbstractExpression
 
 
-class LateralJoinBuildPlan(AbstractJoin):
+class LateralJoinPlan(AbstractJoin):
     """
-    This plan is used for storing information required for hashjoin build side.
-    It prepares the hash table of preferably the smaller relation
-    which is used by the probe side to find relevant rows.
-    Arguments:
-        join_type: JoinType
-        build_keys (List[DataFrameColumn]) : list of equi-key columns.
-                        If empty, then Cartitian product.
+    This plan is used for storing information required for lateral join
     """
 
     def __init__(self,
-                 join_type: JoinType,
-                 probe_keys: List[DataFrameColumn],
-                 predicate: AbstractExpression,
-                 column_ids: List[AbstractExpression]
+                 predicate: AbstractExpression]
                  ):
-        self.predicate = predicate
-        self.join_project = column_ids
         super().__init__(PlanOprType.JOIN,
-                         join_type,
-                         probe_keys
+                         JoinType.LATERAL_JOIN,
+                         predicate
                          )
