@@ -56,6 +56,9 @@ class GroupExpression:
     def rules_explored(self):
         return self._rules_explored
 
+    def is_logical(self):
+        return self.opr.is_logical()
+
     def mark_rule_explored(self, rule_id: RuleType):
         self._rules_explored |= rule_id
 

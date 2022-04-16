@@ -15,6 +15,7 @@
 
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.group import Group, INVALID_GROUP_ID
+from eva.utils.logging_manager import LoggingLevel, LoggingManager
 
 
 class Memo:
@@ -24,7 +25,7 @@ class Memo:
 
     def __init__(self):
         self._group_exprs = dict()
-        self._groups = []
+        self._groups = {}
 
     @property
     def groups(self):
@@ -42,6 +43,12 @@ class Memo:
             return self.group_exprs[expr]
         else:
             return INVALID_GROUP_ID
+
+    def get_group_by_id(self, group_id: int) -> GroupExpression:
+        if group_id in self._groups.keys():
+            return self._groups[group_id]
+        else:
+            LoggingManager().log('Missing group id', LoggingLevel.ERROR)
 
     """
     For the consistency of the memo, all modification should use the
