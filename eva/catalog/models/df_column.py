@@ -124,4 +124,10 @@ class DataFrameColumn(BaseModel):
             self.type == other.type
 
     def __hash__(self):
-        return hash((self.id, self.metadata_id, self.is_nullable, self.array_type, tuple(self.array_dimensions), self.name, self.type))
+        return hash((self.id,
+                     self.metadata_id,
+                     self.is_nullable,
+                     self.array_type,
+                     tuple(self.array_dimensions),
+                     self.name,
+                     self.type))

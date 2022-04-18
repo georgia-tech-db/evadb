@@ -128,4 +128,7 @@ class FunctionExpression(AbstractExpression):
                 and self.function == other.function)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.output, self.output_obj, self.function))
+        return hash((super().__hash__(),
+                     self.output,
+                     self.output_obj,
+                     self.function))

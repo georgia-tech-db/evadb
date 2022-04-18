@@ -62,6 +62,7 @@ class UdfMetadata(BaseModel):
             self.type == other.type
 
     def __hash__(self) -> int:
-        return hash((self.id, self.name,
+        return hash((self.id,
+                     self.name,
                      self.impl_file_path,
                      self.type))
