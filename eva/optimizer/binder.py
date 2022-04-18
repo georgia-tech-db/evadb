@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import itertools
+import copy
 
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.memo import Memo
-from eva.optimizer.operators import Operator, OperatorType
+from eva.optimizer.operators import Dummy, Operator, OperatorType
 
 
 class Binder:
@@ -28,17 +29,19 @@ class Binder:
         self._memo = memo
 
     @staticmethod
-    def _grp_binder(id: int, pattern: Pattern, memo: Memo):
-        grp = memo.groups[id]
+    def _grp_binder(idx: int, pattern: Pattern, memo: Memo):
+        grp = memo.groups[idx]
 
         for expr in grp.logical_exprs:
             yield from Binder._binder(expr, pattern, memo)
 
     @staticmethod
     def _binder(expr: GroupExpression, pattern: Pattern, memo: Memo):
-        curr_iterator = iter([expr.opr])
+        assert isinstance(expr, GroupExpression)
+        curr_iterator = iter(())
         child_binders = []
         if pattern.opr_type is not OperatorType.DUMMY:
+            curr_iterator = iter([expr.opr])
             if expr.opr.opr_type != pattern.opr_type:
                 return
 
@@ -50,6 +53,9 @@ class Binder:
                 child_binders.append(
                     Binder._grp_binder(child_grp, pattern_child, memo)
                 )
+        else:
+            # record the group id in a Dummy Opearator
+            curr_iterator = iter([Dummy(expr.group_id)])
 
         yield from itertools.product(curr_iterator, *child_binders)
 
@@ -71,4 +77,11 @@ class Binder:
     def __iter__(self):
         # the iterator only returns one match, which stems from the root node
         for match in Binder._binder(self._grp_expr, self._pattern, self._memo):
-            yield Binder.build_opr_tree_from_pre_order_repr(match)
+            # We should not modify the operator in the group
+            # expression as it might be used in later rules. Hack:
+            # Creating a copy of the match Potential fix: Store only
+            # the content in the group expression and manage the
+            # parent-child relationship separately. Refer
+            # optimizer_context:_xform_opr_to_group_expr
+            match_copy = [copy.copy(opr) for opr in match]
+            yield Binder.build_opr_tree_from_pre_order_repr(match_copy)

@@ -66,9 +66,14 @@ class CreateMaterializedViewStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, CreateMaterializedViewStatement):
             return False
-        print(self)
-        print(other)
         return (self.view_ref == other.view_ref
                 and self.col_list == other.col_list
                 and self.if_not_exists == other.if_not_exists
                 and self.query == other.query)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.view_ref,
+                     tuple(self.col_list),
+                     self.if_not_exists,
+                     self.query))

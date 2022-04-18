@@ -15,8 +15,6 @@
 from abc import ABC, abstractmethod
 from enum import IntEnum, unique, auto
 
-from eva.utils import generic_utils
-
 
 @unique
 class ExpressionType(IntEnum):
@@ -66,10 +64,13 @@ class ExpressionReturnType(IntEnum):
 
 class AbstractExpression(ABC):
 
-    def __init__(self, exp_type: ExpressionType, rtype: ExpressionReturnType = ExpressionReturnType.INVALID, children = []):
+    def __init__(self,
+                 exp_type: ExpressionType,
+                 rtype: ExpressionReturnType = ExpressionReturnType.INVALID,
+                 children=None):
         self._etype = exp_type
         self._rtype = rtype
-        self._children = children
+        self._children = children or []
 
     def get_child(self, index: int):
         if index < 0 or index >= len(self._children):
@@ -94,7 +95,6 @@ class AbstractExpression(ABC):
     @etype.setter
     def etype(self, expr_type: ExpressionType):
         self._etype = expr_type
-
 
     @property
     def rtype(self) -> ExpressionReturnType:

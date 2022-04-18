@@ -45,7 +45,6 @@ class OptimizerTask:
         self._task_type = task_type
         self._optimizer_context = optimizer_context
 
-
     @property
     def task_type(self):
         return self._task_type
@@ -143,25 +142,21 @@ class BottomUpRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                # Uncertain correctness
-                self.root_expr.mark_rule_explored(rule.rule_type)
                 LoggingManager().log('In BottomUp, Rule {} matched for {}'
                                      .format(rule, self.root_expr),
                                      LoggingLevel.INFO)
                 after = rule.apply(match, self.optimizer_context)
-                new_expr = self.optimizer_context._xform_opr_to_group_expr(
-                    opr=after,
-                    root_group_id=self.root_expr.group_id,
-                    is_root=True,
-                    copy_opr=False
+                new_expr = self.optimizer_context.replace_expression(
+                    after,
+                    self.root_expr.group_id
                 )
-                self.root_expr = new_expr
                 LoggingManager().log(
                     'After rewiting {}'.format(self.root_expr),
                     LoggingLevel.INFO
                 )
                 self.optimizer_context.task_stack.push(BottomUpRewrite(
                     new_expr, self.rule_set, self.optimizer_context))
+            self.root_expr.mark_rule_explored(rule.rule_type)
 
 
 class OptimizeExpression(OptimizerTask):
@@ -208,7 +203,11 @@ class OptimizeExpression(OptimizerTask):
 class ApplyRule(OptimizerTask):
     '''apply a transformation or implementation rule'''
 
-    def __init__(self, rule: Rule, root_expr: GroupExpression, optimizer_context: OptimizerContext, explore: bool):
+    def __init__(self,
+                 rule: Rule,
+                 root_expr: GroupExpression,
+                 optimizer_context: OptimizerContext,
+                 explore: bool):
         self.rule = rule
         self.root_expr = root_expr
         self.explore = explore
@@ -224,8 +223,9 @@ class ApplyRule(OptimizerTask):
             if not self.rule.check(match, self.optimizer_context):
                 continue
             after = self.rule.apply(match, self.optimizer_context)
-            new_expr = self.optimizer_context.add_opr_to_group(after, self.root_expr.group_id)
-            
+            new_expr = self.optimizer_context.add_opr_to_group(
+                after, self.root_expr.group_id)
+
             if new_expr.is_logical():
                 # optimize expressions
                 self.optimizer_context.task_stack.push(OptimizeExpression(
@@ -244,7 +244,6 @@ class OptimizeGroup(OptimizerTask):
         super().__init__(optimizer_context, OptimizerTaskType.OPTIMIZE_GROUP)
 
     def execute(self):
-        print(self.group)
         # Todo: Get the property from the context
         if self.group.get_best_expr(PropertyType.DEFAULT):
             return

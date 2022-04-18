@@ -52,6 +52,3 @@ class CascadeOptimizer(unittest.TestCase):
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
-
-if __name__ == '__main__':
-    unittest.main()

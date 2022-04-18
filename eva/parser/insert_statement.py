@@ -68,3 +68,9 @@ class InsertTableStatement(AbstractStatement):
         return (self.table == other.table
                 and self.column_list == other.column_list
                 and self.value_list == other.value_list)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table,
+                     tuple(self.column_list),
+                     tuple(self.value_list)))

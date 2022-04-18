@@ -49,3 +49,9 @@ class CreatePlan(AbstractPlan):
     @property
     def column_list(self):
         return self._column_list
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table_ref,
+                     self.if_not_exists,
+                     tuple(self.column_list)))

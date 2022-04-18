@@ -18,6 +18,13 @@ from abc import ABC
 from eva.planner.types import PlanOprType
 from typing import List
 
+'''
+Note: hash of any operator class doesn't include the hashes of
+children. The hash is implemented to help optimizer catch duplicates.
+To compare if two operators are same you should use equality (which
+considers all the children).
+'''
+
 
 class AbstractPlan(ABC):
 
@@ -56,12 +63,7 @@ class AbstractPlan(ABC):
 
     @property
     def children(self) -> List['AbstractPlan']:
-        """returns children list of current node
-
-        Returns:
-            List[AbstractPlan] -- children list
-        """
-        return self._children[:]
+        return self._children
 
     @property
     def opr_type(self) -> PlanOprType:
@@ -73,11 +75,11 @@ class AbstractPlan(ABC):
         """
         return self._opr_type
 
-    def __str__(self, level=0):
-        out_string = "\t" * level + '' + "\n"
-        for child in self.children:
-            out_string += child.__str__(level + 1)
-        return out_string
+    def clear_children(self):
+        self.children.clear()
 
     def is_logical(self):
         return False
+
+    def __hash__(self) -> int:
+        return hash(self.opr_type)

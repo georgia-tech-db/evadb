@@ -45,3 +45,6 @@ class UploadPlan(AbstractPlan):
         print_str = 'UploadPlan(file_path={} video_blob={})'.format(
             self.file_path, "string of video blob")
         return print_str
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.file_path, self.video_blob))

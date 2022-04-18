@@ -50,3 +50,9 @@ class CreateMaterializedViewPlan(AbstractPlan):
     @property
     def columns(self):
         return self._columns
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.view,
+                     self.if_not_exists,
+                     tuple(self.columns)))

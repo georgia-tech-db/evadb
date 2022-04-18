@@ -24,6 +24,11 @@ class GroupExpression:
                  opr: Operator,
                  group_id: int = UNDEFINED_GROUP_ID,
                  children: List[int] = []):
+        # remove this assert after fixing
+        # optimizer_context:_xform_opr_to_group_expr
+        assert len(
+            opr.children) == 0, '''Cannot create a group expression
+                                from operator with children'''
         self._opr = opr
         self._group_id = group_id
         self._children = children
@@ -66,8 +71,9 @@ class GroupExpression:
         return (self._rules_explored & rule_id) == rule_id
 
     def __eq__(self, other: 'GroupExpression'):
-        return (self.opr == other.opr and
-                self.children == other.children)
+        return (self.group_id == other.group_id
+                and self.opr == other.opr
+                and self.children == other.children)
 
     def __str__(self) -> str:
         return '%s(%s)' % (

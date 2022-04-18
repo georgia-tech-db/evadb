@@ -50,3 +50,9 @@ class InsertPlan(AbstractPlan):
     @property
     def value_list(self):
         return self._value_list
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table_metainfo,
+                     tuple(self.column_list),
+                     tuple(self.value_list)))

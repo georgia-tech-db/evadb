@@ -14,8 +14,9 @@
 # limitations under the License.
 
 from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.group import Group, UNDEFINED_GROUP_ID
+from eva.optimizer.group import Group
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.constants import UNDEFINED_GROUP_ID
 
 
 class Memo:
@@ -60,7 +61,7 @@ class Memo:
         new_group_id = len(self._groups)
         self._groups[new_group_id] = Group(new_group_id)
         self._insert_expr(expr, new_group_id)
-        
+
     def _insert_expr(self, expr: GroupExpression, group_id: int):
         """
         Insert a group expressoin into a particular group
@@ -80,10 +81,12 @@ class Memo:
             del self._group_exprs[expr]
         for expr in group.physical_exprs:
             del self._group_exprs[expr]
-        
+
         group.clear_grp_exprs()
 
-    def add_group_expr(self, expr: GroupExpression, group_id: int = UNDEFINED_GROUP_ID) -> GroupExpression:
+    def add_group_expr(self,
+                       expr: GroupExpression,
+                       group_id: int = UNDEFINED_GROUP_ID) -> GroupExpression:
         """
         Add an expression into the memo.
         If expr exists, we return it.
@@ -94,15 +97,17 @@ class Memo:
         duplicate_expr = self.find_duplicate_expr(expr)
         if duplicate_expr is not None:
             return duplicate_expr
-        
+
         # did not find a dulpicate expression
         expr.group_id = group_id
-        self._group_exprs[expr] = expr
-        
+
         if expr.group_id == UNDEFINED_GROUP_ID:
             self._create_new_group(expr)
         else:
             self._insert_expr(expr, group_id)
-        
-        assert expr.group_id is not UNDEFINED_GROUP_ID, 'Expr should have a valid group id'
+
+        assert expr.group_id is not UNDEFINED_GROUP_ID, '''Expr
+                                                        should have a
+                                                        valid group
+                                                        id'''
         return expr

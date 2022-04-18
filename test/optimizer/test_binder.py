@@ -55,7 +55,7 @@ class TestBinder(unittest.TestCase):
                          /           \
                   LogicalGet      LogicalFilter
                                   /           \
-                            LogicalGet       Dummy
+                            LogicalGet       LogicalGet
 
         Pattern:
                          LogicalFilter
@@ -64,20 +64,13 @@ class TestBinder(unittest.TestCase):
         """
 
         sub_child_opr = LogicalGet(MagicMock(), MagicMock())
-        sub_root_opr = LogicalFilter(MagicMock(), [sub_child_opr, Dummy()])
+        sub_child_opr_2 = LogicalGet(MagicMock(), MagicMock())
+        sub_root_opr = LogicalFilter(
+            MagicMock(), [sub_child_opr, sub_child_opr_2])
 
         child_opr = LogicalGet(MagicMock(), MagicMock())
         root_opr = LogicalFilter(
             MagicMock(), [child_opr, sub_root_opr])
-
-        # copy for binder to operate on
-        sub_child_opr_cpy = LogicalGet(MagicMock(), MagicMock())
-        sub_root_opr_cpy = LogicalFilter(
-            MagicMock(), [sub_child_opr_cpy, Dummy()])
-
-        child_opr_cpy = LogicalGet(MagicMock(), MagicMock())
-        root_opr_cpy = LogicalFilter(
-            MagicMock(), [child_opr_cpy, sub_root_opr_cpy])
 
         child_ptn = Pattern(OperatorType.LOGICALGET)
         root_ptn = Pattern(OperatorType.LOGICALFILTER)
@@ -86,14 +79,20 @@ class TestBinder(unittest.TestCase):
 
         opt_ctxt = OptimizerContext()
         root_grp_expr = opt_ctxt.add_opr_to_group(
-            root_opr_cpy)
+            root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
+        expected_match = root_opr
+        expected_match.append_child(child_opr)
+        expected_match.append_child(Dummy(2))
         for match in iter(binder):
-            self.helper_pre_order_match(root_opr, match)
+            self.helper_pre_order_match(expected_match, match)
 
         opt_ctxt = OptimizerContext()
         sub_root_grp_expr = opt_ctxt.add_opr_to_group(
-            sub_root_opr_cpy)
+            sub_root_opr)
+        expected_match = sub_root_opr
+        expected_match.append_child(sub_child_opr)
+        expected_match.append_child(Dummy(1))
         binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)
         for match in iter(binder):
             self.helper_pre_order_match(sub_root_opr, match)

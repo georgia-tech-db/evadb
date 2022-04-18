@@ -488,7 +488,3 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition('labels', None, None, None)
         ], False, select_stmt[0])
         self.assertEqual(mat_view_stmt[0], expected_stmt)
-
-
-if __name__ == '__main__':
-    unittest.main()
