@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from copy import deepcopy
 from enum import IntEnum, auto
 from typing import List
 
@@ -103,7 +104,18 @@ class Operator:
         return self._opr_type < OperatorType.LOGICALDELIMITER
 
     def __hash__(self) -> int:
-        return hash(self.opr_type)
+        return hash((self.opr_type, tuple(self.children)))
+
+    def __copy__(self):
+        # deepcopy the children
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for k, v in self.__dict__.items():
+            if k == '_children':
+                setattr(result, k, deepcopy(v, {}))
+            else:
+                setattr(result, k, v)
+        return result
 
 
 class Dummy(Operator):

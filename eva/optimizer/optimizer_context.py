@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.memo import Memo
 from eva.optimizer.operators import Dummy, Operator
@@ -63,12 +64,14 @@ class OptimizerContext:
 
         # Group Expression only needs the operator content. Remove
         # the opr children as parent-child relationship is captured
-        # by the group expressions
-        # Hack: manually clearing the children as we don't need the dependency.
-        # Better fix is to rewrite the operator class to support  exposing only
-        # the content
-        opr.clear_children()
-        expr = GroupExpression(opr=opr, children=child_ids)
+        # by the group expressions.
+        # Hack: Shallow copy all the content except children and
+        # manually clearing the children as we don't need the
+        # dependency. Better fix is to rewrite the operator class to
+        # support  exposing only the content
+        opr_copy = copy.copy(opr)
+        opr_copy.clear_children()
+        expr = GroupExpression(opr=opr_copy, children=child_ids)
         return expr
 
     def replace_expression(self, opr: Operator, group_id: int):

@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 from mock import MagicMock
@@ -11,6 +12,7 @@ from eva.optimizer.rules.pattern import Pattern
 
 class TestBinder(unittest.TestCase):
     def helper_pre_order_match(self, cur_opr, res_opr):
+        print(cur_opr)
         self.assertEqual(cur_opr.opr_type, res_opr.opr_type)
         self.assertEqual(len(cur_opr.children), len(res_opr.children))
 
@@ -81,18 +83,16 @@ class TestBinder(unittest.TestCase):
         root_grp_expr = opt_ctxt.add_opr_to_group(
             root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
-        expected_match = root_opr
-        expected_match.append_child(child_opr)
-        expected_match.append_child(Dummy(2))
+        expected_match = copy.copy(root_opr)
+        expected_match.children = [child_opr, Dummy(2)]
         for match in iter(binder):
             self.helper_pre_order_match(expected_match, match)
 
         opt_ctxt = OptimizerContext()
         sub_root_grp_expr = opt_ctxt.add_opr_to_group(
             sub_root_opr)
-        expected_match = sub_root_opr
-        expected_match.append_child(sub_child_opr)
-        expected_match.append_child(Dummy(1))
+        expected_match = copy.copy(sub_root_opr)
+        expected_match.children = [sub_child_opr, Dummy(1)]
         binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)
         for match in iter(binder):
-            self.helper_pre_order_match(sub_root_opr, match)
+            self.helper_pre_order_match(expected_match, match)

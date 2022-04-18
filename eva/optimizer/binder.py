@@ -65,9 +65,9 @@ class Binder:
             return pre_order_repr
         else:
             opr_tree = pre_order_repr[0]
+            opr_tree.children.clear()
             if len(pre_order_repr) > 1:
                 # remove old children
-                opr_tree.children.clear()
                 for child in pre_order_repr[1:]:
                     opr_tree.append_child(
                         Binder.build_opr_tree_from_pre_order_repr(child)
@@ -84,4 +84,5 @@ class Binder:
             # parent-child relationship separately. Refer
             # optimizer_context:_xform_opr_to_group_expr
             match_copy = [copy.copy(opr) for opr in match]
-            yield Binder.build_opr_tree_from_pre_order_repr(match_copy)
+            x = Binder.build_opr_tree_from_pre_order_repr(match_copy)
+            yield x
