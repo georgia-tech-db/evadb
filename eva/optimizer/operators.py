@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from copy import deepcopy
 from enum import IntEnum, auto
 from typing import List
 
@@ -45,14 +44,6 @@ class OperatorType(IntEnum):
     LOGICALSAMPLE = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALDELIMITER = auto()
-
-
-"""
-Note: hash of any operator class doesn't include the hashes of
-children. The hash is implemented to help optimizer catch duplicates.
-To compare if two operators are same you should use equality (which
-considers all the children).
-"""
 
 
 class Operator:
@@ -112,7 +103,7 @@ class Operator:
         result = cls.__new__(cls)
         for k, v in self.__dict__.items():
             if k == '_children':
-                setattr(result, k, deepcopy(v, {}))
+                setattr(result, k, [])
             else:
                 setattr(result, k, v)
         return result

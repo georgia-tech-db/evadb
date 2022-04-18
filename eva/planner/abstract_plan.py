@@ -15,16 +15,8 @@
 
 
 from abc import ABC
-from copy import deepcopy
 from eva.planner.types import PlanOprType
 from typing import List
-
-'''
-Note: hash of any operator class doesn't include the hashes of
-children. The hash is implemented to help optimizer catch duplicates.
-To compare if two operators are same you should use equality (which
-considers all the children).
-'''
 
 
 class AbstractPlan(ABC):
@@ -92,7 +84,7 @@ class AbstractPlan(ABC):
         for k, v in self.__dict__.items():
             print('here')
             if k == '_children':
-                setattr(result, k, deepcopy(v, {}))
+                setattr(result, k, [])
             else:
                 setattr(result, k, v)
         return result
