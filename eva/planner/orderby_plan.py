@@ -42,3 +42,6 @@ class OrderByPlan(AbstractPlan):
     @property
     def orderby_list(self):
         return self._orderby_list
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), tuple(self._orderby_list)))

@@ -59,7 +59,3 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['label'][idx])
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -140,3 +140,13 @@ class SelectStatement(AbstractStatement):
                 and self.union_all == other.union_all
                 and self.orderby_list == other.orderby_list
                 and self.limit_count == other.limit_count)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.from_table,
+                     tuple(self.target_list),
+                     self.where_clause,
+                     self.union_link,
+                     self.union_all,
+                     tuple(self.orderby_list),
+                     self.limit_count))

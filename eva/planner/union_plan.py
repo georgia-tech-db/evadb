@@ -33,3 +33,6 @@ class UnionPlan(AbstractPlan):
     @property
     def all(self):
         return self._all
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._all))

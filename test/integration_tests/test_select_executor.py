@@ -155,7 +155,7 @@ class SelectExecutorTest(unittest.TestCase):
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_select_and_limit(self):
+    def test_aselect_and_limit(self):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
@@ -177,7 +177,3 @@ class SelectExecutorTest(unittest.TestCase):
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
-
-
-if __name__ == '__main__':
-    unittest.main()

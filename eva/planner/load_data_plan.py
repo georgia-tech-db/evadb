@@ -73,3 +73,10 @@ class LoadDataPlan(AbstractPlan):
                                      self.column_list,
                                      self.file_options)
         return print_str
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.table_metainfo,
+                     self.file_path,
+                     self.batch_mem_size,
+                     tuple(self.column_list),
+                     frozenset(self.file_options.items())))

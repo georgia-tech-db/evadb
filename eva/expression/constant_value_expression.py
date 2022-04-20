@@ -55,3 +55,6 @@ class ConstantValueExpression(AbstractExpression):
             return is_equal and all(self.value == other.value)
         else:
             return is_equal and self.value == other.value
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.v_type, str(self.value)))

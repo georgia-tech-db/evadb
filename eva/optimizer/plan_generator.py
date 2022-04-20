@@ -20,6 +20,7 @@ from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.property import PropertyType
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
+from eva.optimizer.rules.rules import RulesManager
 
 
 class PlanGenerator:
@@ -60,37 +61,29 @@ class PlanGenerator:
     def optimize(self, logical_plan: Operator):
         optimizer_context = OptimizerContext()
         memo = optimizer_context.memo
-        grp_expr = optimizer_context.xform_opr_to_group_expr(
-            opr=logical_plan,
-            copy_opr=False
+        grp_expr = optimizer_context.add_opr_to_group(
+            opr=logical_plan
         )
         root_grp_id = grp_expr.group_id
+        root_expr = memo.groups[root_grp_id].logical_exprs[0]
 
-        """
-        for g in optimizer_context.memo._groups:
-            for expr in g._logical_exprs:
-                print(expr)
-        """
         # TopDown Rewrite
         optimizer_context.task_stack.push(
-            TopDownRewrite(grp_expr, optimizer_context))
-        self.execute_task_stack(optimizer_context.task_stack)
-        # Update the group expression
-        grp_expr = memo.groups[root_grp_id].logical_exprs[0]
-        # BottomUp Rewrite
-        optimizer_context.task_stack.push(
-            BottomUpRewrite(grp_expr, optimizer_context))
+            TopDownRewrite(root_expr, RulesManager().rewrite_rules,
+                           optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
-        """
-        print('-------------------We are done logical rewriter-----------\n')
-        for g in optimizer_context.memo._groups:
-            for expr in g._logical_exprs:
-                print(expr)
-        """
-        # Optimize Expression (logical -> physical transformation)
+        # BottomUp Rewrite
+        root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
-            OptimizeGroup(root_grp_id, optimizer_context))
+            BottomUpRewrite(root_expr, RulesManager().logical_rules,
+                            optimizer_context))
+        self.execute_task_stack(optimizer_context.task_stack)
+
+        # Optimize Expression (logical -> physical transformation)
+        root_group = memo.get_group_by_id(root_grp_id)
+        optimizer_context.task_stack.push(
+            OptimizeGroup(root_group, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
         # Build Optimal Tree

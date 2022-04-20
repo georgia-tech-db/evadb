@@ -79,3 +79,11 @@ class CreateUDFPlan(AbstractPlan):
     @property
     def udf_type(self):
         return self._udf_type
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.if_not_exists,
+                     tuple(self.inputs),
+                     tuple(self.outputs),
+                     self.impl_path,
+                     self.udf_type))
