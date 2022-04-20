@@ -68,7 +68,6 @@ class PlanExecutor:
         elif plan_opr_type == PlanOprType.UNION:
             executor_node = UnionExecutor(node=plan)
         elif plan_opr_type == PlanOprType.STORAGE_PLAN:
-            print('In Executor', plan.video)
             executor_node = StorageExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PP_FILTER:
             executor_node = PPExecutor(node=plan)

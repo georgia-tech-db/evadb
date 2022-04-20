@@ -38,7 +38,6 @@ class TestOptimizerTask(unittest.TestCase):
 
     def implement_group(self, root_grp_id, opt_cxt):
         grp = opt_cxt.memo.groups[root_grp_id]
-        print('Here', grp)
         opt_cxt.task_stack.push(OptimizeGroup(grp, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id

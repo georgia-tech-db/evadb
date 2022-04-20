@@ -40,7 +40,6 @@ class StoragePlan(AbstractPlan):
                  total_shards: int = 0,
                  curr_shard: int = 0):
         super().__init__(PlanOprType.STORAGE_PLAN)
-        print('In storage: ', video)
         self._video = video
         self._batch_mem_size = batch_mem_size
         self._skip_frames = skip_frames
