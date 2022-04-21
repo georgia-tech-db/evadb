@@ -93,7 +93,7 @@ def bind_function_expr(expr: FunctionExpression, column_mapping):
                 LoggingManager().log(
                     'Invalid output {} selected for UDF {}'.format(
                         expr.output, expr.name), LoggingLevel().ERROR)
-        expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)
 
 
 def create_column_metadata(col_list: List[ColumnDefinition]):
