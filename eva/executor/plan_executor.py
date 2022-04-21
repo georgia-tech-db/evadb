@@ -116,9 +116,10 @@ class PlanExecutor:
         consumer = execution_tree
         producer = execution_tree.children[0]
 
-        consumer_task = ray_stage.options(num_gpus=1).remote([consumer],
-                [queue], [output_queue])
-        ray_stage_wait_and_alert.remote([consumer_task], [output_queue])
+        consumer_tasks = []
+        for _ in range(2): 
+            consumer_tasks.append(ray_stage.options(num_gpus=1).remote([consumer], [queue], [output_queue]))
+        ray_stage_wait_and_alert.remote(consumer_tasks, [output_queue])
 
         producer_task = ray_stage.remote([producer], [], [queue])
         ray_stage_wait_and_alert.remote([producer_task], [queue])
