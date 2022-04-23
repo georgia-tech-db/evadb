@@ -28,31 +28,44 @@ from eva.parser.types import JoinType
 
 class TableSources(evaql_parserVisitor):
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
+        return self.visit(ctx.tableSource())
 
-        table_list = []
-        table_sources_count = len(ctx.tableSource())
-        for table_sources_index in range(table_sources_count):
-            table = self.visit(ctx.tableSource(table_sources_index))
-            table_list.append(table)
+    def visitTableSourceBase(self, ctx: evaql_parser.TableSourceBaseContext):
+        left_node = self.visit(ctx.tableSourceItemWithSample())
+        join_nodes = [left_node]
+        for table_join_index in range(len(ctx.joinPart())):
+            table = self.visit(ctx.joinPart(table_join_index))
+            join_nodes.append(table)
 
-        # For Join Operator
-        if table_sources_count > 1:  # Do Not Support More Than 2 Sources
-            left_child = table_list[0]
-            right_source = table_list[1]
+        num_table_joins = len(join_nodes)
 
-            join_type = None
-            if right_source.is_func_expr():
-                join_type = JoinType.LATERAL_JOIN
-            elif right_source.is_table_atom():
-                # add support for other kind of joins
-                join_type = JoinType.INNER_JOIN
+        # Join Nodes
+        if num_table_joins > 1:
+            # Add Join nodes -> left deep tree
+            # t1, t2, t3 -> j2 ( j1 ( t1, t2 ), t3 )
+            for i in range(num_table_joins - 1):
+                join_nodes[i + 1].table.left = join_nodes[i]
 
-            right_child = TableRef(JoinNode(left=left_child,
-                                            right=right_source,
-                                            join_type=join_type))
-            table_list = [right_child]
+            return join_nodes[-1]
+        else:
+            return join_nodes[0]
 
-        return table_list
+    # Join
+    def visitInnerJoin(self, ctx: evaql_parser.InnerJoinContext):
+        table = self.visit(ctx.tableSourceItemWithSample())
+        if table.is_func_expr():
+            return TableRef(JoinNode(None,
+                                     table,
+                                     join_type=JoinType.LATERAL_JOIN))
+        else:
+            if ctx.ON() is None:
+                raise Exception(
+                    'ERROR: Syntax error: Join should specify the ON columns')
+            join_predicates = self.visit(ctx.expression())
+            return TableRef(JoinNode(None,
+                                     table,
+                                     predicate=join_predicates,
+                                     join_type=JoinType.INNER_JOIN))
 
     def visitTableSourceItemWithSample(
             self, ctx: evaql_parser.TableSourceItemWithSampleContext):
@@ -122,10 +135,6 @@ class TableSources(evaql_parserVisitor):
                 LoggingManager().log('Error while parsing \
                                 visitQuerySpecification', LoggingLevel.ERROR)
                 raise e
-
-        # we don't support multiple table sources
-        if from_clause is not None:
-            from_clause = from_clause[0]
 
         select_stmt = SelectStatement(
             target_list, from_clause, where_clause,
