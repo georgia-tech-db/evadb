@@ -32,7 +32,7 @@ class TestOptimizerTask(unittest.TestCase):
     def bottom_up_rewrite(self, root_grp_id, opt_cxt):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
         opt_cxt.task_stack.push(BottomUpRewrite(
-            grp_expr, RulesManager().logical_rules, opt_cxt))
+            grp_expr, RulesManager().tmp_rewrite_rules, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
@@ -162,3 +162,7 @@ class TestOptimizerTask(unittest.TestCase):
         child_opr = best_child_grp_expr.opr
         self.assertEqual(type(child_opr), SeqScanPlan)
         self.assertEqual(child_opr.predicate, child_predicate)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -78,7 +78,6 @@ class Memo:
         """
         group = self.groups[group_id]
         for expr in group.logical_exprs:
-            print(expr)
             del self._group_exprs[expr]
         for expr in group.physical_exprs:
             del self._group_exprs[expr]

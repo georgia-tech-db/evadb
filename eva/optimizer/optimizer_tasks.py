@@ -61,17 +61,9 @@ class TopDownRewrite(OptimizerTask):
     def __init__(self, root_expr: GroupExpression,
                  rule_set: List[Rule],
                  optimizer_context: OptimizerContext):
-        self._root_expr = root_expr
+        self.root_expr = root_expr
         self.rule_set = rule_set
         super().__init__(optimizer_context, OptimizerTaskType.TOP_DOWN_REWRITE)
-
-    @property
-    def root_expr(self):
-        return self._root_expr
-
-    @root_expr.setter
-    def root_expr(self, expr: GroupExpression):
-        self._root_expr = expr
 
     def execute(self):
         valid_rules = []
@@ -99,7 +91,7 @@ class TopDownRewrite(OptimizerTask):
                 self.optimizer_context.task_stack.push(TopDownRewrite(
                     new_expr, self.rule_set, self.optimizer_context))
 
-            self.root_expr.mark_rule_explored(rule.rule_type)
+                self.root_expr.mark_rule_explored(rule.rule_type)
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.groups[child] \
                 .logical_exprs[0]
@@ -170,7 +162,7 @@ class OptimizeExpression(OptimizerTask):
                          OptimizerTaskType.OPTIMIZE_EXPRESSION)
 
     def execute(self):
-        all_rules = RulesManager().logical_rules
+        all_rules = RulesManager().rewrite_rules
         # if exploring, we don't need to consider implementation rules
         if not self.explore:
             all_rules.extend(RulesManager().implementation_rules)
