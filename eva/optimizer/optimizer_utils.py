@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+from eva.optimizer.operators import LogicalJoin
 from eva.parser.table_ref import TableRef, TableInfo
 from eva.catalog.models.df_metadata import DataFrameMetadata
 
@@ -204,3 +205,22 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
             raise RuntimeError(err_msg)
     else:
         return False
+
+
+def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
+    cols = set()
+    for col in dataset_metadata.columns:
+        if not col.array_type:
+            cols.add(col.name)
+    return cols
+
+
+def extract_join_keys(self, join_node: LogicalJoin):
+    predicate = join_node.join_predicate
+    pred_list = ExpressionUtils.expression_tree_to_conjunction_list(predicate)
+    # need to have the column map -
+    left_table_metadata = join_node.lhs().dataset_metadata
+    left_columns = self.get_columns_of_table(left_table_metadata)
+    right_table_metadata = join_node.rhs().dataset_metadata
+    right_columns = self.get_columns_of_table(right_table_metadata)
+    return left_columns.intersection(right_columns)

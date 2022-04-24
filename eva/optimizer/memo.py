@@ -49,12 +49,6 @@ class Memo:
         else:
             LoggingManager().log('Missing group id', LoggingLevel.ERROR)
 
-    def get_group_by_id(self, group_id: int) -> GroupExpression:
-        if group_id in self._groups.keys():
-            return self._groups[group_id]
-        else:
-            LoggingManager().log('Missing group id', LoggingLevel.ERROR)
-
     """
     For the consistency of the memo, all modification should use the
     following functions.
@@ -84,7 +78,6 @@ class Memo:
         """
         group = self.groups[group_id]
         for expr in group.logical_exprs:
-            print(expr)
             del self._group_exprs[expr]
         for expr in group.physical_exprs:
             del self._group_exprs[expr]

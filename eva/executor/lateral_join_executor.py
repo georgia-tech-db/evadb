@@ -18,7 +18,7 @@ from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
 # from eva.executor.abstract_executor import UPSTREAM_BATCH
 # from eva.planner.nested_loop_join_plan import NestedLoopJoin
-from eva.planner.lateral_join_build_plan import LateralJoinBuildPlan
+from eva.planner.lateral_join_plan import LateralJoinPlan
 
 # from eva.utils.metrics import Metrics
 
@@ -37,10 +37,8 @@ class LateralJoinExecutor(AbstractExecutor):
 
     def __init__(self, node: LateralJoinPlan):
         super().__init__(node)
-        self.predicate = node.predicate
-        self.join_type = node.join_type
+        self.predicate = node.join_predicate
         self.join_project = node.join_project
-        # self.join_keys = node.join_keys
 
     def validate(self):
         pass
@@ -52,16 +50,19 @@ class LateralJoinExecutor(AbstractExecutor):
 
         for outer_batch in outer.exec():
             for result_batch in inner.exec(lateral_input=outer_batch):
+                # merge
+                result_batch = Batch.merge_column_wise(
+                    [outer_batch, result_batch])
                 if not result_batch.empty() and self.predicate is not None:
                     outcomes = self.predicate.evaluate(result_batch).frames
                     result_batch = Batch(result_batch.frames
                                          [(outcomes > 0).to_numpy()]
                                          .reset_index(drop=True))
-            # Then do project
-            if not result_batch.empty() and self.join_project is not None:
-                batches = [expr.evaluate(result_batch)
-                           for expr in self.join_project]
-                result_batch = Batch.merge_column_wise(batches)
+                # Then do project
+                if not result_batch.empty() and self.join_project:
+                    batches = [expr.evaluate(result_batch)
+                               for expr in self.join_project]
+                    result_batch = Batch.merge_column_wise(batches)
 
-            if not result_batch.empty():
-                return result_batch
+                if not result_batch.empty():
+                    return result_batch

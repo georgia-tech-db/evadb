@@ -30,8 +30,10 @@ class PlanOprType(Enum):
     LIMIT = auto()
     SAMPLE = auto()
     FUNCTION_SCAN = auto()
-    JOIN = auto()
+    HASH_JOIN = auto()
     LATERAL_JOIN = auto()
-    BUILD_JOIN = auto()
+    HASH_BUILD = auto()
     CREATE_MATERIALIZED_VIEW = auto()
+    PREDICATE_FILTER = auto()
+    PROJECT = auto()
     # add other types

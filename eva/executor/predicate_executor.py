@@ -16,40 +16,27 @@ from typing import Iterator
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.planner.predicate_plan import PredicatePlan
 
 
-class SequentialScanExecutor(AbstractExecutor):
+class PredicateExecutor(AbstractExecutor):
     """
-    Applies predicates to filter the frames which satisfy the condition
-    Arguments:
-        node (AbstractPlan): The SequentialScanPlan
-
     """
 
-    def __init__(self, node: SeqScanPlan):
+    def __init__(self, node: PredicatePlan):
         super().__init__(node)
         self.predicate = node.predicate
-        self.project_expr = node.columns
 
     def validate(self):
         pass
 
     def exec(self) -> Iterator[Batch]:
-
         child_executor = self.children[0]
         for batch in child_executor.exec():
-            # We do the predicate first
             if not batch.empty() and self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch).frames
                 batch = Batch(
                     batch.frames[(outcomes > 0).to_numpy()].reset_index(
                         drop=True))
-
-            # Then do project
-            if not batch.empty() and self.project_expr:
-                batches = [expr.evaluate(batch) for expr in self.project_expr]
-                batch = Batch.merge_column_wise(batches)
-
             if not batch.empty():
                 yield batch

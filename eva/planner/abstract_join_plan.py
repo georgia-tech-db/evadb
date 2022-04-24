@@ -48,3 +48,8 @@ class AbstractJoin(AbstractPlan):
     @property
     def join_predicate(self) -> AbstractExpression:
         return self._join_predicate
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.join_type,
+                     self.join_predicate))

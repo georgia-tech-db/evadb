@@ -652,6 +652,10 @@ class LogicalFunctionScan(Operator):
         return (is_subtree_equal
                 and self.func_expr == other.func_expr)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.func_expr))
+
 
 class LogicalJoin(Operator):
     """
@@ -672,22 +676,22 @@ class LogicalJoin(Operator):
                  children: List = None):
         super().__init__(OperatorType.LOGICALJOIN, children)
         self._join_type = join_type
-        self._predicate = join_predicate
+        self._join_predicate = join_predicate
         self._left_keys = left_keys
         self._right_keys = right_keys
-        self._target_list = None
+        self._join_project = []
 
     @property
     def join_type(self):
         return self._join_type
 
     @property
-    def predicate(self):
-        return self._predicate
+    def join_predicate(self):
+        return self._join_predicate
 
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
+    @join_predicate.setter
+    def join_predicate(self, predicate):
+        self._join_predicate = predicate
 
     @property
     def left_keys(self):
@@ -706,12 +710,12 @@ class LogicalJoin(Operator):
         self._right_keys = keys
 
     @property
-    def target_list(self):
-        return self._target_list
+    def join_project(self):
+        return self._join_project
 
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
+    @join_project.setter
+    def join_project(self, join_project):
+        self._target_list = join_project
 
     def lhs(self):
         return self.children[0]
@@ -725,9 +729,18 @@ class LogicalJoin(Operator):
             return False
         return (is_subtree_equal
                 and self.join_type == other.join_type
-                and self.predicate == other.predicate
+                and self.join_predicate == other.join_predicate
                 and self.left_keys == other.left_keys
-                and self.right_keys == other.right_keys)
+                and self.right_keys == other.right_keys
+                and self.join_project == other.join_project)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.join_type,
+                     self.join_predicate,
+                     self.left_keys,
+                     self.right_keys,
+                     tuple(self.join_project)))
 
 
 class LogicalCreateMaterializedView(Operator):

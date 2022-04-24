@@ -22,7 +22,7 @@ from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.server.command_handler import execute_query_fetch_all
 
-from test.util import create_sample_video, create_dummy_batches, file_remove
+from test.util import create_sample_video, create_dummy_batches, file_remove, load_inbuilt_udfs, create_table
 
 NUM_FRAMES = 10
 
@@ -35,6 +35,7 @@ class SelectExecutorTest(unittest.TestCase):
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
+        load_inbuilt_udfs()
 
     @classmethod
     def tearDownClass(cls):
@@ -155,7 +156,7 @@ class SelectExecutorTest(unittest.TestCase):
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_aselect_and_limit(self):
+    def test_select_and_limit(self):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
@@ -177,3 +178,23 @@ class SelectExecutorTest(unittest.TestCase):
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_lateral_join(self):
+        select_query = """SELECT id FROM MyVideo JOIN LATERAL
+                        FastRCNNObjectDetector(data) WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(actual_batch.frames.columns, ['id'])
+        self.assertEqual(actual_batch.batch_size, 5)
+
+    def test_ahash_join(self):
+        table1 = create_table('table1', 100, 3)
+        table2 = create_table('table2', 1000, 2)
+        select_query = """SELECT table1.a2 FROM table1 JOIN
+                        table2 ON table1.a1 = table2.a1;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(pd.concat([table1, table2], keys=[
+                         'a1'], join="inner"), actual_batch)
+
+
+if __name__ == '__main__':
+    unittest.main()

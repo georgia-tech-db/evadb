@@ -16,27 +16,22 @@
 from typing import List
 
 from eva.planner.types import PlanOprType
-from eva.planner.abstract_join_plan import AbstractJoin
-from eva.parser.types import JoinType
 from eva.catalog.models.df_column import DataFrameColumn
 
 
-class HashJoinBuildPlan(AbstractJoin):
+class HashJoinBuildPlan():
     """
     This plan is used for storing information required for hashjoin build side.
     It prepares the hash table of preferably the smaller relation
     which is used by the probe side to find relevant rows.
     Arguments:
-        join_type: JoinType
         build_keys (List[DataFrameColumn]) : list of equi-key columns.
                         If empty, then Cartitian product.
     """
 
-    def __init__(self,
-                 join_type: JoinType,
-                 build_keys: List[DataFrameColumn],
-                 ):
-        super().__init__(PlanOprType.BUILD_JOIN,
-                         join_type,
-                         build_keys,
-                         )
+    def __init__(self, build_keys: List[DataFrameColumn]):
+        self.build_keys = build_keys
+        super().__init__(PlanOprType.HASH_BUILD)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.build_keys))

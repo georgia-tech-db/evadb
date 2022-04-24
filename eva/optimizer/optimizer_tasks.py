@@ -285,6 +285,8 @@ class OptimizeInputs(OptimizerTask):
                 )
                 return
 
+        cost += self.optimizer_context.cost_model.calculate_cost(
+            self.root_expr)
         grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
 
 

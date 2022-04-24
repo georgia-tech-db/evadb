@@ -15,6 +15,7 @@
 import copy
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.memo import Memo
+from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Dummy, Operator
 from eva.optimizer.group_expression import GroupExpression
 from eva.constants import UNDEFINED_GROUP_ID
@@ -29,9 +30,14 @@ class OptimizerContext:
                 stack to keep track outstanding tasks
     """
 
-    def __init__(self):
+    def __init__(self, cost_model):
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
+        self._cost_model = cost_model
+
+    @property
+    def cost_model(self):
+        return self._cost_model
 
     @property
     def task_stack(self):

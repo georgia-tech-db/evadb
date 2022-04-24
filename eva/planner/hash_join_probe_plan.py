@@ -37,13 +37,18 @@ class HashJoinProbePlan(AbstractJoin):
     def __init__(self,
                  join_type: JoinType,
                  probe_keys: List[DataFrameColumn],
-                 predicate: AbstractExpression,
-                 column_ids: List[AbstractExpression]
+                 join_predicate: AbstractExpression,
+                 join_project: List[AbstractExpression]
                  ):
         self.probe_keys = probe_keys
-        self.predicate = predicate
-        self.join_project = column_ids
-        super().__init__(PlanOprType.JOIN,
+        self.join_project = join_project
+        super().__init__(PlanOprType.HASH_JOIN,
                          join_type,
-                         predicate
+                         join_predicate
                          )
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.probe_keys,
+                     self.join_project,
+                     self.join_predicate))

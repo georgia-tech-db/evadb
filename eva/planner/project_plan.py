@@ -12,26 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from eva.planner.types import PlanOprType
-from eva.planner.abstract_join_plan import AbstractJoin
-from eva.parser.types import JoinType
+from typing import List
 from eva.expression.abstract_expression import AbstractExpression
+from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
-class LateralJoinPlan(AbstractJoin):
+class ProjectPlan(AbstractPlan):
     """
-    This plan is used for storing information required for lateral join
+    Arguments:
+        target_list List[(AbstractExpression)]: projection list
     """
 
-    def __init__(self, join_predicate: AbstractExpression):
-        self.join_project = []
-        super().__init__(PlanOprType.LATERAL_JOIN,
-                         JoinType.LATERAL_JOIN,
-                         join_predicate
-                         )
+    def __init__(self, target_list: List[AbstractExpression]):
+        self.target_list = target_list
+        super().__init__(PlanOprType.PROJECT)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
-                     tuple(self.join_project)))
+                     tuple(self.target_list)))

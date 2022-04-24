@@ -16,6 +16,8 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.limit_executor import LimitExecutor
+from eva.executor.predicate_executor import PredicateExecutor
+from eva.executor.project_executor import ProjectExecutor
 from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.models.storage.batch import Batch
@@ -92,17 +94,20 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.JOIN:
-            if plan.join_type == JoinType.LATERAL_JOIN:
-                executor_node = LateralJoinExecutor(node=plan)
-            else:
-                executor_node = HashJoinExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.BUILD_JOIN:
+        elif plan_opr_type == PlanOprType.LATERAL_JOIN:
+            executor_node = LateralJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.HASH_JOIN:
+            executor_node = HashJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.HASH_BUILD:
             executor_node = BuildJoinExecutor(node=plan)
         elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
             executor_node = FunctionScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.PROJECT:
+            executor_node = ProjectExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
+            executor_node = PredicateExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))
@@ -124,6 +129,5 @@ class PlanExecutor:
         execution_tree = self._build_execution_tree(self._plan)
         output = execution_tree.exec()
         if output is not None:
-            # How to check output is Iterator[Batch]
             yield from output
         self._clean_execution_tree(execution_tree)
