@@ -585,16 +585,13 @@ class RulesManager:
 
     def __init__(self):
 
-        self._tmp_rewrite_rules = [
-            EmbedProjectIntoGet(),
-            EmbedProjectIntoDerivedGet(),
-            PushdownProjectThroughSample()
-        ]
-
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
             EmbedFilterIntoDerivedGet(),
-            PushdownFilterThroughSample()
+            PushdownFilterThroughSample(),
+            EmbedProjectIntoGet(),
+            EmbedProjectIntoDerivedGet(),
+            PushdownProjectThroughSample()
         ]
 
         self._implementation_rules = [
@@ -611,16 +608,11 @@ class RulesManager:
             LogicalLimitToPhysical(),
             LogicalCreateMaterializedViewToPhysical()
         ]
-        self._all_rules = self._tmp_rewrite_rules + \
-            self._rewrite_rules + self._implementation_rules
+        self._all_rules = self._rewrite_rules + self._implementation_rules
 
     @property
     def rewrite_rules(self):
         return self._rewrite_rules
-
-    @property
-    def tmp_rewrite_rules(self):
-        return self._tmp_rewrite_rules
 
     @property
     def implementation_rules(self):

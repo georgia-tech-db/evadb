@@ -64,7 +64,7 @@ class PlanGenerator:
         # BottomUp Rewrite
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
-            BottomUpRewrite(root_expr, RulesManager().tmp_rewrite_rules,
+            BottomUpRewrite(root_expr, RulesManager().rewrite_rules,
                             optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 

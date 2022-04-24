@@ -32,7 +32,7 @@ class TestOptimizerTask(unittest.TestCase):
     def bottom_up_rewrite(self, root_grp_id, opt_cxt):
         grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
         opt_cxt.task_stack.push(BottomUpRewrite(
-            grp_expr, RulesManager().tmp_rewrite_rules, opt_cxt))
+            grp_expr, RulesManager().rewrite_rules, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
@@ -54,41 +54,6 @@ class TestOptimizerTask(unittest.TestCase):
         self.assertEqual(type(grp_expr.opr), LogicalGet)
         self.assertEqual(grp_expr.opr.predicate, predicate)
         self.assertEqual(grp_expr.opr.children, [])
-
-    def test_nested_top_down_rewrite(self):
-        child_predicate = MagicMock()
-        root_predicate = MagicMock()
-
-        child_get_opr = LogicalGet(MagicMock(), MagicMock())
-        child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
-        child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
-        root_derived_get_opr = LogicalQueryDerivedGet(
-            children=[child_project_opr])
-        root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
-        root_project_opr = LogicalProject(MagicMock(), [root_filter_opr])
-
-        opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
-
-        grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
-
-        self.assertEqual(type(grp_expr.opr), LogicalProject)
-        self.assertEqual(len(grp_expr.children), 1)
-
-        child_grp_id = grp_expr.children[0]
-        child_expr = opt_cxt.memo.groups[child_grp_id].logical_exprs[0]
-        self.assertEqual(type(child_expr.opr), LogicalQueryDerivedGet)
-        self.assertEqual(child_expr.opr.predicate, root_predicate)
-        self.assertEqual(len(child_expr.children), 1)
-
-        child_grp_id = child_expr.children[0]
-        child_expr = opt_cxt.memo.groups[child_grp_id].logical_exprs[0]
-        self.assertEqual(type(child_expr.opr), LogicalProject)
-        self.assertEqual(len(child_expr.children), 1)
-
-        child_grp_id = child_expr.children[0]
-        child_expr = opt_cxt.memo.groups[child_grp_id].logical_exprs[0]
-        self.assertEqual(type(child_expr.opr), LogicalGet)
-        self.assertEqual(child_expr.opr.predicate, child_predicate)
 
     def test_nested_bottom_up_rewrite(self):
         child_predicate = MagicMock()
@@ -162,7 +127,3 @@ class TestOptimizerTask(unittest.TestCase):
         child_opr = best_child_grp_expr.opr
         self.assertEqual(type(child_opr), SeqScanPlan)
         self.assertEqual(child_opr.predicate, child_predicate)
-
-
-if __name__ == '__main__':
-    unittest.main()
