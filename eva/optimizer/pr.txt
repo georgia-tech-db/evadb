@@ -1,7 +1,0 @@
-1. Binder: Consumes a group expression and generates a new copy of the matching operator tree. This operator tree is later converted to the group expression and added back to the memo.
-2. If the pattern has a DummyPattern, the binder tries to match it with any operator type. If a match is found, we return it as a DummyOperator node. The dummy operator node captures the group id of the matching expression.
-3. Operators encapsulated inside group expressions should never have children. The parent/child dependency is managed via memo. Therefore, conversion from the operator tree (created by the parser or returned by binder) to group expression transfers only the content of the operator node to the group expression.  The children of the operator are dropped.
-4. Conversion from operator to group expression creates an expression with UNDEFINED_ID and tries to find a duplicate in the memo before inserting a new copy.
-5. Dummy operator nodes are not converted to group expression. Instead, the group id they were matched to is added as a child of the parent group expression.
-6. Memo avoids duplicate inserts via hashing. All the operators, plan nodes, expressions, etc. now supports hashing. Note, that the hash value of operators and plan nodes doesn't respect child dependency. This is  intentionally done to enable caching in memo as we don't want to
-7. Added new stages in the optimizer tasks. ApplyRule applies the rule to the expression. Explore group generates more equivalent logical expressions (required to handle join reordering).
