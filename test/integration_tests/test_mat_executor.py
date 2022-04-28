@@ -55,7 +55,7 @@ class MaterializedViewTest(unittest.TestCase):
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
-        expected = [{'id': i, 'label': labels[1 + i % 2]}
+        expected = [{'dummy_view.id': i, 'dummy_view.label': labels[1 + i % 2]}
                     for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
@@ -80,8 +80,8 @@ class MaterializedViewTest(unittest.TestCase):
         actual_batch.sort()
 
         labels = DummyObjectDetector().labels
-        expected = [{'id': i, 'label': labels[1 + i % 2]}
-                    for i in range(5)]
+        expected = [{'dummy_view2.id': i,
+                     'dummy_view2.label': labels[1 + i % 2]} for i in range(5)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 

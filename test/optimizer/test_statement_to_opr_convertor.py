@@ -49,7 +49,7 @@ class StatementToOprTest(unittest.TestCase):
         table_ref = TableRef(TableInfo("test"))
         converter.visit_table_ref(table_ref)
         mock.assert_called_with(table_ref.table)
-        mock_lget.assert_called_with(table_ref, mock.return_value)
+        mock_lget.assert_called_with(table_ref, mock.return_value, 'test')
         self.assertEqual(mock_lget.return_value, converter._plan)
 
     @patch('eva.optimizer.statement_to_opr_convertor.LogicalGet')
@@ -262,7 +262,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         m = MagicMock()
         mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT id FROM (SELECT data, id FROM video \
-            WHERE data > 2) WHERE id>3;""")[0]
+            WHERE data > 2) AS T WHERE id>3;""")[0]
         converter = StatementToPlanConvertor()
         actual_plan = converter.visit(stmt)
         plans = [LogicalProject([TupleValueExpression('id')])]
@@ -272,7 +272,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     ExpressionType.COMPARE_GREATER,
                     TupleValueExpression('id'),
                     ConstantValueExpression(3))))
-        plans.append(LogicalQueryDerivedGet())
+        plans.append(LogicalQueryDerivedGet(alias='T'))
         plans.append(LogicalProject(
             [TupleValueExpression('data'), TupleValueExpression('id')]))
         plans.append(
@@ -282,7 +282,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     TupleValueExpression('data'),
                     ConstantValueExpression(2))))
 
-        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+        plans.append(LogicalGet(TableRef(TableInfo('video')), m, 'video'))
         expected_plan = None
         for plan in reversed(plans):
             if expected_plan:
@@ -322,7 +322,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     TupleValueExpression('data'),
                     ConstantValueExpression(2))))
 
-        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+        plans.append(LogicalGet(TableRef(TableInfo('video')), m, 'video'))
 
         expected_plan = None
         for plan in reversed(plans):
@@ -362,7 +362,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     TupleValueExpression('data'),
                     ConstantValueExpression(2))))
 
-        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+        plans.append(LogicalGet(TableRef(TableInfo('video')), m, 'video'))
 
         expected_plan = None
         for plan in reversed(plans):
@@ -402,10 +402,12 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     TupleValueExpression('id'),
                     ConstantValueExpression(2))))
 
-        plans.append(LogicalSample(ConstantValueExpression(2)))
+        sample_freq = ConstantValueExpression(2)
+        plans.append(LogicalSample(sample_freq))
 
-        plans.append(LogicalGet(TableRef(TableInfo('video'),
-                                         ConstantValueExpression(2)), m))
+        plans.append(LogicalGet(TableRef(table=TableInfo('video'),
+                                         alias='video',
+                                         sample_freq=sample_freq), m, 'video'))
 
         expected_plan = None
         for plan in reversed(plans):
@@ -434,7 +436,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     ExpressionType.COMPARE_GREATER,
                     TupleValueExpression('id'),
                     ConstantValueExpression(3))))
-        left_plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+        left_plans.append(LogicalGet(TableRef(TableInfo('video')), m, 'video'))
 
         def reverse_plan(plans):
             return_plan = None
@@ -452,7 +454,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                     ExpressionType.COMPARE_LEQ,
                     TupleValueExpression('id'),
                     ConstantValueExpression(3))))
-        right_plans.append(LogicalGet(TableRef(TableInfo('video')), m))
+        right_plans.append(LogicalGet(
+            TableRef(TableInfo('video')), m, 'video'))
         expect_right_plan = reverse_plan(right_plans)
         expected_plan = LogicalUnion(True)
         expected_plan.append_child(expect_right_plan)
@@ -468,7 +471,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             MagicMock(), 0, [
                 MagicMock()], [
                 MagicMock()])
-        query_derived_plan = LogicalQueryDerivedGet()
+        query_derived_plan = LogicalQueryDerivedGet(alias='T')
         load_plan = LogicalLoadData(MagicMock(), MagicMock(),
                                     MagicMock(), MagicMock())
         self.assertEqual(create_plan, create_plan)

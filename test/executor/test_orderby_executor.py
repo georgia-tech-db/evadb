@@ -39,8 +39,9 @@ class OrderByExecutorTest(unittest.TestCase):
         "query: .... ORDER BY A ASC, B DESC "
 
         plan = OrderByPlan(
-            [(TupleValueExpression('A'), ParserOrderBySortType.ASC),
-             (TupleValueExpression('B'), ParserOrderBySortType.DESC)])
+            [(TupleValueExpression(col_alias='A'), ParserOrderBySortType.ASC),
+             (TupleValueExpression(col_alias='B'), ParserOrderBySortType.DESC)
+             ])
 
         orderby_executor = OrderByExecutor(plan)
         orderby_executor.append_child(DummyExecutor(batches))
@@ -67,6 +68,7 @@ class OrderByExecutorTest(unittest.TestCase):
         expected_batches = [Batch(frames=df) for df in [
             expected_df1, expected_df2, expected_df3]]
 
+        print(expected_batches[0], sorted_batches[0])
         self.assertEqual(expected_batches[0], sorted_batches[0])
         self.assertEqual(expected_batches[1], sorted_batches[1])
         self.assertEqual(expected_batches[2], sorted_batches[2])

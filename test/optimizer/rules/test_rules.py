@@ -108,7 +108,7 @@ class TestRules(unittest.TestCase):
         expr2 = MagicMock()
         expr3 = MagicMock()
 
-        logi_get = LogicalGet(MagicMock(), MagicMock())
+        logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         logi_project = LogicalProject([expr1, expr2, expr3], [logi_get])
 
         rewrite_opr = rule.apply(logi_project, MagicMock())
@@ -120,7 +120,7 @@ class TestRules(unittest.TestCase):
         rule = EmbedFilterIntoGet()
         predicate = MagicMock()
 
-        logi_get = LogicalGet(MagicMock(), MagicMock())
+        logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         logi_filter = LogicalFilter(predicate, [logi_get])
 
         rewrite_opr = rule.apply(logi_filter, MagicMock())
@@ -132,7 +132,7 @@ class TestRules(unittest.TestCase):
         rule = EmbedFilterIntoDerivedGet()
         predicate = MagicMock()
 
-        logi_derived_get = LogicalQueryDerivedGet([Dummy()])
+        logi_derived_get = LogicalQueryDerivedGet(MagicMock(), [Dummy()])
         logi_filter = LogicalFilter(predicate, [logi_derived_get])
 
         rewrite_opr = rule.apply(logi_filter, MagicMock())

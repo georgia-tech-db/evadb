@@ -13,34 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pandas as pd
-from enum import Enum, unique
 from typing import Callable, List
 
+from eva.catalog.models.udf_io import UdfIO
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, \
     ExpressionType
 from eva.models.storage.batch import Batch
 from eva.udfs.gpu_compatible import GPUCompatible
-from eva.catalog.models.udf_io import UdfIO
-
-
-@unique
-class ExecutionMode(Enum):
-    # EXEC means the executed function mutates the batch frame and returns
-    # it back. The frame batch is mutated.
-    EXEC = 1
-    # EVAL function with return values
-    EVAL = 2
 
 
 class FunctionExpression(AbstractExpression):
     """
     Consider FunctionExpression: ObjDetector -> (labels, boxes)
-    
+
     `output`: If the user wants only subset of ouputs. Eg,
     ObjDetector.lables the parser with set output to 'labels'
-    
+
     `ourput_col_aliases`: It is populated by the binder. In case the
     output is None, the binder sets output_col_aliases to list of all
     output columns of the FunctionExpression. Eg, ['labels',
@@ -51,22 +41,18 @@ class FunctionExpression(AbstractExpression):
     might be assessing the results using alias. Eg,
     `Select OD.labels FROM Video JOIN LATERAL ObjDetector AS OD;`
     """
-    def __init__(self, func: Callable,
-                 mode: ExecutionMode = ExecutionMode.EVAL, name=None,
-                 is_temp: bool = False, output=None, alias=None,
-                 **kwargs):
-        if mode == ExecutionMode.EXEC:
-            assert name is not None
+
+    def __init__(self, func: Callable, name=None,
+                 output=None, alias=None, **kwargs):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
-        self._mode = mode
         self._name = name
         self._function = func
-        self._is_temp = is_temp
-        self._output = output
-        self.alias = alias
-        self.output_col_aliases = []
+        self._output: str = output
+        self.alias: str = alias
+        self.output_col_aliases: List[str] = []
+        self.output_objs: List[UdfIO] = []
 
     @property
     def name(self):
@@ -96,9 +82,9 @@ class FunctionExpression(AbstractExpression):
         outcomes = Batch(pd.DataFrame(outcomes))
 
         outcomes.modify_column_alias(self.alias)
-        
+
         return outcomes.project(self.output_col_aliases)
-        
+
     def _gpu_enabled_function(self):
         if isinstance(self._function, GPUCompatible):
             device = self._context.gpu_device()
@@ -114,4 +100,5 @@ class FunctionExpression(AbstractExpression):
                 and self.output == other.output
                 and self.alias == other.alias
                 and self.output_col_aliases == other.output_col_aliases
-                and self.function == other.function)
+                and self.function == other.function
+                and self.output_objs == other.output_objs)

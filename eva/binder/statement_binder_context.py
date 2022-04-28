@@ -15,49 +15,56 @@
 
 from typing import Dict, List, Tuple, Union
 
-from matplotlib.pyplot import table
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_column import DataFrameColumn
-
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
+
+CatalogColumnType = Union[DataFrameColumn, UdfIO]
 
 
 class StatementBinderContext:
     def __init__(self):
         self._table_alias_map: Dict[str, DataFrameMetadata] = dict()
-        self._func_alias_map: Dict[str, UdfMetadata] = dict()
-        self._derived_table_alias_map: Dict[str, List[DataFrameColumn]] = dict()
+        self._derived_table_alias_map: Dict[str,
+                                            List[CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
-    
+
     def _check_duplicate_alias(self, alias):
-        if alias in self._derived_table_alias_map or alias in self._func_alias_map or alias in self._table_alias_map: 
+        if (alias in self._derived_table_alias_map
+                or alias in self._table_alias_map):
             raise RuntimeError('Found duplicate alias {}'.format(alias))
 
     def add_table_alias(self, alias: str, table_name: str):
         self._check_duplicate_alias(alias)
         table_obj = self._catalog.get_dataset_metadata(None, table_name)
         self._table_alias_map[alias] = table_obj
-    
-    def add_function_alias(self, alias: str, func_name: str):
+
+    def add_derived_table_alias(self,
+                                alias: str,
+                                target_list: List[Union[TupleValueExpression,
+                                                        FunctionExpression]]):
         self._check_duplicate_alias(alias)
-        func_obj = self._catalog.get_udf_by_name(func_name)
-        self._func_alias_map[alias] = func_obj
-    
-    def add_derived_table_alias(self, alias: str, target_list: List[DataFrameColumn]):
-        self._check_duplicate_alias(alias)
-        self._derived_table_alias_map[alias] = target_list
-            
-    def get_binded_column(self, 
-                          col_name: str, 
-                          alias: str = None) -> Tuple[str, Union[DataFrameColumn, UdfIO]]:
+        col_list = []
+        for expr in target_list:
+            if isinstance(expr, FunctionExpression):
+                col_list.extend(expr.output_objs)
+            else:
+                col_list.append(expr.col_object)
+
+        self._derived_table_alias_map[alias] = col_list
+
+    def get_binded_column(self,
+                          col_name: str,
+                          alias: str = None) -> Tuple[str, CatalogColumnType]:
         def raise_error():
             err_msg = 'Invalid column = {}'.format(col_name)
             LoggingManager().log(err_msg, LoggingLevel.ERROR)
             raise RuntimeError(err_msg)
-        
+
         if not alias:
             alias, col_obj = self._search_all_alias_maps(col_name)
         else:
@@ -65,34 +72,28 @@ class StatementBinderContext:
             col_obj = self._check_table_alias_map(alias, col_name)
             if not col_obj:
                 col_obj = self._check_derived_table_alias_map(alias, col_name)
-            if not col_obj:
-                col_obj = self._check_func_alias_map(alias, col_name)
 
         if col_obj:
             return alias, col_obj
-        
+
         raise_error()
-    
+
     def _check_table_alias_map(self, alias, col_name) -> DataFrameColumn:
         table_obj = self._table_alias_map.get(alias, None)
         if table_obj:
             return self._catalog.get_column_object(table_obj, col_name)
-    
-    def _check_derived_table_alias_map(self, alias, col_name) ->DataFrameColumn:
+
+    def _check_derived_table_alias_map(self,
+                                       alias,
+                                       col_name) -> DataFrameColumn:
         col_objs = self._derived_table_alias_map.get(alias, None)
         if col_objs:
             for obj in col_objs:
-                if obj.col_name.lower() == col_name:
+                if obj.name.lower() == col_name:
                     return obj
 
-    def _check_func_alias_map(self, alias, col_name) -> UdfIO:
-        func_obj = self._func_alias_map.get(alias, None)
-        if func_obj:
-            return self._catalog.get_udf_io_by_name(func_obj, col_name)
-
-    def _search_all_alias_maps(self, 
-                                 col_name: str) -> Tuple[str, Union[DataFrameColumn, 
-                                                               UdfIO]]:
+    def _search_all_alias_maps(self,
+                               col_name: str) -> Tuple[str, CatalogColumnType]:
         num_alias_matches = 0
         alias_match = None
         match_obj = None
@@ -100,26 +101,19 @@ class StatementBinderContext:
             col_obj = self._check_table_alias_map(alias, col_name)
             if col_obj:
                 match_obj = col_obj
-                num_alias_matches += 1 
-                alias_match =  alias 
+                num_alias_matches += 1
+                alias_match = alias
 
         for alias in self._derived_table_alias_map:
             col_obj = self._check_derived_table_alias_map(alias, col_name)
             if col_obj:
                 match_obj = col_obj
-                num_alias_matches += 1 
-                alias_match =  alias 
-
-        for alias in self._func_alias_map.keys():
-            col_obj = self._check_func_alias_map(alias, col_name)
-            if col_obj:
-                match_obj = col_obj
-                num_alias_matches += 1 
-                alias_match =  alias 
+                num_alias_matches += 1
+                alias_match = alias
 
         if num_alias_matches > 1:
             err_msg = 'Ambiguous Column name = {}'.format(col_name)
-            LoggingManager().log(err_msg, LoggingLevel.ERROR)  
-            raise RuntimeError(err_msg)  
-        
-        return alias_match, match_obj 
+            LoggingManager().log(err_msg, LoggingLevel.ERROR)
+            raise RuntimeError(err_msg)
+
+        return alias_match, match_obj

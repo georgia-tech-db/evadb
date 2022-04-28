@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import List
 from sqlalchemy.orm.exc import NoResultFound
-from eva.catalog.models.udf import UdfMetadata
 
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.base_service import BaseService
@@ -28,9 +27,8 @@ class UdfIOService(BaseService):
     def get_inputs_by_udf_id(self, udf_id: int):
         try:
             result = self.model.query \
-                .with_entities(self.model._id) \
                 .filter(self.model._udf_id == udf_id,
-                        self.model._is_input == True).all() # noqa
+                        self.model._is_input == True).all()  # noqa
         except Exception as e:
             LoggingManager().log(
                 "Get UDF inputs failed {}".format(str(e)),
@@ -41,7 +39,7 @@ class UdfIOService(BaseService):
         try:
             result = self.model.query \
                 .filter(self.model._udf_id == udf_id,
-                        self.model._is_input == False).all() # noqa
+                        self.model._is_input == False).all()  # noqa
         except Exception as e:
             LoggingManager().log(
                 "Get UDF outputs failed {}".format(str(e)),

@@ -20,7 +20,8 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 class TupleValueExpression(AbstractExpression):
     def __init__(self, col_name: str = None, table_alias: str = None,
-                 col_idx: int = -1, col_object: DataFrameColumn = None):
+                 col_idx: int = -1, col_object: DataFrameColumn = None,
+                 col_alias=None):
         super().__init__(ExpressionType.TUPLE_VALUE,
                          rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
@@ -28,18 +29,16 @@ class TupleValueExpression(AbstractExpression):
         self._table_metadata_id = None
         self._col_idx = col_idx
         self._col_object = col_object
-        self.col_alias = None
+        self._col_alias = col_alias
 
     @property
     def table_metadata_id(self) -> int:
         return self._table_metadata_id
 
-   
     @table_metadata_id.setter
     def table_metadata_id(self, id: int):
         self._table_metadata_id = id
 
-   
     @property
     def table_alias(self) -> str:
         return self._table_alias
@@ -59,6 +58,14 @@ class TupleValueExpression(AbstractExpression):
     @col_object.setter
     def col_object(self, value: DataFrameColumn):
         self._col_object = value
+
+    @property
+    def col_alias(self) -> str:
+        return self._col_alias
+
+    @col_alias.setter
+    def col_alias(self, value: str):
+        self._col_alias = value
 
     def evaluate(self, batch: Batch, *args, **kwargs):
         if "mask" in kwargs:

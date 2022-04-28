@@ -51,9 +51,8 @@ class Batch:
                  frames=pd.DataFrame(),
                  identifier_column=None):
         super().__init__()
-        self._frames = frames
+        self.frames = frames
         self._identifier_column = identifier_column
-        self._batch_size = len(frames)
 
     @property
     def frames(self):
@@ -149,8 +148,9 @@ class Batch:
             elif not self.empty():
                 by = self.frames.columns[0]
             else:
-                LoggingManager().log('Sorting an empty batch', LoggingLevel.WARNING)
-                return 
+                LoggingManager().log('Sorting an empty batch',
+                                     LoggingLevel.WARNING)
+                return
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
     def sort_orderby(self, by, sort_type):
@@ -283,7 +283,8 @@ class Batch:
         new_col_names = []
         for col_name in self.frames.columns:
             if '.' in col_name:
-                new_col_names.append('{}.{}'.format(alias, col_name.split('.')[1]))
+                new_col_names.append('{}.{}'.format(
+                    alias, col_name.split('.')[1]))
             else:
                 new_col_names.append('{}.{}'.format(alias, col_name))
 
