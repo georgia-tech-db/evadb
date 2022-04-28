@@ -101,3 +101,7 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['labels'][idx])
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -36,3 +36,6 @@ class SamplePlan(AbstractPlan):
     @property
     def sample_freq(self):
         return self._sample_freq
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.sample_freq))

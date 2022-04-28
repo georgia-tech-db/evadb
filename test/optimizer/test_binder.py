@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 from mock import MagicMock
@@ -11,6 +12,7 @@ from eva.optimizer.rules.pattern import Pattern
 
 class TestBinder(unittest.TestCase):
     def helper_pre_order_match(self, cur_opr, res_opr):
+        print(cur_opr)
         self.assertEqual(cur_opr.opr_type, res_opr.opr_type)
         self.assertEqual(len(cur_opr.children), len(res_opr.children))
 
@@ -40,8 +42,8 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child2_ptn)
 
         opt_ctxt = OptimizerContext()
-        root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
-            root_opr, is_root=True)
+        root_grp_expr = opt_ctxt.add_opr_to_group(
+            root_opr)
 
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
 
@@ -55,7 +57,7 @@ class TestBinder(unittest.TestCase):
                          /           \
                   LogicalGet      LogicalFilter
                                   /           \
-                            LogicalGet       Dummy
+                            LogicalGet       LogicalGet
 
         Pattern:
                          LogicalFilter
@@ -64,20 +66,13 @@ class TestBinder(unittest.TestCase):
         """
 
         sub_child_opr = LogicalGet(MagicMock(), MagicMock())
-        sub_root_opr = LogicalFilter(MagicMock(), [sub_child_opr, Dummy()])
+        sub_child_opr_2 = LogicalGet(MagicMock(), MagicMock())
+        sub_root_opr = LogicalFilter(
+            MagicMock(), [sub_child_opr, sub_child_opr_2])
 
         child_opr = LogicalGet(MagicMock(), MagicMock())
         root_opr = LogicalFilter(
             MagicMock(), [child_opr, sub_root_opr])
-
-        # copy for binder to operate on
-        sub_child_opr_cpy = LogicalGet(MagicMock(), MagicMock())
-        sub_root_opr_cpy = LogicalFilter(
-            MagicMock(), [sub_child_opr_cpy, Dummy()])
-
-        child_opr_cpy = LogicalGet(MagicMock(), MagicMock())
-        root_opr_cpy = LogicalFilter(
-            MagicMock(), [child_opr_cpy, sub_root_opr_cpy])
 
         child_ptn = Pattern(OperatorType.LOGICALGET)
         root_ptn = Pattern(OperatorType.LOGICALFILTER)
@@ -85,15 +80,19 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(Pattern(OperatorType.DUMMY))
 
         opt_ctxt = OptimizerContext()
-        root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
-            root_opr_cpy, is_root=True)
+        root_grp_expr = opt_ctxt.add_opr_to_group(
+            root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
+        expected_match = copy.copy(root_opr)
+        expected_match.children = [child_opr, Dummy(2)]
         for match in iter(binder):
-            self.helper_pre_order_match(root_opr, match)
+            self.helper_pre_order_match(expected_match, match)
 
         opt_ctxt = OptimizerContext()
-        sub_root_grp_expr = opt_ctxt.xform_opr_to_group_expr(
-            sub_root_opr_cpy, is_root=True)
+        sub_root_grp_expr = opt_ctxt.add_opr_to_group(
+            sub_root_opr)
+        expected_match = copy.copy(sub_root_opr)
+        expected_match.children = [sub_child_opr, Dummy(1)]
         binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)
         for match in iter(binder):
-            self.helper_pre_order_match(sub_root_opr, match)
+            self.helper_pre_order_match(expected_match, match)

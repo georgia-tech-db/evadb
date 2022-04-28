@@ -56,12 +56,7 @@ class AbstractPlan(ABC):
 
     @property
     def children(self) -> List['AbstractPlan']:
-        """returns children list of current node
-
-        Returns:
-            List[AbstractPlan] -- children list
-        """
-        return self._children[:]
+        return self._children
 
     @property
     def opr_type(self) -> PlanOprType:
@@ -73,11 +68,22 @@ class AbstractPlan(ABC):
         """
         return self._opr_type
 
-    def __str__(self, level=0):
-        out_string = "\t" * level + '' + "\n"
-        for child in self.children:
-            out_string += child.__str__(level + 1)
-        return out_string
+    def clear_children(self):
+        self.children.clear()
 
     def is_logical(self):
         return False
+
+    def __hash__(self) -> int:
+        return hash(self.opr_type)
+
+    def __copy__(self):
+        # deepcopy the children
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for k, v in self.__dict__.items():
+            if k == '_children':
+                setattr(result, k, [])
+            else:
+                setattr(result, k, v)
+        return result

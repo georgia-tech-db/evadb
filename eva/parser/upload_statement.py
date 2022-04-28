@@ -52,3 +52,6 @@ class UploadStatement(AbstractStatement):
             return False
         return (self.path == other.path and
                 self.video_blob == other.video_blob)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.path, self.video_blob))

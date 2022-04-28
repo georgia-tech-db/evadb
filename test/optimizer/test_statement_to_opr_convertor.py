@@ -43,7 +43,8 @@ from eva.parser.types import ParserOrderBySortType, FileFormatType
 class StatementToOprTest(unittest.TestCase):
     @patch('eva.optimizer.statement_to_opr_convertor.LogicalGet')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    def test_visit_table_ref_should_create_logical_get_opr(self, mock,
+    def test_visit_table_ref_should_create_logical_get_opr(self,
+                                                           mock,
                                                            mock_lget):
         converter = StatementToPlanConvertor()
         table_ref = TableRef(TableInfo("test"))

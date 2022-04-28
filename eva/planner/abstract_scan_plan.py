@@ -38,3 +38,6 @@ class AbstractScan(AbstractPlan):
     @property
     def predicate(self) -> AbstractExpression:
         return self._predicate
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.predicate))

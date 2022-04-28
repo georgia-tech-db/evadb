@@ -37,6 +37,12 @@ class ColConstraintInfo:
                 and self.primary == other.primary
                 and self.unique == other.unique)
 
+    def __hash__(self) -> int:
+        return hash((self.nullable,
+                     self.default_value,
+                     self.primary,
+                     self.unique))
+
 
 class ColumnDefinition:
     def __init__(self, col_name: str, col_type: ColumnType,
@@ -45,7 +51,7 @@ class ColumnDefinition:
         self._name = col_name
         self._type = col_type
         self._array_type = col_array_type
-        self._dimension = col_dim
+        self._dimension = col_dim or []
         self._cci = cci
 
     @property
@@ -81,6 +87,13 @@ class ColumnDefinition:
                 and self.array_type == other.array_type
                 and self.dimension == other.dimension
                 and self.cci == other.cci)
+
+    def __hash__(self) -> int:
+        return hash((self.name,
+                     self.type,
+                     self.array_type,
+                     tuple(self.dimension),
+                     self.cci))
 
 
 class CreateTableStatement(AbstractStatement):
@@ -123,3 +136,9 @@ class CreateTableStatement(AbstractStatement):
         return (self.table_ref == other.table_ref
                 and self.if_not_exists == other.if_not_exists
                 and self.column_list == other.column_list)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table_ref,
+                     self.if_not_exists,
+                     tuple(self.column_list)))

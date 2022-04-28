@@ -40,3 +40,6 @@ class LimitPlan(AbstractPlan):
     @property
     def limit_value(self):
         return self._limit_count.value
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._limit_count))

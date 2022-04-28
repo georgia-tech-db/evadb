@@ -41,3 +41,6 @@ class SeqScanPlan(AbstractScan):
     @property
     def columns(self):
         return self._column_ids
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), tuple(self.columns)))

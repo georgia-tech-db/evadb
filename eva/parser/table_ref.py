@@ -54,6 +54,9 @@ class TableInfo:
                 and self.schema_name == other.schema_name
                 and self.database_name == other.database_name)
 
+    def __hash__(self) -> int:
+        return hash((self.table_name, self.schema_name, self.database_name))
+
 
 class TableRef:
     """
@@ -93,3 +96,6 @@ class TableRef:
             return False
         return (self.table == other.table
                 and self.sample_freq == other.sample_freq)
+
+    def __hash__(self) -> int:
+        return hash((self.table, self.sample_freq))
