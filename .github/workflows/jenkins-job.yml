@@ -1,0 +1,17 @@
+name: Trigger Jenkins Job
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    steps:
+    - name: Trigger Jenkins Job
+      uses: appleboy/jenkins-action@master
+      with:
+        url: "https://ada-00.cc.gatech.edu/jenkins"
+        user: "gtdbuser"
+        token: ${{ secrets.JENKINS_ACCESS_TOKEN }}
+        job: "eva"
