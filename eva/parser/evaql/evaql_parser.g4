@@ -239,7 +239,7 @@ tableSource
     ;
 
 tableSourceItemWithSample
-    : tableSourceItem sampleClause?
+    : tableSourceItem (AS? uid)? sampleClause?
     ;
 
 tableSourceItem
@@ -247,7 +247,7 @@ tableSourceItem
     | (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )                                                            #subqueryTableItem
+      ) AS uid                                                          #subqueryTableItem
     ;
 
 sampleClause

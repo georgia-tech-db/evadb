@@ -61,13 +61,13 @@ class StatementToPlanConvertor:
             # NestedQuery
             self.visit_select(table_ref.table)
             child_plan = self._plan
-            self._plan = LogicalQueryDerivedGet()
+            self._plan = LogicalQueryDerivedGet(table_ref.alias)
             self._plan.append_child(child_plan)
         else:
             # Table
             catalog_vid_metadata = bind_dataset(table_ref.table)
             self._populate_column_map(catalog_vid_metadata)
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
+            self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
 
         if table_ref.sample_freq:
             self._visit_sample(table_ref.sample_freq)
@@ -245,7 +245,7 @@ class StatementToPlanConvertor:
                 column_list.append(
                     TupleValueExpression(
                         col_name=column.name,
-                        table_name=table_metainfo.name,
+                        table_alias=table_metainfo.name,
                         col_object=column))
 
         # bind the columns

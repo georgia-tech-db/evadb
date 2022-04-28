@@ -434,7 +434,7 @@ class LogicalGetToSeqScan(Rule):
             "executor", "batch_mem_size")
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = SeqScanPlan(before.predicate, before.target_list)
+        after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         after.append_child(StoragePlan(
             before.dataset_metadata, batch_mem_size=batch_mem_size))
         return after
@@ -471,7 +471,7 @@ class LogicalDerivedGetToPhysical(Rule):
 
     def apply(self, before: LogicalQueryDerivedGet,
               context: OptimizerContext):
-        after = SeqScanPlan(before.predicate, before.target_list)
+        after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         return after
 
 

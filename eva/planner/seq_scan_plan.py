@@ -33,11 +33,14 @@ class SeqScanPlan(AbstractScan):
 
     def __init__(self,
                  predicate: AbstractExpression,
-                 column_ids: List[AbstractExpression]):
+                 column_ids: List[AbstractExpression],
+                 alias: str = None):
         self._column_ids = column_ids
+        self.alias = alias
         super().__init__(PlanOprType.SEQUENTIAL_SCAN,
                          predicate)
 
     @property
     def columns(self):
         return self._column_ids
+    

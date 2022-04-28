@@ -67,22 +67,26 @@ class TableRef:
     """
 
     def __init__(self,
-                 table: Union[TableInfo, SelectStatement] = None,
+                 table: Union[TableInfo, SelectStatement],
+                 alias: str = None,
                  sample_freq: float = None):
-        self._table = table
-        self._sample_freq = sample_freq
-
-    @property
-    def table(self):
-        return self._table
-
-    @property
-    def sample_freq(self):
-        return self._sample_freq
-
+        
+        self.table = table
+        self.alias = alias or self.generate_alias()    
+        self.sample_freq = sample_freq
+        
     def is_select(self) -> bool:
         return isinstance(self.table, SelectStatement)
 
+    def generate_alias(self) -> str:
+        # create alias for the table
+        # TableInfo -> table_name.lower()
+        # SelectStatement -> select
+        if isinstance(self.table, TableInfo):
+            return self.table.table_name.lower()
+        elif isinstance(self.table, SelectStatement):
+            raise RuntimeError('Nested select should have alias')
+    
     def __str__(self):
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
             str(self.table), str(self.sample_freq))
@@ -92,4 +96,5 @@ class TableRef:
         if not isinstance(other, TableRef):
             return False
         return (self.table == other.table
+                and self.alias == other.alias
                 and self.sample_freq == other.sample_freq)

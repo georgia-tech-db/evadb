@@ -159,6 +159,13 @@ class CatalogManager(object):
         metadata.schema = df_columns
         return metadata
 
+    def get_column_object(self, table_obj: DataFrameMetadata, col_name:str) -> DataFrameColumn:
+        col_objs = self._column_service.columns_by_dataset_id_and_names(table_obj.id, column_names=[col_name])
+        if col_objs:
+            return col_objs[0]
+        else:
+            return None
+    
     def udf_io(
             self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
             dimensions: List[int], is_input: bool):
@@ -211,6 +218,17 @@ class CatalogManager(object):
             UdfMetadata object
         """
         return self._udf_service.udf_by_name(name)
+
+    def get_udf_inputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
+        if not isinstance(udf_obj, UdfMetadata):
+            raise ValueError('Expected UdfMetadata object, got {}'.format(type(udf_obj)))
+        return self._udf_io_service.get_inputs_by_udf_id(udf_obj.id)
+
+    def get_udf_outputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
+        if not isinstance(udf_obj, UdfMetadata):
+            raise ValueError('Expected UdfMetadata object, got {}'.format(type(udf_obj)))
+        return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
+
 
     def delete_metadata(self, table_name: str) -> bool:
         """
