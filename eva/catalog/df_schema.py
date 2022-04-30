@@ -54,3 +54,6 @@ class DataFrameSchema(object):
     def __eq__(self, other):
         return self.name == other.name and \
             self._column_list == other.column_list
+
+    def __hash__(self) -> int:
+        return hash((self.name, tuple(self.column_list)))

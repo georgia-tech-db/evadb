@@ -32,3 +32,6 @@ class AbstractStatement:
     @property
     def stmt_type(self):
         return self._stmt_type
+
+    def __hash__(self) -> int:
+        return hash(self.stmt_type)

@@ -48,19 +48,14 @@ class OperatorType(IntEnum):
 
 class Operator:
     """Base class for logital plan of operators
-
     Arguments:
         op_type: {OperatorType} -- {the opr type held by this node}
         children: {List} -- {the list of operator children for this node}
     """
 
-    def __init__(self, op_type: OperatorType, children: List = None):
+    def __init__(self, op_type: OperatorType, children=None):
         self._opr_type = op_type
-        self._children = children if children is not None else []
-
-    def append_child(self, child: 'Operator'):
-        if child:
-            self._children.append(child)
+        self._children = children or []
 
     @property
     def children(self):
@@ -73,6 +68,12 @@ class Operator:
     @property
     def opr_type(self):
         return self._opr_type
+
+    def append_child(self, child: 'Operator'):
+        self.children.append(child)
+
+    def clear_children(self):
+        self.children = []
 
     def __str__(self) -> str:
         return '%s[%s](%s)' % (
@@ -93,23 +94,51 @@ class Operator:
     def is_logical(self):
         return self._opr_type < OperatorType.LOGICALDELIMITER
 
+    def __hash__(self) -> int:
+        return hash((self.opr_type, tuple(self.children)))
+
+    def __copy__(self):
+        # deepcopy the children
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for k, v in self.__dict__.items():
+            if k == '_children':
+                setattr(result, k, [])
+            else:
+                setattr(result, k, v)
+        return result
+
 
 class Dummy(Operator):
-    def __init__(self):
+    '''
+    Acts as a placeholder for matching any operator in optimizer.
+    It track the group_id of the matching operator.
+    '''
+
+    def __init__(self, group_id: int):
         super().__init__(OperatorType.DUMMY, None)
+        self.group_id = group_id
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.group_id))
 
 
 class LogicalGet(Operator):
-    def __init__(self, video: TableRef, dataset_metadata: DataFrameMetadata,
+
+    def __init__(self,
+                 video: TableRef,
+                 dataset_metadata: DataFrameMetadata,
                  alias: str,
-                 children: List = None):
-        super().__init__(OperatorType.LOGICALGET, children)
+                 predicate: AbstractExpression = None,
+                 target_list: List[AbstractExpression] = None,
+                 children=None):
         self._video = video
         self._dataset_metadata = dataset_metadata
         self._alias = alias
-        self._predicate = None
-        self._target_list = None
-        
+        self._predicate = predicate
+        self._target_list = target_list or []
+        super().__init__(OperatorType.LOGICALGET, children)
+
     @property
     def video(self):
         return self._video
@@ -121,7 +150,7 @@ class LogicalGet(Operator):
     @property
     def alias(self):
         return self._alias
-    
+
     @property
     def predicate(self):
         return self._predicate
@@ -149,14 +178,27 @@ class LogicalGet(Operator):
                 and self.predicate == other.predicate
                 and self.target_list == other.target_list)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.alias,
+                     self.video,
+                     self.dataset_metadata,
+                     self.predicate,
+                     tuple(self.target_list)))
+
 
 class LogicalQueryDerivedGet(Operator):
-    def __init__(self, alias: str, children: List = None):
+
+    def __init__(self,
+                 alias: str,
+                 predicate: AbstractExpression = None,
+                 target_list: List[AbstractExpression] = None,
+                 children: List = None):
         super().__init__(OperatorType.LOGICALQUERYDERIVEDGET,
                          children=children)
         self._alias = alias
-        self.predicate = None
-        self.target_list = None
+        self.predicate = predicate
+        self.target_list = target_list or []
 
     @property
     def alias(self):
@@ -171,11 +213,17 @@ class LogicalQueryDerivedGet(Operator):
                 and self.target_list == other.target_list
                 and self.alias == other.alias)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.alias,
+                     self.predicate,
+                     tuple(self.target_list)))
+
 
 class LogicalFilter(Operator):
-    def __init__(self, predicate: AbstractExpression, children: List = None):
-        super().__init__(OperatorType.LOGICALFILTER, children)
+    def __init__(self, predicate: AbstractExpression, children=None):
         self._predicate = predicate
+        super().__init__(OperatorType.LOGICALFILTER, children)
 
     @property
     def predicate(self):
@@ -188,10 +236,13 @@ class LogicalFilter(Operator):
         return (is_subtree_equal
                 and self.predicate == other.predicate)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.predicate))
+
 
 class LogicalProject(Operator):
     def __init__(self, target_list: List[AbstractExpression],
-                 children: List = None):
+                 children=None):
         super().__init__(OperatorType.LOGICALPROJECT, children)
         self._target_list = target_list
 
@@ -205,6 +256,9 @@ class LogicalProject(Operator):
             return False
         return (is_subtree_equal
                 and self.target_list == other.target_list)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), tuple(self.target_list)))
 
 
 class LogicalOrderBy(Operator):
@@ -224,9 +278,13 @@ class LogicalOrderBy(Operator):
         return (is_subtree_equal
                 and self.orderby_list == other.orderby_list)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), tuple(self.orderby_list)))
+
 
 class LogicalLimit(Operator):
-    def __init__(self, limit_count: ConstantValueExpression,
+    def __init__(self,
+                 limit_count: ConstantValueExpression,
                  children: List = None):
         super().__init__(OperatorType.LOGICALLIMIT, children)
         self._limit_count = limit_count
@@ -241,6 +299,9 @@ class LogicalLimit(Operator):
             return False
         return (is_subtree_equal
                 and self.limit_count == other.limit_count)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.limit_count))
 
 
 class LogicalSample(Operator):
@@ -260,6 +321,9 @@ class LogicalSample(Operator):
         return (is_subtree_equal
                 and self.sample_freq == other.sample_freq)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.sample_freq))
+
 
 class LogicalUnion(Operator):
     def __init__(self, all: bool, children: List = None):
@@ -275,6 +339,9 @@ class LogicalUnion(Operator):
         if not isinstance(other, LogicalUnion):
             return False
         return (is_subtree_equal and self.all == other.all)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.all))
 
 
 class LogicalInsert(Operator):
@@ -318,6 +385,12 @@ class LogicalInsert(Operator):
                 and self.value_list == other.value_list
                 and self.column_list == other.column_list)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table_metainfo,
+                     tuple(self.value_list),
+                     tuple(self.column_list)))
+
 
 class LogicalCreate(Operator):
     """Logical node for create table operations
@@ -330,7 +403,7 @@ class LogicalCreate(Operator):
     """
 
     def __init__(self, video: TableRef, column_list: List[ColumnDefinition],
-                 if_not_exists: bool = False, children=None):
+                 if_not_exists: bool = False, children: List = None):
         super().__init__(OperatorType.LOGICALCREATE, children)
         self._video = video
         self._column_list = column_list
@@ -356,6 +429,12 @@ class LogicalCreate(Operator):
                 and self.video == other.video
                 and self.column_list == other.column_list
                 and self.if_not_exists == other.if_not_exists)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.video,
+                     tuple(self.column_list),
+                     self.if_not_exists))
 
 
 class LogicalCreateUDF(Operator):
@@ -386,7 +465,7 @@ class LogicalCreateUDF(Operator):
                  outputs: List[UdfIO],
                  impl_path: Path,
                  udf_type: str = None,
-                 children=None):
+                 children: List = None):
         super().__init__(OperatorType.LOGICALCREATEUDF, children)
         self._name = name
         self._if_not_exists = if_not_exists
@@ -431,6 +510,15 @@ class LogicalCreateUDF(Operator):
                 and self.udf_type == other.udf_type
                 and self.impl_path == other.impl_path)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.name,
+                     self.if_not_exists,
+                     tuple(self.inputs),
+                     tuple(self.outputs),
+                     self.udf_type,
+                     self.impl_path))
+
 
 class LogicalLoadData(Operator):
     """Logical node for load data operation
@@ -443,11 +531,11 @@ class LogicalLoadData(Operator):
     def __init__(self, table_metainfo: DataFrameMetadata,
                  path: Path,
                  column_list: List[AbstractExpression] = None,
-                 file_options: dict = None, children=None):
+                 file_options: dict = dict(), children: List = None):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
         self._table_metainfo = table_metainfo
         self._path = path
-        self._column_list = column_list
+        self._column_list = column_list or []
         self._file_options = file_options
 
     @property
@@ -484,6 +572,13 @@ class LogicalLoadData(Operator):
                 and self.column_list == other.column_list
                 and self.file_options == other.file_options)
 
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table_metainfo,
+                     self.path,
+                     tuple(self.column_list),
+                     frozenset(self.file_options.items())))
+
 
 class LogicalUpload(Operator):
     """Logical node for upload operation
@@ -518,6 +613,12 @@ class LogicalUpload(Operator):
         return (is_subtree_equal
                 and self.path == other.path
                 and self.video_blob == other.video_blob)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.path,
+                     self.path,
+                     self.video_blob))
 
 
 class LogicalCreateMaterializedView(Operator):
@@ -556,3 +657,9 @@ class LogicalCreateMaterializedView(Operator):
                 and self.view == other.view
                 and self.col_list == other.col_list
                 and self.if_not_exists == other.if_not_exists)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.view,
+                     tuple(self.col_list),
+                     self.if_not_exists))

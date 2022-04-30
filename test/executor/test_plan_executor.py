@@ -51,11 +51,11 @@ class PlanExecutorTest(unittest.TestCase):
 
         predicate = None
 
-        root_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
-        child_1_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
-        child_2_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
-        child_3_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
-        child_1_1_abs_plan = SeqScanPlan(predicate=predicate, column_ids=[])
+        root_abs_plan = SeqScanPlan(predicate=predicate, columns=[])
+        child_1_abs_plan = SeqScanPlan(predicate=predicate, columns=[])
+        child_2_abs_plan = SeqScanPlan(predicate=predicate, columns=[])
+        child_3_abs_plan = SeqScanPlan(predicate=predicate, columns=[])
+        child_1_1_abs_plan = SeqScanPlan(predicate=predicate, columns=[])
 
         root_abs_plan.append_child(child_1_abs_plan)
         root_abs_plan.append_child(child_2_abs_plan)
@@ -199,7 +199,7 @@ class PlanExecutorTest(unittest.TestCase):
         # LoadDataExecutor
         mock_build.reset_mock()
         mock_clean.reset_mock()
-        tree = MagicMock(node=LoadDataPlan(None, None, None, None, 
+        tree = MagicMock(node=LoadDataPlan(None, None, None, None,
                                            None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())

@@ -96,3 +96,12 @@ class CreateUDFStatement(AbstractStatement):
                 and self.outputs == other.outputs
                 and self.impl_path == other.impl_path
                 and self.udf_type == other.udf_type)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.name,
+                     self.if_not_exists,
+                     tuple(self.inputs),
+                     tuple(self.outputs,
+                           self.impl_path,
+                           self.udf_type)))

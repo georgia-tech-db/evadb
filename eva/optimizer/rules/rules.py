@@ -52,11 +52,11 @@ class RuleType(Flag):
 
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
+    EMBED_PROJECT_INTO_DERIVED_GET = auto()
+    EMBED_PROJECT_INTO_GET = auto()
 
     REWRITE_DELIMETER = auto()
 
@@ -74,6 +74,8 @@ class RuleType(Flag):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
+
+    NUM_RULES = auto()
 
 
 class Promise(IntEnum):
@@ -181,10 +183,13 @@ class EmbedFilterIntoGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        # logical_get = copy.deepcopy(before.children[0])
-        logical_get = before.children[0]
-        logical_get.predicate = predicate
-        return logical_get
+        lget = before.children[0]
+        new_get_opr = LogicalGet(lget.video, lget.dataset_metadata,
+                                 alias=lget.alias,
+                                 predicate=predicate,
+                                 target_list=lget.target_list,
+                                 children=lget.children)
+        return new_get_opr
 
 
 class EmbedProjectIntoGet(Rule):
@@ -201,11 +206,15 @@ class EmbedProjectIntoGet(Rule):
         return True
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
-        select_list = before.target_list
-        # logical_get = copy.deepcopy(before.children[0])
-        logical_get = before.children[0]
-        logical_get.target_list = select_list
-        return logical_get
+        target_list = before.target_list
+        lget = before.children[0]
+        new_get_opr = LogicalGet(lget.video, lget.dataset_metadata,
+                                 alias=lget.alias,
+                                 predicate=lget.predicate,
+                                 target_list=target_list,
+                                 children=lget.children)
+
+        return new_get_opr
 
 # For nested queries
 
@@ -227,10 +236,12 @@ class EmbedFilterIntoDerivedGet(Rule):
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
-        # logical_derived_get = copy.deepcopy(before.children[0])
-        logical_derived_get = before.children[0]
-        logical_derived_get.predicate = predicate
-        return logical_derived_get
+        ld_get = before.children[0]
+        new_opr = LogicalQueryDerivedGet(alias=ld_get.alias,
+                                         predicate=predicate,
+                                         target_list=ld_get.target_list,
+                                         children=ld_get.children)
+        return new_opr
 
 
 class EmbedProjectIntoDerivedGet(Rule):
@@ -249,11 +260,13 @@ class EmbedProjectIntoDerivedGet(Rule):
         return True
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
-        select_list = before.target_list
-        # logical_derived_get = copy.deepcopy(before.children[0])
-        logical_derived_get = before.children[0]
-        logical_derived_get.target_list = select_list
-        return logical_derived_get
+        target_list = before.target_list
+        ld_get = before.children[0]
+        new_opr = LogicalQueryDerivedGet(alias=ld_get.alias,
+                                         predicate=ld_get.predicate,
+                                         target_list=target_list,
+                                         children=ld_get.children)
+        return new_opr
 
 
 class PushdownFilterThroughSample(Rule):
@@ -274,7 +287,10 @@ class PushdownFilterThroughSample(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         sample = before.children[0]
         logical_get = sample.children[0]
-        logical_get.predicate = before.predicate
+        new_filter = LogicalFilter(before.predicate)
+        new_filter.append_child(logical_get)
+        sample.clear_children()
+        sample.append_child(new_filter)
         return sample
 
 
@@ -296,7 +312,10 @@ class PushdownProjectThroughSample(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         sample = before.children[0]
         logical_get = sample.children[0]
-        logical_get.target_list = before.target_list
+        new_project = LogicalProject(before.target_list)
+        new_project.append_child(logical_get)
+        sample.clear_children()
+        sample.append_child(new_project)
         return sample
 
 
@@ -454,6 +473,8 @@ class LogicalSampleToUniformSample(Rule):
 
     def apply(self, before: LogicalSample, context: OptimizerContext):
         after = SamplePlan(before.sample_freq)
+        for child in before.children:
+            after.append_child(child)
         return after
 
 
@@ -472,6 +493,7 @@ class LogicalDerivedGetToPhysical(Rule):
     def apply(self, before: LogicalQueryDerivedGet,
               context: OptimizerContext):
         after = SeqScanPlan(before.predicate, before.target_list, before.alias)
+        after.append_child(before.children[0])
         return after
 
 
@@ -491,6 +513,8 @@ class LogicalUnionToPhysical(Rule):
 
     def apply(self, before: LogicalUnion, context: OptimizerContext):
         after = UnionPlan(before.all)
+        for child in before.children:
+            after.append_child(child)
         return after
 
 
@@ -508,6 +532,8 @@ class LogicalOrderByToPhysical(Rule):
 
     def apply(self, before: LogicalOrderBy, context: OptimizerContext):
         after = OrderByPlan(before.orderby_list)
+        for child in before.children:
+            after.append_child(child)
         return after
 
 
@@ -525,6 +551,8 @@ class LogicalLimitToPhysical(Rule):
 
     def apply(self, before: LogicalLimit, context: OptimizerContext):
         after = LimitPlan(before.limit_count)
+        for child in before.children:
+            after.append_child(child)
         return after
 
 
@@ -546,6 +574,8 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
         after = CreateMaterializedViewPlan(before.view,
                                            columns=before.col_list,
                                            if_not_exists=before.if_not_exists)
+        for child in before.children:
+            after.append_child(child)
         return after
 
 # IMPLEMENTATION RULES END
@@ -563,12 +593,13 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
+
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
-            EmbedProjectIntoGet(),
             EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoDerivedGet(),
             PushdownFilterThroughSample(),
+            EmbedProjectIntoGet(),
+            EmbedProjectIntoDerivedGet(),
             PushdownProjectThroughSample()
         ]
 
@@ -586,6 +617,7 @@ class RulesManager:
             LogicalLimitToPhysical(),
             LogicalCreateMaterializedViewToPhysical()
         ]
+        self._all_rules = self._rewrite_rules + self._implementation_rules
 
     @property
     def rewrite_rules(self):
@@ -594,3 +626,7 @@ class RulesManager:
     @property
     def implementation_rules(self):
         return self._implementation_rules
+
+    @property
+    def all_rules(self):
+        return self._all_rules

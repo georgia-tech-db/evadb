@@ -59,7 +59,8 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         expected_rows = [{'myvideo.id': i,
                           'myvideo.data': np.array(np.ones((2, 2, 3)) *
-                                           float(i + 1) * 25, dtype=np.uint8)
+                                                   float(i + 1) * 25,
+                                                   dtype=np.uint8)
                           } for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
@@ -187,5 +188,3 @@ class SelectExecutorTest(unittest.TestCase):
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
-
-

@@ -54,6 +54,9 @@ class TableInfo:
                 and self.schema_name == other.schema_name
                 and self.database_name == other.database_name)
 
+    def __hash__(self) -> int:
+        return hash((self.table_name, self.schema_name, self.database_name))
+
 
 class TableRef:
     """
@@ -70,11 +73,11 @@ class TableRef:
                  table: Union[TableInfo, SelectStatement],
                  alias: str = None,
                  sample_freq: float = None):
-        
+
         self.table = table
-        self.alias = alias or self.generate_alias()    
+        self.alias = alias or self.generate_alias()
         self.sample_freq = sample_freq
-        
+
     def is_select(self) -> bool:
         return isinstance(self.table, SelectStatement)
 
@@ -86,7 +89,7 @@ class TableRef:
             return self.table.table_name.lower()
         elif isinstance(self.table, SelectStatement):
             raise RuntimeError('Nested select should have alias')
-    
+
     def __str__(self):
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
             str(self.table), str(self.sample_freq))
@@ -98,3 +101,6 @@ class TableRef:
         return (self.table == other.table
                 and self.alias == other.alias
                 and self.sample_freq == other.sample_freq)
+
+    def __hash__(self) -> int:
+        return hash((self.table, self.sample_freq))

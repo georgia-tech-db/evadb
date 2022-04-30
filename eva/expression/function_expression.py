@@ -102,3 +102,12 @@ class FunctionExpression(AbstractExpression):
                 and self.output_col_aliases == other.output_col_aliases
                 and self.function == other.function
                 and self.output_objs == other.output_objs)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.name,
+                     self.output,
+                     self.alias,
+                     tuple(self.output_col_aliases),
+                     self.function,
+                     tuple(self.output_objs)))
