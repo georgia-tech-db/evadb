@@ -16,7 +16,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from typing import Iterable
+from typing import Iterable, NoReturn
 
 from pandas import DataFrame
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
@@ -277,7 +277,7 @@ class Batch:
         """ Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
 
-    def modify_column_alias(self, alias: str):
+    def modify_column_alias(self, alias: str) -> NoReturn:
         # a, b, c -> table1.a, table1.b, table1.c
         # t1.a -> t2.a
         new_col_names = []
@@ -287,5 +287,16 @@ class Batch:
                     alias, col_name.split('.')[1]))
             else:
                 new_col_names.append('{}.{}'.format(alias, col_name))
+
+        self.frames.columns = new_col_names
+
+    def drop_column_alias(self) -> NoReturn:
+        # table1.a, table1.b, table1.c -> a, b, c
+        new_col_names = []
+        for col_name in self.frames.columns:
+            if '.' in col_name:
+                new_col_names.append(col_name.split('.')[1])
+            else:
+                new_col_names.append(col_name)
 
         self.frames.columns = new_col_names

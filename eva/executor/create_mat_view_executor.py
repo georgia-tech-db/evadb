@@ -73,4 +73,5 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
             # Populate the view
             for batch in child.exec():
+                batch.drop_column_alias()
                 StorageEngine.write(view_metainfo, batch)

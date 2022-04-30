@@ -60,6 +60,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
         petastorm = PetastormStorageEngine()
         petastorm.create(self.table)
         for batch in dummy_batches:
+            batch.drop_column_alias()
             petastorm.write(self.table, batch)
 
         read_batch = list(petastorm.read(self.table, batch_mem_size=3000))
@@ -71,6 +72,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
         petastorm = PetastormStorageEngine()
         petastorm.create(self.table)
         for batch in dummy_batches:
+            batch.drop_column_alias()
             petastorm.write(self.table, batch)
 
         read_batch = list(

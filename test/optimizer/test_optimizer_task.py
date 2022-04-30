@@ -42,7 +42,7 @@ class TestOptimizerTask(unittest.TestCase):
         self.execute_task_stack(opt_cxt.task_stack)
         return opt_cxt, root_grp_id
 
-    def test_aaasimple_top_down_rewrite(self):
+    def test_simple_top_down_rewrite(self):
         predicate = MagicMock()
         child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         root_opr = LogicalFilter(predicate, [child_opr])
@@ -97,7 +97,7 @@ class TestOptimizerTask(unittest.TestCase):
         self.assertEqual(type(best_root_grp_expr.opr), SeqScanPlan)
         self.assertEqual(best_root_grp_expr.opr.predicate, predicate)
 
-    def test_aanested_implementation(self):
+    def test_nested_implementation(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
 
@@ -130,7 +130,3 @@ class TestOptimizerTask(unittest.TestCase):
         child_opr = best_child_grp_expr.opr
         self.assertEqual(type(child_opr), SeqScanPlan)
         self.assertEqual(child_opr.predicate, child_predicate)
-
-
-if __name__ == '__main__':
-    unittest.main()
