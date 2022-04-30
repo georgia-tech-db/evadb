@@ -68,7 +68,6 @@ class OrderByExecutorTest(unittest.TestCase):
         expected_batches = [Batch(frames=df) for df in [
             expected_df1, expected_df2, expected_df3]]
 
-        print(expected_batches[0], sorted_batches[0])
         self.assertEqual(expected_batches[0], sorted_batches[0])
         self.assertEqual(expected_batches[1], sorted_batches[1])
         self.assertEqual(expected_batches[2], sorted_batches[2])

@@ -72,10 +72,10 @@ class StatementBinder:
             if node.is_select():
                 current_context = self._binder_context
                 self._binder_context = StatementBinderContext()
-                bind(node.table)
+                bind(node.select_statement)
                 self._binder_context = current_context
                 self._binder_context.add_derived_table_alias(
-                    node.alias, node.table.target_list)
+                    node.alias, node.select_statement.target_list)
             else:
                 # Table
                 self._binder_context.add_table_alias(

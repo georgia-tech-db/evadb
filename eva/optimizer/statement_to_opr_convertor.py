@@ -59,7 +59,7 @@ class StatementToPlanConvertor:
         """
         if table_ref.is_select():
             # NestedQuery
-            self.visit_select(table_ref.table)
+            self.visit_select(table_ref.select_statement)
             child_plan = self._plan
             self._plan = LogicalQueryDerivedGet(table_ref.alias)
             self._plan.append_child(child_plan)
