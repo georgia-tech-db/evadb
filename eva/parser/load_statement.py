@@ -30,7 +30,7 @@ class LoadDataStatement(AbstractStatement):
     path (str): path from where data needs to be loaded
     """
 
-    def __init__(self, 
+    def __init__(self,
                  table: TableRef,
                  path: str,
                  column_list: List[AbstractExpression] = None,
@@ -69,3 +69,10 @@ class LoadDataStatement(AbstractStatement):
                 and self.path == other.path
                 and self.column_list == other.column_list
                 and self.file_options == other.file_options)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.table,
+                     self.path,
+                     tuple(self.column_list),
+                     frozenset(self.file_options.items())))

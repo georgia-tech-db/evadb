@@ -3,8 +3,7 @@ import unittest
 from mock import MagicMock
 
 from eva.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
-                                     LogicalQueryDerivedGet, LogicalSample,
-                                     Dummy)
+                                     LogicalQueryDerivedGet, LogicalSample)
 from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
@@ -68,12 +67,13 @@ class TestRules(unittest.TestCase):
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
-        supported_rewrite_rules = [EmbedFilterIntoGet(),
-                                   EmbedProjectIntoGet(),
-                                   EmbedFilterIntoDerivedGet(),
-                                   EmbedProjectIntoDerivedGet(),
-                                   PushdownFilterThroughSample(),
-                                   PushdownProjectThroughSample()]
+        supported_rewrite_rules = [
+            EmbedFilterIntoGet(),
+            EmbedFilterIntoDerivedGet(),
+            PushdownFilterThroughSample(),
+            EmbedProjectIntoGet(),
+            EmbedProjectIntoDerivedGet(),
+            PushdownProjectThroughSample()]
         self.assertEqual(len(supported_rewrite_rules),
                          len(RulesManager().rewrite_rules))
         # check all the rule instance exists
@@ -112,7 +112,7 @@ class TestRules(unittest.TestCase):
         logi_project = LogicalProject([expr1, expr2, expr3], [logi_get])
 
         rewrite_opr = rule.apply(logi_project, MagicMock())
-        self.assertEqual(rewrite_opr, logi_get)
+        self.assertFalse(rewrite_opr is logi_get)
         self.assertEqual(rewrite_opr.target_list, [expr1, expr2, expr3])
 
     # EmbedFilterIntoGet
@@ -124,7 +124,7 @@ class TestRules(unittest.TestCase):
         logi_filter = LogicalFilter(predicate, [logi_get])
 
         rewrite_opr = rule.apply(logi_filter, MagicMock())
-        self.assertEqual(rewrite_opr, logi_get)
+        self.assertFalse(rewrite_opr is logi_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
     # EmbedFilterIntoDerivedGet
@@ -132,11 +132,11 @@ class TestRules(unittest.TestCase):
         rule = EmbedFilterIntoDerivedGet()
         predicate = MagicMock()
 
-        logi_derived_get = LogicalQueryDerivedGet([Dummy()])
+        logi_derived_get = LogicalQueryDerivedGet()
         logi_filter = LogicalFilter(predicate, [logi_derived_get])
 
         rewrite_opr = rule.apply(logi_filter, MagicMock())
-        self.assertEqual(rewrite_opr, logi_derived_get)
+        self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.predicate, predicate)
 
     # EmbedProjectIntoDerivedGet
@@ -145,11 +145,11 @@ class TestRules(unittest.TestCase):
         rule = EmbedProjectIntoDerivedGet()
         target_list = MagicMock()
 
-        logi_derived_get = LogicalQueryDerivedGet([Dummy()])
+        logi_derived_get = LogicalQueryDerivedGet()
         logi_project = LogicalProject(target_list, [logi_derived_get])
 
         rewrite_opr = rule.apply(logi_project, MagicMock())
-        self.assertEqual(rewrite_opr, logi_derived_get)
+        self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.target_list, target_list)
 
     # PushdownFilterThroughSample
@@ -157,23 +157,26 @@ class TestRules(unittest.TestCase):
         rule = PushdownFilterThroughSample()
         predicate = MagicMock()
         constexpr = MagicMock()
-        logi_get = LogicalGet(MagicMock(), MagicMock(), [Dummy()])
+        logi_get = LogicalGet(MagicMock(), MagicMock())
         sample = LogicalSample(constexpr, [logi_get])
         logi_filter = LogicalFilter(predicate, [sample])
-
         rewrite_opr = rule.apply(logi_filter, MagicMock())
-        self.assertEqual(rewrite_opr, sample)
-        self.assertEqual(rewrite_opr.children[0].predicate, predicate)
+        self.assertIsInstance(rewrite_opr, LogicalSample)
+        print(rewrite_opr.children[0])
+        self.assertIsInstance(rewrite_opr.children[0], LogicalFilter)
+        self.assertIsInstance(rewrite_opr.children[0].children[0], LogicalGet)
 
     # PushdownProjectThroughSample
     def test_pushdown_project_thru_sample(self):
         rule = PushdownProjectThroughSample()
         target_list = MagicMock()
         constexpr = MagicMock()
-        logi_get = LogicalGet(MagicMock(), MagicMock(), [Dummy()])
+        logi_get = LogicalGet(MagicMock(), MagicMock())
         sample = LogicalSample(constexpr, [logi_get])
         logi_project = LogicalProject(target_list, [sample])
 
         rewrite_opr = rule.apply(logi_project, MagicMock())
-        self.assertEqual(rewrite_opr, sample)
+        self.assertTrue(rewrite_opr is sample)
+        self.assertFalse(rewrite_opr.children[0] is logi_project)
+        self.assertTrue(logi_get is rewrite_opr.children[0].children[0])
         self.assertEqual(rewrite_opr.children[0].target_list, target_list)

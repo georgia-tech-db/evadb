@@ -46,14 +46,14 @@ class UdfIO(BaseModel):
                  type: ColumnType,
                  is_nullable: bool = False,
                  array_type: NdArrayType = None,
-                 array_dimensions: List[int] = [],
+                 array_dimensions: List[int] = None,
                  is_input: bool = True,
                  udf_id: int = None):
         self._name = name
         self._type = type
         self._is_nullable = is_nullable
         self._array_type = array_type
-        self.array_dimensions = array_dimensions
+        self.array_dimensions = array_dimensions or str([])
         self._is_input = is_input
         self._udf_id = udf_id
 
@@ -130,3 +130,13 @@ class UdfIO(BaseModel):
             self.name == other.name and \
             self.udf_id == other.udf_id and \
             self.type == other.type
+
+    def __hash__(self) -> int:
+        return hash((self.id,
+                     self.is_input,
+                     self.is_nullable,
+                     self.array_type,
+                     tuple(self.array_dimensions),
+                     self.name,
+                     self.udf_id,
+                     self.type))

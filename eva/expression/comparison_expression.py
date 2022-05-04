@@ -77,3 +77,6 @@ class ComparisonExpression(AbstractExpression):
             return False
         return (is_subtree_equal
                 and self.etype == other.etype)
+
+    def __hash__(self) -> int:
+        return super().__hash__()

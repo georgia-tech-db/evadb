@@ -30,4 +30,5 @@ class PlanOprType(IntEnum):
     LIMIT = auto()
     SAMPLE = auto()
     CREATE_MATERIALIZED_VIEW = auto()
+    EXCHANGE = auto()
     # add other types

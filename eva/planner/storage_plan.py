@@ -75,3 +75,12 @@ class StoragePlan(AbstractPlan):
     @property
     def curr_shard(self):
         return self._curr_shard
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.video,
+                     self.batch_mem_size,
+                     self.skip_frames,
+                     self.offset,
+                     self.limit,
+                     self.total_shards,
+                     self.curr_shard))
