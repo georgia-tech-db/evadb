@@ -32,6 +32,7 @@ from eva.executor.upload_executor import UploadExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.orderby_executor import OrderByExecutor
+from eva.executor.exchange_executor import ExchangeExecutor
 from eva.executor.ray_stage import *
 
 class PlanExecutor:
@@ -89,6 +90,9 @@ class PlanExecutor:
             executor_node = SampleExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.EXCHANGE:
+            executor_node = ExchangeExecutor(node=plan)
+
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))
@@ -136,12 +140,8 @@ class PlanExecutor:
         """execute the plan tree
         """
         execution_tree = self._build_execution_tree(self._plan)
-        if isinstance(execution_tree, SequentialScanExecutor) \
-                and isinstance(execution_tree.children[0], StorageExecutor):
-            yield from self.ray_execute_plan(execution_tree)
-        else:
-            output = execution_tree.exec()
-            if output is not None:
-                # How to check output is Iterator[Batch]
-                yield from output
+        output = execution_tree.exec()
+        if output is not None:
+            # How to check output is Iterator[Batch]
+            yield from output
         self._clean_execution_tree(execution_tree)

@@ -13,19 +13,16 @@ def ray_stage_wait_and_alert(tasks: ray.ObjectRef, output_queue: Queue):
         q.put(StageCompleteSignal)
 
 @ray.remote
-def ray_stage(funcs: List[Callable], input_queue: Queue, output_queue: Queue):
-    pfuncs = []
-    for f in funcs:
-        if hasattr(f, 'prepare'):
-            f.prepare()
-        pfuncs.append(f)
-
-    if len(input_queue) > 1 or len(output_queue) > 1:
+def ray_stage(exectuor: Callable, input_queues: List[Queue], output_queues: List[Queue]):
+    if len(input_queues) > 1 or len(output_queues) > 1:
             raise NotImplementedError
 
-    if len(pfuncs) == 0:
-        return
+    gen = exectuor(input_queues=input_queues)
+    for next_item in gen:
+        for oq in output_queues:
+            oq.put(next_item)
 
+    """
     if len(input_queue) == 0:
         # source node
         first = pfuncs[0]()
@@ -47,5 +44,5 @@ def ray_stage(funcs: List[Callable], input_queue: Queue, output_queue: Queue):
                 next_item = f(next_item)
             for q in output_queue:
                 q.put(next_item)
-
+    """
 

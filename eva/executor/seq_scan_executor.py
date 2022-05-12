@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator, List, Callable
+from typing import Iterator, List, Callable, Generator
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -35,10 +35,10 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, **kwargs) -> Iterator[Batch]:
 
         child_executor = self.children[0]
-        for batch in child_executor.exec():
+        for batch in child_executor.exec(**kwargs):
             # We do the predicate first
             if not batch.empty() and self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch).frames
@@ -54,7 +54,9 @@ class SequentialScanExecutor(AbstractExecutor):
             if not batch.empty():
                 yield batch
 
-    def __call__(self, batch: Batch) -> Batch:
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec(**kwargs)
+        """
         if not batch.empty() and self.predicate is not None:
             outcomes = self.predicate.evaluate(batch).frames
             batch = Batch(
@@ -67,5 +69,6 @@ class SequentialScanExecutor(AbstractExecutor):
             batch = Batch.merge_column_wise(batches)
 
         return batch
+        """
 
 

@@ -36,6 +36,6 @@ class StorageExecutor(AbstractExecutor):
             return StorageEngine.read(self.node.video,
                                       self.node.batch_mem_size)
 
-    def __call__(self) -> Generator[Batch, None, None]:
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
         yield from self.exec()
 

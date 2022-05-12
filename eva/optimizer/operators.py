@@ -29,6 +29,7 @@ class OperatorType(IntEnum):
     Manages enums for all the operators supported
     """
     DUMMY = auto()
+    LOGICALEXCHANGE = auto()
     LOGICALGET = auto()
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
@@ -664,3 +665,19 @@ class LogicalCreateMaterializedView(Operator):
                      self.view,
                      tuple(self.col_list),
                      self.if_not_exists))
+
+
+class LogicalExchange(Operator):
+
+    def __init__(self, children=None):
+        super().__init__(OperatorType.LOGICALEXCHANGE,
+                         children)
+
+    def __eq__(self, other):
+        if not isinstance(other, LogicalExchange):
+            return False
+        return True
+
+    def __hash__(self) -> int:
+        return super().__hash__()
+

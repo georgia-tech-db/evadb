@@ -47,6 +47,10 @@ class AbstractExecutor(ABC):
         """
         return self._children
 
+    @children.setter
+    def children(self, children: List['AbstractExecutor']):
+        self._children = children
+
     @property
     def node(self) -> AbstractPlan:
         return self._node

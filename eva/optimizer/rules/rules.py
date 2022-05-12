@@ -27,7 +27,7 @@ from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample, LogicalCreateMaterializedView)
+    LogicalSample, LogicalCreateMaterializedView, LogicalExchange)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -40,6 +40,7 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.sample_plan import SamplePlan
+from eva.planner.exchange_plan import ExchangePlan
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -61,6 +62,7 @@ class RuleType(Flag):
     REWRITE_DELIMETER = auto()
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
+    LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
@@ -85,6 +87,7 @@ class Promise(IntEnum):
     conflict
     """
     # IMPLEMENTATION RULES
+    LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
@@ -445,9 +448,13 @@ class LogicalGetToSeqScan(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = SeqScanPlan(before.predicate, before.target_list)
-        after.append_child(StoragePlan(
+        ex2 = ExchangePlan(parallelism = 1)
+        ex2.append_child(StoragePlan(
             before.dataset_metadata, batch_mem_size=batch_mem_size))
-        return after
+        after.append_child(ex2)
+        ex1 = ExchangePlan(parallelism = 2, ray_conf = {'num_gpus': 1})
+        ex1.append_child(after)
+        return ex1
 
 
 class LogicalSampleToUniformSample(Rule):
@@ -569,6 +576,26 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
             after.append_child(child)
         return after
 
+class LogicalExchangeToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALEXCHANGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_EXCHANGE_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_EXCHANGE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalExchange, context: OptimizerContext):
+        after = ExchangePlan(before.view)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -606,7 +633,8 @@ class RulesManager:
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
-            LogicalCreateMaterializedViewToPhysical()
+            LogicalCreateMaterializedViewToPhysical(),
+            LogicalExchangeToPhysical()
         ]
         self._all_rules = self._rewrite_rules + self._implementation_rules
 
