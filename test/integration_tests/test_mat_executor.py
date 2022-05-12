@@ -85,7 +85,7 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_aashould_mat_view_with_fastrcnn(self):
+    def test_should_mat_view_with_fastrcnn(self):
         select_query = """SELECT id, FastRCNNObjectDetector(data).labels
                             FROM UATRAC WHERE id < 5;"""
         query = '''CREATE MATERIALIZED VIEW IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
@@ -101,7 +101,3 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['uadtrac_fastrcnn.labels'][idx])
-
-
-if __name__ == '__main__':
-    unittest.main()

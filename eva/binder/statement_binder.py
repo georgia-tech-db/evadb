@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import singledispatch
-from typing import Union
+from functools import singledispatchmethod
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
@@ -34,88 +33,85 @@ class StatementBinder:
         self._binder_context = binder_context
         self._catalog = CatalogManager()
 
-    def bind_node(self, node: Union[AbstractStatement, AbstractExpression]):
+    @singledispatchmethod
+    def bind(self, node: AbstractStatement):
+        pass
 
-        @singledispatch
-        def bind(node: AbstractStatement):
-            pass
+    @bind.register(AbstractExpression)
+    def _bind_abstract_expr(self, node: AbstractExpression):
+        for child in node.children:
+            self.bind(child)
 
-        @bind.register(AbstractExpression)
-        def _(node: AbstractExpression):
-            for child in node.children:
-                bind(child)
+    @bind.register(SelectStatement)
+    def _bind_select_statement(self, node: SelectStatement):
+        self.bind(node.from_table)
+        if node.where_clause:
+            self.bind(node.where_clause)
+        if node.target_list:
+            for expr in node.target_list:
+                self.bind(expr)
+        if node.orderby_list:
+            for expr in node.orderby_list:
+                self.bind(expr[0])
+        if node.union_link:
+            current_context = self._binder_context
+            self._binder_context = StatementBinderContext()
+            self.bind(node.union_link)
+            self._binder_context = current_context
 
-        @bind.register(SelectStatement)
-        def _(node: SelectStatement):
-            bind(node.from_table)
-            if node.where_clause:
-                bind(node.where_clause)
-            if node.target_list:
-                for expr in node.target_list:
-                    bind(expr)
-            if node.orderby_list:
-                for expr in node.orderby_list:
-                    bind(expr[0])
-            if node.union_link:
-                current_context = self._binder_context
-                self._binder_context = StatementBinderContext()
-                bind(node.union_link)
-                self._binder_context = current_context
+    @bind.register(CreateMaterializedViewStatement)
+    def _bind_create_mat_statement(self,
+                                   node: CreateMaterializedViewStatement):
+        self.bind(node.query)
+        # Todo Verify if the number projected columns matches table
 
-        @bind.register(CreateMaterializedViewStatement)
-        def _(node: CreateMaterializedViewStatement):
-            bind(node.query)
-            # Todo Verify if the number projected columns matches table
+    @bind.register(TableRef)
+    def _bind_tableref(self, node: TableRef):
+        if node.is_select():
+            current_context = self._binder_context
+            self._binder_context = StatementBinderContext()
+            self.bind(node.select_statement)
+            self._binder_context = current_context
+            self._binder_context.add_derived_table_alias(
+                node.alias, node.select_statement.target_list)
+        else:
+            # Table
+            self._binder_context.add_table_alias(
+                node.alias, node.table.table_name)
 
-        @bind.register(TableRef)
-        def _(node: TableRef):
-            if node.is_select():
-                current_context = self._binder_context
-                self._binder_context = StatementBinderContext()
-                bind(node.select_statement)
-                self._binder_context = current_context
-                self._binder_context.add_derived_table_alias(
-                    node.alias, node.select_statement.target_list)
-            else:
-                # Table
-                self._binder_context.add_table_alias(
-                    node.alias, node.table.table_name)
+    @bind.register(TupleValueExpression)
+    def _bind_tuple_expr(self, node: TupleValueExpression):
+        table_alias, col_obj = self._binder_context.get_binded_column(
+            node.col_name, node.table_alias)
+        node.col_alias = '{}.{}'.format(table_alias, node.col_name.lower())
+        node.col_object = col_obj
 
-        @bind.register(TupleValueExpression)
-        def _(node: TupleValueExpression):
-            table_alias, col_obj = self._binder_context.get_binded_column(
-                node.col_name, node.table_alias)
-            node.col_alias = '{}.{}'.format(table_alias, node.col_name.lower())
-            node.col_object = col_obj
+    @bind.register(FunctionExpression)
+    def _bind_func_expr(self, node: FunctionExpression):
+        # bind all the children
+        for child in node.children:
+            self.bind(child)
 
-        @bind.register(FunctionExpression)
-        def _(node: FunctionExpression):
-            # bind all the children
-            for child in node.children:
-                bind(child)
+        node.alias = node.alias or node.name.lower()
+        udf_obj = self._catalog.get_udf_by_name(node.name)
+        assert udf_obj is not None, (
+            'UDF with name {} does not exist in the catalog. Please '
+            'create the UDF using CREATE UDF command'.format(node.name))
 
-            node.alias = node.alias or node.name.lower()
-            udf_obj = self._catalog.get_udf_by_name(node.name)
-            assert udf_obj is not None, (
-                'UDF with name {} does not exist in the catalog. Please '
-                'create the UDF using CREATE UDF command'.format(node.name))
+        output_objs = self._catalog.get_udf_outputs(udf_obj)
+        if node.output:
+            for obj in output_objs:
+                if obj.name.lower() == node.output:
+                    node.output_col_aliases.append(
+                        '{}.{}'.format(node.alias, obj.name.lower()))
+                    node.output_objs = [obj]
+            assert len(node.output_col_aliases) == 1, (
+                'Duplicate columns {} in UDF {}'.format(node.output,
+                                                        udf_obj.name))
+        else:
+            node.output_col_aliases = ['{}.{}'.format(
+                node.alias, obj.name.lower()) for obj in output_objs]
+            node.output_objs = output_objs
 
-            output_objs = self._catalog.get_udf_outputs(udf_obj)
-            if node.output:
-                for obj in output_objs:
-                    if obj.name.lower() == node.output:
-                        node.output_col_aliases.append(
-                            '{}.{}'.format(node.alias, obj.name.lower()))
-                        node.output_objs = [obj]
-                assert len(node.output_col_aliases) == 1, (
-                    'Duplicate columns {} in UDF {}'.format(node.output,
-                                                            udf_obj.name))
-            else:
-                node.output_col_aliases = ['{}.{}'.format(
-                    node.alias, obj.name) for obj in output_objs]
-                node.output_objs = output_objs
-
-            node.function = path_to_class(
-                udf_obj.impl_file_path, udf_obj.name)()
-
-        bind(node)
+        node.function = path_to_class(
+            udf_obj.impl_file_path, udf_obj.name)()

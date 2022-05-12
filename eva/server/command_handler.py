@@ -35,7 +35,7 @@ def execute_query(query) -> Iterator[Batch]:
     """
     stmt = Parser().parse(query)[0]
     try:
-        StatementBinder(StatementBinderContext()).bind_node(stmt)
+        StatementBinder(StatementBinderContext()).bind(stmt)
     except Exception:
         raise RuntimeError('Invalid Query')
     l_plan = StatementToPlanConvertor().visit(stmt)
