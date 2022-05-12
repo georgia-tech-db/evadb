@@ -491,3 +491,7 @@ class ParserTests(unittest.TestCase):
         ], False, select_stmt[0])
         self.assertEqual(mat_view_stmt[0], expected_stmt)
         self.assertEqual(hash(mat_view_stmt[0]), hash(expected_stmt))
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -243,11 +243,11 @@ tableSourceItemWithSample
     ;
 
 tableSourceItem
-    : tableName                                  #atomTableItem
+    : tableName                              #atomTableItem
     | (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      ) AS uid                                                          #subqueryTableItem
+      )                                                         #subqueryTableItem
     ;
 
 sampleClause
@@ -259,7 +259,7 @@ joinPart
     : JOIN tableSourceItemWithSample
       (
         ON expression
-        | USING '(' uidList ')'
+        | USING LR_BRACKET uidList RR_BRACKET
       )?                                                            #innerJoin
     ;
 

@@ -65,29 +65,24 @@ class StatementToOprTest(unittest.TestCase):
         converter._populate_column_map.assert_called_with(mock.return_value)
 
     @patch('eva.optimizer.statement_to_opr_convertor.LogicalFilter')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_predicate_should_add_logical_filter(self, mock,
+    def test_visit_select_predicate_should_add_logical_filter(self,
                                                               mock_lfilter):
         converter = StatementToPlanConvertor()
         select_predicate = MagicMock()
         converter._visit_select_predicate(select_predicate)
 
         mock_lfilter.assert_called_with(select_predicate)
-        mock.assert_called_with(select_predicate, converter._column_map)
         mock_lfilter.return_value.append_child.assert_called()
         self.assertEqual(mock_lfilter.return_value, converter._plan)
 
     @patch('eva.optimizer.statement_to_opr_convertor.LogicalProject')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    def test_visit_projection_should_add_logical_predicate(self, mock,
+    def test_visit_projection_should_add_logical_predicate(self,
                                                            mock_lproject):
         converter = StatementToPlanConvertor()
         projects = MagicMock()
 
         converter._visit_projection(projects)
-
         mock_lproject.assert_called_with(projects)
-        mock.assert_called_with(projects, converter._column_map)
         mock_lproject.return_value.append_child.assert_called()
         self.assertEqual(mock_lproject.return_value, converter._plan)
 
@@ -298,10 +293,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
 
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_orderby(self, mock_p, mock_c, mock_d):
+    def test_visit_select_orderby(self, mock_c, mock_d):
         m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT data, id FROM video \
             WHERE data > 2 ORDER BY data, id DESC;""")[0]
 
@@ -340,10 +334,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
 
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_limit(self, mock_p, mock_c, mock_d):
+    def test_visit_select_limit(self, mock_c, mock_d):
         m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT data, id FROM video \
                    WHERE data > 2 LIMIT 3;""")[0]
 
@@ -380,10 +373,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
 
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_sample(self, mock_p, mock_c, mock_d):
+    def test_visit_select_sample(self, mock_c, mock_d):
         m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT data, id FROM video SAMPLE 2 \
                    WHERE id > 2 LIMIT 3;""")[0]
 
@@ -420,11 +412,9 @@ statement_to_opr_convertor.column_definition_to_udf_io')
 
     @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
     @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_should_visit_select_union_if_union_query(self, mock_p, mock_c,
-                                                      mock_d):
+    def test_should_visit_select_union_if_union_query(self, mock_c, mock_d):
         m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
+        mock_c.return_value = mock_d.return_value = m
         stmt = Parser().parse(""" SELECT id FROM video WHERE id>3
                               UNION ALL
                               SELECT id FROM video WHERE id<=3;""")[0]

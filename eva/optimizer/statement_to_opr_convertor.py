@@ -32,7 +32,6 @@ from eva.parser.load_statement import LoadDataStatement
 from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
 from eva.optimizer.optimizer_utils import (bind_columns_expr,
-                                           bind_predicate_expr,
                                            bind_dataset,
                                            column_definition_to_udf_io,
                                            create_video_metadata)
@@ -119,8 +118,6 @@ class StatementToPlanConvertor:
 
     def _visit_orderby(self, orderby_list):
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
-        orderby_columns = [orderbyexpr[0] for orderbyexpr in orderby_list]
-        bind_columns_expr(orderby_columns, self._column_map)
         orderby_opr = LogicalOrderBy(orderby_list)
         orderby_opr.append_child(self._plan)
         self._plan = orderby_opr
@@ -139,15 +136,11 @@ class StatementToPlanConvertor:
         self._plan.append_child(right_child_plan)
 
     def _visit_projection(self, select_columns):
-        # Bind the columns using catalog
-        bind_columns_expr(select_columns, self._column_map)
         projection_opr = LogicalProject(select_columns)
         projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):
-        # Binding the expression
-        bind_predicate_expr(predicate, self._column_map)
         filter_opr = LogicalFilter(predicate)
         filter_opr.append_child(self._plan)
         self._plan = filter_opr

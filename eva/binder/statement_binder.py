@@ -96,12 +96,9 @@ class StatementBinder:
 
             node.alias = node.alias or node.name.lower()
             udf_obj = self._catalog.get_udf_by_name(node.name)
-            assert udf_obj is not None, '''UDF with name {} does not
-                                           exist in the catalog.
-                                           Please create the UDF
-                                           using CREATE UDF
-                                           command'''.format(
-                node.name)
+            assert udf_obj is not None, (
+                'UDF with name {} does not exist in the catalog. Please '
+                'create the UDF using CREATE UDF command'.format(node.name))
 
             output_objs = self._catalog.get_udf_outputs(udf_obj)
             if node.output:
@@ -109,17 +106,16 @@ class StatementBinder:
                     if obj.name.lower() == node.output:
                         node.output_col_aliases.append(
                             '{}.{}'.format(node.alias, obj.name.lower()))
-                assert len(node.output_col_aliases) == 1, '''Duplicate
-                                                          columns {}
-                                                          in UDF
-                                                          {}'''.format(
-                    node.output, udf_obj.name)
+                        node.output_objs = [obj]
+                assert len(node.output_col_aliases) == 1, (
+                    'Duplicate columns {} in UDF {}'.format(node.output,
+                                                            udf_obj.name))
             else:
                 node.output_col_aliases = ['{}.{}'.format(
                     node.alias, obj.name) for obj in output_objs]
+                node.output_objs = output_objs
 
             node.function = path_to_class(
                 udf_obj.impl_file_path, udf_obj.name)()
-            node.output_objs = output_objs
 
         bind(node)
