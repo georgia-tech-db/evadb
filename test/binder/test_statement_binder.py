@@ -16,6 +16,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.parser.types import FileFormatType
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -35,13 +36,15 @@ class StatementBinderTests(unittest.TestCase):
             self.assertEqual(tve.col_object, 'col_obj')
             self.assertEqual(tve.col_alias, col_alias)
 
-    def test_bind_tableref(self):
+    @patch('eva.binder.statement_binder.bind_table_info')
+    def test_bind_tableref(self, mock_bind_tabe_info):
         with patch.object(StatementBinderContext, 'add_table_alias') as mock:
             binder = StatementBinder(StatementBinderContext())
             tableref = MagicMock()
             tableref.is_select.return_value = False
             binder._bind_tableref(tableref)
             mock.assert_called_with(tableref.alias, tableref.table.table_name)
+            mock_bind_tabe_info.assert_called_once_with(tableref.table)
 
         with patch.object(StatementBinder, 'bind') as mock_binder:
             with patch.object(StatementBinderContext,
@@ -130,7 +133,7 @@ class StatementBinderTests(unittest.TestCase):
                 mock_binder.assert_any_call(mock)
 
     @patch('eva.binder.statement_binder.StatementBinderContext')
-    def test_select_statement_union_starts_new_context(self, mock_ctx):
+    def test_bind_select_statement_union_starts_new_context(self, mock_ctx):
         binder = StatementBinder(StatementBinderContext())
         select_statement = MagicMock()
         select_statement.union_link = None
@@ -141,3 +144,59 @@ class StatementBinderTests(unittest.TestCase):
         select_statement = MagicMock()
         binder._bind_select_statement(select_statement)
         self.assertEqual(mock_ctx.call_count, 1)
+
+    @patch('eva.binder.statement_binder.create_video_metadata')
+    @patch('eva.binder.statement_binder.TupleValueExpression')
+    def test_bind_load_video_statement(self, mock_tve, mock_create):
+        load_statement = MagicMock()
+        load_statement.file_options = {'file_format': FileFormatType.VIDEO}
+        load_statement.column_list = None
+        column = MagicMock()
+        table_ref_obj = MagicMock()
+        table_ref_obj.columns = [column]
+        table_ref_obj.name = 'table_alias'
+        load_statement.table_ref.table.table_obj = table_ref_obj
+        load_statement.table_ref.table.table_name = 'table_name'
+        mock_tve.return_value = tve_return_value = MagicMock()
+
+        with patch.object(StatementBinder, 'bind') as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            binder._bind_load_data_statement(load_statement)
+            mock_binder.assert_any_call(load_statement.table_ref)
+            mock_create.assert_any_call('table_name')
+            mock_tve.assert_called_with(
+                col_name=column.name,
+                table_alias='table_alias',
+                col_object=column)
+            mock_binder.assert_any_call(tve_return_value)
+            self.assertEqual(load_statement.column_list, [tve_return_value])
+
+    @patch('eva.binder.statement_binder.create_video_metadata')
+    @patch('eva.binder.statement_binder.TupleValueExpression')
+    def test_bind_load_data(self, mock_tve, mock_create):
+        load_statement = MagicMock()
+        column = MagicMock()
+        load_statement.column_list = [column]
+
+        table_ref_obj = MagicMock()
+        table_ref_obj.columns = [column]
+
+        with patch.object(StatementBinder, 'bind') as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            binder._bind_load_data_statement(load_statement)
+            mock_binder.assert_any_call(load_statement.table_ref)
+            mock_create.assert_not_called()
+            mock_tve.assert_not_called()
+            mock_binder.assert_any_call(column)
+
+    @patch('eva.binder.statement_binder.create_video_metadata')
+    @patch('eva.binder.statement_binder.TupleValueExpression')
+    def test_bind_load_data_raises(self, mock_tve, mock_create):
+        load_statement = MagicMock()
+        column = MagicMock()
+        load_statement.column_list = [column]
+        load_statement.table_ref.table.table_obj = None
+        with self.assertRaises(RuntimeError):
+            with patch.object(StatementBinder, 'bind'):
+                binder = StatementBinder(StatementBinderContext())
+                binder._bind_load_data_statement(load_statement)

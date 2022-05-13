@@ -15,17 +15,21 @@
 
 from functools import singledispatchmethod
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.binder.binder_utils import bind_table_info, create_video_metadata
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_mat_view_statement import \
     CreateMaterializedViewStatement
+from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
+from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
+from eva.utils.logging_manager import LoggingLevel, LoggingManager
 
 
 class StatementBinder:
@@ -65,6 +69,43 @@ class StatementBinder:
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
 
+    @bind.register(LoadDataStatement)
+    def _bind_load_data_statement(self, node: LoadDataStatement):
+        table_ref = node.table_ref
+        if node.file_options['file_format'] == FileFormatType.VIDEO:
+            # Create a new metadata object
+            create_video_metadata(table_ref.table.table_name)
+            self.bind(table_ref)
+        else:
+            self.bind(table_ref)
+
+        table_ref_obj = table_ref.table.table_obj
+        if table_ref_obj is None:
+            error = '{} does not exists. Create the table using \
+                            CREATE TABLE.'.format(table_ref.table.table_name)
+            LoggingManager().log(error, LoggingLevel.ERROR)
+            raise RuntimeError(error)
+
+        # if query had columns specified, we just copy them
+        if node.column_list is not None:
+            column_list = node.column_list
+
+        # else we curate the column list from the metadata
+        else:
+            column_list = []
+            for column in table_ref_obj.columns:
+                column_list.append(
+                    TupleValueExpression(
+                        col_name=column.name,
+                        table_alias=table_ref_obj.name.lower(),
+                        col_object=column))
+
+        # bind the columns
+        for expr in column_list:
+            self.bind(expr)
+
+        node.column_list = column_list
+
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):
         if node.is_select():
@@ -78,6 +119,7 @@ class StatementBinder:
             # Table
             self._binder_context.add_table_alias(
                 node.alias, node.table.table_name)
+            bind_table_info(node.table)
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):

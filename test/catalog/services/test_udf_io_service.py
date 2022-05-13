@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from unittest import TestCase
-import unittest
 
 from mock import patch
 from mock import MagicMock
@@ -59,7 +58,3 @@ class UdfServiceTest(TestCase):
         service.add_udf_io(io_list)
         for mock in io_list:
             mock.save.assert_called_once()
-
-
-if __name__ == '__main__':
-    unittest.main()

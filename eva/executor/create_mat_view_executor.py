@@ -19,8 +19,8 @@ from eva.planner.types import PlanOprType
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine
 from eva.expression.abstract_expression import ExpressionType
-from eva.optimizer.optimizer_utils import (create_table_metadata,
-                                           handle_if_not_exists)
+from eva.binder.binder_utils import (create_table_metadata,
+                                     handle_if_not_exists)
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 

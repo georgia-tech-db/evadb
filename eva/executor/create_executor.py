@@ -16,8 +16,8 @@
 from eva.planner.create_plan import CreatePlan
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine
-from eva.optimizer.optimizer_utils import (create_table_metadata,
-                                           handle_if_not_exists)
+from eva.binder.binder_utils import (handle_if_not_exists,
+                                     create_table_metadata)
 
 
 class CreateExecutor(AbstractExecutor):

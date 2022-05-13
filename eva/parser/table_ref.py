@@ -29,6 +29,7 @@ class TableInfo:
         self._table_name = table_name
         self._schema_name = schema_name
         self._database_name = database_name
+        self._table_obj = None
 
     @property
     def table_name(self):
@@ -42,6 +43,14 @@ class TableInfo:
     def database_name(self):
         return self._database_name
 
+    @property
+    def table_obj(self):
+        return self._table_obj
+
+    @table_obj.setter
+    def table_obj(self, obj):
+        self._table_obj = obj
+
     def __str__(self):
         table_info_str = "TABLE INFO:: (" + self._table_name + ")"
 
@@ -52,10 +61,14 @@ class TableInfo:
             return False
         return (self.table_name == other.table_name
                 and self.schema_name == other.schema_name
-                and self.database_name == other.database_name)
+                and self.database_name == other.database_name
+                and self.table_obj == other.table_obj)
 
     def __hash__(self) -> int:
-        return hash((self.table_name, self.schema_name, self.database_name))
+        return hash((self.table_name,
+                     self.schema_name,
+                     self.database_name,
+                     self.table_obj))
 
 
 class TableRef:
