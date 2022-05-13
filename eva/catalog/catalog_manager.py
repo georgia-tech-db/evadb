@@ -260,16 +260,6 @@ class CatalogManager(object):
         """
         return self._udf_service.delete_udf_by_name(udf_name)
 
-    def get_udf_io_by_name(self, udf: UdfMetadata, udf_io_name: str) -> UdfIO:
-        """Returns the catalog object for the input udfio name
-        Args:
-            udf (UDF): corresponding udf object
-            udf_io_name (str): name to query the UDFIO catalog table
-        Returns:
-            UdfIO: catalog object found
-        """
-        return self._udf_io_service.udf_io_by_name(udf.id, udf_io_name)
-
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(
             database_name, table_name)
