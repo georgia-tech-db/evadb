@@ -111,7 +111,7 @@ def create_csv(num_rows, columns):
         pass
     df = pd.DataFrame(columns=columns)
     for col in columns:
-        df[col] = np.random.randint(1, 1000, num_rows)
+        df[col] = np.random.randint(1, 100, num_rows)
     df.to_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
               index=False)
     return df
@@ -131,6 +131,7 @@ def create_table(table_name, num_rows, num_columns):
     load_query = """LOAD DATA INFILE 'dummy.csv' INTO {}
                    WITH FORMAT CSV;""".format(table_name)
     execute_query_fetch_all(load_query)
+    df.columns = [f'{table_name}.{col}' for col in df.columns]
     return df
 
 

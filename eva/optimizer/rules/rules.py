@@ -17,6 +17,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, auto, IntEnum
 from typing import TYPE_CHECKING
+from eva.optimizer.optimizer_utils import extract_equi_join_keys
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
 
 from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.operators import OperatorType, Operator
+from eva.optimizer.operators import Dummy, OperatorType, Operator
 from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
@@ -49,7 +50,6 @@ from eva.planner.lateral_join_plan import LateralJoinPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.configuration.configuration_manager import ConfigurationManager
-import eva.optimizer.optimizer_utils as OptimizerUtils
 
 
 class RuleType(Flag):
@@ -671,18 +671,24 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         #                                              /
         #                                            A
 
-        A = join_node.lhs()
-        B = join_node.rhs()
-        join_keys = OptimizerUtils.extract_join_keys(join_node)
+        a: Dummy = join_node.lhs()
+        b: Dummy = join_node.rhs()
+        a_table_aliases = context.memo.get_group_by_id(a.group_id).aliases
+        b_table_aliases = context.memo.get_group_by_id(b.group_id).aliases
+        join_predicates = join_node.join_predicate
+        a_join_keys, b_join_keys = extract_equi_join_keys(join_predicates,
+                                                          a_table_aliases,
+                                                          b_table_aliases)
 
-        build_plan = HashJoinBuildPlan(join_node.join_type, join_keys)
-        build_plan.append_child(A)
+        build_plan = HashJoinBuildPlan(join_node.join_type,
+                                       a_join_keys)
+        build_plan.append_child(a)
         probe_side = HashJoinProbePlan(join_node.join_type,
-                                       join_keys,
-                                       join_node.join_predicate,
+                                       b_join_keys,
+                                       join_predicates,
                                        join_node.join_project)
         probe_side.append_child(build_plan)
-        probe_side.append_child(B)
+        probe_side.append_child(b)
         return probe_side
 
 

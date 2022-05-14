@@ -14,12 +14,14 @@
 # limitations under the License.
 
 from typing import List
+from eva.parser.types import JoinType
+from eva.planner.abstract_plan import AbstractPlan
 
 from eva.planner.types import PlanOprType
 from eva.catalog.models.df_column import DataFrameColumn
 
 
-class HashJoinBuildPlan():
+class HashJoinBuildPlan(AbstractPlan):
     """
     This plan is used for storing information required for hashjoin build side.
     It prepares the hash table of preferably the smaller relation
@@ -29,9 +31,12 @@ class HashJoinBuildPlan():
                         If empty, then Cartitian product.
     """
 
-    def __init__(self, build_keys: List[DataFrameColumn]):
+    def __init__(self, join_type: JoinType, build_keys: List[DataFrameColumn]):
+        self.join_type = join_type
         self.build_keys = build_keys
         super().__init__(PlanOprType.HASH_BUILD)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.build_keys))
+        return hash((super().__hash__(),
+                     self.join_type,
+                     tuple(self.build_keys or [])))

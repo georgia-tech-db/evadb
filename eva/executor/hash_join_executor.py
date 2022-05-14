@@ -33,9 +33,9 @@ class HashJoinExecutor(AbstractExecutor):
 
     def __init__(self, node: HashJoinProbePlan):
         super().__init__(node)
-        self.predicate = node.predicate
+        self.predicate = node.join_predicate
         self.join_type = node.join_type
-        self.join_keys = node.probe_keys
+        self.probe_keys = node.probe_keys
         self.join_project = node.join_project
 
     def validate(self):
@@ -45,27 +45,26 @@ class HashJoinExecutor(AbstractExecutor):
 
         build_table = self.children[0]
         probe_table = self.children[1]
-
+        hash_keys = [key.col_alias for key in self.probe_keys]
         for build_batch in build_table.exec():
             for probe_batch in probe_table.exec():
                 probe_batch.frames.index = probe_batch.frames[
-                    self.join_keys].apply(
+                    hash_keys].apply(
                     lambda x: hash(tuple(x)), axis=1)
-                join_batch = probe_batch.frames.merge(
-                    build_batch.frames, left_index=True, right_index=True, how='inner')
-                join_batch = join_batch.loc[:, ~
-                                            join_batch.columns.str.endswith('_y')]
-                join_batch.columns = join_batch.columns.str.rstrip('_x')
+                join_batch = probe_batch.frames.merge(build_batch.frames,
+                                                      left_index=True,
+                                                      right_index=True,
+                                                      how='inner')
                 join_batch.reset_index(drop=True, inplace=True)
                 join_batch = Batch(join_batch)
-                if not join_batch.empty() and self.predicate is not None:
+                if not join_batch.empty() and self.predicate:
                     outcomes = self.predicate.evaluate(join_batch).frames
-                    join_batch = Batch(
-                        join_batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True))
+                    filtered_df = join_batch.frames[(outcomes > 0).to_numpy()]
+                    join_batch = Batch(filtered_df.reset_index(drop=True))
                 # Then do project
-                if not join_batch.empty() and self.join_project is not None:
+                if not join_batch.empty() and self.join_project:
                     batches = [expr.evaluate(join_batch)
                                for expr in self.join_project]
                     join_batch = Batch.merge_column_wise(batches)
 
-            yield join_batch
+                yield join_batch

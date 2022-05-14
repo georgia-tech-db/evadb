@@ -123,6 +123,8 @@ class StatementBinder:
         elif node.is_join():
             self.bind(node.join_node.left)
             self.bind(node.join_node.right)
+            if node.join_node.predicate:
+                self.bind(node.join_node.predicate)
         elif node.is_func_expr():
             self.bind(node.func_expr)
         else:

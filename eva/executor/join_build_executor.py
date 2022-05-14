@@ -9,8 +9,9 @@ from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 class BuildJoinExecutor(AbstractExecutor):
     def __init__(self, node: HashJoinBuildPlan):
         super().__init__(node)
-        self.predicate = node.join_predicate
+        self.predicate = None  # node.join_predicate
         self.join_type = node.join_type
+        self.build_keys = node.build_keys
 
     def validate(self):
         pass
@@ -25,6 +26,7 @@ class BuildJoinExecutor(AbstractExecutor):
             if not batch.empty():
                 cumm_batches.append(batch)
         cumm_batches = Batch.concat(cumm_batches)
-        cumm_batches.frames.index = cumm_batches.frames[self.join_keys].apply(
+        hash_keys = [key.col_alias for key in self.build_keys]
+        cumm_batches.frames.index = cumm_batches.frames[hash_keys].apply(
             lambda x: hash(tuple(x)), axis=1)
         yield cumm_batches

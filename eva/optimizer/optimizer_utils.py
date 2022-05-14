@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-from eva.optimizer.operators import LogicalJoin
+from typing import List, Tuple
+from eva.expression.abstract_expression import (AbstractExpression,
+                                                ExpressionType)
+from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.catalog.models.df_metadata import DataFrameMetadata
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -57,14 +59,29 @@ def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
     return cols
 
 
-def extract_join_keys(self, join_node: LogicalJoin):
-    pass
-    # predicate = join_node.join_predicate
-    # pred_list = ExpressionUtils.\
-    #  expression_tree_to_conjunction_list(predicate)
-    # need to have the column map -
-    # left_table_metadata = join_node.lhs().dataset_metadata
-    # left_columns = self.get_columns_of_table(left_table_metadata)
-    # right_table_metadata = join_node.rhs().dataset_metadata
-    # right_columns = self.get_columns_of_table(right_table_metadata)
-    # return left_columns.intersection(right_columns)
+def extract_equi_join_keys(join_predicate: AbstractExpression,
+                           left_table_aliases: List[str],
+                           right_table_aliases: List[str]) \
+    -> Tuple[List[AbstractExpression],
+             List[AbstractExpression]]:
+
+    pred_list = expression_tree_to_conjunction_list(join_predicate)
+    left_join_keys = []
+    right_join_keys = []
+    for pred in pred_list:
+        if pred.etype == ExpressionType.COMPARE_EQUAL:
+            left_child = pred.children[0]
+            right_child = pred.children[1]
+            # only extract if both are TupleValueExpression
+            if (left_child.etype == ExpressionType.TUPLE_VALUE
+                    and right_child.etype == ExpressionType.TUPLE_VALUE):
+                if (left_child.table_alias in left_table_aliases
+                        and right_child.table_alias in right_table_aliases):
+                    left_join_keys.append(left_child)
+                    right_join_keys.append(right_child)
+                elif (left_child.table_alias in right_table_aliases
+                        and right_child.table_alias in left_table_aliases):
+                    left_join_keys.append(right_child)
+                    right_join_keys.append(left_child)
+
+    return (left_join_keys, right_join_keys)

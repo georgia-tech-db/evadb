@@ -14,7 +14,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Dict
+from typing import Dict, List
 
 from eva.optimizer.property import Property
 from eva.optimizer.group_expression import GroupExpression
@@ -38,8 +38,9 @@ class Winner:
 
 class Group:
 
-    def __init__(self, group_id: int):
+    def __init__(self, group_id: int, aliases: List[str] = None):
         self._group_id = group_id
+        self._aliases = aliases
         self._logical_exprs = []
         self._physical_exprs = []
         self._winner_exprs: Dict[Property, Winner] = {}
@@ -48,6 +49,10 @@ class Group:
     @property
     def group_id(self):
         return self._group_id
+
+    @property
+    def aliases(self):
+        return self._aliases
 
     @property
     def logical_exprs(self):

@@ -37,6 +37,9 @@ class SelectExecutorTest(unittest.TestCase):
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
+        cls.table1 = create_table('table1', 100, 3)
+        cls.table2 = create_table('table2', 500, 3)
+        cls.table3 = create_table('table3', 1000, 3)
 
     @classmethod
     def tearDownClass(cls):
@@ -198,15 +201,53 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ['myvideo.id'])
         self.assertEqual(actual_batch.batch_size, 5)
 
-    def test_hash_join(self):
-        table1 = create_table('table1', 100, 3)
-        table2 = create_table('table2', 1000, 2)
+    def test_hash_join_with_one_on(self):
         select_query = """SELECT table1.a2 FROM table1 JOIN
                         table2 ON table1.a1 = table2.a1;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(pd.concat([table1, table2], keys=[
-                         'a1'], join="inner"), actual_batch)
+        expected = pd.merge(self.table1,
+                            self.table2,
+                            left_on=['table1.a1'],
+                            right_on=['table2.a1'],
+                            how="inner")
+        if len(expected):
+            expected_batch = Batch(expected).project(['table1.a2'])
+            self.assertEqual(expected_batch.sort_orderby(['table1.a2']),
+                             actual_batch.sort_orderby(['table1.a2']))
 
+    def test_hash_join_with_multiple_on(self):
+        select_query = """SELECT table1.a0, table1.a1 FROM table1 JOIN
+                        table1 AS table2 ON table1.a1 = table2.a1 AND
+                        table1.a0 = table2.a0;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        expected = pd.merge(self.table1,
+                            self.table1,
+                            left_on=['table1.a1', 'table1.a0'],
+                            right_on=['table1.a1', 'table1.a0'],
+                            how="inner")
+        if len(expected):
+            expected_batch = Batch(expected).project(
+                ['table1.a0', 'table1.a1'])
+            self.assertEqual(expected_batch.sort_orderby(['table1.a1']),
+                             actual_batch.sort_orderby(['table1.a1']))
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_hash_join_with_multiple_tables(self):
+        select_query = """SELECT table1.a0 FROM table1 JOIN table2
+                          ON table1.a0 = table2.a0 JOIN table3
+                          ON table3.a1 = table1.a1 WHERE table1.a2 > 50;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        tmp = pd.merge(self.table1,
+                       self.table2,
+                       left_on=['table1.a0'],
+                       right_on=['table2.a0'],
+                       how="inner")
+        expected = pd.merge(tmp,
+                            self.table3,
+                            left_on=['table1.a1'],
+                            right_on=['table3.a1'],
+                            how="inner")
+        expected = expected.where(expected['table1.a2'] > 50)
+        if len(expected):
+            expected_batch = Batch(expected).project(['table1.a0'])
+            self.assertEqual(expected_batch.sort_orderby(['table1.a0']),
+                             actual_batch.sort_orderby(['table1.a0']))

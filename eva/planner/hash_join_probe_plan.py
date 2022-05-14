@@ -49,6 +49,5 @@ class HashJoinProbePlan(AbstractJoin):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
-                     self.probe_keys,
-                     self.join_project,
-                     self.join_predicate))
+                     tuple(self.probe_keys or []),
+                     tuple(self.join_project or [])))
