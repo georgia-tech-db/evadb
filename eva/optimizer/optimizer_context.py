@@ -30,7 +30,7 @@ class OptimizerContext:
                 stack to keep track outstanding tasks
     """
 
-    def __init__(self, cost_model):
+    def __init__(self, cost_model: CostModel):
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
         self._cost_model = cost_model

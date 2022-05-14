@@ -1,6 +1,7 @@
 import unittest
 
 from mock import MagicMock
+from eva.optimizer.cost_model import CostModel
 
 from eva.optimizer.optimizer_tasks import (
     TopDownRewrite, BottomUpRewrite, OptimizeGroup)
@@ -19,7 +20,7 @@ class TestOptimizerTask(unittest.TestCase):
             task.execute()
 
     def top_down_rewrite(self, opr):
-        opt_cxt = OptimizerContext()
+        opt_cxt = OptimizerContext(CostModel())
         grp_expr = opt_cxt.add_opr_to_group(
             opr
         )

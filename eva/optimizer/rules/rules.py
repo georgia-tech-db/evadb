@@ -17,7 +17,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, auto, IntEnum
 from typing import TYPE_CHECKING
-from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan

@@ -4,6 +4,7 @@ import unittest
 from mock import MagicMock
 
 from eva.optimizer.binder import Binder
+from eva.optimizer.cost_model import CostModel
 from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.operators import (
     OperatorType, LogicalFilter, LogicalGet, Dummy)
@@ -41,7 +42,7 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child1_ptn)
         root_ptn.append_child(child2_ptn)
 
-        opt_ctxt = OptimizerContext()
+        opt_ctxt = OptimizerContext(CostModel())
         root_grp_expr = opt_ctxt.add_opr_to_group(
             root_opr)
 
@@ -79,7 +80,7 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child_ptn)
         root_ptn.append_child(Pattern(OperatorType.DUMMY))
 
-        opt_ctxt = OptimizerContext()
+        opt_ctxt = OptimizerContext(CostModel())
         root_grp_expr = opt_ctxt.add_opr_to_group(
             root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
@@ -88,7 +89,7 @@ class TestBinder(unittest.TestCase):
         for match in iter(binder):
             self.helper_pre_order_match(expected_match, match)
 
-        opt_ctxt = OptimizerContext()
+        opt_ctxt = OptimizerContext(CostModel())
         sub_root_grp_expr = opt_ctxt.add_opr_to_group(
             sub_root_opr)
         expected_match = copy.copy(sub_root_opr)

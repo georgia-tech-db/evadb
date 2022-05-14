@@ -35,21 +35,9 @@ class InsertPlan(AbstractPlan):
                  column_list: List[AbstractExpression],
                  value_list: List[AbstractExpression]):
         super().__init__(PlanOprType.INSERT)
-        self._table_metainfo = table_metainfo
-        self._columns_list = column_list
-        self._value_list = value_list
-
-    @property
-    def table_metainfo(self):
-        return self._table_metainfo
-
-    @property
-    def column_list(self):
-        return self._columns_list
-
-    @property
-    def value_list(self):
-        return self._value_list
+        self.table_metainfo = table_metainfo
+        self.columns_list = column_list
+        self.value_list = value_list
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),

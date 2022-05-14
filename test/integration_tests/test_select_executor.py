@@ -22,7 +22,8 @@ from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.server.command_handler import execute_query_fetch_all
 
-from test.util import create_sample_video, create_dummy_batches, file_remove, load_inbuilt_udfs, create_table
+from test.util import (create_sample_video, create_dummy_batches,
+                       file_remove, load_inbuilt_udfs, create_table)
 
 NUM_FRAMES = 10
 
@@ -156,7 +157,7 @@ class SelectExecutorTest(unittest.TestCase):
                      if i < 2 or i == 5 or i > 7]))[0]
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_select_and_limit(self):
+    def test_aselect_and_limit(self):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
@@ -186,7 +187,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ['id'])
         self.assertEqual(actual_batch.batch_size, 5)
 
-    def test_ahash_join(self):
+    def test_hash_join(self):
         table1 = create_table('table1', 100, 3)
         table2 = create_table('table2', 1000, 2)
         select_query = """SELECT table1.a2 FROM table1 JOIN

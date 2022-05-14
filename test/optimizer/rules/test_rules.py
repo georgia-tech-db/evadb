@@ -4,17 +4,16 @@ from mock import MagicMock
 
 from eva.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
                                      LogicalQueryDerivedGet, LogicalSample,
-                                     LogicalJoin,
-                                     LogicalQueryDerivedGet,
-                                     LogicalSample)
+                                     LogicalJoin)
 from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
                                        LogicalCreateMaterializedViewToPhysical,
+                                       LogicalFilterToPhysical,
+                                       LogicalLateralJoinToPhysical,
+                                       LogicalProjectToPhysical,
                                        PushdownFilterThroughSample,
                                        PushdownProjectThroughSample,
-                                       PushdownProjectThroughJoin,
-                                       PushdownFilterThroughJoin,
                                        LogicalCreateToPhysical,
                                        LogicalCreateUDFToPhysical,
                                        LogicalInsertToPhysical,
@@ -27,7 +26,7 @@ from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        LogicalOrderByToPhysical,
                                        LogicalLimitToPhysical,
                                        LogicalFunctionScanToPhysical,
-                                       LogicalJoinToPhysical)
+                                       LogicalJoinToPhysicalHashJoin)
 from eva.optimizer.rules.rules import Promise, RulesManager
 
 
@@ -46,10 +45,6 @@ class TestRules(unittest.TestCase):
         self.assertTrue(Promise.EMBED_FILTER_INTO_GET >
                         Promise.IMPLEMENTATION_DELIMETER)
         self.assertTrue(Promise.EMBED_PROJECT_INTO_GET >
-                        Promise.IMPLEMENTATION_DELIMETER)
-        self.assertTrue(Promise.PUSHDOWN_FILTER_THROUGH_JOIN >
-                        Promise.IMPLEMENTATION_DELIMETER)
-        self.assertTrue(Promise.PUSHDOWN_PROJECT_THROUGH_JOIN >
                         Promise.IMPLEMENTATION_DELIMETER)
 
         # Promise of implementation rules should be lesser than rewrite rules
@@ -75,15 +70,12 @@ class TestRules(unittest.TestCase):
                         Promise.IMPLEMENTATION_DELIMETER)
         self.assertTrue(Promise.LOGICAL_UNION_TO_PHYSICAL <
                         Promise.IMPLEMENTATION_DELIMETER)
-        self.assertTrue(Promise.LOGICAL_JOIN_TO_PHYSICAL <
-                        Promise.IMPLEMENTATION_DELIMETER)
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
         supported_rewrite_rules = [EmbedFilterIntoGet(),
                                    EmbedFilterIntoDerivedGet(),
-                                   PushdownFilterThroughSample(),
-                                   PushdownFilterThroughJoin()
+                                   PushdownFilterThroughSample()
                                    ]
         self.assertEqual(len(supported_rewrite_rules),
                          len(RulesManager().rewrite_rules))
@@ -104,9 +96,12 @@ class TestRules(unittest.TestCase):
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
+            LogicalLateralJoinToPhysical(),
             LogicalFunctionScanToPhysical(),
-            LogicalJoinToPhysical(),
-            LogicalCreateMaterializedViewToPhysical()]
+            LogicalJoinToPhysicalHashJoin(),
+            LogicalCreateMaterializedViewToPhysical(),
+            LogicalFilterToPhysical(),
+            LogicalProjectToPhysical()]
         self.assertEqual(len(supported_implementation_rules),
                          len(RulesManager().implementation_rules))
 
@@ -192,18 +187,6 @@ class TestRules(unittest.TestCase):
         self.assertFalse(rewrite_opr.children[0] is logi_project)
         self.assertTrue(logi_get is rewrite_opr.children[0].children[0])
         self.assertEqual(rewrite_opr.children[0].target_list, target_list)
-
-    # PushdownFilterThroughJoin
-    def test_pushdown_filter_thru_join(self):
-        rule = PushdownFilterThroughJoin()
-        predicate = MagicMock()
-
-        logi_join = LogicalJoin(MagicMock())
-        logi_filter = LogicalFilter(predicate, [logi_join])
-
-        rewrite_opr = rule.apply(logi_filter, MagicMock())
-        self.assertEqual(rewrite_opr, logi_join)
-        self.assertEqual(rewrite_opr.predicate, predicate)
 
     # PushdownProjectThroughJoin
     def PushdownProjectThroughJoin(self):

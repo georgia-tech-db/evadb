@@ -64,7 +64,7 @@ class LoadDataPlan(AbstractPlan):
         return self._file_options
 
     def __str__(self):
-        print_str = 'LoadDataPlan(table_id={}, file_path={}, \
+        return 'LoadDataPlan(table_id={}, file_path={}, \
             batch_mem_size={}, \
             column_list={}, \
             file_options={})'.format(self.table_metainfo,
@@ -72,7 +72,6 @@ class LoadDataPlan(AbstractPlan):
                                      self.batch_mem_size,
                                      self.column_list,
                                      self.file_options)
-        return print_str
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.table_metainfo,

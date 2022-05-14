@@ -37,7 +37,7 @@ class ParserVisitorTests(unittest.TestCase):
     @mock.patch.object(ParserVisitor, 'visit')
     def test_should_query_specification_visitor(self, mock_visit):
         mock_visit.side_effect = ["columns",
-                                  {"from": ["tables"], "where": "predicates"}]
+                                  {"from": "table_ref", "where": "predicates"}]
 
         visitor = ParserVisitor()
         ctx = MagicMock()
@@ -52,7 +52,7 @@ class ParserVisitorTests(unittest.TestCase):
 
         mock_visit.assert_has_calls([call(child_1), call(child_2)])
 
-        self.assertEqual(expected.from_table, "tables")
+        self.assertEqual(expected.from_table, "table_ref")
         self.assertEqual(expected.where_clause, "predicates")
         self.assertEqual(expected.target_list, "columns")
 
@@ -365,7 +365,7 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
         mock_visit.assert_has_calls([call(ctx.fileName()),
-                                     call(ctx.tableName()), 
+                                     call(ctx.tableName()),
                                      call(ctx.fileOptions()),
                                      call(ctx.uidList())])
         mock_load.assert_called_once()
