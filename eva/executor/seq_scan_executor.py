@@ -31,6 +31,7 @@ class SequentialScanExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
         self.project_expr = node.columns
+        self.alias = node.alias
 
     def validate(self):
         pass
@@ -39,6 +40,11 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.exec():
+            # apply alias to the batch
+            # id, data -> myvideo.id, myvideo.data
+            if self.alias:
+                batch.modify_column_alias(self.alias)
+
             # We do the predicate first
             if not batch.empty() and self.predicate is not None:
                 outcomes = self.predicate.evaluate(batch).frames

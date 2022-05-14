@@ -243,7 +243,7 @@ tableSource
     ;
 
 tableSourceItemWithSample
-    : tableSourceItem sampleClause?
+    : tableSourceItem (AS? uid)? sampleClause?
     ;
 
 tableSourceItem
@@ -268,7 +268,7 @@ joinPart
     : JOIN tableSourceItemWithSample
       (
         ON expression
-        | USING '(' uidList ')'
+        | USING LR_BRACKET uidList RR_BRACKET
       )?                                                            #innerJoin
     ;
 

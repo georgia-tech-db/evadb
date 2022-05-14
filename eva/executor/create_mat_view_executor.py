@@ -19,8 +19,8 @@ from eva.planner.types import PlanOprType
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine
 from eva.expression.abstract_expression import ExpressionType
-from eva.optimizer.optimizer_utils import (create_table_metadata,
-                                           handle_if_not_exists)
+from eva.binder.binder_utils import (create_table_metadata,
+                                     handle_if_not_exists)
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 
@@ -45,27 +45,31 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
                 LoggingManager().log(err_msg, LoggingLevel.ERROR)
                 raise RuntimeError(err_msg)
-            if len(self.node.columns) != len(child.project_expr):
+
+            # gather child projected column objects
+            child_objs = []
+            for child_col in child.project_expr:
+                if child_col.etype == ExpressionType.TUPLE_VALUE:
+                    child_objs.append(child_col.col_object)
+                elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
+                    child_objs.extend(child_col.output_objs)
+
+            # Number of projected columns should be equal to mat view columns
+            if len(self.node.columns) != len(child_objs):
                 err_msg = '# projected columns mismatch, expected {} found {}\
-                '.format(len(self.node.columns), len(child.project_expr))
+                '.format(len(self.node.columns), len(child_objs))
                 LoggingManager().log(err_msg, LoggingLevel.ERROR)
                 raise RuntimeError(err_msg)
 
             col_defs = []
             # Copy column type info from child columns
-            for idx, child_col in enumerate(child.project_expr):
+            for idx, child_col_obj in enumerate(child_objs):
                 col = self.node.columns[idx]
-                col_obj = None
-                if child_col.etype == ExpressionType.TUPLE_VALUE:
-                    col_obj = child_col.col_object
-                elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
-                    col_obj = child_col.output_obj
-
                 col_defs.append(ColumnDefinition(
                     col.name,
-                    col_obj.type,
-                    col_obj.array_type,
-                    col_obj.array_dimensions))
+                    child_col_obj.type,
+                    child_col_obj.array_type,
+                    child_col_obj.array_dimensions))
 
             view_metainfo = create_table_metadata(
                 self.node.view, col_defs)
@@ -73,4 +77,5 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
             # Populate the view
             for batch in child.exec():
+                batch.drop_column_alias()
                 StorageEngine.write(view_metainfo, batch)

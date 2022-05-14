@@ -128,14 +128,17 @@ class Dummy(Operator):
 
 
 class LogicalGet(Operator):
+
     def __init__(self,
                  video: TableRef,
                  dataset_metadata: DataFrameMetadata,
+                 alias: str,
                  predicate: AbstractExpression = None,
                  target_list: List[AbstractExpression] = None,
                  children=None):
         self._video = video
         self._dataset_metadata = dataset_metadata
+        self._alias = alias
         self._predicate = predicate
         self._target_list = target_list or []
         super().__init__(OperatorType.LOGICALGET, children)
@@ -147,6 +150,10 @@ class LogicalGet(Operator):
     @property
     def dataset_metadata(self):
         return self._dataset_metadata
+
+    @property
+    def alias(self):
+        return self._alias
 
     @property
     def predicate(self):
@@ -171,11 +178,13 @@ class LogicalGet(Operator):
         return (is_subtree_equal
                 and self.video == other.video
                 and self.dataset_metadata == other.dataset_metadata
+                and self.alias == other.alias
                 and self.predicate == other.predicate
                 and self.target_list == other.target_list)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
+                     self.alias,
                      self.video,
                      self.dataset_metadata,
                      self.predicate,
@@ -183,33 +192,21 @@ class LogicalGet(Operator):
 
 
 class LogicalQueryDerivedGet(Operator):
+
     def __init__(self,
+                 alias: str,
                  predicate: AbstractExpression = None,
                  target_list: List[AbstractExpression] = None,
                  children: List = None):
         super().__init__(OperatorType.LOGICALQUERYDERIVEDGET,
                          children=children)
-        # `TODO` We need to store the alias information here
-        # We need construct the map using the target list of the
-        # subquery to validate the overall query
+        self._alias = alias
         self.predicate = predicate
         self.target_list = target_list or []
 
     @property
-    def predicate(self):
-        return self._predicate
-
-    @predicate.setter
-    def predicate(self, predicate):
-        self._predicate = predicate
-
-    @property
-    def target_list(self):
-        return self._target_list
-
-    @target_list.setter
-    def target_list(self, target_list):
-        self._target_list = target_list
+    def alias(self):
+        return self._alias
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
@@ -217,10 +214,12 @@ class LogicalQueryDerivedGet(Operator):
             return False
         return (is_subtree_equal
                 and self.predicate == other.predicate
-                and self.target_list == other.target_list)
+                and self.target_list == other.target_list
+                and self.alias == other.alias)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
+                     self.alias,
                      self.predicate,
                      tuple(self.target_list)))
 

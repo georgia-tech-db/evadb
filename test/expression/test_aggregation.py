@@ -28,6 +28,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_sum(self):
         columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_SUM,
             None,
@@ -40,6 +41,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_count(self):
         columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_COUNT,
             None,
@@ -52,6 +54,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_avg(self):
         columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_AVG,
             None,
@@ -64,6 +67,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_min(self):
         columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_MIN,
             None,
@@ -76,6 +80,7 @@ class AggregationExpressionsTest(unittest.TestCase):
 
     def test_aggregation_max(self):
         columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_MAX,
             None,

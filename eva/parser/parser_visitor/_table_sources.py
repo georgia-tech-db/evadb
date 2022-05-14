@@ -44,7 +44,7 @@ class TableSources(evaql_parserVisitor):
             # Add Join nodes -> left deep tree
             # t1, t2, t3 -> j2 ( j1 ( t1, t2 ), t3 )
             for i in range(num_table_joins - 1):
-                join_nodes[i + 1].table.left = join_nodes[i]
+                join_nodes[i + 1].join_node.left = join_nodes[i]
 
             return join_nodes[-1]
         else:
@@ -70,10 +70,13 @@ class TableSources(evaql_parserVisitor):
     def visitTableSourceItemWithSample(
             self, ctx: evaql_parser.TableSourceItemWithSampleContext):
         sample_freq = None
+        alias = None
         table = self.visit(ctx.tableSourceItem())
         if ctx.sampleClause():
             sample_freq = self.visit(ctx.sampleClause())
-        return TableRef(table, sample_freq)
+        if ctx.AS():
+            alias = self.visit(ctx.uid())
+        return TableRef(table, alias, sample_freq)
 
     # Nested sub query
     def visitSubqueryTableItem(

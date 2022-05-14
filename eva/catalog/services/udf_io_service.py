@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.base_service import BaseService
+from eva.utils.logging_manager import LoggingLevel, LoggingManager
 
 
 class UdfIOService(BaseService):
@@ -24,19 +24,25 @@ class UdfIOService(BaseService):
         super().__init__(UdfIO)
 
     def get_inputs_by_udf_id(self, udf_id: int):
-        result = self.model.query \
-            .with_entities(self.model._id) \
-            .filter(self.model._udf_id == udf_id,
-                    self.model._is_input == True).all()  # noqa
-
+        try:
+            result = self.model.query \
+                .filter(self.model._udf_id == udf_id,
+                        self.model._is_input == True).all()  # noqa
+        except Exception as e:
+            LoggingManager().log(
+                "Get UDF inputs failed {}".format(str(e)),
+                LoggingLevel.ERROR)
         return result
 
     def get_outputs_by_udf_id(self, udf_id: int):
-        result = self.model.query \
-            .with_entities(self.model._id) \
-            .filter(self.model._udf_id == udf_id,
-                    self.model._is_input == False).all()  # noqa
-
+        try:
+            result = self.model.query \
+                .filter(self.model._udf_id == udf_id,
+                        self.model._is_input == False).all()  # noqa
+        except Exception as e:
+            LoggingManager().log(
+                "Get UDF outputs failed {}".format(str(e)),
+                LoggingLevel.ERROR)
         return result
 
     def add_udf_io(self, io_list: List[UdfIO]):
@@ -48,17 +54,3 @@ class UdfIOService(BaseService):
 
         for io in io_list:
             io.save()
-
-    def udf_io_by_name(self, udf_id: int, name: str):
-        """return the udf_io entry that matches the name provided.
-        None if no such entry found.
-
-        Arguments:
-        name(str): name to be searched
-        """
-
-        try:
-            return self.model.query.filter(self.model._udf_id == udf_id,
-                                           self.model._name == name).one()
-        except NoResultFound:
-            return None

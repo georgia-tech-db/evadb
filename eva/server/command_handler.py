@@ -16,6 +16,8 @@ import asyncio
 import pandas as pd
 
 from typing import Iterator, Optional
+from eva.binder.statement_binder import StatementBinder
+from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.parser.parser import Parser
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
@@ -32,6 +34,10 @@ def execute_query(query) -> Iterator[Batch]:
     Execute the query and return a result generator.
     """
     stmt = Parser().parse(query)[0]
+    try:
+        StatementBinder(StatementBinderContext()).bind(stmt)
+    except Exception:
+        raise RuntimeError('Invalid Query')
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()

@@ -31,12 +31,11 @@ class UdfServiceTest(TestCase):
         service = UdfIOService()
 
         actual = service.get_inputs_by_udf_id(UDF_NAME)
-        mocked.query.with_entities.assert_called_with(mocked._id)
-        mocked.query.with_entities.return_value.filter.assert_called_with(
+        mocked.query.filter.assert_called_with(
             mocked._id == UDF_ID, mocked._is_input == True)  # noqa
-        mocked.query.with_entities.return_value.filter.return_value.all \
+        mocked.query.filter.return_value.all \
             .assert_called_once()
-        expected = mocked.query.with_entities.return_value.filter. \
+        expected = mocked.query.filter. \
             return_value.all.return_value
         self.assertEqual(actual, expected)
 
@@ -45,12 +44,11 @@ class UdfServiceTest(TestCase):
         service = UdfIOService()
 
         actual = service.get_outputs_by_udf_id(UDF_NAME)
-        mocked.query.with_entities.assert_called_with(mocked._id)
-        mocked.query.with_entities.return_value.filter.assert_called_with(
+        mocked.query.filter.assert_called_with(
             mocked._id == UDF_ID, mocked._is_input == True)  # noqa
-        mocked.query.with_entities.return_value.filter.return_value.all \
+        mocked.query.filter.return_value.all \
             .assert_called_once()
-        expected = mocked.query.with_entities.return_value.filter.\
+        expected = mocked.query.filter.\
             return_value.all.return_value
         self.assertEqual(actual, expected)
 

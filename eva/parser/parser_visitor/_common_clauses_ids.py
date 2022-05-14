@@ -53,7 +53,7 @@ class CommonClauses(evaql_parserVisitor):
         uid = self.visit(ctx.uid())
 
         if len(dottedIds):
-            return TupleValueExpression(table_name=uid, col_name=dottedIds[0])
+            return TupleValueExpression(table_alias=uid, col_name=dottedIds[0])
         else:
             return TupleValueExpression(col_name=uid)
 

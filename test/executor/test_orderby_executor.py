@@ -39,8 +39,9 @@ class OrderByExecutorTest(unittest.TestCase):
         "query: .... ORDER BY A ASC, B DESC "
 
         plan = OrderByPlan(
-            [(TupleValueExpression('A'), ParserOrderBySortType.ASC),
-             (TupleValueExpression('B'), ParserOrderBySortType.DESC)])
+            [(TupleValueExpression(col_alias='A'), ParserOrderBySortType.ASC),
+             (TupleValueExpression(col_alias='B'), ParserOrderBySortType.DESC)
+             ])
 
         orderby_executor = OrderByExecutor(plan)
         orderby_executor.append_child(DummyExecutor(batches))

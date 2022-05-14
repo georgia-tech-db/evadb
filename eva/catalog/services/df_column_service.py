@@ -24,12 +24,11 @@ class DatasetColumnService(BaseService):
 
     def columns_by_dataset_id_and_names(self, dataset_id, column_names):
         result = self.model.query \
-            .with_entities(self.model._id) \
             .filter(self.model._metadata_id == dataset_id,
                     self.model._name.in_(column_names)) \
             .all()
 
-        return [res[0] for res in result]
+        return result
 
     def columns_by_id_and_dataset_id(self,
                                      dataset_id: int,

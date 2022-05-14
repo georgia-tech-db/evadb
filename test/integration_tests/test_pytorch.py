@@ -58,4 +58,4 @@ class PytorchTest(unittest.TestCase):
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-            self.assertTrue('car' in res['label'][idx])
+            self.assertTrue('car' in res['ssdobjectdetector.label'][idx])

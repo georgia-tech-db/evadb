@@ -32,8 +32,8 @@ class TestBinder(unittest.TestCase):
                          /           \
                   LogicalGet      LogicalGet
         """
-        child1_opr = LogicalGet(MagicMock(), MagicMock())
-        child2_opr = LogicalGet(MagicMock(), MagicMock())
+        child1_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
+        child2_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         root_opr = LogicalFilter(MagicMock(), [child1_opr, child2_opr])
 
         child1_ptn = Pattern(OperatorType.LOGICALGET)
@@ -66,12 +66,12 @@ class TestBinder(unittest.TestCase):
                   LogicalGet      Dummy
         """
 
-        sub_child_opr = LogicalGet(MagicMock(), MagicMock())
-        sub_child_opr_2 = LogicalGet(MagicMock(), MagicMock())
+        sub_child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
+        sub_child_opr_2 = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sub_root_opr = LogicalFilter(
             MagicMock(), [sub_child_opr, sub_child_opr_2])
 
-        child_opr = LogicalGet(MagicMock(), MagicMock())
+        child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         root_opr = LogicalFilter(
             MagicMock(), [child_opr, sub_root_opr])
 

@@ -22,10 +22,12 @@ from eva.expression.function_expression import FunctionExpression
 
 class FunctionScanExecutorTest(unittest.TestCase):
     def test_simple_function_scan(self):
-        values = Batch(pd.DataFrame([1, 2, 3]))
-        expression = FunctionExpression(lambda x: x + 1)
+        values = Batch(pd.DataFrame([1, 2, 3], columns=['a']))
+        expression = FunctionExpression(
+            lambda x: x + 1, name='test', alias='test')
+        expression.output_col_aliases = ['test.a']
         plan = type("FunctionScanPlan", (), {"func_expr": expression})
         function_scan_executor = FunctionScanExecutor(plan)
         actual = list(function_scan_executor.exec(values))[0]
-        expected = Batch(pd.DataFrame([2, 3, 4]))
+        expected = Batch(pd.DataFrame([2, 3, 4], columns=['test.a']))
         self.assertEqual(expected, actual)

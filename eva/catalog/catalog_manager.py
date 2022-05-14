@@ -159,6 +159,16 @@ class CatalogManager(object):
         metadata.schema = df_columns
         return metadata
 
+    def get_column_object(self,
+                          table_obj: DataFrameMetadata,
+                          col_name: str) -> DataFrameColumn:
+        col_objs = self._column_service.columns_by_dataset_id_and_names(
+            table_obj.id, column_names=[col_name])
+        if col_objs:
+            return col_objs[0]
+        else:
+            return None
+
     def udf_io(
             self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
             dimensions: List[int], is_input: bool):
@@ -212,6 +222,18 @@ class CatalogManager(object):
         """
         return self._udf_service.udf_by_name(name)
 
+    def get_udf_inputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
+        if not isinstance(udf_obj, UdfMetadata):
+            raise ValueError('''Expected UdfMetadata object, got
+                             {}'''.format(type(udf_obj)))
+        return self._udf_io_service.get_inputs_by_udf_id(udf_obj.id)
+
+    def get_udf_outputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
+        if not isinstance(udf_obj, UdfMetadata):
+            raise ValueError('''Expected UdfMetadata object, got
+                             {}'''.format(type(udf_obj)))
+        return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
+
     def delete_metadata(self, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
@@ -237,16 +259,6 @@ class CatalogManager(object):
            True if successfully deleted else False
         """
         return self._udf_service.delete_udf_by_name(udf_name)
-
-    def get_udf_io_by_name(self, udf: UdfMetadata, udf_io_name: str) -> UdfIO:
-        """Returns the catalog object for the input udfio name
-        Args:
-            udf (UDF): corresponding udf object
-            udf_io_name (str): name to query the UDFIO catalog table
-        Returns:
-            UdfIO: catalog object found
-        """
-        return self._udf_io_service.udf_io_by_name(udf.id, udf_io_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(

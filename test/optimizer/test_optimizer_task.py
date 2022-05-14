@@ -45,7 +45,7 @@ class TestOptimizerTask(unittest.TestCase):
 
     def test_simple_top_down_rewrite(self):
         predicate = MagicMock()
-        child_opr = LogicalGet(MagicMock(), MagicMock())
+        child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         root_opr = LogicalFilter(predicate, [child_opr])
 
         opt_cxt, root_grp_id = self.top_down_rewrite(root_opr)
@@ -60,11 +60,11 @@ class TestOptimizerTask(unittest.TestCase):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
 
-        child_get_opr = LogicalGet(MagicMock(), MagicMock())
+        child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
         child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
         root_derived_get_opr = LogicalQueryDerivedGet(
-            children=[child_project_opr])
+            MagicMock(), children=[child_project_opr])
         root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
         root_project_opr = LogicalProject(MagicMock(), [root_filter_opr])
 
@@ -95,11 +95,11 @@ class TestOptimizerTask(unittest.TestCase):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
 
-        child_get_opr = LogicalGet(MagicMock(), MagicMock())
+        child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
         child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
         root_derived_get_opr = LogicalQueryDerivedGet(
-            children=[child_project_opr])
+            MagicMock(), children=[child_project_opr])
         root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
         root_project_opr = LogicalProject(
             MagicMock(), children=[root_filter_opr])
@@ -120,8 +120,8 @@ class TestOptimizerTask(unittest.TestCase):
 
     def test_simple_implementation(self):
         predicate = MagicMock()
-        child_opr = LogicalGet(MagicMock(), MagicMock())
-        root_opr = LogicalFilter(predicate, children=[child_opr])
+        child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
+        root_opr = LogicalFilter(predicate, [child_opr])
 
         opt_cxt, root_grp_id = self.top_down_rewrite(root_opr)
         opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
@@ -137,12 +137,15 @@ class TestOptimizerTask(unittest.TestCase):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
 
-        child_get_opr = LogicalGet(MagicMock(), MagicMock())
-        child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
-        child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
+        child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
+        child_filter_opr = LogicalFilter(
+            child_predicate, children=[child_get_opr])
+        child_project_opr = LogicalProject(
+            MagicMock(), children=[child_filter_opr])
         root_derived_get_opr = LogicalQueryDerivedGet(
-            children=[child_project_opr])
-        root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
+            MagicMock(), children=[child_project_opr])
+        root_filter_opr = LogicalFilter(
+            root_predicate, children=[root_derived_get_opr])
         root_project_opr = LogicalProject(
             MagicMock(), children=[root_filter_opr])
 

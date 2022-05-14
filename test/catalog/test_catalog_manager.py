@@ -19,6 +19,7 @@ from mock import MagicMock
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.udf import UdfMetadata
 
 
 class CatalogManagerTests(unittest.TestCase):
@@ -179,3 +180,25 @@ class CatalogManagerTests(unittest.TestCase):
         self.assertEqual(
             udf_mock.return_value.delete_udf_by_name.return_value,
             actual)
+
+    @mock.patch('eva.catalog.catalog_manager.UdfIOService')
+    def test_get_udf_outputs(self, udf_mock):
+        mock_func = udf_mock.return_value.get_outputs_by_udf_id
+        udf_obj = MagicMock(spec=UdfMetadata)
+        CatalogManager().get_udf_outputs(udf_obj)
+        mock_func.assert_called_once_with(udf_obj.id)
+
+        # should raise error
+        with self.assertRaises(ValueError):
+            CatalogManager().get_udf_outputs(MagicMock())
+
+    @mock.patch('eva.catalog.catalog_manager.UdfIOService')
+    def test_get_udf_inputs(self, udf_mock):
+        mock_func = udf_mock.return_value.get_inputs_by_udf_id
+        udf_obj = MagicMock(spec=UdfMetadata)
+        CatalogManager().get_udf_inputs(udf_obj)
+        mock_func.assert_called_once_with(udf_obj.id)
+
+        # should raise error
+        with self.assertRaises(ValueError):
+            CatalogManager().get_udf_inputs(MagicMock())

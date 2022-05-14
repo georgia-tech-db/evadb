@@ -164,8 +164,8 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         filters = range(num_frames)
     data = []
     for i in filters:
-        data.append({'id': i + start_id,
-                     'data': np.array(
+        data.append({'myvideo.id': i + start_id,
+                     'myvideo.data': np.array(
                          np.ones((2, 2, 3)) * float(i + 1) * 25,
                          dtype=np.uint8)})
 
