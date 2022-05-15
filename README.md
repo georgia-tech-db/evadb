@@ -20,13 +20,13 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 ## Installation
 
 ### Dependency
-EVA requires Python 3.7 or later and JAVA 8. On Ubuntu, you can install the JAVA by `sudo -E apt install -y openjdk-8-jdk openjdk-8-jre`.
+EVA requires Python 3.8 or later and JAVA 8. On Ubuntu, you can install the JAVA by `sudo -E apt install -y openjdk-8-jdk openjdk-8-jre`.
 
 ### Recommended
 To install EVA, we recommend using virtual environment and pip:
 ```shell
-python3 -m venv env37
-. env37/bin/activate
+python3 -m venv env38
+. env38/bin/activate
 pip install --upgrade pip
 pip install evatestdb
 ```
@@ -34,8 +34,8 @@ pip install evatestdb
 ### Install From Source
 ```shell
 git clone https://github.com/georgia-tech-db/eva.git && cd eva
-python3 -m venv env37
-. env37/bin/activate
+python3 -m venv env38
+. env38/bin/activate
 pip install --upgrade pip
 sh script/antlr4/generate_parser.sh
 pip install .
@@ -69,17 +69,17 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
 ### Configure GPU (Recommended)
 
-1. If your workstation has a GPU, you need to first set it up and configure it. You can run the following command first to check your hardware capabilities. 
+1. If your workstation has a GPU, you need to first set it up and configure it. You can run the following command first to check your hardware capabilities.
 
     ```
     ubuntu-drivers devices
     ```
 
-    If you do have an NVIDIA GPU, and its not been configured yet, follow all the steps in this link carefully. `https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31`. 
+    If you do have an NVIDIA GPU, and its not been configured yet, follow all the steps in this link carefully. `https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31`.
 
     Some pointers:
-    - When installing NVIDIA drivers, check the correct driver version for your GPU to avoid compatibiility issues. 
-    - When installing cuDNN, you will have to create an account. Make sure you get the correct deb files for your OS and architecture. 
+    - When installing NVIDIA drivers, check the correct driver version for your GPU to avoid compatibiility issues.
+    - When installing cuDNN, you will have to create an account. Make sure you get the correct deb files for your OS and architecture.
 
 2. You can run the following code in a jupyter instance to verify your GPU is working well along with PyTorch.
 
@@ -96,8 +96,8 @@ SELECT id, data FROM MyVideo WHERE id < 5;
     ```
     gpus: {'127.0.1.1': [0]}
     ```
-    
-    `127.0.1.1` is the loopback address on which the eva server is started. 0 refers to the GPU index to be used. 
+
+    `127.0.1.1` is the loopback address on which the eva server is started. 0 refers to the GPU index to be used.
 
 ### Sample Notebook
 
@@ -108,7 +108,7 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 
 2. Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to [tutorials/object_detection.ipynb](tutorials/object_detection.ipynb)
 
-3. You might have to install ipywidgets to visualize the input video and output. Follow steps in `https://ipywidgets.readthedocs.io/en/latest/user_install.html` as per your jupyter environment. 
+3. You might have to install ipywidgets to visualize the input video and output. Follow steps in `https://ipywidgets.readthedocs.io/en/latest/user_install.html` as per your jupyter environment.
 
 4. Run each cell one by one. Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.
 
