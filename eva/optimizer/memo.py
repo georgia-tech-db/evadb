@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import Dict, List
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.group import Group
 from eva.optimizer.operators import OperatorType
@@ -27,8 +27,8 @@ class Memo:
     """
 
     def __init__(self):
-        # self map to speed up finding duplicates
-        self._group_exprs = dict()
+        # map from hash to group_expr to speed up finding duplicates
+        self._group_exprs: Dict[int, GroupExpression] = dict()
         self._groups = dict()
 
     @property
@@ -40,8 +40,8 @@ class Memo:
         return self._group_exprs
 
     def find_duplicate_expr(self, expr: GroupExpression) -> GroupExpression:
-        if expr in self.group_exprs:
-            return self.group_exprs[expr]
+        if hash(expr) in self.group_exprs:
+            return self.group_exprs[hash(expr)]
         else:
             return None
 
@@ -87,7 +87,7 @@ class Memo:
 
         group = self.groups[group_id]
         group.add_expr(expr)
-        self._group_exprs[expr] = expr
+        self._group_exprs[hash(expr)] = expr
 
     def erase_group(self, group_id: int):
         """
@@ -95,9 +95,9 @@ class Memo:
         """
         group = self.groups[group_id]
         for expr in group.logical_exprs:
-            del self._group_exprs[expr]
+            del self._group_exprs[hash(expr)]
         for expr in group.physical_exprs:
-            del self._group_exprs[expr]
+            del self._group_exprs[hash(expr)]
 
         group.clear_grp_exprs()
 

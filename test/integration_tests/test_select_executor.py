@@ -201,7 +201,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ['myvideo.id'])
         self.assertEqual(actual_batch.batch_size, 5)
 
-    def test_hash_join_with_one_on(self):
+    def test_aahash_join_with_one_on(self):
         select_query = """SELECT table1.a2 FROM table1 JOIN
                         table2 ON table1.a1 = table2.a1;"""
         actual_batch = execute_query_fetch_all(select_query)

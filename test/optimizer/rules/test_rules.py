@@ -10,6 +10,7 @@ from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedProjectIntoDerivedGet,
                                        LogicalCreateMaterializedViewToPhysical,
                                        LogicalFilterToPhysical,
+                                       LogicalInnerJoinCommutativity,
                                        LogicalLateralJoinToPhysical,
                                        LogicalProjectToPhysical,
                                        PushdownFilterThroughSample,
@@ -75,14 +76,24 @@ class TestRules(unittest.TestCase):
         # adding/removing rules should update this test
         supported_rewrite_rules = [EmbedFilterIntoGet(),
                                    EmbedFilterIntoDerivedGet(),
-                                   PushdownFilterThroughSample()
-                                   ]
+                                   PushdownFilterThroughSample(),
+                                   EmbedProjectIntoGet(),
+                                   EmbedProjectIntoDerivedGet(),
+                                   PushdownProjectThroughSample()]
         self.assertEqual(len(supported_rewrite_rules),
                          len(RulesManager().rewrite_rules))
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
             self.assertTrue(any(isinstance(rule, type(x))
                                 for x in RulesManager().rewrite_rules))
+
+        supported_logical_rules = [LogicalInnerJoinCommutativity()]
+        self.assertEqual(len(supported_logical_rules),
+                         len(RulesManager().logical_rules))
+
+        for rule in supported_logical_rules:
+            self.assertTrue(any(isinstance(rule, type(x))
+                                for x in RulesManager().logical_rules))
 
         supported_implementation_rules = [
             LogicalCreateToPhysical(),

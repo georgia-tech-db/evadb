@@ -37,15 +37,15 @@ class CostModel:
         def cost(opr: AbstractPlan):
             return 1.0
 
-        @cost.register
+        @cost.register(HashJoinBuildPlan)
         def cost_hash_join_build_plan(opr: HashJoinBuildPlan):
             return 1.0
 
-        @cost.register
+        @cost.register(HashJoinProbePlan)
         def cost_hash_join_probe_plan(opr: HashJoinProbePlan):
             return 1.0
 
-        @cost.register
+        @cost.register(SeqScanPlan)
         def cost_seq_scan(opr: SeqScanPlan):
             return 1.0
 

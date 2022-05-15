@@ -140,7 +140,7 @@ class LogicalGet(Operator):
         self._dataset_metadata = dataset_metadata
         self._alias = alias
         self._predicate = predicate
-        self._target_list = target_list or []
+        self._target_list = target_list
         super().__init__(OperatorType.LOGICALGET, children)
 
     @property
@@ -188,7 +188,7 @@ class LogicalGet(Operator):
                      self.video,
                      self.dataset_metadata,
                      self.predicate,
-                     tuple(self.target_list)))
+                     tuple(self.target_list or [])))
 
 
 class LogicalQueryDerivedGet(Operator):

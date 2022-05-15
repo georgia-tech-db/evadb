@@ -370,7 +370,7 @@ class LogicalInnerJoinCommutativity(Rule):
         #     /           \        ->       /               \
         #    A             B               B                A
 
-        new_join = LogicalJoin(before.join_type, before.join_predicates)
+        new_join = LogicalJoin(before.join_type, before.join_predicate)
         new_join.append_child(before.rhs())
         new_join.append_child(before.lhs())
         return new_join
@@ -770,15 +770,16 @@ class RulesManager:
 
     def __init__(self):
         self._logical_rules = [
-            EmbedProjectIntoGet(),
-            EmbedProjectIntoDerivedGet(),
-            PushdownProjectThroughSample()
+            LogicalInnerJoinCommutativity()
         ]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
             EmbedFilterIntoDerivedGet(),
-            PushdownFilterThroughSample()
+            PushdownFilterThroughSample(),
+            EmbedProjectIntoGet(),
+            EmbedProjectIntoDerivedGet(),
+            PushdownProjectThroughSample()
         ]
 
         self._implementation_rules = [

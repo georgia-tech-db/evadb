@@ -88,7 +88,7 @@ class OptimizerContext:
         """
         self.memo.erase_group(group_id)
         new_expr = self._xform_opr_to_group_expr(opr)
-        self.memo.add_group_expr(new_expr, group_id)
+        new_expr = self.memo.add_group_expr(new_expr, group_id)
         return new_expr
 
     def add_opr_to_group(self,
@@ -98,5 +98,5 @@ class OptimizerContext:
         Convert opertator to group_expression and add to the group
         """
         grp_expr = self._xform_opr_to_group_expr(opr)
-        self.memo.add_group_expr(grp_expr, group_id)
+        grp_expr = self.memo.add_group_expr(grp_expr, group_id)
         return grp_expr
