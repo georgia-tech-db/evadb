@@ -16,8 +16,6 @@ from typing import List, Tuple
 from eva.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
-from eva.catalog.models.df_metadata import DataFrameMetadata
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import LoggingLevel
@@ -49,14 +47,6 @@ def column_definition_to_udf_io(
                                     is_input=is_input)
         )
     return result_list
-
-
-def get_columns_of_table(self, dataset_metadata: DataFrameMetadata):
-    cols = set()
-    for col in dataset_metadata.columns:
-        if not col.array_type:
-            cols.add(col.name)
-    return cols
 
 
 def extract_equi_join_keys(join_predicate: AbstractExpression,

@@ -16,24 +16,10 @@ from typing import Iterator
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
-# from eva.executor.abstract_executor import UPSTREAM_BATCH
-# from eva.planner.nested_loop_join_plan import NestedLoopJoin
 from eva.planner.lateral_join_plan import LateralJoinPlan
-
-# from eva.utils.metrics import Metrics
 
 
 class LateralJoinExecutor(AbstractExecutor):
-    """
-    Nested Loop Join executor:
-    Returns the tuple joined from inner and outer tuples which
-    satisfies the predicate clause.
-    It scans the inner relation to join with current outer tuple.
-
-    Arguments:
-        node (AbstractPlan): The NestedLoopJoin
-
-    """
 
     def __init__(self, node: LateralJoinPlan):
         super().__init__(node)

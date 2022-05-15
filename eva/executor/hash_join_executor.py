@@ -20,16 +20,6 @@ from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 
 
 class HashJoinExecutor(AbstractExecutor):
-    """
-    Nested Loop Join executor:
-    Returns the tuple joined from inner and outer tuples which
-    satisfies the predicate clause.
-    It scans the inner relation to join with current outer tuple.
-
-    Arguments:
-        node (AbstractPlan): The NestedLoopJoin
-
-    """
 
     def __init__(self, node: HashJoinProbePlan):
         super().__init__(node)
