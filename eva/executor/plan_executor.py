@@ -21,7 +21,6 @@ from eva.executor.project_executor import ProjectExecutor
 from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.models.storage.batch import Batch
-from eva.parser.types import JoinType
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 from eva.executor.pp_executor import PPExecutor
