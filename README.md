@@ -52,7 +52,7 @@ pip install .
 </p>
 </details>
 
-## Verify Installation
+## QuickStart
 
 1. Set up the server and client
 - Activate the virtual environment: `. env37/bin/activate`
