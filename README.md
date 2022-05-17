@@ -53,8 +53,8 @@ pip install .
 </p>
 </details>
 
-## QuickStart
-
+<details><summary> QuickStart </summary>
+<p>
 1. Set up the server and client
 - Activate the virtual environment: `. env37/bin/activate`
 
@@ -76,6 +76,8 @@ LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
+</p>
+</details>
 
 ## Example Queries
 1. Search frames with a car
