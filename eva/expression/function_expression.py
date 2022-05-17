@@ -31,7 +31,7 @@ class FunctionExpression(AbstractExpression):
     `output`: If the user wants only subset of ouputs. Eg,
     ObjDetector.lables the parser with set output to 'labels'
 
-    `ourput_col_aliases`: It is populated by the binder. In case the
+    `output_col_aliases`: It is populated by the binder. In case the
     output is None, the binder sets output_col_aliases to list of all
     output columns of the FunctionExpression. Eg, ['labels',
     'boxes']. Otherwise, only the output columns.
