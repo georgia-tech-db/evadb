@@ -66,7 +66,7 @@ pip install .
 UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```
 
-3. Run the `LOAD` command in the client terminal: (may take a while)
+3. Run the `LOAD` command in the client terminal:
 ```mysql
 LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```
@@ -76,7 +76,15 @@ LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
 
-##
+## Example Queries
+1. Search frames with a pedestrian and a car
+```mysql
+SELECT id, frame FROM MyVideo WHERE ['pedestrain', 'car'] <@ FastRCNNObjectDetector(frame).labels;
+```
+2. Search frames containing greater than 3 cars
+```mysql
+SELECT id, frame FROM DETRAC WHERE array_count(FastRCNNObjectDetector(frame).labels, 'car') > 3;
+```
 
 ## Documentation
 
