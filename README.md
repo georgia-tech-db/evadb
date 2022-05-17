@@ -20,7 +20,7 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 ## Quick Links
 * [Demo](https://ada-00.cc.gatech.edu/eva/playground)
 * [Website](https://georgia-tech-db.github.io/eva/index.html)
-* [Documentation](evagatech.readthedocs.io/)
+* [Documentation](https://evagatech.readthedocs.io/en/latest/)
 * [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
 * [Forum](https://gitter.im/georgia-tech-db/eva)
 
