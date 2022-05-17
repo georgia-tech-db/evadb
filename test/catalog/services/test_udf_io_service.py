@@ -39,6 +39,14 @@ class UdfServiceTest(TestCase):
             return_value.all.return_value
         self.assertEqual(actual, expected)
 
+    @patch("eva.catalog.services.udf_io_service.UdfIOService")
+    def test_get_inputs_by_udf_id_should_raise(self, mocked):
+        service = UdfIOService()
+        service.get_inputs_by_udf_id = func = MagicMock()
+        func.side_effect = Exception()
+        with self.assertRaises(Exception):
+            service.get_inputs_by_udf_id(UDF_NAME)
+
     @patch('eva.catalog.services.udf_io_service.UdfIO')
     def test_get_outputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOService()
@@ -51,6 +59,14 @@ class UdfServiceTest(TestCase):
         expected = mocked.query.filter.\
             return_value.all.return_value
         self.assertEqual(actual, expected)
+
+    @patch("eva.catalog.services.udf_io_service.UdfIOService")
+    def test_get_outputs_by_udf_id_should_raise(self, _):
+        service = UdfIOService()
+        service.get_outputs_by_udf_id = func = MagicMock()
+        func.side_effect = Exception()
+        with self.assertRaises(Exception):
+            service.get_outputs_by_udf_id(UDF_NAME)
 
     def test_add_udf_io_should_save_io(self):
         service = UdfIOService()
