@@ -38,7 +38,11 @@ class StatementBinder:
         self._catalog = CatalogManager()
 
     @singledispatchmethod
-    def bind(self, node: AbstractStatement):
+    def bind(self, node):
+        raise NotImplementedError(f'Cannot bind {type(node)}')
+
+    @bind.register(AbstractStatement)
+    def _bind_abstract_statement(self, node: AbstractStatement):
         pass
 
     @bind.register(AbstractExpression)
@@ -75,9 +79,8 @@ class StatementBinder:
         if node.file_options['file_format'] == FileFormatType.VIDEO:
             # Create a new metadata object
             create_video_metadata(table_ref.table.table_name)
-            self.bind(table_ref)
-        else:
-            self.bind(table_ref)
+
+        self.bind(table_ref)
 
         table_ref_obj = table_ref.table.table_obj
         if table_ref_obj is None:

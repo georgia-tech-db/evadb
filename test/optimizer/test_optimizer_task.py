@@ -176,7 +176,3 @@ class TestOptimizerTask(unittest.TestCase):
         child_opr = best_child_grp_expr.opr
         self.assertEqual(type(child_opr), SeqScanPlan)
         self.assertEqual(child_opr.predicate, child_predicate)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -28,22 +28,22 @@ class UdfIOService(BaseService):
             result = self.model.query \
                 .filter(self.model._udf_id == udf_id,
                         self.model._is_input == True).all()  # noqa
+            return result
         except Exception as e:
-            LoggingManager().log(
-                "Get UDF inputs failed {}".format(str(e)),
-                LoggingLevel.ERROR)
-        return result
+            error = f'Getting inputs for UDF id {udf_id} raised {e}'
+            LoggingManager().log(error, LoggingLevel.ERROR)
+            raise RuntimeError(error)
 
     def get_outputs_by_udf_id(self, udf_id: int):
         try:
             result = self.model.query \
                 .filter(self.model._udf_id == udf_id,
                         self.model._is_input == False).all()  # noqa
+            return result
         except Exception as e:
-            LoggingManager().log(
-                "Get UDF outputs failed {}".format(str(e)),
-                LoggingLevel.ERROR)
-        return result
+            error = f'Getting outputs for UDF id {udf_id} raised {e}'
+            LoggingManager().log(error, LoggingLevel.ERROR)
+            raise RuntimeError(error)
 
     def add_udf_io(self, io_list: List[UdfIO]):
         """Commit an entry in the udf_io table

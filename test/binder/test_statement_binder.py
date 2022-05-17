@@ -80,24 +80,26 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_any_call(tableref.join_node.right)
 
     def test_bind_tableref_should_raise(self):
-        with self.assertRaises(ValueError):
-            binder = StatementBinder(StatementBinderContext())
-            tableref = MagicMock()
-            tableref.is_select.return_value = False
-            tableref.is_func_expr.return_value = False
-            tableref.is_join.return_value = False
-            tableref.is_table_atom.return_value = False
-            binder._bind_tableref(tableref)
+        with patch.object(StatementBinder, 'bind'):
+            with self.assertRaises(ValueError):
+                binder = StatementBinder(StatementBinderContext())
+                tableref = MagicMock()
+                tableref.is_select.return_value = False
+                tableref.is_func_expr.return_value = False
+                tableref.is_join.return_value = False
+                tableref.is_table_atom.return_value = False
+                binder._bind_tableref(tableref)
 
     @patch('eva.binder.statement_binder.StatementBinderContext')
     def test_bind_tableref_starts_new_context(self, mock_ctx):
-        binder = StatementBinder(StatementBinderContext())
-        tableref = MagicMock()
-        tableref.is_table_atom.return_value = False
-        tableref.is_join.return_value = False
-        tableref.is_select.return_value = True
-        binder._bind_tableref(tableref)
-        self.assertEqual(mock_ctx.call_count, 1)
+        with patch.object(StatementBinder, 'bind'):
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_join.return_value = False
+            tableref.is_select.return_value = True
+            binder._bind_tableref(tableref)
+            self.assertEqual(mock_ctx.call_count, 1)
 
     def test_bind_create_mat_statement(self):
         with patch.object(StatementBinder, 'bind') as mock_binder:
@@ -168,16 +170,17 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch('eva.binder.statement_binder.StatementBinderContext')
     def test_bind_select_statement_union_starts_new_context(self, mock_ctx):
-        binder = StatementBinder(StatementBinderContext())
-        select_statement = MagicMock()
-        select_statement.union_link = None
-        binder._bind_select_statement(select_statement)
-        self.assertEqual(mock_ctx.call_count, 0)
+        with patch.object(StatementBinder, 'bind'):
+            binder = StatementBinder(StatementBinderContext())
+            select_statement = MagicMock()
+            select_statement.union_link = None
+            binder._bind_select_statement(select_statement)
+            self.assertEqual(mock_ctx.call_count, 0)
 
-        binder = StatementBinder(StatementBinderContext())
-        select_statement = MagicMock()
-        binder._bind_select_statement(select_statement)
-        self.assertEqual(mock_ctx.call_count, 1)
+            binder = StatementBinder(StatementBinderContext())
+            select_statement = MagicMock()
+            binder._bind_select_statement(select_statement)
+            self.assertEqual(mock_ctx.call_count, 1)
 
     @patch('eva.binder.statement_binder.create_video_metadata')
     @patch('eva.binder.statement_binder.TupleValueExpression')
@@ -234,3 +237,7 @@ class StatementBinderTests(unittest.TestCase):
             with patch.object(StatementBinder, 'bind'):
                 binder = StatementBinder(StatementBinderContext())
                 binder._bind_load_data_statement(load_statement)
+
+
+if __name__ == '__main__':
+    unittest.main()

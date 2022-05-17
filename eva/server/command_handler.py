@@ -36,8 +36,8 @@ def execute_query(query) -> Iterator[Batch]:
     stmt = Parser().parse(query)[0]
     try:
         StatementBinder(StatementBinderContext()).bind(stmt)
-    except Exception:
-        raise RuntimeError('Invalid Query')
+    except Exception as error:
+        raise RuntimeError(f'Binder failed: {error}')
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()
