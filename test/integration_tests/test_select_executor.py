@@ -188,3 +188,11 @@ class SelectExecutorTest(unittest.TestCase):
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_should_fail_to_bind(self):
+        query = 'SELECT id, data FROM Random WHERE id < 2;'
+        with self.assertRaises(RuntimeError) as cm:
+            execute_query_fetch_all(query)
+            print(cm.exception)
+        self.assertTrue(
+            'Binder failed: Random does not exists.' in str(cm.exception))
