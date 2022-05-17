@@ -13,11 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.models.storage.batch import Batch
-from eva.storage.storage_engine import VideoStorageEngine
 from eva.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, create_sample_csv
 from test.util import create_dummy_batches, create_dummy_csv_batches
@@ -42,13 +39,13 @@ class LoadExecutorTest(unittest.TestCase):
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
 
-        metadata = CatalogManager().get_dataset_metadata("", "MyVideo")
-        actual_batch = Batch(pd.DataFrame())
-        actual_batch = Batch.concat(VideoStorageEngine.read(
-            metadata, batch_mem_size=3000), copy=False)
+        select_query = """SELECT id, data FROM MyVideo;"""
+
+        actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(create_dummy_batches())
-        self.assertEqual([actual_batch], expected_batch)
+        expected_batch = list(create_dummy_batches())[0]
+        expected_batch.modify_column_alias('myvideo')
+        self.assertEqual(actual_batch, expected_batch)
 
     # integration test for csv
     def test_should_load_csv_in_table(self):
@@ -85,4 +82,5 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         expected_batch = create_dummy_csv_batches()
+        expected_batch.modify_column_alias('myvideocsv')
         self.assertEqual(actual_batch, expected_batch)

@@ -28,6 +28,9 @@ class TupleValueExpressionsTest(unittest.TestCase):
         tup_val_exp1 = TupleValueExpression(col_name=0)
         tup_val_exp2 = TupleValueExpression(col_name=1)
         tup_val_exp3 = TupleValueExpression(col_name=2)
+        tup_val_exp1.col_alias = 0
+        tup_val_exp2.col_alias = 1
+        tup_val_exp3.col_alias = 2
         tuples = Batch(pd.DataFrame({
             0: [1, 2, 3, 4, 5, 6],
             1: [7, 8, 9, 10, 11, 12],

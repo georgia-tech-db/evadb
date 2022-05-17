@@ -184,9 +184,11 @@ class EmbedFilterIntoGet(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         lget = before.children[0]
-        new_get_opr = LogicalGet(
-            lget.video, lget.dataset_metadata,
-            predicate, lget.target_list, lget.children)
+        new_get_opr = LogicalGet(lget.video, lget.dataset_metadata,
+                                 alias=lget.alias,
+                                 predicate=predicate,
+                                 target_list=lget.target_list,
+                                 children=lget.children)
         return new_get_opr
 
 
@@ -204,11 +206,14 @@ class EmbedProjectIntoGet(Rule):
         return True
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
-        select_list = before.target_list
+        target_list = before.target_list
         lget = before.children[0]
-        new_get_opr = LogicalGet(
-            lget.video, lget.dataset_metadata,
-            lget.predicate, select_list, lget.children)
+        new_get_opr = LogicalGet(lget.video, lget.dataset_metadata,
+                                 alias=lget.alias,
+                                 predicate=lget.predicate,
+                                 target_list=target_list,
+                                 children=lget.children)
+
         return new_get_opr
 
 # For nested queries
@@ -232,8 +237,10 @@ class EmbedFilterIntoDerivedGet(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            predicate, ld_get.target_list, ld_get.children)
+        new_opr = LogicalQueryDerivedGet(alias=ld_get.alias,
+                                         predicate=predicate,
+                                         target_list=ld_get.target_list,
+                                         children=ld_get.children)
         return new_opr
 
 
@@ -255,8 +262,10 @@ class EmbedProjectIntoDerivedGet(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         target_list = before.target_list
         ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(
-            ld_get.predicate, target_list, ld_get.children)
+        new_opr = LogicalQueryDerivedGet(alias=ld_get.alias,
+                                         predicate=ld_get.predicate,
+                                         target_list=target_list,
+                                         children=ld_get.children)
         return new_opr
 
 
@@ -444,7 +453,7 @@ class LogicalGetToSeqScan(Rule):
             "executor", "batch_mem_size")
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = SeqScanPlan(before.predicate, before.target_list)
+        after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         after.append_child(StoragePlan(
             before.dataset_metadata, batch_mem_size=batch_mem_size))
         return after
@@ -483,7 +492,7 @@ class LogicalDerivedGetToPhysical(Rule):
 
     def apply(self, before: LogicalQueryDerivedGet,
               context: OptimizerContext):
-        after = SeqScanPlan(before.predicate, before.target_list)
+        after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         after.append_child(before.children[0])
         return after
 

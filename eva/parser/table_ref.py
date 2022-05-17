@@ -29,6 +29,7 @@ class TableInfo:
         self._table_name = table_name
         self._schema_name = schema_name
         self._database_name = database_name
+        self._table_obj = None
 
     @property
     def table_name(self):
@@ -42,6 +43,14 @@ class TableInfo:
     def database_name(self):
         return self._database_name
 
+    @property
+    def table_obj(self):
+        return self._table_obj
+
+    @table_obj.setter
+    def table_obj(self, obj):
+        self._table_obj = obj
+
     def __str__(self):
         table_info_str = "TABLE INFO:: (" + self._table_name + ")"
 
@@ -52,17 +61,21 @@ class TableInfo:
             return False
         return (self.table_name == other.table_name
                 and self.schema_name == other.schema_name
-                and self.database_name == other.database_name)
+                and self.database_name == other.database_name
+                and self.table_obj == other.table_obj)
 
     def __hash__(self) -> int:
-        return hash((self.table_name, self.schema_name, self.database_name))
+        return hash((self.table_name,
+                     self.schema_name,
+                     self.database_name,
+                     self.table_obj))
 
 
 class TableRef:
     """
     dummy class right now need to handle join expression
     Attributes:
-        table: can be one of the following based on the query type:
+        : can be one of the following based on the query type:
             TableInfo: expression of table name and database name,
             SelectStatement: select statement in case of nested queries,
             JoinDefinition: join statement in case of join queries #TODO
@@ -70,32 +83,55 @@ class TableRef:
     """
 
     def __init__(self,
-                 table: Union[TableInfo, SelectStatement] = None,
+                 table: Union[TableInfo, SelectStatement],
+                 alias: str = None,
                  sample_freq: float = None):
-        self._table = table
-        self._sample_freq = sample_freq
 
-    @property
-    def table(self):
-        return self._table
+        self._ref_handle = table
+        self._sample_freq = sample_freq
+        self.alias = alias or self.generate_alias()
 
     @property
     def sample_freq(self):
         return self._sample_freq
 
     def is_select(self) -> bool:
-        return isinstance(self.table, SelectStatement)
+        return isinstance(self._ref_handle, SelectStatement)
+
+    @property
+    def table(self) -> TableInfo:
+        assert isinstance(self._ref_handle, TableInfo), 'Expected \
+                TableInfo, got {}'.format(type(self._ref_handle))
+        return self._ref_handle
+
+    @property
+    def select_statement(self):
+        assert isinstance(self._ref_handle, SelectStatement), "Expected \
+                SelectStatement, got{}".format(type(self._ref_handle))
+        return self._ref_handle
+
+    def generate_alias(self) -> str:
+        # create alias for the table
+        # TableInfo -> table_name.lower()
+        # SelectStatement -> select
+        if isinstance(self._ref_handle, TableInfo):
+            return self._ref_handle.table_name.lower()
+        elif isinstance(self._ref_handle, SelectStatement):
+            raise RuntimeError('Nested select should have alias')
 
     def __str__(self):
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            str(self.table), str(self.sample_freq))
+            str(self._ref_handle), str(self.sample_freq))
         return table_ref_str
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
             return False
-        return (self.table == other.table
+        return (self._ref_handle == other._ref_handle
+                and self.alias == other.alias
                 and self.sample_freq == other.sample_freq)
 
     def __hash__(self) -> int:
-        return hash((self.table, self.sample_freq))
+        return hash((self._ref_handle,
+                     self.alias,
+                     self.sample_freq))

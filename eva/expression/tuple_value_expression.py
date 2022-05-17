@@ -19,40 +19,33 @@ from .abstract_expression import AbstractExpression, ExpressionType, \
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_name: str = None, table_name: str = None,
-                 col_idx: int = -1, col_object: DataFrameColumn = None):
+    def __init__(self, col_name: str = None, table_alias: str = None,
+                 col_idx: int = -1, col_object: DataFrameColumn = None,
+                 col_alias=None):
         super().__init__(ExpressionType.TUPLE_VALUE,
                          rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
-        self._table_name = table_name
+        self._table_alias = table_alias
         self._table_metadata_id = None
-        self._col_metadata_id = None
         self._col_idx = col_idx
         self._col_object = col_object
+        self._col_alias = col_alias
 
     @property
     def table_metadata_id(self) -> int:
         return self._table_metadata_id
 
-    @property
-    def col_metadata_id(self) -> int:
-        return self._col_metadata_id
-
     @table_metadata_id.setter
     def table_metadata_id(self, id: int):
         self._table_metadata_id = id
 
-    @col_metadata_id.setter
-    def col_metadata_id(self, id: int):
-        self._col_metadata_id = id
-
     @property
-    def table_name(self) -> str:
-        return self._table_name
+    def table_alias(self) -> str:
+        return self._table_alias
 
-    @table_name.setter
-    def table_name(self, name: str):
-        self._table_name = name
+    @table_alias.setter
+    def table_alias(self, name: str):
+        self._table_alias = name
 
     @property
     def col_name(self) -> str:
@@ -66,26 +59,35 @@ class TupleValueExpression(AbstractExpression):
     def col_object(self, value: DataFrameColumn):
         self._col_object = value
 
+    @property
+    def col_alias(self) -> str:
+        return self._col_alias
+
+    @col_alias.setter
+    def col_alias(self, value: str):
+        self._col_alias = value
+
     def evaluate(self, batch: Batch, *args, **kwargs):
         if "mask" in kwargs:
             batch = batch[kwargs["mask"]]
-        return batch.project([self.col_name])
+        return batch.project([self.col_alias])
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, TupleValueExpression):
             return False
-        return (is_subtree_equal and self.table_name == other.table_name
+        return (is_subtree_equal and self.table_alias == other.table_alias
                 and self.table_metadata_id == other.table_metadata_id
                 and self.col_name == other.col_name
-                and self.col_metadata_id == other.col_metadata_id
+                and self.col_alias == other.col_alias
                 and self.col_object == other.col_object
                 and self._col_idx == other._col_idx)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
+                     self.table_alias,
                      self.table_metadata_id,
                      self.col_name,
-                     self.col_metadata_id,
+                     self.col_alias,
                      self.col_object,
                      self._col_idx))
