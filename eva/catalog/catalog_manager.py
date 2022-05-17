@@ -101,24 +101,6 @@ class CatalogManager(object):
         metadata.schema = column_list
         return metadata
 
-    def get_metadata(self, metadata_id: int,
-                     col_id_list: List[int] = None) -> DataFrameMetadata:
-        """This method returns the metadata object given a metadata_id.
-
-        Arguments:
-            metadata_id: metadata id of the table
-            col_id_list: optional column ids of the table referred.
-                         If none all the columns are required
-
-        Returns:
-            metadata object with all the details of video/dataset
-        """
-        metadata = self._dataset_service.dataset_by_id(metadata_id)
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata_id, col_id_list)
-        metadata.schema = df_columns
-        return metadata
-
     def create_column_metadata(
         self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
         dimensions: List[int]

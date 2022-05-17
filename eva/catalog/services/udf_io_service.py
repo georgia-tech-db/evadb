@@ -31,7 +31,7 @@ class UdfIOService(BaseService):
             return result
         except Exception as e:
             error = f'Getting inputs for UDF id {udf_id} raised {e}'
-            LoggingManager().exception(error, LoggingLevel.ERROR)
+            LoggingManager().log(error, LoggingLevel.ERROR)
             raise RuntimeError(error)
 
     def get_outputs_by_udf_id(self, udf_id: int):
