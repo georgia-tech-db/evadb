@@ -39,10 +39,13 @@ class TableSources(evaql_parserVisitor):
     def visitTableSourceItemWithSample(
             self, ctx: evaql_parser.TableSourceItemWithSampleContext):
         sample_freq = None
+        alias = None
         table = self.visit(ctx.tableSourceItem())
         if ctx.sampleClause():
             sample_freq = self.visit(ctx.sampleClause())
-        return TableRef(table, sample_freq)
+        if ctx.AS():
+            alias = self.visit(ctx.uid())
+        return TableRef(table, alias, sample_freq)
 
     # Nested sub query
     def visitSubqueryTableItem(

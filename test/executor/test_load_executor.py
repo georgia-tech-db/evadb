@@ -112,9 +112,9 @@ class LoadExecutorTest(unittest.TestCase):
         file_options = {}
         file_options['file_format'] = FileFormatType.CSV
         column_list = [
-            TupleValueExpression(col_name='id', table_name='dummy'),
-            TupleValueExpression(col_name='frame_id', table_name='dummy'),
-            TupleValueExpression(col_name='video_id', table_name='dummy')
+            TupleValueExpression(col_name='id', table_alias='dummy'),
+            TupleValueExpression(col_name='frame_id', table_alias='dummy'),
+            TupleValueExpression(col_name='video_id', table_alias='dummy')
         ]
         plan = type(
             "LoadDataPlan", (), {

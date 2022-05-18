@@ -18,10 +18,11 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 * EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
 
 ## Quick Links
-* [EVA website](https://georgia-tech-db.github.io/eva/index.html)
-* [EVA tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [EVA documentation](evagatech.readthedocs.io/)
-* [EVA community forum](https://gitter.im/georgia-tech-db/eva)
+* [Demo](https://ada-00.cc.gatech.edu/eva/playground)
+* [Website](https://georgia-tech-db.github.io/eva/index.html)
+* [Documentation](https://evagatech.readthedocs.io/en/latest/)
+* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
+* [Forum](https://gitter.im/georgia-tech-db/eva)
 
 ## Installation
 
@@ -52,8 +53,8 @@ pip install .
 </p>
 </details>
 
-## QuickStart
-
+<details><summary> QuickStart </summary>
+<p>
 1. Set up the server and client
 - Activate the virtual environment: `. env37/bin/activate`
 
@@ -75,12 +76,21 @@ LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
+</p>
+</details>
 
 ## Example Queries
-1. Search frames with a pedestrian and a car
+1. Search frames with a car
 ```mysql
-SELECT id, frame FROM MyVideo WHERE ['pedestrain', 'car'] <@ FastRCNNObjectDetector(frame).labels;
+SELECT id, frame FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(frame).labels;
 ```
+![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
+
+2. Search frames with a pedestrian and a car
+```mysql
+SELECT id, frame FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(frame).labels;
+```
+
 2. Search frames containing greater than 3 cars
 ```mysql
 SELECT id, frame FROM DETRAC WHERE array_count(FastRCNNObjectDetector(frame).labels, 'car') > 3;
@@ -88,7 +98,7 @@ SELECT id, frame FROM DETRAC WHERE array_count(FastRCNNObjectDetector(frame).lab
 
 ## Documentation
 
-You can find documentation and code snippets for EVA [here](https://evagatech.readthedocs.io/).
+You can find documentation for EVA [here](https://evagatech.readthedocs.io/).
 
 ## Contributing
 
@@ -103,4 +113,4 @@ See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors
 
 ## License
 Copyright (c) 2018-2022 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
-Licensed under the [Apache License](LICENSE).
+Licensed under [Apache License](LICENSE).

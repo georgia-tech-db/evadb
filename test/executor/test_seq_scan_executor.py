@@ -31,7 +31,8 @@ class SeqScanExecutorTest(unittest.TestCase):
                               pd.DataFrame([False, False, True]))})
 
         plan = type("ScanPlan", (), {"predicate": expression,
-                                     "columns": None})
+                                     "columns": None,
+                                     "alias": None})
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
@@ -45,7 +46,8 @@ class SeqScanExecutorTest(unittest.TestCase):
         batch = Batch(frames=dataframe)
 
         plan = type("ScanPlan", (), {"predicate": None,
-                                     "columns": None})
+                                     "columns": None,
+                                     "alias": None})
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
@@ -65,7 +67,8 @@ class SeqScanExecutorTest(unittest.TestCase):
                             x.frames['data']))})]
 
         plan = type("ScanPlan", (), {"predicate": None,
-                                     "columns": expression})
+                                     "columns": expression,
+                                     "alias": None})
         proj_executor = SequentialScanExecutor(plan)
         proj_executor.append_child(DummyExecutor([batch]))
 

@@ -18,7 +18,7 @@ jobs:
             python -m venv env37
             . env37/bin/activate
             pip install --upgrade pip
-            python setup.py install 
+            python setup.py install
 
       - run:
           name: Generate Parser Files

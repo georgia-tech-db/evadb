@@ -24,7 +24,6 @@ from eva.models.storage.batch import Batch
 from eva.parser.parser_visitor import ParserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.expression.abstract_expression import ExpressionType
-from eva.expression.function_expression import ExecutionMode
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from antlr4 import TerminalNode
@@ -273,8 +272,7 @@ class ParserVisitorTests(unittest.TestCase):
             [call(ctx.simpleId()), call(ctx.dottedId()),
              call(ctx.functionArgs())])
 
-        func_mock.assert_called_with(None, mode=ExecutionMode.EXEC,
-                                     name='name', output=udf_output)
+        func_mock.assert_called_with(None, name='name', output=udf_output)
 
         for arg in func_args:
             func_mock.return_value.append_child.assert_any_call(arg)
@@ -365,7 +363,7 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
         mock_visit.assert_has_calls([call(ctx.fileName()),
-                                     call(ctx.tableName()), 
+                                     call(ctx.tableName()),
                                      call(ctx.fileOptions()),
                                      call(ctx.uidList())])
         mock_load.assert_called_once()

@@ -48,7 +48,8 @@ class CascadeOptimizer(unittest.TestCase):
         """
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected = [{'id': i * 2, 'label': ['person']}
+        expected = [{'myvideo.id': i * 2,
+                     'dummyobjectdetector.label': ['person']}
                     for i in range(NUM_FRAMES // 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)

@@ -1,0 +1,31 @@
+format: jb-book
+root: index
+parts:
+  - caption: Overview
+    chapters:
+      - file: source/overview/index
+      - file: source/overview/installation
+
+  - caption: Tutorial
+    chapters:
+      - file: source/tutorials/tutorial
+
+  - caption: Reference
+    chapters:
+      - file: source/reference/index
+        title: SQL Reference
+        sections:
+          - file: source/reference/select
+
+      - file: source/reference/udf
+        title: Register UDFs
+
+
+
+  - caption: Developer Guides
+    chapters:
+      - file: source/contribute/contributing
+        sections:
+          - file: source/contribute/new_operator
+          - file: source/contribute/debugging
+      - file: source/contribute/packaging

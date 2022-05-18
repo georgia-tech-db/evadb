@@ -17,8 +17,7 @@ from antlr4 import TerminalNode
 
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
-from eva.expression.function_expression import FunctionExpression, \
-    ExecutionMode
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
 
@@ -40,7 +39,6 @@ class Functions(evaql_parserVisitor):
 
         udf_args = self.visit(ctx.functionArgs())
         func_expr = FunctionExpression(None, name=udf_name,
-                                       mode=ExecutionMode.EXEC,
                                        output=udf_output)
         for arg in udf_args:
             func_expr.append_child(arg)

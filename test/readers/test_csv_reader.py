@@ -17,7 +17,7 @@ import unittest
 
 from eva.readers.csv_reader import CSVReader
 
-from test.util import create_sample_csv 
+from test.util import create_sample_csv
 from test.util import file_remove
 from test.util import NUM_FRAMES, PATH_PREFIX, FRAME_SIZE
 from test.util import create_dummy_csv_batches
@@ -31,15 +31,15 @@ class CSVLoaderTest(unittest.TestCase):
 
     def tearDown(self):
         file_remove('dummy.csv')
-        
+
     def test_should_return_one_batch(self):
 
         column_list = [
-            TupleValueExpression(col_name='id', table_name='dummy'),
-            TupleValueExpression(col_name='frame_id', table_name='dummy'),
-            TupleValueExpression(col_name='video_id', table_name='dummy')
+            TupleValueExpression(col_name='id', table_alias='dummy'),
+            TupleValueExpression(col_name='frame_id', table_alias='dummy'),
+            TupleValueExpression(col_name='video_id', table_alias='dummy')
         ]
-        
+
         # call the CSVReader
         csv_loader = CSVReader(
             file_url=os.path.join(PATH_PREFIX, 'dummy.csv'),

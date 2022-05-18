@@ -31,24 +31,24 @@ class LoadDataStatement(AbstractStatement):
     """
 
     def __init__(self,
-                 table: TableRef,
+                 table_ref: TableRef,
                  path: str,
                  column_list: List[AbstractExpression] = None,
                  file_options: dict = None):
         super().__init__(StatementType.LOAD_DATA)
-        self._table = table
+        self._table_ref = table_ref
         self._path = Path(path)
         self._column_list = column_list
         self._file_options = file_options
 
     def __str__(self) -> str:
         print_str = "LOAD DATA INFILE {} INTO {}({})".format(
-            self._path.name, self._table, self._column_list)
+            self._path.name, self._table_ref, self._column_list)
         return print_str
 
     @property
-    def table(self) -> TableRef:
-        return self._table
+    def table_ref(self) -> TableRef:
+        return self._table_ref
 
     @property
     def path(self) -> Path:
@@ -58,6 +58,10 @@ class LoadDataStatement(AbstractStatement):
     def column_list(self) -> List[AbstractExpression]:
         return self._column_list
 
+    @column_list.setter
+    def column_list(self, col_list: List[AbstractExpression]):
+        self._column_list = col_list
+
     @property
     def file_options(self) -> dict:
         return self._file_options
@@ -65,14 +69,14 @@ class LoadDataStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, LoadDataStatement):
             return False
-        return (self.table == other.table
+        return (self.table_ref == other.table_ref
                 and self.path == other.path
                 and self.column_list == other.column_list
                 and self.file_options == other.file_options)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
-                     self.table,
+                     self.table_ref,
                      self.path,
                      tuple(self.column_list),
                      frozenset(self.file_options.items())))
