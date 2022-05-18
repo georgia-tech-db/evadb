@@ -2,6 +2,11 @@
 
 ## Syntax
 
+![Flow chart showing the syntax of the SELECT keyword](images/select.svg)
+
+![Flow chart showing the syntax of the FROM keyword](images/from.svg)
+
+
 ## Example Queries
 
 1. Search frames with a car
