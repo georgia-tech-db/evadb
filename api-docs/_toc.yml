@@ -15,6 +15,7 @@ parts:
       - file: source/reference/index
         title: SQL Reference
         sections:
+          - file: source/reference/load
           - file: source/reference/select
 
       - file: source/reference/udf
