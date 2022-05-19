@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.executor.executor_utils import apply_predicate, apply_project
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -39,16 +40,7 @@ class LateralJoinExecutor(AbstractExecutor):
                 # merge
                 result_batch = Batch.merge_column_wise(
                     [outer_batch, result_batch])
-                if not result_batch.empty() and self.predicate is not None:
-                    outcomes = self.predicate.evaluate(result_batch).frames
-                    result_batch = Batch(result_batch.frames
-                                         [(outcomes > 0).to_numpy()]
-                                         .reset_index(drop=True))
-                # Then do project
-                if not result_batch.empty() and self.join_project:
-                    batches = [expr.evaluate(result_batch)
-                               for expr in self.join_project]
-                    result_batch = Batch.merge_column_wise(batches)
-
+                result_batch = apply_predicate(result_batch, self.predicate)
+                result_batch = apply_project(result_batch, self.join_project)
                 if not result_batch.empty():
                     return result_batch

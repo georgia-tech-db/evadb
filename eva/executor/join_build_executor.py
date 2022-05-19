@@ -21,10 +21,8 @@ class BuildJoinExecutor(AbstractExecutor):
         # build in memory hash table and pass to the probe phase
         # Assumption the hash table fits in memory
         # Todo: Implement a partition based hash join (grace hash join)
-        cumm_batches = []
-        for batch in child_executor.exec():
-            if not batch.empty():
-                cumm_batches.append(batch)
+        cumm_batches = [batch for batch in child_executor.exec()
+                        if not batch.empty()]
         cumm_batches = Batch.concat(cumm_batches)
         hash_keys = [key.col_alias for key in self.build_keys]
         cumm_batches.frames.index = cumm_batches.frames[hash_keys].apply(

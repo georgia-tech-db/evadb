@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.executor.executor_utils import apply_predicate
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -33,10 +34,6 @@ class PredicateExecutor(AbstractExecutor):
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec():
-            if not batch.empty() and self.predicate is not None:
-                outcomes = self.predicate.evaluate(batch).frames
-                batch = Batch(
-                    batch.frames[(outcomes > 0).to_numpy()].reset_index(
-                        drop=True))
+            batch = apply_predicate(batch, self.predicate)
             if not batch.empty():
                 yield batch

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.executor.executor_utils import apply_project
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -33,9 +34,7 @@ class ProjectExecutor(AbstractExecutor):
     def exec(self) -> Iterator[Batch]:
         child_executor = self.children[0]
         for batch in child_executor.exec():
-            if not batch.empty() and self.target_list:
-                batches = [expr.evaluate(batch) for expr in self.target_list]
-                batch = Batch.merge_column_wise(batches)
+            batch = apply_project(batch, self.target_list)
 
             if not batch.empty():
                 yield batch

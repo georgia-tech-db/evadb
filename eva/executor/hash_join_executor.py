@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.executor.executor_utils import apply_predicate, apply_project
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
@@ -47,14 +48,6 @@ class HashJoinExecutor(AbstractExecutor):
                                                       how='inner')
                 join_batch.reset_index(drop=True, inplace=True)
                 join_batch = Batch(join_batch)
-                if not join_batch.empty() and self.predicate:
-                    outcomes = self.predicate.evaluate(join_batch).frames
-                    filtered_df = join_batch.frames[(outcomes > 0).to_numpy()]
-                    join_batch = Batch(filtered_df.reset_index(drop=True))
-                # Then do project
-                if not join_batch.empty() and self.join_project:
-                    batches = [expr.evaluate(join_batch)
-                               for expr in self.join_project]
-                    join_batch = Batch.merge_column_wise(batches)
-
+                join_batch = apply_predicate(join_batch, self.predicate)
+                join_batch = apply_project(join_batch, self.join_project)
                 yield join_batch

@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.seq_scan_plan import SeqScanPlan
@@ -46,16 +47,9 @@ class SequentialScanExecutor(AbstractExecutor):
                 batch.modify_column_alias(self.alias)
 
             # We do the predicate first
-            if not batch.empty() and self.predicate is not None:
-                outcomes = self.predicate.evaluate(batch).frames
-                batch = Batch(
-                    batch.frames[(outcomes > 0).to_numpy()].reset_index(
-                        drop=True))
-
+            batch = apply_predicate(batch, self.predicate)
             # Then do project
-            if not batch.empty() and self.project_expr:
-                batches = [expr.evaluate(batch) for expr in self.project_expr]
-                batch = Batch.merge_column_wise(batches)
+            batch = apply_project(batch, self.project_expr)
 
             if not batch.empty():
                 yield batch
