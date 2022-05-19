@@ -28,6 +28,6 @@ class FunctionScanExecutorTest(unittest.TestCase):
         expression.output_col_aliases = ['test.a']
         plan = type("FunctionScanPlan", (), {"func_expr": expression})
         function_scan_executor = FunctionScanExecutor(plan)
-        actual = list(function_scan_executor.exec(values))[0]
+        actual = list(function_scan_executor.exec(lateral_input=values))[0]
         expected = Batch(pd.DataFrame([2, 3, 4], columns=['test.a']))
         self.assertEqual(expected, actual)

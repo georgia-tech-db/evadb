@@ -34,7 +34,11 @@ class FunctionScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self, lateral_input: Batch, *args, **kwargs) -> Iterator[Batch]:
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
+        print(kwargs)
+        assert 'lateral_input' in kwargs, (
+            'Key lateral_input not passed to the FunctionScan')
+        lateral_input = kwargs.get('lateral_input')
         if not lateral_input.empty():
             res = self.func_expr.evaluate(lateral_input)
 
