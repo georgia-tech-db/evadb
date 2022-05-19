@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from unittest import TestCase
+import unittest
 
 from mock import patch
 from mock import MagicMock
@@ -31,28 +32,46 @@ class UdfServiceTest(TestCase):
         service = UdfIOService()
 
         actual = service.get_inputs_by_udf_id(UDF_NAME)
-        mocked.query.with_entities.assert_called_with(mocked._id)
-        mocked.query.with_entities.return_value.filter.assert_called_with(
+        mocked.query.filter.assert_called_with(
             mocked._id == UDF_ID, mocked._is_input == True)  # noqa
-        mocked.query.with_entities.return_value.filter.return_value.all \
+        mocked.query.filter.return_value.all \
             .assert_called_once()
-        expected = mocked.query.with_entities.return_value.filter. \
+        expected = mocked.query.filter. \
             return_value.all.return_value
         self.assertEqual(actual, expected)
+
+    @patch("eva.catalog.services.udf_io_service.UdfIO")
+    def test_get_inputs_by_udf_id_should_raise(self, mock):
+        service = UdfIOService()
+        mock.query.filter.side_effect = Exception('error')
+        with self.assertRaises(Exception) as cm:
+            service.get_inputs_by_udf_id(UDF_NAME)
+        self.assertEqual(
+            f'Getting inputs for UDF id {UDF_NAME} raised error',
+            str(cm.exception))
 
     @patch('eva.catalog.services.udf_io_service.UdfIO')
     def test_get_outputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOService()
 
         actual = service.get_outputs_by_udf_id(UDF_NAME)
-        mocked.query.with_entities.assert_called_with(mocked._id)
-        mocked.query.with_entities.return_value.filter.assert_called_with(
+        mocked.query.filter.assert_called_with(
             mocked._id == UDF_ID, mocked._is_input == True)  # noqa
-        mocked.query.with_entities.return_value.filter.return_value.all \
+        mocked.query.filter.return_value.all \
             .assert_called_once()
-        expected = mocked.query.with_entities.return_value.filter.\
+        expected = mocked.query.filter.\
             return_value.all.return_value
         self.assertEqual(actual, expected)
+
+    @patch("eva.catalog.services.udf_io_service.UdfIO")
+    def test_get_outputs_by_udf_id_should_raise(self, mock):
+        service = UdfIOService()
+        mock.query.filter.side_effect = Exception('error')
+        with self.assertRaises(Exception) as cm:
+            service.get_outputs_by_udf_id(UDF_NAME)
+        self.assertEqual(
+            f'Getting outputs for UDF id {UDF_NAME} raised error',
+            str(cm.exception))
 
     def test_add_udf_io_should_save_io(self):
         service = UdfIOService()
@@ -60,3 +79,7 @@ class UdfServiceTest(TestCase):
         service.add_udf_io(io_list)
         for mock in io_list:
             mock.save.assert_called_once()
+
+
+if __name__ == '__main__':
+    unittest.main()

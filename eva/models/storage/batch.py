@@ -16,7 +16,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from typing import Iterable
+from typing import Iterable, NoReturn
 
 from pandas import DataFrame
 from eva.utils.logging_manager import LoggingManager, LoggingLevel
@@ -49,9 +49,8 @@ class Batch:
 
     def __init__(self,
                  frames=pd.DataFrame(),
-                 identifier_column='id'):
+                 identifier_column=None):
         super().__init__()
-        # store the batch with columns sorted
         self.frames = frames
         self._identifier_column = identifier_column
 
@@ -143,8 +142,15 @@ class Batch:
         """
         in_place sort
         """
-        if by is None and self.identifier_column in self._frames:
-            by = [self.identifier_column]
+        if by is None:
+            if self.identifier_column in self._frames:
+                by = [self.identifier_column]
+            elif not self.empty():
+                by = self.frames.columns[0]
+            else:
+                LoggingManager().log('Sorting an empty batch',
+                                     LoggingLevel.WARNING)
+                return
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
     def sort_orderby(self, by, sort_type):
@@ -270,3 +276,27 @@ class Batch:
     def reset_index(self):
         """ Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
+
+    def modify_column_alias(self, alias: str) -> NoReturn:
+        # a, b, c -> table1.a, table1.b, table1.c
+        # t1.a -> t2.a
+        new_col_names = []
+        for col_name in self.frames.columns:
+            if '.' in col_name:
+                new_col_names.append('{}.{}'.format(
+                    alias, col_name.split('.')[1]))
+            else:
+                new_col_names.append('{}.{}'.format(alias, col_name))
+
+        self.frames.columns = new_col_names
+
+    def drop_column_alias(self) -> NoReturn:
+        # table1.a, table1.b, table1.c -> a, b, c
+        new_col_names = []
+        for col_name in self.frames.columns:
+            if '.' in col_name:
+                new_col_names.append(col_name.split('.')[1])
+            else:
+                new_col_names.append(col_name)
+
+        self.frames.columns = new_col_names

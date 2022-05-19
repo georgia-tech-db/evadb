@@ -4,20 +4,20 @@ Get Started
 =============
 
 Installation
--------
+--------------
 EVA requires Python 3.7 or later. To install EVA, we recommend using pip::
 
     pip install evadb
 
 
 Running EVA Server
--------
+---------------------
 EVA runs as a client server architecture. So you need to start the server before you can connect to it via various interfaces:::
 
     eva_server
 
 Querying EVA
--------
+--------------
 
 - Querying Via Command Line::
 

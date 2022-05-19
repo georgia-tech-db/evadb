@@ -429,17 +429,18 @@ class ParserTests(unittest.TestCase):
     def test_nested_select_statement(self):
         parser = Parser()
         sub_query = """SELECT CLASS FROM TAIPAI WHERE CLASS = 'VAN'"""
-        nested_query = """SELECT ID FROM ({});""".format(sub_query)
+        nested_query = """SELECT ID FROM ({}) AS T;""".format(sub_query)
         parsed_sub_query = parser.parse(sub_query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
         self.assertEqual(actual_stmt.target_list[0].col_name, 'ID')
-        self.assertEqual(actual_stmt.from_table, TableRef(parsed_sub_query))
+        self.assertEqual(actual_stmt.from_table,
+                         TableRef(parsed_sub_query, alias='T'))
 
         sub_query = """SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
                               WHERE Yolo(frame).label = 'vehicle'"""
         nested_query = """SELECT Licence_plate(bbox) FROM
-                            ({})
+                            ({}) AS T
                           WHERE Is_suspicious(bbox) = 1 AND
                                 Licence_plate(bbox) = '12345';
                       """.format(sub_query)
@@ -450,7 +451,8 @@ class ParserTests(unittest.TestCase):
         query_stmt = parser.parse(query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         sub_query_stmt = parser.parse(sub_query)[0]
-        self.assertEqual(actual_stmt.from_table, TableRef(sub_query_stmt))
+        self.assertEqual(actual_stmt.from_table,
+                         TableRef(sub_query_stmt, alias='T'))
         self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
         self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
 
@@ -488,7 +490,4 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition('labels', None, None, None)
         ], False, select_stmt[0])
         self.assertEqual(mat_view_stmt[0], expected_stmt)
-
-
-if __name__ == '__main__':
-    unittest.main()
+        self.assertEqual(hash(mat_view_stmt[0]), hash(expected_stmt))

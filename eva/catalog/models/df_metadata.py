@@ -77,3 +77,11 @@ class DataFrameMetadata(BaseModel):
             self.identifier_column == other.identifier_column and \
             self.name == other.name and \
             self.is_video == other.is_video
+
+    def __hash__(self) -> int:
+        return hash((self.id,
+                     self.file_url,
+                     self.schema,
+                     self.identifier_column,
+                     self.name,
+                     self.is_video))

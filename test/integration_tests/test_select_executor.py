@@ -57,9 +57,10 @@ class SelectExecutorTest(unittest.TestCase):
     def test_should_load_and_sort_in_table(self):
         select_query = "SELECT data, id FROM MyVideo ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected_rows = [{'id': i,
-                          'data': np.array(np.ones((2, 2, 3)) *
-                                           float(i + 1) * 25, dtype=np.uint8)
+        expected_rows = [{'myvideo.id': i,
+                          'myvideo.data': np.array(np.ones((2, 2, 3)) *
+                                                   float(i + 1) * 25,
+                                                   dtype=np.uint8)
                           } for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
@@ -73,7 +74,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_rows = [{"id": i} for i in range(NUM_FRAMES)]
+        expected_rows = [{"myvideo.id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -106,7 +107,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT data FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected_rows = [{"data": np.array(
+        expected_rows = [{"myvideo.data": np.array(
             np.ones((2, 2, 3)) * float(5 + 1) * 25, dtype=np.uint8)}]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
@@ -129,11 +130,21 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_nested_select_video_in_table(self):
         nested_select_query = """SELECT id, data FROM
-            (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5)
+            (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5) AS T
             WHERE id >= 3;"""
         actual_batch = execute_query_fetch_all(nested_select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
+        expected_batch.modify_column_alias('T')
+        self.assertEqual(actual_batch, expected_batch)
+
+        nested_select_query = """SELECT T.id, T.data FROM
+            (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5) AS T
+            WHERE id >= 3;"""
+        actual_batch = execute_query_fetch_all(nested_select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
+        expected_batch.modify_column_alias('T')
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_union_video_in_table(self):
@@ -178,6 +189,10 @@ class SelectExecutorTest(unittest.TestCase):
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_should_fail_to_bind(self):
+        query = 'SELECT id, data FROM Random WHERE id < 2;'
+        with self.assertRaises(RuntimeError) as cm:
+            execute_query_fetch_all(query)
+            print(cm.exception)
+        self.assertTrue(
+            'Binder failed: Random does not exists.' in str(cm.exception))

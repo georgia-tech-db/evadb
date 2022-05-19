@@ -42,7 +42,7 @@ class OrderByExecutor(AbstractExecutor):
     def extract_column_names(self):
         """ extracts the string name of the column """
         # self._columns: List[TupleValueExpression]
-        return [tve.col_name for tve in self._columns]
+        return [tve.col_alias for tve in self._columns]
 
     def extract_sort_types(self):
         """ extracts the sort type for the column """
