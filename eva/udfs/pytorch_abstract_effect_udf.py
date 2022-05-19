@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ from PIL import Image
 from torch import nn, Tensor
 from torchvision.transforms import Compose, transforms
 
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_effect_udfs import AbstractEffectUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 from eva.configuration.configuration_manager import ConfigurationManager
 
@@ -47,13 +47,14 @@ class PytorchAbstractEffectUDF(AbstractEffectUDF, nn.Module, GPUCompatible, ABC)
 
     def transform(self, images: np.ndarray):
         # reverse the channels from opencv
+        #  and add a fourth batch dimension
         return self.transforms(Image.fromarray(images[:, :, ::-1]))\
             .unsqueeze(0)
 
     def forward(self, frames: List[np.ndarray]):
         tens_batch = torch.cat([self.transform(x) for x in frames])\
             .to(self.get_device())
-        return self.classify(tens_batch)
+        return self.apply(tens_batch)
 
     @abstractmethod
     def _get_frames(self, frames: Tensor) -> Tensor:
@@ -69,7 +70,7 @@ class PytorchAbstractEffectUDF(AbstractEffectUDF, nn.Module, GPUCompatible, ABC)
     def apply(self, frames: Tensor) -> List[Tensor]:
         """
         Given the gpu_batch_size, we split the input tensor inpto chunks.
-        And call the _get_predictions and merge the results.
+        And call the _get_frames and merge the results.
         Arguments:
             frames (Tensor): tensor on which transformation is performed
         Returns:
@@ -80,11 +81,11 @@ class PytorchAbstractEffectUDF(AbstractEffectUDF, nn.Module, GPUCompatible, ABC)
 
         if gpu_batch_size:
             chunks = torch.split(frames, gpu_batch_size)
-            outcome = []
+            transformed = []
             for tensor in chunks:
-                outcome = outcome.append(self._get_frames(tensor))
+                transformed = transformed.append(self._get_frames(tensor))
 
-            return outcome
+            return transformed
         else:
             return self._get_frames(frames)
 

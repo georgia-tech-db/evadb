@@ -44,8 +44,7 @@ class BoxBlur(PytorchAbstractFilterUDF):
     @property
     def input_format(self) -> FrameInfo:
         # TODO: figure this out
-        return FrameInfo(-1, -1, 3, ColorSpace.RGC)
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     def _get_frames(self, frames: Tensor) -> Tensor:
         pass
-

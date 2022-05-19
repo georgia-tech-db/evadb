@@ -27,7 +27,7 @@ class GaussianBlur(PytorchAbstractEffectUDF):
 
     @property
     def name(self) -> str:
-        return "boxblur"
+        return "gaussianblur"
 
     def __init__(self,
                  kernel_size=3,
