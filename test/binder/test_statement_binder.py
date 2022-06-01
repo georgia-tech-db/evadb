@@ -238,6 +238,24 @@ class StatementBinderTests(unittest.TestCase):
                 binder = StatementBinder(StatementBinderContext())
                 binder._bind_load_data_statement(load_statement)
 
+    def test_bind_unknown_object(self):
+        class UnknownType:
+            pass
+        with self.assertRaises(NotImplementedError):
+            binder = StatementBinder(StatementBinderContext())
+            binder.bind(UnknownType())
 
-if __name__ == '__main__':
-    unittest.main()
+    @patch('eva.binder.statement_binder.sys')
+    def test_bind_with_python37(self, mock_sys):
+        mock_sys.version_info = (3, 8)
+        with patch.object(StatementBinderContext, 'get_binded_column') as mock:
+            mock.return_value = ['table_alias', 'col_obj']
+            binder = StatementBinder(StatementBinderContext())
+            tve = MagicMock()
+            tve.col_name = 'col_name'
+            binder._bind_tuple_expr(tve)
+            col_alias = '{}.{}'.format('table_alias', 'col_name')
+            mock.assert_called_with(tve.col_name, tve.table_alias)
+            self.assertEqual(tve.col_object, 'col_obj')
+            self.assertEqual(tve.col_alias, col_alias)
+

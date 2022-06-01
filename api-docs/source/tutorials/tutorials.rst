@@ -13,7 +13,7 @@ Configure GPU (Recommended)
         ubuntu-drivers devices
         nvidia-smi
 
-    A valid output from the commands indicates that your GPU is configured and ready to use. If not, you need to first install necessary drivers and configure your GPU. `this <https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31>`_ page provides a step-by-step guide to install and configure the drivers for ubuntu. 
+    A valid output from the commands indicates that your GPU is configured and ready to use. If not, you need to first install necessary drivers and configure your GPU. `this <https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31>`_ page provides a step-by-step guide to install and configure the drivers for ubuntu.
 
     Some pointers:
         * When installing NVIDIA drivers, check the correct driver version for your GPU to avoid compatibiility issues.
@@ -27,7 +27,7 @@ Configure GPU (Recommended)
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print(device)
 
-    Output of `cuda:0` indicates the presence of a GPU. 
+    Output of `cuda:0` indicates the presence of a GPU.
     (Note: 0 indicates the index of the GPU in system. Incase you have multiple GPUs, the index needs to be accordingly changed)
 
 3. Now configure the executor section in eva.yml as follows:
@@ -35,7 +35,7 @@ Configure GPU (Recommended)
     .. code-block:: yaml
 
         executor:
-            
+
             gpus: {'127.0.1.1': [0]}
 
     `127.0.1.1` is the loopback address on which the eva server is started. 0 refers to the GPU index to be used.
@@ -53,8 +53,8 @@ Quickstart Tutorial
 
 2. **Start client**:
 
-    * Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to `tutorials/object_detection.ipynb`. 
-    
+    * Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to `tutorials/object_detection.ipynb`.
+
     * You might have to install ipywidgets to visualize the input video and output. Follow steps `here <https://ipywidgets.readthedocs.io/en/latest/user_install.html>`_ as per your jupyter environment.
 
 3. **Notebook walkthrough**:
@@ -120,13 +120,6 @@ Quickstart Tutorial
             cursor.execute("""SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo""")
             response = cursor.fetch_all()
 
-        UDFs are typically used like sql functions along with the 'SELECT' command. The 'Unnest' function is used to unnest the output of the UDF.    
+        UDFs are typically used like sql functions along with the 'SELECT' command. The 'Unnest' function is used to unnest the output of the UDF.
 
-    Shown above is a quickstart tutorial of how you can use EVA for your video analysis tasks. 
-    
-
-
-
-
-
-
+    Shown above is a quickstart tutorial of how you can use EVA for your video analysis tasks.
