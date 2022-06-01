@@ -41,7 +41,7 @@ class StatementBinderTests(unittest.TestCase):
         with patch.object(StatementBinderContext, 'add_table_alias') as mock:
             binder = StatementBinder(StatementBinderContext())
             tableref = MagicMock()
-            tableref.is_select.return_value = False
+            tableref.is_table_atom.return_value = True
             binder._bind_tableref(tableref)
             mock.assert_called_with(tableref.alias, tableref.table.table_name)
             mock_bind_tabe_info.assert_called_once_with(tableref.table)
@@ -51,21 +51,55 @@ class StatementBinderTests(unittest.TestCase):
                               'add_derived_table_alias') as mock_context:
                 binder = StatementBinder(StatementBinderContext())
                 tableref = MagicMock()
+                tableref.is_table_atom.return_value = False
                 tableref.is_select.return_value = True
                 binder._bind_tableref(tableref)
                 mock_context.assert_called_with(
                     tableref.alias, tableref.select_statement.target_list)
                 mock_binder.assert_called_with(tableref.select_statement)
 
-    @patch('eva.binder.statement_binder.StatementBinderContext')
-    def test_bind_tableref_starts_new_context(self, mock_ctx):
+    def test_bind_tableref_with_func_expr(self):
         with patch.object(StatementBinder, 'bind') as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_select.return_value = False
+            tableref.is_join.return_value = False
+            binder._bind_tableref(tableref)
+            mock_binder.assert_called_with(tableref.func_expr)
+
+    def test_bind_tableref_with_join(self):
+        with patch.object(StatementBinder, 'bind') as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_select.return_value = False
+            tableref.is_join.return_value = True
+            binder._bind_tableref(tableref)
+            mock_binder.assert_any_call(tableref.join_node.left)
+            mock_binder.assert_any_call(tableref.join_node.right)
+
+    def test_bind_tableref_should_raise(self):
+        with patch.object(StatementBinder, 'bind'):
+            with self.assertRaises(ValueError):
+                binder = StatementBinder(StatementBinderContext())
+                tableref = MagicMock()
+                tableref.is_select.return_value = False
+                tableref.is_func_expr.return_value = False
+                tableref.is_join.return_value = False
+                tableref.is_table_atom.return_value = False
+                binder._bind_tableref(tableref)
+
+    @patch('eva.binder.statement_binder.StatementBinderContext')
+    def test_bind_tableref_starts_new_context(self, mock_ctx):
+        with patch.object(StatementBinder, 'bind'):
+            binder = StatementBinder(StatementBinderContext())
+            tableref = MagicMock()
+            tableref.is_table_atom.return_value = False
+            tableref.is_join.return_value = False
             tableref.is_select.return_value = True
             binder._bind_tableref(tableref)
             self.assertEqual(mock_ctx.call_count, 1)
-            mock_binder.assert_called_with(tableref.select_statement)
 
     def test_bind_create_mat_statement(self):
         with patch.object(StatementBinder, 'bind') as mock_binder:
@@ -224,5 +258,4 @@ class StatementBinderTests(unittest.TestCase):
             mock.assert_called_with(tve.col_name, tve.table_alias)
             self.assertEqual(tve.col_object, 'col_obj')
             self.assertEqual(tve.col_alias, col_alias)
-
 

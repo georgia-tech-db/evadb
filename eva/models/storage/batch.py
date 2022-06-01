@@ -153,7 +153,7 @@ class Batch:
                 return
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
-    def sort_orderby(self, by, sort_type):
+    def sort_orderby(self, by, sort_type=None):
         """
         in_place sort for orderby
 

@@ -162,7 +162,7 @@ class OptimizeExpression(OptimizerTask):
                          OptimizerTaskType.OPTIMIZE_EXPRESSION)
 
     def execute(self):
-        all_rules = RulesManager().rewrite_rules
+        all_rules = RulesManager().logical_rules
         # if exploring, we don't need to consider implementation rules
         if not self.explore:
             all_rules.extend(RulesManager().implementation_rules)
@@ -277,6 +277,8 @@ class OptimizeInputs(OptimizerTask):
                 )
                 return
 
+        cost += self.optimizer_context.cost_model.calculate_cost(
+            self.root_expr)
         grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
 
 
