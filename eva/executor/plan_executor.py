@@ -16,6 +16,8 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.limit_executor import LimitExecutor
+from eva.executor.predicate_executor import PredicateExecutor
+from eva.executor.project_executor import ProjectExecutor
 from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.models.storage.batch import Batch
@@ -32,6 +34,10 @@ from eva.executor.upload_executor import UploadExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.orderby_executor import OrderByExecutor
+from eva.executor.hash_join_executor import HashJoinExecutor
+from eva.executor.lateral_join_executor import LateralJoinExecutor
+from eva.executor.join_build_executor import BuildJoinExecutor
+from eva.executor.function_scan_executor import FunctionScanExecutor
 
 
 class PlanExecutor:
@@ -87,8 +93,20 @@ class PlanExecutor:
             executor_node = LimitExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SAMPLE:
             executor_node = SampleExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.LATERAL_JOIN:
+            executor_node = LateralJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.HASH_JOIN:
+            executor_node = HashJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.HASH_BUILD:
+            executor_node = BuildJoinExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.FUNCTION_SCAN:
+            executor_node = FunctionScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.PROJECT:
+            executor_node = ProjectExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
+            executor_node = PredicateExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))

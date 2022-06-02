@@ -1,14 +1,33 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import unittest
 
 from mock import MagicMock
 
 from eva.optimizer.operators import (LogicalGet, LogicalProject, LogicalFilter,
-                                     LogicalQueryDerivedGet,
-                                     LogicalSample)
+                                     LogicalQueryDerivedGet, LogicalSample,
+                                     LogicalJoin)
 from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        EmbedFilterIntoDerivedGet,
                                        EmbedProjectIntoDerivedGet,
                                        LogicalCreateMaterializedViewToPhysical,
+                                       LogicalFilterToPhysical,
+                                       LogicalInnerJoinCommutativity,
+                                       LogicalLateralJoinToPhysical,
+                                       LogicalProjectToPhysical,
                                        PushdownFilterThroughSample,
                                        PushdownProjectThroughSample,
                                        LogicalCreateToPhysical,
@@ -21,7 +40,9 @@ from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        LogicalDerivedGetToPhysical,
                                        LogicalUnionToPhysical,
                                        LogicalOrderByToPhysical,
-                                       LogicalLimitToPhysical)
+                                       LogicalLimitToPhysical,
+                                       LogicalFunctionScanToPhysical,
+                                       LogicalJoinToPhysicalHashJoin)
 from eva.optimizer.rules.rules import Promise, RulesManager
 
 
@@ -68,19 +89,26 @@ class TestRules(unittest.TestCase):
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
-        supported_rewrite_rules = [
-            EmbedFilterIntoGet(),
-            EmbedFilterIntoDerivedGet(),
-            PushdownFilterThroughSample(),
-            EmbedProjectIntoGet(),
-            EmbedProjectIntoDerivedGet(),
-            PushdownProjectThroughSample()]
+        supported_rewrite_rules = [EmbedFilterIntoGet(),
+                                   EmbedFilterIntoDerivedGet(),
+                                   PushdownFilterThroughSample(),
+                                   EmbedProjectIntoGet(),
+                                   EmbedProjectIntoDerivedGet(),
+                                   PushdownProjectThroughSample()]
         self.assertEqual(len(supported_rewrite_rules),
                          len(RulesManager().rewrite_rules))
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
             self.assertTrue(any(isinstance(rule, type(x))
                                 for x in RulesManager().rewrite_rules))
+
+        supported_logical_rules = [LogicalInnerJoinCommutativity()]
+        self.assertEqual(len(supported_logical_rules),
+                         len(RulesManager().logical_rules))
+
+        for rule in supported_logical_rules:
+            self.assertTrue(any(isinstance(rule, type(x))
+                                for x in RulesManager().logical_rules))
 
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
@@ -94,7 +122,12 @@ class TestRules(unittest.TestCase):
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
-            LogicalCreateMaterializedViewToPhysical()]
+            LogicalLateralJoinToPhysical(),
+            LogicalFunctionScanToPhysical(),
+            LogicalJoinToPhysicalHashJoin(),
+            LogicalCreateMaterializedViewToPhysical(),
+            LogicalFilterToPhysical(),
+            LogicalProjectToPhysical()]
         self.assertEqual(len(supported_implementation_rules),
                          len(RulesManager().implementation_rules))
 
@@ -141,7 +174,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(rewrite_opr.predicate, predicate)
 
     # EmbedProjectIntoDerivedGet
-
     def test_simple_project_into_derived_get(self):
         rule = EmbedProjectIntoDerivedGet()
         target_list = MagicMock()
@@ -181,3 +213,17 @@ class TestRules(unittest.TestCase):
         self.assertFalse(rewrite_opr.children[0] is logi_project)
         self.assertTrue(logi_get is rewrite_opr.children[0].children[0])
         self.assertEqual(rewrite_opr.children[0].target_list, target_list)
+
+    # PushdownProjectThroughJoin
+    def PushdownProjectThroughJoin(self):
+        rule = EmbedProjectIntoGet()
+        expr1 = MagicMock()
+        expr2 = MagicMock()
+        expr3 = MagicMock()
+
+        logi_join = LogicalJoin(MagicMock())
+        logi_project = LogicalProject([expr1, expr2, expr3], [logi_join])
+
+        rewrite_opr = rule.apply(logi_project, MagicMock())
+        self.assertEqual(rewrite_opr, logi_join)
+        self.assertEqual(rewrite_opr.target_list, [expr1, expr2, expr3])

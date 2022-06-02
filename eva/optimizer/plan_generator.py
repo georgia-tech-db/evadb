@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.optimizer_tasks import (
@@ -47,7 +48,8 @@ class PlanGenerator:
         return physical_plan
 
     def optimize(self, logical_plan: Operator):
-        optimizer_context = OptimizerContext()
+        cost_model = CostModel()
+        optimizer_context = OptimizerContext(cost_model)
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(
             opr=logical_plan

@@ -42,7 +42,7 @@ class FunctionExpression(AbstractExpression):
     `Select OD.labels FROM Video JOIN LATERAL ObjDetector AS OD;`
     """
 
-    def __init__(self, func: Callable, name=None,
+    def __init__(self, func: Callable, name: str,
                  output=None, alias=None, **kwargs):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)

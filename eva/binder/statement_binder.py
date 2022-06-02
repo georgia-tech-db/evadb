@@ -12,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from functools import singledispatchmethod
+import sys
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.binder.binder_utils import bind_table_info, create_video_metadata
 from eva.catalog.catalog_manager import CatalogManager
@@ -24,12 +23,26 @@ from eva.parser.create_mat_view_statement import \
     CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
-
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
+
+if sys.version_info >= (3, 8):
+    from functools import singledispatchmethod
+else:
+    # https://stackoverflow.com/questions/24601722/how-can-i-use-functools-singledispatch-with-instance-methods
+    from functools import singledispatch, update_wrapper
+
+    def singledispatchmethod(func):
+        dispatcher = singledispatch(func)
+
+        def wrapper(*args, **kw):
+            return dispatcher.dispatch(args[1].__class__)(*args, **kw)
+        wrapper.register = dispatcher.register
+        update_wrapper(wrapper, func)
+        return wrapper
 
 
 class StatementBinder:
@@ -111,18 +124,27 @@ class StatementBinder:
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):
-        if node.is_select():
+        if node.is_table_atom():
+            # Table
+            self._binder_context.add_table_alias(
+                node.alias, node.table.table_name)
+            bind_table_info(node.table)
+        elif node.is_select():
             current_context = self._binder_context
             self._binder_context = StatementBinderContext()
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
                 node.alias, node.select_statement.target_list)
+        elif node.is_join():
+            self.bind(node.join_node.left)
+            self.bind(node.join_node.right)
+            if node.join_node.predicate:
+                self.bind(node.join_node.predicate)
+        elif node.is_func_expr():
+            self.bind(node.func_expr)
         else:
-            # Table
-            self._binder_context.add_table_alias(
-                node.alias, node.table.table_name)
-            bind_table_info(node.table)
+            raise ValueError(f'Unsupported node {type(node)}')
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):

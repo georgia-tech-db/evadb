@@ -46,5 +46,5 @@ class SeqScanPlan(AbstractScan):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
-                     tuple(self.columns),
+                     tuple(self.columns or []),
                      self.alias))

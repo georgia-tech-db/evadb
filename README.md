@@ -82,18 +82,18 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 ## Example Queries
 1. Search frames with a car
 ```mysql
-SELECT id, frame FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(frame).labels;
+SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
 ![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
 
 2. Search frames with a pedestrian and a car
 ```mysql
-SELECT id, frame FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(frame).labels;
+SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
 ```
 
 2. Search frames containing greater than 3 cars
 ```mysql
-SELECT id, frame FROM DETRAC WHERE array_count(FastRCNNObjectDetector(frame).labels, 'car') > 3;
+SELECT id, data FROM DETRAC WHERE array_count(FastRCNNObjectDetector(data).labels, 'car') > 3;
 ```
 
 ## Documentation

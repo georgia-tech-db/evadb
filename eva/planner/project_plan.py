@@ -12,19 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-
-from mock import MagicMock
-from eva.optimizer.cost_model import CostModel
-
-from eva.optimizer.optimizer_context import OptimizerContext
+from typing import List
+from eva.expression.abstract_expression import AbstractExpression
+from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
-class TestOptimizerContext(unittest.TestCase):
-    def test_add_root(self):
-        fake_opr = MagicMock()
-        fake_opr.children = []
+class ProjectPlan(AbstractPlan):
+    """
+    Arguments:
+        target_list List[(AbstractExpression)]: projection list
+    """
 
-        opt_ctxt = OptimizerContext(CostModel())
-        opt_ctxt.add_opr_to_group(fake_opr)
-        self.assertEqual(len(opt_ctxt.memo.group_exprs), 1)
+    def __init__(self, target_list: List[AbstractExpression]):
+        self.target_list = target_list
+        super().__init__(PlanOprType.PROJECT)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     tuple(self.target_list)))

@@ -52,6 +52,7 @@ INSERT:                              'INSERT';
 IS:                                  'IS';
 JOIN:                                'JOIN';
 KEY:                                 'KEY';
+LATERAL:                             'LATERAL';
 LIKE:                                'LIKE';
 LIMIT:                               'LIMIT';
 LOAD:                                'LOAD';

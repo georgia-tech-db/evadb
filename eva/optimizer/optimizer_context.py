@@ -15,6 +15,7 @@
 import copy
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.memo import Memo
+from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Dummy, Operator
 from eva.optimizer.group_expression import GroupExpression
 from eva.constants import UNDEFINED_GROUP_ID
@@ -29,9 +30,14 @@ class OptimizerContext:
                 stack to keep track outstanding tasks
     """
 
-    def __init__(self):
+    def __init__(self, cost_model: CostModel):
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
+        self._cost_model = cost_model
+
+    @property
+    def cost_model(self):
+        return self._cost_model
 
     @property
     def task_stack(self):
@@ -82,7 +88,7 @@ class OptimizerContext:
         """
         self.memo.erase_group(group_id)
         new_expr = self._xform_opr_to_group_expr(opr)
-        self.memo.add_group_expr(new_expr, group_id)
+        new_expr = self.memo.add_group_expr(new_expr, group_id)
         return new_expr
 
     def add_opr_to_group(self,
@@ -92,5 +98,5 @@ class OptimizerContext:
         Convert opertator to group_expression and add to the group
         """
         grp_expr = self._xform_opr_to_group_expr(opr)
-        self.memo.add_group_expr(grp_expr, group_id)
+        grp_expr = self.memo.add_group_expr(grp_expr, group_id)
         return grp_expr

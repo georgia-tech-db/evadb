@@ -229,10 +229,14 @@ orderByClause
 orderByExpression
     : expression order=(ASC | DESC)?
     ;
-
+// Forcing EXPLICIT JOIN KEYWORD
 tableSources
-    : tableSource (',' tableSource)*
+    : tableSource
     ;
+
+//tableSources
+//    : tableSource (',' tableSource)*
+//    ;
 
 tableSource
     : tableSourceItemWithSample joinPart*                #tableSourceBase
@@ -243,11 +247,16 @@ tableSourceItemWithSample
     ;
 
 tableSourceItem
-    : tableName                              #atomTableItem
-    | (
+    : tableName                                         #atomTableItem
+    | subqueryTableSourceItem                           #subqueryTableItem
+    | LATERAL functionCall                              #lateralFunctionCallItem
+    ;
+
+subqueryTableSourceItem
+    : (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )                                                         #subqueryTableItem
+      )
     ;
 
 sampleClause

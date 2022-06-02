@@ -17,17 +17,23 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, auto, IntEnum
 from typing import TYPE_CHECKING
+from eva.optimizer.optimizer_utils import extract_equi_join_keys
+from eva.planner.hash_join_build_plan import HashJoinBuildPlan
+from eva.planner.predicate_plan import PredicatePlan
+from eva.planner.project_plan import ProjectPlan
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
+from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.operators import OperatorType, Operator
+from eva.optimizer.operators import Dummy, OperatorType, Operator
 from eva.optimizer.operators import (
     LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample, LogicalCreateMaterializedView)
+    LogicalSample, LogicalJoin, LogicalFunctionScan,
+    LogicalCreateMaterializedView)
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -40,6 +46,9 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.sample_plan import SamplePlan
+from eva.planner.lateral_join_plan import LateralJoinPlan
+from eva.planner.hash_join_probe_plan import HashJoinProbePlan
+from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -57,8 +66,11 @@ class RuleType(Flag):
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
-
     REWRITE_DELIMETER = auto()
+
+    # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
+    LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
+    TRANSFORMATION_DELIMETER = auto()
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_UNION_TO_PHYSICAL = auto()
@@ -73,6 +85,11 @@ class RuleType(Flag):
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
+    LOGICAL_FILTER_TO_PHYSICAL = auto()
+    LOGICAL_PROJECT_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     NUM_RULES = auto()
@@ -97,7 +114,15 @@ class Promise(IntEnum):
     LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
     LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
+    LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
+    LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
+    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
+    LOGICAL_FILTER_TO_PHYSICAL = auto()
+    LOGICAL_PROJECT_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
+
+    # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
+    LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
 
     # REWRITE RULES
     EMBED_FILTER_INTO_GET = auto()
@@ -320,6 +345,38 @@ class PushdownProjectThroughSample(Rule):
 
 
 # REWRITE RULES END
+##############################################
+
+##############################################
+# LOGICAL RULES START
+
+
+class LogicalInnerJoinCommutativity(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_INNER_JOIN_COMMUTATIVITY, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_INNER_JOIN_COMMUTATIVITY
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        # has to be an inner join
+        return before.join_type == JoinType.INNER_JOIN
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        #     LogicalJoin(Inner)            LogicalJoin(Inner)
+        #     /           \        ->       /               \
+        #    A             B               B                A
+
+        new_join = LogicalJoin(before.join_type, before.join_predicate)
+        new_join.append_child(before.rhs())
+        new_join.append_child(before.lhs())
+        return new_join
+
+
+# LOGICAL RULES END
 ##############################################
 
 
@@ -556,6 +613,85 @@ class LogicalLimitToPhysical(Rule):
         return after
 
 
+class LogicalFunctionScanToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFUNCTIONSCAN)
+        super().__init__(RuleType.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
+        after = FunctionScanPlan(before.func_expr)
+        return after
+
+
+class LogicalLateralJoinToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
+        super().__init__(RuleType.LOGICAL_LATERAL_JOIN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        assert before.join_type == JoinType.LATERAL_JOIN
+        return True
+
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        lateral_join_plan = LateralJoinPlan(join_node.join_predicate)
+        lateral_join_plan.join_project = join_node.join_project
+        lateral_join_plan.append_child(join_node.lhs())
+        lateral_join_plan.append_child(join_node.rhs())
+        return lateral_join_plan
+
+
+class LogicalJoinToPhysicalHashJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return before.join_type == JoinType.INNER_JOIN
+
+    def apply(self, join_node: LogicalJoin, context: OptimizerContext):
+        #          HashJoinPlan                       HashJoinProbePlan
+        #          /           \     ->                  /               \
+        #         A             B        HashJoinBuildPlan               B
+        #                                              /
+        #                                            A
+
+        a: Dummy = join_node.lhs()
+        b: Dummy = join_node.rhs()
+        a_table_aliases = context.memo.get_group_by_id(a.group_id).aliases
+        b_table_aliases = context.memo.get_group_by_id(b.group_id).aliases
+        join_predicates = join_node.join_predicate
+        a_join_keys, b_join_keys = extract_equi_join_keys(join_predicates,
+                                                          a_table_aliases,
+                                                          b_table_aliases)
+
+        build_plan = HashJoinBuildPlan(join_node.join_type,
+                                       a_join_keys)
+        build_plan.append_child(a)
+        probe_side = HashJoinProbePlan(join_node.join_type,
+                                       b_join_keys,
+                                       join_predicates,
+                                       join_node.join_project)
+        probe_side.append_child(build_plan)
+        probe_side.append_child(b)
+        return probe_side
+
+
 class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
@@ -578,6 +714,46 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
             after.append_child(child)
         return after
 
+
+class LogicalFilterToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_FILTER_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FILTER_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        after = PredicatePlan(before.predicate)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
+class LogicalProjectToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALPROJECT)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_PROJECT_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_PROJECT_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalProject, context: OptimizerContext):
+        after = ProjectPlan(before.target_list)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -593,6 +769,9 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
+        self._logical_rules = [
+            LogicalInnerJoinCommutativity()
+        ]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
@@ -615,9 +794,15 @@ class RulesManager:
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
-            LogicalCreateMaterializedViewToPhysical()
+            LogicalLateralJoinToPhysical(),
+            LogicalJoinToPhysicalHashJoin(),
+            LogicalFunctionScanToPhysical(),
+            LogicalCreateMaterializedViewToPhysical(),
+            LogicalFilterToPhysical(),
+            LogicalProjectToPhysical()
         ]
-        self._all_rules = self._rewrite_rules + self._implementation_rules
+        self._all_rules = self._rewrite_rules + \
+            self._logical_rules + self._implementation_rules
 
     @property
     def rewrite_rules(self):
@@ -626,6 +811,10 @@ class RulesManager:
     @property
     def implementation_rules(self):
         return self._implementation_rules
+
+    @property
+    def logical_rules(self):
+        return self._logical_rules
 
     @property
     def all_rules(self):
