@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum, auto
+from enum import unique, Enum, auto
 
 
 @unique
-class PlanOprType(IntEnum):
+class PlanOprType(Enum):
     SEQUENTIAL_SCAN = auto()
     STORAGE_PLAN = auto()
     PP_FILTER = auto()
@@ -29,5 +29,11 @@ class PlanOprType(IntEnum):
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
+    FUNCTION_SCAN = auto()
+    HASH_JOIN = auto()
+    LATERAL_JOIN = auto()
+    HASH_BUILD = auto()
     CREATE_MATERIALIZED_VIEW = auto()
+    PREDICATE_FILTER = auto()
+    PROJECT = auto()
     # add other types

@@ -1,6 +1,22 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import unittest
 
 from mock import MagicMock
+from eva.optimizer.cost_model import CostModel
 
 from eva.optimizer.optimizer_tasks import (
     TopDownRewrite, BottomUpRewrite, OptimizeGroup)
@@ -19,7 +35,7 @@ class TestOptimizerTask(unittest.TestCase):
             task.execute()
 
     def top_down_rewrite(self, opr):
-        opt_cxt = OptimizerContext()
+        opt_cxt = OptimizerContext(CostModel())
         grp_expr = opt_cxt.add_opr_to_group(
             opr
         )
@@ -55,18 +71,48 @@ class TestOptimizerTask(unittest.TestCase):
         self.assertEqual(grp_expr.opr.predicate, predicate)
         self.assertEqual(grp_expr.opr.children, [])
 
+    def test_nested_top_down_rewrite(self):
+        child_predicate = MagicMock()
+        root_predicate = MagicMock()
+
+        child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
+        child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
+        child_project_opr = LogicalProject([MagicMock()], [child_filter_opr])
+        root_derived_get_opr = LogicalQueryDerivedGet(
+            MagicMock(), children=[child_project_opr])
+        root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
+        root_project_opr = LogicalProject([MagicMock()], [root_filter_opr])
+
+        opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
+
+        grp_expr = opt_cxt.memo.groups[root_grp_id].logical_exprs[0]
+
+        self.assertEqual(type(grp_expr.opr), LogicalProject)
+        self.assertEqual(len(grp_expr.children), 1)
+
+        child_grp_id = grp_expr.children[0]
+        child_expr = opt_cxt.memo.groups[child_grp_id].logical_exprs[0]
+        self.assertEqual(type(child_expr.opr), LogicalQueryDerivedGet)
+        self.assertEqual(child_expr.opr.predicate, root_predicate)
+        self.assertEqual(len(child_expr.children), 1)
+
+        child_grp_id = child_expr.children[0]
+        child_expr = opt_cxt.memo.groups[child_grp_id].logical_exprs[0]
+        self.assertEqual(type(child_expr.opr), LogicalGet)
+        self.assertEqual(child_expr.opr.predicate, child_predicate)
+
     def test_nested_bottom_up_rewrite(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
 
         child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
-        child_project_opr = LogicalProject(MagicMock(), [child_filter_opr])
+        child_project_opr = LogicalProject([MagicMock()], [child_filter_opr])
         root_derived_get_opr = LogicalQueryDerivedGet(
             MagicMock(), children=[child_project_opr])
         root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
-        root_project_opr = LogicalProject(
-            MagicMock(), children=[root_filter_opr])
+        root_project_opr = LogicalProject([MagicMock()],
+                                          children=[root_filter_opr])
 
         opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
         opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
@@ -105,13 +151,13 @@ class TestOptimizerTask(unittest.TestCase):
         child_filter_opr = LogicalFilter(
             child_predicate, children=[child_get_opr])
         child_project_opr = LogicalProject(
-            MagicMock(), children=[child_filter_opr])
+            [MagicMock()], children=[child_filter_opr])
         root_derived_get_opr = LogicalQueryDerivedGet(
             MagicMock(), children=[child_project_opr])
         root_filter_opr = LogicalFilter(
             root_predicate, children=[root_derived_get_opr])
         root_project_opr = LogicalProject(
-            MagicMock(), children=[root_filter_opr])
+            [MagicMock()], children=[root_filter_opr])
 
         opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
         opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)

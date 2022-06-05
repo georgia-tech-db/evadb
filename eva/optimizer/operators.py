@@ -14,14 +14,16 @@
 # limitations under the License.
 from enum import IntEnum, auto
 from typing import List
+from pathlib import Path
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef
+from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.udf_io import UdfIO
-from pathlib import Path
 
 
 class OperatorType(IntEnum):
@@ -42,6 +44,8 @@ class OperatorType(IntEnum):
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
+    LOGICALJOIN = auto()
+    LOGICALFUNCTIONSCAN = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICALDELIMITER = auto()
 
@@ -136,7 +140,7 @@ class LogicalGet(Operator):
         self._dataset_metadata = dataset_metadata
         self._alias = alias
         self._predicate = predicate
-        self._target_list = target_list or []
+        self._target_list = target_list
         super().__init__(OperatorType.LOGICALGET, children)
 
     @property
@@ -184,7 +188,7 @@ class LogicalGet(Operator):
                      self.video,
                      self.dataset_metadata,
                      self.predicate,
-                     tuple(self.target_list)))
+                     tuple(self.target_list or [])))
 
 
 class LogicalQueryDerivedGet(Operator):
@@ -619,6 +623,123 @@ class LogicalUpload(Operator):
                      self.path,
                      self.path,
                      self.video_blob))
+
+
+class LogicalFunctionScan(Operator):
+    """
+    Logical node for function table scans
+
+    Attributes:
+        func_expr: AbstractExpression
+            function_expression that yield a table like output
+    """
+
+    def __init__(self,
+                 func_expr: AbstractExpression,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
+        self._func_expr = func_expr
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFunctionScan):
+            return False
+        return (is_subtree_equal
+                and self.func_expr == other.func_expr)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.func_expr))
+
+
+class LogicalJoin(Operator):
+    """
+    Logical node for join operators
+
+    Attributes:
+        join_type: JoinType
+            Join type provided by the user - Lateral, Inner, Outer
+        join_predicate: AbstractExpression
+            condition/predicate expression used to join the tables
+    """
+
+    def __init__(self,
+                 join_type: JoinType,
+                 join_predicate: AbstractExpression = None,
+                 left_keys: List[DataFrameColumn] = None,
+                 right_keys: List[DataFrameColumn] = None,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALJOIN, children)
+        self._join_type = join_type
+        self._join_predicate = join_predicate
+        self._left_keys = left_keys
+        self._right_keys = right_keys
+        self._join_project = []
+
+    @property
+    def join_type(self):
+        return self._join_type
+
+    @property
+    def join_predicate(self):
+        return self._join_predicate
+
+    @join_predicate.setter
+    def join_predicate(self, predicate):
+        self._join_predicate = predicate
+
+    @property
+    def left_keys(self):
+        return self._left_keys
+
+    @left_keys.setter
+    def left_keys(self, keys):
+        self._left_key = keys
+
+    @property
+    def right_keys(self):
+        return self._right_keys
+
+    @right_keys.setter
+    def right_keys(self, keys):
+        self._right_keys = keys
+
+    @property
+    def join_project(self):
+        return self._join_project
+
+    @join_project.setter
+    def join_project(self, join_project):
+        self._target_list = join_project
+
+    def lhs(self):
+        return self.children[0]
+
+    def rhs(self):
+        return self.children[1]
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalJoin):
+            return False
+        return (is_subtree_equal
+                and self.join_type == other.join_type
+                and self.join_predicate == other.join_predicate
+                and self.left_keys == other.left_keys
+                and self.right_keys == other.right_keys
+                and self.join_project == other.join_project)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.join_type,
+                     self.join_predicate,
+                     self.left_keys,
+                     self.right_keys,
+                     tuple(self.join_project)))
 
 
 class LogicalCreateMaterializedView(Operator):

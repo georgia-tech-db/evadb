@@ -14,6 +14,8 @@
 # limitations under the License.
 
 import unittest
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
 
@@ -33,8 +35,8 @@ from eva.expression.abstract_expression import ExpressionType
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 
-from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.types import ParserOrderBySortType, FileFormatType
+from eva.parser.table_ref import JoinNode, TableRef, TableInfo
+from eva.parser.types import JoinType, ParserOrderBySortType, FileFormatType
 from eva.catalog.column_type import ColumnType, NdArrayType
 
 from pathlib import Path
@@ -490,4 +492,117 @@ class ParserTests(unittest.TestCase):
                 ColumnDefinition('labels', None, None, None)
         ], False, select_stmt[0])
         self.assertEqual(mat_view_stmt[0], expected_stmt)
-        self.assertEqual(hash(mat_view_stmt[0]), hash(expected_stmt))
+
+    def test_join(self):
+        select_query = '''SELECT table1.a FROM table1 JOIN table2
+                    ON table1.a = table2.a; '''
+        parser = Parser()
+        select_stmt = parser.parse(select_query)[0]
+        table1_col_a = TupleValueExpression('a', 'table1')
+        table2_col_a = TupleValueExpression('a', 'table2')
+        select_list = [table1_col_a]
+        from_table = TableRef(JoinNode(
+            TableRef(TableInfo('table1')),
+            TableRef(TableInfo('table2')),
+            predicate=ComparisonExpression(
+                ExpressionType.COMPARE_EQUAL,
+                table1_col_a,
+                table2_col_a),
+            join_type=JoinType.INNER_JOIN))
+        expected_stmt = SelectStatement(select_list, from_table)
+
+        self.assertEqual(select_stmt, expected_stmt)
+
+    def test_join_with_where(self):
+        select_query = '''SELECT table1.a FROM table1 JOIN table2
+            ON table1.a = table2.a WHERE table1.a <= 5'''
+        parser = Parser()
+        select_stmt = parser.parse(select_query)[0]
+        table1_col_a = TupleValueExpression('a', 'table1')
+        table2_col_a = TupleValueExpression('a', 'table2')
+        select_list = [table1_col_a]
+        from_table = TableRef(JoinNode(
+                              TableRef(TableInfo('table1')),
+                              TableRef(TableInfo('table2')),
+                              predicate=ComparisonExpression(
+                                  ExpressionType.COMPARE_EQUAL,
+                                  table1_col_a,
+                                  table2_col_a),
+                              join_type=JoinType.INNER_JOIN))
+        where_clause = ComparisonExpression(
+            ExpressionType.COMPARE_LEQ,
+            table1_col_a,
+            ConstantValueExpression(5))
+        expected_stmt = SelectStatement(select_list, from_table, where_clause)
+        self.assertEqual(select_stmt, expected_stmt)
+
+    def test_multiple_join_with_multiple_ON(self):
+        select_query = '''SELECT table1.a FROM table1 JOIN table2
+            ON table1.a = table2.a JOIN table3
+            ON table3.a = table1.a WHERE table1.a <= 5'''
+        parser = Parser()
+        select_stmt = parser.parse(select_query)[0]
+        table1_col_a = TupleValueExpression('a', 'table1')
+        table2_col_a = TupleValueExpression('a', 'table2')
+        table3_col_a = TupleValueExpression('a', 'table3')
+        select_list = [table1_col_a]
+        child_join = TableRef(JoinNode(
+                              TableRef(TableInfo('table1')),
+                              TableRef(TableInfo('table2')),
+                              predicate=ComparisonExpression(
+                                  ExpressionType.COMPARE_EQUAL,
+                                  table1_col_a,
+                                  table2_col_a),
+                              join_type=JoinType.INNER_JOIN))
+
+        from_table = TableRef(JoinNode(
+                              child_join,
+                              TableRef(TableInfo('table3')),
+                              predicate=ComparisonExpression(
+                                  ExpressionType.COMPARE_EQUAL,
+                                  table3_col_a,
+                                  table1_col_a),
+                              join_type=JoinType.INNER_JOIN))
+        where_clause = ComparisonExpression(
+            ExpressionType.COMPARE_LEQ,
+            table1_col_a,
+            ConstantValueExpression(5))
+        expected_stmt = SelectStatement(select_list, from_table, where_clause)
+        self.assertEqual(select_stmt, expected_stmt)
+
+    def test_multiple_join_with_single_ON_should_raise(self):
+        select_query = '''SELECT table1.a FROM table1 JOIN table2 JOIN table3
+                    ON table3.a = table1.a AND table1.a = table2.a;'''
+        parser = Parser()
+        with self.assertRaises(Exception):
+            parser.parse(select_query)[0]
+
+    def test_lateral_join(self):
+        select_query = '''SELECT frame FROM MyVideo JOIN LATERAL
+                            ObjectDet(frame);'''
+        parser = Parser()
+        select_stmt = parser.parse(select_query)[0]
+        tuple_frame = TupleValueExpression('frame')
+        func_expr = FunctionExpression(
+            func=None, name='ObjectDet', children=[tuple_frame])
+        from_table = TableRef(JoinNode(
+                              TableRef(TableInfo('MyVideo')),
+                              TableRef(func_expr),
+                              join_type=JoinType.LATERAL_JOIN))
+        expected_stmt = SelectStatement([tuple_frame], from_table)
+        self.assertEqual(select_stmt, expected_stmt)
+
+    def test_lateral_join_with_where(self):
+        select_query = '''SELECT frame FROM MyVideo JOIN LATERAL
+                            ObjectDet(frame);'''
+        parser = Parser()
+        select_stmt = parser.parse(select_query)[0]
+        tuple_frame = TupleValueExpression('frame')
+        func_expr = FunctionExpression(
+            func=None, name='ObjectDet', children=[tuple_frame])
+        from_table = TableRef(JoinNode(
+            TableRef(TableInfo('MyVideo')),
+            TableRef(func_expr),
+            join_type=JoinType.LATERAL_JOIN))
+        expected_stmt = SelectStatement([tuple_frame], from_table)
+        self.assertEqual(select_stmt, expected_stmt)

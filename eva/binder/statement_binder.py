@@ -124,18 +124,27 @@ class StatementBinder:
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):
-        if node.is_select():
+        if node.is_table_atom():
+            # Table
+            self._binder_context.add_table_alias(
+                node.alias, node.table.table_name)
+            bind_table_info(node.table)
+        elif node.is_select():
             current_context = self._binder_context
             self._binder_context = StatementBinderContext()
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
                 node.alias, node.select_statement.target_list)
+        elif node.is_join():
+            self.bind(node.join_node.left)
+            self.bind(node.join_node.right)
+            if node.join_node.predicate:
+                self.bind(node.join_node.predicate)
+        elif node.is_func_expr():
+            self.bind(node.func_expr)
         else:
-            # Table
-            self._binder_context.add_table_alias(
-                node.alias, node.table.table_name)
-            bind_table_info(node.table)
+            raise ValueError(f'Unsupported node {type(node)}')
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):

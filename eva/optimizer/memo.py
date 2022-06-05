@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict, List
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.group import Group
+from eva.optimizer.operators import OperatorType
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
 from eva.constants import UNDEFINED_GROUP_ID
 
@@ -25,8 +27,8 @@ class Memo:
     """
 
     def __init__(self):
-        # self map to speed up finding duplicates
-        self._group_exprs = dict()
+        # map from hash to group_expr to speed up finding duplicates
+        self._group_exprs: Dict[int, GroupExpression] = dict()
         self._groups = dict()
 
     @property
@@ -38,8 +40,8 @@ class Memo:
         return self._group_exprs
 
     def find_duplicate_expr(self, expr: GroupExpression) -> GroupExpression:
-        if expr in self.group_exprs:
-            return self.group_exprs[expr]
+        if hash(expr) in self.group_exprs:
+            return self.group_exprs[hash(expr)]
         else:
             return None
 
@@ -54,12 +56,27 @@ class Memo:
     following functions.
     """
 
+    def _get_table_aliases(self, expr: GroupExpression) -> List[str]:
+        """
+        Collects table aliases of all the children
+        """
+        aliases = []
+        for child_grp_id in expr.children:
+            child_grp = self._groups[child_grp_id]
+            aliases.extend(child_grp.aliases)
+        if (expr.opr.opr_type == OperatorType.LOGICALGET or
+                expr.opr.opr_type == OperatorType.LOGICALQUERYDERIVEDGET):
+            aliases.append(expr.opr.alias)
+
+        return aliases
+
     def _create_new_group(self, expr: GroupExpression):
         """
         Create new group for the expr
         """
         new_group_id = len(self._groups)
-        self._groups[new_group_id] = Group(new_group_id)
+        aliases = self._get_table_aliases(expr)
+        self._groups[new_group_id] = Group(new_group_id, aliases)
         self._insert_expr(expr, new_group_id)
 
     def _insert_expr(self, expr: GroupExpression, group_id: int):
@@ -70,7 +87,7 @@ class Memo:
 
         group = self.groups[group_id]
         group.add_expr(expr)
-        self._group_exprs[expr] = expr
+        self._group_exprs[hash(expr)] = expr
 
     def erase_group(self, group_id: int):
         """
@@ -78,9 +95,9 @@ class Memo:
         """
         group = self.groups[group_id]
         for expr in group.logical_exprs:
-            del self._group_exprs[expr]
+            del self._group_exprs[hash(expr)]
         for expr in group.physical_exprs:
-            del self._group_exprs[expr]
+            del self._group_exprs[hash(expr)]
 
         group.clear_grp_exprs()
 

@@ -56,7 +56,7 @@ class ExpressionEvaluationTest(unittest.TestCase):
     def test_should_return_false_for_unequal_expressions(self):
         const_exp1 = ConstantValueExpression(0)
         const_exp2 = ConstantValueExpression(1)
-        func_expr = FunctionExpression(lambda x: x + 1)
+        func_expr = FunctionExpression(lambda x: x + 1, name='test')
         cmpr_exp = ComparisonExpression(
             ExpressionType.COMPARE_NEQ,
             const_exp1,
