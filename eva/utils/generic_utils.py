@@ -67,7 +67,7 @@ def path_to_class(filepath: str, classname: str):
         LoggingManager().log(
             'Failed to import %s from %s\nException: %s'
             % (classname, filepath, e),
-            LoggingLevel.WARNING)
+            LoggingLevel.ERROR)
     return classobj
 
 

@@ -64,5 +64,5 @@ class LoadVideoExecutor(AbstractExecutor):
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek
         if success:
-            yield Batch(pd.DataFrame({'Video': str(self.node.file_path)},
+            yield Batch(pd.DataFrame({'Video {} successfully added': str(self.node.file_path)},
                                      index=[0]))
