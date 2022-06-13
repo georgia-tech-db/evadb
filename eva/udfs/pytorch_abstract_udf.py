@@ -27,12 +27,14 @@ try:
     import torch
     from torch import nn, Tensor
 except ImportError as e:
-    raise ImportError(f"Failed to import with error {e}, please try `pip install torch`")
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torch`")
    
 try:
     from torchvision.transforms import Compose, transforms
 except ImportError as e:
-    raise ImportError(f"Failed to import with error {e}, please try `pip install torchvision`")
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torchvision`")
 
 
 class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):

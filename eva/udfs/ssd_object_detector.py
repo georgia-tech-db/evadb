@@ -15,12 +15,14 @@ try:
     import torch.nn.functional as F
     from torch import Tensor
 except ImportError as e:
-    raise ImportError(f"Failed to import with error {e}, please try `pip install torch`")
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torch`")
 
 try:
     from torchvision.transforms import Compose, transforms
 except ImportError as e:
-    raise ImportError(f"Failed to import with error {e}, please try `pip install torchvision`")
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torchvision`")
 
 
 class SSDObjectDetector(PytorchAbstractUDF):
