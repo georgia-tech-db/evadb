@@ -24,7 +24,6 @@ from eva.models.storage.batch import Batch
 from eva.parser.parser_visitor import ParserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.expression.abstract_expression import ExpressionType
-from eva.expression.function_expression import ExecutionMode
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from antlr4 import TerminalNode
@@ -37,7 +36,7 @@ class ParserVisitorTests(unittest.TestCase):
     @mock.patch.object(ParserVisitor, 'visit')
     def test_should_query_specification_visitor(self, mock_visit):
         mock_visit.side_effect = ["columns",
-                                  {"from": ["tables"], "where": "predicates"}]
+                                  {"from": "table_ref", "where": "predicates"}]
 
         visitor = ParserVisitor()
         ctx = MagicMock()
@@ -52,7 +51,7 @@ class ParserVisitorTests(unittest.TestCase):
 
         mock_visit.assert_has_calls([call(child_1), call(child_2)])
 
-        self.assertEqual(expected.from_table, "tables")
+        self.assertEqual(expected.from_table, "table_ref")
         self.assertEqual(expected.where_clause, "predicates")
         self.assertEqual(expected.target_list, "columns")
 
@@ -273,8 +272,7 @@ class ParserVisitorTests(unittest.TestCase):
             [call(ctx.simpleId()), call(ctx.dottedId()),
              call(ctx.functionArgs())])
 
-        func_mock.assert_called_with(None, mode=ExecutionMode.EXEC,
-                                     name='name', output=udf_output)
+        func_mock.assert_called_with(None, name='name', output=udf_output)
 
         for arg in func_args:
             func_mock.return_value.append_child.assert_any_call(arg)
@@ -365,7 +363,7 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
         mock_visit.assert_has_calls([call(ctx.fileName()),
-                                     call(ctx.tableName()), 
+                                     call(ctx.tableName()),
                                      call(ctx.fileOptions()),
                                      call(ctx.uidList())])
         mock_load.assert_called_once()

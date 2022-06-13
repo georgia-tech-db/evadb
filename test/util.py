@@ -21,6 +21,7 @@ import shutil
 from eva.models.storage.batch import Batch
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
+from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -103,6 +104,37 @@ def create_dummy_csv_batches():
     return Batch(df)
 
 
+def create_csv(num_rows, columns):
+    try:
+        os.remove(os.path.join(PATH_PREFIX, 'dummy.csv'))
+    except FileNotFoundError:
+        pass
+    df = pd.DataFrame(columns=columns)
+    for col in columns:
+        df[col] = np.random.randint(1, 100, num_rows)
+    df.to_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
+              index=False)
+    return df
+
+
+def create_table(table_name, num_rows, num_columns):
+    # creates a table with num_rows tuples and columns = [a1, a2, a3, ...]
+    columns = ''.join('a{} INTEGER, '.format(i)
+                      for i in range(num_columns - 1))
+    columns += 'a{} INTEGER'.format(num_columns - 1)
+    create_table_query = 'CREATE TABLE IF NOT EXISTS {} ( {} );'.format(
+        table_name, columns)
+    execute_query_fetch_all(create_table_query)
+    columns = ['a{}'.format(i) for i in range(num_columns)]
+    df = create_csv(num_rows, columns)
+    # load the CSV
+    load_query = """LOAD DATA INFILE 'dummy.csv' INTO {}
+                   WITH FORMAT CSV;""".format(table_name)
+    execute_query_fetch_all(load_query)
+    df.columns = [f'{table_name}.{col}' for col in df.columns]
+    return df
+
+
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
         os.remove(os.path.join(PATH_PREFIX, 'dummy.avi'))
@@ -133,8 +165,8 @@ def create_dummy_batches(num_frames=NUM_FRAMES,
         filters = range(num_frames)
     data = []
     for i in filters:
-        data.append({'id': i + start_id,
-                     'data': np.array(
+        data.append({'myvideo.id': i + start_id,
+                     'myvideo.data': np.array(
                          np.ones((2, 2, 3)) * float(i + 1) * 25,
                          dtype=np.uint8)})
 

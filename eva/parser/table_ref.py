@@ -18,6 +18,9 @@ from typing import Union
 
 
 from eva.parser.select_statement import SelectStatement
+from eva.parser.types import JoinType
+from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.function_expression import FunctionExpression
 
 
 class TableInfo:
@@ -29,6 +32,7 @@ class TableInfo:
         self._table_name = table_name
         self._schema_name = schema_name
         self._database_name = database_name
+        self._table_obj = None
 
     @property
     def table_name(self):
@@ -42,8 +46,16 @@ class TableInfo:
     def database_name(self):
         return self._database_name
 
+    @property
+    def table_obj(self):
+        return self._table_obj
+
+    @table_obj.setter
+    def table_obj(self, obj):
+        self._table_obj = obj
+
     def __str__(self):
-        table_info_str = "TABLE INFO:: (" + self._table_name + ")"
+        table_info_str = self._table_name
 
         return table_info_str
 
@@ -52,44 +64,124 @@ class TableInfo:
             return False
         return (self.table_name == other.table_name
                 and self.schema_name == other.schema_name
-                and self.database_name == other.database_name)
+                and self.database_name == other.database_name
+                and self.table_obj == other.table_obj)
+
+    def __hash__(self) -> int:
+        return hash((self.table_name,
+                     self.schema_name,
+                     self.database_name,
+                     self.table_obj))
+
+
+class JoinNode:
+    def __init__(self,
+                 left: 'TableRef' = None,
+                 right: 'TableRef' = None,
+                 predicate: AbstractExpression = None,
+                 join_type: JoinType = None) -> None:
+        self.left = left
+        self.right = right
+        self.predicate = predicate
+        self.join_type = join_type
+
+    def __eq__(self, other):
+        if not isinstance(other, JoinNode):
+            return False
+        return (self.left == other.left
+                and self.right == other.right
+                and self.predicate == other.predicate
+                and self.join_type == other.join_type)
+
+    def __str__(self) -> str:
+        return "JOIN {} ({}, {}) ON {}".format(self.join_type,
+                                               self.left, self.right,
+                                               self.predicate)
 
 
 class TableRef:
     """
-    dummy class right now need to handle join expression
     Attributes:
-        table: can be one of the following based on the query type:
+        : can be one of the following based on the query type:
             TableInfo: expression of table name and database name,
+            FunctionExpression: lateral function calls
             SelectStatement: select statement in case of nested queries,
-            JoinDefinition: join statement in case of join queries #TODO
+            JoinNode: join node in case of join queries
         sample_freq: sampling frequency for the table reference
     """
 
     def __init__(self,
-                 table: Union[TableInfo, SelectStatement] = None,
+                 table: Union[TableInfo, FunctionExpression,
+                              SelectStatement, JoinNode],
+                 alias: str = None,
                  sample_freq: float = None):
-        self._table = table
-        self._sample_freq = sample_freq
 
-    @property
-    def table(self):
-        return self._table
+        self._ref_handle = table
+        self._sample_freq = sample_freq
+        self.alias = alias or self.generate_alias()
 
     @property
     def sample_freq(self):
         return self._sample_freq
 
+    def is_table_atom(self) -> bool:
+        return isinstance(self._ref_handle, TableInfo)
+
+    def is_func_expr(self) -> bool:
+        return isinstance(self._ref_handle, FunctionExpression)
+
     def is_select(self) -> bool:
-        return isinstance(self.table, SelectStatement)
+        return isinstance(self._ref_handle, SelectStatement)
+
+    def is_join(self) -> bool:
+        return isinstance(self._ref_handle, JoinNode)
+
+    @property
+    def table(self) -> TableInfo:
+        assert isinstance(self._ref_handle, TableInfo), 'Expected \
+                TableInfo, got {}'.format(type(self._ref_handle))
+        return self._ref_handle
+
+    @property
+    def func_expr(self) -> FunctionExpression:
+        assert isinstance(self._ref_handle, FunctionExpression), 'Expected \
+                FunctionExpression, got {}'.format(type(self._ref_handle))
+        return self._ref_handle
+
+    @property
+    def join_node(self) -> JoinNode:
+        assert isinstance(self._ref_handle, JoinNode), 'Expected \
+                JoinNode, got {}'.format(type(self._ref_handle))
+        return self._ref_handle
+
+    @property
+    def select_statement(self) -> SelectStatement:
+        assert isinstance(self._ref_handle, SelectStatement), "Expected \
+                SelectStatement, got{}".format(type(self._ref_handle))
+        return self._ref_handle
+
+    def generate_alias(self) -> str:
+        # create alias for the table
+        # TableInfo -> table_name.lower()
+        # SelectStatement -> select
+        if isinstance(self._ref_handle, TableInfo):
+            return self._ref_handle.table_name.lower()
+        elif isinstance(self._ref_handle, SelectStatement):
+            raise RuntimeError('Nested select should have alias')
 
     def __str__(self):
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            str(self.table), str(self.sample_freq))
+            str(self._ref_handle), str(self.sample_freq))
         return table_ref_str
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
             return False
-        return (self.table == other.table
+        return (self._ref_handle == other._ref_handle
+                and self.alias == other.alias
                 and self.sample_freq == other.sample_freq)
+
+    def __hash__(self) -> int:
+        return hash((self._ref_handle,
+                     self.alias,
+                     self.sample_freq))

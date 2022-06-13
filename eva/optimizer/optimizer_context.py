@@ -15,9 +15,10 @@
 import copy
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.memo import Memo
-from eva.optimizer.operators import Operator
+from eva.optimizer.cost_model import CostModel
+from eva.optimizer.operators import Dummy, Operator
 from eva.optimizer.group_expression import GroupExpression
-from eva.constants import INVALID_GROUP_ID
+from eva.constants import UNDEFINED_GROUP_ID
 
 
 class OptimizerContext:
@@ -29,9 +30,14 @@ class OptimizerContext:
                 stack to keep track outstanding tasks
     """
 
-    def __init__(self):
+    def __init__(self, cost_model: CostModel):
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
+        self._cost_model = cost_model
+
+    @property
+    def cost_model(self):
+        return self._cost_model
 
     @property
     def task_stack(self):
@@ -41,53 +47,56 @@ class OptimizerContext:
     def memo(self):
         return self._memo
 
-    def xform_opr_to_group_expr(
+    def _xform_opr_to_group_expr(
         self,
-        opr: Operator,
-        root_group_id: int = INVALID_GROUP_ID,
-        is_root: bool = False,
-        copy_opr: bool = True
+        opr: Operator
     ) -> GroupExpression:
         """
-        Generate a group expression from a logical operator.
-        If the root_group_id is given, then the group_id of the
-        root logical operator is guaranteed.
+        Note: Internal function Generate a group expressions from a
+        logical operator tree. Caller is responsible for assigning
+        the group to the returned GroupExpression.
         """
-
         # Go through the children first.
         child_ids = []
         for child_opr in opr.children:
-            child_id = self.xform_opr_to_group_expr(
-                opr=child_opr,
-                root_group_id=root_group_id,
-                is_root=False,
-                copy_opr=copy_opr
-            ).group_id
-            child_ids.append(child_id)
+            if isinstance(child_opr, Dummy):
+                child_ids.append(child_opr.group_id)
+            else:
+                child_expr = self._xform_opr_to_group_expr(opr=child_opr)
+                # add the expr to memo
+                # handles duplicates and assigns group id
+                memo_expr = self.memo.add_group_expr(child_expr)
+                child_ids.append(memo_expr.group_id)
 
-        # Check if we need copy
-        if copy_opr:
-            opr_copy = copy.deepcopy(opr)
-            opr = opr_copy
-
-        if is_root:
-            expr = GroupExpression(opr=opr, group_id=root_group_id,
-                                   children=child_ids)
-            expr = self.memo.add_group_expr(expr)
-            assert root_group_id == INVALID_GROUP_ID or \
-                expr.group_id == root_group_id
-        else:
-            # If not root, we do not care the group_id
-            expr = GroupExpression(opr=opr, group_id=INVALID_GROUP_ID,
-                                   children=child_ids)
-            expr = self.memo.add_group_expr(expr)
-            if root_group_id != INVALID_GROUP_ID and \
-                    expr.group_id == root_group_id:
-                # This expr has the same group_id with the root one,
-                # so we need give it a new group.
-                self.memo._remove_expr(expr)
-                self.memo._append_expr(expr)
-            assert root_group_id == INVALID_GROUP_ID or \
-                expr.group_id != root_group_id
-
+        # Group Expression only needs the operator content. Remove
+        # the opr children as parent-child relationship is captured
+        # by the group expressions.
+        # Hack: Shallow copy all the content except children and
+        # manually clearing the children as we don't need the
+        # dependency. Better fix is to rewrite the operator class to
+        # support  exposing only the content
+        opr_copy = copy.copy(opr)
+        opr_copy.clear_children()
+        expr = GroupExpression(opr=opr_copy, children=child_ids)
         return expr
+
+    def replace_expression(self, opr: Operator, group_id: int):
+        """
+        Removes all the expressions from the specified group and
+        create a new expression. This is called by rewrite rules. The
+        new expr gets assigned a new group id
+        """
+        self.memo.erase_group(group_id)
+        new_expr = self._xform_opr_to_group_expr(opr)
+        new_expr = self.memo.add_group_expr(new_expr, group_id)
+        return new_expr
+
+    def add_opr_to_group(self,
+                         opr: Operator,
+                         group_id: int = UNDEFINED_GROUP_ID):
+        """
+        Convert opertator to group_expression and add to the group
+        """
+        grp_expr = self._xform_opr_to_group_expr(opr)
+        grp_expr = self.memo.add_group_expr(grp_expr, group_id)
+        return grp_expr

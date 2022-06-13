@@ -101,7 +101,9 @@ class LogicalExpressionsTest(unittest.TestCase):
     def test_short_circuiting_and_complete(self):
         # tests whether right-hand side is bypassed completely with and
         tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_l.col_alias = 0
         tup_val_exp_r = TupleValueExpression(col_name=1)
+        tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
             ExpressionType.COMPARE_EQUAL,
@@ -127,7 +129,9 @@ class LogicalExpressionsTest(unittest.TestCase):
     def test_short_circuiting_or_complete(self):
         # tests whether right-hand side is bypassed completely with or
         tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_l.col_alias = 0
         tup_val_exp_r = TupleValueExpression(col_name=1)
+        tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
             ExpressionType.COMPARE_EQUAL,
@@ -153,7 +157,9 @@ class LogicalExpressionsTest(unittest.TestCase):
     def test_short_circuiting_and_partial(self):
         # tests whether right-hand side is partially executed with and
         tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_l.col_alias = 0
         tup_val_exp_r = TupleValueExpression(col_name=1)
+        tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
             ExpressionType.COMPARE_EQUAL,
@@ -180,7 +186,9 @@ class LogicalExpressionsTest(unittest.TestCase):
     def test_short_circuiting_or_partial(self):
         # tests whether right-hand side is partially executed with or
         tup_val_exp_l = TupleValueExpression(col_name=0)
+        tup_val_exp_l.col_alias = 0
         tup_val_exp_r = TupleValueExpression(col_name=1)
+        tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
             ExpressionType.COMPARE_EQUAL,

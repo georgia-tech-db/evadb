@@ -12,3 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from eva.expression.abstract_expression import ExpressionType
+
+
+def expression_tree_to_conjunction_list(expression_tree):
+    expression_list = []
+    if expression_tree.etype == ExpressionType.LOGICAL_AND:
+        expression_list.extend(expression_tree_to_conjunction_list(
+            expression_tree.children[0]))
+        expression_list.extend(expression_tree_to_conjunction_list(
+            expression_tree.children[1]))
+    else:
+        expression_list.append(expression_tree)
+
+    return expression_list

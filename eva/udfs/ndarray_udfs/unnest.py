@@ -12,11 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+Disabling unnest because it is flaky
+1. We need to define what unnest should do with multiple inputs
+2. How many outputs does unnest generate
+
+
 import pandas as pd
 import numpy as np
 from itertools import zip_longest
 
 from eva.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
+
+
 
 
 class Unnest(AbstractNdarrayUDF):
@@ -34,11 +42,10 @@ class Unnest(AbstractNdarrayUDF):
         return pd.DataFrame(tups, columns=[*rest, *explode])[[*df]]
 
     def exec(self, inp: pd.DataFrame) -> pd.DataFrame:
-        """
-        1. infer using the first row, design a better way without compromising
-        speed
-        2. Append dummy column to keep track of original index
-        """
+        # 1. infer using the first row, design a better way without
+        #    compromising speed
+        # 2. Append dummy column to keep track of original index
+
         first_row = inp.iloc[0]
         explode = []
         dummy_idx = 'dummy_idx'
@@ -51,3 +58,4 @@ class Unnest(AbstractNdarrayUDF):
         res = res.set_index(dummy_idx)
         res.index.name = None
         return res
+"""

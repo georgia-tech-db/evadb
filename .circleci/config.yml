@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.7
+      - image: cimg/python:3.8
     resource_class: large
     steps:
       - checkout
@@ -18,7 +18,7 @@ jobs:
             python -m venv env37
             . env37/bin/activate
             pip install --upgrade pip
-            python setup.py install 
+            python setup.py install
 
       - run:
           name: Generate Parser Files

@@ -10,6 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+from datetime import datetime
 import warnings
 import os
 import sys
@@ -27,7 +28,7 @@ warnings.filterwarnings(
 # -- Project information -----------------------------------------------------
 
 project = 'EVA'
-copyright = '2018-2020, Georgia Tech Database Group'
+copyright = str(datetime.now().year) + ', Georgia Tech Database Group'
 author = 'Georgia Tech Database Group'
 
 # The full version, including alpha/beta/rc tags
@@ -35,11 +36,6 @@ release = '0.0.1'
 
 master_doc = 'index'
 
-# html_theme = 'mps'
-
-html_sidebars = {
-    '**': ['localtoc.html', 'relations.html', 'links.html', 'contact.html'],
-}
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,6 +43,7 @@ html_sidebars = {
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "sphinx_external_toc",
     'sphinx.ext.autosummary',
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
@@ -56,15 +53,33 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx.ext.graphviz',
-    'extensions.mps'
+    "myst_nb",
+    "sphinx-jsonschema"
 ]
-autosummary_generate = True  # Turn on sphinx.ext.autosummary
+
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+    "deflist",
+    "html_admonition",
+    "html_image",
+    "colon_fence",
+    "smartquotes",
+    "replacements",
+]
+
+external_toc_exclude_missing = True
+external_toc_path = "_toc.yml"
+
+autosummary_generate = False  # Turn on sphinx.ext.autosummary
 autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
+
 # Remove 'view source code' from top of page (for html, not python)
 html_show_sourcelink = False
 # If no class summary, inherit base class summary
 autodoc_inherit_docstrings = False
 numpydoc_show_class_members = False
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -74,13 +89,11 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-# The suffix of source filenames.
-source_suffix = '.rst'
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
 
-highlight_language = 'python'
+# highlight_language = 'python'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
@@ -106,9 +119,8 @@ html_theme_options = {
     "use_repository_button": True,
     "use_issues_button": True,
     "use_edit_page_button": True,
-    "path_to_docs": "api-docs",
-    "home_page_in_toc": True,
-    "show_navbar_depth": 0,
+    "path_to_docs": "api-docs/",
+    "home_page_in_toc": False
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

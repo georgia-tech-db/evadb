@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
@@ -20,7 +19,8 @@ from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
-                                     LogicalLimit, LogicalSample)
+                                     LogicalLimit, LogicalSample,
+                                     LogicalFunctionScan, LogicalJoin)
 from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
@@ -29,45 +29,50 @@ from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
-from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
-from eva.optimizer.optimizer_utils import (bind_columns_expr,
-                                           bind_predicate_expr,
-                                           bind_dataset,
-                                           column_definition_to_udf_io,
-                                           create_video_metadata)
+from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import LoggingLevel, LoggingManager
-from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class StatementToPlanConvertor:
     def __init__(self):
         self._plan = None
         self._dataset = None
-        self._column_map = {}  # key: column_name (str) value: DataFrameColumn
-
-    def _populate_column_map(self, dataset: DataFrameMetadata):
-        for column in dataset.columns:
-            self._column_map[column.name.lower()] = column
 
     def visit_table_ref(self, table_ref: TableRef):
-        """Bind table ref object and convert to Logical get operator
+        """Bind table ref object and convert to LogicalGet, LogicalJoin,
+            LogicalFunctionScan, or LogicalQueryDerivedGet
 
         Arguments:
-            table {TableRef} -- [Input table ref object created by the parser]
+            table {TableRef} - - [Input table ref object created by the parser]
         """
-        if table_ref.is_select():
-            # NestedQuery
-            self.visit_select(table_ref.table)
-            child_plan = self._plan
-            self._plan = LogicalQueryDerivedGet()
-            self._plan.append_child(child_plan)
-        else:
+        if table_ref.is_table_atom():
             # Table
-            catalog_vid_metadata = bind_dataset(table_ref.table)
-            self._populate_column_map(catalog_vid_metadata)
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata)
+            catalog_vid_metadata = table_ref.table.table_obj
+            self._plan = LogicalGet(table_ref,
+                                    catalog_vid_metadata,
+                                    table_ref.alias)
+
+        elif table_ref.is_func_expr():
+            self._plan = LogicalFunctionScan(func_expr=table_ref.func_expr)
+
+        elif table_ref.is_select():
+            # NestedQuery
+            self.visit_select(table_ref.select_statement)
+            child_plan = self._plan
+            self._plan = LogicalQueryDerivedGet(table_ref.alias)
+            self._plan.append_child(child_plan)
+
+        elif table_ref.is_join():
+            join_node = table_ref.join_node
+            join_plan = LogicalJoin(join_type=join_node.join_type,
+                                    join_predicate=join_node.predicate)
+            self.visit_table_ref(join_node.left)
+            join_plan.append_child(self._plan)
+            self.visit_table_ref(join_node.right)
+            join_plan.append_child(self._plan)
+            self._plan = join_plan
 
         if table_ref.sample_freq:
             self._visit_sample(table_ref.sample_freq)
@@ -76,7 +81,7 @@ class StatementToPlanConvertor:
         """converter for select statement
 
         Arguments:
-            statement {SelectStatement} -- [input select statement]
+            statement {SelectStatement} - - [input select statement]
         """
 
         table_ref = statement.from_table
@@ -117,8 +122,6 @@ class StatementToPlanConvertor:
 
     def _visit_orderby(self, orderby_list):
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
-        orderby_columns = [orderbyexpr[0] for orderbyexpr in orderby_list]
-        bind_columns_expr(orderby_columns, self._column_map)
         orderby_opr = LogicalOrderBy(orderby_list)
         orderby_opr.append_child(self._plan)
         self._plan = orderby_opr
@@ -137,15 +140,11 @@ class StatementToPlanConvertor:
         self._plan.append_child(right_child_plan)
 
     def _visit_projection(self, select_columns):
-        # Bind the columns using catalog
-        bind_columns_expr(select_columns, self._column_map)
         projection_opr = LogicalProject(select_columns)
         projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
     def _visit_select_predicate(self, predicate: AbstractExpression):
-        # Binding the expression
-        bind_predicate_expr(predicate, self._column_map)
         filter_opr = LogicalFilter(predicate)
         filter_opr.append_child(self._plan)
         self._plan = filter_opr
@@ -154,7 +153,7 @@ class StatementToPlanConvertor:
         """Converter for parsed insert statement
 
         Arguments:
-            statement {AbstractStatement} -- [input insert statement]
+            statement {AbstractStatement} - - [input insert statement]
         """
         '''
         table_ref = statement.table
@@ -183,7 +182,7 @@ class StatementToPlanConvertor:
         """Convertor for parsed insert Statement
 
         Arguments:
-            statement {AbstractStatement} -- [Create statement]
+            statement {AbstractStatement} - - [Create statement]
         """
         table_ref = statement.table_ref
         if table_ref is None:
@@ -198,7 +197,7 @@ class StatementToPlanConvertor:
         """Convertor for parsed create udf statement
 
         Arguments:
-            statement {CreateUDFStatement} -- Create UDF Statement
+            statement {CreateUDFStatement} - - Create UDF Statement
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
         annotated_outputs = column_definition_to_udf_io(
@@ -213,47 +212,13 @@ class StatementToPlanConvertor:
 
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement
-        If the input table already exists we return its
-        metadata. Else we will create a new metadata object for this
-        table name.
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
-        table_ref = statement.table
-        table_metainfo = bind_dataset(table_ref.table)
-        if table_metainfo is None:
-            if statement.file_options['file_format'] == FileFormatType.VIDEO:
-                # Create a new metadata object
-                table_metainfo = create_video_metadata(
-                    table_ref.table.table_name)
-            else:
-                error = '{} does not exists. Create the table using \
-                            CREATE TABLE.'.format(table_ref.table.table_name)
-                LoggingManager().log(error, LoggingLevel.ERROR)
-                raise RuntimeError(error)
-        # populate self._column_map
-        self._populate_column_map(table_metainfo)
-
-        # if query had columns specified, we just copy them
-        if statement.column_list is not None:
-            column_list = statement.column_list
-
-        # else we curate the column list from the metadata
-        else:
-            column_list = []
-            for column in table_metainfo.columns:
-                column_list.append(
-                    TupleValueExpression(
-                        col_name=column.name,
-                        table_name=table_metainfo.name,
-                        col_object=column))
-
-        # bind the columns
-        bind_columns_expr(column_list, self._column_map)
-
+        table_metainfo = statement.table_ref.table.table_obj
         load_data_opr = LogicalLoadData(table_metainfo,
                                         statement.path,
-                                        column_list,
+                                        statement.column_list,
                                         statement.file_options)
         self._plan = load_data_opr
 
@@ -281,7 +246,7 @@ class StatementToPlanConvertor:
            The logic is hidden from client.
 
         Arguments:
-            statement {AbstractStatement} -- [Input statement]
+            statement {AbstractStatement} - - [Input statement]
         """
         if isinstance(statement, SelectStatement):
             self.visit_select(statement)

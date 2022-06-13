@@ -111,6 +111,13 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(udf.impl_file_path, 'fasterRCNN')
         self.assertEqual(udf.name, 'udf')
         self.assertEqual(udf.type, 'ObjectDetection')
+        self.assertEqual(str(udf), 'udf: (udf, fasterRCNN, ObjectDetection)\n')
+
+    def test_udf_hash(self):
+        udf1 = UdfMetadata('udf', 'fasterRCNN', 'ObjectDetection')
+        udf2 = UdfMetadata('udf', 'fasterRCNN', 'ObjectDetection')
+
+        self.assertEqual(hash(udf1), hash(udf2))
 
     def test_udf_equality(self):
         udf = UdfMetadata('udf', 'fasterRCNN', 'ObjectDetection')

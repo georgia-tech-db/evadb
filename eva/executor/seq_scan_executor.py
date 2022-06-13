@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.seq_scan_plan import SeqScanPlan
@@ -31,6 +32,7 @@ class SequentialScanExecutor(AbstractExecutor):
         super().__init__(node)
         self.predicate = node.predicate
         self.project_expr = node.columns
+        self.alias = node.alias
 
     def validate(self):
         pass
@@ -39,17 +41,15 @@ class SequentialScanExecutor(AbstractExecutor):
 
         child_executor = self.children[0]
         for batch in child_executor.exec():
-            # We do the predicate first
-            if not batch.empty() and self.predicate is not None:
-                outcomes = self.predicate.evaluate(batch).frames
-                batch = Batch(
-                    batch.frames[(outcomes > 0).to_numpy()].reset_index(
-                        drop=True))
+            # apply alias to the batch
+            # id, data -> myvideo.id, myvideo.data
+            if self.alias:
+                batch.modify_column_alias(self.alias)
 
+            # We do the predicate first
+            batch = apply_predicate(batch, self.predicate)
             # Then do project
-            if not batch.empty() and self.project_expr is not None:
-                batches = [expr.evaluate(batch) for expr in self.project_expr]
-                batch = Batch.merge_column_wise(batches)
+            batch = apply_project(batch, self.project_expr)
 
             if not batch.empty():
                 yield batch

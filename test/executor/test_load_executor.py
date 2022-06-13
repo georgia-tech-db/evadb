@@ -48,7 +48,7 @@ class LoadExecutorTest(unittest.TestCase):
             batch = next(load_executor.exec())
             create_mock.assert_called_once_with(table_metainfo, file_path)
             self.assertEqual(batch, Batch(pd.DataFrame(
-                [{'Video': file_path}])))
+                [{'Video successfully added': file_path}])))
 
     @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_search_in_upload_directory(
@@ -74,7 +74,7 @@ class LoadExecutorTest(unittest.TestCase):
             create_mock.assert_called_once_with(
                 table_metainfo, self.upload_path / file_path)
             self.assertEqual(batch, Batch(pd.DataFrame(
-                [{'Video': file_path}])))
+                [{'Video successfully added': file_path}])))
 
     @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_fail_to_find_file(self, create_mock):
@@ -112,9 +112,9 @@ class LoadExecutorTest(unittest.TestCase):
         file_options = {}
         file_options['file_format'] = FileFormatType.CSV
         column_list = [
-            TupleValueExpression(col_name='id', table_name='dummy'),
-            TupleValueExpression(col_name='frame_id', table_name='dummy'),
-            TupleValueExpression(col_name='video_id', table_name='dummy')
+            TupleValueExpression(col_name='id', table_alias='dummy'),
+            TupleValueExpression(col_name='frame_id', table_alias='dummy'),
+            TupleValueExpression(col_name='video_id', table_alias='dummy')
         ]
         plan = type(
             "LoadDataPlan", (), {

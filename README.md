@@ -17,6 +17,13 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 * EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
 
+## Quick Links
+* [Demo](https://ada-00.cc.gatech.edu/eva/playground)
+* [Website](https://georgia-tech-db.github.io/eva/index.html)
+* [Documentation](https://evagatech.readthedocs.io/en/latest/)
+* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
+* [Forum](https://gitter.im/georgia-tech-db/eva)
+
 ## Installation
 
 ### Dependency
@@ -25,24 +32,29 @@ EVA requires Python 3.7 or later and JAVA 8. On Ubuntu, you can install the JAVA
 ### Recommended
 To install EVA, we recommend using virtual environment and pip:
 ```shell
-python3 -m venv env37
-. env37/bin/activate
+python3 -m venv env38
+. env38/bin/activate
 pip install --upgrade pip
 pip install evatestdb
 ```
 
-### Install From Source
-```shell
+<details><summary>Install from source </summary>
+<p>
+
+```bash
 git clone https://github.com/georgia-tech-db/eva.git && cd eva
-python3 -m venv env37
-. env37/bin/activate
+python3 -m venv env38
+. env38/bin/activate
 pip install --upgrade pip
 sh script/antlr4/generate_parser.sh
 pip install .
 ```
 
-## Verify Installation
+</p>
+</details>
 
+<details><summary> QuickStart </summary>
+<p>
 1. Set up the server and client
 - Activate the virtual environment: `. env37/bin/activate`
 
@@ -55,7 +67,7 @@ pip install .
 UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```
 
-3. Run the `LOAD` command in the client terminal: (may take a while)
+3. Run the `LOAD` command in the client terminal:
 ```mysql
 LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```
@@ -64,57 +76,29 @@ LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
+</p>
+</details>
 
-## Quickstart Tutorial
+## Example Queries
+1. Search frames with a car
+```mysql
+SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
+```
+![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
 
-### Configure GPU (Recommended)
+2. Search frames with a pedestrian and a car
+```mysql
+SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
+```
 
-1. If your workstation has a GPU, you need to first set it up and configure it. You can run the following command first to check your hardware capabilities. 
-
-    ```
-    ubuntu-drivers devices
-    ```
-
-    If you do have an NVIDIA GPU, and its not been configured yet, follow all the steps in this link carefully. `https://towardsdatascience.com/deep-learning-gpu-installation-on-ubuntu-18-4-9b12230a1d31`. 
-
-    Some pointers:
-    - When installing NVIDIA drivers, check the correct driver version for your GPU to avoid compatibiility issues. 
-    - When installing cuDNN, you will have to create an account. Make sure you get the correct deb files for your OS and architecture. 
-
-2. You can run the following code in a jupyter instance to verify your GPU is working well along with PyTorch.
-
-    ```
-    import torch
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    print(device)
-    ```
-
-    Output of `cuda:0` indicates the presence of a GPU. (Note: 0 indicates the index of the GPU in system. Incase you have multiple GPUs, the index needs to be accordingly changed)
-
-2. Now configure the `executor` section in `~/.eva/eva.yml` as follows:
-
-    ```
-    gpus: {'127.0.1.1': [0]}
-    ```
-    
-    `127.0.1.1` is the loopback address on which the eva server is started. 0 refers to the GPU index to be used. 
-
-### Sample Notebook
-
-1. Open a terminal instance and start the server:
-    ```
-    eva_server
-    ```
-
-2. Open another terminal instance. Start a jupyter lab/notebook instance, and navigate to [tutorials/object_detection.ipynb](tutorials/object_detection.ipynb)
-
-3. You might have to install ipywidgets to visualize the input video and output. Follow steps in `https://ipywidgets.readthedocs.io/en/latest/user_install.html` as per your jupyter environment. 
-
-4. Run each cell one by one. Each cell is self-explanatory. If everything has been configured correctly you should be able to see a ipywidgets Video instance with the bounding boxes output of the executed query.
+2. Search frames containing greater than 3 cars
+```mysql
+SELECT id, data FROM DETRAC WHERE array_count(FastRCNNObjectDetector(data).labels, 'car') > 3;
+```
 
 ## Documentation
 
-You can find documentation and code snippets for EVA [here](https://evagatech.readthedocs.io/).
+You can find documentation for EVA [here](https://evagatech.readthedocs.io/).
 
 ## Contributing
 
@@ -128,5 +112,5 @@ For information on installing from source and contributing to EVA, see our
 See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
 ## License
-Copyright (c) 2018-2020 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
-Licensed under the [Apache License](LICENSE).
+Copyright (c) 2018-2022 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
+Licensed under [Apache License](LICENSE).

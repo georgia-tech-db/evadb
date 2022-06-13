@@ -52,7 +52,7 @@ class SelectStatement(AbstractStatement):
         self._target_list = target_list
         self._union_link = None
         self._union_all = False
-        self._orderby_list = kwargs.get("orderby_clause_list", None)
+        self._orderby_list = kwargs.get('orderby_clause_list', None)
         self._limit_count = kwargs.get("limit_count", None)
 
     @property
@@ -140,3 +140,13 @@ class SelectStatement(AbstractStatement):
                 and self.union_all == other.union_all
                 and self.orderby_list == other.orderby_list
                 and self.limit_count == other.limit_count)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.from_table,
+                     tuple(self.target_list or []),
+                     self.where_clause,
+                     self.union_link,
+                     self.union_all,
+                     tuple(self.orderby_list or []),
+                     self.limit_count))
