@@ -67,7 +67,7 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector\
                      import SSDObjectDetector  # noqa: F401
                 pass
-        
+
         with self.assertRaises(ImportError):
             with mock.patch('torch.Tensor'):
                 from eva.udfs.pytorch_abstract_udf\
@@ -76,7 +76,7 @@ class PytorchTest(unittest.TestCase):
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
-            with mock.pathc('torchvision'):
+            with mock.patch('torchvision'):
                 from eva.udfs.ssd_object_detector\
                     import SSDObjectDetector  # noqa: F401
                 pass
