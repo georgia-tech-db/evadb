@@ -86,7 +86,3 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.pytorch_abstract_udf\
                     import PytorchAbstractUDF  # noqa: F401
                 pass
-
-
-if __name__ == '__main__':
-    unittest.main()
