@@ -52,7 +52,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         with self.assertRaises(ImportError):
             with mock.patch('torch.Tensor'):
                 from eva.udfs.fastrcnn_object_detector\
-                     import FastRCNNObjectDetector  # noqa: F401
+                    import FastRCNNObjectDetector  # noqa: F401
                 pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
