@@ -14,12 +14,13 @@
 # limitations under the License.
 import os
 import unittest
+import mock
+import sys
 
 import cv2
 import pandas as pd
 
 from eva.models.storage.batch import Batch
-from eva.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
 
 NUM_FRAMES = 10
 
@@ -34,8 +35,24 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         img = cv2.imread(path)
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    def test_should_raise_import_error_with_missing_torch(self):
+        with self.assertRaises(ImportError):
+            with mock.patch.dict(sys.modules, {'torch': None}):
+                from eva.udfs.fastrcnn_object_detector\
+                    import FastRCNNObjectDetector  # noqa: F401
+                pass
+
+    def test_should_raise_import_error_with_missing_torchvision(self):
+        with self.assertRaises(ImportError):
+            with mock.patch.dict(sys.modules,
+                                 {'torchvision': None}):
+                from eva.udfs.fastrcnn_object_detector\
+                    import FastRCNNObjectDetector  # noqa: F401
+                pass
+
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
+        from eva.udfs.fastrcnn_object_detector import FastRCNNObjectDetector
         frame_dog = {'id': 1, 'data': self._load_image(
             os.path.join(self.base_path, 'data', 'dog.jpeg'))}
         frame_dog_cat = {'id': 2, 'data': self._load_image(
