@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 import mock
+import sys
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -63,26 +64,40 @@ class PytorchTest(unittest.TestCase):
 
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
-            with mock.patch('torch.Tensor', ImportError):
+            with mock.patch.dict(sys.modules, {'torch': None}):
                 from eva.udfs.ssd_object_detector\
                     import SSDObjectDetector  # noqa: F401
                 pass
 
         with self.assertRaises(ImportError):
-            with mock.patch('torch.Tensor', ImportError):
+            with mock.patch.dict(sys.modules, {'torch': None}):
                 from eva.udfs.pytorch_abstract_udf\
                     import PytorchAbstractUDF  # noqa: F401
+                pass
+
+        with self.assertRaises(ImportError):
+            with mock.patch.dict(sys.modules, {'torch': None}):
+                from eva.udfs.fastrcnn_object_detector\
+                    import FastRCNNObjectDetector  # noqa: F401
                 pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
-            with mock.patch('torchvision', ImportError):
+            with mock.patch.dict(sys.modules,
+                                 {'torchvision.transforms': None}):
                 from eva.udfs.ssd_object_detector\
                     import SSDObjectDetector  # noqa: F401
                 pass
 
         with self.assertRaises(ImportError):
-            with mock.patch('torch.Tensor', ImportError):
+            with mock.patch.dict(sys.modules,
+                                 {'torchvision.transforms': None}):
                 from eva.udfs.pytorch_abstract_udf\
                     import PytorchAbstractUDF  # noqa: F401
+                pass
+
+        with self.assertRaises(ImportError):
+            with mock.patch.dict(sys.modules, {'torchvision': None}):
+                from eva.udfs.fastrcnn_object_detector\
+                    import FastRCNNObjectDetector  # noqa: F401
                 pass

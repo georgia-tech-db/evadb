@@ -14,7 +14,6 @@
 # limitations under the License.
 import os
 import unittest
-import mock
 
 import cv2
 import pandas as pd
@@ -47,17 +46,3 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
         self.assertEqual(["dog"], result[0].labels)
         self.assertEqual(["cat", "dog"], result[1].labels)
-
-    def test_should_raise_import_error_with_missing_torch(self):
-        with self.assertRaises(ImportError):
-            with mock.patch('torch.Tensor', ImportError):
-                from eva.udfs.fastrcnn_object_detector\
-                    import FastRCNNObjectDetector  # noqa: F401
-                pass
-
-    def test_should_raise_import_error_with_missing_torchvision(self):
-        with self.assertRaises(ImportError):
-            with mock.patch('torchvision', ImportError):
-                from eva.udfs.fastrcnn_object_detector\
-                    import FastRCNNObjectDetector  # noqa: F401
-                pass
