@@ -18,14 +18,23 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-import torch
 from PIL import Image
-from torch import nn, Tensor
-from torchvision.transforms import Compose, transforms
-
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 from eva.configuration.configuration_manager import ConfigurationManager
+
+try:
+    import torch
+    from torch import nn, Tensor
+except ImportError as e:
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torch`")
+   
+try:
+    from torchvision.transforms import Compose, transforms
+except ImportError as e:
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torchvision`")
 
 
 class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):

@@ -15,13 +15,23 @@
 from typing import List
 
 import pandas as pd
-import torchvision
 import numpy as np
 
-from torch import Tensor
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+
+try:
+    from torch import Tensor
+except ImportError as e:
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torch`")
+
+try:
+    import torchvision
+except ImportError as e:
+    raise ImportError(f"Failed to import with error {e}, \
+        please try `pip install torch`")
 
 
 class FastRCNNObjectDetector(PytorchAbstractUDF):

@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import mock
+import sys
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -59,3 +61,18 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue('car' in res['ssdobjectdetector.label'][idx])
+
+    def test_should_raise_import_error_with_missing_torch(self):
+        with self.assertRaises(ImportError):
+            with mock.patch.dict(sys.modules, {'torch': None}):
+                from eva.udfs.ssd_object_detector\
+                    import SSDObjectDetector  # noqa: F401
+                pass
+
+    def test_should_raise_import_error_with_missing_torchvision(self):
+        with self.assertRaises(ImportError):
+            with mock.patch.dict(sys.modules,
+                                 {'torchvision.transforms': None}):
+                from eva.udfs.ssd_object_detector\
+                    import SSDObjectDetector  # noqa: F401
+                pass
