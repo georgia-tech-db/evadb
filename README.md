@@ -17,80 +17,62 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 
 * EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
 
-## Quick Links
+## Links
 * [Demo](https://ada-00.cc.gatech.edu/eva/playground)
 * [Website](https://georgia-tech-db.github.io/eva/index.html)
 * [Documentation](https://evagatech.readthedocs.io/en/latest/)
 * [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [Forum](https://gitter.im/georgia-tech-db/eva)
+* [Chat](https://gitter.im/georgia-tech-db/eva)
 
-## Installation
+## QuickStart
 
-### Dependency
-EVA requires Python 3.8+. 
+1. EVA requires Python 3.8+. To install EVA, we recommend using an virtual environment and the pip package manager:
 
-### Installation instructions for users
-To install EVA, we recommend using an virtual environment and the pip package manager:
 ```shell
 pip install evadb
 ```
 
-<details><summary>Installation instructions for developers</summary>
-<p>
-
-EVA requires Java 8. On Ubuntu, you can install using this command: `sudo -E apt install -y openjdk-8-jdk openjdk-8-jre`.
-
+1. Start the EVA server and the client programs
 ```shell
-git clone https://github.com/georgia-tech-db/eva.git && cd eva
-python3 -m venv env38
-. env38/bin/activate
-pip install --upgrade pip
-sh script/antlr4/generate_parser.sh
-pip install .
+eva_server&   # launch server
+eva_client    # launch client
 ```
 
-</p>
-</details>
+2. UPLOAD a video using the client terminal (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
-<details><summary> QuickStart </summary>
-<p>
-1. Start the EVA server and the client programs:
-
-- Launch server: `eva_server&`
-
-- Launch client: `eva_client`
-
-2. `UPLOAD` a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) as an example):
 ```mysql
 UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
 ```
 
-3. Run the `LOAD` command in the client:
+3. LOAD the video using the client terminal:
+
 ```mysql
 LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
 ```
 
-4. Here is a simple query:
+4. That's it. You can now start issuing queries over that video:
+
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
-</p>
-</details>
 
-## Illustrative Queries
+## More Interesting Queries
 
 1. Search for frames in a video that contain a car
+
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
 ![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
 
 2. Search for frames in a video that contain  a pedestrian and a car
+
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
 ```
 
 2. Search frames in a video containing more than 3 cars
+
 ```mysql
 SELECT id, data FROM DETRAC WHERE array_count(FastRCNNObjectDetector(data).labels, 'car') > 3;
 ```
@@ -98,6 +80,24 @@ SELECT id, data FROM DETRAC WHERE array_count(FastRCNNObjectDetector(data).label
 ## Documentation
 
 Documentation for EVA is located [here](https://evagatech.readthedocs.io/).
+
+### Installation Instructions for Developers
+
+To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
+
+```shell
+git clone https://github.com/georgia-tech-db/eva.git && cd eva
+python3 -m venv env38                                # to create a virtual environment
+. env38/bin/activate
+pip install --upgrade pip
+sudo -E apt install -y openjdk-8-jdk openjdk-8-jre   # to install JAVA
+sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
+pip install .
+```
+
+</p>
+</details>
+
 
 ## Contributing
 
