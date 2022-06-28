@@ -16,12 +16,28 @@
 from cmd import Cmd
 from contextlib import ExitStack
 from eva.server.db_api import connect
+from os import path
+from readline import read_history_file, write_history_file, set_history_length
+
+# History file to persist EVA  command history across multiple client sessions
+histfile = 'eva.history'
+histfile_size = 1000
 
 
 class EvaCommandInterpreter(Cmd):
 
     def __init__(self):
         super().__init__()
+
+    def preloop(self):
+        # To retain command history across multiple client sessions
+        if path.exists(histfile):
+            read_history_file(histfile)
+
+    def postloop(self):
+        # To retain command history across multiple client sessions
+        set_history_length(histfile_size)
+        write_history_file(histfile)
 
     def set_connection(self, connection):
         self.connection = connection
