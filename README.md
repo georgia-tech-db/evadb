@@ -74,7 +74,7 @@ SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetect
 2. Search frames in a video containing more than 3 cars
 
 ```mysql
-SELECT id, data FROM DETRAC WHERE array_count(FastRCNNObjectDetector(data).labels, 'car') > 3;
+SELECT id, data FROM MyVideo WHERE Array_Count(FastRCNNObjectDetector(data).labels, 'car') > 3;
 ```
 
 ## Documentation
