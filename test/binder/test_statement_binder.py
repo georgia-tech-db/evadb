@@ -258,4 +258,3 @@ class StatementBinderTests(unittest.TestCase):
             mock.assert_called_with(tve.col_name, tve.table_alias)
             self.assertEqual(tve.col_object, 'col_obj')
             self.assertEqual(tve.col_alias, col_alias)
-

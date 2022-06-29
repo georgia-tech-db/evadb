@@ -15,6 +15,7 @@
 from enum import unique, Enum, auto
 
 
+# Modified, add RENAME
 @unique
 class PlanOprType(Enum):
     SEQUENTIAL_SCAN = auto()
@@ -22,6 +23,9 @@ class PlanOprType(Enum):
     PP_FILTER = auto()
     INSERT = auto()
     CREATE = auto()
+    RENAME = auto()
+    TRUNCATE = auto()
+    DROP = auto()
     CREATE_UDF = auto()
     LOAD_DATA = auto()
     UPLOAD = auto()

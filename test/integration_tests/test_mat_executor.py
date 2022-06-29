@@ -51,8 +51,7 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(materialized_query)
 
         select_query = 'SELECT id, label FROM dummy_view;'
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch = sorted(execute_query_fetch_all(select_query))
 
         labels = DummyObjectDetector().labels
         expected = [{'dummy_view.id': i, 'dummy_view.label': labels[1 + i % 2]}
@@ -76,8 +75,7 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(materialized_query)
 
         select_query = 'SELECT id, label FROM dummy_view2;'
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch = sorted(execute_query_fetch_all(select_query))
 
         labels = DummyObjectDetector().labels
         expected = [{'dummy_view2.id': i,
@@ -93,8 +91,7 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         select_view_query = 'SELECT id, labels FROM uadtrac_fastRCNN'
-        actual_batch = execute_query_fetch_all(select_view_query)
-        actual_batch.sort()
+        actual_batch = sorted(execute_query_fetch_all(select_view_query))
 
         self.assertEqual(actual_batch.batch_size, 5)
         # non-trivial test case

@@ -70,6 +70,14 @@ SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).label
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
 ```
+## Extending new DDL command in EVA
+Now EVA support following DDL commands:
+* CREATE
+* RENAME
+* DROP
+* TRUNCATE
+
+For the tutorial of implementing a DDL command, please refer to  `tutorial_extend_ddl_cmd.md`.
 
 2. Search frames in a video containing more than 3 cars
 

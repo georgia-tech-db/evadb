@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf | createMaterializedView
-    | dropDatabase | dropTable | dropIndex
+    | dropDatabase | dropTable | dropIndex | renameTable | truncateTable
     ;
 
 dmlStatement
@@ -57,6 +57,19 @@ createTable
     : CREATE TABLE
       ifNotExists?
       tableName createDefinitions                                  #columnCreateTable
+    ;
+
+// Rename statements
+renameTable
+    : RENAME TABLE
+      oldtableName
+      TO newtableName
+    ;
+
+//Truncate statements
+truncateTable
+    : TRUNCATE TABLE
+      tableName
     ;
 
 // Create UDFs
@@ -354,6 +367,12 @@ fullId
     ;
 
 tableName
+    : fullId
+    ;
+oldtableName
+    : fullId
+    ;
+newtableName
     : fullId
     ;
 
