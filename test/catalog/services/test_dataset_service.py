@@ -24,6 +24,7 @@ DATASET_URL = 'file1'
 DATASET_NAME = 'name'
 DATABASE_NAME = "test"
 IDENTIFIER = 'data_id'
+DATASET_NEW_NAME = 'new_name'
 
 
 class DatasetServiceTest(unittest.TestCase):
@@ -75,6 +76,24 @@ class DatasetServiceTest(unittest.TestCase):
         expected = mocked.query.filter.return_value.one_or_none.return_value
 
         self.assertEqual(actual, expected)
+
+    @patch("eva.catalog.services.df_service.DataFrameMetadata")
+    def test_rename_dataset_object_by_id(self, mocked):
+        service = DatasetService()
+        self.assertTrue(
+            service.rename_dataset_by_id(
+                DATASET_NEW_NAME,
+                DATASET_ID))
+        expected_output = 1
+        mocked.query.with_entities.return_value.filter.return_value.one \
+            .return_value = [expected_output]
+
+        result = service.dataset_by_name(DATASET_NEW_NAME)
+        mocked.query.with_entities.assert_called_with(mocked._id)
+        mocked.query.with_entities.return_value.filter.assert_called_with(
+            mocked._name == DATASET_NEW_NAME)
+
+        self.assertEqual(result, expected_output)
 
     @patch('eva.catalog.services.df_service.DatasetService.dataset_by_id')
     def test_delete_dataset_object_by_id(self, mock_id):

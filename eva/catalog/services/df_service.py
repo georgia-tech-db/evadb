@@ -15,6 +15,7 @@
 from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
+from time import time
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
@@ -22,6 +23,7 @@ from eva.utils.logging_manager import LoggingManager, LoggingLevel
 
 
 class DatasetService(BaseService):
+
     def __init__(self):
         super().__init__(DataFrameMetadata)
 
@@ -110,3 +112,23 @@ class DatasetService(BaseService):
                 LoggingLevel.ERROR)
             return False
         return True
+
+    def rename_dataset_by_id(self, new_name: str, metadata_id: int) -> bool:
+        try:
+            dataset = self.dataset_by_id(metadata_id)
+            dataset._name = new_name
+            dataset.save()
+
+        except Exception:
+            LoggingManager().log(
+                "update dataset name with id {}".format(metadata_id),
+                LoggingLevel.ERROR)
+            return False
+        return True
+
+    def truncate_table_new_metadata(self, metadata_id: int):
+        # -> DataFrameMetadata:
+        dataset = self.dataset_by_id(metadata_id)
+        # TODO: Fix this logic of naming
+        new_name = dataset._name + str(int(time.time()))
+        return dataset._name, new_name

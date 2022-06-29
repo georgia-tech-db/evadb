@@ -12,10 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# import unittest
-# import pandas as pd
-# import numpy as np
-# from pytest import skip
 
 # from eva.catalog.catalog_manager import CatalogManager
 # from eva.models.storage.batch import Batch

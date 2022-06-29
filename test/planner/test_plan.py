@@ -20,6 +20,9 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 
 from eva.planner.create_plan import CreatePlan
+from eva.planner.rename_plan import RenamePlan
+from eva.planner.truncate_plan import TruncatePlan
+from eva.planner.drop_plan import DropPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.load_data_plan import LoadDataPlan
@@ -48,6 +51,44 @@ class PlanNodeTests(unittest.TestCase):
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
+
+    def test_rename_plan(self):
+        dummy_info = TableInfo("old")
+        dummy_old = TableRef(dummy_info)
+        dummy_new = TableInfo("new")
+        video_id = 0
+
+        CatalogManager().reset()
+        dummy_plan_node = RenamePlan(dummy_old, video_id, dummy_new)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
+        self.assertEqual(dummy_plan_node.old_table.table.table_name,
+                         "old")
+        self.assertEqual(dummy_plan_node.new_name.table_name,
+                         "new")
+
+    def test_truncate_plan(self):
+        dummy_info = TableInfo('dummy')
+        dummy_table = TableRef(dummy_info)
+        video_id = 0
+
+        CatalogManager().reset()
+        dummy_plan_node = TruncatePlan(dummy_table, video_id)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.TRUNCATE)
+        self.assertEqual(dummy_plan_node.table_ref.table.table_name,
+                         "dummy")
+
+    def test_drop_plan(self):
+        dummy_info = TableInfo('dummy')
+        dummy_table = TableRef(dummy_info)
+        video_id = 0
+
+        CatalogManager().reset()
+        dummy_plan_node = DropPlan([dummy_table], False, [video_id])
+
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
+        self.assertEqual(
+            dummy_plan_node.table_refs[0].table.table_name, "dummy")
+        self.assertEqual(dummy_plan_node.table_ids[0], video_id)
 
     def test_insert_plan(self):
         video_id = 0

@@ -28,7 +28,7 @@ class CSVReader(AbstractReader):
         """
             Reads a CSV file and yields frame data.
             Args:
-                column_list: list of columns (TupleValueExpression) 
+                column_list: list of columns (TupleValueExpression)
                 to read from the CSV file
         """
 
@@ -36,16 +36,16 @@ class CSVReader(AbstractReader):
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
-        
+
         # TODO: What is a good location to put this code?
         def convert_csv_string_to_ndarray(row_string):
             """
-            Conver a string of comma seperated values to a numpy 
+            Conver a string of comma seperated values to a numpy
             float array
             """
             return np.array(
                 [np.float32(val) for val in row_string.split(",")])
-        
+
         LoggingManager().log("Reading CSV frames", LoggingLevel.INFO)
 
         # TODO: Need to add strong sanity checks on the columns.
@@ -60,7 +60,7 @@ class CSVReader(AbstractReader):
             for col in chunk.columns:
 
                 # TODO: Is there a better way to do this?
-                if (isinstance(chunk[col].iloc[0], str) and 
+                if (isinstance(chunk[col].iloc[0], str) and
                         col_map[col].col_object.type.name == 'NDARRAY'):
 
                     # convert the string to a numpy array

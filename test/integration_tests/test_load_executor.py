@@ -41,8 +41,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         select_query = """SELECT id, data FROM MyVideo;"""
 
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch = sorted(execute_query_fetch_all(select_query))
         expected_batch = list(create_dummy_batches())[0]
         expected_batch.modify_column_alias('myvideo')
         self.assertEqual(actual_batch, expected_batch)
@@ -77,8 +76,7 @@ class LoadExecutorTest(unittest.TestCase):
                           object_id
                           FROM MyVideoCSV;"""
 
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch = sorted(execute_query_fetch_all(select_query))
 
         # assert the batches are equal
         expected_batch = create_dummy_csv_batches()

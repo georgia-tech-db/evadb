@@ -30,6 +30,9 @@ from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.upload_statement import UploadStatement
 from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.truncate_statement import TruncateTableStatement
+from eva.parser.drop_statement import DropTableStatement
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -64,6 +67,54 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
+
+    # modified
+    def test_rename_statement(self):
+        parser = Parser()
+        rename_queries = "RENAME TABLE student TO student_info"
+        expected_stmt = RenameTableStatement(
+            TableRef(TableInfo('student')),
+            TableInfo('student_info'))
+        eva_statement_list = parser.parse(rename_queries)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.RENAME)
+
+        rename_stmt = eva_statement_list[0]
+        self.assertEqual(rename_stmt, expected_stmt)
+
+    # modified
+    def test_truncate_statement(self):
+        parser = Parser()
+        truncate_queries = "TRUNCATE TABLE student_info"
+        expected_stmt = TruncateTableStatement(
+            TableRef(TableInfo('student_info')))
+        eva_statement_list = parser.parse(truncate_queries)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.TRUNCATE)
+
+        truncate_stmt = eva_statement_list[0]
+        self.assertEqual(truncate_stmt, expected_stmt)
+
+    def test_drop_statement(self):
+        parser = Parser()
+        drop_queries = "DROP TABLE student_info"
+        expected_stmt = DropTableStatement(
+            [TableRef(TableInfo('student_info'))], False)
+        eva_statement_list = parser.parse(drop_queries)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.DROP
+        )
+        drop_stmt = eva_statement_list[0]
+        self.assertEqual(drop_stmt, expected_stmt)
 
     def test_single_statement_queries(self):
         parser = Parser()
