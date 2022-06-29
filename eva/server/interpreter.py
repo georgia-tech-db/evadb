@@ -78,11 +78,11 @@ def handle_user_input(connection):
 
     # Start command interpreter
     prompt = EvaCommandInterpreter()
-    prompt.prompt = '$ '
+    prompt.prompt = 'eva=#'
 
     prompt.set_connection(connection)
 
-    prompt.cmdloop('Welcome to EVA Command Line')
+    prompt.cmdloop('eva (v 0.0.1)\nType "help" for help')
 
 
 def start_cmd_client(host: str, port: int):
