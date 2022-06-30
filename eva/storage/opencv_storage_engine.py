@@ -38,10 +38,10 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         dir_path = Path(table.file_url)
         try:
             dir_path.mkdir(parents=True)
-            shutil.copy2(str(video_file), str(dir_path))
+            shutil.copy2(str(video_file), str(dir_path))            
         except FileExistsError:
             error = 'Failed to load the video as directory \
-                                already exists {}'.format(
+                        already exists: {}'.format(
                 dir_path)
             LoggingManager().log(error, LoggingLevel.ERROR)
             raise FileExistsError(error)

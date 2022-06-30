@@ -52,7 +52,7 @@ class LoadVideoExecutor(AbstractExecutor):
                 video_file_path = video_path
 
         if video_file_path is None:
-            error = "Failed to find the video file {}".format(
+            error = "Failed to find a video file at location: {}".format(
                 self.node.file_path
             )
             LoggingManager().log(error, LoggingLevel.ERROR)
@@ -67,7 +67,7 @@ class LoadVideoExecutor(AbstractExecutor):
         if success:
             yield Batch(
                 pd.DataFrame(
-                    {"Video successfully added": str(self.node.file_path)},
+                    {"Video successfully added at location: ": str(self.node.file_path)},
                     index=[0],
                 )
             )
