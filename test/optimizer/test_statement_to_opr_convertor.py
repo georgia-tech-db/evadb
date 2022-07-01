@@ -27,10 +27,13 @@ from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.optimizer.operators import (LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData, LogicalRename, LogicalTruncate,
-                                     LogicalDrop, LogicalGet, LogicalSample,
-                                     LogicalGet, LogicalFilter,LogicalOrderBy,
-                                     LogicalUnion, LogicalFunctionScan,LogicalJoin)
+                                     LogicalLoadData, LogicalRename, 
+                                     LogicalTruncate,
+                                     LogicalDrop, LogicalSample,
+                                     LogicalGet, LogicalFilter, 
+                                     LogicalOrderBy,
+                                     LogicalUnion, LogicalFunctionScan, 
+                                     LogicalJoin)
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -185,23 +188,42 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    def test_should_return_false_for_unequal_plans_and_true_for_equal_plans(self):
+    def test_should_return_false_for_unequal_plans_and_true_for_equal_plans(
+            self):
         plans = []
-        create_plan = LogicalCreate(TableRef(TableInfo('video')), [MagicMock()])
+        create_plan = LogicalCreate(
+            TableRef(
+                TableInfo('video')), [
+                MagicMock()])
         create_udf_plan = LogicalCreateUDF('udf', False, None, None, None)
-        insert_plan = LogicalInsert(MagicMock(), 0, [MagicMock()], [MagicMock()])
+        insert_plan = LogicalInsert(
+            MagicMock(), 0, [
+                MagicMock()], [
+                MagicMock()])
         query_derived_plan = LogicalQueryDerivedGet(alias='T')
-        load_plan = LogicalLoadData(MagicMock(), MagicMock(),MagicMock(), MagicMock())
+        load_plan = LogicalLoadData(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock())
         truncate_plan = LogicalTruncate(TableRef(TableInfo('video')), 5)
-        rename_plan = LogicalRename(TableRef(TableInfo('old')), 5, TableInfo('new'))
+        rename_plan = LogicalRename(
+            TableRef(
+                TableInfo('old')),
+            5,
+            TableInfo('new'))
         drop_plan = LogicalDrop([MagicMock()], [5], True)
-        get_plan = LogicalGet(MagicMock(),MagicMock(),MagicMock())
+        get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())
         order_by_plan = LogicalOrderBy(MagicMock())
         union_plan = LogicalUnion(MagicMock())
         function_scan_plan = LogicalFunctionScan(MagicMock())
-        join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        join_plan = LogicalJoin(
+            MagicMock(),
+            MagicMock(),
+            MagicMock(),
+            MagicMock())
 
         create_plan.append_child(create_udf_plan)
 
@@ -224,6 +246,5 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         length = len(plans)
         for i in range(length):
             self.assertEqual(plans[i], plans[i])
-            if i >= 1: # compare against next plan
-                self.assertNotEqual(plans[i-1], plans[i])
-        
+            if i >= 1:  # compare against next plan
+                self.assertNotEqual(plans[i - 1], plans[i])
