@@ -142,52 +142,6 @@ class CatalogManager(object):
                 column_names)
         return metadata_id, column_ids
 
-    def get_column_types(self, table_metadata_id: int,
-                         col_id_list: List[int]) -> List[ColumnType]:
-        """
-        This method consumes the input table_id and the input column_id_list
-        and
-        returns a list of ColumnType for each provided column_id.
-
-        Arguments:
-            table_metadata_id {int} -- [metadata_id of the table]
-            col_id_list {List[int]} -- [metadata ids of the columns; If list
-            = None, return type for all columns in the table]
-
-        Returns:
-            List[ColumnType] -- [list of required column type for each input
-            column]
-        """
-        metadata = self._dataset_service.dataset_by_id(table_metadata_id)
-        col_types = []
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata.id, col_id_list
-        )
-        for col in df_columns:
-            col_types.append(col.type)
-
-        return col_types
-
-    def get_column_ids(self, table_metadata_id: int) -> List[int]:
-        """
-        This method returns all the column_ids associated with the given
-        table_metadata_id
-
-        Arguments:
-            table_metadata_id {int} -- [table metadata id for which columns
-            are required]
-
-        Returns:
-            List[int] -- [list of columns ids for this table]
-        """
-        col_ids = []
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            table_metadata_id)
-        for col in df_columns:
-            col_ids.append(col[0])
-
-        return col_ids
-
     def create_column_metadata(
         self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
         dimensions: List[int]

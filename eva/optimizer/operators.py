@@ -559,7 +559,7 @@ class LogicalDrop(Operator):
         return (is_subtree_equal
                 and self.table_refs == other.table_refs
                 and self.if_exists == other.if_exists
-                and self.catalog_table_id == other.catalog_table_id)
+                and self.catalog_table_ids == other.catalog_table_ids)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
