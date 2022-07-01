@@ -42,9 +42,9 @@ async def realtime_server_status(protocol, server_closed):
             previous_errors = protocol.__errors__
 
             logger.info("Status: " +
-                                 "connections: " + str(previous_connections) +
-                                 " " +
-                                 "errors: " + str(previous_errors)
+                        "connections: " + str(previous_connections) +
+                        " " +
+                        "errors: " + str(previous_errors)
                         )
 
         # Report changes every 1~s

@@ -23,6 +23,8 @@ from eva.utils.logging_manager import logger
 ##################################################################
 # RENAME STATEMENT
 ##################################################################
+
+
 class RenameTable(evaql_parserVisitor):
     def visitOldtableName(self, ctx: evaql_parser.OldtableNameContext):
 
@@ -33,7 +35,7 @@ class RenameTable(evaql_parserVisitor):
         else:
             error = 'Invalid Old Table'
             logger.error(error)
-   
+
     def visitNewtableName(self, ctx: evaql_parser.NewtableNameContext):
 
         table_name = self.visit(ctx.fullId())

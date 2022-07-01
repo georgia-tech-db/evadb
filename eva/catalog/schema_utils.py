@@ -98,5 +98,7 @@ class SchemaUtils(object):
             try:
                 df[col] = df[col].apply(lambda x: x.astype(dtype, copy=False))
             except Exception:
-                logger.exception('Failed to cast %s to %s for Petastorm' % (col, dtype))
+                logger.exception(
+                    'Failed to cast %s to %s for Petastorm' %
+                    (col, dtype))
         return df

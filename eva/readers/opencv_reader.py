@@ -19,6 +19,7 @@ from typing import Iterator, Dict
 from eva.readers.abstract_reader import AbstractReader
 from eva.utils.logging_manager import logger
 
+
 class OpenCVReader(AbstractReader):
 
     def __init__(self, *args, start_frame_id=0, **kwargs):

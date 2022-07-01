@@ -17,10 +17,10 @@ import logging
 
 LOG_handler = logging.StreamHandler()
 LOG_formatter = logging.Formatter(
-                fmt='%(asctime)-15s %(levelname)-6s'
-                 '[%(module)s:%(filename)s:%(funcName)s:%(lineno)04d] %(message)s',
-                datefmt='%m-%d-%Y %H:%M:%S'
-            )
+    fmt='%(asctime)-15s %(levelname)-6s'
+    '[%(module)s:%(filename)s:%(funcName)s:%(lineno)04d] %(message)s',
+    datefmt='%m-%d-%Y %H:%M:%S'
+)
 LOG_handler.setFormatter(LOG_formatter)
 
 logger = logging.getLogger(__name__)

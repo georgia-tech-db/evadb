@@ -18,6 +18,7 @@ from pyspark.conf import SparkConf
 
 from eva.configuration.configuration_manager import ConfigurationManager
 
+
 class Session(object):
     """
     Wrapper around Spark Session

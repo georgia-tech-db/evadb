@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from eva.utils.logging_manager import logger
 import asyncio
 import sys
 from os.path import dirname, abspath, join
@@ -24,11 +25,11 @@ THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
 
-from eva.utils.logging_manager import logger
 from eva.server.server import start_server  # noqa: E402
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
 from eva.configuration.configuration_manager import \
     ConfigurationManager  # noqa: E402
+
 
 def eva():
     """

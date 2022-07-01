@@ -18,6 +18,7 @@ import asyncio
 from eva.server.networking_utils import set_socket_io_timeouts
 from eva.utils.logging_manager import logger
 
+
 class EvaProtocolBuffer:
     """
     Buffer to handle arbitrary length of message.
@@ -77,7 +78,7 @@ class EvaClient(asyncio.Protocol):
         EvaClient.__connections__ += 1
 
         logger.debug("[ " + str(self.id) + " ]" +
-                             " Init Client")
+                     " Init Client")
 
     def connection_made(self, transport):
         self.transport = transport
@@ -85,17 +86,17 @@ class EvaClient(asyncio.Protocol):
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
             logger.debug("[ " + str(self.id) + " ]" +
-                                 " Could not set timeout"
-                                 )
+                         " Could not set timeout"
+                         )
             return
 
         logger.debug("[ " + str(self.id) + " ]" +
-                             " Connected to server")
+                     " Connected to server")
 
     def connection_lost(self, exc, exc2=None):
 
         logger.debug("[ " + str(self.id) + " ]" +
-                             " Disconnected from server")
+                     " Disconnected from server")
 
         try:
             self.transport.abort()  # free sockets early, free sockets often
@@ -115,9 +116,9 @@ class EvaClient(asyncio.Protocol):
 
         response_chunk = data.decode()
         logger.debug("[ " + str(self.id) + " ]" +
-                             " Response from server: --|" +
-                             str(response_chunk) + "|--"
-                             )
+                     " Response from server: --|" +
+                     str(response_chunk) + "|--"
+                     )
 
         self.buffer.feed_data(response_chunk)
         while self.buffer.has_complete_message():
@@ -128,8 +129,8 @@ class EvaClient(asyncio.Protocol):
     def send_message(self, message):
 
         logger.debug("[ " + str(self.id) + " ]" +
-                             " Request to server: --|" + str(message) + "|--"
-                             )
+                     " Request to server: --|" + str(message) + "|--"
+                     )
 
         request_chunk = (str(len(message)) + '|' + message).encode('ascii')
         # Send request

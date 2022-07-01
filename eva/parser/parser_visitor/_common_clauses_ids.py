@@ -22,6 +22,8 @@ from eva.utils.logging_manager import logger
 ##################################################################
 # COMMON CLAUSES Ids, Column_names, Table_names
 ##################################################################
+
+
 class CommonClauses(evaql_parserVisitor):
     def visitTableName(self, ctx: evaql_parser.TableNameContext):
 

@@ -77,8 +77,8 @@ def handle_request(transport, request_message):
     data = (str(len(responseData)) + '|' + responseData).encode('ascii')
 
     logger.debug('Response to client: --|' +
-                         str(response) + '|--\n' +
-                         'Length: ' + str(len(responseData)))
+                 str(response) + '|--\n' +
+                 'Length: ' + str(len(responseData)))
 
     transport.write(data)
 

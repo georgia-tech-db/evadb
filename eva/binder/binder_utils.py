@@ -22,6 +22,7 @@ from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
+
 def create_video_metadata(name: str) -> DataFrameMetadata:
     """Create video metadata object.
         We have predefined columns for such a object

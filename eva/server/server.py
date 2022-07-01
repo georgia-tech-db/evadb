@@ -59,7 +59,7 @@ class EvaServer(asyncio.Protocol):
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info('peername')
         logger.debug('Connection from client: ' + str(peername) +
-                             str(self._socket_timeout))
+                     str(self._socket_timeout))
         EvaServer.__connections__ += 1
 
     def connection_lost(self, exc):
@@ -75,8 +75,8 @@ class EvaServer(asyncio.Protocol):
 
         message = data.decode()
         logger.debug('Request from client: --|' +
-                             str(message) +
-                             '|--')
+                     str(message) +
+                     '|--')
 
         self.buffer.feed_data(message)
         while self.buffer.has_complete_message():
@@ -125,7 +125,7 @@ def start_server(host: string,
 
     for socket in server.sockets:
         logger.critical('PID(' + str(os.getpid()) + ') serving on '
-                             + str(socket.getsockname()))
+                        + str(socket.getsockname()))
 
     server_closed = loop.create_task(server.wait_closed())
 

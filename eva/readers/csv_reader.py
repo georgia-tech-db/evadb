@@ -20,6 +20,7 @@ from typing import Iterator, Dict
 from eva.readers.abstract_reader import AbstractReader
 from eva.utils.logging_manager import logger
 
+
 class CSVReader(AbstractReader):
 
     def __init__(self, *args, column_list, **kwargs):

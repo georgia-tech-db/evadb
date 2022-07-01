@@ -17,6 +17,7 @@ import unittest
 import logging
 logger = logging.getLogger(__name__)
 
+
 class LoggingManagerTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
