@@ -14,26 +14,14 @@
 # limitations under the License.
 import unittest
 
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
-
+import logging
+logger = logging.getLogger(__name__)
 
 class LoggingManagerTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_logging_manager_singleton_pattern(self):
-        x = LoggingManager()
-        y = LoggingManager()
-        self.assertEqual(x, y)
-
     def test_log_levels(self):
 
-        LoggingManager().setEffectiveLevel(LoggingLevel.DEBUG)
-
-        LoggingManager().log("debug", LoggingLevel.DEBUG)
-        LoggingManager().log("info", LoggingLevel.INFO)
-        LoggingManager().log("warn", LoggingLevel.WARNING)
-        LoggingManager().log("error", LoggingLevel.ERROR)
-        LoggingManager().log("critical", LoggingLevel.CRITICAL)
+        logger.debug("debug")

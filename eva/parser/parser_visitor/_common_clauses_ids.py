@@ -17,8 +17,7 @@ from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.table_ref import TableInfo
 from eva.parser.evaql.evaql_parser import evaql_parser
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
-
+from eva.utils.logging_manager import logger
 
 ##################################################################
 # COMMON CLAUSES Ids, Column_names, Table_names
@@ -32,7 +31,7 @@ class CommonClauses(evaql_parserVisitor):
             return table_info
         else:
             error = 'Invalid Table Name'
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
 
     def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
         # Adding support for a.b
@@ -40,8 +39,7 @@ class CommonClauses(evaql_parserVisitor):
         dottedIds = []
         if ctx.dottedId():
             if len(ctx.dottedId()) != 1:
-                LoggingManager().log("Only tablename.colname syntax supported",
-                                     LoggingLevel.ERROR)
+                logger.error("Only tablename.colname syntax supported")
                 return
             for id in ctx.dottedId():
                 dottedIds.append(self.visit(id))

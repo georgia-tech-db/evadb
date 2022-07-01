@@ -27,7 +27,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 if sys.version_info >= (3, 8):
     from functools import singledispatchmethod
@@ -99,7 +99,7 @@ class StatementBinder:
         if table_ref_obj is None:
             error = '{} does not exists. Create the table using \
                             CREATE TABLE.'.format(table_ref.table.table_name)
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
             raise RuntimeError(error)
 
         # if query had columns specified, we just copy them

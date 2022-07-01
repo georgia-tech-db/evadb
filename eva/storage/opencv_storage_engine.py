@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Iterator
 from pathlib import Path
 import struct
@@ -22,8 +23,7 @@ from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.readers.opencv_reader import OpenCVReader
 from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 class OpenCVStorageEngine(AbstractStorageEngine):
@@ -43,7 +43,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             error = 'Failed to load the video as directory \
                         already exists: {}'.format(
                 dir_path)
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
             raise FileExistsError(error)
         self._create_video_metadata(dir_path, video_file.name)
         return True
@@ -68,7 +68,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             (version, ) = struct.unpack('!H', f.read(struct.calcsize('!H')))
             if version > self.curr_version:
                 error = 'Invalid metadata version {}'.format(version)
-                LoggingManager().log(error, LoggingLevel.ERROR)
+                logger.error(error)
                 raise RuntimeError(error)
             (length,) = struct.unpack('!H', f.read(struct.calcsize('!H')))
             path = f.read(length)

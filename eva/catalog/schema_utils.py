@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import numpy as np
 import pandas as pd
 
@@ -22,8 +23,7 @@ from petastorm.unischema import UnischemaField
 from pyspark.sql.types import IntegerType, FloatType, StringType
 
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
+from eva.utils.logging_manager import logger
 
 
 class SchemaUtils(object):
@@ -68,8 +68,7 @@ class SchemaUtils(object):
                                               NdarrayCodec(),
                                               column_is_nullable)
         else:
-            LoggingManager().log("Invalid column type: " + str(column_type),
-                                 LoggingLevel.ERROR)
+            logger.error("Invalid column type: " + str(column_type))
 
         return petastorm_column
 
@@ -99,7 +98,5 @@ class SchemaUtils(object):
             try:
                 df[col] = df[col].apply(lambda x: x.astype(dtype, copy=False))
             except Exception:
-                LoggingManager().exception(
-                    'Failed to cast %s to %s for Petastorm' % (col, dtype)
-                )
+                logger.exception('Failed to cast %s to %s for Petastorm' % (col, dtype))
         return df

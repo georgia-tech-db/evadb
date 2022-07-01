@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
@@ -38,7 +39,7 @@ from eva.parser.upload_statement import UploadStatement
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io,\
     bind_table_ref
 from eva.parser.table_ref import TableRef
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 
 class StatementToPlanConvertor:
@@ -92,8 +93,7 @@ class StatementToPlanConvertor:
 
         table_ref = statement.from_table
         if table_ref is None:
-            LoggingManager().log('From entry missing in select statement',
-                                 LoggingLevel.ERROR)
+            logger.error('From entry missing in select statement')
             return None
 
         self.visit_table_ref(table_ref)
@@ -192,8 +192,7 @@ class StatementToPlanConvertor:
         """
         table_ref = statement.table_ref
         if table_ref is None:
-            LoggingManager().log("Missing Table Name In Create Statement",
-                                 LoggingLevel.ERROR)
+            logger.error("Missing Table Name In Create Statement")
 
         create_opr = LogicalCreate(
             table_ref, statement.column_list, statement.if_not_exists)

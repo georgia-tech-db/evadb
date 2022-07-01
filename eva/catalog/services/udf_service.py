@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.services.base_service import BaseService
+from eva.utils.logging_manager import logger
+
 from sqlalchemy.orm.exc import NoResultFound
-
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
-
 
 class UdfService(BaseService):
     def __init__(self):
@@ -78,8 +78,6 @@ class UdfService(BaseService):
             if udf_record:
                 udf_record.delete()
         except Exception:
-            LoggingManager().log(
-                "delete udf failed with name {}".format(name),
-                LoggingLevel.ERROR)
+            logger.exception("delete udf failed with name {}".format(name))
             return False
         return True

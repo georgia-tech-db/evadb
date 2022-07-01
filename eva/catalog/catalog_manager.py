@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from typing import List, Tuple
 
 from eva.catalog.column_type import ColumnType, NdArrayType
@@ -25,9 +26,8 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_service import UdfService
 from eva.catalog.services.udf_io_service import UdfIOService
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
 from eva.utils.generic_utils import generate_file_path
+from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
@@ -63,7 +63,7 @@ class CatalogManager(object):
         it includes only one task ie. initializing database. It creates the
         catalog database and tables if they do not exist.
         """
-        LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
+        logger.info("Bootstrapping catalog")
         init_db()
 
     def _shutdown_catalog(self):
@@ -71,7 +71,7 @@ class CatalogManager(object):
         This method is responsible for gracefully shutting the
         catalog manager. Currently, it includes dropping the catalog database
         """
-        LoggingManager().log("Shutting catalog", LoggingLevel.INFO)
+        logger.info("Shutting catalog")
         drop_db()
 
     def create_metadata(self, name: str, file_url: str,
@@ -135,9 +135,8 @@ class CatalogManager(object):
         column_ids = []
         if column_names is not None:
             if not isinstance(column_names, list):
-                LoggingManager().log(
-                    "CatalogManager::get_table_binding() expected list",
-                    LoggingLevel.WARNING)
+                logger.warn(
+                    "CatalogManager::get_table_binding() expected list")
             column_ids = self._column_service.columns_by_dataset_id_and_names(
                 metadata_id,
                 column_names)

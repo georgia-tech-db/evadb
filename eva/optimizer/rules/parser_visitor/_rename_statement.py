@@ -18,7 +18,7 @@ from eva.parser.table_ref import TableRef, TableInfo
 
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 # Modified
 ##################################################################
@@ -35,7 +35,7 @@ class RenameTable(evaql_parserVisitor):
             return table_info
         else:
             error = 'Invalid Old Table'
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
 
     def visitNewtableName(self, ctx: evaql_parser.NewtableNameContext):
 
@@ -45,7 +45,7 @@ class RenameTable(evaql_parserVisitor):
             return table_info
         else:
             error = 'Invalid New Table'
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
 
     def visitRenameTable(self, ctx: evaql_parser.RenameTableContext):
         old_table_ref = TableRef(self.visit(ctx.oldtableName()))

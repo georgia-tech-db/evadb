@@ -18,8 +18,8 @@ from eva.parser.table_ref import TableRef, JoinNode
 
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
 from eva.parser.types import JoinType
+from eva.utils.logging_manager import logger
 
 ##################################################################
 # TABLE SOURCES
@@ -135,8 +135,8 @@ class TableSources(evaql_parserVisitor):
 
             except BaseException as e:
                 # stop parsing something bad happened
-                LoggingManager().log('Error while parsing \
-                                visitQuerySpecification', LoggingLevel.ERROR)
+                logger.error('Error while parsing \
+                                visitQuerySpecification')
                 raise e
 
         select_stmt = SelectStatement(

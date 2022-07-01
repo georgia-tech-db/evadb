@@ -13,13 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-
 
 class Session(object):
     """
@@ -69,9 +66,8 @@ class Session(object):
         self._session = session_builder.getOrCreate()
 
         # Configure logging
-        log4j_level = LoggingManager().getLog4JLevel()
         spark_context = self._session.sparkContext
-        spark_context.setLogLevel(log4j_level)
+        spark_context.setLogLevel('OFF')
 
     def get_session(self):
         return self._session

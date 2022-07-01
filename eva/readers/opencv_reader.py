@@ -17,9 +17,7 @@ import cv2
 from typing import Iterator, Dict
 
 from eva.readers.abstract_reader import AbstractReader
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
-
+from eva.utils.logging_manager import logger
 
 class OpenCVReader(AbstractReader):
 
@@ -44,7 +42,7 @@ class OpenCVReader(AbstractReader):
         video_offset = self.offset if self.offset else 0
         video.set(cv2.CAP_PROP_POS_FRAMES, video_offset)
 
-        LoggingManager().log("Reading frames", LoggingLevel.INFO)
+        logger.debug("Reading frames")
 
         _, frame = video.read()
         frame_id = self._start_frame_id

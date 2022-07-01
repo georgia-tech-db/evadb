@@ -14,12 +14,12 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Dict, List
 
+from typing import Dict, List
 from eva.optimizer.property import Property
 from eva.optimizer.group_expression import GroupExpression
-from eva.utils.logging_manager import LoggingManager
 from eva.constants import UNDEFINED_GROUP_ID
+from eva.utils.logging_manager import logger
 
 
 class Winner:
@@ -79,7 +79,7 @@ class Group:
             expr.group_id = self.group_id
 
         if expr.group_id != self.group_id:
-            LoggingManager().log('Expected group id {}, found {}'.format(
+            logger.error('Expected group id {}, found {}'.format(
                 self.group_id, expr.group_id))
             return
 

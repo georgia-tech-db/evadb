@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import json
 import numpy as np
 import pandas as pd
@@ -19,7 +20,8 @@ import pandas as pd
 from typing import Iterable, NoReturn
 
 from pandas import DataFrame
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+
+from eva.utils.logging_manager import logger
 
 
 class BatchEncoder(json.JSONEncoder):
@@ -63,8 +65,7 @@ class Batch:
         if isinstance(values, DataFrame):
             self._frames = values
         else:
-            LoggingManager().log('Batch constructor not properly called!',
-                                 LoggingLevel.DEBUG)
+            logger.debug('Batch constructor not properly called!')
             raise ValueError('Batch constructor not properly called. \
                 Expected pandas.DataFrame')
         self._batch_size = len(values)
@@ -148,8 +149,7 @@ class Batch:
             elif not self.empty():
                 by = self.frames.columns[0]
             else:
-                LoggingManager().log('Sorting an empty batch',
-                                     LoggingLevel.WARNING)
+                logger.warn('Sorting an empty batch')
                 return
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
@@ -171,10 +171,9 @@ class Batch:
         if by is not None:
             for column in by:
                 if column not in self._frames.columns:
-                    LoggingManager().log(
+                    logger.error(
                         'Can not orderby non-projected column: {}'.format(
-                            column),
-                        LoggingLevel.ERROR)
+                            column))
                     raise KeyError(
                         'Can not orderby non-projected column: {}'.format(
                             column))
@@ -182,9 +181,8 @@ class Batch:
             self._frames.sort_values(
                 by, ascending=sort_type, ignore_index=True, inplace=True)
         else:
-            LoggingManager().log(
-                'Columns and Sort Type are required for orderby',
-                LoggingLevel.WARNING)
+            logger.warn(
+                'Columns and Sort Type are required for orderby')
 
     def project(self, cols: []) -> 'Batch':
         """
@@ -194,9 +192,8 @@ class Batch:
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
         if len(unknown_cols):
-            LoggingManager().log("Unexpected columns %s\n\
-                                 Frames: %s" % (unknown_cols, self._frames),
-                                 LoggingLevel.WARNING)
+            logger.warn("Unexpected columns %s\n\
+                                 Frames: %s" % (unknown_cols, self._frames))
         return Batch(self._frames[verfied_cols], self._identifier_column)
 
     @classmethod
@@ -218,9 +215,8 @@ class Batch:
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1, copy=False)
         if new_frames.columns.duplicated().any():
-            LoggingManager().log(
-                'Duplicated column name detected {}'.format(new_frames),
-                LoggingLevel.WARNING)
+            logger.warn(
+                'Duplicated column name detected {}'.format(new_frames))
         return Batch(new_frames)
 
     def __add__(self, other: 'Batch'):

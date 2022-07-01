@@ -18,9 +18,7 @@ import pandas as pd
 from typing import Iterator, Dict
 
 from eva.readers.abstract_reader import AbstractReader
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
-
+from eva.utils.logging_manager import logger
 
 class CSVReader(AbstractReader):
 
@@ -46,7 +44,7 @@ class CSVReader(AbstractReader):
             return np.array(
                 [np.float32(val) for val in row_string.split(",")])
 
-        LoggingManager().log("Reading CSV frames", LoggingLevel.INFO)
+        logger.info("Reading CSV frames")
 
         # TODO: Need to add strong sanity checks on the columns.
 
