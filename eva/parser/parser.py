@@ -40,15 +40,15 @@ class MyErrorListener(ErrorListener):
         error_str = "ERROR: Ambiguity -" + str(configs)
         raise Exception(error_str)
 
-    def reportAttemptingFullContext(self, recognizer, dfa, startIndex,
-                                    stopIndex, conflictingAlts, configs):
-        error_str = "ERROR: Attempting Full Context -" + str(configs)
-        raise Exception(error_str)
+    # def reportAttemptingFullContext(self, recognizer, dfa, startIndex,
+    #                                 stopIndex, conflictingAlts, configs):
+    #     error_str = "ERROR: Attempting Full Context -" + str(configs)
+    #     raise Exception(error_str)
 
-    def reportContextSensitivity(self, recognizer, dfa, startIndex,
-                                 stopIndex, prediction, configs):
-        error_str = "ERROR: Context Sensitivity -" + str(configs)
-        raise Exception(error_str)
+    # def reportContextSensitivity(self, recognizer, dfa, startIndex,
+    #                              stopIndex, prediction, configs):
+    #     error_str = "ERROR: Context Sensitivity -" + str(configs)
+    #     raise Exception(error_str)
 
 
 class Parser(object):
