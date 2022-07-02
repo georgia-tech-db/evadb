@@ -35,10 +35,10 @@ class MyErrorListener(ErrorListener):
                     str(column) + " - " + str(msg)
         raise Exception(error_str)
 
-    def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
-                        exact, ambigAlts, configs):
-        error_str = "ERROR: Ambiguity -" + str(configs)
-        raise Exception(error_str)
+    # def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
+    #                    exact, ambigAlts, configs):
+    #    error_str = "ERROR: Ambiguity -" + str(configs)
+    #    raise Exception(error_str)
 
     # def reportAttemptingFullContext(self, recognizer, dfa, startIndex,
     #                                 stopIndex, conflictingAlts, configs):
