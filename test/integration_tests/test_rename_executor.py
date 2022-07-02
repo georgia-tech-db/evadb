@@ -1,9 +1,7 @@
 import unittest
-import numpy as np
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.logging_manager import logger
 
 from test.util import create_sample_video, file_remove
 

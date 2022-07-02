@@ -16,7 +16,6 @@
 from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
-from time import time
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService

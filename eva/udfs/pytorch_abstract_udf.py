@@ -24,7 +24,6 @@ from eva.udfs.gpu_compatible import GPUCompatible
 from eva.configuration.configuration_manager import ConfigurationManager
 
 import torch
-import torchvision
 from torch import nn, Tensor
 from torchvision.transforms import Compose, transforms
 

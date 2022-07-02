@@ -210,7 +210,6 @@ class Encoder(object):
         self.scale_xy = dboxes.scale_xy
         self.scale_wh = dboxes.scale_wh
 
-
     def scale_back_batch(self, bboxes_in, scores_in):
         """
             Do scale and transform from xywh to ltrb
