@@ -84,7 +84,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS MyVideoObjects (id, labels, scores, bboxe
 SELECT id, FastRCNNObjectDetector(data) FROM MyVideo;
 ```
 
-5. Load a metadata table for a video
+5. Create a metadata table that keeps tracks of details about objects in a video
 
 ```mysql
 CREATE TABLE IF NOT EXISTS MyCSV (
