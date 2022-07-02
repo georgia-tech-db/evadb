@@ -74,7 +74,7 @@ class Parser(object):
 
         parser = evaql_parser(stream)
         # Attach error listener for debugging parser errors
-        # parser._listeners = [self._error_listener]
+        parser._listeners = [self._error_listener]
 
         tree = parser.root()
 

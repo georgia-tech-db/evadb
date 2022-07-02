@@ -28,15 +28,15 @@ class Response:
     Data model for EVA server response
     """
 
-    def __init__(self, status: ResponseStatus, batch: Batch, metrics=None):
+    def __init__(self, status: ResponseStatus, batch: Batch, error: str = ''):
         self._status = status
         self._batch = batch
-        self._metrics = metrics
+        self._error = error
 
     def to_json(self):
         obj = {'status': self.status,
                'batch': self.batch,
-               'metrics': self.metrics}
+               'error': self.error}
         return json.dumps(obj, cls=ResponseEncoder)
 
     @classmethod
@@ -47,14 +47,14 @@ class Response:
     def __eq__(self, other: 'Response'):
         return self.status == other.status and \
             self.batch == other.batch and \
-            self.metrics == other.metrics
+            self.error == other.error
 
     def __str__(self):
         return 'Response Object:\n' \
                '@status: %s\n' \
                '@batch: %s\n' \
-               '@metrics: %s' \
-               % (self.status, self.batch, self.metrics)
+               '@error: %s' \
+               % (self.status, self.batch, self.error)
 
     @property
     def status(self):
@@ -65,5 +65,5 @@ class Response:
         return self._batch
 
     @property
-    def metrics(self):
-        return self._metrics
+    def error(self):
+        return self._error
