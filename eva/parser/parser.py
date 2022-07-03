@@ -30,7 +30,7 @@ class MyErrorListener(ErrorListener):
     def __init__(self):
         super(MyErrorListener, self).__init__()
 
-    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
+    def AntlrErrorListener(self, recognizer, offendingSymbol, line, column, msg, e):
         error_str = "ERROR: Syntax error - Line" + str(line) + ": Col " +\
                     str(column) + " - " + str(msg)
         raise Exception(error_str)
@@ -66,7 +66,7 @@ class Parser(object):
 
     def __init__(self):
         self._visitor = ParserVisitor()
-        self._error_listener = MyErrorListener()
+        self._error_listener = AntlrErrorListener()
 
     def parse(self, query_string: str) -> list:
         lexer = evaql_lexer(InputStream(query_string))
