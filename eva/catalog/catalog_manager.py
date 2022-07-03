@@ -26,7 +26,6 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_service import UdfService
 from eva.catalog.services.udf_io_service import UdfIOService
-from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
@@ -105,16 +104,6 @@ class CatalogManager(object):
     def rename_table(self, new_name: str, metadata_id: int):
         return self._dataset_service.rename_dataset_by_id(
             new_name, metadata_id)
-
-    def truncate_table_metadata(self, metadata_id: int):
-        old_name, new_name = \
-            self._dataset_service.truncate_table_new_metadata(metadata_id)
-        new_metadata = self._dataset_service.create_dataset(
-            new_name, str(generate_file_path(new_name)), 'id')
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata_id)
-        new_metadata.schema = df_columns
-        return old_name, new_name, new_metadata
 
     def get_table_bindings(self, database_name: str, table_name: str,
                            column_names: List[str] = None) -> Tuple[int,
