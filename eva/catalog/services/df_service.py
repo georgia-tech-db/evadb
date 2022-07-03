@@ -95,37 +95,20 @@ class DatasetService(BaseService):
         return self.model.query.filter(
             self.model._name == dataset_name).one_or_none()
 
-    def delete_dataset_by_id(self, metadata_id: int) -> bool:
+    def drop_dataset_by_name(self,
+                             database_name: str,
+                             dataset_name: str) -> bool:
         """ Delete dataset from the db
             Arguments:
-                metadata_id(int): id to be removed
+                table_name(str): name to be removed
             Returns:
                 True if successfully removed else false
         """
         try:
-            dataset = self.dataset_by_id(metadata_id)
+            dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
         except Exception:
             logger.error(
-                "delete dataset failed with id {}".format(metadata_id))
+                "delete dataset failed for name {}".format(dataset_name))
             return False
         return True
-
-    def rename_dataset_by_id(self, new_name: str, metadata_id: int) -> bool:
-        try:
-            dataset = self.dataset_by_id(metadata_id)
-            dataset._name = new_name
-            dataset.save()
-
-        except Exception:
-            logger.error(
-                "update dataset name with id {}".format(metadata_id))
-            return False
-        return True
-
-    def truncate_table_new_metadata(self, metadata_id: int):
-        # -> DataFrameMetadata:
-        dataset = self.dataset_by_id(metadata_id)
-        # TODO: Fix this logic of naming
-        new_name = dataset._name + "truncate"
-        return dataset._name, new_name

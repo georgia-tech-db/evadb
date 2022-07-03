@@ -26,7 +26,6 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_service import UdfService
 from eva.catalog.services.udf_io_service import UdfIOService
-from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
@@ -101,20 +100,6 @@ class CatalogManager(object):
         column_list = self._column_service.create_column(column_list)
         metadata.schema = column_list
         return metadata
-
-    def rename_table(self, new_name: str, metadata_id: int):
-        return self._dataset_service.rename_dataset_by_id(
-            new_name, metadata_id)
-
-    def truncate_table_metadata(self, metadata_id: int):
-        old_name, new_name = \
-            self._dataset_service.truncate_table_new_metadata(metadata_id)
-        new_metadata = self._dataset_service.create_dataset(
-            new_name, str(generate_file_path(new_name)), 'id')
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata_id)
-        new_metadata.schema = df_columns
-        return old_name, new_name, new_metadata
 
     def get_table_bindings(self, database_name: str, table_name: str,
                            column_names: List[str] = None) -> Tuple[int,
@@ -257,7 +242,9 @@ class CatalogManager(object):
                              {}'''.format(type(udf_obj)))
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def delete_metadata(self, table_name: str) -> bool:
+    def drop_dataset_metadata(self,
+                              database_name: str,
+                              table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -268,12 +255,13 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        return self._dataset_service.delete_dataset_by_id(metadata_id)
+        return self._dataset_service.drop_dataset_by_name(database_name,
+                                                          table_name)
 
-    def delete_udf(self, udf_name: str) -> bool:
+    def drop_udf(self, udf_name: str) -> bool:
         """
-        This method drops the udf entry from the catalog
+        This method drops the udf entry and corresponding udf_io
+        from the catalog
 
         Arguments:
            udf_name: udf name to be dropped.
@@ -281,7 +269,7 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._udf_service.delete_udf_by_name(udf_name)
+        return self._udf_service.drop_udf_by_name(udf_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(
