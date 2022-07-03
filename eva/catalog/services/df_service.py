@@ -123,9 +123,3 @@ class DatasetService(BaseService):
             return False
         return True
 
-    def truncate_table_new_metadata(self, metadata_id: int):
-        # -> DataFrameMetadata:
-        dataset = self.dataset_by_id(metadata_id)
-        # TODO: Fix this logic of naming
-        new_name = dataset._name + "truncate"
-        return dataset._name, new_name
