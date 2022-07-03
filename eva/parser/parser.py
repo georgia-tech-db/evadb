@@ -22,15 +22,15 @@ from eva.parser.evaql.evaql_lexer import evaql_lexer
 from eva.parser.parser_visitor import ParserVisitor
 
 
-class MyErrorListener(ErrorListener):
+class AntlrErrorListener(ErrorListener):
 
     # Reference
     # https://www.antlr.org/api/Java/org/antlr/v4/runtime/BaseErrorListener.html
 
     def __init__(self):
-        super(MyErrorListener, self).__init__()
+        super(AntlrErrorListener, self).__init__()
 
-    def AntlrErrorListener(self, recognizer, offendingSymbol, line, column, msg, e):
+    def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         error_str = "ERROR: Syntax error - Line" + str(line) + ": Col " +\
                     str(column) + " - " + str(msg)
         raise Exception(error_str)
