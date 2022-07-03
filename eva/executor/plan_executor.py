@@ -25,8 +25,6 @@ from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.create_executor import CreateExecutor
-from eva.executor.rename_executor import RenameExecutor
-from eva.executor.truncate_executor import TruncateExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
@@ -82,10 +80,6 @@ class PlanExecutor:
             executor_node = PPExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE:
             executor_node = CreateExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.RENAME:
-            executor_node = RenameExecutor(node=plan)
-        elif plan_opr_type == PlanOprType.TRUNCATE:
-            executor_node = TruncateExecutor(node=plan)
         elif plan_opr_type == PlanOprType.DROP:
             executor_node = DropExecutor(node=plan)
         elif plan_opr_type == PlanOprType.INSERT:

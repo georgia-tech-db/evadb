@@ -23,7 +23,7 @@ class DropTableStatement(AbstractStatement):
     """Drop Table Statement constructed after parsing the input query
 
     Attributes:
-        TableRef: table reference in the truncate table statement
+        TableRef: table reference in the drop table statement
     """
 
     def __init__(self,
@@ -51,7 +51,10 @@ class DropTableStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, DropTableStatement):
             return False
-        print(self.table_refs, '==', other.table_refs)
         return (self.table_refs == other.table_refs
                 and self.if_exists == other.if_exists)
-        # and self.if_exists == other.if_exists)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     tuple(self.table_refs),
+                     self.if_exists))
