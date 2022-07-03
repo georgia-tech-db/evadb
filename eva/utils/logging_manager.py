@@ -15,81 +15,13 @@
 
 import logging
 
-from enum import Enum
+LOG_handler = logging.StreamHandler()
+LOG_formatter = logging.Formatter(
+    fmt='%(asctime)-15s %(levelname)-6s'
+    '[%(module)s:%(filename)s:%(funcName)s:%(lineno)04d] %(message)s',
+    datefmt='%m-%d-%Y %H:%M:%S'
+)
+LOG_handler.setFormatter(LOG_formatter)
 
-
-class LoggingLevel(Enum):
-    NOTSET = 0
-    DEBUG = 10
-    INFO = 20
-    WARNING = 30
-    ERROR = 40
-    CRITICAL = 50
-
-
-class LoggingManager(object):
-
-    _instance = None
-    _LOG = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(LoggingManager, cls).__new__(cls)
-
-            # LOGGING INITIALIZATION
-            cls._LOG = logging.getLogger(__name__)
-            LOG_handler = logging.StreamHandler()
-            LOG_formatter = logging.Formatter(
-                fmt='%(asctime)-15s [%(funcName)s():%(lineno)03d] '
-                '%(levelname)-5s: %(message)s',
-                datefmt='%m-%d-%Y %H:%M:%S'
-            )
-            LOG_handler.setFormatter(LOG_formatter)
-            cls._LOG.addHandler(LOG_handler)
-
-        return cls._instance
-
-    def log(self, string, level: LoggingLevel = LoggingLevel.DEBUG):
-        if level == LoggingLevel.DEBUG:
-            self._LOG.debug(string)
-        elif level == LoggingLevel.INFO:
-            self._LOG.info(string)
-        elif level == LoggingLevel.WARNING:
-            self._LOG.warn(string)
-        elif level == LoggingLevel.ERROR:
-            self._LOG.error(string)
-        elif level == LoggingLevel.CRITICAL:
-            self._LOG.critical(string)
-
-    def setEffectiveLevel(self, level: LoggingLevel):
-
-        # Note: pytest logging level cannot be higher than WARNING
-        # https://github.com/segevfiner/pytest/blob/master/
-        # _pytest/logging.py#L246
-        self._LOG.setLevel(level.value)
-
-    def getEffectiveLevel(self):
-        return logging.getLevelName(self._LOG.getEffectiveLevel())
-
-    def getLog4JLevel(self):
-
-        logger_level = self.getEffectiveLevel()
-
-        # Reference:
-        # https://logging.apache.org/log4j/1.2/apidocs/org/
-        # apache/log4j/Level.html
-
-        # for spark log level configuration
-        if logger_level == 'DEBUG':
-            return "DEBUG"
-        elif logger_level == 'INFO':
-            return "INFO"
-        elif logger_level == 'WARNING':
-            return "WARN"
-        elif logger_level == 'ERROR':
-            return "ERROR"
-        elif logger_level == 'CRITICAL':
-            return "FATAL"
-
-    def exception(self, error):
-        self._LOG.exception(error)
+logger = logging.getLogger(__name__)
+logger.addHandler(LOG_handler)

@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import argparse
 import sys
 from os.path import dirname, abspath, join
+from eva.utils.logging_manager import logger
 
 '''
 To allow running eva_server from any location
@@ -24,8 +26,6 @@ EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
 sys.path.append(EVA_CODE_DIR)
 
 from eva.server.interpreter import start_cmd_client  # noqa: E402
-from eva.utils.logging_manager import LoggingManager, \
-    LoggingLevel  # noqa: E402
 
 
 def eva_client(host='0.0.0.0', port=5432):
@@ -37,7 +37,7 @@ def eva_client(host='0.0.0.0', port=5432):
     try:
         start_cmd_client(host=host, port=port)
     except Exception as e:
-        LoggingManager().log(e, LoggingLevel.CRITICAL)
+        logger.critical(e)
 
 
 def parse_args(args):

@@ -12,14 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from __future__ import annotations
+
 from enum import IntEnum, auto
 from eva.optimizer.group import Group
 from eva.optimizer.rules.rules import Rule, RulesManager
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.binder import Binder
 from eva.optimizer.property import PropertyType
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
+
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
@@ -80,9 +83,8 @@ class TopDownRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                LoggingManager().log('In TopDown, Rule {} matched for {}'
-                                     .format(rule, self.root_expr),
-                                     LoggingLevel.INFO)
+                logger.info('In TopDown, Rule {} matched for {}'
+                            .format(rule, self.root_expr))
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.replace_expression(
                     after,
@@ -134,17 +136,15 @@ class BottomUpRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                LoggingManager().log('In BottomUp, Rule {} matched for {}'
-                                     .format(rule, self.root_expr),
-                                     LoggingLevel.INFO)
+                logger.info('In BottomUp, Rule {} matched for {}'
+                            .format(rule, self.root_expr))
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.replace_expression(
                     after,
                     self.root_expr.group_id
                 )
-                LoggingManager().log(
-                    'After rewiting {}'.format(self.root_expr),
-                    LoggingLevel.INFO
+                logger.info(
+                    'After rewiting {}'.format(self.root_expr)
                 )
                 self.optimizer_context.task_stack.push(BottomUpRewrite(
                     new_expr, self.rule_set, self.optimizer_context))

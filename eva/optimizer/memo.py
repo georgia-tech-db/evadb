@@ -17,8 +17,8 @@ from typing import Dict, List
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.group import Group
 from eva.optimizer.operators import OperatorType
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
 from eva.constants import UNDEFINED_GROUP_ID
+from eva.utils.logging_manager import logger
 
 
 class Memo:
@@ -49,7 +49,7 @@ class Memo:
         if group_id in self._groups.keys():
             return self._groups[group_id]
         else:
-            LoggingManager().log('Missing group id', LoggingLevel.ERROR)
+            logger.error('Missing group id')
 
     """
     For the consistency of the memo, all modification should use the

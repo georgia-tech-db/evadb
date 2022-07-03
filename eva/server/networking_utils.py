@@ -16,8 +16,7 @@
 import socket
 import asyncio
 
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 async def realtime_server_status(protocol, server_closed):
@@ -42,12 +41,11 @@ async def realtime_server_status(protocol, server_closed):
             previous_connections = protocol.__connections__
             previous_errors = protocol.__errors__
 
-            LoggingManager().log("Status: " +
-                                 "connections: " + str(previous_connections) +
-                                 " " +
-                                 "errors: " + str(previous_errors),
-                                 LoggingLevel.INFO
-                                 )
+            logger.info("Status: " +
+                        "connections: " + str(previous_connections) +
+                        " " +
+                        "errors: " + str(previous_errors)
+                        )
 
         # Report changes every 1~s
         await asyncio.sleep(1)

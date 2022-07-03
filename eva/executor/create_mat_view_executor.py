@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from eva.parser.create_statement import ColumnDefinition
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType
@@ -21,7 +22,7 @@ from eva.storage.storage_engine import StorageEngine
 from eva.expression.abstract_expression import ExpressionType
 from eva.binder.binder_utils import (create_table_metadata,
                                      handle_if_not_exists)
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 class CreateMaterializedViewExecutor(AbstractExecutor):
@@ -43,7 +44,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 err_msg = 'Invalid query {}, expected {}'.format(
                     child.node.opr_type, PlanOprType.SEQUENTIAL_SCAN)
 
-                LoggingManager().log(err_msg, LoggingLevel.ERROR)
+                logger.error(err_msg)
                 raise RuntimeError(err_msg)
 
             # gather child projected column objects
@@ -58,7 +59,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
             if len(self.node.columns) != len(child_objs):
                 err_msg = '# projected columns mismatch, expected {} found {}\
                 '.format(len(self.node.columns), len(child_objs))
-                LoggingManager().log(err_msg, LoggingLevel.ERROR)
+                logger.error(err_msg)
                 raise RuntimeError(err_msg)
 
             col_defs = []

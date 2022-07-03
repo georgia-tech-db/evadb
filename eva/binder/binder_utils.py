@@ -20,7 +20,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.generic_utils import generate_file_path
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 
 def create_video_metadata(name: str) -> DataFrameMetadata:
@@ -79,9 +79,8 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
     result_list = []
     for col in col_list:
         if col is None:
-            LoggingManager().log(
-                "Empty column while creating column metadata",
-                LoggingLevel.ERROR)
+            logger.error(
+                "Empty column while creating column metadata")
             result_list.append(col)
         result_list.append(
             CatalogManager().create_column_metadata(
@@ -110,7 +109,7 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
     else:
         error = '{} does not exists. Create the table using \
                         CREATE TABLE.'.format(table_info.table_name)
-        LoggingManager().log(error, LoggingLevel.ERROR)
+        logger.error(error)
         raise RuntimeError(error)
 
 
@@ -119,10 +118,10 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
                                            table_ref.table.table_name):
         err_msg = 'Table: {} already exsits'.format(table_ref)
         if if_not_exist:
-            LoggingManager().log(err_msg, LoggingLevel.WARNING)
+            logger.warn(err_msg)
             return True
         else:
-            LoggingManager().log(err_msg, LoggingLevel.ERROR)
+            logger.error(err_msg)
             raise RuntimeError(err_msg)
     else:
         return False

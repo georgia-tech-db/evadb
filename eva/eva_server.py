@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from eva.utils.logging_manager import logger
 import asyncio
 import sys
 from os.path import dirname, abspath, join
@@ -28,8 +29,6 @@ from eva.server.server import start_server  # noqa: E402
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
 from eva.configuration.configuration_manager import \
     ConfigurationManager  # noqa: E402
-from eva.utils.logging_manager import LoggingManager  # noqa: E402
-from eva.utils.logging_manager import LoggingLevel  # noqa: E402
 
 
 def eva():
@@ -54,7 +53,7 @@ def eva():
                     )
 
     except Exception as e:
-        LoggingManager().log(e, LoggingLevel.CRITICAL)
+        logger.critical(e)
 
 
 def main():

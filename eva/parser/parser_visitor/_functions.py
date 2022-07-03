@@ -19,7 +19,7 @@ from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 
 ##################################################################
@@ -32,8 +32,7 @@ class Functions(evaql_parserVisitor):
         if ctx.simpleId():
             udf_name = self.visit(ctx.simpleId())
         else:
-            LoggingManager().log('UDF function name missing.',
-                                 LoggingLevel.ERROR)
+            logger.error('UDF function name missing.')
         if ctx.dottedId():
             udf_output = self.visit(ctx.dottedId())
 
@@ -79,8 +78,7 @@ class Functions(evaql_parserVisitor):
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
                     if len(ctx.createDefinitions()) != 2:
-                        LoggingManager().log('UDF Input or Output Missing',
-                                             LoggingLevel.ERROR)
+                        logger.error('UDF Input or Output Missing')
                     input_definitions = self.visit(ctx.createDefinitions(0))
                     output_definitions = self.visit(ctx.createDefinitions(1))
 
@@ -91,7 +89,7 @@ class Functions(evaql_parserVisitor):
                     impl_path = self.visit(ctx.udfImpl()).value
 
             except BaseException:
-                LoggingManager().log('CREATE UDF Failed', LoggingLevel.ERROR)
+                logger.error('CREATE UDF Failed')
                 # stop parsing something bad happened
                 return None
         stmt = CreateUDFStatement(
