@@ -79,10 +79,33 @@ Now EVA support following DDL commands:
 
 For the tutorial of implementing a DDL command, please refer to  `tutorial_extend_ddl_cmd.md`.
 
-2. Search frames in a video containing more than 3 cars
+3. Search frames in a video containing more than 3 cars
 
 ```mysql
-SELECT id, data FROM DETRAC WHERE array_count(FastRCNNObjectDetector(data).labels, 'car') > 3;
+SELECT id, data FROM MyVideo WHERE Array_Count(FastRCNNObjectDetector(data).labels, 'car') > 3;
+```
+
+4. Materialize the objects detected in a video
+
+```mysql
+CREATE MATERIALIZED VIEW IF NOT EXISTS MyVideoObjects (id, labels, scores, bboxes) AS 
+SELECT id, FastRCNNObjectDetector(data) FROM MyVideo;
+```
+
+5. Create a metadata table that keeps tracks of details about objects in a video
+
+```mysql
+CREATE TABLE IF NOT EXISTS MyCSV (
+                id INTEGER UNIQUE,
+                frame_id INTEGER,
+                video_id INTEGER,
+                dataset_name TEXT(30),
+                label TEXT(30),
+                bbox NDARRAY FLOAT32(4),
+                object_id INTEGER
+);
+UPLOAD INFILE 'data/ua_detrac/metadata.csv' PATH 'test_metadata.csv';
+LOAD DATA INFILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
 ```
 
 ## Documentation

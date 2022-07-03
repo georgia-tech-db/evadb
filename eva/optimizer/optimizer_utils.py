@@ -20,7 +20,6 @@ from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
-
 from eva.parser.table_ref import TableInfo
 
 
