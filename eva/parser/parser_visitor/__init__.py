@@ -19,7 +19,6 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor._common_clauses_ids import CommonClauses
 from eva.parser.parser_visitor._create_statements import CreateTable
 from eva.parser.parser_visitor._rename_statement import RenameTable
-from eva.parser.parser_visitor._truncate_statement import TruncateTable
 from eva.parser.parser_visitor._drop_statement import DropTable
 from eva.parser.parser_visitor._expressions import Expressions
 from eva.parser.parser_visitor._functions import Functions
@@ -38,7 +37,7 @@ from eva.parser.parser_visitor._upload_statement import Upload
 # Modified, add RenameTable
 class ParserVisitor(CommonClauses, CreateTable, Expressions,
                     Functions, Insert, Select, TableSources,
-                    Load, Upload, RenameTable, TruncateTable,
+                    Load, Upload, RenameTable,
                     DropTable):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:

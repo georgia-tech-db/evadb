@@ -31,7 +31,6 @@ from eva.parser.load_statement import LoadDataStatement
 from eva.parser.upload_statement import UploadStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.truncate_statement import TruncateTableStatement
 from eva.parser.drop_statement import DropTableStatement
 
 from eva.expression.abstract_expression import ExpressionType
@@ -85,21 +84,6 @@ class ParserTests(unittest.TestCase):
         rename_stmt = eva_statement_list[0]
         self.assertEqual(rename_stmt, expected_stmt)
 
-    # modified
-    def test_truncate_statement(self):
-        parser = Parser()
-        truncate_queries = "TRUNCATE TABLE student_info"
-        expected_stmt = TruncateTableStatement(
-            TableRef(TableInfo('student_info')))
-        eva_statement_list = parser.parse(truncate_queries)
-        self.assertIsInstance(eva_statement_list, list)
-        self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(
-            eva_statement_list[0].stmt_type,
-            StatementType.TRUNCATE)
-
-        truncate_stmt = eva_statement_list[0]
-        self.assertEqual(truncate_stmt, expected_stmt)
 
     def test_drop_statement(self):
         parser = Parser()

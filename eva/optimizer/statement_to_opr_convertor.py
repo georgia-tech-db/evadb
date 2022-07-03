@@ -29,7 +29,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.truncate_statement import TruncateTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.create_mat_view_statement \
@@ -288,8 +287,6 @@ class StatementToPlanConvertor:
             self.visit_create(statement)
         elif isinstance(statement, RenameTableStatement):
             self.visit_rename(statement)
-        elif isinstance(statement, TruncateTableStatement):
-            self.visit_truncate(statement)
         elif isinstance(statement, DropTableStatement):
             self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):
