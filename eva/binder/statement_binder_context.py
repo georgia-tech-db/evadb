@@ -21,7 +21,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 CatalogColumnType = Union[DataFrameColumn, UdfIO]
 
@@ -62,7 +62,7 @@ class StatementBinderContext:
                           alias: str = None) -> Tuple[str, CatalogColumnType]:
         def raise_error():
             err_msg = 'Invalid column = {}'.format(col_name)
-            LoggingManager().log(err_msg, LoggingLevel.ERROR)
+            logger.error(err_msg)
             raise RuntimeError(err_msg)
 
         if not alias:
@@ -113,7 +113,7 @@ class StatementBinderContext:
 
         if num_alias_matches > 1:
             err_msg = 'Ambiguous Column name = {}'.format(col_name)
-            LoggingManager().log(err_msg, LoggingLevel.ERROR)
+            logger.error(err_msg)
             raise RuntimeError(err_msg)
 
         return alias_match, match_obj

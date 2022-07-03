@@ -21,8 +21,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import VideoStorageEngine
 from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 class LoadVideoExecutor(AbstractExecutor):
@@ -52,10 +51,10 @@ class LoadVideoExecutor(AbstractExecutor):
                 video_file_path = video_path
 
         if video_file_path is None:
-            error = "Failed to find the video file {}".format(
+            error = "Failed to find a video file at location: {}".format(
                 self.node.file_path
             )
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
             raise RuntimeError(error)
 
         success = VideoStorageEngine.create(
@@ -67,7 +66,8 @@ class LoadVideoExecutor(AbstractExecutor):
         if success:
             yield Batch(
                 pd.DataFrame(
-                    {"Video successfully added": str(self.node.file_path)},
+                    {"Video successfully added at location: ": str(
+                        self.node.file_path)},
                     index=[0],
                 )
             )
