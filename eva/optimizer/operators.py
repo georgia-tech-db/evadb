@@ -491,42 +491,6 @@ class LogicalRename(Operator):
                      self._catalog_table_id))
 
 
-class LogicalTruncate(Operator):
-    """Logical node for truncate table operations
-
-    Arguments:
-        table_ref {TableRef}: [old table that is to be renamed]
-        catalog_table_id {int}: [catalog id for the old table]
-    """
-
-    def __init__(self, table_ref: TableRef,
-                 catalog_table_id: int, children=None):
-        super().__init__(OperatorType.LOGICALTRUNCATE, children)
-        self._table_ref = table_ref
-        self._catalog_table_id = catalog_table_id
-
-    @property
-    def table_ref(self):
-        return self._table_ref
-
-    @property
-    def catalog_table_id(self):
-        return self._catalog_table_id
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalTruncate):
-            return False
-        return (is_subtree_equal
-                and self.table_ref == other.table_ref
-                and self.catalog_table_id == other.catalog_table_id)
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self._table_ref,
-                     self._catalog_table_id))
-
-
 class LogicalDrop(Operator):
     """
         Logical node for drop table operations

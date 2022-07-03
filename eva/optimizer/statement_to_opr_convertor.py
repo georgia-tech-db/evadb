@@ -17,7 +17,7 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
                                      LogicalCreate,
-                                     LogicalRename, LogicalTruncate,
+                                     LogicalRename,
                                      LogicalDrop,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
@@ -211,17 +211,6 @@ class StatementToPlanConvertor:
                                    statement.new_table_name)
         print("rename table id:", rename_opr.catalog_table_id)
         self._plan = rename_opr
-
-    def visit_truncate(self, statement: TruncateTableStatement):
-        """Convertor for parsed truncate statement
-        Arguments:
-            statement(TruncateTableStatement): [Truncate statement]
-        """
-        table_ref = statement.table_ref
-        catalog_table_id = bind_table_ref(table_ref.table)
-        truncate_opr = LogicalTruncate(table_ref,
-                                       catalog_table_id)
-        self._plan = truncate_opr
 
     def visit_drop(self, statement: DropTableStatement):
         table_refs = statement.table_refs

@@ -21,7 +21,6 @@ from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 
 from eva.planner.create_plan import CreatePlan
 from eva.planner.rename_plan import RenamePlan
-from eva.planner.truncate_plan import TruncatePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
@@ -65,17 +64,6 @@ class PlanNodeTests(unittest.TestCase):
                          "old")
         self.assertEqual(dummy_plan_node.new_name.table_name,
                          "new")
-
-    def test_truncate_plan(self):
-        dummy_info = TableInfo('dummy')
-        dummy_table = TableRef(dummy_info)
-        video_id = 0
-
-        CatalogManager().reset()
-        dummy_plan_node = TruncatePlan(dummy_table, video_id)
-        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.TRUNCATE)
-        self.assertEqual(dummy_plan_node.table_ref.table.table_name,
-                         "dummy")
 
     def test_drop_plan(self):
         dummy_info = TableInfo('dummy')

@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf | createMaterializedView
-    | dropDatabase | dropTable | dropIndex | renameTable | truncateTable
+    | dropDatabase | dropTable | dropIndex | renameTable 
     ;
 
 dmlStatement
@@ -64,12 +64,6 @@ renameTable
     : RENAME TABLE
       oldtableName
       TO newtableName
-    ;
-
-//Truncate statements
-truncateTable
-    : TRUNCATE TABLE
-      tableName
     ;
 
 // Create UDFs
