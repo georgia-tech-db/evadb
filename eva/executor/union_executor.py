@@ -17,7 +17,7 @@ from typing import Iterator
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.union_plan import UnionPlan
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 class UnionExecutor(AbstractExecutor):
@@ -36,8 +36,7 @@ class UnionExecutor(AbstractExecutor):
 
     def exec(self) -> Iterator[Batch]:
         if self.node.all is False:
-            LoggingManager().log('Only UNION ALL is supported now.',
-                                 LoggingLevel.WARNING)
+            logger.warn('Only UNION ALL is supported now.')
 
         # We should have only two children
         for child in self.children:

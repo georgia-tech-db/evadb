@@ -20,7 +20,7 @@ from pathlib import Path
 import sys
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 def validate_kwargs(kwargs, allowed_kwargs,
@@ -64,10 +64,10 @@ def path_to_class(filepath: str, classname: str):
         spec.loader.exec_module(module)
         classobj = getattr(module, classname)
     except Exception as e:
-        LoggingManager().log(
+        logger.error(
             'Failed to import %s from %s\nException: %s'
-            % (classname, filepath, e),
-            LoggingLevel.ERROR)
+            % (classname, filepath, e)
+        )
     return classobj
 
 
@@ -93,8 +93,7 @@ def generate_file_path(name: str = '') -> Path:
     """
     dataset_location = ConfigurationManager().get_value("core", "datasets_dir")
     if dataset_location is None:
-        LoggingManager().log(
-            'Missing location key in eva.yml', LoggingLevel.ERROR)
+        logger.error('Missing location key in eva.yml')
         raise KeyError('Missing datasets_dir key in eva.yml')
 
     dataset_location = Path(dataset_location)

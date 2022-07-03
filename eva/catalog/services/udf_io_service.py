@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import List
 
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.base_service import BaseService
-from eva.utils.logging_manager import LoggingLevel, LoggingManager
+from eva.utils.logging_manager import logger
 
 
 class UdfIOService(BaseService):
@@ -31,7 +32,7 @@ class UdfIOService(BaseService):
             return result
         except Exception as e:
             error = f'Getting inputs for UDF id {udf_id} raised {e}'
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
             raise RuntimeError(error)
 
     def get_outputs_by_udf_id(self, udf_id: int):
@@ -42,7 +43,7 @@ class UdfIOService(BaseService):
             return result
         except Exception as e:
             error = f'Getting outputs for UDF id {udf_id} raised {e}'
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            logger.error(error)
             raise RuntimeError(error)
 
     def add_udf_io(self, io_list: List[UdfIO]):

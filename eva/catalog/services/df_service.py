@@ -12,16 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 class DatasetService(BaseService):
+
     def __init__(self):
         super().__init__(DataFrameMetadata)
 
@@ -61,9 +63,8 @@ class DatasetService(BaseService):
                 .filter(self.model._name == name).one()
             return result[0]
         except NoResultFound:
-            LoggingManager().log(
-                "get_id_from_name failed with name {}".format(name),
-                LoggingLevel.ERROR)
+            logger.error(
+                "get_id_from_name failed with name {}".format(name))
 
     def dataset_by_id(self, dataset_id) -> DataFrameMetadata:
         """
@@ -105,8 +106,7 @@ class DatasetService(BaseService):
             dataset = self.dataset_by_id(metadata_id)
             dataset.delete()
         except Exception:
-            LoggingManager().log(
-                "detele datset failed with id {}".format(metadata_id),
-                LoggingLevel.ERROR)
+            logger.error(
+                "delete dataset failed with id {}".format(metadata_id))
             return False
         return True

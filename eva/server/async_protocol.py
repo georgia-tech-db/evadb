@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import asyncio
 
 from eva.server.networking_utils import set_socket_io_timeouts
-from eva.utils.logging_manager import LoggingManager
+from eva.utils.logging_manager import logger
 
 
 class EvaProtocolBuffer:
@@ -76,35 +77,32 @@ class EvaClient(asyncio.Protocol):
 
         EvaClient.__connections__ += 1
 
-        LoggingManager().log("[ " + str(self.id) + " ]" +
-                             " Init Client"
-                             )
+        logger.debug("[ " + str(self.id) + " ]" +
+                     " Init Client")
 
     def connection_made(self, transport):
         self.transport = transport
 
         if not set_socket_io_timeouts(self.transport, 60, 0):
             self.transport.abort()
-            LoggingManager().log("[ " + str(self.id) + " ]" +
-                                 " Could not set timeout"
-                                 )
+            logger.debug("[ " + str(self.id) + " ]" +
+                         " Could not set timeout"
+                         )
             return
 
-        LoggingManager().log("[ " + str(self.id) + " ]" +
-                             " Connected to server"
-                             )
+        logger.debug("[ " + str(self.id) + " ]" +
+                     " Connected to server")
 
     def connection_lost(self, exc, exc2=None):
 
-        LoggingManager().log("[ " + str(self.id) + " ]" +
-                             " Disconnected from server"
-                             )
+        logger.debug("[ " + str(self.id) + " ]" +
+                     " Disconnected from server")
 
         try:
             self.transport.abort()  # free sockets early, free sockets often
             self.transport = None
         except Exception as e:
-            LoggingManager().exception(e)
+            logger.exception(e)
             exc2 = e
         finally:
             if exc or exc2:
@@ -117,10 +115,10 @@ class EvaClient(asyncio.Protocol):
     def data_received(self, data):
 
         response_chunk = data.decode()
-        LoggingManager().log("[ " + str(self.id) + " ]" +
-                             " Response from server: --|" +
-                             str(response_chunk) + "|--"
-                             )
+        logger.debug("[ " + str(self.id) + " ]" +
+                     " Response from server: --|" +
+                     str(response_chunk) + "|--"
+                     )
 
         self.buffer.feed_data(response_chunk)
         while self.buffer.has_complete_message():
@@ -130,9 +128,9 @@ class EvaClient(asyncio.Protocol):
     @asyncio.coroutine
     def send_message(self, message):
 
-        LoggingManager().log("[ " + str(self.id) + " ]" +
-                             " Request to server: --|" + str(message) + "|--"
-                             )
+        logger.debug("[ " + str(self.id) + " ]" +
+                     " Request to server: --|" + str(message) + "|--"
+                     )
 
         request_chunk = (str(len(message)) + '|' + message).encode('ascii')
         # Send request

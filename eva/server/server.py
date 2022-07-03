@@ -22,12 +22,9 @@ from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1
 
 from eva.server.networking_utils import realtime_server_status,\
     set_socket_io_timeouts
-
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
-
 from eva.server.command_handler import handle_request
-
 from eva.server.async_protocol import EvaProtocolBuffer
+from eva.utils.logging_manager import logger
 
 
 class EvaServer(asyncio.Protocol):
@@ -61,8 +58,8 @@ class EvaServer(asyncio.Protocol):
 
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info('peername')
-        LoggingManager().log('Connection from client: ' + str(peername) +
-                             str(self._socket_timeout))
+        logger.debug('Connection from client: ' + str(peername) +
+                     str(self._socket_timeout))
         EvaServer.__connections__ += 1
 
     def connection_lost(self, exc):
@@ -77,19 +74,19 @@ class EvaServer(asyncio.Protocol):
     def data_received(self, data):
 
         message = data.decode()
-        LoggingManager().log('Request from client: --|' +
-                             str(message) +
-                             '|--')
+        logger.debug('Request from client: --|' +
+                     str(message) +
+                     '|--')
 
         self.buffer.feed_data(message)
         while self.buffer.has_complete_message():
             request_message = self.buffer.read_message()
 
             if request_message in ["quit", "exit"]:
-                LoggingManager().log('Close client socket')
+                logger.debug('Close client socket')
                 return self.transport.close()
             else:
-                LoggingManager().log('Handle request')
+                logger.debug('Handle request')
                 asyncio.create_task(
                     handle_request(self.transport, request_message)
                 )
@@ -108,7 +105,7 @@ def start_server(host: string,
         stop_server_future: future for externally stopping the server
     """
 
-    LoggingManager().log('Start Server', LoggingLevel.CRITICAL)
+    logger.critical('Start Server')
 
     # Register signal handler
     def raiseSystemExit(_, __):
@@ -127,9 +124,8 @@ def start_server(host: string,
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        LoggingManager().log('PID(' + str(os.getpid()) + ') serving on '
-                             + str(socket.getsockname()),
-                             LoggingLevel.CRITICAL)
+        logger.critical('PID(' + str(os.getpid()) + ') serving on '
+                        + str(socket.getsockname()))
 
     server_closed = loop.create_task(server.wait_closed())
 
@@ -142,7 +138,7 @@ def start_server(host: string,
 
     except KeyboardInterrupt:
 
-        LoggingManager().log("Server process interrupted")
+        logger.debug("Server process interrupted")
 
     finally:
         # Stop monitor
@@ -155,4 +151,4 @@ def start_server(host: string,
         loop.run_until_complete(server.wait_closed())
         loop.close()
 
-        LoggingManager().log("Successfully shutdown server.")
+        logger.debug("Successfully shutdown server.")

@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import asyncio
 
 from typing import Iterator, Optional
@@ -24,8 +25,7 @@ from eva.optimizer.plan_generator import PlanGenerator
 from eva.executor.plan_executor import PlanExecutor
 from eva.models.server.response import ResponseStatus, Response
 from eva.models.storage.batch import Batch
-
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 def execute_query(query) -> Iterator[Batch]:
@@ -60,12 +60,12 @@ def handle_request(transport, request_message):
         If user inputs 'quit' stops the event loop
         otherwise just echoes user input
     """
-    LoggingManager().log('Receive request: --|' + str(request_message) + '|--')
+    logger.debug('Receive request: --|' + str(request_message) + '|--')
 
     try:
         output_batch = execute_query_fetch_all(request_message)
     except Exception as e:
-        LoggingManager().log(e, LoggingLevel.WARNING)
+        logger.warn(e)
         response = Response(
             status=ResponseStatus.FAIL,
             batch=None,
@@ -78,9 +78,9 @@ def handle_request(transport, request_message):
     # Send data length, because response can be very large
     data = (str(len(responseData)) + '|' + responseData).encode('ascii')
 
-    LoggingManager().log('Response to client: --|' +
-                         str(response) + '|--\n' +
-                         'Length: ' + str(len(responseData)))
+    logger.debug('Response to client: --|' +
+                 str(response) + '|--\n' +
+                 'Length: ' + str(len(responseData)))
 
     transport.write(data)
 
