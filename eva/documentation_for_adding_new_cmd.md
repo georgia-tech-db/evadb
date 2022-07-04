@@ -1,5 +1,5 @@
 # Extending a new DDL command to EVA
-This document is the note of tracing implementation of CREATE command. We also list all the file that need to be modified or added to extend a new DDL command to EVA. We hope this tutorial will be helpful when future users trying to implement new command in EVA. 
+This document is the note of tracing implementation of CREATE command. We also list all the file that need to be modified or added to extend a new DDL command to EVA. We hope this tutorial will be helpful when future users trying to implement new command in EVA.
 ## command_handler
 An input query string is handled by **Parser**, **StatementTOPlanConvertor**, **PlanGenerator**, and **PlanExcutor**. So let's discuss each part separately.
 ``` python=
@@ -23,7 +23,7 @@ The parser firstly generate **syntax tree** from the input string, and then tans
 The first part of Parser is build from two ANTLR file.
 ### parser/evaql
 * `evaql_lexer.g4` - add key words(eg. CREATE, TABLE) under **Common Keywords**
-* `evaql_parser.g4` 
+* `evaql_parser.g4`
     * Add new grammar name(eg. createTable) under **ddlStatement**
     * Write a new grammar, for example:
     ```
@@ -54,7 +54,7 @@ class ParserVisitor(CommonClauses, CreateTable, Expressions,
 # 2. StatementToPlanConvertor
 The part transforms the statement into corresponding logical plan.
 ### optimizer
-* `operators.py` 
+* `operators.py`
     * Define class Logical\[cmd], which is the logical node for the specific type of command.
     ```python=
     class LogicalCreate(Operator):
@@ -63,8 +63,8 @@ The part transforms the statement into corresponding logical plan.
         self._video = video
         self._column_list = column_list
         self._if_not_exists = if_not_exists
-        # ... 
-        
+        # ...
+
     ```
     * Register new operator type to **class OperatorType**, Notice that must add it **before LOGICALDELIMITER** !!!
 * `statement_to_opr_convertor.py`
@@ -78,7 +78,7 @@ The part transforms the statement into corresponding logical plan.
     # May need to convert the statement into another data type.
     # The new data type is usable for excuting command.
     # For example, column_list -> column_metadata_list
-    
+
     def visit_create(self, statement: AbstractStatement):
         video_ref = statement.table_ref
         if video_ref is None:
@@ -119,7 +119,7 @@ class CreatePlan(AbstractPlan):
 ```
 * `types.py` - register new plan operator type to PlanOprType
 ### optimizer/rules
-* `rules.py`- 
+* `rules.py`-
     * Import operators
     * Register new ruletype to **RuleType** and **Promise** (place it **before IMPLEMENTATION_DELIMETER** !!)
     * implement class `Logical[cmd]ToPhysical`, its memeber function apply() will construct a corresbonding`[cmd]Plan` object.
@@ -157,7 +157,7 @@ PlanExecutor uses data stored in physical plan to accomplish the command.
             metadata = CatalogManager().create_metadata(table_name, file_url, self.node.column_list)
 
             StorageEngine.create(table=metadata)
-    
+
     ```
 
 ## Some additional note
@@ -168,4 +168,3 @@ Data tructure of EVA database:
     * For RENAME cmd, we used old_table_name to access the corresponing entry in metadata table, and modified name of the entry.
 * **Storage engine**:
     * APIs are defined in `src/storage`, currently only support create, read, write.
-
