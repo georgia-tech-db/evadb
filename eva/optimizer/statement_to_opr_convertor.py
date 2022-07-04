@@ -99,6 +99,7 @@ class StatementToPlanConvertor:
 
         # Projection operator
         select_columns = statement.target_list
+        print('In creating select_columns: %s' % select_columns)
 
         # ToDO
         # add support for SELECT STAR

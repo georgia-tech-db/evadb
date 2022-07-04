@@ -19,6 +19,8 @@ from eva.parser.table_ref import TableRef, JoinNode
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.types import JoinType
+from eva.expression.tuple_value_expression import TupleValueExpression
+
 from eva.utils.logging_manager import logger
 
 ##################################################################
@@ -147,11 +149,14 @@ class TableSources(evaql_parserVisitor):
         return select_stmt
 
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
-        select_list = []
-        select_elements_count = len(ctx.selectElement())
-        for select_element_index in range(select_elements_count):
-            element = self.visit(ctx.selectElement(select_element_index))
-            select_list.append(element)
+        if ctx.star:
+            select_list = [TupleValueExpression(col_name='*')]
+        else:
+            select_list = []
+            select_elements_count = len(ctx.selectElement())
+            for select_element_index in range(select_elements_count):
+                element = self.visit(ctx.selectElement(select_element_index))
+                select_list.append(element)
 
         return select_list
 

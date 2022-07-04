@@ -20,6 +20,9 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.generic_utils import generate_file_path
+from eva.binder.statement_binder_context import StatementBinderContext
+from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.utils.logging_manager import logger
 
 
@@ -125,3 +128,24 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
             raise RuntimeError(err_msg)
     else:
         return False
+
+
+def extend_star_in_target_list(
+    target_list: List[AbstractExpression],
+    alias: str,
+    binder_context: StatementBinderContext
+):
+    idx = 0
+    while idx < len(target_list):
+        expr = target_list[idx]
+        if isinstance(expr, TupleValueExpression) and expr.col_name == '*':
+            del target_list[idx]
+            col_names = binder_context._search_all_col_name(alias)
+            for col_name in col_names:
+                target_list.insert(
+                    idx,
+                    TupleValueExpression(col_name=col_name, table_alias=alias)
+                )
+                idx += 1
+        else:
+            idx += 1

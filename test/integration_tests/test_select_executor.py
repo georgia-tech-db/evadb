@@ -88,6 +88,14 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)
+    
+    def test_should_select_star_in_table(self):
+        select_query = "SELECT * FROM MyVideo;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        print(actual_batch)
+        expected_batch = list(create_dummy_batches())
+        self.assertEqual([actual_batch], expected_batch)
 
     @unittest.skip('Too slow when batch size is small.')
     def test_should_load_and_select_real_video_in_table(self):

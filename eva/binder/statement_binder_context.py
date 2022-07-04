@@ -91,6 +91,17 @@ class StatementBinderContext:
             for obj in col_objs:
                 if obj.name.lower() == col_name:
                     return obj
+    
+    def _search_all_col_name(self, alias: str) -> List[str]:
+        table_obj = self._table_alias_map.get(alias, None)
+        if table_obj:
+            return [col.name for col in table_obj.columns]
+        col_objs = self._derived_table_alias_map.get(alias, None)
+        if col_objs:
+            return [obj.name for obj in col_objs]
+        err_msg = 'Cannot find alias = {}'.format(alias)
+        logger.error(err_msg)
+        raise RuntimeError(err_msg)
 
     def _search_all_alias_maps(self,
                                col_name: str) -> Tuple[str, CatalogColumnType]:
