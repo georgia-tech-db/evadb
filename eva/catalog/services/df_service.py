@@ -100,7 +100,8 @@ class DatasetService(BaseService):
                              dataset_name: str) -> bool:
         """ Delete dataset from the db
             Arguments:
-                table_name(str): name to be removed
+                database_name  (str): Database to which dataset belongs
+                dataset_name (str): name of the dataset
             Returns:
                 True if successfully removed else false
         """
@@ -109,6 +110,6 @@ class DatasetService(BaseService):
             dataset.delete()
         except Exception:
             logger.error(
-                "delete dataset failed for name {}".format(dataset_name))
+                "Delete dataset failed for name {}".format(dataset_name))
             return False
         return True

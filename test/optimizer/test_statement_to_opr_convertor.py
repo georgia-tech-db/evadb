@@ -183,7 +183,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             MagicMock(),
             MagicMock())
 
-        drop_plan = LogicalDrop([MagicMock()], [5], True)
+        drop_plan = LogicalDrop([MagicMock()], True)
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())

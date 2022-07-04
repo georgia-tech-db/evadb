@@ -7,19 +7,31 @@ from test.util import create_sample_video, file_remove
 
 
 class DropExecutorTest(unittest.TestCase):
-
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
 
     def tearDown(self):
-        file_remove('dummy.avi')
+        file_remove("dummy.avi")
 
     # integration test
     def test_should_drop_table(self):
+        catalog_manager = CatalogManager()
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
+        metadata_obj = catalog_manager.get_dataset_metadata(
+            None, "MyVideo"
+        )
+        self.assertFalse(metadata_obj is None)
+        column_objects = catalog_manager.get_all_column_objects(metadata_obj)
+        self.assertEqual(len(column_objects), 2)
+
         drop_query = """DROP TABLE MyVideo;"""
         execute_query_fetch_all(drop_query)
+        self.assertTrue(
+            catalog_manager.get_dataset_metadata(None, "MyVideo") is None
+        )
+        column_objects = catalog_manager.get_all_column_objects(metadata_obj)
+        self.assertEqual(len(column_objects), 0)

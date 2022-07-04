@@ -177,6 +177,10 @@ class CatalogManager(object):
         else:
             return None
 
+    def get_all_column_objects(self, table_obj: DataFrameMetadata):
+        col_objs = self._column_service.get_dataset_columns(table_obj)
+        return col_objs
+
     def udf_io(
             self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
             dimensions: List[int], is_input: bool):

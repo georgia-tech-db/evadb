@@ -25,24 +25,18 @@ class DropPlan(AbstractPlan):
     operations.
     Arguments:
         table_ref {TableRef} -- table ref for table to be truncated in storage
-        table_id {int} -- catalog table id for the table
+        if_exists {bool} -- if True do not throw error if table does not exist
     """
 
     def __init__(self, table_refs: List[TableRef],
-                 if_exists: bool,
-                 table_ids: List[int]):
+                 if_exists: bool):
         super().__init__(PlanOprType.DROP)
         self._table_refs = table_refs
-        self._table_ids = table_ids
         self._if_exists = if_exists
 
     @property
     def table_refs(self):
         return self._table_refs
-
-    @property
-    def table_ids(self):
-        return self._table_ids
 
     @property
     def if_exists(self):
