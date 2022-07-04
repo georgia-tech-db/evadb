@@ -22,33 +22,33 @@ from eva.parser.evaql.evaql_lexer import evaql_lexer
 from eva.parser.parser_visitor import ParserVisitor
 
 
-class MyErrorListener(ErrorListener):
+class AntlrErrorListener(ErrorListener):
 
     # Reference
     # https://www.antlr.org/api/Java/org/antlr/v4/runtime/BaseErrorListener.html
 
     def __init__(self):
-        super(MyErrorListener, self).__init__()
+        super(AntlrErrorListener, self).__init__()
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         error_str = "ERROR: Syntax error - Line" + str(line) + ": Col " +\
                     str(column) + " - " + str(msg)
         raise Exception(error_str)
 
-    def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
-                        exact, ambigAlts, configs):
-        error_str = "ERROR: Ambiguity -" + str(configs)
-        raise Exception(error_str)
+    # def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
+    #                    exact, ambigAlts, configs):
+    #    error_str = "ERROR: Ambiguity -" + str(configs)
+    #    raise Exception(error_str)
 
-    def reportAttemptingFullContext(self, recognizer, dfa, startIndex,
-                                    stopIndex, conflictingAlts, configs):
-        error_str = "ERROR: Attempting Full Context -" + str(configs)
-        raise Exception(error_str)
+    # def reportAttemptingFullContext(self, recognizer, dfa, startIndex,
+    #                                 stopIndex, conflictingAlts, configs):
+    #     error_str = "ERROR: Attempting Full Context -" + str(configs)
+    #     raise Exception(error_str)
 
-    def reportContextSensitivity(self, recognizer, dfa, startIndex,
-                                 stopIndex, prediction, configs):
-        error_str = "ERROR: Context Sensitivity -" + str(configs)
-        raise Exception(error_str)
+    # def reportContextSensitivity(self, recognizer, dfa, startIndex,
+    #                              stopIndex, prediction, configs):
+    #     error_str = "ERROR: Context Sensitivity -" + str(configs)
+    #     raise Exception(error_str)
 
 
 class Parser(object):
@@ -66,7 +66,7 @@ class Parser(object):
 
     def __init__(self):
         self._visitor = ParserVisitor()
-        self._error_listener = MyErrorListener()
+        self._error_listener = AntlrErrorListener()
 
     def parse(self, query_string: str) -> list:
         lexer = evaql_lexer(InputStream(query_string))
@@ -74,7 +74,7 @@ class Parser(object):
 
         parser = evaql_parser(stream)
         # Attach error listener for debugging parser errors
-        # parser._listeners = [self._error_listener]
+        parser._listeners = [self._error_listener]
 
         tree = parser.root()
 
