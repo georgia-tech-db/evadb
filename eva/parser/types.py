@@ -22,7 +22,6 @@ class ColumnConstraintEnum(Enum):
     UNIQUE = auto()
 
 
-# Modified, add RENAME, add TRUNCATE
 @unique
 class StatementType(Enum):
     """
@@ -30,8 +29,6 @@ class StatementType(Enum):
     """
     SELECT = auto(),
     CREATE = auto(),
-    RENAME = auto(),
-    TRUNCATE = auto(),
     DROP = auto(),
     INSERT = auto(),
     CREATE_UDF = auto(),

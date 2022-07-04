@@ -20,14 +20,12 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.create_statement import ColumnDefinition
-from eva.parser.table_ref import TableRef, TableInfo
+from eva.parser.table_ref import TableRef
 from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.udf_io import UdfIO
 
 
-# Modified, add LOGICALRENAME type and LogicalRename()
-# IMPORTANT: Add it before LOGICALDELIMITER !!
 class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
@@ -38,8 +36,6 @@ class OperatorType(IntEnum):
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
     LOGICALCREATE = auto()
-    LOGICALRENAME = auto()
-    LOGICALTRUNCATE = auto()
     LOGICALDROP = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
@@ -444,87 +440,6 @@ class LogicalCreate(Operator):
                      self.video,
                      tuple(self.column_list),
                      self.if_not_exists))
-
-
-class LogicalRename(Operator):
-    """Logical node for rename table operations
-
-    Arguments:
-        old_table {TableRef}: [old table that is to be renamed]
-        catalog_table_id {int}: [catalog id for the old table]
-        new_name {TableInfo}: [new name for the old table]
-    """
-
-    def __init__(self, old_table_ref: TableRef,
-                 catalog_table_id: int,
-                 new_name: TableInfo, children=None):
-        super().__init__(OperatorType.LOGICALRENAME, children)
-        self._new_name = new_name
-        self._old_table_ref = old_table_ref
-        self._catalog_table_id = catalog_table_id
-
-    @property
-    def new_name(self):
-        return self._new_name
-
-    @property
-    def old_table_ref(self):
-        return self._old_table_ref
-
-    @property
-    def catalog_table_id(self):
-        return self._catalog_table_id
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalRename):
-            return False
-        return (is_subtree_equal
-                and self._new_name == other._new_name
-                and self._old_table_ref == other._old_table_ref
-                and self._catalog_table_id == other._catalog_table_id)
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self._new_name,
-                     self._old_table_ref,
-                     self._catalog_table_id))
-
-
-class LogicalTruncate(Operator):
-    """Logical node for truncate table operations
-
-    Arguments:
-        table_ref {TableRef}: [old table that is to be renamed]
-        catalog_table_id {int}: [catalog id for the old table]
-    """
-
-    def __init__(self, table_ref: TableRef,
-                 catalog_table_id: int, children=None):
-        super().__init__(OperatorType.LOGICALTRUNCATE, children)
-        self._table_ref = table_ref
-        self._catalog_table_id = catalog_table_id
-
-    @property
-    def table_ref(self):
-        return self._table_ref
-
-    @property
-    def catalog_table_id(self):
-        return self._catalog_table_id
-
-    def __eq__(self, other):
-        is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalTruncate):
-            return False
-        return (is_subtree_equal
-                and self.table_ref == other.table_ref
-                and self.catalog_table_id == other.catalog_table_id)
-
-    def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self._table_ref,
-                     self._catalog_table_id))
 
 
 class LogicalDrop(Operator):

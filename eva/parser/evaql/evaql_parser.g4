@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf | createMaterializedView
-    | dropDatabase | dropTable | dropIndex | renameTable | truncateTable
+    | dropDatabase | dropTable | dropIndex
     ;
 
 dmlStatement

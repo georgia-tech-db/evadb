@@ -53,8 +53,6 @@ from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.configuration.configuration_manager import ConfigurationManager
 
-# Modified
-
 
 class RuleType(Flag):
     """
@@ -84,8 +82,6 @@ class RuleType(Flag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
-    LOGICAL_RENAME_TO_PHYSICAL = auto()
-    LOGICAL_TRUNCATE_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
@@ -114,8 +110,6 @@ class Promise(IntEnum):
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
-    LOGICAL_RENAME_TO_PHYSICAL = auto()
-    LOGICAL_TRUNCATE_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
@@ -779,7 +773,6 @@ class LogicalProjectToPhysical(Rule):
 ##############################################
 
 
-# Modified
 class RulesManager:
     """Singelton class to manage all the rules in our system
     """
