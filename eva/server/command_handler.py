@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import asyncio
-import pandas as pd
 
 from typing import Iterator, Optional
 from eva.binder.statement_binder import StatementBinder
@@ -67,8 +66,11 @@ def handle_request(transport, request_message):
         output_batch = execute_query_fetch_all(request_message)
     except Exception as e:
         logger.warn(e)
-        output_batch = Batch(pd.DataFrame([{'error': str(e)}]))
-        response = Response(status=ResponseStatus.FAIL, batch=output_batch)
+        response = Response(
+            status=ResponseStatus.FAIL,
+            batch=None,
+            error=str(e)
+        )
     else:
         response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
 
