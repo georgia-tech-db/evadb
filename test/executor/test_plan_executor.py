@@ -25,8 +25,6 @@ from eva.planner.storage_plan import StoragePlan
 from eva.planner.pp_plan import PPScanPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_plan import CreatePlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.truncate_plan import TruncatePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.load_data_plan import LoadDataPlan
@@ -215,34 +213,6 @@ class PlanExecutorTest(unittest.TestCase):
         mock_build.reset_mock()
         mock_clean.reset_mock()
         tree = MagicMock(node=UploadPlan(None, None))
-        mock_build.return_value = tree
-        actual = list(PlanExecutor(None).execute_plan())
-        tree.exec.assert_called_once()
-        mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
-        self.assertEqual(actual, [])
-
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_rename_plans(
-            self, mock_clean, mock_build):
-
-        # RenameExecutor
-        tree = MagicMock(node=RenamePlan(None, None, None))
-        mock_build.return_value = tree
-        actual = list(PlanExecutor(None).execute_plan())
-        tree.exec.assert_called_once()
-        mock_build.assert_called_once_with(None)
-        mock_clean.assert_called_once()
-        self.assertEqual(actual, [])
-
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_truncate_plans(
-            self, mock_clean, mock_build):
-
-        # TruncateExecutor
-        tree = MagicMock(node=TruncatePlan(None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
