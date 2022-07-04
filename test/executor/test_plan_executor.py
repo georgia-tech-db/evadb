@@ -226,7 +226,7 @@ class PlanExecutorTest(unittest.TestCase):
             self, mock_clean, mock_build):
 
         # DropExecutor
-        tree = MagicMock(node=DropPlan(None, None, None))
+        tree = MagicMock(node=DropPlan(None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()

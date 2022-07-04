@@ -87,9 +87,7 @@ class TestRules(unittest.TestCase):
                         Promise.IMPLEMENTATION_DELIMETER)
         self.assertTrue(Promise.LOGICAL_UNION_TO_PHYSICAL <
                         Promise.IMPLEMENTATION_DELIMETER)
-        self.assertTrue(Promise.LOGICAL_RENAME_TO_PHYSICAL <
-                        Promise.IMPLEMENTATION_DELIMETER)
-        self.assertTrue(Promise.LOGICAL_TRUNCATE_TO_PHYSICAL <
+        self.assertTrue(Promise.LOGICAL_DROP_TO_PHYSICAL <
                         Promise.IMPLEMENTATION_DELIMETER)
 
     def test_supported_rules(self):

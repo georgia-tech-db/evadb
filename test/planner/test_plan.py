@@ -53,15 +53,13 @@ class PlanNodeTests(unittest.TestCase):
     def test_drop_plan(self):
         dummy_info = TableInfo('dummy')
         dummy_table = TableRef(dummy_info)
-        video_id = 0
 
         CatalogManager().reset()
-        dummy_plan_node = DropPlan([dummy_table], False, [video_id])
+        dummy_plan_node = DropPlan([dummy_table], False)
 
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
         self.assertEqual(
             dummy_plan_node.table_refs[0].table.table_name, "dummy")
-        self.assertEqual(dummy_plan_node.table_ids[0], video_id)
 
     def test_insert_plan(self):
         video_id = 0
