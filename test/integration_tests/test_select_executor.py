@@ -93,7 +93,6 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        print(actual_batch)
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)
 

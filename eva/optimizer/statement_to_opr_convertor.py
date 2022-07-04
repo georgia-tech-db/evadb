@@ -99,10 +99,7 @@ class StatementToPlanConvertor:
 
         # Projection operator
         select_columns = statement.target_list
-        print('In creating select_columns: %s' % select_columns)
 
-        # ToDO
-        # add support for SELECT STAR
         if select_columns is not None:
             self._visit_projection(select_columns)
 
