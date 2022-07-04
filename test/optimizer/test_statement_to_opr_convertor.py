@@ -21,18 +21,15 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.table_ref import TableRef, TableInfo
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.truncate_statement import TruncateTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.optimizer.operators import (LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData, LogicalRename, 
-                                     LogicalTruncate,
+                                     LogicalLoadData,
                                      LogicalDrop, LogicalSample,
-                                     LogicalGet, LogicalFilter, 
+                                     LogicalGet, LogicalFilter,
                                      LogicalOrderBy,
-                                     LogicalUnion, LogicalFunctionScan, 
+                                     LogicalUnion, LogicalFunctionScan,
                                      LogicalJoin)
 
 
@@ -158,27 +155,6 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    # Modified
-    def test_visit_should_call_rename(self):
-        stmt = MagicMock(spec=RenameTableStatement)
-        convertor = StatementToPlanConvertor()
-        mock = MagicMock()
-        convertor.visit_rename = mock
-
-        convertor.visit(stmt)
-        mock.assert_called_once()
-        mock.assert_called_with(stmt)
-
-    def test_visit_should_call_truncate(self):
-        stmt = MagicMock(spec=TruncateTableStatement)
-        convertor = StatementToPlanConvertor()
-        mock = MagicMock()
-        convertor.visit_truncate = mock
-
-        convertor.visit(stmt)
-        mock.assert_called_once()
-        mock.assert_called_with(stmt)
-
     def test_visit_should_call_drop(self):
         stmt = MagicMock(spec=DropTableStatement)
         convertor = StatementToPlanConvertor()
@@ -206,12 +182,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
             MagicMock(),
             MagicMock(),
             MagicMock())
-        truncate_plan = LogicalTruncate(TableRef(TableInfo('video')), 5)
-        rename_plan = LogicalRename(
-            TableRef(
-                TableInfo('old')),
-            5,
-            TableInfo('new'))
+
         drop_plan = LogicalDrop([MagicMock()], [5], True)
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
@@ -232,8 +203,6 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         plans.append(insert_plan)
         plans.append(query_derived_plan)
         plans.append(load_plan)
-        plans.append(truncate_plan)
-        plans.append(rename_plan)
         plans.append(drop_plan)
         plans.append(get_plan)
         plans.append(sample_plan)

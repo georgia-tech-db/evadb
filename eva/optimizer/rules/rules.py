@@ -29,15 +29,13 @@ from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.operators import Dummy, OperatorType, Operator
 from eva.optimizer.operators import (
-    LogicalCreate, LogicalTruncate, LogicalRename, LogicalDrop,
+    LogicalCreate, LogicalDrop,
     LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample, LogicalJoin, LogicalFunctionScan,
     LogicalCreateMaterializedView)
 from eva.planner.create_plan import CreatePlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.truncate_plan import TruncatePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -399,7 +397,6 @@ class LogicalInnerJoinCommutativity(Rule):
 class LogicalCreateToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATE)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -411,43 +408,6 @@ class LogicalCreateToPhysical(Rule):
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list,
                            before.if_not_exists)
-        return after
-
-
-# Modified
-class LogicalRenameToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALRENAME)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_RENAME_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_RENAME_TO_PHYSICAL
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalRename, context: OptimizerContext):
-        after = RenamePlan(before.old_table_ref,
-                           before.catalog_table_id, before.new_name)
-        return after
-
-
-class LogicalTruncateToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALTRUNCATE)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_TRUNCATE_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_TRUNCATE_TO_PHYSICAL
-
-    def check(self, before: Operator, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalTruncate, context: OptimizerContext):
-        after = TruncatePlan(before.table_ref,
-                             before.catalog_table_id)
         return after
 
 
@@ -463,15 +423,13 @@ class LogicalDropToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_refs, before.if_exists,
-                         before.catalog_table_ids)
+        after = DropPlan(before.table_refs, before.if_exists)
         return after
 
 
 class LogicalCreateUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEUDF)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_UDF_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -493,7 +451,6 @@ class LogicalCreateUDFToPhysical(Rule):
 class LogicalInsertToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALINSERT)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_INSERT_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -511,7 +468,6 @@ class LogicalInsertToPhysical(Rule):
 class LogicalLoadToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALLOADDATA)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_LOAD_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -557,7 +513,6 @@ class LogicalUploadToPhysical(Rule):
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
 
     def promise(self):
@@ -851,8 +806,6 @@ class RulesManager:
 
         self._implementation_rules = [
             LogicalCreateToPhysical(),
-            LogicalRenameToPhysical(),
-            LogicalTruncateToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),

@@ -13,13 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
+from eva.models.storage.batch import Batch
 from eva.planner.drop_plan import DropPlan
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.utils.logging_manager import logger
 
 
 class DropExecutor(AbstractExecutor):
-
     def __init__(self, node: DropPlan):
         super().__init__(node)
 
@@ -27,12 +29,36 @@ class DropExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """ Drop table executor """
+        """Drop table executor"""
+        catalog_manager = CatalogManager()
+        if len(self.node.table_refs) > 1:
+            logger.exception('Drop supports only single table')
+        table_ref = self.node.table_refs[0]
 
-        # TODO: Use if exists
-        # tables_to_drop = self.node.table_refs
-        tables_to_drop_ids = self.node.table_ids
-        # if_exists = self.node.if_exists
+        if not catalog_manager.check_table_exists(
+            table_ref.table.database_name, table_ref.table.table_name
+        ):
+            err_msg = "Table: {} does not exsits".format(table_ref)
+            if self.node.if_exists:
+                logger.warn(err_msg)
+            else:
+                logger.exception(err_msg)
 
-        for table_id in tables_to_drop_ids:
-            CatalogManager()._dataset_service.delete_dataset_by_id(table_id)
+        success = catalog_manager.drop_dataset_metadata(
+            table_ref.table.database_name, table_ref.table.table_name
+        )
+
+        if not success:
+            err_msg = "Failed to drop {}".format(table_ref)
+            logger.exception(err_msg)
+
+        yield Batch(
+            pd.DataFrame(
+                {
+                    "Table Successfully dropped: {}".format(
+                        table_ref.table.table_name
+                    )
+                },
+                index=[0],
+            )
+        )

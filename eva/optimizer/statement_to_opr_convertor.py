@@ -17,7 +17,6 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
                                      LogicalCreate,
-                                     LogicalRename, LogicalTruncate,
                                      LogicalDrop,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
@@ -28,16 +27,13 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.truncate_statement import TruncateTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.upload_statement import UploadStatement
-from eva.optimizer.optimizer_utils import column_definition_to_udf_io,\
-    bind_table_ref
+from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.table_ref import TableRef
 from eva.utils.logging_manager import logger
 
@@ -198,42 +194,8 @@ class StatementToPlanConvertor:
             table_ref, statement.column_list, statement.if_not_exists)
         self._plan = create_opr
 
-# Modified
-    def visit_rename(self, statement: RenameTableStatement):
-        """Convertor for parsed rename statement
-        Arguments:
-            statement(RenameTableStatement): [Rename statement]
-        """
-        old_table_ref = statement.old_table_ref
-        catalog_table_id = bind_table_ref(old_table_ref.table)
-        rename_opr = LogicalRename(old_table_ref,
-                                   catalog_table_id,
-                                   statement.new_table_name)
-        print("rename table id:", rename_opr.catalog_table_id)
-        self._plan = rename_opr
-
-    def visit_truncate(self, statement: TruncateTableStatement):
-        """Convertor for parsed truncate statement
-        Arguments:
-            statement(TruncateTableStatement): [Truncate statement]
-        """
-        table_ref = statement.table_ref
-        catalog_table_id = bind_table_ref(table_ref.table)
-        truncate_opr = LogicalTruncate(table_ref,
-                                       catalog_table_id)
-        self._plan = truncate_opr
-
     def visit_drop(self, statement: DropTableStatement):
-        table_refs = statement.table_refs
-        if_exists = statement.if_exists
-
-        catalog_table_ids = []
-        for table_ref in table_refs:
-            if table_ref.table:
-                catalog_table_ids.append(bind_table_ref(table_ref.table))
-
-        drop_opr = LogicalDrop(table_refs, catalog_table_ids, if_exists)
-
+        drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):
@@ -297,10 +259,6 @@ class StatementToPlanConvertor:
             self.visit_insert(statement)
         elif isinstance(statement, CreateTableStatement):
             self.visit_create(statement)
-        elif isinstance(statement, RenameTableStatement):
-            self.visit_rename(statement)
-        elif isinstance(statement, TruncateTableStatement):
-            self.visit_truncate(statement)
         elif isinstance(statement, DropTableStatement):
             self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):

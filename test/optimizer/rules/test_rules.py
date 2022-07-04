@@ -31,8 +31,6 @@ from eva.optimizer.rules.rules import (EmbedProjectIntoGet, EmbedFilterIntoGet,
                                        PushdownFilterThroughSample,
                                        PushdownProjectThroughSample,
                                        LogicalCreateToPhysical,
-                                       LogicalRenameToPhysical,
-                                       LogicalTruncateToPhysical,
                                        LogicalDropToPhysical,
                                        LogicalCreateUDFToPhysical,
                                        LogicalInsertToPhysical,
@@ -119,8 +117,6 @@ class TestRules(unittest.TestCase):
 
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
-            LogicalRenameToPhysical(),
-            LogicalTruncateToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),

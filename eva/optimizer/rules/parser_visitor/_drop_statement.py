@@ -34,6 +34,5 @@ class DropTable(evaql_parserVisitor):
             if child.getRuleIndex() == evaql_parser.RULE_ifExists:
                 if_exists = True
         tables_to_drop = self.visit(ctx.tables())
-
-        drop_stmt = DropTableStatement(tables_to_drop, if_exists=if_exists)
+        drop_stmt = DropTableStatement(tables_to_drop[0], if_exists=if_exists)
         return drop_stmt

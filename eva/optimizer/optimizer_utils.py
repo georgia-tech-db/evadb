@@ -21,8 +21,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
 
-from eva.parser.table_ref import TableInfo
-
 
 def column_definition_to_udf_io(
         col_list: List[ColumnDefinition], is_input: bool):
@@ -76,19 +74,3 @@ def extract_equi_join_keys(join_predicate: AbstractExpression,
                     right_join_keys.append(left_child)
 
     return (left_join_keys, right_join_keys)
-
-
-def bind_table_ref(video_info: TableInfo) -> int:
-    """Grab the metadata id from the catalog for
-    input video
-    Arguments:
-        video_info {TableInfo} -- [input parsed video info]
-    Return:
-        catalog_entry for input table
-    """
-
-    catalog = CatalogManager()
-    catalog_entry_id, _ = catalog.get_table_bindings(video_info.database_name,
-                                                     video_info.table_name,
-                                                     None)
-    return catalog_entry_id
