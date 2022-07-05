@@ -86,4 +86,4 @@ class UdfService(BaseService):
         try:
             return self.model.query.all()
         except NoResultFound:
-            return None
+            return []
