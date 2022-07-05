@@ -18,6 +18,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.planner.drop_plan import DropPlan
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -43,6 +44,11 @@ class DropExecutor(AbstractExecutor):
                 logger.warn(err_msg)
             else:
                 logger.exception(err_msg)
+
+        if table_ref.table.table_obj.is_video:
+            VideoStorageEngine.drop(table=table_ref.table.table_obj)
+        else:
+            StorageEngine.drop(table=table_ref.table.table_obj)
 
         success = catalog_manager.drop_dataset_metadata(
             table_ref.table.database_name, table_ref.table.table_name
