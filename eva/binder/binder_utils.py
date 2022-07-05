@@ -131,21 +131,12 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
 
 
 def extend_star_in_target_list(
-    target_list: List[AbstractExpression],
     alias: str,
     binder_context: StatementBinderContext
-):
-    idx = 0
-    while idx < len(target_list):
-        expr = target_list[idx]
-        if isinstance(expr, TupleValueExpression) and expr.col_name == '*':
-            del target_list[idx]
-            col_names = binder_context._search_all_col_name(alias)
-            for col_name in col_names:
-                target_list.insert(
-                    idx,
-                    TupleValueExpression(col_name=col_name, table_alias=alias)
-                )
-                idx += 1
-        else:
-            idx += 1
+) -> List[AbstractExpression]:
+    col_names = binder_context._search_all_col_name(alias)
+    target_list = list(
+        [TupleValueExpression(col_name=col_name, table_alias=alias) 
+            for col_name in col_names]
+    )
+    return target_list

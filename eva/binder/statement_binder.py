@@ -70,11 +70,13 @@ class StatementBinder:
         if node.where_clause:
             self.bind(node.where_clause)
         if node.target_list:
-            extend_star_in_target_list(
-                node.target_list,
-                node.from_table.alias,
-                self._binder_context
-            )
+            # SELECT * support
+            if len(node.target_list) == 1 and \
+                    isinstance(node.target_list[0], TupleValueExpression) and \
+                    node.target_list[0].col_name == '*':
+                node.target_list = extend_star_in_target_list(
+                    node.from_table.alias, self._binder_context
+                )
             for expr in node.target_list:
                 self.bind(expr)
         if node.orderby_list:
