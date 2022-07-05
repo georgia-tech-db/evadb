@@ -91,7 +91,7 @@ class DatasetServiceTest(unittest.TestCase):
     )
     def test_drop_dataset_by_name_should_raise_exception(self, mock_func):
         service = DatasetService()
-        mock_func.return_value.delete.side_effect = Exception()
+        mock_func.return_value.side_effect = Exception()
         with self.assertRaises(Exception) as cm:
             service.drop_dataset_by_name("database_name", "dataset_name")
             self.assertEqual(
