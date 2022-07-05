@@ -75,7 +75,6 @@ SOME:                                'SOME';
 TABLE:                               'TABLE';
 TO:                                  'TO';
 TRUE:                                'TRUE';
-TRUNCATE:                            'TRUNCATE';
 UNION:                               'UNION';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';

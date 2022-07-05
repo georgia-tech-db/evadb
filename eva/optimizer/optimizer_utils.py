@@ -78,12 +78,11 @@ def extract_equi_join_keys(join_predicate: AbstractExpression,
 
 
 def bind_table_ref(video_info: TableInfo) -> int:
-    """Grab the metadata id from the catalog for
-    input video
+    """Grab metadata id from the catalog for given table info object
     Arguments:
         video_info {TableInfo} -- [input parsed video info]
     Return:
-        catalog_entry for input table
+        dataset id corresponding to given table info
     """
 
     catalog = CatalogManager()

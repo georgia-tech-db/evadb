@@ -26,8 +26,6 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.udf_io import UdfIO
 
 
-# Modified, add LOGICALRENAME type and LogicalRename()
-# IMPORTANT: Add it before LOGICALDELIMITER !!
 class OperatorType(IntEnum):
     """
     Manages enums for all the operators supported
