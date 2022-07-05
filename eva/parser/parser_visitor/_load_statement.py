@@ -39,13 +39,13 @@ class Load(evaql_parserVisitor):
         if ctx.uidList():
             column_list = self.visit(ctx.uidList())
 
-        stmt = LoadDataStatement(table, file_path, column_list, 
+        stmt = LoadDataStatement(table, file_path, column_list,
                                  file_options)
         return stmt
 
     def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
         file_format = FileFormatType.VIDEO
-        # Check the file format 
+        # Check the file format
         if ctx.CSV() is not None:
             file_format = FileFormatType.CSV
 

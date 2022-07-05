@@ -41,7 +41,7 @@ class ModulePathTest(unittest.TestCase):
         torch.cuda.is_available.assert_called()
 
     @patch('eva.utils.generic_utils.ConfigurationManager')
-    def test_should_return_a_randon_full_path(self, mock_conf):
+    def test_should_return_a_random_full_path(self, mock_conf):
         mock_conf_inst = MagicMock()
         mock_conf.return_value = mock_conf_inst
         mock_conf_inst.get_value.return_value = 'eva_datasets'

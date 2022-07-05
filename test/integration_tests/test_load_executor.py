@@ -42,7 +42,7 @@ class LoadExecutorTest(unittest.TestCase):
         select_query = """SELECT id, data FROM MyVideo;"""
 
         actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch.sort()                
         expected_batch = list(create_dummy_batches())[0]
         expected_batch.modify_column_alias('myvideo')
         self.assertEqual(actual_batch, expected_batch)

@@ -65,8 +65,8 @@ class UdfService(BaseService):
         except NoResultFound:
             return None
 
-    def delete_udf_by_name(self, name: str):
-        """Delete a udf entry from the catalog udfmetadata
+    def drop_udf_by_name(self, name: str):
+        """Drop a udf entry from the catalog udfmetadata
 
         Arguments:
             name (str): udf name to be deleted
@@ -76,9 +76,8 @@ class UdfService(BaseService):
         """
         try:
             udf_record = self.udf_by_name(name)
-            if udf_record:
-                udf_record.delete()
+            udf_record.delete()
         except Exception:
-            logger.exception("delete udf failed with name {}".format(name))
+            logger.exception("Delete udf failed for name {}".format(name))
             return False
         return True

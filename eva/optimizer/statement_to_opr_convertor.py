@@ -17,6 +17,7 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
                                      LogicalCreate,
+                                     LogicalDrop,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
@@ -26,6 +27,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
+from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
@@ -192,6 +194,10 @@ class StatementToPlanConvertor:
             table_ref, statement.column_list, statement.if_not_exists)
         self._plan = create_opr
 
+    def visit_drop(self, statement: DropTableStatement):
+        drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
+        self._plan = drop_opr
+
     def visit_create_udf(self, statement: CreateUDFStatement):
         """Convertor for parsed create udf statement
 
@@ -253,6 +259,8 @@ class StatementToPlanConvertor:
             self.visit_insert(statement)
         elif isinstance(statement, CreateTableStatement):
             self.visit_create(statement)
+        elif isinstance(statement, DropTableStatement):
+            self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):
             self.visit_create_udf(statement)
         elif isinstance(statement, LoadDataStatement):

@@ -12,9 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import shutil
 from typing import Iterator, List
 from pathlib import Path
 
+from petastorm.unischema import dict_to_spark_row
+from petastorm.predicates import in_lambda
 from eva.spark.session import Session
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
@@ -22,8 +25,7 @@ from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.readers.petastorm_reader import PetastormReader
 from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
-from petastorm.unischema import dict_to_spark_row
-from petastorm.predicates import in_lambda
+from eva.utils.logging_manager import logger
 
 
 class PetastormStorageEngine(AbstractStorageEngine):
@@ -59,6 +61,13 @@ class PetastormStorageEngine(AbstractStorageEngine):
                 .write \
                 .mode('overwrite') \
                 .parquet(self._spark_url(table))
+
+    def drop(self, table: DataFrameMetadata):
+        dir_path = self._spark_url(table)
+        try:
+            shutil.rmtree(str(dir_path))
+        except Exception as e:
+            logger.exception(f'Failed to drop the video table {e}')
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         """

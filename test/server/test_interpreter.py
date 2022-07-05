@@ -66,7 +66,7 @@ class InterpreterTests(unittest.TestCase):
                 prompt.cursor.execute.assert_called_once_with(query)
                 prompt.cursor.fetch_all.assert_called_once_with()
                 self.assertTrue('123' in buf.getvalue())
-        
+
     # We are mocking the connect funciton call that gets imported into
     # interpreter instead of the one in db_api.
     @patch('eva.server.interpreter.connect')
@@ -84,4 +84,3 @@ class InterpreterTests(unittest.TestCase):
 
         mock_connect.assert_called_once_with(host, port)
         mock_cmdloop.assert_called_once()
-
