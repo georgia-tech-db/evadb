@@ -121,17 +121,18 @@ class SelectExecutorTest(unittest.TestCase):
                    INTO UADETRAC;"""
         execute_query_fetch_all(query)
 
-        select_query = "SELECT id,data FROM UADETRAC;"
+        select_query = "SELECT * FROM UADETRAC;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         video_reader = OpenCVReader(
-            'data/ua_detrac/ua_detrac/mp4',
+            'data/ua_detrac/ua_detrac.mp4',
             batch_mem_size=30000000
         )
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
-        self.assertTrue(actual_batch, expected_batch)
+        expected_batch.modify_column_alias('uadetrac')
+        self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
