@@ -86,17 +86,16 @@ class DatasetServiceTest(unittest.TestCase):
         mock_func.assert_called_once_with("database_name", "dataset_name")
         mock_func.return_value.delete.assert_called_once()
 
-    @patch(
-        "eva.catalog.services.df_service.DatasetService.dataset_object_by_name"
-    )
-    def test_drop_dataset_by_name_should_raise_exception(self, mock_func):
-        service = DatasetService()
-        mock_func.return_value.side_effect = Exception()
-        with self.assertRaises(Exception) as cm:
-            service.drop_dataset_by_name("database_name", "dataset_name")
-            self.assertEqual(
-                "Delete dataset failed for name {}".format("dataset_name"),
-                str(cm.exception),
-            )
-        mock_func.assert_called_once_with("database_name", "dataset_name")
-        mock_func.return_value.delete.assert_not_called()
+    def test_drop_dataset_by_name_should_raise_exception(self):
+        with patch.object(DatasetService, 'dataset_object_by_name') \
+                as mock_func:
+            mock_func.side_effect = Exception()
+            service = DatasetService()
+            with self.assertRaises(Exception) as cm:
+                service.drop_dataset_by_name("database_name", "dataset_name")
+                self.assertEqual(
+                    "Delete dataset failed for name {}".format("dataset_name"),
+                    str(cm.exception),
+                )
+            mock_func.assert_called_once_with("database_name", "dataset_name")
+            mock_func.return_value.delete.assert_not_called()
