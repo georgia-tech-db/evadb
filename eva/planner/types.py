@@ -38,4 +38,5 @@ class PlanOprType(Enum):
     CREATE_MATERIALIZED_VIEW = auto()
     PREDICATE_FILTER = auto()
     PROJECT = auto()
+    SHOW_INFO = auto()
     # add other types
