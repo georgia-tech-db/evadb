@@ -35,7 +35,7 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement
+    : simpleDescribeStatement | helpStatement | showStatement
     ;
 
 // Data Definition Language
@@ -356,6 +356,10 @@ simpleDescribeStatement
 
 helpStatement
     : HELP STRING_LITERAL
+    ;
+
+showStatement
+    : SHOW (UDFS | TABLES)
     ;
 
 // Common Clauses

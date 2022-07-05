@@ -20,6 +20,7 @@ from eva.executor.predicate_executor import PredicateExecutor
 from eva.executor.project_executor import ProjectExecutor
 from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
+from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
@@ -110,6 +111,8 @@ class PlanExecutor:
             executor_node = ProjectExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
             executor_node = PredicateExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.SHOW_INFO:
+            executor_node = ShowInfoExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))

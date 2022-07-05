@@ -256,3 +256,6 @@ class CatalogManager(object):
             return False
         else:
             return True
+
+    def get_all_udf_entries(self):
+        return self._udf_service.get_all_udfs()
