@@ -33,12 +33,26 @@ class StatementBinderContext:
                                             List[CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
 
-    def _check_duplicate_alias(self, alias):
+    def _check_duplicate_alias(self, alias: str):
+        """
+        Sanity check: no duplicate alias in table and derived_table
+        Arguments:
+            alias (str): name of the alias
+
+        Exception:
+            Raise exception if found duplication
+        """
         if (alias in self._derived_table_alias_map
                 or alias in self._table_alias_map):
             raise RuntimeError('Found duplicate alias {}'.format(alias))
 
     def add_table_alias(self, alias: str, table_name: str):
+        """
+        Add a alias -> table_name mapping
+        Arguments:
+            alias (str): name of alias
+            table_name (str): name of the table
+        """
         self._check_duplicate_alias(alias)
         table_obj = self._catalog.get_dataset_metadata(None, table_name)
         self._table_alias_map[alias] = table_obj
@@ -47,6 +61,12 @@ class StatementBinderContext:
                                 alias: str,
                                 target_list: List[Union[TupleValueExpression,
                                                         FunctionExpression]]):
+        """
+        Add a alias -> derived table column mapping
+        Arguments:
+            alias (str): name of alias
+            target_list: list of Tuplevalue Expression or FunctionExpression
+        """
         self._check_duplicate_alias(alias)
         col_list = []
         for expr in target_list:
@@ -60,6 +80,15 @@ class StatementBinderContext:
     def get_binded_column(self,
                           col_name: str,
                           alias: str = None) -> Tuple[str, CatalogColumnType]:
+        """
+        Find the binded column object
+        Arguments:
+            col_name (str): columna name
+            alias (str): alias name
+
+        Returns:
+            A tuple of alias and column object
+        """
         def raise_error():
             err_msg = 'Invalid column = {}'.format(col_name)
             logger.error(err_msg)
@@ -79,6 +108,15 @@ class StatementBinderContext:
         raise_error()
 
     def _check_table_alias_map(self, alias, col_name) -> DataFrameColumn:
+        """
+        Find the column object in table alias map
+        Arguments:
+            col_name (str): columna name
+            alias (str): alias name
+
+        Returns:
+            column object
+        """
         table_obj = self._table_alias_map.get(alias, None)
         if table_obj:
             return self._catalog.get_column_object(table_obj, col_name)
@@ -86,6 +124,15 @@ class StatementBinderContext:
     def _check_derived_table_alias_map(self,
                                        alias,
                                        col_name) -> DataFrameColumn:
+        """
+        Find the column object in derived table alias map
+        Arguments:
+            col_name (str): columna name
+            alias (str): alias name
+
+        Returns:
+            column object
+        """
         col_objs = self._derived_table_alias_map.get(alias, None)
         if col_objs:
             for obj in col_objs:
@@ -105,6 +152,14 @@ class StatementBinderContext:
 
     def _search_all_alias_maps(self,
                                col_name: str) -> Tuple[str, CatalogColumnType]:
+        """
+        Search the alias and column object using column name
+        Arguments:
+            col_name (str): column name
+
+        Returns:
+            A tuple of alias and column object.
+        """
         num_alias_matches = 0
         alias_match = None
         match_obj = None
