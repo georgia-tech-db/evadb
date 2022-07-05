@@ -93,19 +93,41 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(create_dummy_batches())
-        self.assertEqual([actual_batch], expected_batch)
+        expected_batch = list(create_dummy_batches())[0]
+        self.assertEqual(actual_batch, expected_batch)
 
-    @unittest.skip('Too slow when batch size is small.')
-    def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
-                   INTO MyVideo;"""
-        execute_query_fetch_all(query)
+        select_query = "SELECT * FROM MyVideo WHERE id = 5;"
+        actual_batch = execute_query_fetch_all(select_query)
+        expected_batch = list(create_dummy_batches(filters=[5]))[0]
+        self.assertEqual(actual_batch, expected_batch)
 
-        select_query = "SELECT id,data FROM MyVideo;"
+    def test_should_select_star_in_nested_query(self):
+        select_query = """SELECT * FROM (SELECT * FROM MyVideo) AS T;"""
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        video_reader = OpenCVReader('data/ua_detrac/ua_detrac/mp4')
+        expected_batch = list(create_dummy_batches())[0]
+        expected_batch.modify_column_alias('T')
+        self.assertEqual(actual_batch, expected_batch)
+
+        select_query = """SELECT * FROM (SELECT id FROM MyVideo) AS T;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_rows = [{"T.id": i} for i in range(NUM_FRAMES)]
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_load_and_select_real_video_in_table(self):
+        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
+                   INTO UADETRAC;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT id,data FROM UADETRAC;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        video_reader = OpenCVReader(
+            'data/ua_detrac/ua_detrac/mp4',
+            batch_mem_size=30000000
+        )
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
