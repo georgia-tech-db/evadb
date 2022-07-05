@@ -14,7 +14,7 @@
 # limitations under the License.
 
 
-from typing import List, Tuple
+from typing import List
 
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.base_model import init_db, drop_db
@@ -101,36 +101,6 @@ class CatalogManager(object):
         metadata.schema = column_list
         return metadata
 
-    def rename_table(self, new_name: str, metadata_id: int):
-        return self._dataset_service.rename_dataset_by_id(
-            new_name, metadata_id)
-
-    def get_table_bindings(self, database_name: str, table_name: str,
-                           column_names: List[str] = None) -> Tuple[int,
-                                                                    List[int]]:
-        """This method fetches bindings for strings.
-
-        Args:
-            database_name: currently not in use
-            table_name: the table that is being referred to
-            column_names: the column names of the table for which
-           bindings are required
-
-        Returns:
-            returns metadata_id of table and a list of column ids
-        """
-
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        column_ids = []
-        if column_names is not None:
-            if not isinstance(column_names, list):
-                logger.warn(
-                    "CatalogManager::get_table_binding() expected list")
-            column_ids = self._column_service.columns_by_dataset_id_and_names(
-                metadata_id,
-                column_names)
-        return metadata_id, column_ids
-
     def create_column_metadata(
         self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
         dimensions: List[int]
@@ -180,6 +150,10 @@ class CatalogManager(object):
             return col_objs[0]
         else:
             return None
+
+    def get_all_column_objects(self, table_obj: DataFrameMetadata):
+        col_objs = self._column_service.get_dataset_columns(table_obj)
+        return col_objs
 
     def udf_io(
             self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
@@ -246,7 +220,9 @@ class CatalogManager(object):
                              {}'''.format(type(udf_obj)))
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def delete_metadata(self, table_name: str) -> bool:
+    def drop_dataset_metadata(self,
+                              database_name: str,
+                              table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -257,12 +233,13 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        return self._dataset_service.delete_dataset_by_id(metadata_id)
+        return self._dataset_service.drop_dataset_by_name(database_name,
+                                                          table_name)
 
-    def delete_udf(self, udf_name: str) -> bool:
+    def drop_udf(self, udf_name: str) -> bool:
         """
-        This method drops the udf entry from the catalog
+        This method drops the udf entry and corresponding udf_io
+        from the catalog
 
         Arguments:
            udf_name: udf name to be dropped.
@@ -270,7 +247,11 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._udf_service.delete_udf_by_name(udf_name)
+        return self._udf_service.drop_udf_by_name(udf_name)
+
+    def rename_table(self, new_name: str, metadata_id: int):
+        return self._dataset_service.rename_dataset_by_id(
+            new_name, metadata_id)
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(

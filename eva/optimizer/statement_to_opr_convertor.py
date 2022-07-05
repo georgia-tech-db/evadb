@@ -197,7 +197,6 @@ class StatementToPlanConvertor:
             table_ref, statement.column_list, statement.if_not_exists)
         self._plan = create_opr
 
-# Modified
     def visit_rename(self, statement: RenameTableStatement):
         """Convertor for parsed rename statement
         Arguments:
@@ -212,16 +211,7 @@ class StatementToPlanConvertor:
         self._plan = rename_opr
 
     def visit_drop(self, statement: DropTableStatement):
-        table_refs = statement.table_refs
-        if_exists = statement.if_exists
-
-        catalog_table_ids = []
-        for table_ref in table_refs:
-            if table_ref.table:
-                catalog_table_ids.append(bind_table_ref(table_ref.table))
-
-        drop_opr = LogicalDrop(table_refs, catalog_table_ids, if_exists)
-
+        drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):

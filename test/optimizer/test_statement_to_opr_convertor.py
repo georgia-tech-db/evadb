@@ -156,7 +156,6 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    # Modified
     def test_visit_should_call_rename(self):
         stmt = MagicMock(spec=RenameTableStatement)
         convertor = StatementToPlanConvertor()
@@ -199,7 +198,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                 TableInfo('old')),
             5,
             TableInfo('new'))
-        drop_plan = LogicalDrop([MagicMock()], [5], True)
+        drop_plan = LogicalDrop([MagicMock()], True)
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())

@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
 
 
@@ -23,16 +25,16 @@ class DatasetColumnService(BaseService):
         super().__init__(DataFrameColumn)
 
     def columns_by_dataset_id_and_names(self, dataset_id, column_names):
-        result = self.model.query \
-            .filter(self.model._metadata_id == dataset_id,
-                    self.model._name.in_(column_names)) \
-            .all()
+        result = self.model.query.filter(
+            self.model._metadata_id == dataset_id,
+            self.model._name.in_(column_names),
+        ).all()
 
         return result
 
-    def columns_by_id_and_dataset_id(self,
-                                     dataset_id: int,
-                                     id_list: List[int] = None):
+    def columns_by_id_and_dataset_id(
+        self, dataset_id: int, id_list: List[int] = None
+    ):
         """return all the columns that matches id_list and  dataset_id
 
         Arguments:
@@ -44,17 +46,27 @@ class DatasetColumnService(BaseService):
             List[self.model] -- [the filtered self.models]
         """
         if id_list is not None:
-            return self.model.query \
-                .filter(self.model._metadata_id == dataset_id,
-                        self.model._id.in_(id_list)) \
-                .all()
+            return self.model.query.filter(
+                self.model._metadata_id == dataset_id,
+                self.model._id.in_(id_list),
+            ).all()
 
-        return self.model.query \
-            .filter(self.model._metadata_id == dataset_id) \
-            .all()
+        return self.model.query.filter(
+            self.model._metadata_id == dataset_id
+        ).all()
 
     def create_column(self, column_list):
         saved_column_list = []
         for column in column_list:
             saved_column_list.append(column.save())
         return saved_column_list
+
+    def get_dataset_columns(
+        self, dataset: DataFrameMetadata
+    ) -> List[DataFrameColumn]:
+        try:
+            return self.model.query.filter(
+                self.model._metadata_id == dataset.id
+            ).all()
+        except NoResultFound:
+            return None

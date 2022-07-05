@@ -21,9 +21,7 @@ from eva.parser.create_mat_view_statement \
 
 from eva.parser.parser import Parser
 from eva.parser.statement import AbstractStatement
-
 from eva.parser.statement import StatementType
-
 from eva.parser.select_statement import SelectStatement
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.create_udf_statement import CreateUDFStatement
@@ -67,7 +65,6 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
 
-    # modified
     def test_rename_statement(self):
         parser = Parser()
         rename_queries = "RENAME TABLE student TO student_info"
@@ -83,7 +80,6 @@ class ParserTests(unittest.TestCase):
 
         rename_stmt = eva_statement_list[0]
         self.assertEqual(rename_stmt, expected_stmt)
-
 
     def test_drop_statement(self):
         parser = Parser()

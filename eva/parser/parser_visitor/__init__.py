@@ -37,8 +37,7 @@ from eva.parser.parser_visitor._upload_statement import Upload
 # Modified, add RenameTable
 class ParserVisitor(CommonClauses, CreateTable, Expressions,
                     Functions, Insert, Select, TableSources,
-                    Load, Upload, RenameTable,
-                    DropTable):
+                    Load, Upload, RenameTable, DropTable):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
             if child is not TerminalNode:

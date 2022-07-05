@@ -39,7 +39,6 @@ class OperatorType(IntEnum):
     LOGICALINSERT = auto()
     LOGICALCREATE = auto()
     LOGICALRENAME = auto()
-    LOGICALTRUNCATE = auto()
     LOGICALDROP = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
@@ -497,20 +496,14 @@ class LogicalDrop(Operator):
     """
 
     def __init__(self, table_refs: List[TableRef],
-                 catalog_table_ids: List[int],
                  if_exists: bool, children=None):
         super().__init__(OperatorType.LOGICALDROP, children)
         self._table_refs = table_refs
-        self._catalog_table_ids = catalog_table_ids
         self._if_exists = if_exists
 
     @property
     def table_refs(self):
         return self._table_refs
-
-    @property
-    def catalog_table_ids(self):
-        return self._catalog_table_ids
 
     @property
     def if_exists(self):
@@ -522,13 +515,11 @@ class LogicalDrop(Operator):
             return False
         return (is_subtree_equal
                 and self.table_refs == other.table_refs
-                and self.if_exists == other.if_exists
-                and self.catalog_table_ids == other.catalog_table_ids)
+                and self.if_exists == other.if_exists)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
                      tuple(self._table_refs),
-                     tuple(self._catalog_table_ids),
                      self._if_exists))
 
 

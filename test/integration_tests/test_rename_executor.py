@@ -18,8 +18,20 @@ class RenameExecutorTest(unittest.TestCase):
 
     # integration test
     def test_should_rename_table(self):
+        catalog_manager = CatalogManager()
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
+        self.assertTrue(
+            catalog_manager.get_dataset_metadata(None, "MyVideo2") is None
+        )
+        
         rename_query = """RENAME TABLE MyVideo TO MyVideo2;"""
         execute_query_fetch_all(rename_query)
+
+        self.assertTrue(
+            catalog_manager.get_dataset_metadata(None, "MyVideo") is None
+        )
+        self.assertFalse(
+            catalog_manager.get_dataset_metadata(None, "MyVideo2") is None
+        )

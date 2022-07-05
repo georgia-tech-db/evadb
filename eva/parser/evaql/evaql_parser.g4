@@ -66,6 +66,15 @@ renameTable
       TO newtableName
     ;
 
+<<<<<<< HEAD
+=======
+//Truncate statements
+truncateTable
+    : TRUNCATE TABLE
+      tableName
+    ;
+
+>>>>>>> 841172f57721b1b383d6a94586d737ae4e2608b8
 // Create UDFs
 createUdf
     : CREATE UDF

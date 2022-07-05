@@ -87,7 +87,6 @@ def bind_table_ref(video_info: TableInfo) -> int:
     """
 
     catalog = CatalogManager()
-    catalog_entry_id, _ = catalog.get_table_bindings(video_info.database_name,
-                                                     video_info.table_name,
-                                                     None)
+    catalog_entry_id = catalog._dataset_service.dataset_by_name(
+        video_info.table_name)
     return catalog_entry_id

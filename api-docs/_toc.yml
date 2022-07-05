@@ -28,5 +28,6 @@ parts:
       - file: source/contribute/contributing
         sections:
           - file: source/contribute/new_operator
+          - file: source/contribute/new_ddl_command
           - file: source/contribute/debugging
       - file: source/contribute/packaging

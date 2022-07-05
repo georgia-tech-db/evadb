@@ -95,19 +95,22 @@ class DatasetService(BaseService):
         return self.model.query.filter(
             self.model._name == dataset_name).one_or_none()
 
-    def delete_dataset_by_id(self, metadata_id: int) -> bool:
+    def drop_dataset_by_name(self,
+                             database_name: str,
+                             dataset_name: str) -> bool:
         """ Delete dataset from the db
             Arguments:
-                metadata_id(int): id to be removed
+                database_name  (str): Database to which dataset belongs
+                dataset_name (str): name of the dataset
             Returns:
                 True if successfully removed else false
         """
         try:
-            dataset = self.dataset_by_id(metadata_id)
+            dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
         except Exception:
             logger.error(
-                "delete dataset failed with id {}".format(metadata_id))
+                "Delete dataset failed for name {}".format(dataset_name))
             return False
         return True
 

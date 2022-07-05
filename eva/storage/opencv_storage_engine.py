@@ -48,6 +48,13 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         self._create_video_metadata(dir_path, video_file.name)
         return True
 
+    def drop(self, table: DataFrameMetadata):
+        dir_path = Path(table.file_url)
+        try:
+            shutil.rmtree(str(dir_path))
+        except Exception as e:
+            logger.exception(f'Failed to drop the video table {e}')
+
     def write(self, table: DataFrameMetadata, rows: Batch):
         pass
 
