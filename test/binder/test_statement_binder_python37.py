@@ -38,6 +38,3 @@ class StatementBinderPython37Tests(unittest.TestCase):
             mock_binder.assert_any_call(select_statement.union_link)
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
-
-
-

@@ -27,7 +27,3 @@ class ResponseTest(unittest.TestCase):
                             batch=batch)
         response2 = Response.from_json(response.to_json())
         self.assertEqual(response, response2)
-
-
-
-

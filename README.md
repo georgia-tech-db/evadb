@@ -70,7 +70,6 @@ SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).label
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-
 3. Search frames in a video containing more than 3 cars
 
 ```mysql
@@ -80,7 +79,7 @@ SELECT id, data FROM MyVideo WHERE Array_Count(FastRCNNObjectDetector(data).labe
 4. Materialize the objects detected in a video
 
 ```mysql
-CREATE MATERIALIZED VIEW IF NOT EXISTS MyVideoObjects (id, labels, scores, bboxes) AS 
+CREATE MATERIALIZED VIEW IF NOT EXISTS MyVideoObjects (id, labels, scores, bboxes) AS
 SELECT id, FastRCNNObjectDetector(data) FROM MyVideo;
 ```
 
@@ -99,6 +98,12 @@ CREATE TABLE IF NOT EXISTS MyCSV (
 UPLOAD INFILE 'data/ua_detrac/metadata.csv' PATH 'test_metadata.csv';
 LOAD DATA INFILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
 ```
+6. Drop a table
+```mysql
+DROP TABLE MyVideo;
+```
+
+
 
 ## Documentation
 

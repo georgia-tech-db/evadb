@@ -118,8 +118,7 @@ class AsyncProtocolTests(unittest.TestCase):
     def test_data_received(self):
         client = EvaClient()
         client.queue = MagicMock()
-        
+
         testdata = '4|1234'.encode('ascii')
         client.data_received(testdata)
         client.queue.put_nowait.assert_called_once_with('1234')
-

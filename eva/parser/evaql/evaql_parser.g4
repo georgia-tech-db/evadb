@@ -59,6 +59,19 @@ createTable
       tableName createDefinitions                                  #columnCreateTable
     ;
 
+// Rename statements
+renameTable
+    : RENAME TABLE
+      oldtableName
+      TO newtableName
+    ;
+
+//Truncate statements
+truncateTable
+    : TRUNCATE TABLE
+      tableName
+    ;
+
 // Create UDFs
 createUdf
     : CREATE UDF
@@ -354,6 +367,12 @@ fullId
     ;
 
 tableName
+    : fullId
+    ;
+oldtableName
+    : fullId
+    ;
+newtableName
     : fullId
     ;
 

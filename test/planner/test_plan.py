@@ -20,6 +20,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 
 from eva.planner.create_plan import CreatePlan
+from eva.planner.drop_plan import DropPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.load_data_plan import LoadDataPlan
@@ -48,6 +49,17 @@ class PlanNodeTests(unittest.TestCase):
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
+
+    def test_drop_plan(self):
+        dummy_info = TableInfo('dummy')
+        dummy_table = TableRef(dummy_info)
+
+        CatalogManager().reset()
+        dummy_plan_node = DropPlan([dummy_table], False)
+
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
+        self.assertEqual(
+            dummy_plan_node.table_refs[0].table.table_name, "dummy")
 
     def test_insert_plan(self):
         video_id = 0

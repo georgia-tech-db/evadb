@@ -29,12 +29,14 @@ from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.operators import Dummy, OperatorType, Operator
 from eva.optimizer.operators import (
-    LogicalCreate, LogicalInsert, LogicalLoadData, LogicalUpload,
+    LogicalCreate, LogicalDrop,
+    LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample, LogicalJoin, LogicalFunctionScan,
     LogicalCreateMaterializedView)
 from eva.planner.create_plan import CreatePlan
+from eva.planner.drop_plan import DropPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.insert_plan import InsertPlan
@@ -80,6 +82,7 @@ class RuleType(Flag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
+    LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_GET_TO_SEQSCAN = auto()
@@ -107,6 +110,7 @@ class Promise(IntEnum):
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
+    LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
@@ -387,7 +391,6 @@ class LogicalInnerJoinCommutativity(Rule):
 class LogicalCreateToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATE)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -402,10 +405,25 @@ class LogicalCreateToPhysical(Rule):
         return after
 
 
+class LogicalDropToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDROP)
+        super().__init__(RuleType.LOGICAL_DROP_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DROP_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDrop, context: OptimizerContext):
+        after = DropPlan(before.table_refs, before.if_exists)
+        return after
+
+
 class LogicalCreateUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEUDF)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_CREATE_UDF_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -427,7 +445,6 @@ class LogicalCreateUDFToPhysical(Rule):
 class LogicalInsertToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALINSERT)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_INSERT_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -445,7 +462,6 @@ class LogicalInsertToPhysical(Rule):
 class LogicalLoadToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALLOADDATA)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_LOAD_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -491,7 +507,6 @@ class LogicalUploadToPhysical(Rule):
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
 
     def promise(self):
@@ -784,6 +799,7 @@ class RulesManager:
 
         self._implementation_rules = [
             LogicalCreateToPhysical(),
+            LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),

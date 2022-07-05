@@ -36,6 +36,7 @@ class OperatorType(IntEnum):
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
     LOGICALCREATE = auto()
+    LOGICALDROP = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
     LOGICALUPLOAD = auto()
@@ -439,6 +440,39 @@ class LogicalCreate(Operator):
                      self.video,
                      tuple(self.column_list),
                      self.if_not_exists))
+
+
+class LogicalDrop(Operator):
+    """
+        Logical node for drop table operations
+    """
+
+    def __init__(self, table_refs: List[TableRef],
+                 if_exists: bool, children=None):
+        super().__init__(OperatorType.LOGICALDROP, children)
+        self._table_refs = table_refs
+        self._if_exists = if_exists
+
+    @property
+    def table_refs(self):
+        return self._table_refs
+
+    @property
+    def if_exists(self):
+        return self._if_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDrop):
+            return False
+        return (is_subtree_equal
+                and self.table_refs == other.table_refs
+                and self.if_exists == other.if_exists)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     tuple(self._table_refs),
+                     self._if_exists))
 
 
 class LogicalCreateUDF(Operator):

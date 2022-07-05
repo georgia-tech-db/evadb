@@ -151,6 +151,10 @@ class CatalogManager(object):
         else:
             return None
 
+    def get_all_column_objects(self, table_obj: DataFrameMetadata):
+        col_objs = self._column_service.get_dataset_columns(table_obj)
+        return col_objs
+
     def udf_io(
             self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
             dimensions: List[int], is_input: bool):
@@ -216,7 +220,9 @@ class CatalogManager(object):
                              {}'''.format(type(udf_obj)))
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def delete_metadata(self, table_name: str) -> bool:
+    def drop_dataset_metadata(self,
+                              database_name: str,
+                              table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -227,12 +233,13 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        return self._dataset_service.delete_dataset_by_id(metadata_id)
+        return self._dataset_service.drop_dataset_by_name(database_name,
+                                                          table_name)
 
-    def delete_udf(self, udf_name: str) -> bool:
+    def drop_udf(self, udf_name: str) -> bool:
         """
-        This method drops the udf entry from the catalog
+        This method drops the udf entry and corresponding udf_io
+        from the catalog
 
         Arguments:
            udf_name: udf name to be dropped.
@@ -240,7 +247,7 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._udf_service.delete_udf_by_name(udf_name)
+        return self._udf_service.drop_udf_by_name(udf_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(

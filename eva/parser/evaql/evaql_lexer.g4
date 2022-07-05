@@ -72,6 +72,7 @@ SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
 SOME:                                'SOME';
 TABLE:                               'TABLE';
+TO:                                  'TO';
 TRUE:                                'TRUE';
 UNION:                               'UNION';
 UNIQUE:                              'UNIQUE';
