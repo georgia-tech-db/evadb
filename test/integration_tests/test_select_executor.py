@@ -118,7 +118,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     @unittest.skip('Not supported in current version')
     def test_select_star_in_lateral_join(self):
-        select_query = """SELECT * FROM MyVideo JOIN LATERAL FastRCNNObjectDetector(data);"""
+        select_query = """SELECT * FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data);"""
         actual_batch = execute_query_fetch_all(select_query)
         print(actual_batch)
         self.assertEqual(actual_batch.frames.columns, ['myvideo.id'])
@@ -137,8 +138,6 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch = Batch(expected)
             self.assertEqual(expected_batch.sort_orderby(['table1.a2']),
                              actual_batch.sort_orderby(['table1.a2']))
-
-
 
     def test_should_load_and_select_real_video_in_table(self):
         query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
