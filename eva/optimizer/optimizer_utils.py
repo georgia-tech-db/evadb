@@ -20,7 +20,6 @@ from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
-from eva.parser.table_ref import TableInfo
 
 
 def column_definition_to_udf_io(
@@ -75,17 +74,3 @@ def extract_equi_join_keys(join_predicate: AbstractExpression,
                     right_join_keys.append(left_child)
 
     return (left_join_keys, right_join_keys)
-
-
-def bind_table_ref(video_info: TableInfo) -> int:
-    """Grab metadata id from the catalog for given table info object
-    Arguments:
-        video_info {TableInfo} -- [input parsed video info]
-    Return:
-        dataset id corresponding to given table info
-    """
-
-    catalog = CatalogManager()
-    catalog_entry_id = catalog._dataset_service.dataset_by_name(
-        video_info.table_name)
-    return catalog_entry_id

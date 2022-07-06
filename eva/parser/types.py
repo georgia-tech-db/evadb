@@ -22,7 +22,6 @@ class ColumnConstraintEnum(Enum):
     UNIQUE = auto()
 
 
-# Modified, add RENAME, add TRUNCATE
 @unique
 class StatementType(Enum):
     """

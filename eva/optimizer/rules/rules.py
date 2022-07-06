@@ -413,7 +413,6 @@ class LogicalCreateToPhysical(Rule):
 class LogicalRenameToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALRENAME)
-        # pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_RENAME_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -423,8 +422,7 @@ class LogicalRenameToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalRename, context: OptimizerContext):
-        after = RenamePlan(before.old_table_ref,
-                           before.catalog_table_id, before.new_name)
+        after = RenamePlan(before.old_table_ref, before.new_name)
         return after
 
 
@@ -796,7 +794,6 @@ class LogicalProjectToPhysical(Rule):
 ##############################################
 
 
-# Modified
 class RulesManager:
     """Singelton class to manage all the rules in our system
     """

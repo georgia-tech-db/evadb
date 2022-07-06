@@ -19,7 +19,6 @@ from eva.executor.abstract_executor import AbstractExecutor
 
 
 class RenameExecutor(AbstractExecutor):
-
     def __init__(self, node: RenamePlan):
         super().__init__(node)
 
@@ -31,7 +30,6 @@ class RenameExecutor(AbstractExecutor):
 
         Calls the catalog to modified metadata corresponding to the table.
         """
-
-        new_table_name = self.node.new_name.table_name
-        table_id = self.node.table_id
-        CatalogManager().rename_table(new_table_name, table_id)
+        CatalogManager().rename_table(
+            self.node.new_name, self.node.old_table.table
+        )

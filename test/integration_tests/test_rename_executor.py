@@ -23,15 +23,18 @@ class RenameExecutorTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         self.assertTrue(
-            catalog_manager.get_dataset_metadata(None, "MyVideo2") is None
+            catalog_manager.get_dataset_metadata(None, "MyVideo") is not None
         )
-        
-        rename_query = """RENAME TABLE MyVideo TO MyVideo2;"""
+        self.assertTrue(
+            catalog_manager.get_dataset_metadata(None, "MyVideo1") is None
+        )
+
+        rename_query = """RENAME TABLE MyVideo TO MyVideo1;"""
         execute_query_fetch_all(rename_query)
 
         self.assertTrue(
             catalog_manager.get_dataset_metadata(None, "MyVideo") is None
         )
-        self.assertFalse(
-            catalog_manager.get_dataset_metadata(None, "MyVideo2") is None
+        self.assertTrue(
+            catalog_manager.get_dataset_metadata(None, "MyVideo1") is not None
         )

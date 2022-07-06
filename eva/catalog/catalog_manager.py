@@ -26,6 +26,7 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_service import UdfService
 from eva.catalog.services.udf_io_service import UdfIOService
+from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
 
 
@@ -73,11 +74,14 @@ class CatalogManager(object):
         logger.info("Shutting catalog")
         drop_db()
 
-    def create_metadata(self, name: str, file_url: str,
-                        column_list: List[DataFrameColumn],
-                        identifier_column='id',
-                        is_video=False) -> \
-            DataFrameMetadata:
+    def create_metadata(
+        self,
+        name: str,
+        file_url: str,
+        column_list: List[DataFrameColumn],
+        identifier_column="id",
+        is_video=False,
+    ) -> DataFrameMetadata:
         """Creates metadata object
 
         Creates a metadata object and column objects and persists them in
@@ -94,7 +98,8 @@ class CatalogManager(object):
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column, is_video=is_video)
+            name, file_url, identifier_id=identifier_column, is_video=is_video
+        )
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
@@ -102,8 +107,11 @@ class CatalogManager(object):
         return metadata
 
     def create_column_metadata(
-        self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
-        dimensions: List[int]
+        self,
+        column_name: str,
+        data_type: ColumnType,
+        array_type: NdArrayType,
+        dimensions: List[int],
     ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
@@ -116,11 +124,16 @@ class CatalogManager(object):
             array_type {NdArrayType} -- type of ndarray
             dimensions {List[int]} -- dimensions of the column created
         """
-        return DataFrameColumn(column_name, data_type, array_type=array_type,
-                               array_dimensions=dimensions)
+        return DataFrameColumn(
+            column_name,
+            data_type,
+            array_type=array_type,
+            array_dimensions=dimensions,
+        )
 
-    def get_dataset_metadata(self, database_name: str, dataset_name: str) -> \
-            DataFrameMetadata:
+    def get_dataset_metadata(
+        self, database_name: str, dataset_name: str
+    ) -> DataFrameMetadata:
         """
         Returns the Dataset metadata for the given dataset name
         Arguments:
@@ -131,21 +144,24 @@ class CatalogManager(object):
         """
 
         metadata = self._dataset_service.dataset_object_by_name(
-            database_name, dataset_name)
+            database_name, dataset_name
+        )
         if metadata is None:
             return None
         # we are forced to set schema every time metadata is fetched
         # ToDo: maybe keep schema as a part of persistent metadata object
         df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata.id, None)
+            metadata.id, None
+        )
         metadata.schema = df_columns
         return metadata
 
-    def get_column_object(self,
-                          table_obj: DataFrameMetadata,
-                          col_name: str) -> DataFrameColumn:
+    def get_column_object(
+        self, table_obj: DataFrameMetadata, col_name: str
+    ) -> DataFrameColumn:
         col_objs = self._column_service.columns_by_dataset_id_and_names(
-            table_obj.id, column_names=[col_name])
+            table_obj.id, column_names=[col_name]
+        )
         if col_objs:
             return col_objs[0]
         else:
@@ -156,8 +172,13 @@ class CatalogManager(object):
         return col_objs
 
     def udf_io(
-            self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
-            dimensions: List[int], is_input: bool):
+        self,
+        io_name: str,
+        data_type: ColumnType,
+        array_type: NdArrayType,
+        dimensions: List[int],
+        is_input: bool,
+    ):
         """Constructs an in memory udf_io object with given info.
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog call create_udf with
@@ -170,11 +191,21 @@ class CatalogManager(object):
             dimensions(List[int]):dimensions of the io created
             is_input(bool): whether a input or output, if true it is an input
         """
-        return UdfIO(io_name, data_type, array_type=array_type,
-                     array_dimensions=dimensions, is_input=is_input)
+        return UdfIO(
+            io_name,
+            data_type,
+            array_type=array_type,
+            array_dimensions=dimensions,
+            is_input=is_input,
+        )
 
-    def create_udf(self, name: str, impl_file_path: str,
-                   type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
+    def create_udf(
+        self,
+        name: str,
+        impl_file_path: str,
+        type: str,
+        udf_io_list: List[UdfIO],
+    ) -> UdfMetadata:
         """Creates an udf metadata object and udf_io objects and persists them
         in database.
 
@@ -210,19 +241,27 @@ class CatalogManager(object):
 
     def get_udf_inputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
         if not isinstance(udf_obj, UdfMetadata):
-            raise ValueError('''Expected UdfMetadata object, got
-                             {}'''.format(type(udf_obj)))
+            raise ValueError(
+                """Expected UdfMetadata object, got
+                             {}""".format(
+                    type(udf_obj)
+                )
+            )
         return self._udf_io_service.get_inputs_by_udf_id(udf_obj.id)
 
     def get_udf_outputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
         if not isinstance(udf_obj, UdfMetadata):
-            raise ValueError('''Expected UdfMetadata object, got
-                             {}'''.format(type(udf_obj)))
+            raise ValueError(
+                """Expected UdfMetadata object, got
+                             {}""".format(
+                    type(udf_obj)
+                )
+            )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(self,
-                              database_name: str,
-                              table_name: str) -> bool:
+    def drop_dataset_metadata(
+        self, database_name: str, table_name: str
+    ) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -233,8 +272,9 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(database_name,
-                                                          table_name)
+        return self._dataset_service.drop_dataset_by_name(
+            database_name, table_name
+        )
 
     def drop_udf(self, udf_name: str) -> bool:
         """
@@ -249,13 +289,17 @@ class CatalogManager(object):
         """
         return self._udf_service.drop_udf_by_name(udf_name)
 
-    def rename_table(self, new_name: str, metadata_id: int):
-        return self._dataset_service.rename_dataset_by_id(
-            new_name, metadata_id)
+    def rename_table(self, new_name: TableInfo, curr_table: TableInfo):
+        return self._dataset_service.rename_dataset_by_name(
+            new_name.table_name,
+            curr_table.database_name,
+            curr_table.table_name,
+        )
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(
-            database_name, table_name)
+            database_name, table_name
+        )
         if metadata is None:
             return False
         else:
