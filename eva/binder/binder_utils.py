@@ -20,6 +20,8 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.generic_utils import generate_file_path
+from eva.binder.statement_binder_context import StatementBinderContext
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.utils.logging_manager import logger
 
 
@@ -125,3 +127,14 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
             raise RuntimeError(err_msg)
     else:
         return False
+
+
+def extend_star(binder_context: StatementBinderContext) \
+        -> List[TupleValueExpression]:
+    col_objs = binder_context._get_all_alias_and_col_name()
+
+    target_list = list(
+        [TupleValueExpression(col_name=col_name, table_alias=alias) 
+            for alias, col_name in col_objs]
+    )
+    return target_list

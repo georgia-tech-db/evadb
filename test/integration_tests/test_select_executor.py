@@ -88,21 +88,59 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())
         self.assertEqual([actual_batch], expected_batch)
-
-    @unittest.skip('Too slow when batch size is small.')
-    def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
-                   INTO MyVideo;"""
-        execute_query_fetch_all(query)
-
-        select_query = "SELECT id,data FROM MyVideo;"
+    
+    def test_should_select_star_in_table(self):
+        select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        video_reader = OpenCVReader('data/ua_detrac/ua_detrac/mp4')
+        expected_batch = list(create_dummy_batches())[0]
+        self.assertEqual(actual_batch, expected_batch)
+
+        select_query = "SELECT * FROM MyVideo WHERE id = 5;"
+        actual_batch = execute_query_fetch_all(select_query)
+        expected_batch = list(create_dummy_batches(filters=[5]))[0]
+        self.assertEqual(actual_batch, expected_batch)
+
+    def test_should_select_star_in_nested_query(self):
+        select_query = """SELECT * FROM (SELECT * FROM MyVideo) AS T;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches())[0]
+        expected_batch.modify_column_alias('T')
+        self.assertEqual(actual_batch, expected_batch)
+
+        select_query = """SELECT * FROM (SELECT id FROM MyVideo) AS T;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_rows = [{"T.id": i} for i in range(NUM_FRAMES)]
+        expected_batch = Batch(frames=pd.DataFrame(expected_rows))
+        self.assertEqual(actual_batch, expected_batch)
+
+    @unittest.skip('Not supported in current version')
+    def test_select_star_in_lateral_join(self):
+        select_query = """SELECT * FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data);"""
+        actual_batch = execute_query_fetch_all(select_query)
+        print(actual_batch)
+        self.assertEqual(actual_batch.frames.columns, ['myvideo.id'])
+
+    def test_should_load_and_select_real_video_in_table(self):
+        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
+                   INTO UADETRAC;"""
+        execute_query_fetch_all(query)
+
+        select_query = "SELECT * FROM UADETRAC;"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        video_reader = OpenCVReader(
+            'data/ua_detrac/ua_detrac.mp4',
+            batch_mem_size=30000000
+        )
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
-        self.assertTrue(actual_batch, expected_batch)
+        expected_batch.modify_column_alias('uadetrac')
+        self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
         select_query = "SELECT id,data FROM MyVideo WHERE id = 5;"
@@ -202,7 +240,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.batch_size, 5)
 
     def test_aahash_join_with_one_on(self):
-        select_query = """SELECT table1.a2 FROM table1 JOIN
+        select_query = """SELECT * FROM table1 JOIN
                         table2 ON table1.a1 = table2.a1;"""
         actual_batch = execute_query_fetch_all(select_query)
         expected = pd.merge(self.table1,
@@ -211,12 +249,12 @@ class SelectExecutorTest(unittest.TestCase):
                             right_on=['table2.a1'],
                             how="inner")
         if len(expected):
-            expected_batch = Batch(expected).project(['table1.a2'])
+            expected_batch = Batch(expected)
             self.assertEqual(expected_batch.sort_orderby(['table1.a2']),
                              actual_batch.sort_orderby(['table1.a2']))
 
     def test_hash_join_with_multiple_on(self):
-        select_query = """SELECT table1.a0, table1.a1 FROM table1 JOIN
+        select_query = """SELECT * FROM table1 JOIN
                         table1 AS table2 ON table1.a1 = table2.a1 AND
                         table1.a0 = table2.a0;"""
         actual_batch = execute_query_fetch_all(select_query)
@@ -226,13 +264,12 @@ class SelectExecutorTest(unittest.TestCase):
                             right_on=['table1.a1', 'table1.a0'],
                             how="inner")
         if len(expected):
-            expected_batch = Batch(expected).project(
-                ['table1.a0', 'table1.a1'])
+            expected_batch = Batch(expected)
             self.assertEqual(expected_batch.sort_orderby(['table1.a1']),
                              actual_batch.sort_orderby(['table1.a1']))
 
     def test_hash_join_with_multiple_tables(self):
-        select_query = """SELECT table1.a0 FROM table1 JOIN table2
+        select_query = """SELECT * FROM table1 JOIN table2
                           ON table1.a0 = table2.a0 JOIN table3
                           ON table3.a1 = table1.a1 WHERE table1.a2 > 50;"""
         actual_batch = execute_query_fetch_all(select_query)
@@ -248,6 +285,6 @@ class SelectExecutorTest(unittest.TestCase):
                             how="inner")
         expected = expected.where(expected['table1.a2'] > 50)
         if len(expected):
-            expected_batch = Batch(expected).project(['table1.a0'])
+            expected_batch = Batch(expected)
             self.assertEqual(expected_batch.sort_orderby(['table1.a0']),
                              actual_batch.sort_orderby(['table1.a0']))
