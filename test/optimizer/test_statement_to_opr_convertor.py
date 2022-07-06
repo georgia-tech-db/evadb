@@ -26,11 +26,11 @@ from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.optimizer.operators import (LogicalQueryDerivedGet, LogicalCreate,
                                      LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData, LogicalRename, 
+                                     LogicalLoadData, LogicalRename,
                                      LogicalDrop, LogicalSample,
-                                     LogicalGet, LogicalFilter, 
-                                     LogicalOrderBy,
-                                     LogicalUnion, LogicalFunctionScan, 
+                                     LogicalGet, LogicalFilter,
+                                     LogicalOrderBy, LogicalShow,
+                                     LogicalUnion, LogicalFunctionScan,
                                      LogicalJoin)
 
 
@@ -198,6 +198,8 @@ statement_to_opr_convertor.column_definition_to_udf_io')
                 TableInfo('old')),
             5,
             TableInfo('new'))
+
+        show_plan = LogicalShow(MagicMock())
         drop_plan = LogicalDrop([MagicMock()], True)
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
@@ -227,6 +229,7 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         plans.append(union_plan)
         plans.append(function_scan_plan)
         plans.append(join_plan)
+        plans.append(show_plan)
 
         length = len(plans)
         for i in range(length):

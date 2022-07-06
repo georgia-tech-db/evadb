@@ -27,6 +27,7 @@ from eva.parser.parser_visitor._select_statement import Select
 from eva.parser.parser_visitor._table_sources import TableSources
 from eva.parser.parser_visitor._load_statement import Load
 from eva.parser.parser_visitor._upload_statement import Upload
+from eva.parser.parser_visitor._show_statements import Show
 
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which
@@ -37,7 +38,7 @@ from eva.parser.parser_visitor._upload_statement import Upload
 # Modified, add RenameTable
 class ParserVisitor(CommonClauses, CreateTable, Expressions,
                     Functions, Insert, Select, TableSources,
-                    Load, Upload, RenameTable, DropTable):
+                    Load, Upload, RenameTable, DropTable, Show):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:
             if child is not TerminalNode:

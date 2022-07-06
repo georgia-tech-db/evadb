@@ -21,7 +21,7 @@ from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.types import JoinType
+from eva.parser.types import JoinType, ShowType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.udf_io import UdfIO
 
@@ -49,6 +49,7 @@ class OperatorType(IntEnum):
     LOGICALJOIN = auto()
     LOGICALFUNCTIONSCAN = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
+    LOGICAL_SHOW = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -855,3 +856,26 @@ class LogicalCreateMaterializedView(Operator):
                      self.view,
                      tuple(self.col_list),
                      self.if_not_exists))
+
+
+class LogicalShow(Operator):
+    def __init__(self,
+                 show_type: ShowType,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICAL_SHOW, children)
+        self._show_type = show_type
+
+    @property
+    def show_type(self):
+        return self._show_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalShow):
+            return False
+        return (is_subtree_equal
+                and self.show_type == other.show_type)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.show_type))

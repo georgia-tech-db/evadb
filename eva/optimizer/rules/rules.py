@@ -21,13 +21,14 @@ from eva.optimizer.optimizer_utils import extract_equi_join_keys
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
+from eva.planner.show_info_plan import ShowInfoPlan
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.operators import Dummy, OperatorType, Operator
+from eva.optimizer.operators import Dummy, LogicalShow, OperatorType, Operator
 from eva.optimizer.operators import (
     LogicalCreate, LogicalDrop, LogicalRename,
     LogicalInsert, LogicalLoadData, LogicalUpload,
@@ -97,6 +98,7 @@ class RuleType(Flag):
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
+    LOGICAL_SHOW_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     NUM_RULES = auto()
@@ -128,6 +130,7 @@ class Promise(IntEnum):
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
+    LOGICAL_SHOW_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -790,6 +793,23 @@ class LogicalProjectToPhysical(Rule):
             after.append_child(child)
         return after
 
+
+class LogicalShowToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_SHOW)
+        super().__init__(RuleType.LOGICAL_SHOW_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_SHOW_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalShow, context: OptimizerContext):
+        after = ShowInfoPlan(before.show_type)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -837,7 +857,8 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical()
+            LogicalProjectToPhysical(),
+            LogicalShowToPhysical()
         ]
         self._all_rules = self._rewrite_rules + \
             self._logical_rules + self._implementation_rules

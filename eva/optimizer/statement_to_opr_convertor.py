@@ -20,10 +20,12 @@ from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalRename,
                                      LogicalDrop,
                                      LogicalCreateUDF, LogicalLoadData,
+                                     LogicalShow,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
                                      LogicalLimit, LogicalSample,
                                      LogicalFunctionScan, LogicalJoin)
+from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
@@ -256,6 +258,10 @@ class StatementToPlanConvertor:
         mat_view_opr.append_child(self._plan)
         self._plan = mat_view_opr
 
+    def visit_show(self, statement: ShowStatement):
+        show_opr = LogicalShow(statement.show_type)
+        self._plan = show_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -282,6 +288,8 @@ class StatementToPlanConvertor:
             self.visit_upload(statement)
         elif isinstance(statement, CreateMaterializedViewStatement):
             self.visit_materialized_view(statement)
+        elif isinstance(statement, ShowStatement):
+            self.visit_show(statement)
         return self._plan
 
     @property

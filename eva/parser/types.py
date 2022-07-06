@@ -36,6 +36,7 @@ class StatementType(Enum):
     LOAD_DATA = auto(),
     UPLOAD = auto(),
     CREATE_MATERIALIZED_VIEW = auto(),
+    SHOW = auto()
     # add other types
 
 
@@ -61,3 +62,9 @@ class FileFormatType(Enum):
     """
     VIDEO = auto()
     CSV = auto()
+
+
+@unique
+class ShowType(Enum):
+    UDFS = auto()
+    TABLES = auto()
