@@ -17,7 +17,7 @@ storage:
   engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
   video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
   video_engine_version: 0
-  path_prefix: "./"
+  path_prefix: "/tmp"
 
   # https://petastorm.readthedocs.io/en/latest/api.html#module-petastorm.reader
   petastorm: {'cache_type' : 'local-disk',
