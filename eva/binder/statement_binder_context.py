@@ -139,16 +139,22 @@ class StatementBinderContext:
                 if obj.name.lower() == col_name:
                     return obj
     
-    def _search_all_col_name(self, alias: str) -> List[str]:
-        table_obj = self._table_alias_map.get(alias, None)
-        if table_obj:
-            return [col.name for col in table_obj.columns]
-        col_objs = self._derived_table_alias_map.get(alias, None)
-        if col_objs:
-            return [obj.name for obj in col_objs]
-        err_msg = 'Cannot find alias = {}'.format(alias)
-        logger.error(err_msg)
-        raise RuntimeError(err_msg)
+    def _get_all_alias_and_col_name(self) -> List[Tuple[str, str]]:
+        """
+        Return all alias and column objects mapping in the current context
+        Returns:
+            a list of tuple of alias name, column name
+        """
+        alias_cols = []
+        for alias, table_obj in self._table_alias_map.items():
+            alias_cols += list(
+                [(alias, col.name) for col in table_obj.columns]
+            )
+        for alias, dtable_obj in self._derived_table_alias_map.items():
+            alias_cols += list(
+                [(alias, col.name) for col in dtable_obj]
+            )
+        return alias_cols
 
     def _search_all_alias_maps(self,
                                col_name: str) -> Tuple[str, CatalogColumnType]:

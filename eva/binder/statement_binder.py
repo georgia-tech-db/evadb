@@ -15,7 +15,7 @@
 import sys
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.binder.binder_utils import bind_table_info, create_video_metadata, \
-    extend_star_in_target_list
+    extend_star
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
@@ -74,9 +74,7 @@ class StatementBinder:
             if len(node.target_list) == 1 and \
                     isinstance(node.target_list[0], TupleValueExpression) and \
                     node.target_list[0].col_name == '*':
-                node.target_list = extend_star_in_target_list(
-                    node.from_table.alias, self._binder_context
-                )
+                node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
                 self.bind(expr)
         if node.orderby_list:
