@@ -55,10 +55,9 @@ class PlanNodeTests(unittest.TestCase):
         dummy_info = TableInfo("old")
         dummy_old = TableRef(dummy_info)
         dummy_new = TableInfo("new")
-        video_id = 0
 
         CatalogManager().reset()
-        dummy_plan_node = RenamePlan(dummy_old, video_id, dummy_new)
+        dummy_plan_node = RenamePlan(dummy_old, dummy_new)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
         self.assertEqual(dummy_plan_node.old_table.table.table_name,
                          "old")

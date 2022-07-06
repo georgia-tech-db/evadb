@@ -96,9 +96,7 @@ class DatasetService(BaseService):
             self.model._name == dataset_name
         ).one_or_none()
 
-    def drop_dataset_by_name(
-        self, database_name: str, dataset_name: str
-    ) -> bool:
+    def drop_dataset_by_name(self, database_name: str, dataset_name: str):
         """Delete dataset from the db
         Arguments:
             database_name  (str): Database to which dataset belongs
@@ -109,12 +107,12 @@ class DatasetService(BaseService):
         try:
             dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
-        except Exception:
-            logger.error(
-                "Delete dataset failed for name {}".format(dataset_name)
+        except Exception as e:
+            err_msg = "Delete dataset failed for name {} with error {}".format(
+                dataset_name, str(e)
             )
-            return False
-        return True
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
 
     def rename_dataset_by_name(
         self, new_name: str, curr_database_name: str, curr_dataset_name: str
@@ -123,7 +121,7 @@ class DatasetService(BaseService):
             dataset = self.dataset_object_by_name(
                 curr_database_name, curr_dataset_name
             )
-            dataset.update(**{'_name': new_name})
+            dataset.update(_name=new_name)
 
         except Exception as e:
             err_msg = "Update dataset name failed for {} with error {}".format(
