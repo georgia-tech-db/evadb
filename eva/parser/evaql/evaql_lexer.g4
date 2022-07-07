@@ -66,6 +66,7 @@ ORDER:                               'ORDER';
 PATH:                                'PATH';
 PRIMARY:                             'PRIMARY';
 REFERENCES:                          'REFERENCES';
+RENAME:                              'RENAME';
 SAMPLE:                              'SAMPLE';
 SELECT:                              'SELECT';
 SET:                                 'SET';

@@ -29,6 +29,7 @@ class StatementType(Enum):
     """
     SELECT = auto(),
     CREATE = auto(),
+    RENAME = auto(),
     DROP = auto(),
     INSERT = auto(),
     CREATE_UDF = auto(),

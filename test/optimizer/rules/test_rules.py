@@ -39,6 +39,7 @@ from eva.optimizer.rules.rules import (
     PushdownFilterThroughSample,
     PushdownProjectThroughSample,
     LogicalCreateToPhysical,
+    LogicalRenameToPhysical,
     LogicalDropToPhysical,
     LogicalCreateUDFToPhysical,
     LogicalInsertToPhysical,
@@ -126,6 +127,10 @@ class TestRules(unittest.TestCase):
             < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
+            Promise.LOGICAL_RENAME_TO_PHYSICAL
+            < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
             Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
 
@@ -166,6 +171,7 @@ class TestRules(unittest.TestCase):
 
         supported_implementation_rules = [
             LogicalCreateToPhysical(),
+            LogicalRenameToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
