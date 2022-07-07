@@ -155,6 +155,8 @@ class StatementBinder:
                 self.bind(node.join_node.predicate)
         elif node.is_func_expr():
             self.bind(node.func_expr)
+            self._binder_context.add_derived_table_alias(
+                node.func_expr.alias, [node.func_expr])
         else:
             raise ValueError(f'Unsupported node {type(node)}')
 

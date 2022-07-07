@@ -124,7 +124,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
                 {
                     "labels": pred_class,
                     "scores": pred_score,
-                    "boxes": pred_boxes
+                    "bboxes": pred_boxes
                 },
                 ignore_index=True)
         return outcome
