@@ -35,7 +35,6 @@ class FunctionScanExecutor(AbstractExecutor):
         pass
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        print(kwargs)
         assert 'lateral_input' in kwargs, (
             'Key lateral_input not passed to the FunctionScan')
         lateral_input = kwargs.get('lateral_input')
