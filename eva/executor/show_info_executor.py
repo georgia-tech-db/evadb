@@ -12,34 +12,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
 
-from eva.planner.function_scan_plan import FunctionScanPlan
+import pandas as pd
+from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
+from eva.parser.types import ShowType
+from eva.planner.show_info_plan import ShowInfoPlan
 
 
-class FunctionScanExecutor(AbstractExecutor):
-    """
-    Executes functional expression which yields a table of rows
-    Arguments:
-        node (AbstractPlan): FunctionScanPlan
+class ShowInfoExecutor(AbstractExecutor):
 
-    """
-
-    def __init__(self, node: FunctionScanPlan):
+    def __init__(self, node: ShowInfoPlan):
         super().__init__(node)
-        self.func_expr = node.func_expr
 
     def validate(self):
         pass
 
-    def exec(self, *args, **kwargs) -> Iterator[Batch]:
-        assert 'lateral_input' in kwargs, (
-            'Key lateral_input not passed to the FunctionScan')
-        lateral_input = kwargs.get('lateral_input')
-        if not lateral_input.empty():
-            res = self.func_expr.evaluate(lateral_input)
+    def exec(self):
+        """Create udf executor
 
-            if not res.empty():
-                yield res
+        Calls the catalog to create udf metadata.
+        """
+        catalog_manager = CatalogManager()
+        show_entries = []
+        if self.node.show_type is ShowType.UDFS:
+            udfs = catalog_manager.get_all_udf_entries()
+            for udf in udfs:
+                show_entries.append(udf.display_format())
+
+        yield Batch(pd.DataFrame(show_entries))

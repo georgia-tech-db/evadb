@@ -29,12 +29,14 @@ class StatementType(Enum):
     """
     SELECT = auto(),
     CREATE = auto(),
+    RENAME = auto(),
     DROP = auto(),
     INSERT = auto(),
     CREATE_UDF = auto(),
     LOAD_DATA = auto(),
     UPLOAD = auto(),
     CREATE_MATERIALIZED_VIEW = auto(),
+    SHOW = auto()
     # add other types
 
 
@@ -60,3 +62,9 @@ class FileFormatType(Enum):
     """
     VIDEO = auto()
     CSV = auto()
+
+
+@unique
+class ShowType(Enum):
+    UDFS = auto()
+    TABLES = auto()

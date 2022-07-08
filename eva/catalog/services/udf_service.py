@@ -81,3 +81,9 @@ class UdfService(BaseService):
             logger.exception("Delete udf failed for name {}".format(name))
             return False
         return True
+
+    def get_all_udfs(self):
+        try:
+            return self.model.query.all()
+        except NoResultFound:
+            return []

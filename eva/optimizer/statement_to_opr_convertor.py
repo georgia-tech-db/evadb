@@ -17,16 +17,20 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
                                      LogicalCreate,
+                                     LogicalRename,
                                      LogicalDrop,
                                      LogicalCreateUDF, LogicalLoadData,
+                                     LogicalShow,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
                                      LogicalLimit, LogicalSample,
                                      LogicalFunctionScan, LogicalJoin)
+from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
+from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.create_mat_view_statement \
@@ -102,8 +106,6 @@ class StatementToPlanConvertor:
         # Projection operator
         select_columns = statement.target_list
 
-        # ToDO
-        # add support for SELECT STAR
         if select_columns is not None:
             self._visit_projection(select_columns)
 
@@ -194,6 +196,15 @@ class StatementToPlanConvertor:
             table_ref, statement.column_list, statement.if_not_exists)
         self._plan = create_opr
 
+    def visit_rename(self, statement: RenameTableStatement):
+        """Convertor for parsed rename statement
+        Arguments:
+            statement(RenameTableStatement): [Rename statement]
+        """
+        rename_opr = LogicalRename(statement.old_table_ref,
+                                   statement.new_table_name)
+        self._plan = rename_opr
+
     def visit_drop(self, statement: DropTableStatement):
         drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
         self._plan = drop_opr
@@ -249,6 +260,10 @@ class StatementToPlanConvertor:
         mat_view_opr.append_child(self._plan)
         self._plan = mat_view_opr
 
+    def visit_show(self, statement: ShowStatement):
+        show_opr = LogicalShow(statement.show_type)
+        self._plan = show_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -263,6 +278,8 @@ class StatementToPlanConvertor:
             self.visit_insert(statement)
         elif isinstance(statement, CreateTableStatement):
             self.visit_create(statement)
+        elif isinstance(statement, RenameTableStatement):
+            self.visit_rename(statement)
         elif isinstance(statement, DropTableStatement):
             self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):
@@ -273,6 +290,8 @@ class StatementToPlanConvertor:
             self.visit_upload(statement)
         elif isinstance(statement, CreateMaterializedViewStatement):
             self.visit_materialized_view(statement)
+        elif isinstance(statement, ShowStatement):
+            self.visit_show(statement)
         return self._plan
 
     @property

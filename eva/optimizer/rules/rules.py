@@ -21,21 +21,23 @@ from eva.optimizer.optimizer_utils import extract_equi_join_keys
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
+from eva.planner.show_info_plan import ShowInfoPlan
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.parser.types import JoinType
 from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.operators import Dummy, OperatorType, Operator
+from eva.optimizer.operators import Dummy, LogicalShow, OperatorType, Operator
 from eva.optimizer.operators import (
-    LogicalCreate, LogicalDrop,
+    LogicalCreate, LogicalDrop, LogicalRename,
     LogicalInsert, LogicalLoadData, LogicalUpload,
     LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample, LogicalJoin, LogicalFunctionScan,
     LogicalCreateMaterializedView)
 from eva.planner.create_plan import CreatePlan
+from eva.planner.rename_plan import RenamePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -52,6 +54,8 @@ from eva.planner.lateral_join_plan import LateralJoinPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.configuration.configuration_manager import ConfigurationManager
+
+# Modified
 
 
 class RuleType(Flag):
@@ -82,6 +86,7 @@ class RuleType(Flag):
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
     LOGICAL_CREATE_TO_PHYSICAL = auto()
+    LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
@@ -93,6 +98,7 @@ class RuleType(Flag):
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
+    LOGICAL_SHOW_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     NUM_RULES = auto()
@@ -110,6 +116,7 @@ class Promise(IntEnum):
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
+    LOGICAL_RENAME_TO_PHYSICAL = auto()
     LOGICAL_DROP_TO_PHYSICAL = auto()
     LOGICAL_LOAD_TO_PHYSICAL = auto()
     LOGICAL_UPLOAD_TO_PHYSICAL = auto()
@@ -123,6 +130,7 @@ class Promise(IntEnum):
     LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
+    LOGICAL_SHOW_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -402,6 +410,22 @@ class LogicalCreateToPhysical(Rule):
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list,
                            before.if_not_exists)
+        return after
+
+
+class LogicalRenameToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALRENAME)
+        super().__init__(RuleType.LOGICAL_RENAME_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_RENAME_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalRename, context: OptimizerContext):
+        after = RenamePlan(before.old_table_ref, before.new_name)
         return after
 
 
@@ -784,6 +808,23 @@ class LogicalProjectToPhysical(Rule):
             after.append_child(child)
         return after
 
+
+class LogicalShowToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_SHOW)
+        super().__init__(RuleType.LOGICAL_SHOW_TO_PHYSICAL,
+                         pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_SHOW_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalShow, context: OptimizerContext):
+        after = ShowInfoPlan(before.show_type)
+        return after
+
 # IMPLEMENTATION RULES END
 ##############################################
 
@@ -814,6 +855,7 @@ class RulesManager:
 
         self._implementation_rules = [
             LogicalCreateToPhysical(),
+            LogicalRenameToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
             LogicalInsertToPhysical(),
@@ -830,7 +872,8 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            LogicalProjectToPhysical()
+            LogicalProjectToPhysical(),
+            LogicalShowToPhysical()
         ]
         self._all_rules = self._rewrite_rules + \
             self._logical_rules + self._implementation_rules

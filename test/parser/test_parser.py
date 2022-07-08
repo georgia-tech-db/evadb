@@ -21,15 +21,14 @@ from eva.parser.create_mat_view_statement \
 
 from eva.parser.parser import Parser
 from eva.parser.statement import AbstractStatement
-
 from eva.parser.statement import StatementType
-
 from eva.parser.select_statement import SelectStatement
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.upload_statement import UploadStatement
 from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.drop_statement import DropTableStatement
 
 from eva.expression.abstract_expression import ExpressionType
@@ -65,6 +64,22 @@ class ParserTests(unittest.TestCase):
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(
                 eva_statement_list[0], AbstractStatement)
+
+    def test_rename_statement(self):
+        parser = Parser()
+        rename_queries = "RENAME TABLE student TO student_info"
+        expected_stmt = RenameTableStatement(
+            TableRef(TableInfo('student')),
+            TableInfo('student_info'))
+        eva_statement_list = parser.parse(rename_queries)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.RENAME)
+
+        rename_stmt = eva_statement_list[0]
+        self.assertEqual(rename_stmt, expected_stmt)
 
     def test_drop_statement(self):
         parser = Parser()

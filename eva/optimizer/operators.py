@@ -20,8 +20,8 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.create_statement import ColumnDefinition
-from eva.parser.table_ref import TableRef
-from eva.parser.types import JoinType
+from eva.parser.table_ref import TableRef, TableInfo
+from eva.parser.types import JoinType, ShowType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.catalog.models.udf_io import UdfIO
 
@@ -36,6 +36,7 @@ class OperatorType(IntEnum):
     LOGICALPROJECT = auto()
     LOGICALINSERT = auto()
     LOGICALCREATE = auto()
+    LOGICALRENAME = auto()
     LOGICALDROP = auto()
     LOGICALCREATEUDF = auto()
     LOGICALLOADDATA = auto()
@@ -48,6 +49,7 @@ class OperatorType(IntEnum):
     LOGICALJOIN = auto()
     LOGICALFUNCTIONSCAN = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
+    LOGICAL_SHOW = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -440,6 +442,42 @@ class LogicalCreate(Operator):
                      self.video,
                      tuple(self.column_list),
                      self.if_not_exists))
+
+
+class LogicalRename(Operator):
+    """Logical node for rename table operations
+
+    Arguments:
+        old_table {TableRef}: [old table that is to be renamed]
+        new_name {TableInfo}: [new name for the old table]
+    """
+
+    def __init__(self, old_table_ref: TableRef,
+                 new_name: TableInfo, children=None):
+        super().__init__(OperatorType.LOGICALRENAME, children)
+        self._new_name = new_name
+        self._old_table_ref = old_table_ref
+
+    @property
+    def new_name(self):
+        return self._new_name
+
+    @property
+    def old_table_ref(self):
+        return self._old_table_ref
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalRename):
+            return False
+        return (is_subtree_equal
+                and self._new_name == other._new_name
+                and self._old_table_ref == other._old_table_ref)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self._new_name,
+                     self._old_table_ref))
 
 
 class LogicalDrop(Operator):
@@ -850,3 +888,26 @@ class LogicalCreateMaterializedView(Operator):
                      self.view,
                      tuple(self.col_list),
                      self.if_not_exists))
+
+
+class LogicalShow(Operator):
+    def __init__(self,
+                 show_type: ShowType,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICAL_SHOW, children)
+        self._show_type = show_type
+
+    @property
+    def show_type(self):
+        return self._show_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalShow):
+            return False
+        return (is_subtree_equal
+                and self.show_type == other.show_type)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.show_type))

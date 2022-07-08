@@ -20,6 +20,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 
 from eva.planner.create_plan import CreatePlan
+from eva.planner.rename_plan import RenamePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
@@ -49,6 +50,19 @@ class PlanNodeTests(unittest.TestCase):
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
+
+    def test_rename_plan(self):
+        dummy_info = TableInfo("old")
+        dummy_old = TableRef(dummy_info)
+        dummy_new = TableInfo("new")
+
+        CatalogManager().reset()
+        dummy_plan_node = RenamePlan(dummy_old, dummy_new)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
+        self.assertEqual(dummy_plan_node.old_table.table.table_name,
+                         "old")
+        self.assertEqual(dummy_plan_node.new_name.table_name,
+                         "new")
 
     def test_drop_plan(self):
         dummy_info = TableInfo('dummy')

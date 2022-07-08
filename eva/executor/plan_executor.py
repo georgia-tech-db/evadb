@@ -20,11 +20,13 @@ from eva.executor.predicate_executor import PredicateExecutor
 from eva.executor.project_executor import ProjectExecutor
 from eva.executor.sample_executor import SampleExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
+from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 from eva.executor.pp_executor import PPExecutor
 from eva.executor.create_executor import CreateExecutor
+from eva.executor.rename_executor import RenameExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
@@ -80,6 +82,8 @@ class PlanExecutor:
             executor_node = PPExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE:
             executor_node = CreateExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.RENAME:
+            executor_node = RenameExecutor(node=plan)
         elif plan_opr_type == PlanOprType.DROP:
             executor_node = DropExecutor(node=plan)
         elif plan_opr_type == PlanOprType.INSERT:
@@ -110,6 +114,8 @@ class PlanExecutor:
             executor_node = ProjectExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
             executor_node = PredicateExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.SHOW_INFO:
+            executor_node = ShowInfoExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))

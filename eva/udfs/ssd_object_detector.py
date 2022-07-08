@@ -1,3 +1,17 @@
+# coding=utf-8
+# Copyright 2018-2020 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import itertools
 import numpy as np
 import pandas as pd
@@ -195,35 +209,6 @@ class Encoder(object):
         self.nboxes = self.dboxes.size(0)
         self.scale_xy = dboxes.scale_xy
         self.scale_wh = dboxes.scale_wh
-
-    def encode(self, bboxes_in, labels_in, criteria=0.5):
-
-        ious = calc_iou_tensor(bboxes_in, self.dboxes)
-        best_dbox_ious, best_dbox_idx = ious.max(dim=0)
-        best_bbox_ious, best_bbox_idx = ious.max(dim=1)
-
-        # set best ious 2.0
-        best_dbox_ious.index_fill_(0, best_bbox_idx, 2.0)
-
-        idx = torch.arange(0, best_bbox_idx.size(0), dtype=torch.int64)
-        best_dbox_idx[best_bbox_idx[idx]] = idx
-
-        # filter IoU > 0.5
-        masks = best_dbox_ious > criteria
-        labels_out = torch.zeros(self.nboxes, dtype=torch.long)
-        labels_out[masks] = labels_in[best_dbox_idx[masks]]
-        bboxes_out = self.dboxes.clone()
-        bboxes_out[masks, :] = bboxes_in[best_dbox_idx[masks], :]
-        # Transform format to xywh format
-        x, y, w, h = 0.5 * (bboxes_out[:, 0] + bboxes_out[:, 2]), \
-            0.5 * (bboxes_out[:, 1] + bboxes_out[:, 3]), \
-            - bboxes_out[:, 0] + bboxes_out[:, 2], \
-            - bboxes_out[:, 1] + bboxes_out[:, 3]
-        bboxes_out[:, 0] = x
-        bboxes_out[:, 1] = y
-        bboxes_out[:, 2] = w
-        bboxes_out[:, 3] = h
-        return bboxes_out, labels_out
 
     def scale_back_batch(self, bboxes_in, scores_in):
         """

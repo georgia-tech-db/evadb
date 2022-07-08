@@ -27,6 +27,11 @@ wheels/
 *.egg
 MANIFEST
 pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pypirc
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -156,3 +161,9 @@ miniconda.sh
 
 # Datasets
 eva_datasets/
+eva.history
+
+# nohup
+nohup.out
+*mp4*
+develop.sh
