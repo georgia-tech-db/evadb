@@ -77,7 +77,8 @@ class EVACursor(object):
          the content into a string.
         """
         if 'UPLOAD' in query:
-            file_path = query.split()[2][1:-1]
+            query_list = query.split()
+            file_path = query_list[2][1:-1]
             dst_path = os.path.basename(file_path)
             with open(file_path, "rb") as f:
                 bytes_read = f.read()
@@ -85,10 +86,11 @@ class EVACursor(object):
                 query = 'UPLOAD PATH ' + \
                         '\'' + dst_path + '\'' + \
                         ' BLOB ' + \
-                        '\"' + b64_string + '\" ' + \
-                        query.split()[3] + ' ' + query.split()[4]
-                print(query)
-                exit(0)
+                        '\"' + b64_string + '\" ';
+
+                for token in query_list[3:]:
+                    query += token + ' '
+
         return query
 
     def __getattr__(self, name):
