@@ -107,8 +107,8 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
     if obj:
         table_info.table_obj = obj
     else:
-        error = '{} does not exists. Create the table using \
-                        CREATE TABLE.'.format(table_info.table_name)
+        error = '{} does not exist. Create the table using' \
+                ' CREATE TABLE.'.format(table_info.table_name)
         logger.error(error)
         raise RuntimeError(error)
 

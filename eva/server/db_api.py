@@ -15,6 +15,7 @@
 import asyncio
 import random
 import base64
+import os
 
 from eva.server.async_protocol import EvaClient
 from eva.models.server.response import Response
@@ -77,14 +78,17 @@ class EVACursor(object):
         """
         if 'UPLOAD' in query:
             file_path = query.split()[2][1:-1]
-            dst_path = query.split()[-1][1:-2]
+            dst_path = os.path.basename(file_path)
             with open(file_path, "rb") as f:
                 bytes_read = f.read()
                 b64_string = str(base64.b64encode(bytes_read))
                 query = 'UPLOAD PATH ' + \
                         '\'' + dst_path + '\'' + \
                         ' BLOB ' + \
-                        '\"' + b64_string + '\";'
+                        '\"' + b64_string + '\" ' + \
+                        query.split()[3] + ' ' + query.split()[4]
+                print(query)
+                exit(0)
         return query
 
     def __getattr__(self, name):

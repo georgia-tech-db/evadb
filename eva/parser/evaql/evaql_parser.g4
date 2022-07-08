@@ -194,6 +194,11 @@ uploadStatement
     : UPLOAD
       PATH fileName
       BLOB videoBlob
+      INTO tableName
+        (
+            ('(' columns=uidList ')')
+        )?
+      (WITH fileOptions)?
     ;
 
 fileName

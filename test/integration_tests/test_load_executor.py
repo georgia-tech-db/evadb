@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from ast import Load
 import unittest
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -42,7 +43,7 @@ class LoadExecutorTest(unittest.TestCase):
         select_query = """SELECT id, data FROM MyVideo;"""
 
         actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()                
+        actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         expected_batch.modify_column_alias('myvideo')
         self.assertEqual(actual_batch, expected_batch)
@@ -84,3 +85,12 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = create_dummy_csv_batches()
         expected_batch.modify_column_alias('myvideocsv')
         self.assertEqual(actual_batch, expected_batch)
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(LoadExecutorTest('test_should_load_video_in_table'))
+    unittest.TextTestRunner().run(suite)
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
+    # unittest.main(LoadExecutorTest("test_should_load_video_in_table"))

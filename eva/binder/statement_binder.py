@@ -23,6 +23,7 @@ from eva.parser.create_mat_view_statement import \
     CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.upload_statement import UploadStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
@@ -89,6 +90,42 @@ class StatementBinder:
 
     @bind.register(LoadDataStatement)
     def _bind_load_data_statement(self, node: LoadDataStatement):
+        table_ref = node.table_ref
+        if node.file_options['file_format'] == FileFormatType.VIDEO:
+            # Create a new metadata object
+            create_video_metadata(table_ref.table.table_name)
+
+        self.bind(table_ref)
+
+        table_ref_obj = table_ref.table.table_obj
+        if table_ref_obj is None:
+            error = '{} does not exists. Create the table using \
+                            CREATE TABLE.'.format(table_ref.table.table_name)
+            logger.error(error)
+            raise RuntimeError(error)
+
+        # if query had columns specified, we just copy them
+        if node.column_list is not None:
+            column_list = node.column_list
+
+        # else we curate the column list from the metadata
+        else:
+            column_list = []
+            for column in table_ref_obj.columns:
+                column_list.append(
+                    TupleValueExpression(
+                        col_name=column.name,
+                        table_alias=table_ref_obj.name.lower(),
+                        col_object=column))
+
+        # bind the columns
+        for expr in column_list:
+            self.bind(expr)
+
+        node.column_list = column_list
+
+    @bind.register(UploadStatement)
+    def _bind_upload_statement(self, node: UploadStatement):
         table_ref = node.table_ref
         if node.file_options['file_format'] == FileFormatType.VIDEO:
             # Create a new metadata object

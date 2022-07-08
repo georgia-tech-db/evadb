@@ -21,15 +21,14 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import VideoStorageEngine
 from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.dictionary import EVA_DEFAULT_DIR
 from eva.utils.logging_manager import logger
 
 
 class LoadVideoExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        self.upload_path = Path(
-            ConfigurationManager().get_value("storage", "path_prefix")
-        )
+        self.upload_path = EVA_DEFAULT_DIR
 
     def validate(self):
         pass
