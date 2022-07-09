@@ -23,6 +23,7 @@ from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.parser.types import FileFormatType
 
+
 class UploadExecutor(AbstractExecutor):
 
     def __init__(self, node: UploadPlan):

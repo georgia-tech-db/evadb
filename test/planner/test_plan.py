@@ -149,11 +149,11 @@ class PlanNodeTests(unittest.TestCase):
             batch_mem_size={}, \
             column_list={}, \
             file_options={})'.format(file_path,
-                                       "string of video blob",
-                                       table_metainfo,
-                                       batch_mem_size,
-                                       column_list,
-                                       file_options)
+                                     "string of video blob",
+                                     table_metainfo,
+                                     batch_mem_size,
+                                     column_list,
+                                     file_options)
         plan = UploadPlan(file_path, video_blob,
                           table_metainfo, batch_mem_size,
                           column_list, file_options)

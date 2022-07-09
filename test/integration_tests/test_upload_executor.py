@@ -19,7 +19,7 @@ import base64
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
-from test.util import file_remove, UPLOAD_DIR
+from test.util import UPLOAD_DIR
 
 
 class UploadExecutorTest(unittest.TestCase):

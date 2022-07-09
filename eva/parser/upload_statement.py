@@ -21,6 +21,7 @@ from eva.parser.table_ref import TableRef
 from pathlib import Path
 from typing import List
 
+
 class UploadStatement(AbstractStatement):
     """
     Upload Statement constructed after parsing the input query
@@ -46,7 +47,8 @@ class UploadStatement(AbstractStatement):
 
     def __str__(self) -> str:
         print_str = "UPLOAD PATH {} BLOB {} INTO {}({}) WITH {}".format(
-            self._path, "string of video blob", self._table_ref, self._column_list, self._file_options)
+            self._path, "string of video blob", self._table_ref,
+            self._column_list, self._file_options)
         return print_str
 
     @property

@@ -11,7 +11,6 @@ from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.dictionary import EVA_DEFAULT_DIR
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3

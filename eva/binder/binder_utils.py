@@ -134,7 +134,7 @@ def extend_star(binder_context: StatementBinderContext) \
     col_objs = binder_context._get_all_alias_and_col_name()
 
     target_list = list(
-        [TupleValueExpression(col_name=col_name, table_alias=alias) 
+        [TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs]
     )
     return target_list

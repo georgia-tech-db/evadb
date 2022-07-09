@@ -458,8 +458,7 @@ class ParserTests(unittest.TestCase):
             TableRef(
                 TableInfo('MyVideo')),
             column_list,
-            file_options
-            )
+            file_options)
 
         eva_statement_list = parser.parse(upload_query)
         self.assertIsInstance(eva_statement_list, list)

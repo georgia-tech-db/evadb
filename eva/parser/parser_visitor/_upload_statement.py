@@ -20,6 +20,7 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 
+
 class Upload(evaql_parserVisitor):
     def visitUploadStatement(self, ctx: evaql_parser.UploadStatementContext):
         srv_path = self.visit(ctx.fileName()).value
@@ -39,7 +40,8 @@ class Upload(evaql_parserVisitor):
         if ctx.uidList():
             column_list = self.visit(ctx.uidList())
 
-        stmt = UploadStatement(srv_path, video_blob, table, column_list, file_options)
+        stmt = UploadStatement(srv_path, video_blob, table,
+                               column_list, file_options)
         return stmt
 
     def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):

@@ -86,7 +86,7 @@ class EVACursor(object):
                 query = 'UPLOAD PATH ' + \
                         '\'' + dst_path + '\'' + \
                         ' BLOB ' + \
-                        '\"' + b64_string + '\" ';
+                        '\"' + b64_string + '\" '
 
                 for token in query_list[3:]:
                     query += token + ' '
