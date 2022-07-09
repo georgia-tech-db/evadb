@@ -137,12 +137,32 @@ class PlanNodeTests(unittest.TestCase):
     def test_upload_plan(self):
         file_path = 'test.mp4'
         video_blob = "b'AAAA'"
-        plan_str = 'UploadPlan(file_path={} video_blob={})'.format(
-            file_path, "string of video blob")
-        plan = UploadPlan(file_path, video_blob)
+        table_metainfo = 'meta_info'
+        file_format = FileFormatType.VIDEO
+        file_options = {}
+        file_options['file_format'] = file_format
+        column_list = None
+        batch_mem_size = 3000
+        plan_str = 'UploadPlan(file_path={}, \
+            video_blob={}, \
+            table_id={}, \
+            batch_mem_size={}, \
+            column_list={}, \
+            file_options={})'.format(file_path,
+                                       "string of video blob",
+                                       table_metainfo,
+                                       batch_mem_size,
+                                       column_list,
+                                       file_options)
+        plan = UploadPlan(file_path, video_blob,
+                          table_metainfo, batch_mem_size,
+                          column_list, file_options)
         self.assertEqual(plan.opr_type, PlanOprType.UPLOAD)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(plan.video_blob, video_blob)
+        self.assertEqual(plan.table_metainfo, table_metainfo)
+        self.assertEqual(plan.batch_mem_size, batch_mem_size)
+
         self.assertEqual(str(plan), plan_str)
 
     def test_union_plan(self):
@@ -158,3 +178,9 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.CREATE_MATERIALIZED_VIEW)
         self.assertEqual(plan.view, dummy_view)
         self.assertEqual(plan.columns, columns)
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(PlanNodeTests('test_upload_plan'))
+    unittest.TextTestRunner().run(suite)

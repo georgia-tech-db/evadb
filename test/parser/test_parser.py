@@ -445,10 +445,22 @@ class ParserTests(unittest.TestCase):
 
     def test_upload_statement(self):
         parser = Parser()
-        upload_query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'";"""
+        upload_query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
+                          INTO MyVideo WITH FORMAT VIDEO;"""
+
+        file_options = {}
+        file_options['file_format'] = FileFormatType.VIDEO
+        column_list = None
+
         expected_stmt = UploadStatement(
             Path('data/video.mp4'),
-            "b'AAAA'")
+            "b'AAAA'",
+            TableRef(
+                TableInfo('MyVideo')),
+            column_list,
+            file_options
+            )
+
         eva_statement_list = parser.parse(upload_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

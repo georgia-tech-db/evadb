@@ -30,7 +30,7 @@ class LoadCSVExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
         config = ConfigurationManager()
-        self.path_prefix = config.get_value('storage', 'path_prefix')
+        self.upload_dir = config.get_value('storage', 'upload_dir')
 
     def validate(self):
         pass
@@ -45,7 +45,7 @@ class LoadCSVExecutor(AbstractExecutor):
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
         csv_reader = CSVReader(
-            os.path.join(self.path_prefix, self.node.file_path),
+            os.path.join(self.upload_dir, self.node.file_path),
             column_list=self.node.column_list,
             batch_mem_size=self.node.batch_mem_size
         )

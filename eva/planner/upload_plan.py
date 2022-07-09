@@ -70,7 +70,8 @@ class UploadPlan(AbstractPlan):
         return self._file_options
 
     def __str__(self):
-        return 'UploadPlan(file_path={} video_blob={}, \
+        return 'UploadPlan(file_path={}, \
+            video_blob={}, \
             table_id={}, \
             batch_mem_size={}, \
             column_list={}, \

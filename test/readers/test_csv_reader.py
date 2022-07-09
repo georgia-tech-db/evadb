@@ -19,7 +19,7 @@ from eva.readers.csv_reader import CSVReader
 
 from test.util import create_sample_csv
 from test.util import file_remove
-from test.util import NUM_FRAMES, PATH_PREFIX, FRAME_SIZE
+from test.util import NUM_FRAMES, UPLOAD_DIR, FRAME_SIZE
 from test.util import create_dummy_csv_batches
 from eva.expression.tuple_value_expression import TupleValueExpression
 
@@ -42,7 +42,7 @@ class CSVLoaderTest(unittest.TestCase):
 
         # call the CSVReader
         csv_loader = CSVReader(
-            file_url=os.path.join(PATH_PREFIX, 'dummy.csv'),
+            file_url=os.path.join(UPLOAD_DIR, 'dummy.csv'),
             column_list=column_list,
             batch_mem_size=NUM_FRAMES * FRAME_SIZE)
 

@@ -21,7 +21,6 @@ from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.dictionary import EVA_DEFAULT_DIR
 from eva.parser.types import FileFormatType
 
 class UploadExecutor(AbstractExecutor):
@@ -29,7 +28,7 @@ class UploadExecutor(AbstractExecutor):
     def __init__(self, node: UploadPlan):
         super().__init__(node)
         config = ConfigurationManager()
-        # self.path_prefix = config.get_value('storage', 'path_prefix')
+        self.upload_dir = config.get_value('storage', 'upload_dir')
 
     def validate(self):
         pass
@@ -45,7 +44,7 @@ class UploadExecutor(AbstractExecutor):
         video_blob = self.node.video_blob
         path = self.node.file_path
         video_bytes = base64.b64decode(video_blob[1:])
-        with open(os.path.join(EVA_DEFAULT_DIR, path), 'wb') as f:
+        with open(os.path.join(self.upload_dir, path), 'wb') as f:
             f.write(video_bytes)
 
         # invoke the appropriate executor

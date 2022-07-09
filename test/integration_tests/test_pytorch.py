@@ -19,7 +19,7 @@ import sys
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
-from test.util import (copy_sample_video_to_prefix,
+from test.util import (copy_sample_video_to_upload_dir,
                        file_remove, load_inbuilt_udfs)
 
 
@@ -27,7 +27,7 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        copy_sample_video_to_prefix()
+        copy_sample_video_to_upload_dir()
         query = """LOAD DATA INFILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)

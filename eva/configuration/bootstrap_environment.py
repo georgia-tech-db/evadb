@@ -21,7 +21,7 @@ import yaml
 
 from eva.configuration.dictionary import EVA_INSTALLATION_DIR, \
     EVA_DEFAULT_DIR, EVA_DATASET_DIR, DB_DEFAULT_URI, \
-    EVA_CONFIG_FILE
+    EVA_CONFIG_FILE, EVA_UPLOAD_DIR
 from eva.configuration.config_utils import read_value_config, \
     update_value_config
 
@@ -59,8 +59,11 @@ def bootstrap_environment():
     # fill default values for dataset and database if not present
     dataset_location = read_value_config(cfg, "core", "datasets_dir")
     database_uri = read_value_config(cfg, "core", "catalog_database_uri")
+    upload_location = read_value_config(cfg, "storage", "upload_dir")
 
-    if not dataset_location or not database_uri:
+    if not dataset_location or \
+       not database_uri or \
+       not upload_location:
         if not dataset_location:
             dataset_location = str(
                 eva_home_directory / EVA_DATASET_DIR)
@@ -71,6 +74,11 @@ def bootstrap_environment():
             update_value_config(cfg, "core", "catalog_database_uri",
                                 database_uri)
 
+        if not upload_location:
+            upload_location = str(
+                eva_home_directory / EVA_UPLOAD_DIR)
+            update_value_config(cfg, "storage", "upload_dir",
+                                upload_location)
         # update config on disk
         with open(config_path, 'w') as ymlfile:
             ymlfile.write(yaml.dump(cfg))

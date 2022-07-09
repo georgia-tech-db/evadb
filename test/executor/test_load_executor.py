@@ -54,7 +54,7 @@ class LoadExecutorTest(unittest.TestCase):
     def test_should_search_in_upload_directory(
             self, create_mock):
         self.upload_path = Path(
-            ConfigurationManager().get_value('storage', 'path_prefix'))
+            ConfigurationManager().get_value('storage', 'upload_dir'))
         file_path = 'video'
         table_metainfo = 'info'
         batch_mem_size = 3000
@@ -135,3 +135,13 @@ class LoadExecutorTest(unittest.TestCase):
 
         # remove the dummy.csv
         file_remove('dummy.csv')
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(LoadExecutorTest(
+        'test_should_fail_to_find_file'))
+    unittest.TextTestRunner().run(suite)
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
+    # unittest.main(LoadExecutorTest("test_should_load_video_in_table"))

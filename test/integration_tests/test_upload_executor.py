@@ -19,7 +19,7 @@ import base64
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
-from test.util import file_remove, PATH_PREFIX
+from test.util import file_remove, UPLOAD_DIR
 
 
 class UploadExecutorTest(unittest.TestCase):
@@ -37,23 +37,17 @@ class UploadExecutorTest(unittest.TestCase):
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
         expected_blob = "b'AAAA'"
-        with open(os.path.join(PATH_PREFIX, 'dummy.avi'), 'rb') as f:
+        with open(os.path.join(UPLOAD_DIR, 'dummy.avi'), 'rb') as f:
             bytes_read = f.read()
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
 
     def test_should_check_for_file_table_load(self):
+        # all load tests
         pass
 
-    def test_should_check_that_file_exists_at_location(self):
-        self.assertTrue(os.path.isfile(os.path.join(PATH_PREFIX, 'dummy.avi')))
 
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(UploadExecutorTest('test_should_upload_video_to_location'))
-    suite.addTest(UploadExecutorTest(
-        'test_should_check_that_file_exists_at_location'))
     unittest.TextTestRunner().run(suite)
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite)
-    # unittest.main(LoadExecutorTest("test_should_load_video_in_table"))

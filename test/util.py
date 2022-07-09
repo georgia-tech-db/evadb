@@ -16,8 +16,7 @@ from eva.configuration.dictionary import EVA_DEFAULT_DIR
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
 CONFIG = ConfigurationManager()
-# PATH_PREFIX = CONFIG.get_value('storage', 'path_prefix')
-PATH_PREFIX = EVA_DEFAULT_DIR
+UPLOAD_DIR = CONFIG.get_value('storage', 'upload_dir')
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
@@ -56,7 +55,7 @@ def convert_bbox(bbox):
 
 def create_sample_csv(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(PATH_PREFIX, 'dummy.csv'))
+        os.remove(os.path.join(UPLOAD_DIR, 'dummy.csv'))
     except FileNotFoundError:
         pass
 
@@ -81,25 +80,25 @@ def create_sample_csv(num_frames=NUM_FRAMES):
             index += 1
 
     df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
+    df_sample_meta.to_csv(os.path.join(UPLOAD_DIR, 'dummy.csv'),
                           index=False)
 
 
 def create_dummy_csv_batches():
-    df = pd.read_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
+    df = pd.read_csv(os.path.join(UPLOAD_DIR, 'dummy.csv'),
                      converters={'bbox': convert_bbox})
     return Batch(df)
 
 
 def create_csv(num_rows, columns):
     try:
-        os.remove(os.path.join(PATH_PREFIX, 'dummy.csv'))
+        os.remove(os.path.join(UPLOAD_DIR, 'dummy.csv'))
     except FileNotFoundError:
         pass
     df = pd.DataFrame(columns=columns)
     for col in columns:
         df[col] = np.random.randint(1, 100, num_rows)
-    df.to_csv(os.path.join(PATH_PREFIX, 'dummy.csv'),
+    df.to_csv(os.path.join(UPLOAD_DIR, 'dummy.csv'),
               index=False)
     return df
 
@@ -124,11 +123,11 @@ def create_table(table_name, num_rows, num_columns):
 
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(PATH_PREFIX, 'dummy.avi'))
+        os.remove(os.path.join(UPLOAD_DIR, 'dummy.avi'))
     except FileNotFoundError:
         pass
 
-    out = cv2.VideoWriter(os.path.join(PATH_PREFIX, 'dummy.avi'),
+    out = cv2.VideoWriter(os.path.join(UPLOAD_DIR, 'dummy.avi'),
                           cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10,
                           (2, 2))
     for i in range(num_frames):
@@ -137,13 +136,13 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
 
-def copy_sample_video_to_prefix():
+def copy_sample_video_to_upload_dir():
     shutil.copyfile('data/ua_detrac/ua_detrac.mp4',
-                    os.path.join(PATH_PREFIX, 'ua_detrac.mp4'))
+                    os.path.join(UPLOAD_DIR, 'ua_detrac.mp4'))
 
 
 def file_remove(path):
-    os.remove(os.path.join(PATH_PREFIX, path))
+    os.remove(os.path.join(UPLOAD_DIR, path))
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES,

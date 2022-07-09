@@ -19,7 +19,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from test.util import create_sample_video, file_remove, \
-    copy_sample_video_to_prefix, load_inbuilt_udfs
+    copy_sample_video_to_upload_dir, load_inbuilt_udfs
 from test.util import DummyObjectDetector
 
 NUM_FRAMES = 10
@@ -31,7 +31,7 @@ class MaterializedViewTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        copy_sample_video_to_prefix()
+        copy_sample_video_to_upload_dir()
         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         query = """LOAD DATA INFILE 'ua_detrac.mp4'
