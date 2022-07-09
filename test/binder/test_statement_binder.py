@@ -210,6 +210,32 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch('eva.binder.statement_binder.create_video_metadata')
     @patch('eva.binder.statement_binder.TupleValueExpression')
+    def test_bind_upload_video_statement(self, mock_tve, mock_create):
+        upload_statement = MagicMock()
+        upload_statement.file_options = {'file_format': FileFormatType.VIDEO}
+        upload_statement.column_list = None
+        column = MagicMock()
+        table_ref_obj = MagicMock()
+        table_ref_obj.columns = [column]
+        table_ref_obj.name = 'table_alias'
+        upload_statement.table_ref.table.table_obj = table_ref_obj
+        upload_statement.table_ref.table.table_name = 'table_name'
+        mock_tve.return_value = tve_return_value = MagicMock()
+
+        with patch.object(StatementBinder, 'bind') as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            binder._bind_upload_statement(upload_statement)
+            mock_binder.assert_any_call(upload_statement.table_ref)
+            mock_create.assert_any_call('table_name')
+            mock_tve.assert_called_with(
+                col_name=column.name,
+                table_alias='table_alias',
+                col_object=column)
+            mock_binder.assert_any_call(tve_return_value)
+            self.assertEqual(upload_statement.column_list, [tve_return_value])
+
+    @patch('eva.binder.statement_binder.create_video_metadata')
+    @patch('eva.binder.statement_binder.TupleValueExpression')
     def test_bind_load_data(self, mock_tve, mock_create):
         load_statement = MagicMock()
         column = MagicMock()
@@ -228,6 +254,24 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch('eva.binder.statement_binder.create_video_metadata')
     @patch('eva.binder.statement_binder.TupleValueExpression')
+    def test_bind_upload_data(self, mock_tve, mock_create):
+        upload_statement = MagicMock()
+        column = MagicMock()
+        upload_statement.column_list = [column]
+
+        table_ref_obj = MagicMock()
+        table_ref_obj.columns = [column]
+
+        with patch.object(StatementBinder, 'bind') as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            binder._bind_upload_statement(upload_statement)
+            mock_binder.assert_any_call(upload_statement.table_ref)
+            mock_create.assert_not_called()
+            mock_tve.assert_not_called()
+            mock_binder.assert_any_call(column)
+
+    @patch('eva.binder.statement_binder.create_video_metadata')
+    @patch('eva.binder.statement_binder.TupleValueExpression')
     def test_bind_load_data_raises(self, mock_tve, mock_create):
         load_statement = MagicMock()
         column = MagicMock()
@@ -237,6 +281,18 @@ class StatementBinderTests(unittest.TestCase):
             with patch.object(StatementBinder, 'bind'):
                 binder = StatementBinder(StatementBinderContext())
                 binder._bind_load_data_statement(load_statement)
+
+    @patch('eva.binder.statement_binder.create_video_metadata')
+    @patch('eva.binder.statement_binder.TupleValueExpression')
+    def test_bind_upload_raises(self, mock_tve, mock_create):
+        upload_statement = MagicMock()
+        column = MagicMock()
+        upload_statement.column_list = [column]
+        upload_statement.table_ref.table.table_obj = None
+        with self.assertRaises(RuntimeError):
+            with patch.object(StatementBinder, 'bind'):
+                binder = StatementBinder(StatementBinderContext())
+                binder._bind_upload_statement(upload_statement)
 
     def test_bind_unknown_object(self):
         class UnknownType:
