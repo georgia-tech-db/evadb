@@ -43,15 +43,3 @@ class Upload(evaql_parserVisitor):
         stmt = UploadStatement(srv_path, video_blob, table,
                                column_list, file_options)
         return stmt
-
-    def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
-        file_format = FileFormatType.VIDEO
-        # Check the file format
-        if ctx.CSV() is not None:
-            file_format = FileFormatType.CSV
-
-        # parse and add more file options in future
-        file_options = {}
-        file_options['file_format'] = file_format
-
-        return file_options
