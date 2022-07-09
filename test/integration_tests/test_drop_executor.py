@@ -38,3 +38,10 @@ class DropExecutorTest(unittest.TestCase):
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
         self.assertEqual(len(column_objects), 0)
         self.assertFalse(Path(video_dir).exists())
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(DropExecutorTest(
+        'test_should_drop_table'))
+    unittest.TextTestRunner().run(suite)

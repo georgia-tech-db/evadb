@@ -140,8 +140,5 @@ class LoadExecutorTest(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(LoadExecutorTest(
-        'test_should_fail_to_find_file'))
+        'test_should_call_csv_reader_and_storage_engine'))
     unittest.TextTestRunner().run(suite)
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite)
-    # unittest.main(LoadExecutorTest("test_should_load_video_in_table"))

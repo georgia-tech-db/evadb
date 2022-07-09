@@ -56,7 +56,7 @@ def bootstrap_environment():
     with open(config_path, 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    # fill default values for dataset and database if not present
+    # fill default values for dataset, database and upload locations if not present
     dataset_location = read_value_config(cfg, "core", "datasets_dir")
     database_uri = read_value_config(cfg, "core", "catalog_database_uri")
     upload_location = read_value_config(cfg, "storage", "upload_dir")
@@ -79,6 +79,11 @@ def bootstrap_environment():
                 eva_home_directory / EVA_UPLOAD_DIR)
             update_value_config(cfg, "storage", "upload_dir",
                                 upload_location)
+
+        # Create upload directory in eva home directory if it does not exist
+        upload_location = Path(upload_location)
+        upload_location.mkdir(parents=True, exist_ok=True)
+
         # update config on disk
         with open(config_path, 'w') as ymlfile:
             ymlfile.write(yaml.dump(cfg))

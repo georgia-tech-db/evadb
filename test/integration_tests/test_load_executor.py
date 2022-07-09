@@ -91,6 +91,3 @@ if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(LoadExecutorTest('test_should_load_video_in_table'))
     unittest.TextTestRunner().run(suite)
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite)
-    # unittest.main(LoadExecutorTest("test_should_load_video_in_table"))

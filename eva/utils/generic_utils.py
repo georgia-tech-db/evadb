@@ -99,14 +99,6 @@ def generate_file_path(name: str = '') -> Path:
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
 
-    # Create upload location if it does not exist along with dataset location
-    upload_location = ConfigurationManager().get_value("storage", "upload_dir")
-    if upload_location is None:
-        logger.error('Missing upload location key in eva.yml')
-        raise KeyError('Missing upload_dir key in eva.yml')
-    upload_location = Path(upload_location)
-    upload_location.mkdir(parents=True, exist_ok=True)
-
     salt = uuid.uuid4().hex
     file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
     path = dataset_location / file_name
