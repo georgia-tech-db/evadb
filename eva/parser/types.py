@@ -36,7 +36,8 @@ class StatementType(Enum):
     LOAD_DATA = auto(),
     UPLOAD = auto(),
     CREATE_MATERIALIZED_VIEW = auto(),
-    SHOW = auto()
+    SHOW = auto(),
+    DROP_UDF = auto()
     # add other types
 
 

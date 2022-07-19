@@ -17,7 +17,7 @@ import unittest
 from eva.executor.pp_executor import PPExecutor
 from eva.models.storage.batch import Batch
 from test.util import create_dataframe
-from ..executor.utils import DummyExecutor
+from test.executor.utils import DummyExecutor
 
 
 class PPScanExecutorTest(unittest.TestCase):

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -81,7 +81,7 @@ class ParserTests(unittest.TestCase):
         rename_stmt = eva_statement_list[0]
         self.assertEqual(rename_stmt, expected_stmt)
 
-    def test_drop_statement(self):
+    def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
         expected_stmt = DropTableStatement(
