@@ -30,6 +30,7 @@ from eva.parser.upload_statement import UploadStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -95,6 +96,36 @@ class ParserTests(unittest.TestCase):
         )
         drop_stmt = eva_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
+
+    def test_drop_udf_statement(self):
+        parser = Parser()
+        drop_udf_query = """DROP UDF FastRCNN
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
+                  TYPE  Classification
+                  IMPL  'data/fastrcnn.py';
+        """
+
+        expected_stmt = DropUDFStatement(
+            'FastRCNN',
+            False,
+            [ColumnDefinition(
+                    'Frame_Array', ColumnType.NDARRAY, NdArrayType.UINT8,
+                    [3, 256, 256])],
+            [ColumnDefinition('Labels', ColumnType.NDARRAY, NdArrayType.STR, [10]),
+                ColumnDefinition('Bbox', ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4])],
+            Path('data/fastrcnn.py'),
+            'Classification')
+        eva_statement_list = parser.parse(drop_udf_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(
+            eva_statement_list[0].stmt_type,
+            StatementType.DROP_UDF)
+
+        drop_udf_stmt = eva_statement_list[0]
+
+        self.assertEqual(drop_udf_stmt, expected_stmt)
 
     def test_single_statement_queries(self):
         parser = Parser()

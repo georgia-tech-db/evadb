@@ -53,7 +53,7 @@ class Functions(evaql_parserVisitor):
         return args
     
     # Get UDF information from context
-    def getUDFInfo (ctx):
+    def getUDFInfo (self, ctx):
         udf_name = None
         if_not_exists = False
         if_exists = False
@@ -97,7 +97,7 @@ class Functions(evaql_parserVisitor):
                 return None
 
         if if_exists and if_not_exists:
-            logger.error('Bad DROP UDF command syntax')
+            logger.error('Bad CREATE/DROP UDF command syntax')
 
         return (udf_name,
         if_exists or if_not_exists,
@@ -108,12 +108,12 @@ class Functions(evaql_parserVisitor):
 
     # Drop UDF
     def visitDropUdf(self, ctx: evaql_parser.DropUdfContext):
-        udf_info = getUdfInfo(ctx)
+        udf_info = self.getUDFInfo(ctx)
         stmt = DropUDFStatement(*udf_info)
         return stmt
 
     # Create UDF
     def visitCreateUdf(self, ctx: evaql_parser.CreateUdfContext):
-        udf_info = getUdfInfo(ctx)
+        udf_info = self.getUDFInfo(ctx)
         stmt = CreateUDFStatement(*udf_info)
         return stmt
