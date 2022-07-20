@@ -40,4 +40,5 @@ class PlanOprType(Enum):
     PREDICATE_FILTER = auto()
     PROJECT = auto()
     SHOW_INFO = auto()
+    DROP_UDF = auto()
     # add other types

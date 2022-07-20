@@ -103,8 +103,7 @@ class ParserTests(unittest.TestCase):
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
                   TYPE  Classification
-                  IMPL  'data/fastrcnn.py';
-        """
+                  IMPL  'data/fastrcnn.py';"""
 
         expected_stmt = DropUDFStatement(
             'FastRCNN',
@@ -122,9 +121,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(
             eva_statement_list[0].stmt_type,
             StatementType.DROP_UDF)
-
         drop_udf_stmt = eva_statement_list[0]
-
         self.assertEqual(drop_udf_stmt, expected_stmt)
 
     def test_single_statement_queries(self):
