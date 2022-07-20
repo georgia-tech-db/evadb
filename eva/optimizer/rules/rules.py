@@ -32,7 +32,7 @@ from eva.optimizer.operators import Dummy, LogicalShow, OperatorType, Operator
 from eva.optimizer.operators import (
     LogicalCreate, LogicalDrop, LogicalRename,
     LogicalInsert, LogicalLoadData, LogicalUpload,
-    LogicalCreateUDF, LogicalProject, LogicalGet, LogicalFilter,
+    LogicalCreateUDF, LogicalDropUDF, LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample, LogicalJoin, LogicalFunctionScan,
     LogicalCreateMaterializedView)
@@ -40,6 +40,7 @@ from eva.planner.create_plan import CreatePlan
 from eva.planner.rename_plan import RenamePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.load_data_plan import LoadDataPlan
@@ -99,6 +100,7 @@ class RuleType(Flag):
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_SHOW_TO_PHYSICAL = auto()
+    LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     NUM_RULES = auto()
@@ -131,6 +133,7 @@ class Promise(IntEnum):
     LOGICAL_FILTER_TO_PHYSICAL = auto()
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_SHOW_TO_PHYSICAL = auto()
+    LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -458,6 +461,27 @@ class LogicalCreateUDFToPhysical(Rule):
 
     def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
         after = CreateUDFPlan(before.name,
+                              before.if_not_exists,
+                              before.inputs,
+                              before.outputs,
+                              before.impl_path,
+                              before.udf_type)
+        return after
+
+
+class LogicalDropUDFToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDROPUDF)
+        super().__init__(RuleType.LOGICAL_DROP_UDF_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DROP_UDF_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDropUDF, context: OptimizerContext):
+        after = DropUDFPlan(before.name,
                               before.if_not_exists,
                               before.inputs,
                               before.outputs,
@@ -843,6 +867,7 @@ class RulesManager:
             LogicalRenameToPhysical(),
             LogicalDropToPhysical(),
             LogicalCreateUDFToPhysical(),
+            LogicalDropUDFToPhysical(),
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),

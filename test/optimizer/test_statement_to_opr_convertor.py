@@ -161,7 +161,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
         stmt.name = "name"
-        stmt.if_not_exists = True
+        stmt.if_exists = True
         stmt.inputs = ["inp"]
         stmt.outputs = ["out"]
         stmt.impl_path = "tmp.py"
