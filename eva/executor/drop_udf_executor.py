@@ -27,7 +27,7 @@ class DropUDFExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Drop udf executor
+        """Drop UDF executor
 
         Calls the catalog to drop udf metadata.
         """
@@ -39,8 +39,4 @@ class DropUDFExecutor(AbstractExecutor):
                 logger.warn(err_msg)
             else:
                 logger.exception(err_msg)
-        io_list = []
-        io_list.extend(self.node.inputs)
-        io_list.extend(self.node.outputs)
-        impl_path = self.node.impl_path.absolute().as_posix()
-        catalog_manager.drop_udf(self.node.name, impl_path, self.node.udf_type, io_list)
+        response_code = catalog_manager.drop_udf(self.node.name)
