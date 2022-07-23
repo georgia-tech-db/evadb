@@ -145,8 +145,7 @@ dropTable
     ;
 
 dropUdf
-    : DROP UDF
-      ifExists?
+    : DROP UDF ifExists?
       udfName
     ;
 

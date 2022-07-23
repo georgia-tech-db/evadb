@@ -610,7 +610,8 @@ class LogicalDropUDF(Operator):
 
     def __init__(self,
                  name: str,
-                 if_exists: bool):
+                 if_exists: bool,
+                 children: List = None):
         super().__init__(OperatorType.LOGICALDROPUDF, children)
         self._name = name
         self._if_exists = if_exists

@@ -16,6 +16,7 @@
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.utils.logging_manager import logger
 
 
 class DropUDFExecutor(AbstractExecutor):
@@ -35,9 +36,11 @@ class DropUDFExecutor(AbstractExecutor):
 
         # check catalog if it already has this udf entry
         if not catalog_manager.get_udf_by_name(self.node.name):
-            err_msg = "UDF: {} does not exsit".format(self.node.name)
+            err_msg = "UDF {} does not exist and cannot be dropped.".format(self.node.name)
             if self.node.if_exists:
                 logger.warn(err_msg)
             else:
                 logger.exception(err_msg)
-        response_code = catalog_manager.drop_udf(self.node.name)
+                raise Exception(err_msg)
+        else:
+            catalog_manager.drop_udf(self.node.name)
