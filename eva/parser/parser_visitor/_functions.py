@@ -109,7 +109,7 @@ class Functions(evaql_parserVisitor):
     # Drop UDF
     def visitDropUdf(self, ctx: evaql_parser.DropUdfContext):
         udf_info = self.getUDFInfo(ctx)
-        stmt = DropUDFStatement(*udf_info)
+        stmt = DropUDFStatement(*udf_info[:2])
         return stmt
 
     # Create UDF

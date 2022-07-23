@@ -99,22 +99,9 @@ class ParserTests(unittest.TestCase):
 
     def test_drop_udf_statement(self):
         parser = Parser()
-        drop_udf_query = """DROP UDF FastRCNN
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
-                  TYPE  Classification
-                  IMPL  'data/fastrcnn.py';"""
+        drop_udf_query = """DROP UDF FastRCNN;"""
 
-        expected_stmt = DropUDFStatement(
-            'FastRCNN',
-            False,
-            [ColumnDefinition(
-                    'Frame_Array', ColumnType.NDARRAY, NdArrayType.UINT8,
-                    [3, 256, 256])],
-            [ColumnDefinition('Labels', ColumnType.NDARRAY, NdArrayType.STR, [10]),
-                ColumnDefinition('Bbox', ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4])],
-            Path('data/fastrcnn.py'),
-            'Classification')
+        expected_stmt = DropUDFStatement('FastRCNN', False)
         eva_statement_list = parser.parse(drop_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

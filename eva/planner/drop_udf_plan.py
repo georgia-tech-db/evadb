@@ -28,34 +28,16 @@ class DropUDFPlan(AbstractPlan):
         name: str
             udf_name provided by the user required
         if_exists: bool
-            if false should throw an error that no udf with name exists
-            else will drop the table
-        inputs: List[UdfIO]
-            udf inputs, annotated list similar to table columns
-        outputs: List[UdfIO]
-            udf outputs, annotated list similar to table columns
-        impl_file_path: Path
-            file path which holds the implementation of the udf.
-            This file should be placed in the data directory and
-            the path provided should be relative to the eva dir.
-        udf_type: str
-            udf type. it ca be object detection, classification etc.
+            if false, throws an error that no UDF with name exists
+            else will drop the UDF
     """
 
     def __init__(self,
                  name: str,
-                 if_exists: bool,
-                 inputs: List[UdfIO],
-                 outputs: List[UdfIO],
-                 impl_file_path: Path,
-                 udf_type: str = None):
+                 if_exists: bool):
         super().__init__(PlanOprType.DROP_UDF)
         self._name = name
         self._if_exists = if_exists
-        self._inputs = inputs
-        self._outputs = outputs
-        self._impl_path = impl_file_path
-        self._udf_type = udf_type
 
     @property
     def name(self):
@@ -65,26 +47,7 @@ class DropUDFPlan(AbstractPlan):
     def if_exists(self):
         return self._if_exists
 
-    @property
-    def inputs(self):
-        return self._inputs
-
-    @property
-    def outputs(self):
-        return self._outputs
-
-    @property
-    def impl_path(self):
-        return self._impl_path
-
-    @property
-    def udf_type(self):
-        return self._udf_type
-
     def __hash__(self) -> int:
         return hash((super().__hash__(),
-                     self.if_exists,
-                     tuple(self.inputs),
-                     tuple(self.outputs),
-                     self.impl_path,
-                     self.udf_type))
+                     self.name,
+                     self.if_exists))

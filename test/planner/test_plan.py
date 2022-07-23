@@ -109,24 +109,9 @@ class PlanNodeTests(unittest.TestCase):
     def test_drop_udf_plan(self):
         udf_name = 'udf'
         if_exists = True
-        udfIO = 'udfIO'
-        inputs = [udfIO, udfIO]
-        outputs = [udfIO]
-        impl_path = 'test'
-        ty = 'classification'
-        node = DropUDFPlan(
-            udf_name,
-            if_exists,
-            inputs,
-            outputs,
-            impl_path,
-            ty)
+        node = DropUDFPlan(udf_name, if_exists)
         self.assertEqual(node.opr_type, PlanOprType.DROP_UDF)
         self.assertEqual(node.if_exists, True)
-        self.assertEqual(node.inputs, [udfIO, udfIO])
-        self.assertEqual(node.outputs, [udfIO])
-        self.assertEqual(node.impl_path, impl_path)
-        self.assertEqual(node.udf_type, ty)
 
     def test_load_data_plan(self):
         table_metainfo = 'meta_info'

@@ -233,16 +233,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement {DropUDFStatement} - Drop UDF Statement
         """
-        annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
-        annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
-
-        drop_udf_opr = LogicalDropUDF(statement.name,
-                                      statement.if_exists,
-                                      annotated_inputs,
-                                      annotated_outputs,
-                                      statement.impl_path,
-                                      statement.udf_type)
-        self._plan = drop_udf_opr
+        self._plan = LogicalDropUDF(statement.name, statement.if_exists)
 
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement

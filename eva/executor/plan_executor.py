@@ -30,7 +30,7 @@ from eva.executor.rename_executor import RenameExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
-from eva.executor.create_udf_executor import DropUDFExecutor
+from eva.executor.drop_udf_executor import DropUDFExecutor
 from eva.executor.create_mat_view_executor \
     import CreateMaterializedViewExecutor
 from eva.executor.load_executor import LoadDataExecutor

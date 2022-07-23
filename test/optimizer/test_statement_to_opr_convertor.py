@@ -157,28 +157,16 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         "eva.optimizer.\
 statement_to_opr_convertor.column_definition_to_udf_io"
     )
-    def test_visit_drop_udf(self, mock, l_create_udf_mock):
+    def test_visit_drop_udf(self, mock, l_drop_udf_mock):
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
         stmt.name = "name"
         stmt.if_exists = True
-        stmt.inputs = ["inp"]
-        stmt.outputs = ["out"]
-        stmt.impl_path = "tmp.py"
-        stmt.udf_type = "classification"
-        mock.side_effect = ["inp", "out"]
         convertor.visit_drop_udf(stmt)
-        mock.assert_any_call(stmt.inputs, True)
-        mock.assert_any_call(stmt.outputs, False)
-        l_create_udf_mock.assert_called_once()
-        l_create_udf_mock.assert_called_with(
+        l_drop_udf_mock.assert_called_once()
+        l_drop_udf_mock.assert_called_with(
             stmt.name,
-            stmt.if_exists,
-            "inp",
-            "out",
-            stmt.impl_path,
-            stmt.udf_type,
-        )
+            stmt.if_exists)
 
     def test_visit_should_call_drop_udf(self):
         stmt = MagicMock(spec=DropUDFStatement)

@@ -148,10 +148,6 @@ dropUdf
     : DROP UDF
       ifExists?
       udfName
-      INPUT  createDefinitions
-      OUTPUT createDefinitions
-      TYPE   udfType
-      IMPL   udfImpl
     ;
 
 // Data Manipulation Language

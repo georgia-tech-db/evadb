@@ -32,6 +32,7 @@ class DropUDFExecutor(AbstractExecutor):
         Calls the catalog to drop udf metadata.
         """
         catalog_manager = CatalogManager()
+
         # check catalog if it already has this udf entry
         if not catalog_manager.get_udf_by_name(self.node.name):
             err_msg = "UDF: {} does not exsit".format(self.node.name)

@@ -481,12 +481,7 @@ class LogicalDropUDFToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDropUDF, context: OptimizerContext):
-        after = DropUDFPlan(before.name,
-                              before.if_not_exists,
-                              before.inputs,
-                              before.outputs,
-                              before.impl_path,
-                              before.udf_type)
+        after = DropUDFPlan(before.name, before.if_exists)
         return after
 
 
