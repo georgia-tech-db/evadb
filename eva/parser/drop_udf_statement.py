@@ -23,10 +23,11 @@ class DropUDFStatement(AbstractStatement):
     """Drop UDF Statement constructed after parsing the input query
 
     Attributes:
-        name: name of the udf
-        if_exists:
-            if false, throws an error that no UDF with name exists
-            else will drop the UDF
+        name: str
+            name of the udf
+        if_exists: bool
+            if false, throws an error when no UDF with name exists
+            else logs a warning
     """
 
     def __init__(self,

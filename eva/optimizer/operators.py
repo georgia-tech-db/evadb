@@ -604,8 +604,8 @@ class LogicalDropUDF(Operator):
         name: str
             UDF name provided by the user
         if_exists: bool
-            if false, throws an error that no UDF with name exists
-            else will drop the UDF
+            if false, throws an error when no UDF with name exists
+            else logs a warning
     """
 
     def __init__(self,
