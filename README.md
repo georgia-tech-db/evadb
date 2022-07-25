@@ -102,7 +102,19 @@ LOAD DATA INFILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
 ```mysql
 DROP TABLE MyVideo;
 ```
-
+7. Create a UDF
+```mysql
+CREATE UDF IF NOT EXISTS MyUDF
+INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+        scores NDARRAY FLOAT32(ANYDIM))
+TYPE  Classification
+IMPL  'eva/udfs/fastrcnn_object_detector.py';
+```
+8. Drop a UDF
+```mysql
+DROP UDF IF EXISTS MyUDF;
+```
 
 
 ## Documentation
