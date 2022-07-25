@@ -238,6 +238,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
 
         show_plan = LogicalShow(MagicMock())
         drop_plan = LogicalDrop([MagicMock()], True)
+        drop_udf_plan = LogicalDropUDF("FakeUDF", False)
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())
@@ -257,6 +258,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(load_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
+        plans.append(drop_udf_plan)
         plans.append(get_plan)
         plans.append(sample_plan)
         plans.append(filter_plan)

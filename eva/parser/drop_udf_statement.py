@@ -12,12 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import StatementType
-from eva.parser.create_statement import ColumnDefinition
-from pathlib import Path
+
 
 class DropUDFStatement(AbstractStatement):
     """Drop UDF Statement constructed after parsing the input query

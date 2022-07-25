@@ -15,9 +15,6 @@
 
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from typing import List
-from eva.catalog.models.udf_io import UdfIO
-from pathlib import Path
 
 
 class DropUDFPlan(AbstractPlan):

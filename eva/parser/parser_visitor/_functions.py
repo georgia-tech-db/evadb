@@ -22,6 +22,7 @@ from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.utils.logging_manager import logger
 
+
 ##################################################################
 # Functions - UDFs, Aggregate Windowed functions
 ##################################################################
@@ -53,7 +54,7 @@ class Functions(evaql_parserVisitor):
         return args
     
     # Get UDF information from context
-    def getUDFInfo (self, ctx):
+    def getUDFInfo(self, ctx):
         udf_name = None
         if_not_exists = False
         if_exists = False
@@ -100,11 +101,11 @@ class Functions(evaql_parserVisitor):
             logger.error('Bad CREATE/DROP UDF command syntax')
 
         return (udf_name,
-        if_exists or if_not_exists,
-        input_definitions,
-        output_definitions,
-        impl_path,
-        udf_type)
+                if_exists or if_not_exists,
+                input_definitions,
+                output_definitions,
+                impl_path,
+                udf_type)
 
     # Drop UDF
     def visitDropUdf(self, ctx: evaql_parser.DropUdfContext):

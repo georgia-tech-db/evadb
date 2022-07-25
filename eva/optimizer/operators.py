@@ -53,6 +53,7 @@ class OperatorType(IntEnum):
     LOGICALDROPUDF = auto()
     LOGICALDELIMITER = auto()
 
+
 class Operator:
     """Base class for logital plan of operators
     Arguments:

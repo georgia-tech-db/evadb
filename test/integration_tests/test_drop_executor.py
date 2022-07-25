@@ -38,6 +38,7 @@ class DropExecutorTest(unittest.TestCase):
         self.assertEqual(len(column_objects), 0)
         self.assertFalse(Path(video_dir).exists())
 
+
 class DropUDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
@@ -60,7 +61,7 @@ class DropUDFExecutorTest(unittest.TestCase):
         udf = catalog_manager.get_udf_by_name(udf_name)
         self.assertTrue(udf is not None)
 
-        #Test that dropping the UDF reflects in the catalog
+        # Test that dropping the UDF reflects in the catalog
         drop_query = "DROP UDF IF EXISTS {};".format(udf_name)
         execute_query_fetch_all(drop_query)
         udf = catalog_manager.get_udf_by_name(udf_name)
@@ -79,9 +80,10 @@ class DropUDFExecutorTest(unittest.TestCase):
         # - raises an appropriate exception
         drop_query = "DROP UDF {};".format(wrong_udf_name)
         try:
-            op = execute_query_fetch_all(drop_query)
+            execute_query_fetch_all(drop_query)
         except Exception as e:
-            err_msg = "UDF {} does not exist and cannot be dropped.".format(wrong_udf_name)
+            err_msg = "UDF {} does not exist and cannot be dropped."\
+                .format(wrong_udf_name)
             self.assertTrue(str(e) == err_msg)
         udf = catalog_manager.get_udf_by_name(right_udf_name)
         self.assertTrue(udf is not None)

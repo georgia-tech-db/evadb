@@ -32,7 +32,8 @@ from eva.optimizer.operators import Dummy, LogicalShow, OperatorType, Operator
 from eva.optimizer.operators import (
     LogicalCreate, LogicalDrop, LogicalRename,
     LogicalInsert, LogicalLoadData, LogicalUpload,
-    LogicalCreateUDF, LogicalDropUDF, LogicalProject, LogicalGet, LogicalFilter,
+    LogicalCreateUDF, LogicalDropUDF,
+    LogicalProject, LogicalGet, LogicalFilter,
     LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
     LogicalSample, LogicalJoin, LogicalFunctionScan,
     LogicalCreateMaterializedView)
