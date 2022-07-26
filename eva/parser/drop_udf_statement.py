@@ -36,9 +36,9 @@ class DropUDFStatement(AbstractStatement):
 
     def __str__(self) -> str:
         if self._if_exists:
-            print_str = 'DROP UDF IF EXISTS {}'.format(self._name)
+            print_str = 'DROP UDF IF EXISTS {};'.format(self._name)
         else:
-            print_str = 'DROP UDF {}'.format(self._name)
+            print_str = 'DROP UDF {};'.format(self._name)
         return print_str
 
     @property

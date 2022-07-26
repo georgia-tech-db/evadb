@@ -111,6 +111,14 @@ class ParserTests(unittest.TestCase):
         drop_udf_stmt = eva_statement_list[0]
         self.assertEqual(drop_udf_stmt, expected_stmt)
 
+    def test_drop_udf_statement_str(self):
+        drop_udf_query1 = """DROP UDF MyUDF;"""
+        drop_udf_query2 = """DROP UDF IF EXISTS MyUDF;"""
+        expected_stmt1 = DropUDFStatement('MyUDF', False)
+        expected_stmt2 = DropUDFStatement('MyUDF', True)
+        self.assertEqual(str(expected_stmt1), drop_udf_query1)
+        self.assertEqual(str(expected_stmt2), drop_udf_query2)
+
     def test_single_statement_queries(self):
         parser = Parser()
 
