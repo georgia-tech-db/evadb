@@ -12,49 +12,50 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import StatementType
-from eva.parser.table_ref import TableRef
 
 
-class DropTableStatement(AbstractStatement):
-    """Drop Table Statement constructed after parsing the input query
+class DropUDFStatement(AbstractStatement):
+    """Drop UDF Statement constructed after parsing the input query
 
     Attributes:
-        TableRef: table reference in the drop table statement
+        name: str
+            name of the udf
+        if_exists: bool
+            if false, throws an error when no UDF with name exists
+            else logs a warning
     """
 
     def __init__(self,
-                 table_refs: List[TableRef],
+                 name: str,
                  if_exists: bool):
-        super().__init__(StatementType.DROP)
-        self._table_refs = table_refs
+        super().__init__(StatementType.DROP_UDF)
+        self._name = name
         self._if_exists = if_exists
 
     def __str__(self) -> str:
         if self._if_exists:
-            print_str = "DROP TABLE IF EXISTS {}".format(self._table_refs)
+            print_str = 'DROP UDF IF EXISTS {};'.format(self._name)
         else:
-            print_str = "DROP TABLE {}".format(self._table_refs)
+            print_str = 'DROP UDF {};'.format(self._name)
         return print_str
 
     @property
-    def table_refs(self):
-        return self._table_refs
+    def name(self):
+        return self._name
 
     @property
     def if_exists(self):
         return self._if_exists
 
     def __eq__(self, other):
-        if not isinstance(other, DropTableStatement):
+        if not isinstance(other, DropUDFStatement):
             return False
-        return (self.table_refs == other.table_refs
+        return (self.name == other.name
                 and self.if_exists == other.if_exists)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(),
-                     tuple(self.table_refs),
+                     self.name,
                      self.if_exists))

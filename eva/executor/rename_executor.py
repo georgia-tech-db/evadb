@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2020 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,32 +14,22 @@
 # limitations under the License.
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.planner.rename_plan import RenamePlan
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.create_udf_plan import CreateUDFPlan
 
 
-class CreateUDFExecutor(AbstractExecutor):
-
-    def __init__(self, node: CreateUDFPlan):
+class RenameExecutor(AbstractExecutor):
+    def __init__(self, node: RenamePlan):
         super().__init__(node)
 
     def validate(self):
         pass
 
     def exec(self):
-        """Create udf executor
+        """rename table executor
 
-        Calls the catalog to create udf metadata.
+        Calls the catalog to modified metadata corresponding to the table.
         """
-        catalog_manager = CatalogManager()
-        if (self.node.if_not_exists):
-            # check catalog if it already has this udf entry
-            if catalog_manager.get_udf_by_name(self.node.name):
-                return
-        io_list = []
-        io_list.extend(self.node.inputs)
-        io_list.extend(self.node.outputs)
-        impl_path = self.node.impl_path.absolute().as_posix()
-        catalog_manager.create_udf(
-            self.node.name, impl_path, self.node.udf_type,
-            io_list)
+        CatalogManager().rename_table(
+            self.node.new_name, self.node.old_table.table
+        )

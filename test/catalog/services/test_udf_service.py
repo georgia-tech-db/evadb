@@ -15,7 +15,7 @@
 from unittest import TestCase
 
 from mock import patch
-
+from sqlalchemy.orm.exc import NoResultFound
 from eva.catalog.services.udf_service import UdfService
 
 UDF_TYPE = 'classification'
@@ -70,3 +70,10 @@ class UdfServiceTest(TestCase):
                 "Delete udf failed for name {}".format("udf_name"),
                 str(cm.exception),
             )
+
+    @patch("eva.catalog.services.udf_service.UdfMetadata")
+    def test_get_all_udfs_should_return_empty(self, mocked):
+        service = UdfService()
+        mocked.query.all.side_effect = Exception(NoResultFound)
+        with self.assertRaises(Exception):
+            self.assertEqual(service.get_all_udfs(), [])

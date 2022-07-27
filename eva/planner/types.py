@@ -23,6 +23,7 @@ class PlanOprType(Enum):
     PP_FILTER = auto()
     INSERT = auto()
     CREATE = auto()
+    RENAME = auto()
     DROP = auto()
     CREATE_UDF = auto()
     LOAD_DATA = auto()
@@ -38,4 +39,6 @@ class PlanOprType(Enum):
     CREATE_MATERIALIZED_VIEW = auto()
     PREDICATE_FILTER = auto()
     PROJECT = auto()
+    SHOW_INFO = auto()
+    DROP_UDF = auto()
     # add other types
