@@ -180,18 +180,16 @@ class ExpressionUtilsTest(unittest.TestCase):
         self.assertFalse(contains_single_column(expr))
 
     def test_is_simple_predicate(self):
+        self.assertTrue(is_simple_predicate(self.gen_cmp_expr(10)))
+
         expr = ArithmeticExpression(
             ExpressionType.AGGREGATION_COUNT, Mock(), Mock()
         )
         self.assertFalse(is_simple_predicate(expr))
+
         expr = LogicalExpression(
             ExpressionType.LOGICAL_OR,
             self.gen_cmp_expr(10, ExpressionType.COMPARE_GREATER, "x"),
             self.gen_cmp_expr(10, ExpressionType.COMPARE_GREATER, "y"),
         )
-        self.assertTrue(is_simple_predicate(expr))
-        self.assertTrue(
-            is_simple_predicate(
-                self.gen_cmp_expr(10, ExpressionType.COMPARE_GREATER, "x")
-            )
-        )
+        self.assertFalse(is_simple_predicate(expr))

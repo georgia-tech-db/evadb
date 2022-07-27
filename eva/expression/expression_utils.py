@@ -39,6 +39,27 @@ def expression_tree_to_conjunction_list(expression_tree):
     return expression_list
 
 
+def conjuction_list_to_expression_tree(
+    expression_list: List[AbstractExpression],
+) -> AbstractExpression:
+    """Convert expression list to expression tree wuing conjuction connector
+
+    Args:
+        expression_list (List[AbstractExpression]): list of conjunctives
+
+    Returns:
+        AbstractExpression: expression tree
+    """
+    if len(expression_list) == 0:
+        return None
+    prev_expr = expression_list[0]
+    for expr in expression_list[1:]:
+        prev_expr = LogicalExpression(
+            ExpressionType.LOGICAL_AND, prev_expr, expr
+        )
+    return prev_expr
+
+
 def extract_range_list_from_comparison_expr(
     expr: ComparisonExpression, lower_bound: int, upper_bound: int
 ) -> List:
@@ -194,16 +215,20 @@ def extract_range_list_from_predicate(
         )
 
 
-def contains_single_column(predicate: AbstractExpression) -> bool:
+def contains_single_column(
+    predicate: AbstractExpression, column: str = None
+) -> bool:
     """Checks if predicate contains conditions on single predicate
 
     Args:
         predicate (AbstractExpression): predicate expression
-
+        column_alias (str): check if the single column matches
+            the input column_alias
     Returns:
         bool: True, if contains single predicate, else False
             if predicate is None, return False
     """
+
     def get_columns(predicate):
         if isinstance(predicate, TupleValueExpression):
             return set([predicate.col_alias])
@@ -219,14 +244,17 @@ def contains_single_column(predicate: AbstractExpression) -> bool:
 
     cols = get_columns(predicate)
     if len(cols) == 1:
-        return True
-    else:
-        return False
+        if column is None:
+            return True
+        pred_col = cols.pop()
+        if pred_col == column:
+            return True
+    return False
 
 
 def is_simple_predicate(predicate: AbstractExpression) -> bool:
-    """Checks if conditions in the predicate only contains
-        LogicalExpression, ComparisonExpression,
+    """Checks if conditions in the predicate are on a single column and
+        only contains LogicalExpression, ComparisonExpression,
         TupleValueExpression or ConstantValueExpression
 
     Args:
@@ -235,13 +263,20 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     Returns:
         bool: True, if it is a simple predicate, lese False
     """
-    simple_expression = [
+
+    def _has_simple_expressions(expr):
+        simple = type(expr) in simple_expressions
+        for child in expr.children:
+            simple = simple and _has_simple_expressions(child)
+        return simple
+
+    simple_expressions = [
         LogicalExpression,
         ComparisonExpression,
         TupleValueExpression,
         ConstantValueExpression,
     ]
-    simple = type(predicate) in simple_expression
-    for child in predicate.children:
-        simple = simple and is_simple_predicate(child)
-    return simple
+
+    return _has_simple_expressions(predicate) and contains_single_column(
+        predicate
+    )

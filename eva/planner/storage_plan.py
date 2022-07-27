@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -38,7 +39,8 @@ class StoragePlan(AbstractPlan):
                  offset: int = None,
                  limit: int = None,
                  total_shards: int = 0,
-                 curr_shard: int = 0):
+                 curr_shard: int = 0,
+                 predicate: AbstractExpression = None):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._video = video
         self._batch_mem_size = batch_mem_size
@@ -47,6 +49,7 @@ class StoragePlan(AbstractPlan):
         self._limit = limit
         self._total_shards = total_shards
         self._curr_shard = curr_shard
+        self._predicate = predicate
 
     @property
     def video(self):
@@ -76,6 +79,10 @@ class StoragePlan(AbstractPlan):
     def curr_shard(self):
         return self._curr_shard
 
+    @property
+    def predicate(self):
+        return self._predicate
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.video,
                      self.batch_mem_size,
@@ -83,4 +90,5 @@ class StoragePlan(AbstractPlan):
                      self.offset,
                      self.limit,
                      self.total_shards,
-                     self.curr_shard))
+                     self.curr_shard,
+                     self.predicate))

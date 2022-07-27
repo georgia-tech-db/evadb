@@ -31,7 +31,8 @@ class StorageExecutor(AbstractExecutor):
     def exec(self) -> Iterator[Batch]:
         if self.node.video.is_video:
             return VideoStorageEngine.read(self.node.video,
-                                           self.node.batch_mem_size)
+                                           self.node.batch_mem_size,
+                                           predicate=self.node.predicate)
         else:
             return StorageEngine.read(self.node.video,
                                       self.node.batch_mem_size)

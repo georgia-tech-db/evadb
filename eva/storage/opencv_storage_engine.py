@@ -19,6 +19,7 @@ import struct
 import shutil
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.abstract_expression import AbstractExpression
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.readers.opencv_reader import OpenCVReader
 from eva.models.storage.batch import Batch
@@ -27,11 +28,11 @@ from eva.utils.logging_manager import logger
 
 
 class OpenCVStorageEngine(AbstractStorageEngine):
-
     def __init__(self):
-        self.metadata = 'metadata'
+        self.metadata = "metadata"
         self.curr_version = ConfigurationManager().get_value(
-            'storage', 'video_engine_version')
+            "storage", "video_engine_version"
+        )
 
     def create(self, table: DataFrameMetadata, video_file: Path):
         # Create directory to store video and metadata related to the video
@@ -40,9 +41,10 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             dir_path.mkdir(parents=True)
             shutil.copy2(str(video_file), str(dir_path))
         except FileExistsError:
-            error = 'Failed to load the video as directory \
-                        already exists: {}'.format(
-                dir_path)
+            error = "Failed to load the video as directory \
+                        already exists: {}".format(
+                dir_path
+            )
             logger.error(error)
             raise FileExistsError(error)
         self._create_video_metadata(dir_path, video_file.name)
@@ -53,43 +55,51 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         try:
             shutil.rmtree(str(dir_path))
         except Exception as e:
-            logger.exception(f'Failed to drop the video table {e}')
+            logger.exception(f"Failed to drop the video table {e}")
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         pass
 
-    def read(self,
-             table: DataFrameMetadata,
-             batch_mem_size: int,
-             predicate_func=None) -> Iterator[Batch]:
+    def read(
+        self,
+        table: DataFrameMetadata,
+        batch_mem_size: int,
+        predicate: AbstractExpression = None,
+    ) -> Iterator[Batch]:
 
         metadata_file = Path(table.file_url) / self.metadata
         video_file_name = self._get_video_file_path(metadata_file)
         video_file = Path(table.file_url) / video_file_name
-        reader = OpenCVReader(str(video_file), batch_mem_size=batch_mem_size)
+        reader = OpenCVReader(
+            str(video_file), batch_mem_size=batch_mem_size, predicate=predicate
+        )
         for batch in reader.read():
             yield batch
 
     def _get_video_file_path(self, metadata_file):
-        with open(metadata_file, 'rb') as f:
-            (version, ) = struct.unpack('!H', f.read(struct.calcsize('!H')))
+        with open(metadata_file, "rb") as f:
+            (version,) = struct.unpack("!H", f.read(struct.calcsize("!H")))
             if version > self.curr_version:
-                error = 'Invalid metadata version {}'.format(version)
+                error = "Invalid metadata version {}".format(version)
                 logger.error(error)
                 raise RuntimeError(error)
-            (length,) = struct.unpack('!H', f.read(struct.calcsize('!H')))
+            (length,) = struct.unpack("!H", f.read(struct.calcsize("!H")))
             path = f.read(length)
             return Path(path.decode())
 
     def _create_video_metadata(self, dir_path, video_file):
         # File structure
         # <version> <length> <file_name>
-        with open(dir_path / self.metadata, 'wb') as f:
+        with open(dir_path / self.metadata, "wb") as f:
             # write version number
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)
-            data = struct.pack('!HH%ds' % (length,), self.curr_version,
-                               length, file_path_bytes)
+            data = struct.pack(
+                "!HH%ds" % (length,),
+                self.curr_version,
+                length,
+                file_path_bytes,
+            )
             f.write(data)
 
     def _open(self, table):

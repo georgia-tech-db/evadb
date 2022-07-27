@@ -68,24 +68,3 @@ class VideoLoaderTest(unittest.TestCase):
         expected = list(create_dummy_batches(
             filters=[i for i in range(2, NUM_FRAMES)]))
         self.assertTrue(batches, expected)
-
-    def test_should_start_frame_number_from_two(self):
-        video_loader = OpenCVReader(
-            file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_mem_size=FRAME_SIZE * NUM_FRAMES,
-            start_frame_id=2)
-        batches = list(video_loader.read())
-        expected = list(create_dummy_batches(
-            filters=[i for i in range(0, NUM_FRAMES)], start_id=2))
-        self.assertTrue(batches, expected)
-
-    def test_should_start_frame_number_from_two_and_offset_from_one(self):
-        video_loader = OpenCVReader(
-            file_url=os.path.join(PATH_PREFIX, 'dummy.avi'),
-            batch_mem_size=FRAME_SIZE * NUM_FRAMES,
-            offset=1,
-            start_frame_id=2)
-        batches = list(video_loader.read())
-        expected = list(create_dummy_batches(
-            filters=[i for i in range(1, NUM_FRAMES)], start_id=2))
-        self.assertTrue(batches, expected)
