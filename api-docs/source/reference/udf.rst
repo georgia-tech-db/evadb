@@ -147,3 +147,8 @@ Now that you have implemented your UDF we need to register it into EVA and execu
         .. code-block:: sql
 
             SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo;
+	5. Don't forget to drop the UDF when you're done using it!
+
+            .. code-block:: sql
+
+                DROP UDF IF EXISTS FastRCNNObjectDetector;

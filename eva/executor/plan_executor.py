@@ -30,6 +30,7 @@ from eva.executor.rename_executor import RenameExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.drop_udf_executor import DropUDFExecutor
 from eva.executor.create_mat_view_executor \
     import CreateMaterializedViewExecutor
 from eva.executor.load_executor import LoadDataExecutor
@@ -90,6 +91,8 @@ class PlanExecutor:
             executor_node = InsertExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_UDF:
             executor_node = CreateUDFExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.DROP_UDF:
+            executor_node = DropUDFExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LOAD_DATA:
             executor_node = LoadDataExecutor(node=plan)
         elif plan_opr_type == PlanOprType.UPLOAD:

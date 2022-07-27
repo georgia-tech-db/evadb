@@ -24,6 +24,7 @@ from eva.planner.rename_plan import RenamePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.planner.upload_plan import UploadPlan
 from eva.planner.union_plan import UnionPlan
@@ -104,6 +105,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.outputs, [udfIO])
         self.assertEqual(node.impl_path, impl_path)
         self.assertEqual(node.udf_type, ty)
+
+    def test_drop_udf_plan(self):
+        udf_name = 'udf'
+        if_exists = True
+        node = DropUDFPlan(udf_name, if_exists)
+        self.assertEqual(node.opr_type, PlanOprType.DROP_UDF)
+        self.assertEqual(node.if_exists, True)
 
     def test_load_data_plan(self):
         table_metainfo = 'meta_info'

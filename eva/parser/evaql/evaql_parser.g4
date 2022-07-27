@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf | createMaterializedView
-    | dropDatabase | dropTable | dropIndex | renameTable
+    | dropDatabase | dropTable | dropUdf | dropIndex | renameTable
     ;
 
 dmlStatement
@@ -142,6 +142,11 @@ dropIndex
 dropTable
     : DROP TABLE ifExists?
       tables
+    ;
+
+dropUdf
+    : DROP UDF ifExists?
+      udfName
     ;
 
 // Data Manipulation Language

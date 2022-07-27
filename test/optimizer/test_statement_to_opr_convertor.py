@@ -20,6 +20,7 @@ from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.select_statement import SelectStatement
 from eva.parser.table_ref import TableRef, TableInfo
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.drop_statement import DropTableStatement
@@ -32,6 +33,7 @@ from eva.optimizer.operators import (
     LogicalLoadData,
     LogicalRename,
     LogicalDrop,
+    LogicalDropUDF,
     LogicalSample,
     LogicalGet,
     LogicalFilter,
@@ -150,6 +152,32 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
+    @patch("eva.optimizer.statement_to_opr_convertor.LogicalDropUDF")
+    @patch(
+        "eva.optimizer.\
+statement_to_opr_convertor.column_definition_to_udf_io"
+    )
+    def test_visit_drop_udf(self, mock, l_drop_udf_mock):
+        convertor = StatementToPlanConvertor()
+        stmt = MagicMock()
+        stmt.name = "name"
+        stmt.if_exists = True
+        convertor.visit_drop_udf(stmt)
+        l_drop_udf_mock.assert_called_once()
+        l_drop_udf_mock.assert_called_with(
+            stmt.name,
+            stmt.if_exists)
+
+    def test_visit_should_call_drop_udf(self):
+        stmt = MagicMock(spec=DropUDFStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_drop_udf = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
     def test_visit_should_call_insert(self):
         stmt = MagicMock(spec=InsertTableStatement)
         convertor = StatementToPlanConvertor()
@@ -210,6 +238,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
 
         show_plan = LogicalShow(MagicMock())
         drop_plan = LogicalDrop([MagicMock()], True)
+        drop_udf_plan = LogicalDropUDF("FakeUDF", False)
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())
@@ -229,6 +258,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(load_plan)
         plans.append(rename_plan)
         plans.append(drop_plan)
+        plans.append(drop_udf_plan)
         plans.append(get_plan)
         plans.append(sample_plan)
         plans.append(filter_plan)

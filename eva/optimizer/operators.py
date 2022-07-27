@@ -50,6 +50,7 @@ class OperatorType(IntEnum):
     LOGICALFUNCTIONSCAN = auto()
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
+    LOGICALDROPUDF = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -594,6 +595,48 @@ class LogicalCreateUDF(Operator):
                      tuple(self.outputs),
                      self.udf_type,
                      self.impl_path))
+
+
+class LogicalDropUDF(Operator):
+    """
+    Logical node for DROP UDF operations
+
+    Attributes:
+        name: str
+            UDF name provided by the user
+        if_exists: bool
+            if false, throws an error when no UDF with name exists
+            else logs a warning
+    """
+
+    def __init__(self,
+                 name: str,
+                 if_exists: bool,
+                 children: List = None):
+        super().__init__(OperatorType.LOGICALDROPUDF, children)
+        self._name = name
+        self._if_exists = if_exists
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def if_exists(self):
+        return self._if_exists
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDropUDF):
+            return False
+        return (is_subtree_equal
+                and self.name == other.name
+                and self.if_exists == other.if_exists)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),
+                     self.name,
+                     self.if_exists))
 
 
 class LogicalLoadData(Operator):

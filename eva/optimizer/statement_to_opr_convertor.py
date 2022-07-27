@@ -18,7 +18,7 @@ from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
                                      LogicalCreate,
                                      LogicalRename,
-                                     LogicalDrop,
+                                     LogicalDrop, LogicalDropUDF,
                                      LogicalCreateUDF, LogicalLoadData,
                                      LogicalShow,
                                      LogicalUpload, LogicalQueryDerivedGet,
@@ -33,6 +33,7 @@ from eva.parser.create_statement import CreateTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
@@ -226,6 +227,14 @@ class StatementToPlanConvertor:
                                           statement.udf_type)
         self._plan = create_udf_opr
 
+    def visit_drop_udf(self, statement: DropUDFStatement):
+        """Convertor for parsed DROP UDF statement
+
+        Arguments:
+            statement {DropUDFStatement} - Drop UDF Statement
+        """
+        self._plan = LogicalDropUDF(statement.name, statement.if_exists)
+
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement
         Arguments:
@@ -280,6 +289,8 @@ class StatementToPlanConvertor:
             self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):
             self.visit_create_udf(statement)
+        elif isinstance(statement, DropUDFStatement):
+            self.visit_drop_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
         elif isinstance(statement, UploadStatement):
