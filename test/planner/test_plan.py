@@ -20,9 +20,11 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 
 from eva.planner.create_plan import CreatePlan
+from eva.planner.rename_plan import RenamePlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.planner.upload_plan import UploadPlan
 from eva.planner.union_plan import UnionPlan
@@ -49,6 +51,19 @@ class PlanNodeTests(unittest.TestCase):
                          "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
+
+    def test_rename_plan(self):
+        dummy_info = TableInfo("old")
+        dummy_old = TableRef(dummy_info)
+        dummy_new = TableInfo("new")
+
+        CatalogManager().reset()
+        dummy_plan_node = RenamePlan(dummy_old, dummy_new)
+        self.assertEqual(dummy_plan_node.opr_type, PlanOprType.RENAME)
+        self.assertEqual(dummy_plan_node.old_table.table.table_name,
+                         "old")
+        self.assertEqual(dummy_plan_node.new_name.table_name,
+                         "new")
 
     def test_drop_plan(self):
         dummy_info = TableInfo('dummy')
@@ -90,6 +105,13 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.outputs, [udfIO])
         self.assertEqual(node.impl_path, impl_path)
         self.assertEqual(node.udf_type, ty)
+
+    def test_drop_udf_plan(self):
+        udf_name = 'udf'
+        if_exists = True
+        node = DropUDFPlan(udf_name, if_exists)
+        self.assertEqual(node.opr_type, PlanOprType.DROP_UDF)
+        self.assertEqual(node.if_exists, True)
 
     def test_load_data_plan(self):
         table_metainfo = 'meta_info'

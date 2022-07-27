@@ -15,31 +15,33 @@
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.utils.logging_manager import logger
 
 
-class CreateUDFExecutor(AbstractExecutor):
+class DropUDFExecutor(AbstractExecutor):
 
-    def __init__(self, node: CreateUDFPlan):
+    def __init__(self, node: DropUDFPlan):
         super().__init__(node)
 
     def validate(self):
         pass
 
     def exec(self):
-        """Create udf executor
+        """Drop UDF executor
 
-        Calls the catalog to create udf metadata.
+        Calls the catalog to drop udf metadata.
         """
         catalog_manager = CatalogManager()
-        if (self.node.if_not_exists):
-            # check catalog if it already has this udf entry
-            if catalog_manager.get_udf_by_name(self.node.name):
-                return
-        io_list = []
-        io_list.extend(self.node.inputs)
-        io_list.extend(self.node.outputs)
-        impl_path = self.node.impl_path.absolute().as_posix()
-        catalog_manager.create_udf(
-            self.node.name, impl_path, self.node.udf_type,
-            io_list)
+
+        # check catalog if it already has this udf entry
+        if not catalog_manager.get_udf_by_name(self.node.name):
+            err_msg = "UDF {} does not exist and cannot be dropped."\
+                .format(self.node.name)
+            if self.node.if_exists:
+                logger.warn(err_msg)
+            else:
+                logger.exception(err_msg)
+                raise Exception(err_msg)
+        else:
+            catalog_manager.drop_udf(self.node.name)

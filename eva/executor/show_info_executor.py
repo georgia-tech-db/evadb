@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2022 EVA
+# Copyright 2018-2020 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.models.storage.batch import Batch
+from eva.parser.types import ShowType
+from eva.planner.show_info_plan import ShowInfoPlan
 
 
-class CreateUDFExecutor(AbstractExecutor):
+class ShowInfoExecutor(AbstractExecutor):
 
-    def __init__(self, node: CreateUDFPlan):
+    def __init__(self, node: ShowInfoPlan):
         super().__init__(node)
 
     def validate(self):
@@ -32,14 +35,10 @@ class CreateUDFExecutor(AbstractExecutor):
         Calls the catalog to create udf metadata.
         """
         catalog_manager = CatalogManager()
-        if (self.node.if_not_exists):
-            # check catalog if it already has this udf entry
-            if catalog_manager.get_udf_by_name(self.node.name):
-                return
-        io_list = []
-        io_list.extend(self.node.inputs)
-        io_list.extend(self.node.outputs)
-        impl_path = self.node.impl_path.absolute().as_posix()
-        catalog_manager.create_udf(
-            self.node.name, impl_path, self.node.udf_type,
-            io_list)
+        show_entries = []
+        if self.node.show_type is ShowType.UDFS:
+            udfs = catalog_manager.get_all_udf_entries()
+            for udf in udfs:
+                show_entries.append(udf.display_format())
+
+        yield Batch(pd.DataFrame(show_entries))

@@ -30,7 +30,7 @@ class DropExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Drop table executor"""
+        """Drop table executor"""        
         catalog_manager = CatalogManager()
         if len(self.node.table_refs) > 1:
             logger.exception('Drop supports only single table')

@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf | createMaterializedView
-    | dropDatabase | dropTable | dropIndex
+    | dropDatabase | dropTable | dropUdf | dropIndex | renameTable
     ;
 
 dmlStatement
@@ -35,7 +35,7 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement
+    : simpleDescribeStatement | helpStatement | showStatement
     ;
 
 // Data Definition Language
@@ -64,12 +64,6 @@ renameTable
     : RENAME TABLE
       oldtableName
       TO newtableName
-    ;
-
-//Truncate statements
-truncateTable
-    : TRUNCATE TABLE
-      tableName
     ;
 
 // Create UDFs
@@ -148,6 +142,11 @@ dropIndex
 dropTable
     : DROP TABLE ifExists?
       tables
+    ;
+
+dropUdf
+    : DROP UDF ifExists?
+      udfName
     ;
 
 // Data Manipulation Language
@@ -356,6 +355,10 @@ simpleDescribeStatement
 
 helpStatement
     : HELP STRING_LITERAL
+    ;
+
+showStatement
+    : SHOW (UDFS | TABLES)
     ;
 
 // Common Clauses

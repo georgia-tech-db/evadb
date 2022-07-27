@@ -56,8 +56,8 @@ class DatasetServiceTest(unittest.TestCase):
         service = DatasetService()
 
         expected_output = 1
-        mocked.query.with_entities.return_value.filter.return_value.one.\
-            return_value = [expected_output]
+        mocked.query.with_entities.return_value.\
+            filter.return_value.one.return_value = [expected_output]
 
         result = service.dataset_by_name(DATASET_NAME)
         mocked.query.with_entities.assert_called_with(mocked._id)
@@ -80,22 +80,63 @@ class DatasetServiceTest(unittest.TestCase):
     @patch(
         "eva.catalog.services.df_service.DatasetService.dataset_object_by_name"
     )
+    def test_rename_dataset_by_name(self, mock_func):
+        service = DatasetService()
+        service.rename_dataset_by_name(
+            DATASET_NEW_NAME, "database_name", "dataset_name"
+        )
+        mock_func.assert_called_once_with("database_name", "dataset_name")
+        mock_func.return_value.update.assert_called_once_with(
+            _name=DATASET_NEW_NAME
+        )
+
+    def test_rename_dataset_by_name_should_raise_exception(self):
+        with patch.object(
+            DatasetService, "dataset_object_by_name"
+        ) as mock_func:
+            ERR_MSG = "err_message"
+            mock_func.side_effect = Exception(ERR_MSG)
+            service = DatasetService()
+            with self.assertRaises(Exception) as cm:
+                service.rename_dataset_by_name(
+                    DATASET_NEW_NAME, DATABASE_NAME, DATASET_NAME
+                )
+            self.assertEqual(
+                "Update dataset name failed for {} with error {}".format(
+                    DATASET_NAME, ERR_MSG
+                ),
+                str(cm.exception),
+            )
+            mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
+            mock_func.return_value.update.assert_not_called()
+
+    @patch(
+        "eva.catalog.services.df_service.DatasetService.dataset_object_by_name"
+    )
     def test_drop_dataset_by_name(self, mock_func):
         service = DatasetService()
-        service.drop_dataset_by_name("database_name", "dataset_name")
-        mock_func.assert_called_once_with("database_name", "dataset_name")
+        service.drop_dataset_by_name(DATABASE_NAME, DATASET_NAME)
+        mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
         mock_func.return_value.delete.assert_called_once()
 
     def test_drop_dataset_by_name_should_raise_exception(self):
-        with patch.object(DatasetService, 'dataset_object_by_name') \
-                as mock_func:
-            mock_func.side_effect = Exception()
+        with patch.object(
+            DatasetService, "dataset_object_by_name"
+        ) as mock_func:
+            ERR_MSG = "err_message"
+            mock_func.side_effect = Exception(ERR_MSG)
             service = DatasetService()
             with self.assertRaises(Exception) as cm:
-                service.drop_dataset_by_name("database_name", "dataset_name")
-                self.assertEqual(
-                    "Delete dataset failed for name {}".format("dataset_name"),
-                    str(cm.exception),
-                )
-            mock_func.assert_called_once_with("database_name", "dataset_name")
+                service.drop_dataset_by_name(DATABASE_NAME, DATASET_NAME)
+            self.assertEqual(
+                "Delete dataset failed for name {} with error {}".format(
+                    DATASET_NAME, ERR_MSG
+                ),
+                str(cm.exception),
+            )
+            mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
             mock_func.return_value.delete.assert_not_called()
+
+
+if __name__ == "__main__":
+    unittest.main()

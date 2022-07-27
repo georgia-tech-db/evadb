@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from eva.parser.statement import AbstractStatement
-
 from eva.parser.types import StatementType
 from typing import List
 from eva.parser.create_statement import ColumnDefinition

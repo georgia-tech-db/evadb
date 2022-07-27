@@ -17,18 +17,23 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
                                      LogicalFilter, LogicalProject,
                                      LogicalCreate,
-                                     LogicalDrop,
+                                     LogicalRename,
+                                     LogicalDrop, LogicalDropUDF,
                                      LogicalCreateUDF, LogicalLoadData,
+                                     LogicalShow,
                                      LogicalUpload, LogicalQueryDerivedGet,
                                      LogicalUnion, LogicalOrderBy,
                                      LogicalLimit, LogicalSample,
                                      LogicalFunctionScan, LogicalJoin)
+from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
+from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.create_mat_view_statement \
     import CreateMaterializedViewStatement
 from eva.parser.load_statement import LoadDataStatement
@@ -192,6 +197,15 @@ class StatementToPlanConvertor:
             table_ref, statement.column_list, statement.if_not_exists)
         self._plan = create_opr
 
+    def visit_rename(self, statement: RenameTableStatement):
+        """Convertor for parsed rename statement
+        Arguments:
+            statement(RenameTableStatement): [Rename statement]
+        """
+        rename_opr = LogicalRename(statement.old_table_ref,
+                                   statement.new_table_name)
+        self._plan = rename_opr
+
     def visit_drop(self, statement: DropTableStatement):
         drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
         self._plan = drop_opr
@@ -212,6 +226,14 @@ class StatementToPlanConvertor:
                                           statement.impl_path,
                                           statement.udf_type)
         self._plan = create_udf_opr
+
+    def visit_drop_udf(self, statement: DropUDFStatement):
+        """Convertor for parsed DROP UDF statement
+
+        Arguments:
+            statement {DropUDFStatement} - Drop UDF Statement
+        """
+        self._plan = LogicalDropUDF(statement.name, statement.if_exists)
 
     def visit_load_data(self, statement: LoadDataStatement):
         """Convertor for parsed load data statement
@@ -243,6 +265,10 @@ class StatementToPlanConvertor:
         mat_view_opr.append_child(self._plan)
         self._plan = mat_view_opr
 
+    def visit_show(self, statement: ShowStatement):
+        show_opr = LogicalShow(statement.show_type)
+        self._plan = show_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -257,16 +283,22 @@ class StatementToPlanConvertor:
             self.visit_insert(statement)
         elif isinstance(statement, CreateTableStatement):
             self.visit_create(statement)
+        elif isinstance(statement, RenameTableStatement):
+            self.visit_rename(statement)
         elif isinstance(statement, DropTableStatement):
             self.visit_drop(statement)
         elif isinstance(statement, CreateUDFStatement):
             self.visit_create_udf(statement)
+        elif isinstance(statement, DropUDFStatement):
+            self.visit_drop_udf(statement)
         elif isinstance(statement, LoadDataStatement):
             self.visit_load_data(statement)
         elif isinstance(statement, UploadStatement):
             self.visit_upload(statement)
         elif isinstance(statement, CreateMaterializedViewStatement):
             self.visit_materialized_view(statement)
+        elif isinstance(statement, ShowStatement):
+            self.visit_show(statement)
         return self._plan
 
     @property

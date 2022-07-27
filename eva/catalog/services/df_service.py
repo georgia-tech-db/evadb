@@ -23,13 +23,12 @@ from eva.utils.logging_manager import logger
 
 
 class DatasetService(BaseService):
-
     def __init__(self):
         super().__init__(DataFrameMetadata)
 
-    def create_dataset(self, name, file_url,
-                       identifier_id='id',
-                       is_video=False) -> DataFrameMetadata:
+    def create_dataset(
+        self, name, file_url, identifier_id="id", is_video=False
+    ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
@@ -43,7 +42,8 @@ class DatasetService(BaseService):
             name=name,
             file_url=file_url,
             identifier_id=identifier_id,
-            is_video=is_video)
+            is_video=is_video,
+        )
         metadata = metadata.save()
         return metadata
 
@@ -58,13 +58,14 @@ class DatasetService(BaseService):
             int (dataset id)
         """
         try:
-            result = self.model.query \
-                .with_entities(self.model._id) \
-                .filter(self.model._name == name).one()
+            result = (
+                self.model.query.with_entities(self.model._id)
+                .filter(self.model._name == name)
+                .one()
+            )
             return result[0]
         except NoResultFound:
-            logger.error(
-                "get_id_from_name failed with name {}".format(name))
+            logger.error("get_id_from_name failed with name {}".format(name))
 
     def dataset_by_id(self, dataset_id) -> DataFrameMetadata:
         """
@@ -74,12 +75,11 @@ class DatasetService(BaseService):
         Returns:
            DataFrameMetadata
         """
-        return self.model.query \
-            .filter(self.model._id == dataset_id) \
-            .one()
+        return self.model.query.filter(self.model._id == dataset_id).one()
 
-    def dataset_object_by_name(self, database_name, dataset_name,
-                               column_name: List[str] = None):
+    def dataset_object_by_name(
+        self, database_name, dataset_name, column_name: List[str] = None
+    ):
         """
         Get the metadata for the given table.
         Arguments:
@@ -93,23 +93,39 @@ class DatasetService(BaseService):
             DataFrameMetadata - metadata for given dataset_name
         """
         return self.model.query.filter(
-            self.model._name == dataset_name).one_or_none()
+            self.model._name == dataset_name
+        ).one_or_none()
 
-    def drop_dataset_by_name(self,
-                             database_name: str,
-                             dataset_name: str) -> bool:
-        """ Delete dataset from the db
-            Arguments:
-                database_name  (str): Database to which dataset belongs
-                dataset_name (str): name of the dataset
-            Returns:
-                True if successfully removed else false
+    def drop_dataset_by_name(self, database_name: str, dataset_name: str):
+        """Delete dataset from the db
+        Arguments:
+            database_name  (str): Database to which dataset belongs
+            dataset_name (str): name of the dataset
+        Returns:
+            True if successfully removed else false
         """
         try:
             dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
-        except Exception:
-            logger.error(
-                "Delete dataset failed for name {}".format(dataset_name))
-            return False
-        return True
+        except Exception as e:
+            err_msg = "Delete dataset failed for name {} with error {}".format(
+                dataset_name, str(e)
+            )
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
+
+    def rename_dataset_by_name(
+        self, new_name: str, curr_database_name: str, curr_dataset_name: str
+    ):
+        try:
+            dataset = self.dataset_object_by_name(
+                curr_database_name, curr_dataset_name
+            )
+            dataset.update(_name=new_name)
+
+        except Exception as e:
+            err_msg = "Update dataset name failed for {} with error {}".format(
+                curr_dataset_name, str(e)
+            )
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)

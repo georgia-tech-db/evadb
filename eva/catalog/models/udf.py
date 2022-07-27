@@ -19,15 +19,15 @@ from eva.catalog.models.base_model import BaseModel
 
 
 class UdfMetadata(BaseModel):
-    __tablename__ = 'udf'
+    __tablename__ = "udf"
 
-    _name = Column('name', String(100), unique=True)
-    _impl_file_path = Column('impl_file_path', String(128))
-    _type = Column('type', String(100))
+    _name = Column("name", String(100), unique=True)
+    _impl_file_path = Column("impl_file_path", String(128))
+    _type = Column("type", String(100))
 
-    _cols = relationship('UdfIO',
-                         back_populates="_udf",
-                         cascade='all, delete, delete-orphan')
+    _cols = relationship(
+        "UdfIO", back_populates="_udf", cascade="all, delete, delete-orphan"
+    )
 
     def __init__(self, name: str, impl_file_path: str, type: str):
         self._name = name
@@ -50,19 +50,37 @@ class UdfMetadata(BaseModel):
     def type(self):
         return self._type
 
+    def display_format(self):
+        inputs = []
+        outputs = []
+        for col in self._cols:
+            col_display = col.display_format()
+            col_string = f"{col_display['name']} {col_display['data_type']}"
+            if col.is_input:
+                inputs.append(col_string)
+            else:
+                outputs.append(col_string)
+        return {
+            "name": self.name,
+            "inputs": inputs,
+            "outputs": outputs,
+            "type": self.type,
+            "impl": self.impl_file_path,
+        }
+
     def __str__(self):
-        udf_str = 'udf: ({}, {}, {})\n'.format(
-            self.name, self.impl_file_path, self.type)
+        udf_str = "udf: ({}, {}, {})\n".format(
+            self.name, self.impl_file_path, self.type
+        )
         return udf_str
 
     def __eq__(self, other):
-        return self.id == other.id and \
-            self.impl_file_path == other.impl_file_path and \
-            self.name == other.name and \
-            self.type == other.type
+        return (
+            self.id == other.id
+            and self.impl_file_path == other.impl_file_path
+            and self.name == other.name
+            and self.type == other.type
+        )
 
     def __hash__(self) -> int:
-        return hash((self.id,
-                     self.name,
-                     self.impl_file_path,
-                     self.type))
+        return hash((self.id, self.name, self.impl_file_path, self.type))
