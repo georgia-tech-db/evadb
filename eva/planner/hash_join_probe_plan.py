@@ -15,11 +15,11 @@
 
 from typing import List
 
-from eva.planner.types import PlanOprType
-from eva.planner.abstract_join_plan import AbstractJoin
-from eva.parser.types import JoinType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.types import JoinType
+from eva.planner.abstract_join_plan import AbstractJoin
+from eva.planner.types import PlanOprType
 
 
 class HashJoinProbePlan(AbstractJoin):
@@ -34,20 +34,22 @@ class HashJoinProbePlan(AbstractJoin):
         predicate (AbstractExpression)
     """
 
-    def __init__(self,
-                 join_type: JoinType,
-                 probe_keys: List[DataFrameColumn],
-                 join_predicate: AbstractExpression,
-                 join_project: List[AbstractExpression]
-                 ):
+    def __init__(
+        self,
+        join_type: JoinType,
+        probe_keys: List[DataFrameColumn],
+        join_predicate: AbstractExpression,
+        join_project: List[AbstractExpression],
+    ):
         self.probe_keys = probe_keys
         self.join_project = join_project
-        super().__init__(PlanOprType.HASH_JOIN,
-                         join_type,
-                         join_predicate
-                         )
+        super().__init__(PlanOprType.HASH_JOIN, join_type, join_predicate)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     tuple(self.probe_keys or []),
-                     tuple(self.join_project or [])))
+        return hash(
+            (
+                super().__hash__(),
+                tuple(self.probe_keys or []),
+                tuple(self.join_project or []),
+            )
+        )

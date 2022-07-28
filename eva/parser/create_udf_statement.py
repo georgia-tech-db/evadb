@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
+from typing import List
+
+from eva.parser.create_statement import ColumnDefinition
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import StatementType
-from typing import List
-from eva.parser.create_statement import ColumnDefinition
-from pathlib import Path
 
 
 class CreateUDFStatement(AbstractStatement):
@@ -41,13 +42,15 @@ class CreateUDFStatement(AbstractStatement):
             udf type. it ca be object detection, classification etc.
     """
 
-    def __init__(self,
-                 name: str,
-                 if_not_exists: bool,
-                 inputs: List[ColumnDefinition],
-                 outputs: List[ColumnDefinition],
-                 impl_path: str,
-                 udf_type: str = None):
+    def __init__(
+        self,
+        name: str,
+        if_not_exists: bool,
+        inputs: List[ColumnDefinition],
+        outputs: List[ColumnDefinition],
+        impl_path: str,
+        udf_type: str = None,
+    ):
         super().__init__(StatementType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
@@ -57,9 +60,13 @@ class CreateUDFStatement(AbstractStatement):
         self._udf_type = udf_type
 
     def __str__(self) -> str:
-        print_str = 'CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}'. \
-                    format(self._name, self._inputs, self._outputs,
-                           self._udf_type, self._impl_path.name)
+        print_str = "CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}".format(
+            self._name,
+            self._inputs,
+            self._outputs,
+            self._udf_type,
+            self._impl_path.name,
+        )
         return print_str
 
     @property
@@ -89,18 +96,22 @@ class CreateUDFStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, CreateUDFStatement):
             return False
-        return (self.name == other.name
-                and self.if_not_exists == other.if_not_exists
-                and self.inputs == other.inputs
-                and self.outputs == other.outputs
-                and self.impl_path == other.impl_path
-                and self.udf_type == other.udf_type)
+        return (
+            self.name == other.name
+            and self.if_not_exists == other.if_not_exists
+            and self.inputs == other.inputs
+            and self.outputs == other.outputs
+            and self.impl_path == other.impl_path
+            and self.udf_type == other.udf_type
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.name,
-                     self.if_not_exists,
-                     tuple(self.inputs),
-                     tuple(self.outputs,
-                           self.impl_path,
-                           self.udf_type)))
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.if_not_exists,
+                tuple(self.inputs),
+                tuple(self.outputs, self.impl_path, self.udf_type),
+            )
+        )

@@ -29,5 +29,4 @@ class PredicatePlan(AbstractPlan):
         super().__init__(PlanOprType.PREDICATE_FILTER)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.predicate))
+        return hash((super().__hash__(), self.predicate))

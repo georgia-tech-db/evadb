@@ -14,9 +14,9 @@
 # limitations under the License.
 from typing import List
 
+from eva.parser.table_ref import TableRef
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from eva.parser.table_ref import TableRef
 
 
 class DropPlan(AbstractPlan):
@@ -28,8 +28,7 @@ class DropPlan(AbstractPlan):
         if_exists {bool} -- if True do not throw error if table does not exist
     """
 
-    def __init__(self, table_refs: List[TableRef],
-                 if_exists: bool):
+    def __init__(self, table_refs: List[TableRef], if_exists: bool):
         super().__init__(PlanOprType.DROP)
         self._table_refs = table_refs
         self._if_exists = if_exists

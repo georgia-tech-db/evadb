@@ -12,16 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from eva.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
 
 
 class Array_Count(AbstractNdarrayUDF):
-
     @property
     def name(self) -> str:
-        return 'Array_Count'
+        return "Array_Count"
 
     def exec(self, inp: pd.DataFrame):
         """
@@ -46,16 +46,16 @@ class Array_Count(AbstractNdarrayUDF):
         """
         # sanity check
         if len(inp.columns) != 2:
-            raise ValueError('input contains more than one column')
+            raise ValueError("input contains more than one column")
 
         search_element = inp[inp.columns[-1]][0]
         values = pd.DataFrame(inp[inp.columns[0]])
 
         count_result = values.apply(
-            lambda x: self.count_in_row(
-                x[0], search_element), axis=1)
+            lambda x: self.count_in_row(x[0], search_element), axis=1
+        )
 
-        return pd.DataFrame({'count': count_result.values})
+        return pd.DataFrame({"count": count_result.values})
 
     def count_in_row(self, row_val, search_element):
         # change the row and search element to numpy array
@@ -66,7 +66,7 @@ class Array_Count(AbstractNdarrayUDF):
         # row_val and search_element
         if row_val.ndim - search_element.ndim != 1:
             raise ValueError(
-                'inconsistent dimensions for row value and search element')
+                "inconsistent dimensions for row value and search element")
 
         result = row_val == search_element
         # reshape along the first dimension and then

@@ -13,15 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-
-from eva.udfs.udf_bootstrap_queries import (
-    Fastrcnn_udf_query,
-    ArrayCount_udf_query,
-)
+from eva.udfs.udf_bootstrap_queries import (ArrayCount_udf_query,
+                                            Fastrcnn_udf_query)
 
 NUM_FRAMES = 10
 

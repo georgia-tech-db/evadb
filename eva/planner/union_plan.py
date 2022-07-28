@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.planner.types import PlanOprType
 from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
 class UnionPlan(AbstractPlan):

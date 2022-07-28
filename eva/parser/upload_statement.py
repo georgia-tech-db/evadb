@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.parser.statement import AbstractStatement
-
-from eva.parser.types import StatementType
 from pathlib import Path
+
+from eva.parser.statement import AbstractStatement
+from eva.parser.types import StatementType
 
 
 class UploadStatement(AbstractStatement):
@@ -50,8 +50,7 @@ class UploadStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, UploadStatement):
             return False
-        return (self.path == other.path and
-                self.video_blob == other.video_blob)
+        return self.path == other.path and self.video_blob == other.video_blob
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.path, self.video_blob))

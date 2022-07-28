@@ -14,10 +14,11 @@
 # limitations under the License.
 
 from typing import Dict, List
-from eva.optimizer.group_expression import GroupExpression
-from eva.optimizer.group import Group
-from eva.optimizer.operators import OperatorType
+
 from eva.constants import UNDEFINED_GROUP_ID
+from eva.optimizer.group import Group
+from eva.optimizer.group_expression import GroupExpression
+from eva.optimizer.operators import OperatorType
 from eva.utils.logging_manager import logger
 
 
@@ -49,7 +50,7 @@ class Memo:
         if group_id in self._groups.keys():
             return self._groups[group_id]
         else:
-            logger.error('Missing group id')
+            logger.error("Missing group id")
 
     """
     For the consistency of the memo, all modification should use the
@@ -64,8 +65,10 @@ class Memo:
         for child_grp_id in expr.children:
             child_grp = self._groups[child_grp_id]
             aliases.extend(child_grp.aliases)
-        if (expr.opr.opr_type == OperatorType.LOGICALGET or
-                expr.opr.opr_type == OperatorType.LOGICALQUERYDERIVEDGET):
+        if (
+            expr.opr.opr_type == OperatorType.LOGICALGET
+            or expr.opr.opr_type == OperatorType.LOGICALQUERYDERIVEDGET
+        ):
             aliases.append(expr.opr.alias)
 
         return aliases
@@ -83,7 +86,7 @@ class Memo:
         """
         Insert a group expressoin into a particular group
         """
-        assert group_id < len(self.groups), 'Group Id out of the bound'
+        assert group_id < len(self.groups), "Group Id out of the bound"
 
         group = self.groups[group_id]
         group.add_expr(expr)
@@ -101,9 +104,9 @@ class Memo:
 
         group.clear_grp_exprs()
 
-    def add_group_expr(self,
-                       expr: GroupExpression,
-                       group_id: int = UNDEFINED_GROUP_ID) -> GroupExpression:
+    def add_group_expr(
+        self, expr: GroupExpression, group_id: int = UNDEFINED_GROUP_ID
+    ) -> GroupExpression:
         """
         Add an expression into the memo.
         If expr exists, we return it.
@@ -123,8 +126,10 @@ class Memo:
         else:
             self._insert_expr(expr, group_id)
 
-        assert expr.group_id is not UNDEFINED_GROUP_ID, '''Expr
+        assert (
+            expr.group_id is not UNDEFINED_GROUP_ID
+        ), """Expr
                                                         should have a
                                                         valid group
-                                                        id'''
+                                                        id"""
         return expr

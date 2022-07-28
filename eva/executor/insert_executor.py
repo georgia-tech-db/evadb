@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.planner.insert_plan import InsertPlan
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.planner.insert_plan import InsertPlan
 
 
 class InsertExecutor(AbstractExecutor):
-
     def __init__(self, node: InsertPlan):
         super().__init__(node)
 

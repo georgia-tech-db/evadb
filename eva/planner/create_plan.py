@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List
+
+from eva.catalog.models.df_column import DataFrameColumn
+from eva.parser.table_ref import TableRef
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from typing import List
-from eva.parser.table_ref import TableRef
-from eva.catalog.models.df_column import DataFrameColumn
 
 
 class CreatePlan(AbstractPlan):
@@ -30,9 +31,12 @@ class CreatePlan(AbstractPlan):
         if_not_exists {bool} -- Whether to override if there is existing table
     """
 
-    def __init__(self, table_ref: TableRef,
-                 column_list: List[DataFrameColumn],
-                 if_not_exists: bool = False):
+    def __init__(
+        self,
+        table_ref: TableRef,
+        column_list: List[DataFrameColumn],
+        if_not_exists: bool = False,
+    ):
         super().__init__(PlanOprType.CREATE)
         self._table_ref = table_ref
         self._column_list = column_list
@@ -51,7 +55,11 @@ class CreatePlan(AbstractPlan):
         return self._column_list
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table_ref,
-                     self.if_not_exists,
-                     tuple(self.column_list)))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.if_not_exists,
+                tuple(self.column_list),
+            )
+        )

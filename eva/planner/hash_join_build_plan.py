@@ -14,11 +14,11 @@
 # limitations under the License.
 
 from typing import List
+
+from eva.catalog.models.df_column import DataFrameColumn
 from eva.parser.types import JoinType
 from eva.planner.abstract_plan import AbstractPlan
-
 from eva.planner.types import PlanOprType
-from eva.catalog.models.df_column import DataFrameColumn
 
 
 class HashJoinBuildPlan(AbstractPlan):
@@ -37,6 +37,4 @@ class HashJoinBuildPlan(AbstractPlan):
         super().__init__(PlanOprType.HASH_BUILD)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.join_type,
-                     tuple(self.build_keys or [])))
+        return hash((super().__hash__(), self.join_type, tuple(self.build_keys or [])))

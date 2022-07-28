@@ -12,18 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import itertools
 import copy
+import itertools
 
-from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.memo import Memo
 from eva.optimizer.operators import Dummy, Operator, OperatorType
+from eva.optimizer.rules.pattern import Pattern
 
 
 class Binder:
-    def __init__(self, grp_expr: GroupExpression, pattern: Pattern,
-                 memo: Memo):
+    def __init__(self, grp_expr: GroupExpression, pattern: Pattern, memo: Memo):
         self._grp_expr = grp_expr
         self._pattern = pattern
         self._memo = memo
@@ -48,11 +47,9 @@ class Binder:
             if len(pattern.children) != len(expr.children):
                 return
 
-            for child_grp, pattern_child in zip(expr.children,
-                                                pattern.children):
-                child_binders.append(
-                    Binder._grp_binder(child_grp, pattern_child, memo)
-                )
+            for child_grp, pattern_child in zip(expr.children, pattern.children):
+                child_binders.append(Binder._grp_binder(
+                    child_grp, pattern_child, memo))
         else:
             # record the group id in a Dummy Opearator
             curr_iterator = iter([Dummy(expr.group_id)])

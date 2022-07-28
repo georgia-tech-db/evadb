@@ -13,12 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from antlr4 import InputStream, CommonTokenStream
+from antlr4 import CommonTokenStream, InputStream
 from antlr4.error.ErrorListener import ErrorListener
 
-from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_lexer import evaql_lexer
-
+from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor import ParserVisitor
 
 
@@ -31,8 +30,14 @@ class AntlrErrorListener(ErrorListener):
         super(AntlrErrorListener, self).__init__()
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        error_str = "ERROR: Syntax error - Line" + str(line) + ": Col " +\
-                    str(column) + " - " + str(msg)
+        error_str = (
+            "ERROR: Syntax error - Line"
+            + str(line)
+            + ": Col "
+            + str(column)
+            + " - "
+            + str(msg)
+        )
         raise Exception(error_str)
 
     # def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
@@ -55,6 +60,7 @@ class Parser(object):
     """
     Parser for eva; based on EVAQL grammar
     """
+
     _instance = None
     _visitor = None
     _error_listener = None

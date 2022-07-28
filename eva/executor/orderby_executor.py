@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.planner.orderby_plan import OrderByPlan
 
@@ -40,12 +40,12 @@ class OrderByExecutor(AbstractExecutor):
         pass
 
     def extract_column_names(self):
-        """ extracts the string name of the column """
+        """extracts the string name of the column"""
         # self._columns: List[TupleValueExpression]
         return [tve.col_alias for tve in self._columns]
 
     def extract_sort_types(self):
-        """ extracts the sort type for the column """
+        """extracts the sort type for the column"""
         # self._sort_types: List[ParserOrderBySortType]
         sort_type_bools = []
         for st in self._sort_types:
@@ -68,8 +68,8 @@ class OrderByExecutor(AbstractExecutor):
         # sorts the batch
         try:
             aggregated_batch.sort_orderby(
-                by=self.extract_column_names(),
-                sort_type=self.extract_sort_types())
+                by=self.extract_column_names(), sort_type=self.extract_sort_types()
+            )
         except KeyError:
             # pass for now
             pass

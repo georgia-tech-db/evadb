@@ -13,23 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import shutil
-from typing import Iterator, List
 from pathlib import Path
+from typing import Iterator, List
 
-from petastorm.unischema import dict_to_spark_row
-from petastorm.predicates import in_lambda
-from eva.spark.session import Session
-from eva.catalog.models.df_metadata import DataFrameMetadata
 from petastorm.etl.dataset_metadata import materialize_dataset
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.readers.petastorm_reader import PetastormReader
-from eva.models.storage.batch import Batch
+from petastorm.predicates import in_lambda
+from petastorm.unischema import dict_to_spark_row
+
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.models.storage.batch import Batch
+from eva.readers.petastorm_reader import PetastormReader
+from eva.spark.session import Session
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.logging_manager import logger
 
 
 class PetastormStorageEngine(AbstractStorageEngine):
-
     def __init__(self):
         """
         Maintain a long live spark session and context.
@@ -37,7 +37,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         self._spark = Session()
         self.spark_session = self._spark.get_session()
         self.spark_context = self._spark.get_context()
-        self.coalesce = ConfigurationManager().get_value('pyspark', 'coalesce')
+        self.coalesce = ConfigurationManager().get_value("pyspark", "coalesce")
 
     def _spark_url(self, table: DataFrameMetadata) -> str:
         """
@@ -51,23 +51,23 @@ class PetastormStorageEngine(AbstractStorageEngine):
         """
         empty_rdd = self.spark_context.emptyRDD()
 
-        with materialize_dataset(self.spark_session,
-                                 self._spark_url(table),
-                                 table.schema.petastorm_schema):
+        with materialize_dataset(
+            self.spark_session, self._spark_url(
+                table), table.schema.petastorm_schema
+        ):
 
-            self.spark_session.createDataFrame(empty_rdd,
-                                               table.schema.pyspark_schema) \
-                .coalesce(self.coalesce) \
-                .write \
-                .mode('overwrite') \
-                .parquet(self._spark_url(table))
+            self.spark_session.createDataFrame(
+                empty_rdd, table.schema.pyspark_schema
+            ).coalesce(self.coalesce).write.mode("overwrite").parquet(
+                self._spark_url(table)
+            )
 
     def drop(self, table: DataFrameMetadata):
         dir_path = self._spark_url(table)
         try:
             shutil.rmtree(str(dir_path))
         except Exception as e:
-            logger.exception(f'Failed to drop the video table {e}')
+            logger.exception(f"Failed to drop the video table {e}")
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         """
@@ -83,28 +83,31 @@ class PetastormStorageEngine(AbstractStorageEngine):
         # ToDo
         # Throw an error if the row schema doesn't match the table schema
 
-        with materialize_dataset(self.spark_session,
-                                 self._spark_url(table),
-                                 table.schema.petastorm_schema):
+        with materialize_dataset(
+            self.spark_session, self._spark_url(
+                table), table.schema.petastorm_schema
+        ):
 
             records = rows.frames
             columns = records.keys()
-            rows_rdd = self.spark_context.parallelize(records.values) \
-                .map(lambda x: dict(zip(columns, x))) \
-                .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema,
-                                                 x))
-            self.spark_session.createDataFrame(rows_rdd,
-                                               table.schema.pyspark_schema) \
-                .coalesce(self.coalesce) \
-                .write \
-                .mode('append') \
-                .parquet(self._spark_url(table))
+            rows_rdd = (
+                self.spark_context.parallelize(records.values)
+                .map(lambda x: dict(zip(columns, x)))
+                .map(lambda x: dict_to_spark_row(table.schema.petastorm_schema, x))
+            )
+            self.spark_session.createDataFrame(
+                rows_rdd, table.schema.pyspark_schema
+            ).coalesce(self.coalesce).write.mode("append").parquet(
+                self._spark_url(table)
+            )
 
-    def read(self,
-             table: DataFrameMetadata,
-             batch_mem_size: int,
-             columns: List[str] = None,
-             predicate_func=None) -> Iterator[Batch]:
+    def read(
+        self,
+        table: DataFrameMetadata,
+        batch_mem_size: int,
+        columns: List[str] = None,
+        predicate_func=None,
+    ) -> Iterator[Batch]:
         """
         Reads the table and return a batch iterator for the
         tuples that passes the predicate func.
@@ -126,9 +129,8 @@ class PetastormStorageEngine(AbstractStorageEngine):
         # ToDo: Handle the sharding logic. We might have to maintain a
         # context for deciding which shard to read
         reader = PetastormReader(
-            self._spark_url(table),
-            batch_mem_size=batch_mem_size,
-            predicate=predicate)
+            self._spark_url(table), batch_mem_size=batch_mem_size, predicate=predicate
+        )
         for batch in reader.read():
             yield batch
 

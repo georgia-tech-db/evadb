@@ -12,14 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 from typing import Callable, List
+
+import pandas as pd
 
 from eva.catalog.models.udf_io import UdfIO
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
-from eva.expression.abstract_expression import AbstractExpression, \
-    ExpressionType
+from eva.expression.abstract_expression import (AbstractExpression,
+                                                ExpressionType)
 from eva.models.storage.batch import Batch
 from eva.udfs.gpu_compatible import GPUCompatible
 
@@ -42,8 +43,7 @@ class FunctionExpression(AbstractExpression):
     `Select OD.labels FROM Video JOIN LATERAL ObjDetector AS OD;`
     """
 
-    def __init__(self, func: Callable, name: str,
-                 output=None, alias=None, **kwargs):
+    def __init__(self, func: Callable, name: str, output=None, alias=None, **kwargs):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
@@ -72,8 +72,8 @@ class FunctionExpression(AbstractExpression):
 
     def evaluate(self, batch: Batch, **kwargs):
         new_batch = batch
-        child_batches = \
-            [child.evaluate(batch, **kwargs) for child in self.children]
+        child_batches = [child.evaluate(batch, **kwargs)
+                         for child in self.children]
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
 
@@ -96,18 +96,25 @@ class FunctionExpression(AbstractExpression):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, FunctionExpression):
             return False
-        return (is_subtree_equal and self.name == other.name
-                and self.output == other.output
-                and self.alias == other.alias
-                and self.output_col_aliases == other.output_col_aliases
-                and self.function == other.function
-                and self.output_objs == other.output_objs)
+        return (
+            is_subtree_equal
+            and self.name == other.name
+            and self.output == other.output
+            and self.alias == other.alias
+            and self.output_col_aliases == other.output_col_aliases
+            and self.function == other.function
+            and self.output_objs == other.output_objs
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.name,
-                     self.output,
-                     self.alias,
-                     tuple(self.output_col_aliases),
-                     self.function,
-                     tuple(self.output_objs)))
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.output,
+                self.alias,
+                tuple(self.output_col_aliases),
+                self.function,
+                tuple(self.output_objs),
+            )
+        )

@@ -13,25 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import singledispatch
-from eva.planner.abstract_plan import AbstractPlan
+
 from eva.optimizer.group_expression import GroupExpression
+from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.seq_scan_plan import SeqScanPlan
 
 
 class CostModel:
-    '''
+    """
     Basic cost model. Change it as we add more cost based rules
-    '''
+    """
 
     def __init__(self):
         pass
 
     def calculate_cost(self, gexpr: GroupExpression):
-        '''
+        """
         Return the cost of the group expression.
-        '''
+        """
 
         @singledispatch
         def cost(opr: AbstractPlan):

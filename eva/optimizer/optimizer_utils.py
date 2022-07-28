@@ -14,16 +14,16 @@
 # limitations under the License.
 
 from typing import List, Tuple
+
+from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import (AbstractExpression,
                                                 ExpressionType)
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
-from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
 
 
-def column_definition_to_udf_io(
-        col_list: List[ColumnDefinition], is_input: bool):
+def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
     """Create the UdfIO object fro each column definition provided
 
     Arguments:
@@ -36,23 +36,25 @@ def column_definition_to_udf_io(
     result_list = []
     for col in col_list:
         if col is None:
-            logger.error(
-                "Empty column definition while creating udf io")
+            logger.error("Empty column definition while creating udf io")
             result_list.append(col)
         result_list.append(
-            CatalogManager().udf_io(col.name, col.type,
-                                    array_type=col.array_type,
-                                    dimensions=col.dimension,
-                                    is_input=is_input)
+            CatalogManager().udf_io(
+                col.name,
+                col.type,
+                array_type=col.array_type,
+                dimensions=col.dimension,
+                is_input=is_input,
+            )
         )
     return result_list
 
 
-def extract_equi_join_keys(join_predicate: AbstractExpression,
-                           left_table_aliases: List[str],
-                           right_table_aliases: List[str]) \
-    -> Tuple[List[AbstractExpression],
-             List[AbstractExpression]]:
+def extract_equi_join_keys(
+    join_predicate: AbstractExpression,
+    left_table_aliases: List[str],
+    right_table_aliases: List[str],
+) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
 
     pred_list = expression_tree_to_conjunction_list(join_predicate)
     left_join_keys = []
@@ -62,14 +64,20 @@ def extract_equi_join_keys(join_predicate: AbstractExpression,
             left_child = pred.children[0]
             right_child = pred.children[1]
             # only extract if both are TupleValueExpression
-            if (left_child.etype == ExpressionType.TUPLE_VALUE
-                    and right_child.etype == ExpressionType.TUPLE_VALUE):
-                if (left_child.table_alias in left_table_aliases
-                        and right_child.table_alias in right_table_aliases):
+            if (
+                left_child.etype == ExpressionType.TUPLE_VALUE
+                and right_child.etype == ExpressionType.TUPLE_VALUE
+            ):
+                if (
+                    left_child.table_alias in left_table_aliases
+                    and right_child.table_alias in right_table_aliases
+                ):
                     left_join_keys.append(left_child)
                     right_join_keys.append(right_child)
-                elif (left_child.table_alias in right_table_aliases
-                        and right_child.table_alias in left_table_aliases):
+                elif (
+                    left_child.table_alias in right_table_aliases
+                    and right_child.table_alias in left_table_aliases
+                ):
                     left_join_keys.append(right_child)
                     right_join_keys.append(left_child)
 

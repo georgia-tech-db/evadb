@@ -16,8 +16,8 @@ import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.memo import Memo
 from eva.constants import UNDEFINED_GROUP_ID
+from eva.optimizer.memo import Memo
 
 
 class MemoTest(unittest.TestCase):

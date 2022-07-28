@@ -14,14 +14,13 @@
 # limitations under the License.
 import unittest
 
+from eva.catalog.column_type import ColumnType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.catalog.column_type import ColumnType
 
 
 class ComparisonExpressionsTest(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -30,9 +29,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(1)
 
         cmpr_exp = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_EQUAL, const_exp1, const_exp2
         )
         self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
@@ -41,9 +38,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(0)
 
         cmpr_exp = ComparisonExpression(
-            ExpressionType.COMPARE_GREATER,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_GREATER, const_exp1, const_exp2
         )
         self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
@@ -52,9 +47,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(2)
 
         cmpr_exp = ComparisonExpression(
-            ExpressionType.COMPARE_LESSER,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_LESSER, const_exp1, const_exp2
         )
         self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
 
@@ -64,15 +57,11 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp3 = ConstantValueExpression(0)
 
         cmpr_exp1 = ComparisonExpression(
-            ExpressionType.COMPARE_GEQ,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_GEQ, const_exp1, const_exp2
         )
 
         cmpr_exp2 = ComparisonExpression(
-            ExpressionType.COMPARE_GEQ,
-            const_exp1,
-            const_exp3
+            ExpressionType.COMPARE_GEQ, const_exp1, const_exp3
         )
         # checking equal
         self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
@@ -85,15 +74,11 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp3 = ConstantValueExpression(2)
 
         cmpr_exp1 = ComparisonExpression(
-            ExpressionType.COMPARE_LEQ,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_LEQ, const_exp1, const_exp2
         )
 
         cmpr_exp2 = ComparisonExpression(
-            ExpressionType.COMPARE_LEQ,
-            const_exp2,
-            const_exp3
+            ExpressionType.COMPARE_LEQ, const_exp2, const_exp3
         )
 
         # checking lesser
@@ -106,9 +91,7 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(1)
 
         cmpr_exp = ComparisonExpression(
-            ExpressionType.COMPARE_NEQ,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_NEQ, const_exp1, const_exp2
         )
 
         self.assertEqual([True], cmpr_exp.evaluate(None).frames[0].tolist())
@@ -119,17 +102,13 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp3 = ConstantValueExpression([1, 2, 3, 4], ColumnType.NDARRAY)
 
         cmpr_exp1 = ComparisonExpression(
-            ExpressionType.COMPARE_CONTAINS,
-            const_exp3,
-            const_exp1
+            ExpressionType.COMPARE_CONTAINS, const_exp3, const_exp1
         )
 
         self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
 
         cmpr_exp2 = ComparisonExpression(
-            ExpressionType.COMPARE_CONTAINS,
-            const_exp3,
-            const_exp2
+            ExpressionType.COMPARE_CONTAINS, const_exp3, const_exp2
         )
 
         self.assertEqual([False], cmpr_exp2.evaluate(None).frames[0].tolist())
@@ -140,17 +119,13 @@ class ComparisonExpressionsTest(unittest.TestCase):
         const_exp3 = ConstantValueExpression([1, 2, 3, 4], ColumnType.NDARRAY)
 
         cmpr_exp1 = ComparisonExpression(
-            ExpressionType.COMPARE_IS_CONTAINED,
-            const_exp1,
-            const_exp3
+            ExpressionType.COMPARE_IS_CONTAINED, const_exp1, const_exp3
         )
 
         self.assertEqual([True], cmpr_exp1.evaluate(None).frames[0].tolist())
 
         cmpr_exp2 = ComparisonExpression(
-            ExpressionType.COMPARE_IS_CONTAINED,
-            const_exp2,
-            const_exp3
+            ExpressionType.COMPARE_IS_CONTAINED, const_exp2, const_exp3
         )
 
         self.assertEqual([False], cmpr_exp2.evaluate(None).frames[0].tolist())

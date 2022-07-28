@@ -12,16 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from petastorm import make_reader
-from typing import Iterator, Dict
+from typing import Dict, Iterator
 
-from eva.readers.abstract_reader import AbstractReader
+from petastorm import make_reader
+
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.readers.abstract_reader import AbstractReader
 
 
 class PetastormReader(AbstractReader):
-    def __init__(self, *args, cur_shard=None, shard_count=None,
-                 predicate=None, **kwargs):
+    def __init__(
+        self, *args, cur_shard=None, shard_count=None, predicate=None, **kwargs
+    ):
         """
         Reads data from the petastorm parquet stores. Note this won't
         work for any arbitary parquet store apart from one materialized
@@ -45,16 +47,16 @@ class PetastormReader(AbstractReader):
         self.cur_shard = cur_shard
         self.shard_count = shard_count
         self.predicate = predicate
-        petastorm_config = ConfigurationManager().get_value('storage',
-                                                            'petastorm')
+        petastorm_config = ConfigurationManager().get_value("storage", "petastorm")
         # cache not allowed with predicates
         if self.predicate or petastorm_config is None:
             petastorm_config = {}
-        self.cache_type = petastorm_config.get('cache_type', None)
-        self.cache_location = petastorm_config.get('cache_location', None)
-        self.cache_size_limit = petastorm_config.get('cache_size_limit', None)
+        self.cache_type = petastorm_config.get("cache_type", None)
+        self.cache_location = petastorm_config.get("cache_location", None)
+        self.cache_size_limit = petastorm_config.get("cache_size_limit", None)
         self.cache_row_size_estimate = petastorm_config.get(
-            'cache_row_size_estimate', None)
+            "cache_row_size_estimate", None
+        )
         super().__init__(*args, **kwargs)
         if self.cur_shard is not None and self.cur_shard <= 0:
             self.cur_shard = None
@@ -64,14 +66,15 @@ class PetastormReader(AbstractReader):
 
     def _read(self) -> Iterator[Dict]:
         # `Todo`: Generalize this reader
-        with make_reader(self.file_url,
-                         shard_count=self.shard_count,
-                         cur_shard=self.cur_shard,
-                         predicate=self.predicate,
-                         cache_type=self.cache_type,
-                         cache_location=self.cache_location,
-                         cache_size_limit=self.cache_size_limit,
-                         cache_row_size_estimate=self.cache_row_size_estimate)\
-                as reader:
+        with make_reader(
+            self.file_url,
+            shard_count=self.shard_count,
+            cur_shard=self.cur_shard,
+            predicate=self.predicate,
+            cache_type=self.cache_type,
+            cache_location=self.cache_location,
+            cache_size_limit=self.cache_size_limit,
+            cache_row_size_estimate=self.cache_row_size_estimate,
+        ) as reader:
             for row in reader:
                 yield row._asdict()

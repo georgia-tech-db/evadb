@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
+from pyspark.sql import SparkSession
 
 from eva.configuration.configuration_manager import ConfigurationManager
 
@@ -34,7 +34,7 @@ class Session(object):
 
     def __init__(self):
         self._config = ConfigurationManager()
-        name = self._config.get_value('core', 'application')
+        name = self._config.get_value("core", "application")
         self.init_spark_session(name)
 
     def init_spark_session(self, application_name, spark_master=None):
@@ -49,14 +49,13 @@ class Session(object):
         """
 
         eva_spark_conf = SparkConf()
-        pyspark_config = self._config.get_value('pyspark', 'property')
+        pyspark_config = self._config.get_value("pyspark", "property")
         for key, value in pyspark_config.items():
             eva_spark_conf.set(key, value)
 
-        session_builder = SparkSession \
-            .builder \
-            .appName(application_name) \
-            .config(conf=eva_spark_conf)
+        session_builder = SparkSession.builder.appName(application_name).config(
+            conf=eva_spark_conf
+        )
 
         if spark_master:
             session_builder.master(spark_master)
@@ -68,7 +67,7 @@ class Session(object):
 
         # Configure logging
         spark_context = self._session.sparkContext
-        spark_context.setLogLevel('OFF')
+        spark_context.setLogLevel("OFF")
 
     def get_session(self):
         return self._session

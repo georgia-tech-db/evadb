@@ -42,9 +42,8 @@ class StatementBinderContext:
 
     def __init__(self):
         self._table_alias_map: Dict[str, DataFrameMetadata] = dict()
-        self._derived_table_alias_map: Dict[
-            str, List[CatalogColumnType]
-        ] = dict()
+        self._derived_table_alias_map: Dict[str,
+                                            List[CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
 
     def _check_duplicate_alias(self, alias: str):
@@ -56,10 +55,7 @@ class StatementBinderContext:
         Exception:
             Raise exception if found duplication
         """
-        if (
-            alias in self._derived_table_alias_map
-            or alias in self._table_alias_map
-        ):
+        if alias in self._derived_table_alias_map or alias in self._table_alias_map:
             raise RuntimeError("Found duplicate alias {}".format(alias))
 
     def add_table_alias(self, alias: str, table_name: str):
@@ -139,9 +135,7 @@ class StatementBinderContext:
         if table_obj:
             return self._catalog.get_column_object(table_obj, col_name)
 
-    def _check_derived_table_alias_map(
-        self, alias, col_name
-    ) -> CatalogColumnType:
+    def _check_derived_table_alias_map(self, alias, col_name) -> CatalogColumnType:
         """
         Find the column object in derived table alias map
         Arguments:
@@ -165,16 +159,13 @@ class StatementBinderContext:
         """
         alias_cols = []
         for alias, table_obj in self._table_alias_map.items():
-            alias_cols += list(
-                [(alias, col.name) for col in table_obj.columns]
-            )
+            alias_cols += list([(alias, col.name)
+                                for col in table_obj.columns])
         for alias, dtable_obj in self._derived_table_alias_map.items():
             alias_cols += list([(alias, col.name) for col in dtable_obj])
         return alias_cols
 
-    def _search_all_alias_maps(
-        self, col_name: str
-    ) -> Tuple[str, CatalogColumnType]:
+    def _search_all_alias_maps(self, col_name: str) -> Tuple[str, CatalogColumnType]:
         """
         Search the alias and column object using column name
         Arguments:

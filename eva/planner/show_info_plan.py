@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from eva.parser.types import ShowType
-from eva.planner.types import PlanOprType
 from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
 class ShowInfoPlan(AbstractPlan):

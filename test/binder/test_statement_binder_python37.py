@@ -12,21 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 import sys
+import unittest
 from unittest.mock import MagicMock, patch
+
 from eva.binder.statement_binder_context import StatementBinderContext
 
 
 class StatementBinderPython37Tests(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @patch.object(sys, 'version_info', (3, 7))
+    @patch.object(sys, "version_info", (3, 7))
     def test_bind_with_python37(self):
         from eva.binder.statement_binder import StatementBinder
-        with patch.object(StatementBinder, 'bind') as mock_binder:
+
+        with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
             mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]

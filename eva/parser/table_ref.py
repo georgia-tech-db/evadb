@@ -14,13 +14,13 @@
 # limitations under the License.
 
 from __future__ import annotations
+
 from typing import Union
 
-
-from eva.parser.select_statement import SelectStatement
-from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
+from eva.parser.select_statement import SelectStatement
+from eva.parser.types import JoinType
 
 
 class TableInfo:
@@ -62,24 +62,27 @@ class TableInfo:
     def __eq__(self, other):
         if not isinstance(other, TableInfo):
             return False
-        return (self.table_name == other.table_name
-                and self.schema_name == other.schema_name
-                and self.database_name == other.database_name
-                and self.table_obj == other.table_obj)
+        return (
+            self.table_name == other.table_name
+            and self.schema_name == other.schema_name
+            and self.database_name == other.database_name
+            and self.table_obj == other.table_obj
+        )
 
     def __hash__(self) -> int:
-        return hash((self.table_name,
-                     self.schema_name,
-                     self.database_name,
-                     self.table_obj))
+        return hash(
+            (self.table_name, self.schema_name, self.database_name, self.table_obj)
+        )
 
 
 class JoinNode:
-    def __init__(self,
-                 left: 'TableRef' = None,
-                 right: 'TableRef' = None,
-                 predicate: AbstractExpression = None,
-                 join_type: JoinType = None) -> None:
+    def __init__(
+        self,
+        left: "TableRef" = None,
+        right: "TableRef" = None,
+        predicate: AbstractExpression = None,
+        join_type: JoinType = None,
+    ) -> None:
         self.left = left
         self.right = right
         self.predicate = predicate
@@ -88,15 +91,17 @@ class JoinNode:
     def __eq__(self, other):
         if not isinstance(other, JoinNode):
             return False
-        return (self.left == other.left
-                and self.right == other.right
-                and self.predicate == other.predicate
-                and self.join_type == other.join_type)
+        return (
+            self.left == other.left
+            and self.right == other.right
+            and self.predicate == other.predicate
+            and self.join_type == other.join_type
+        )
 
     def __str__(self) -> str:
-        return "JOIN {} ({}, {}) ON {}".format(self.join_type,
-                                               self.left, self.right,
-                                               self.predicate)
+        return "JOIN {} ({}, {}) ON {}".format(
+            self.join_type, self.left, self.right, self.predicate
+        )
 
 
 class TableRef:
@@ -110,11 +115,12 @@ class TableRef:
         sample_freq: sampling frequency for the table reference
     """
 
-    def __init__(self,
-                 table: Union[TableInfo, FunctionExpression,
-                              SelectStatement, JoinNode],
-                 alias: str = None,
-                 sample_freq: float = None):
+    def __init__(
+        self,
+        table: Union[TableInfo, FunctionExpression, SelectStatement, JoinNode],
+        alias: str = None,
+        sample_freq: float = None,
+    ):
 
         self._ref_handle = table
         self._sample_freq = sample_freq
@@ -138,26 +144,42 @@ class TableRef:
 
     @property
     def table(self) -> TableInfo:
-        assert isinstance(self._ref_handle, TableInfo), 'Expected \
-                TableInfo, got {}'.format(type(self._ref_handle))
+        assert isinstance(
+            self._ref_handle, TableInfo
+        ), "Expected \
+                TableInfo, got {}".format(
+            type(self._ref_handle)
+        )
         return self._ref_handle
 
     @property
     def func_expr(self) -> FunctionExpression:
-        assert isinstance(self._ref_handle, FunctionExpression), 'Expected \
-                FunctionExpression, got {}'.format(type(self._ref_handle))
+        assert isinstance(
+            self._ref_handle, FunctionExpression
+        ), "Expected \
+                FunctionExpression, got {}".format(
+            type(self._ref_handle)
+        )
         return self._ref_handle
 
     @property
     def join_node(self) -> JoinNode:
-        assert isinstance(self._ref_handle, JoinNode), 'Expected \
-                JoinNode, got {}'.format(type(self._ref_handle))
+        assert isinstance(
+            self._ref_handle, JoinNode
+        ), "Expected \
+                JoinNode, got {}".format(
+            type(self._ref_handle)
+        )
         return self._ref_handle
 
     @property
     def select_statement(self) -> SelectStatement:
-        assert isinstance(self._ref_handle, SelectStatement), "Expected \
-                SelectStatement, got{}".format(type(self._ref_handle))
+        assert isinstance(
+            self._ref_handle, SelectStatement
+        ), "Expected \
+                SelectStatement, got{}".format(
+            type(self._ref_handle)
+        )
         return self._ref_handle
 
     def generate_alias(self) -> str:
@@ -167,21 +189,22 @@ class TableRef:
         if isinstance(self._ref_handle, TableInfo):
             return self._ref_handle.table_name.lower()
         elif isinstance(self._ref_handle, SelectStatement):
-            raise RuntimeError('Nested select should have alias')
+            raise RuntimeError("Nested select should have alias")
 
     def __str__(self):
         table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            str(self._ref_handle), str(self.sample_freq))
+            str(self._ref_handle), str(self.sample_freq)
+        )
         return table_ref_str
 
     def __eq__(self, other):
         if not isinstance(other, TableRef):
             return False
-        return (self._ref_handle == other._ref_handle
-                and self.alias == other.alias
-                and self.sample_freq == other.sample_freq)
+        return (
+            self._ref_handle == other._ref_handle
+            and self.alias == other.alias
+            and self.sample_freq == other.sample_freq
+        )
 
     def __hash__(self) -> int:
-        return hash((self._ref_handle,
-                     self.alias,
-                     self.sample_freq))
+        return hash((self._ref_handle, self.alias, self.sample_freq))

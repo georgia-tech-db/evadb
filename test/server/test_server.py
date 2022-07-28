@@ -13,22 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-import time
-import threading
-import mock
 import asyncio
-
+import threading
+import time
+import unittest
+from asyncio import CancelledError
 from unittest.mock import MagicMock
 
-from eva.server.server import start_server
-from eva.server.server import EvaServer
+import mock
 
-from asyncio import CancelledError
+from eva.server.server import EvaServer, start_server
 
 
 class ServerTests(unittest.TestCase):
-
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         self.stop_server_future = self.loop.create_future()
@@ -53,10 +50,13 @@ class ServerTests(unittest.TestCase):
         thread.start()
 
         with self.assertRaises(CancelledError):
-            start_server(host=host, port=port,
-                         loop=self.loop,
-                         socket_timeout=socket_timeout,
-                         stop_server_future=self.stop_server_future)
+            start_server(
+                host=host,
+                port=port,
+                loop=self.loop,
+                socket_timeout=socket_timeout,
+                stop_server_future=self.stop_server_future,
+            )
 
     def test_server_protocol_connection_lost(self):
 
@@ -69,27 +69,21 @@ class ServerTests(unittest.TestCase):
 
         # connection made
         eva_server.connection_made(eva_server.transport)
-        self.assertEqual(EvaServer.__connections__, 1,
-                         "connection not made")
+        self.assertEqual(EvaServer.__connections__, 1, "connection not made")
 
         # connection lost
         eva_server.connection_lost(None)
-        self.assertEqual(EvaServer.__connections__, 0,
-                         "connection not lost")
-        self.assertEqual(EvaServer.__errors__, 0,
-                         "connection not errored out")
+        self.assertEqual(EvaServer.__connections__, 0, "connection not lost")
+        self.assertEqual(EvaServer.__errors__, 0, "connection not errored out")
 
         # connection made
         eva_server.connection_made(eva_server.transport)
-        self.assertEqual(EvaServer.__connections__, 1,
-                         "connection not made")
+        self.assertEqual(EvaServer.__connections__, 1, "connection not made")
 
         # connection lost with error
         eva_server.connection_lost(mock.Mock())
-        self.assertEqual(EvaServer.__connections__, 0,
-                         "connection not lost")
-        self.assertEqual(EvaServer.__errors__, 1,
-                         "connection not errored out")
+        self.assertEqual(EvaServer.__connections__, 0, "connection not lost")
+        self.assertEqual(EvaServer.__errors__, 1, "connection not errored out")
 
     def test_server_protocol_data_received(self):
 
@@ -103,8 +97,9 @@ class ServerTests(unittest.TestCase):
         # data received
         data = mock.Mock()
         data.decode = MagicMock(return_value="4|quit")
-        self.assertEqual(eva_server.data_received(data), "closed",
-                         "transport not closed")
+        self.assertEqual(
+            eva_server.data_received(data), "closed", "transport not closed"
+        )
 
         asyncio.set_event_loop(None)
 

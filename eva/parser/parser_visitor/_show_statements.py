@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.show_statement import ShowStatement
 from eva.parser.types import ShowType
 

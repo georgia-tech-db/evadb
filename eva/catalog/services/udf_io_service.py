@@ -26,23 +26,25 @@ class UdfIOService(BaseService):
 
     def get_inputs_by_udf_id(self, udf_id: int):
         try:
-            result = self.model.query \
-                .filter(self.model._udf_id == udf_id,
-                        self.model._is_input == True).all()  # noqa
+            is_input = True
+            result = self.model.query.filter(
+                self.model._udf_id == udf_id, self.model._is_input == is_input
+            ).all()  # noqa
             return result
         except Exception as e:
-            error = f'Getting inputs for UDF id {udf_id} raised {e}'
+            error = f"Getting inputs for UDF id {udf_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
 
     def get_outputs_by_udf_id(self, udf_id: int):
         try:
-            result = self.model.query \
-                .filter(self.model._udf_id == udf_id,
-                        self.model._is_input == False).all()  # noqa
+            is_input = False
+            result = self.model.query.filter(
+                self.model._udf_id == udf_id, self.model._is_input == is_input
+            ).all()  # noqa
             return result
         except Exception as e:
-            error = f'Getting outputs for UDF id {udf_id} raised {e}'
+            error = f"Getting outputs for UDF id {udf_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
 

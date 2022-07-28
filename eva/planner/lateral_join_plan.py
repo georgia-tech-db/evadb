@@ -14,10 +14,10 @@
 # limitations under the License.
 
 
-from eva.planner.types import PlanOprType
-from eva.planner.abstract_join_plan import AbstractJoin
-from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.types import JoinType
+from eva.planner.abstract_join_plan import AbstractJoin
+from eva.planner.types import PlanOprType
 
 
 class LateralJoinPlan(AbstractJoin):
@@ -27,11 +27,9 @@ class LateralJoinPlan(AbstractJoin):
 
     def __init__(self, join_predicate: AbstractExpression):
         self.join_project = []
-        super().__init__(PlanOprType.LATERAL_JOIN,
-                         JoinType.LATERAL_JOIN,
-                         join_predicate
-                         )
+        super().__init__(
+            PlanOprType.LATERAL_JOIN, JoinType.LATERAL_JOIN, join_predicate
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     tuple(self.join_project)))
+        return hash((super().__hash__(), tuple(self.join_project)))

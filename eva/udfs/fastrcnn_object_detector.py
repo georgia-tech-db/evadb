@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import List
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
@@ -24,14 +24,18 @@ from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 try:
     from torch import Tensor
 except ImportError as e:
-    raise ImportError(f"Failed to import with error {e}, \
-        please try `pip install torch`")
+    raise ImportError(
+        f"Failed to import with error {e}, \
+        please try `pip install torch`"
+    )
 
 try:
     import torchvision
 except ImportError as e:
-    raise ImportError(f"Failed to import with error {e}, \
-        please try `pip install torch`")
+    raise ImportError(
+        f"Failed to import with error {e}, \
+        please try `pip install torch`"
+    )
 
 
 class FastRCNNObjectDetector(PytorchAbstractUDF):
@@ -49,7 +53,8 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
         super().__init__()
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True)
+            pretrained=True
+        )
         self.model.eval()
 
     @property
@@ -59,30 +64,97 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
     @property
     def labels(self) -> List[str]:
         return [
-            '__background__', 'person', 'bicycle', 'car', 'motorcycle',
-            'airplane', 'bus',
-            'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'N/A',
-            'stop sign',
-            'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep',
-            'cow',
-            'elephant', 'bear', 'zebra', 'giraffe', 'N/A', 'backpack',
-            'umbrella', 'N/A', 'N/A',
-            'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard',
-            'sports ball',
-            'kite', 'baseball bat', 'baseball glove', 'skateboard',
-            'surfboard', 'tennis racket',
-            'bottle', 'N/A', 'wine glass', 'cup', 'fork', 'knife', 'spoon',
-            'bowl',
-            'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-            'hot dog', 'pizza',
-            'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed', 'N/A',
-            'dining table',
-            'N/A', 'N/A', 'toilet', 'N/A', 'tv', 'laptop', 'mouse', 'remote',
-            'keyboard', 'cell phone',
-            'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'N/A',
-            'book',
-            'clock', 'vase', 'scissors', 'teddy bear', 'hair drier',
-            'toothbrush'
+            "__background__",
+            "person",
+            "bicycle",
+            "car",
+            "motorcycle",
+            "airplane",
+            "bus",
+            "train",
+            "truck",
+            "boat",
+            "traffic light",
+            "fire hydrant",
+            "N/A",
+            "stop sign",
+            "parking meter",
+            "bench",
+            "bird",
+            "cat",
+            "dog",
+            "horse",
+            "sheep",
+            "cow",
+            "elephant",
+            "bear",
+            "zebra",
+            "giraffe",
+            "N/A",
+            "backpack",
+            "umbrella",
+            "N/A",
+            "N/A",
+            "handbag",
+            "tie",
+            "suitcase",
+            "frisbee",
+            "skis",
+            "snowboard",
+            "sports ball",
+            "kite",
+            "baseball bat",
+            "baseball glove",
+            "skateboard",
+            "surfboard",
+            "tennis racket",
+            "bottle",
+            "N/A",
+            "wine glass",
+            "cup",
+            "fork",
+            "knife",
+            "spoon",
+            "bowl",
+            "banana",
+            "apple",
+            "sandwich",
+            "orange",
+            "broccoli",
+            "carrot",
+            "hot dog",
+            "pizza",
+            "donut",
+            "cake",
+            "chair",
+            "couch",
+            "potted plant",
+            "bed",
+            "N/A",
+            "dining table",
+            "N/A",
+            "N/A",
+            "toilet",
+            "N/A",
+            "tv",
+            "laptop",
+            "mouse",
+            "remote",
+            "keyboard",
+            "cell phone",
+            "microwave",
+            "oven",
+            "toaster",
+            "sink",
+            "refrigerator",
+            "N/A",
+            "book",
+            "clock",
+            "vase",
+            "scissors",
+            "teddy bear",
+            "hair drier",
+            "toothbrush",
         ]
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
@@ -101,30 +173,27 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
         predictions = self.model(frames)
         outcome = pd.DataFrame()
         for prediction in predictions:
-            pred_class = [str(self.labels[i]) for i in
-                          list(self.as_numpy(prediction['labels']))]
-            pred_boxes = [[[i[0], i[1]],
-                           [i[2], i[3]]]
-                          for i in
-                          list(self.as_numpy(prediction['boxes']))]
-            pred_score = list(self.as_numpy(prediction['scores']))
-            valid_pred = \
-                [pred_score.index(x) for x in pred_score if
-                 x > self.threshold]
+            pred_class = [
+                str(self.labels[i]) for i in list(self.as_numpy(prediction["labels"]))
+            ]
+            pred_boxes = [
+                [[i[0], i[1]], [i[2], i[3]]]
+                for i in list(self.as_numpy(prediction["boxes"]))
+            ]
+            pred_score = list(self.as_numpy(prediction["scores"]))
+            valid_pred = [pred_score.index(x)
+                          for x in pred_score if x > self.threshold]
 
             if valid_pred:
                 pred_t = valid_pred[-1]
             else:
                 pred_t = -1
 
-            pred_boxes = np.array(pred_boxes[:pred_t + 1])
-            pred_class = np.array(pred_class[:pred_t + 1])
-            pred_score = np.array(pred_score[:pred_t + 1])
+            pred_boxes = np.array(pred_boxes[: pred_t + 1])
+            pred_class = np.array(pred_class[: pred_t + 1])
+            pred_score = np.array(pred_score[: pred_t + 1])
             outcome = outcome.append(
-                {
-                    "labels": pred_class,
-                    "scores": pred_score,
-                    "bboxes": pred_boxes
-                },
-                ignore_index=True)
+                {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
+                ignore_index=True,
+            )
         return outcome

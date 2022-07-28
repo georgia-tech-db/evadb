@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import deque
+
 from eva.optimizer.optimizer_tasks import OptimizerTask
 
 
-class OptimizerTaskStack():
+class OptimizerTaskStack:
     def __init__(self):
         self._task_stack = deque()
 

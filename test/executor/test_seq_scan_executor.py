@@ -13,26 +13,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.executor.utils import DummyExecutor
+from test.util import create_dataframe
+
 import pandas as pd
 
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.models.storage.batch import Batch
-from test.util import create_dataframe
-from test.executor.utils import DummyExecutor
 
 
 class SeqScanExecutorTest(unittest.TestCase):
-
     def test_should_return_only_frames_satisfy_predicate(self):
         dataframe = create_dataframe(3)
         batch = Batch(frames=dataframe)
-        expression = type("AbstractExpression", (),
-                          {"evaluate": lambda x: Batch(
-                              pd.DataFrame([False, False, True]))})
+        expression = type(
+            "AbstractExpression",
+            (),
+            {"evaluate": lambda x: Batch(pd.DataFrame([False, False, True]))},
+        )
 
-        plan = type("ScanPlan", (), {"predicate": expression,
-                                     "columns": None,
-                                     "alias": None})
+        plan = type(
+            "ScanPlan", (), {"predicate": expression,
+                             "columns": None, "alias": None}
+        )
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
@@ -45,9 +48,8 @@ class SeqScanExecutorTest(unittest.TestCase):
 
         batch = Batch(frames=dataframe)
 
-        plan = type("ScanPlan", (), {"predicate": None,
-                                     "columns": None,
-                                     "alias": None})
+        plan = type("ScanPlan", (), {
+                    "predicate": None, "columns": None, "alias": None})
         predicate_executor = SequentialScanExecutor(plan)
         predicate_executor.append_child(DummyExecutor([batch]))
 
@@ -58,17 +60,19 @@ class SeqScanExecutorTest(unittest.TestCase):
         dataframe = create_dataframe(3)
 
         batch = Batch(frames=dataframe)
-        proj_batch = Batch(frames=pd.DataFrame(dataframe['data']))
+        proj_batch = Batch(frames=pd.DataFrame(dataframe["data"]))
         expression = [
             type(
-                "AbstractExpression", (), {
-                    "evaluate": lambda x: Batch(
-                        pd.DataFrame(
-                            x.frames['data']))})]
+                "AbstractExpression",
+                (),
+                {"evaluate": lambda x: Batch(pd.DataFrame(x.frames["data"]))},
+            )
+        ]
 
-        plan = type("ScanPlan", (), {"predicate": None,
-                                     "columns": expression,
-                                     "alias": None})
+        plan = type(
+            "ScanPlan", (), {"predicate": None,
+                             "columns": expression, "alias": None}
+        )
         proj_executor = SequentialScanExecutor(plan)
         proj_executor.append_child(DummyExecutor([batch]))
 

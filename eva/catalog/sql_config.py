@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import scoped_session, sessionmaker
+
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
@@ -44,8 +45,7 @@ class SQLConfig:
 
         Retrieves the database uri for connection from ConfigurationManager.
         """
-        uri = ConfigurationManager().get_value("core",
-                                               "catalog_database_uri")
+        uri = ConfigurationManager().get_value("core", "catalog_database_uri")
         # set echo=True to log SQL
         self.engine = create_engine(uri)
         # statements

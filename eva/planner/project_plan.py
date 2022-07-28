@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+
 from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
@@ -29,5 +30,4 @@ class ProjectPlan(AbstractPlan):
         super().__init__(PlanOprType.PROJECT)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     tuple(self.target_list)))
+        return hash((super().__hash__(), tuple(self.target_list)))

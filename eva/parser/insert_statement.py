@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.parser.statement import AbstractStatement
-
-from eva.parser.types import StatementType
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.table_ref import TableRef
 from typing import List
+
+from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
 
 class InsertTableStatement(AbstractStatement):
@@ -35,19 +35,21 @@ class InsertTableStatement(AbstractStatement):
         list of values to fill
     """
 
-    def __init__(self,
-                 table: TableRef,
-                 column_list: List[AbstractExpression] = None,
-                 value_list: List[AbstractExpression] = None):
+    def __init__(
+        self,
+        table: TableRef,
+        column_list: List[AbstractExpression] = None,
+        value_list: List[AbstractExpression] = None,
+    ):
         super().__init__(StatementType.INSERT)
         self._table = table
         self._column_list = column_list
         self._value_list = value_list
 
     def __str__(self) -> str:
-        print_str = "INSERT INTO {}({}) VALUES ({}) ".format(self._table,
-                                                             self._column_list,
-                                                             self._value_list)
+        print_str = "INSERT INTO {}({}) VALUES ({}) ".format(
+            self._table, self._column_list, self._value_list
+        )
         return print_str
 
     @property
@@ -65,12 +67,18 @@ class InsertTableStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, InsertTableStatement):
             return False
-        return (self.table == other.table
-                and self.column_list == other.column_list
-                and self.value_list == other.value_list)
+        return (
+            self.table == other.table
+            and self.column_list == other.column_list
+            and self.value_list == other.value_list
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table,
-                     tuple(self.column_list),
-                     tuple(self.value_list)))
+        return hash(
+            (
+                super().__hash__(),
+                self.table,
+                tuple(self.column_list),
+                tuple(self.value_list),
+            )
+        )

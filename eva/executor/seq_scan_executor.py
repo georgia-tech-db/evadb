@@ -14,9 +14,9 @@
 # limitations under the License.
 from typing import Iterator
 
+from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
-from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.seq_scan_plan import SeqScanPlan
 
 

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.df_column import DataFrameColumn
@@ -32,9 +33,7 @@ class DatasetColumnService(BaseService):
 
         return result
 
-    def columns_by_id_and_dataset_id(
-        self, dataset_id: int, id_list: List[int] = None
-    ):
+    def columns_by_id_and_dataset_id(self, dataset_id: int, id_list: List[int] = None):
         """return all the columns that matches id_list and  dataset_id
 
         Arguments:
@@ -51,9 +50,7 @@ class DatasetColumnService(BaseService):
                 self.model._id.in_(id_list),
             ).all()
 
-        return self.model.query.filter(
-            self.model._metadata_id == dataset_id
-        ).all()
+        return self.model.query.filter(self.model._metadata_id == dataset_id).all()
 
     def create_column(self, column_list):
         saved_column_list = []
@@ -61,12 +58,8 @@ class DatasetColumnService(BaseService):
             saved_column_list.append(column.save())
         return saved_column_list
 
-    def get_dataset_columns(
-        self, dataset: DataFrameMetadata
-    ) -> List[DataFrameColumn]:
+    def get_dataset_columns(self, dataset: DataFrameMetadata) -> List[DataFrameColumn]:
         try:
-            return self.model.query.filter(
-                self.model._metadata_id == dataset.id
-            ).all()
+            return self.model.query.filter(self.model._metadata_id == dataset.id).all()
         except NoResultFound:
             return None

@@ -21,16 +21,15 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.storage.storage_engine import StorageEngine
 from eva.readers.csv_reader import CSVReader
+from eva.storage.storage_engine import StorageEngine
 
 
 class LoadCSVExecutor(AbstractExecutor):
-
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
         config = ConfigurationManager()
-        self.path_prefix = config.get_value('storage', 'path_prefix')
+        self.path_prefix = config.get_value("storage", "path_prefix")
 
     def validate(self):
         pass
@@ -47,7 +46,7 @@ class LoadCSVExecutor(AbstractExecutor):
         csv_reader = CSVReader(
             os.path.join(self.path_prefix, self.node.file_path),
             column_list=self.node.column_list,
-            batch_mem_size=self.node.batch_mem_size
+            batch_mem_size=self.node.batch_mem_size,
         )
 
         # write with storage engine in batches
@@ -58,9 +57,13 @@ class LoadCSVExecutor(AbstractExecutor):
 
         # yield result
         df_yield_result = Batch(
-            pd.DataFrame({
-                'CSV': str(self.node.file_path),
-                'Number of loaded frames': num_loaded_frames
-            }, index=[0]))
+            pd.DataFrame(
+                {
+                    "CSV": str(self.node.file_path),
+                    "Number of loaded frames": num_loaded_frames,
+                },
+                index=[0],
+            )
+        )
 
         yield df_yield_result

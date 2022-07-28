@@ -12,12 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 from typing import Any
-from eva.expression.abstract_expression import AbstractExpression, \
-    ExpressionType
-from eva.models.storage.batch import Batch
+
+import pandas as pd
+
 from eva.catalog.column_type import ColumnType
+from eva.expression.abstract_expression import (AbstractExpression,
+                                                ExpressionType)
+from eva.models.storage.batch import Batch
 
 
 class ConstantValueExpression(AbstractExpression):
@@ -40,6 +42,7 @@ class ConstantValueExpression(AbstractExpression):
     @property
     def v_type(self):
         return self._v_type
+
     # ToDo implement other functionalities like maintaining hash
     # comparing two objects of this class(==)
 

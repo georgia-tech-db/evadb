@@ -16,19 +16,20 @@ import unittest
 from unittest.mock import MagicMock
 
 from mock import patch
-from eva.executor.create_mat_view_executor \
-    import CreateMaterializedViewExecutor
+
+from eva.executor.create_mat_view_executor import \
+    CreateMaterializedViewExecutor
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType
 
 
 class CreateMaterializedExecutorTest(unittest.TestCase):
-    @patch('eva.executor.create_mat_view_executor.handle_if_not_exists')
+    @patch("eva.executor.create_mat_view_executor.handle_if_not_exists")
     def test_support_only_seq_scan(self, mock_check):
         mock_check.return_value = False
-        dummy_view = TableRef(TableInfo('dummy'))
-        columns = ['id', 'id2']
+        dummy_view = TableRef(TableInfo("dummy"))
+        columns = ["id", "id2"]
         plan = CreateMaterializedViewPlan(dummy_view, columns)
         for child_opr_type in PlanOprType:
             if child_opr_type is PlanOprType.SEQUENTIAL_SCAN:
@@ -40,11 +41,11 @@ class CreateMaterializedExecutorTest(unittest.TestCase):
                 create_udf_executor.append_child(child)
                 create_udf_executor.exec()
 
-    @patch('eva.executor.create_mat_view_executor.handle_if_not_exists')
+    @patch("eva.executor.create_mat_view_executor.handle_if_not_exists")
     def test_raises_mismatch_columns(self, mock_check):
         mock_check.return_value = False
-        dummy_view = TableRef(TableInfo('dummy'))
-        columns = ['id', 'id2']
+        dummy_view = TableRef(TableInfo("dummy"))
+        columns = ["id", "id2"]
         plan = CreateMaterializedViewPlan(dummy_view, columns)
         child = MagicMock()
         child.node.opr_type = PlanOprType.SEQUENTIAL_SCAN

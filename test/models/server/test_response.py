@@ -13,17 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-
-from eva.models.storage.batch import Batch
-from eva.models.server.response import ResponseStatus, Response
 from test.util import create_dataframe
+
+from eva.models.server.response import Response, ResponseStatus
+from eva.models.storage.batch import Batch
 
 
 class ResponseTest(unittest.TestCase):
-
     def test_server_reponse_from_json_string(self):
         batch = Batch(frames=create_dataframe())
-        response = Response(status=ResponseStatus.SUCCESS,
-                            batch=batch)
+        response = Response(status=ResponseStatus.SUCCESS, batch=batch)
         response2 = Response.from_json(response.to_json())
         self.assertEqual(response, response2)

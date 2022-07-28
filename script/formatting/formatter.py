@@ -18,11 +18,14 @@
 # ==============================================
 
 import argparse
+import functools
 import logging
 import os
 import re
+import subprocess
 import sys
-import functools
+
+import pkg_resources
 
 # ==============================================
 # CONFIGURATION
@@ -32,8 +35,9 @@ import functools
 # directory structure: eva/scripts/formatting/<this_file>
 # EVA_DIR needs to be redefined if the directory structure is changed
 CODE_SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
-EVA_DIR = functools.reduce(os.path.join,
-                           [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir])
+EVA_DIR = functools.reduce(
+    os.path.join, [CODE_SOURCE_DIR, os.path.pardir, os.path.pardir]
+)
 
 # other directory paths used are relative to peloton_dir
 EVA_SRC_DIR = os.path.join(EVA_DIR, "eva")
@@ -55,16 +59,21 @@ IGNORE_FILES = [
     "evaql_parserVisitor.py",
 ]
 
-AUTOPEP_BINARY = "autopep8"
-AUTOFLAKE_BINARY = "autoflake"
+FLAKE8_VERSION_REQUIRED = "3.9.1"
+BLACK_VERSION_REQUIRED = "22.6.0"
+ISORT_VERSION_REQUIRED = "5.10.1"
+
+BLACK_BINARY = "black"
+FLAKE_BINARY = "flake8"
 PYLINT_BINARY = "pylint"
+ISORT_BINARY = "isort"
 
 # ==============================================
 # HEADER CONFIGURATION
 # ==============================================
 
 header = """# coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,8 +98,8 @@ header_regex = re.compile(r"((\#.*[\n|.])*)", re.M)
 LOG = logging.getLogger(__name__)
 LOG_handler = logging.StreamHandler()
 LOG_formatter = logging.Formatter(
-    fmt='%(asctime)s [%(funcName)s:%(lineno)03d] %(levelname)-5s: %(message)s',
-    datefmt='%m-%d-%Y %H:%M:%S'
+    fmt="%(asctime)s [%(funcName)s:%(lineno)03d] %(levelname)-5s: %(message)s",
+    datefmt="%m-%d-%Y %H:%M:%S",
 )
 LOG_handler.setFormatter(LOG_formatter)
 LOG.addHandler(LOG_handler)
@@ -101,6 +110,32 @@ LOG.setLevel(logging.INFO)
 # ==============================================
 
 # format the file passed as argument
+
+
+def is_tool(name):
+    """Check whether `name` is on PATH and marked as executable."""
+    # from whichcraft import which
+    from shutil import which
+
+    req_version = None
+    if name is FLAKE_BINARY:
+        req_version = FLAKE8_VERSION_REQUIRED
+    elif name is BLACK_BINARY:
+        req_version = BLACK_VERSION_REQUIRED
+    elif name is ISORT_BINARY:
+        req_version = ISORT_VERSION_REQUIRED
+    if which(name) is None:
+        sys.exit(
+            f"{name} is not installed. Install the python package with:"
+            " pip install {name}=={req_version}"
+        )
+    else:
+        installed_version = pkg_resources.get_distribution(name).version
+        if installed_version != req_version:
+            LOG.warn(
+                f"EVA uses {name} {req_version}. The installed version is"
+                " {installed_version} which can result in different results."
+            )
 
 
 def format_file(file_path, add_header, strip_header, format_code):
@@ -133,29 +168,29 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
+            # ISORT
+            isort_command = f"{ISORT_BINARY}  {file_path}"
+            os.system(isort_command)
 
             # AUTOPEP
-            autopep_command = AUTOPEP_BINARY + \
-                " --in-place --aggressive " + file_path
-            # LOG.info(autopep_command)
-            os.system(autopep_command)
+            black_command = f"{BLACK_BINARY}  {file_path}"
+            # LOG.info(black_command)
+            os.system(black_command)
 
             # AUTOFLAKE
-            autoflake_command = AUTOFLAKE_BINARY + \
-                " --in-place --remove-all-unused-imports"\
+            autoflake_command = (
+                FLAKE_BINARY
+                + " --max-line-length 88 --in-place --remove-all-unused-imports"
                 " --remove-unused-variables " + file_path
+            )
             # LOG.info(autoflake_command)
             os.system(autoflake_command)
-
-            # PYLINT
-            pylint_command = PYLINT_BINARY + \
-                " --rcfile=" + PYLINTRC + " " + file_path
-            # LOG.info(pylint_command)
-            # os.system(pylint_command)
 
     # END WITH
 
     fd.close()
+
+
 # END FORMAT__FILE(FILE_NAME)
 
 
@@ -175,6 +210,8 @@ def format_dir(dir_path, add_header, strip_header, format_code):
             # END IF
         # END FOR [file]
     # END FOR [os.walk]
+
+
 # END ADD_HEADERS_DIR(DIR_PATH)
 
 # ==============================================
@@ -182,21 +219,44 @@ def format_dir(dir_path, add_header, strip_header, format_code):
 # ==============================================
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
-        description='Add/delete headers and/or format source code')
+        description="Add/delete headers and/or format source code"
+    )
 
-    parser.add_argument("-a", "--add-header", help='add suitable header(s)',
-                        action='store_true', default=False)
-    parser.add_argument("-s", "--strip-header", help='strip existing header(s)',
-                        action='store_true', default=False)
-    parser.add_argument("-c", "--format-code", help='format code',
-                        action='store_true', default=True)
-    parser.add_argument("-f", "--file-name",
-                        help='file to be acted on')
-    parser.add_argument("-d", "--dir-name",
-                        help='directory containing files to be acted on')
+    parser.add_argument(
+        "-a",
+        "--add-header",
+        help="add suitable header(s)",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-s",
+        "--strip-header",
+        help="strip existing header(s)",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-m",
+        "--format-modified_code",
+        help="format modified code",
+        action="store_true",
+        default=True,
+    )
+    parser.add_argument(
+        "-c",
+        "--format-all-code",
+        help="format all code",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument("-f", "--file-name", help="file to be acted on")
+    parser.add_argument(
+        "-d", "--dir-name", help="directory containing files to be acted on"
+    )
 
     args = parser.parse_args()
 
@@ -208,17 +268,39 @@ if __name__ == '__main__':
         LOG.error("file_name and dir_name cannot be specified together")
         sys.exit("file_name and dir_name cannot be specified together")
 
-    if args.file_name:
-        LOG.info("Scanning file: " + ''.join(args.file_name))
-        format_file(args.file_name, args.add_header,
-                    args.strip_header,
-                    args.format_code)
+    # CHECK IF FORMATTERS ARE INSTALLED
+    is_tool(BLACK_BINARY)
+    is_tool(FLAKE_BINARY)
+    is_tool(ISORT_BINARY)
+
+    if args.format_modified_code:
+
+        MERGEBASE = subprocess.check_output(
+            "git merge-base origin/master HEAD", shell=True, text=True
+        ).rstrip()
+        print(f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'")
+        files = subprocess.check_output(
+            f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'",
+            shell=True,
+            text=True,
+        ).split("\n")
+        # print(files)
+        for file in files:
+            print(file)
+            format_file(file, args.add_header, args.strip_header, True)
+    elif args.file_name:
+        LOG.info("Scanning file: " + "".join(args.file_name))
+        format_file(
+            args.file_name,
+            args.add_header,
+            args.strip_header,
+            args.format_code,
+        )
     elif args.dir_name:
-        LOG.info("Scanning directory " + ''.join(args.dir_name))
-        format_dir(args.dir_name,
-                   args.add_header,
-                   args.strip_header,
-                   args.format_code)
+        LOG.info("Scanning directory " + "".join(args.dir_name))
+        format_dir(
+            args.dir_name, args.add_header, args.strip_header, args.format_code
+        )
     # BY DEFAULT, WE SCAN THE DEFAULT DIRS AND FIX THEM
     else:
         LOG.info("Default scan")
@@ -229,25 +311,22 @@ if __name__ == '__main__':
             args.add_header = False
             args.strip_header = True
             args.format_code = False
-            format_dir(dir,
-                       args.add_header,
-                       args.strip_header,
-                       args.format_code)
+            format_dir(
+                dir, args.add_header, args.strip_header, args.format_code
+            )
 
             LOG.info("Adding headers : " + dir)
             args.add_header = True
             args.strip_header = False
             args.format_code = False
-            format_dir(dir,
-                       args.add_header,
-                       args.strip_header,
-                       args.format_code)
+            format_dir(
+                dir, args.add_header, args.strip_header, args.format_code
+            )
 
             LOG.info("Formatting code : " + dir)
             args.add_header = False
             args.strip_header = False
             args.format_code = True
-            format_dir(dir,
-                       args.add_header,
-                       args.strip_header,
-                       args.format_code)
+            format_dir(
+                dir, args.add_header, args.strip_header, args.format_code
+            )

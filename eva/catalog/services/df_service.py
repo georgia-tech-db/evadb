@@ -92,9 +92,7 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata - metadata for given dataset_name
         """
-        return self.model.query.filter(
-            self.model._name == dataset_name
-        ).one_or_none()
+        return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
     def drop_dataset_by_name(self, database_name: str, dataset_name: str):
         """Delete dataset from the db
@@ -119,8 +117,7 @@ class DatasetService(BaseService):
     ):
         try:
             dataset = self.dataset_object_by_name(
-                curr_database_name, curr_dataset_name
-            )
+                curr_database_name, curr_dataset_name)
             dataset.update(_name=new_name)
 
         except Exception as e:

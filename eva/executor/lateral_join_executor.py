@@ -13,15 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-from eva.executor.executor_utils import apply_predicate, apply_project
 
-from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import apply_predicate, apply_project
+from eva.models.storage.batch import Batch
 from eva.planner.lateral_join_plan import LateralJoinPlan
 
 
 class LateralJoinExecutor(AbstractExecutor):
-
     def __init__(self, node: LateralJoinPlan):
         super().__init__(node)
         self.predicate = node.join_predicate

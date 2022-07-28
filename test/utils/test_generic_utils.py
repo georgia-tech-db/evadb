@@ -14,39 +14,40 @@
 # limitations under the License.
 
 import unittest
-from mock import patch, MagicMock
 from pathlib import Path
 
-from eva.utils.generic_utils import (str_to_class, path_to_class,
-                                     is_gpu_available, generate_file_path)
+from mock import MagicMock, patch
+
 from eva.readers.opencv_reader import OpenCVReader
+from eva.utils.generic_utils import (generate_file_path, is_gpu_available,
+                                     path_to_class, str_to_class)
 
 
 class ModulePathTest(unittest.TestCase):
-
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class('eva.readers.opencv_reader.OpenCVReader')
+        vl = str_to_class("eva.readers.opencv_reader.OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    @unittest.skip('This returns opecv_reader.OpenCVReader \
-                   instead of eva.readers.opencv_reader.OpenCVReader')
+    @unittest.skip(
+        "This returns opecv_reader.OpenCVReader \
+                   instead of eva.readers.opencv_reader.OpenCVReader"
+    )
     def test_should_return_correct_class_for_path(self):
-        vl = path_to_class('eva/readers/opencv_reader.py', 'OpenCVReader')
+        vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    @patch('eva.utils.generic_utils.torch')
-    def test_should_use_torch_to_check_if_gpu_is_available(self,
-                                                           torch):
+    @patch("eva.utils.generic_utils.torch")
+    def test_should_use_torch_to_check_if_gpu_is_available(self, torch):
         is_gpu_available()
         torch.cuda.is_available.assert_called()
 
-    @patch('eva.utils.generic_utils.ConfigurationManager')
+    @patch("eva.utils.generic_utils.ConfigurationManager")
     def test_should_return_a_random_full_path(self, mock_conf):
         mock_conf_inst = MagicMock()
         mock_conf.return_value = mock_conf_inst
-        mock_conf_inst.get_value.return_value = 'eva_datasets'
-        expected = Path('eva_datasets').resolve()
-        actual = generate_file_path('test')
+        mock_conf_inst.get_value.return_value = "eva_datasets"
+        expected = Path("eva_datasets").resolve()
+        actual = generate_file_path("test")
         self.assertTrue(actual.is_absolute())
         # Root directory must be the same, filename is random
         self.assertTrue(expected.match(str(actual.parent)))

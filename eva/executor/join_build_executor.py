@@ -14,9 +14,8 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.models.storage.batch import Batch
-
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 
 
@@ -40,5 +39,6 @@ class BuildJoinExecutor(AbstractExecutor):
         cumm_batches = Batch.concat(cumm_batches)
         hash_keys = [key.col_alias for key in self.build_keys]
         cumm_batches.frames.index = cumm_batches.frames[hash_keys].apply(
-            lambda x: hash(tuple(x)), axis=1)
+            lambda x: hash(tuple(x)), axis=1
+        )
         yield cumm_batches

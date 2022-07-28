@@ -14,10 +14,11 @@
 # limitations under the License.
 
 import unittest
+from unittest.mock import MagicMock
 
 from mock import patch
-from unittest.mock import MagicMock
-from eva.server.async_protocol import EvaProtocolBuffer, EvaClient
+
+from eva.server.async_protocol import EvaClient, EvaProtocolBuffer
 
 
 class AsyncProtocolTests(unittest.TestCase):
@@ -27,26 +28,26 @@ class AsyncProtocolTests(unittest.TestCase):
     def test_empty_buffer(self):
         buf = EvaProtocolBuffer()
         buf.empty()
-        self.assertEqual('', buf.buf)
+        self.assertEqual("", buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
     def test_feed_data(self):
         buf = EvaProtocolBuffer()
-        data1 = '4|12'
-        data2 = '34'
+        data1 = "4|12"
+        data2 = "34"
 
         buf.feed_data(data1)
-        self.assertEqual('12', buf.buf)
+        self.assertEqual("12", buf.buf)
         self.assertEqual(4, buf.expected_length)
 
         buf.feed_data(data2)
-        self.assertEqual('1234', buf.buf)
+        self.assertEqual("1234", buf.buf)
         self.assertEqual(4, buf.expected_length)
 
     def test_has_complete_message(self):
         buf = EvaProtocolBuffer()
-        data1 = '4|12'
-        data2 = '34'
+        data1 = "4|12"
+        data2 = "34"
 
         buf.feed_data(data1)
         self.assertFalse(buf.has_complete_message())
@@ -55,28 +56,28 @@ class AsyncProtocolTests(unittest.TestCase):
 
     def test_read_message_one(self):
         buf = EvaProtocolBuffer()
-        data1 = '4|12'
-        data2 = '34'
+        data1 = "4|12"
+        data2 = "34"
         buf.feed_data(data1)
         buf.feed_data(data2)
 
-        self.assertEqual('1234', buf.read_message())
-        self.assertEqual('', buf.buf)
+        self.assertEqual("1234", buf.read_message())
+        self.assertEqual("", buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
     def test_read_message_two(self):
         buf = EvaProtocolBuffer()
-        data1 = '4|123'
-        data2 = '42|56'
+        data1 = "4|123"
+        data2 = "42|56"
         buf.feed_data(data1)
         buf.feed_data(data2)
 
-        self.assertEqual('1234', buf.read_message())
-        self.assertEqual('56', buf.read_message())
-        self.assertEqual('', buf.buf)
+        self.assertEqual("1234", buf.read_message())
+        self.assertEqual("56", buf.read_message())
+        self.assertEqual("", buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
-    @patch('eva.server.async_protocol.set_socket_io_timeouts')
+    @patch("eva.server.async_protocol.set_socket_io_timeouts")
     def test_connection_made_time_out(self, mock_set):
         client = EvaClient()
         t = MagicMock()
@@ -86,7 +87,7 @@ class AsyncProtocolTests(unittest.TestCase):
         mock_set.assert_called_once_with(t, 60, 0)
         t.abort.assert_called_once_with()
 
-    @patch('eva.server.async_protocol.set_socket_io_timeouts')
+    @patch("eva.server.async_protocol.set_socket_io_timeouts")
     def test_connection_made_no_time_out(self, mock_set):
         client = EvaClient()
         t = MagicMock()
@@ -109,16 +110,16 @@ class AsyncProtocolTests(unittest.TestCase):
     def test_connection_lost_raise_exception(self):
         client = EvaClient()
         client.transport = MagicMock()
-        client.transport.abort = MagicMock(side_effect=Exception('Boom!'))
+        client.transport.abort = MagicMock(side_effect=Exception("Boom!"))
 
         with self.assertRaises(Exception) as context:
             client.connection_lost(None)
-            self.assertTrue('Boom!' in str(context.exception))
+            self.assertTrue("Boom!" in str(context.exception))
 
     def test_data_received(self):
         client = EvaClient()
         client.queue = MagicMock()
 
-        testdata = '4|1234'.encode('ascii')
+        testdata = "4|1234".encode("ascii")
         client.data_received(testdata)
-        client.queue.put_nowait.assert_called_once_with('1234')
+        client.queue.put_nowait.assert_called_once_with("1234")

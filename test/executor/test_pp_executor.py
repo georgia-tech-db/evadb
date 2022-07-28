@@ -13,20 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.executor.utils import DummyExecutor
+from test.util import create_dataframe
 
 from eva.executor.pp_executor import PPExecutor
 from eva.models.storage.batch import Batch
-from test.util import create_dataframe
-from test.executor.utils import DummyExecutor
 
 
 class PPScanExecutorTest(unittest.TestCase):
-
     def test_should_return_only_frames_satisfy_predicate(self):
         dataframe = create_dataframe(3)
         batch = Batch(frames=dataframe)
-        expression = type("AbstractExpression", (), {"evaluate": lambda x: [
-            False, False, True]})
+        expression = type(
+            "AbstractExpression", (), {"evaluate": lambda x: [
+                False, False, True]}
+        )
 
         plan = type("PPScanPlan", (), {"predicate": expression})
         predicate_executor = PPExecutor(plan)

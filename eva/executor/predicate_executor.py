@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
-from eva.executor.executor_utils import apply_predicate
 
-from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import apply_predicate
+from eva.models.storage.batch import Batch
 from eva.planner.predicate_plan import PredicatePlan
 
 
 class PredicateExecutor(AbstractExecutor):
-    """
-    """
+    """ """
 
     def __init__(self, node: PredicatePlan):
         super().__init__(node)

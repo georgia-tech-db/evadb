@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sqlalchemy.orm.exc import NoResultFound
+
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
-
-from sqlalchemy.orm.exc import NoResultFound
 
 
 class UdfService(BaseService):

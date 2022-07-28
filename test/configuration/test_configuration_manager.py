@@ -18,7 +18,6 @@ from eva.configuration.configuration_manager import ConfigurationManager
 
 
 class ConfigurationManagerTests(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from __future__ import annotations
+
 from eva.optimizer.operators import OperatorType
 
 

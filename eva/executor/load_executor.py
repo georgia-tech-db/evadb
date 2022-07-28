@@ -16,12 +16,11 @@
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
-from eva.planner.load_data_plan import LoadDataPlan
 from eva.parser.types import FileFormatType
+from eva.planner.load_data_plan import LoadDataPlan
 
 
 class LoadDataExecutor(AbstractExecutor):
-
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
 
@@ -34,9 +33,9 @@ class LoadDataExecutor(AbstractExecutor):
         """
 
         # invoke the appropriate executor
-        if self.node.file_options['file_format'] == FileFormatType.VIDEO:
+        if self.node.file_options["file_format"] == FileFormatType.VIDEO:
             executor = LoadVideoExecutor(self.node)
-        elif self.node.file_options['file_format'] == FileFormatType.CSV:
+        elif self.node.file_options["file_format"] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
 
         # for each batch, exec the executor

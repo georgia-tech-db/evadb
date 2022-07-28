@@ -15,13 +15,10 @@
 
 import yaml
 
-
-from eva.configuration.dictionary import EVA_DEFAULT_DIR, \
-    EVA_CONFIG_FILE
-from eva.configuration.config_utils import read_value_config, \
-    update_value_config
-from eva.configuration.bootstrap_environment import \
-    bootstrap_environment
+from eva.configuration.bootstrap_environment import bootstrap_environment
+from eva.configuration.config_utils import (read_value_config,
+                                            update_value_config)
+from eva.configuration.dictionary import EVA_CONFIG_FILE, EVA_DEFAULT_DIR
 
 
 class ConfigurationManager(object):
@@ -35,7 +32,7 @@ class ConfigurationManager(object):
             bootstrap_environment()  # Setup eva in home directory
 
             ymlpath = EVA_DEFAULT_DIR + EVA_CONFIG_FILE
-            with open(ymlpath, 'r') as ymlfile:
+            with open(ymlpath, "r") as ymlfile:
                 cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         return cls._instance

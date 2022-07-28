@@ -14,8 +14,8 @@
 # limitations under the License.
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.planner.rename_plan import RenamePlan
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.planner.rename_plan import RenamePlan
 
 
 class RenameExecutor(AbstractExecutor):
@@ -30,6 +30,4 @@ class RenameExecutor(AbstractExecutor):
 
         Calls the catalog to modified metadata corresponding to the table.
         """
-        CatalogManager().rename_table(
-            self.node.new_name, self.node.old_table.table
-        )
+        CatalogManager().rename_table(self.node.new_name, self.node.old_table.table)

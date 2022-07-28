@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import pandas as pd
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
@@ -22,7 +23,6 @@ from eva.planner.show_info_plan import ShowInfoPlan
 
 
 class ShowInfoExecutor(AbstractExecutor):
-
     def __init__(self, node: ShowInfoPlan):
         super().__init__(node)
 

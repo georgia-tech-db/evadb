@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from __future__ import annotations
+
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import ShowType, StatementType
 
@@ -28,7 +29,7 @@ class ShowStatement(AbstractStatement):
         return self._show_type
 
     def __str__(self):
-        return f'SHOW {self._show_type}'
+        return f"SHOW {self._show_type}"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ShowStatement):
@@ -36,5 +37,4 @@ class ShowStatement(AbstractStatement):
         return self.show_type == other.show_type
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.show_type))
+        return hash((super().__hash__(), self.show_type))

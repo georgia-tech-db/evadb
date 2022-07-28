@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.parser.statement import AbstractStatement
+from typing import List
 
-from eva.parser.types import StatementType
-from eva.parser.table_ref import TableRef
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.select_statement import SelectStatement
-
-from typing import List
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
 
 class CreateMaterializedViewStatement(AbstractStatement):
@@ -31,11 +30,13 @@ class CreateMaterializedViewStatement(AbstractStatement):
         query: select statement used to populate the view
     """
 
-    def __init__(self,
-                 view_ref: TableRef,
-                 col_list: List[ColumnDefinition],
-                 if_not_exists: bool,
-                 query: SelectStatement):
+    def __init__(
+        self,
+        view_ref: TableRef,
+        col_list: List[ColumnDefinition],
+        if_not_exists: bool,
+        query: SelectStatement,
+    ):
         super().__init__(StatementType.CREATE_MATERIALIZED_VIEW)
         self._view_ref = view_ref
         self._col_list = col_list
@@ -44,7 +45,8 @@ class CreateMaterializedViewStatement(AbstractStatement):
 
     def __str__(self) -> str:
         print_str = "CREATE MATERIALIZED VIEW {} ({}) AS {} ".format(
-            self._view_ref, self._col_list, self._query)
+            self._view_ref, self._col_list, self._query
+        )
         return print_str
 
     @property
@@ -66,14 +68,20 @@ class CreateMaterializedViewStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, CreateMaterializedViewStatement):
             return False
-        return (self.view_ref == other.view_ref
-                and self.col_list == other.col_list
-                and self.if_not_exists == other.if_not_exists
-                and self.query == other.query)
+        return (
+            self.view_ref == other.view_ref
+            and self.col_list == other.col_list
+            and self.if_not_exists == other.if_not_exists
+            and self.query == other.query
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.view_ref,
-                     tuple(self.col_list),
-                     self.if_not_exists,
-                     self.query))
+        return hash(
+            (
+                super().__hash__(),
+                self.view_ref,
+                tuple(self.col_list),
+                self.if_not_exists,
+                self.query,
+            )
+        )

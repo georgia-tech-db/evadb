@@ -20,7 +20,6 @@ from eva.spark.session import Session
 
 
 class SparkSessionTest(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

@@ -27,18 +27,16 @@ class DropUDFStatement(AbstractStatement):
             else logs a warning
     """
 
-    def __init__(self,
-                 name: str,
-                 if_exists: bool):
+    def __init__(self, name: str, if_exists: bool):
         super().__init__(StatementType.DROP_UDF)
         self._name = name
         self._if_exists = if_exists
 
     def __str__(self) -> str:
         if self._if_exists:
-            print_str = 'DROP UDF IF EXISTS {};'.format(self._name)
+            print_str = "DROP UDF IF EXISTS {};".format(self._name)
         else:
-            print_str = 'DROP UDF {};'.format(self._name)
+            print_str = "DROP UDF {};".format(self._name)
         return print_str
 
     @property
@@ -52,10 +50,7 @@ class DropUDFStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, DropUDFStatement):
             return False
-        return (self.name == other.name
-                and self.if_exists == other.if_exists)
+        return self.name == other.name and self.if_exists == other.if_exists
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.name,
-                     self.if_exists))
+        return hash((super().__hash__(), self.name, self.if_exists))

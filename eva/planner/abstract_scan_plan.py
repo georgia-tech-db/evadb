@@ -20,7 +20,6 @@ https://www.postgresql.org/docs/9.5/runtime-config-query.html
 """
 from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
-
 from eva.planner.types import PlanOprType
 
 

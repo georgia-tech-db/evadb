@@ -29,9 +29,7 @@ class DropUDFPlan(AbstractPlan):
             else logs a warning
     """
 
-    def __init__(self,
-                 name: str,
-                 if_exists: bool):
+    def __init__(self, name: str, if_exists: bool):
         super().__init__(PlanOprType.DROP_UDF)
         self._name = name
         self._if_exists = if_exists
@@ -45,6 +43,4 @@ class DropUDFPlan(AbstractPlan):
         return self._if_exists
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.name,
-                     self.if_exists))
+        return hash((super().__hash__(), self.name, self.if_exists))

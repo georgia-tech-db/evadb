@@ -17,9 +17,8 @@
 """Abstract class for all the join planners
 """
 from eva.expression.abstract_expression import AbstractExpression
-from eva.planner.abstract_plan import AbstractPlan
 from eva.parser.types import JoinType
-
+from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
 
@@ -33,10 +32,12 @@ class AbstractJoin(AbstractPlan):
             An expression used for joining
     """
 
-    def __init__(self,
-                 node_type: PlanOprType,
-                 join_type: JoinType,
-                 join_predicate: AbstractExpression):
+    def __init__(
+        self,
+        node_type: PlanOprType,
+        join_type: JoinType,
+        join_predicate: AbstractExpression,
+    ):
         super().__init__(node_type)
         self._join_type = join_type
         self._join_predicate = join_predicate
@@ -50,6 +51,4 @@ class AbstractJoin(AbstractPlan):
         return self._join_predicate
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.join_type,
-                     self.join_predicate))
+        return hash((super().__hash__(), self.join_type, self.join_predicate))

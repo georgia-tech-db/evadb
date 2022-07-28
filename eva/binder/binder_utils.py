@@ -14,14 +14,15 @@
 # limitations under the License.
 
 from typing import List
+
+from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.generic_utils import generate_file_path
-from eva.binder.statement_binder_context import StatementBinderContext
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.utils.logging_manager import logger
 
 
@@ -38,32 +39,36 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
         DataFrameMetadata:  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    columns = [ColumnDefinition('id', ColumnType.INTEGER, None,
-                                [], ColConstraintInfo(unique=True))]
+    columns = [
+        ColumnDefinition(
+            "id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+        )
+    ]
     # the ndarray dimensions are set as None. We need to fix this as we
     # cannot assume. Either ask the user to provide this with load or
     # we infer this from the provided video.
     columns.append(
         ColumnDefinition(
-            'data', ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
         )
     )
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column='id', is_video=True)
+        name, uri, col_metadata, identifier_column="id", is_video=True
+    )
     return metadata
 
 
-def create_table_metadata(table_ref: TableRef,
-                          columns: List[ColumnDefinition])\
-        -> DataFrameMetadata:
+def create_table_metadata(
+    table_ref: TableRef, columns: List[ColumnDefinition]
+) -> DataFrameMetadata:
     table_name = table_ref.table.table_name
     column_metadata_list = create_column_metadata(columns)
     file_url = str(generate_file_path(table_name))
-    metadata = CatalogManager().create_metadata(table_name,
-                                                file_url,
-                                                column_metadata_list)
+    metadata = CatalogManager().create_metadata(
+        table_name, file_url, column_metadata_list
+    )
     return metadata
 
 
@@ -81,8 +86,7 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
     result_list = []
     for col in col_list:
         if col is None:
-            logger.error(
-                "Empty column while creating column metadata")
+            logger.error("Empty column while creating column metadata")
             result_list.append(col)
         result_list.append(
             CatalogManager().create_column_metadata(
@@ -104,21 +108,24 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(table_info.database_name,
-                                       table_info.table_name)
+    obj = catalog.get_dataset_metadata(
+        table_info.database_name, table_info.table_name)
     if obj:
         table_info.table_obj = obj
     else:
-        error = '{} does not exists. Create the table using \
-                        CREATE TABLE.'.format(table_info.table_name)
+        error = "{} does not exists. Create the table using \
+                        CREATE TABLE.".format(
+            table_info.table_name
+        )
         logger.error(error)
         raise RuntimeError(error)
 
 
 def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
-    if CatalogManager().check_table_exists(table_ref.table.database_name,
-                                           table_ref.table.table_name):
-        err_msg = 'Table: {} already exsits'.format(table_ref)
+    if CatalogManager().check_table_exists(
+        table_ref.table.database_name, table_ref.table.table_name
+    ):
+        err_msg = "Table: {} already exsits".format(table_ref)
         if if_not_exist:
             logger.warn(err_msg)
             return True
@@ -129,12 +136,13 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
         return False
 
 
-def extend_star(binder_context: StatementBinderContext) \
-        -> List[TupleValueExpression]:
+def extend_star(binder_context: StatementBinderContext) -> List[TupleValueExpression]:
     col_objs = binder_context._get_all_alias_and_col_name()
 
     target_list = list(
-        [TupleValueExpression(col_name=col_name, table_alias=alias)
-            for alias, col_name in col_objs]
+        [
+            TupleValueExpression(col_name=col_name, table_alias=alias)
+            for alias, col_name in col_objs
+        ]
     )
     return target_list

@@ -17,65 +17,54 @@ import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.operators import (
-    LogicalGet,
-    LogicalProject,
-    LogicalFilter,
-    LogicalQueryDerivedGet,
-    LogicalSample,
-    LogicalJoin,
-)
-from eva.optimizer.rules.rules import (
-    EmbedProjectIntoGet,
-    EmbedFilterIntoGet,
-    EmbedFilterIntoDerivedGet,
-    EmbedProjectIntoDerivedGet,
-    LogicalCreateMaterializedViewToPhysical,
-    LogicalFilterToPhysical,
-    LogicalInnerJoinCommutativity,
-    LogicalLateralJoinToPhysical,
-    LogicalProjectToPhysical,
-    LogicalShowToPhysical,
-    PushdownFilterThroughSample,
-    PushdownProjectThroughSample,
-    LogicalCreateToPhysical,
-    LogicalRenameToPhysical,
-    LogicalDropToPhysical,
-    LogicalCreateUDFToPhysical,
-    LogicalDropUDFToPhysical,
-    LogicalInsertToPhysical,
-    LogicalLoadToPhysical,
-    LogicalUploadToPhysical,
-    LogicalSampleToUniformSample,
-    LogicalGetToSeqScan,
-    LogicalDerivedGetToPhysical,
-    LogicalUnionToPhysical,
-    LogicalOrderByToPhysical,
-    LogicalLimitToPhysical,
-    LogicalFunctionScanToPhysical,
-    LogicalJoinToPhysicalHashJoin,
-)
-from eva.optimizer.rules.rules import Promise, RulesManager
+from eva.optimizer.operators import (LogicalFilter, LogicalGet, LogicalJoin,
+                                     LogicalProject, LogicalQueryDerivedGet,
+                                     LogicalSample)
+from eva.optimizer.rules.rules import (EmbedFilterIntoDerivedGet,
+                                       EmbedFilterIntoGet,
+                                       EmbedProjectIntoDerivedGet,
+                                       EmbedProjectIntoGet,
+                                       LogicalCreateMaterializedViewToPhysical,
+                                       LogicalCreateToPhysical,
+                                       LogicalCreateUDFToPhysical,
+                                       LogicalDerivedGetToPhysical,
+                                       LogicalDropToPhysical,
+                                       LogicalDropUDFToPhysical,
+                                       LogicalFilterToPhysical,
+                                       LogicalFunctionScanToPhysical,
+                                       LogicalGetToSeqScan,
+                                       LogicalInnerJoinCommutativity,
+                                       LogicalInsertToPhysical,
+                                       LogicalJoinToPhysicalHashJoin,
+                                       LogicalLateralJoinToPhysical,
+                                       LogicalLimitToPhysical,
+                                       LogicalLoadToPhysical,
+                                       LogicalOrderByToPhysical,
+                                       LogicalProjectToPhysical,
+                                       LogicalRenameToPhysical,
+                                       LogicalSampleToUniformSample,
+                                       LogicalShowToPhysical,
+                                       LogicalUnionToPhysical,
+                                       LogicalUploadToPhysical, Promise,
+                                       PushdownFilterThroughSample,
+                                       PushdownProjectThroughSample,
+                                       RulesManager)
 
 
 class TestRules(unittest.TestCase):
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
         self.assertTrue(
-            Promise.EMBED_FILTER_INTO_DERIVED_GET
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.EMBED_FILTER_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.EMBED_PROJECT_INTO_DERIVED_GET
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.EMBED_PROJECT_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.EMBED_FILTER_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
@@ -86,50 +75,40 @@ class TestRules(unittest.TestCase):
 
         # Promise of implementation rules should be lesser than rewrite rules
         self.assertTrue(
-            Promise.LOGICAL_CREATE_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_CREATE_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_GET_TO_SEQSCAN < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_INSERT_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_INSERT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_LIMIT_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_ORDERBY_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_LOAD_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_UPLOAD_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_UPLOAD_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_UNION_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_UNION_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_RENAME_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_RENAME_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
@@ -151,10 +130,8 @@ class TestRules(unittest.TestCase):
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
             self.assertTrue(
-                any(
-                    isinstance(rule, type(x))
-                    for x in RulesManager().rewrite_rules
-                )
+                any(isinstance(rule, type(x))
+                    for x in RulesManager().rewrite_rules)
             )
 
         supported_logical_rules = [LogicalInnerJoinCommutativity()]
@@ -164,10 +141,8 @@ class TestRules(unittest.TestCase):
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(
-                    isinstance(rule, type(x))
-                    for x in RulesManager().logical_rules
-                )
+                any(isinstance(rule, type(x))
+                    for x in RulesManager().logical_rules)
             )
 
         supported_implementation_rules = [

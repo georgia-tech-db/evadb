@@ -16,7 +16,7 @@
 from sqlalchemy import Column, Integer
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy_utils import database_exists, create_database, drop_database
+from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from eva.catalog.sql_config import SQLConfig
 from eva.utils.logging_manager import logger
@@ -32,8 +32,9 @@ class CustomModel:
     it won't complain for `unkwnown field`s.
     Declares and int id field for all tables
     """
+
     query = db_session.query_property()
-    _id = Column('id', Integer, primary_key=True)
+    _id = Column("id", Integer, primary_key=True)
 
     def __init__(self, **kwargs):
         cls_ = type(self)
@@ -86,16 +87,13 @@ class CustomModel:
             db_session.commit()
         except DatabaseError:
             db_session.rollback()
-            logger.error(
-                "Exception occurred while committing to database.")
+            logger.error("Exception occurred while committing to database.")
             raise Exception("Exception occurred while committing to database.")
 
 
 # Custom Base Model to be inherited by all models
 BaseModel = declarative_base(
-    cls=CustomModel,
-    constructor=None,
-    bind=SQLConfig().engine)
+    cls=CustomModel, constructor=None, bind=SQLConfig().engine)
 
 
 def init_db():

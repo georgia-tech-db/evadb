@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 def read_value_config(cfg, category, key):
     return cfg.get(category, {}).get(key)
 

@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
 from eva.planner.sample_plan import SamplePlan
 
 
@@ -40,5 +40,5 @@ class SampleExecutor(AbstractExecutor):
 
         current = 0
         for batch in child_executor.exec():
-            yield batch[current::self._sample_freq]
+            yield batch[current:: self._sample_freq]
             current = (current - len(batch)) % self._sample_freq

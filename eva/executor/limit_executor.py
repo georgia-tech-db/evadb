@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
 from eva.planner.limit_plan import LimitPlan
 
 

@@ -13,14 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
 from pathlib import Path
 
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import VideoStorageEngine
-from eva.models.storage.batch import Batch
+import pandas as pd
+
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.storage_engine import VideoStorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -58,16 +59,18 @@ class LoadVideoExecutor(AbstractExecutor):
             raise RuntimeError(error)
 
         success = VideoStorageEngine.create(
-            self.node.table_metainfo, video_file_path
-        )
+            self.node.table_metainfo, video_file_path)
 
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek
         if success:
             yield Batch(
                 pd.DataFrame(
-                    {"Video successfully added at location: ": str(
-                        self.node.file_path)},
+                    {
+                        "Video successfully added at location: ": str(
+                            self.node.file_path
+                        )
+                    },
                     index=[0],
                 )
             )

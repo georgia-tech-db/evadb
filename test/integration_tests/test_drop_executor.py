@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import Path
 import unittest
+from pathlib import Path
+from test.util import create_sample_video, file_remove
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import create_sample_video, file_remove
 
 
 class DropExecutorTest(unittest.TestCase):
@@ -35,9 +35,7 @@ class DropExecutorTest(unittest.TestCase):
         query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        metadata_obj = catalog_manager.get_dataset_metadata(
-            None, "MyVideo"
-        )
+        metadata_obj = catalog_manager.get_dataset_metadata(None, "MyVideo")
         video_dir = metadata_obj.file_url
         self.assertFalse(metadata_obj is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
@@ -45,9 +43,8 @@ class DropExecutorTest(unittest.TestCase):
         self.assertTrue(Path(video_dir).exists())
         drop_query = """DROP TABLE MyVideo;"""
         execute_query_fetch_all(drop_query)
-        self.assertTrue(
-            catalog_manager.get_dataset_metadata(None, "MyVideo") is None
-        )
+        self.assertTrue(catalog_manager.get_dataset_metadata(
+            None, "MyVideo") is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
         self.assertEqual(len(column_objects), 0)
         self.assertFalse(Path(video_dir).exists())
@@ -96,8 +93,9 @@ class DropUDFExecutorTest(unittest.TestCase):
         try:
             execute_query_fetch_all(drop_query)
         except Exception as e:
-            err_msg = "UDF {} does not exist and cannot be dropped."\
-                .format(wrong_udf_name)
+            err_msg = "UDF {} does not exist and cannot be dropped.".format(
+                wrong_udf_name
+            )
             self.assertTrue(str(e) == err_msg)
         udf = catalog_manager.get_udf_by_name(right_udf_name)
         self.assertTrue(udf is not None)

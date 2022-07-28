@@ -14,10 +14,11 @@
 # limitations under the License.
 
 import pandas as pd
+
 from eva.catalog.catalog_manager import CatalogManager
+from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.drop_plan import DropPlan
-from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
 from eva.utils.logging_manager import logger
 
@@ -33,7 +34,7 @@ class DropExecutor(AbstractExecutor):
         """Drop table executor"""
         catalog_manager = CatalogManager()
         if len(self.node.table_refs) > 1:
-            logger.exception('Drop supports only single table')
+            logger.exception("Drop supports only single table")
         table_ref = self.node.table_refs[0]
 
         if not catalog_manager.check_table_exists(
@@ -60,11 +61,8 @@ class DropExecutor(AbstractExecutor):
 
         yield Batch(
             pd.DataFrame(
-                {
-                    "Table Successfully dropped: {}".format(
-                        table_ref.table.table_name
-                    )
-                },
+                {"Table Successfully dropped: {}".format(
+                    table_ref.table.table_name)},
                 index=[0],
             )
         )

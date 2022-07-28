@@ -15,11 +15,11 @@
 
 from antlr4 import TerminalNode
 
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.utils.logging_manager import logger
 
 
@@ -33,13 +33,12 @@ class Functions(evaql_parserVisitor):
         if ctx.simpleId():
             udf_name = self.visit(ctx.simpleId())
         else:
-            logger.error('UDF function name missing.')
+            logger.error("UDF function name missing.")
         if ctx.dottedId():
             udf_output = self.visit(ctx.dottedId())
 
         udf_args = self.visit(ctx.functionArgs())
-        func_expr = FunctionExpression(None, name=udf_name,
-                                       output=udf_output)
+        func_expr = FunctionExpression(None, name=udf_name, output=udf_output)
         for arg in udf_args:
             func_expr.append_child(arg)
 
@@ -82,7 +81,7 @@ class Functions(evaql_parserVisitor):
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
                     if len(ctx.createDefinitions()) != 2:
-                        logger.error('UDF Input or Output Missing')
+                        logger.error("UDF Input or Output Missing")
                     input_definitions = self.visit(ctx.createDefinitions(0))
                     output_definitions = self.visit(ctx.createDefinitions(1))
 
@@ -93,19 +92,21 @@ class Functions(evaql_parserVisitor):
                     impl_path = self.visit(ctx.udfImpl()).value
 
             except BaseException:
-                logger.error('CREATE/DROP UDF Failed')
+                logger.error("CREATE/DROP UDF Failed")
                 # stop parsing something bad happened
                 return None
 
         if if_exists and if_not_exists:
-            logger.error('Bad CREATE/DROP UDF command syntax')
+            logger.error("Bad CREATE/DROP UDF command syntax")
 
-        return (udf_name,
-                if_exists or if_not_exists,
-                input_definitions,
-                output_definitions,
-                impl_path,
-                udf_type)
+        return (
+            udf_name,
+            if_exists or if_not_exists,
+            input_definitions,
+            output_definitions,
+            impl_path,
+            udf_type,
+        )
 
     # Drop UDF
     def visitDropUdf(self, ctx: evaql_parser.DropUdfContext):

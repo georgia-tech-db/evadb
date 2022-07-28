@@ -17,12 +17,10 @@
 from antlr4 import TerminalNode
 
 from eva.expression.tuple_value_expression import TupleValueExpression
-
+from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.table_ref import TableRef
-
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.parser.evaql.evaql_parser import evaql_parser
 
 
 ##################################################################
@@ -67,8 +65,7 @@ class Insert(evaql_parserVisitor):
 
         return uid_list
 
-    def visitInsertStatementValue(
-            self, ctx: evaql_parser.InsertStatementValueContext):
+    def visitInsertStatementValue(self, ctx: evaql_parser.InsertStatementValueContext):
         insert_stmt_value = []
         for child in ctx.children:
             if not isinstance(child, TerminalNode):

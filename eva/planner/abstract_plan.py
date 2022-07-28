@@ -15,12 +15,12 @@
 
 
 from abc import ABC
-from eva.planner.types import PlanOprType
 from typing import List
+
+from eva.planner.types import PlanOprType
 
 
 class AbstractPlan(ABC):
-
     def __init__(self, opr_type):
         self._children = []
         self._parent = None
@@ -44,7 +44,7 @@ class AbstractPlan(ABC):
         return self._parent
 
     @parent.setter
-    def parent(self, node: 'AbstractPlan'):
+    def parent(self, node: "AbstractPlan"):
         """sets parent of current node
 
         Arguments:
@@ -55,7 +55,7 @@ class AbstractPlan(ABC):
         self._parent = node
 
     @property
-    def children(self) -> List['AbstractPlan']:
+    def children(self) -> List["AbstractPlan"]:
         return self._children
 
     @property
@@ -82,7 +82,7 @@ class AbstractPlan(ABC):
         cls = self.__class__
         result = cls.__new__(cls)
         for k, v in self.__dict__.items():
-            if k == '_children':
+            if k == "_children":
                 setattr(result, k, [])
             else:
                 setattr(result, k, v)
