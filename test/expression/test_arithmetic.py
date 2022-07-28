@@ -62,3 +62,25 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         )
 
         self.assertEqual([1], cmpr_exp.evaluate(None).frames[0].tolist())
+
+    def test_aaequality(self):
+        const_exp1 = ConstantValueExpression(5)
+        const_exp2 = ConstantValueExpression(15)
+
+        cmpr_exp = ArithmeticExpression(
+            ExpressionType.ARITHMETIC_DIVIDE, const_exp1, const_exp2
+        )
+
+        cmpr_exp2 = ArithmeticExpression(
+            ExpressionType.ARITHMETIC_MULTIPLY, const_exp1, const_exp2
+        )
+        cmpr_exp3 = ArithmeticExpression(
+            ExpressionType.ARITHMETIC_MULTIPLY, const_exp2, const_exp1
+        )
+
+        self.assertNotEqual(cmpr_exp, cmpr_exp2)
+        self.assertNotEqual(cmpr_exp2, cmpr_exp3)
+
+
+if __name__ == '__main__':
+    unittest.main()
