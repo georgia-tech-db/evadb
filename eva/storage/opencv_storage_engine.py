@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import shutil
 import struct
 from pathlib import Path
@@ -89,8 +88,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)
             data = struct.pack(
-                "!HH%ds" % (
-                    length,), self.curr_version, length, file_path_bytes
+                "!HH%ds" % (length,), self.curr_version, length, file_path_bytes
             )
             f.write(data)
 

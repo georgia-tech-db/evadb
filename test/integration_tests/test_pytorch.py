@@ -14,8 +14,7 @@
 # limitations under the License.
 import sys
 import unittest
-from test.util import (copy_sample_video_to_prefix, file_remove,
-                       load_inbuilt_udfs)
+from test.util import copy_sample_video_to_prefix, file_remove, load_inbuilt_udfs
 
 import mock
 
@@ -65,11 +64,13 @@ class PytorchTest(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from eva.udfs.ssd_object_detector import \
-                    SSDObjectDetector  # noqa: F401
+                from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
+
+                pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torchvision.transforms": None}):
-                from eva.udfs.ssd_object_detector import \
-                    SSDObjectDetector  # noqa: F401
+                from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
+
+                pass

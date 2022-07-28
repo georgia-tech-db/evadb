@@ -67,8 +67,7 @@ def path_to_class(filepath: str, classname: str):
         classobj = getattr(module, classname)
     except Exception as e:
         logger.error(
-            "Failed to import %s from %s\nException: %s" % (
-                classname, filepath, e)
+            "Failed to import %s from %s\nException: %s" % (classname, filepath, e)
         )
     return classobj
 

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import copy
 import unittest
 
@@ -20,8 +19,7 @@ from mock import MagicMock
 
 from eva.optimizer.binder import Binder
 from eva.optimizer.cost_model import CostModel
-from eva.optimizer.operators import (Dummy, LogicalFilter, LogicalGet,
-                                     OperatorType)
+from eva.optimizer.operators import Dummy, LogicalFilter, LogicalGet, OperatorType
 from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.rules.pattern import Pattern
 
@@ -82,8 +80,7 @@ class TestBinder(unittest.TestCase):
 
         sub_child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sub_child_opr_2 = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        sub_root_opr = LogicalFilter(
-            MagicMock(), [sub_child_opr, sub_child_opr_2])
+        sub_root_opr = LogicalFilter(MagicMock(), [sub_child_opr, sub_child_opr_2])
 
         child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         root_opr = LogicalFilter(MagicMock(), [child_opr, sub_root_opr])

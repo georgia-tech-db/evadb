@@ -13,8 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (DummyObjectDetector, copy_sample_video_to_prefix,
-                       create_sample_video, file_remove, load_inbuilt_udfs)
+from test.util import (
+    DummyObjectDetector,
+    copy_sample_video_to_prefix,
+    create_sample_video,
+    file_remove,
+    load_inbuilt_udfs,
+)
 
 import pandas as pd
 
@@ -51,7 +56,8 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(materialized_query)
 
         select_query = "SELECT id, label FROM dummy_view;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
 
         labels = DummyObjectDetector().labels
         expected = [
@@ -77,7 +83,8 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(materialized_query)
 
         select_query = "SELECT id, label FROM dummy_view2;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
 
         labels = DummyObjectDetector().labels
         expected = [
@@ -97,7 +104,8 @@ class MaterializedViewTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         select_view_query = "SELECT id, labels FROM uadtrac_fastRCNN"
-        actual_batch = sorted(execute_query_fetch_all(select_view_query))
+        actual_batch = execute_query_fetch_all(select_view_query)
+        actual_batch.sort()
 
         self.assertEqual(actual_batch.batch_size, 5)
         # non-trivial test case

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType

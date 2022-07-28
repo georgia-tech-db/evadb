@@ -17,8 +17,7 @@ from unittest.mock import MagicMock
 
 from mock import patch
 
-from eva.executor.create_mat_view_executor import \
-    CreateMaterializedViewExecutor
+from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType

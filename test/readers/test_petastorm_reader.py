@@ -94,10 +94,8 @@ class PetastormLoaderTest(unittest.TestCase):
         petastorm_reader = PetastormReader(
             file_url=os.path.join(PATH_PREFIX, "dummy.avi"), batch_mem_size=3000
         )
-        dummy_values = map(lambda i: self.DummyRow(
-            i, np.ones((2, 2, 3)) * i), range(3))
+        dummy_values = map(lambda i: self.DummyRow(i, np.ones((2, 2, 3)) * i), range(3))
         mock.return_value = self.DummyReader(dummy_values)
         actual = list(petastorm_reader._read())
         expected = list(dummy_values)
-        self.assertTrue(all([np.allclose(i, j)
-                             for i, j in zip(actual, expected)]))
+        self.assertTrue(all([np.allclose(i, j) for i, j in zip(actual, expected)]))

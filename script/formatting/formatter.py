@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# ==============================================
-# GOAL : Format code, Add/Strip headers
-# ==============================================
-
 import argparse
 import functools
 import logging
@@ -132,7 +127,7 @@ def is_tool(name):
     else:
         installed_version = pkg_resources.get_distribution(name).version
         if installed_version != req_version:
-            LOG.warn(
+            LOG.warning(
                 f"EVA uses {name} {req_version}. The installed version is"
                 " {installed_version} which can result in different results."
             )
@@ -145,8 +140,8 @@ def format_file(file_path, add_header, strip_header, format_code):
 
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
-
         if add_header:
+            LOG.info("Adding header: " + file_path)
             new_file_data = header + file_data
 
             fd.seek(0, 0)
@@ -178,11 +173,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             os.system(black_command)
 
             # AUTOFLAKE
-            autoflake_command = (
-                FLAKE_BINARY
-                + " --max-line-length 88 --in-place --remove-all-unused-imports"
-                " --remove-unused-variables " + file_path
-            )
+            autoflake_command = FLAKE_BINARY + " --max-line-length 88 " + file_path
             # LOG.info(autoflake_command)
             os.system(autoflake_command)
 
@@ -240,18 +231,11 @@ if __name__ == "__main__":
         default=False,
     )
     parser.add_argument(
-        "-m",
-        "--format-modified_code",
+        "-c",
+        "--format-code",
         help="format modified code",
         action="store_true",
         default=True,
-    )
-    parser.add_argument(
-        "-c",
-        "--format-all-code",
-        help="format all code",
-        action="store_true",
-        default=False,
     )
     parser.add_argument("-f", "--file-name", help="file to be acted on")
     parser.add_argument(
@@ -264,6 +248,7 @@ if __name__ == "__main__":
     if args.add_header and args.strip_header:
         LOG.error("adding & stripping headers cannot be done together")
         sys.exit("adding & stripping headers cannot be done together")
+
     if args.file_name and args.dir_name:
         LOG.error("file_name and dir_name cannot be specified together")
         sys.exit("file_name and dir_name cannot be specified together")
@@ -273,22 +258,7 @@ if __name__ == "__main__":
     is_tool(FLAKE_BINARY)
     is_tool(ISORT_BINARY)
 
-    if args.format_modified_code:
-
-        MERGEBASE = subprocess.check_output(
-            "git merge-base origin/master HEAD", shell=True, text=True
-        ).rstrip()
-        print(f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'")
-        files = subprocess.check_output(
-            f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'",
-            shell=True,
-            text=True,
-        ).split("\n")
-        # print(files)
-        for file in files:
-            print(file)
-            format_file(file, args.add_header, args.strip_header, True)
-    elif args.file_name:
+    if args.file_name:
         LOG.info("Scanning file: " + "".join(args.file_name))
         format_file(
             args.file_name,
@@ -298,35 +268,29 @@ if __name__ == "__main__":
         )
     elif args.dir_name:
         LOG.info("Scanning directory " + "".join(args.dir_name))
-        format_dir(
-            args.dir_name, args.add_header, args.strip_header, args.format_code
-        )
-    # BY DEFAULT, WE SCAN THE DEFAULT DIRS AND FIX THEM
+        format_dir(args.dir_name, args.add_header, args.strip_header, args.format_code)
+    # BY DEFAULT, WE FIX THE MODIFIED FILES
     else:
-        LOG.info("Default scan")
-        for dir in DEFAULT_DIRS:
-            LOG.info("Scanning : " + dir + "\n\n")
-
-            LOG.info("Stripping headers : " + dir)
-            args.add_header = False
-            args.strip_header = True
-            args.format_code = False
-            format_dir(
-                dir, args.add_header, args.strip_header, args.format_code
+        LOG.info("Default fix modified files")
+        MERGEBASE = subprocess.check_output(
+            "git merge-base origin/master HEAD", shell=True, text=True
+        ).rstrip()
+        files = (
+            subprocess.check_output(
+                f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'",
+                shell=True,
+                text=True,
             )
+            .rstrip()
+            .split("\n")
+        )
 
-            LOG.info("Adding headers : " + dir)
-            args.add_header = True
-            args.strip_header = False
-            args.format_code = False
-            format_dir(
-                dir, args.add_header, args.strip_header, args.format_code
-            )
+        for file in files:
+            LOG.info("Stripping headers : " + file)
+            format_file(file, False, True, False)
 
-            LOG.info("Formatting code : " + dir)
-            args.add_header = False
-            args.strip_header = False
-            args.format_code = True
-            format_dir(
-                dir, args.add_header, args.strip_header, args.format_code
-            )
+            LOG.info("Adding headers : " + file)
+            format_file(file, True, False, False)
+
+            LOG.info("Formatting File : " + file)
+            format_file(file, False, False, True)

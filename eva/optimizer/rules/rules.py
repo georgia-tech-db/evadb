@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -29,17 +28,31 @@ if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.optimizer.operators import (Dummy, LogicalCreate,
-                                     LogicalCreateMaterializedView,
-                                     LogicalCreateUDF, LogicalDrop,
-                                     LogicalDropUDF, LogicalFilter,
-                                     LogicalFunctionScan, LogicalGet,
-                                     LogicalInsert, LogicalJoin, LogicalLimit,
-                                     LogicalLoadData, LogicalOrderBy,
-                                     LogicalProject, LogicalQueryDerivedGet,
-                                     LogicalRename, LogicalSample, LogicalShow,
-                                     LogicalUnion, LogicalUpload, Operator,
-                                     OperatorType)
+from eva.optimizer.operators import (
+    Dummy,
+    LogicalCreate,
+    LogicalCreateMaterializedView,
+    LogicalCreateUDF,
+    LogicalDrop,
+    LogicalDropUDF,
+    LogicalFilter,
+    LogicalFunctionScan,
+    LogicalGet,
+    LogicalInsert,
+    LogicalJoin,
+    LogicalLimit,
+    LogicalLoadData,
+    LogicalOrderBy,
+    LogicalProject,
+    LogicalQueryDerivedGet,
+    LogicalRename,
+    LogicalSample,
+    LogicalShow,
+    LogicalUnion,
+    LogicalUpload,
+    Operator,
+    OperatorType,
+)
 from eva.optimizer.rules.pattern import Pattern
 from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -430,8 +443,7 @@ class LogicalCreateToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(before.video, before.column_list,
-                           before.if_not_exists)
+        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
         return after
 
 
@@ -518,8 +530,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.table_metainfo,
-                           before.column_list, before.value_list)
+        after = InsertPlan(before.table_metainfo, before.column_list, before.value_list)
         return after
 
 

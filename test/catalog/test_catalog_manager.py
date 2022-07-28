@@ -100,8 +100,7 @@ class CatalogManagerTests(unittest.TestCase):
         ds_mock.return_value.dataset_object_by_name.assert_called_with(
             database_name, dataset_name
         )
-        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_called_with(
-            id, None)
+        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_called_with(id, None)
         self.assertEqual(actual.id, id)
         self.assertEqual(actual.schema, schema)
 
@@ -146,8 +145,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_create_udf(self, udfio_mock, udf_mock):
         catalog = CatalogManager()
         udf_io_list = [MagicMock()]
-        actual = catalog.create_udf(
-            "udf", "sample.py", "classification", udf_io_list)
+        actual = catalog.create_udf("udf", "sample.py", "classification", udf_io_list)
         udfio_mock.return_value.add_udf_io.assert_called_with(udf_io_list)
         udf_mock.return_value.create_udf.assert_called_with(
             "udf", "sample.py", "classification"
@@ -168,8 +166,7 @@ class CatalogManagerTests(unittest.TestCase):
         catalog = CatalogManager()
         actual = catalog.get_udf_by_name("name")
         udf_mock.return_value.udf_by_name.assert_called_with("name")
-        self.assertEqual(
-            actual, udf_mock.return_value.udf_by_name.return_value)
+        self.assertEqual(actual, udf_mock.return_value.udf_by_name.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfService")
     def test_drop_udf(self, udf_mock):

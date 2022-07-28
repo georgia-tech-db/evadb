@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import Dict, Iterator
 
 import numpy as np
@@ -63,8 +62,7 @@ class CSVReader(AbstractReader):
                 ):
 
                     # convert the string to a numpy array
-                    chunk[col] = chunk[col].apply(
-                        convert_csv_string_to_ndarray)
+                    chunk[col] = chunk[col].apply(convert_csv_string_to_ndarray)
 
             # yield the chunk
             for chunk_index, chunk_row in chunk.iterrows():

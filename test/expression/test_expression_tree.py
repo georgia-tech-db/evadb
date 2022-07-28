@@ -56,8 +56,7 @@ class ExpressionEvaluationTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_MAX, None, tuple_expr
         )
-        logical_expr = LogicalExpression(
-            ExpressionType.LOGICAL_OR, cmpr_exp, cmpr_exp)
+        logical_expr = LogicalExpression(ExpressionType.LOGICAL_OR, cmpr_exp, cmpr_exp)
 
         self.assertNotEqual(const_exp1, const_exp2)
         self.assertNotEqual(cmpr_exp, const_exp1)

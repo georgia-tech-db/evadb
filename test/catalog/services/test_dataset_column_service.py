@@ -34,8 +34,7 @@ class DatasetColumnServiceTest(unittest.TestCase):
         service = DatasetColumnService()
         metadata_id = 123
         column_names = ["a", "b"]
-        actual = service.columns_by_dataset_id_and_names(
-            metadata_id, column_names)
+        actual = service.columns_by_dataset_id_and_names(metadata_id, column_names)
         mocked.query.filter.assert_called_with(
             mocked._metadata_id == metadata_id, mocked._name.in_(column_names)
         )
@@ -66,6 +65,5 @@ class DatasetColumnServiceTest(unittest.TestCase):
         metadata_id = 123
         column_ids = None
         actual = service.columns_by_id_and_dataset_id(metadata_id, column_ids)
-        mocked.query.filter.assert_called_with(
-            mocked._metadata_id == metadata_id)
+        mocked.query.filter.assert_called_with(mocked._metadata_id == metadata_id)
         self.assertEqual(actual, return_val)

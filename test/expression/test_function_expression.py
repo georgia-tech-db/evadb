@@ -53,8 +53,7 @@ class FunctionExpressionTest(unittest.TestCase):
     @patch("eva.expression.function_expression.Context")
     def test_should_execute_same_function_if_no_gpu(self, context):
         context_instance = context.return_value
-        mock_function = MagicMock(
-            spec=GPUCompatible, return_value=pd.DataFrame())
+        mock_function = MagicMock(spec=GPUCompatible, return_value=pd.DataFrame())
 
         context_instance.gpu_device.return_value = NO_GPU
 

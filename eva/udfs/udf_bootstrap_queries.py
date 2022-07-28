@@ -13,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# this file is to list out all the ndarray udf create queries in one place
-# as constants
-
 from eva.configuration.dictionary import EVA_INSTALLATION_DIR
 from eva.server.command_handler import execute_query_fetch_all
 

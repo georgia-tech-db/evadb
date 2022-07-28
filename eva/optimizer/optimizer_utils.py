@@ -12,12 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List, Tuple
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionType)
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger

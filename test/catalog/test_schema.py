@@ -77,8 +77,7 @@ class SchemaTests(unittest.TestCase):
             petastorm_col = UnischemaField(
                 col_name, np_type, [10, 10], NdarrayCodec(), True
             )
-            self.assertEqual(
-                SchemaUtils.get_petastorm_column(col), petastorm_col)
+            self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
 
     def test_raise_exception_when_unkown_array_type(self):
         col_name = "frame_id"
@@ -93,8 +92,7 @@ class SchemaTests(unittest.TestCase):
         cols = [MagicMock() for i in range(2)]
         mock_get_pc.side_effect = [1, 2]
         self.assertEqual(
-            SchemaUtils.get_petastorm_schema(
-                "name", cols), mock_uni.return_value
+            SchemaUtils.get_petastorm_schema("name", cols), mock_uni.return_value
         )
         mock_get_pc.assert_has_calls([call(cols[0]), call(cols[1])])
         mock_uni.assert_called_once_with("name", [1, 2])
@@ -106,31 +104,26 @@ class SchemaTests(unittest.TestCase):
         schema_name = "foo"
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn(
-            "frame_data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [
-                28, 28]
+            "frame_data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [28, 28]
         )
         column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]
         schema = DataFrameSchema(schema_name, col_list)
-        expected_schema = SchemaUtils.get_petastorm_schema(
-            schema_name, col_list)
+        expected_schema = SchemaUtils.get_petastorm_schema(schema_name, col_list)
         self.assertEqual(schema.name, schema_name)
         self.assertEqual(schema.column_list, col_list)
-        self.assertEqual(schema.petastorm_schema.fields,
-                         expected_schema.fields)
+        self.assertEqual(schema.petastorm_schema.fields, expected_schema.fields)
         for field1, field2 in zip(
             schema.petastorm_schema.fields, expected_schema.fields
         ):
             self.assertEqual(field1, field2)
-        self.assertEqual(schema.pyspark_schema,
-                         expected_schema.as_spark_schema())
+        self.assertEqual(schema.pyspark_schema, expected_schema.as_spark_schema())
 
     def test_schema_equality(self):
         schema_name = "foo"
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn(
-            "frame_data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [
-                28, 28]
+            "frame_data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [28, 28]
         )
         column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]

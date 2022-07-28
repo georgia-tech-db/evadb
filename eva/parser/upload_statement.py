@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from pathlib import Path
 
 from eva.parser.statement import AbstractStatement
@@ -35,8 +34,7 @@ class UploadStatement(AbstractStatement):
         self._video_blob = video_blob
 
     def __str__(self) -> str:
-        print_str = "UPLOAD PATH {} BLOB {}".format(
-            self._path, "string of video blob")
+        print_str = "UPLOAD PATH {} BLOB {}".format(self._path, "string of video blob")
         return print_str
 
     @property

@@ -65,8 +65,7 @@ class Array_Count(AbstractNdarrayUDF):
         # checks if dimension diff is one between
         # row_val and search_element
         if row_val.ndim - search_element.ndim != 1:
-            raise ValueError(
-                "inconsistent dimensions for row value and search element")
+            raise ValueError("inconsistent dimensions for row value and search element")
 
         result = row_val == search_element
         # reshape along the first dimension and then

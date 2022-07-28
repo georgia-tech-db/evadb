@@ -30,8 +30,7 @@ class DatasetServiceTest(unittest.TestCase):
     @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_create_dataset_should_create_model(self, mocked):
         service = DatasetService()
-        service.create_dataset(DATASET_NAME, DATASET_URL,
-                               identifier_id=IDENTIFIER)
+        service.create_dataset(DATASET_NAME, DATASET_URL, identifier_id=IDENTIFIER)
         mocked.assert_called_with(
             name=DATASET_NAME,
             file_url=DATASET_URL,
@@ -81,8 +80,7 @@ class DatasetServiceTest(unittest.TestCase):
             DATASET_NEW_NAME, "database_name", "dataset_name"
         )
         mock_func.assert_called_once_with("database_name", "dataset_name")
-        mock_func.return_value.update.assert_called_once_with(
-            _name=DATASET_NEW_NAME)
+        mock_func.return_value.update.assert_called_once_with(_name=DATASET_NEW_NAME)
 
     def test_rename_dataset_by_name_should_raise_exception(self):
         with patch.object(DatasetService, "dataset_object_by_name") as mock_func:

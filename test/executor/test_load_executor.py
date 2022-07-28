@@ -154,15 +154,13 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
         write_mock.has_calls(
-            call(table_metainfo, batch_frames[0]), call(
-                table_metainfo, batch_frames[1])
+            call(table_metainfo, batch_frames[0]), call(table_metainfo, batch_frames[1])
         )
 
         # Note: We call exec() from the child classes.
         self.assertEqual(
             batch,
-            Batch(pd.DataFrame(
-                [{"CSV": file_path, "Number of loaded frames": 20}])),
+            Batch(pd.DataFrame([{"CSV": file_path, "Number of loaded frames": 20}])),
         )
 
         # remove the dummy.csv

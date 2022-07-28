@@ -73,8 +73,7 @@ class PlanExecutorTest(unittest.TestCase):
         )
 
         # Root Nodes
-        self.assertEqual(root_abs_plan.opr_type,
-                         root_abs_executor._node.opr_type)
+        self.assertEqual(root_abs_plan.opr_type, root_abs_executor._node.opr_type)
 
         # Children of Root
         for child_abs, child_exec in zip(
@@ -277,8 +276,7 @@ class PlanExecutorTest(unittest.TestCase):
         video = DataFrameMetadata("dataset", "dummy.avi")
         batch_1 = Batch(pd.DataFrame({"data": [1, 2, 3]}))
         batch_2 = Batch(pd.DataFrame({"data": [4, 5, 6]}))
-        class_instatnce.load.return_value = map(
-            lambda x: x, [batch_1, batch_2])
+        class_instatnce.load.return_value = map(lambda x: x, [batch_1, batch_2])
 
         storage_plan = StoragePlan(video, batch_mem_size=3000)
         seq_scan = SeqScanPlan(predicate=dummy_expr, column_ids=[])

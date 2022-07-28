@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import json
 from typing import Iterable, NoReturn
 
@@ -175,12 +174,10 @@ class Batch:
             for column in by:
                 if column not in self._frames.columns:
                     logger.error(
-                        "Can not orderby non-projected column: {}".format(
-                            column)
+                        "Can not orderby non-projected column: {}".format(column)
                     )
                     raise KeyError(
-                        "Can not orderby non-projected column: {}".format(
-                            column)
+                        "Can not orderby non-projected column: {}".format(column)
                     )
 
             self._frames.sort_values(
@@ -221,8 +218,7 @@ class Batch:
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1, copy=False)
         if new_frames.columns.duplicated().any():
-            logger.warn(
-                "Duplicated column name detected {}".format(new_frames))
+            logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
     def __add__(self, other: "Batch"):
@@ -285,8 +281,7 @@ class Batch:
         new_col_names = []
         for col_name in self.frames.columns:
             if "." in col_name:
-                new_col_names.append("{}.{}".format(
-                    alias, col_name.split(".")[1]))
+                new_col_names.append("{}.{}".format(alias, col_name.split(".")[1]))
             else:
                 new_col_names.append("{}.{}".format(alias, col_name))
 

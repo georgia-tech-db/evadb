@@ -41,5 +41,4 @@ class ColumnTypeTests(unittest.TestCase):
             self.assertEqual(NdArrayType.to_numpy_type(ndarray_type), np_type)
 
     def test_raise_exception_uknown_ndarray_type(self):
-        self.assertRaises(
-            ValueError, NdArrayType.to_numpy_type, ColumnType.TEXT)
+        self.assertRaises(ValueError, NdArrayType.to_numpy_type, ColumnType.TEXT)

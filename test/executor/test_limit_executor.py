@@ -31,8 +31,7 @@ from eva.planner.orderby_plan import OrderByPlan
 class LimitExecutorTest(unittest.TestCase):
     def test_should_return_smaller_num_rows(self):
         dfs = [
-            pd.DataFrame(np.random.randint(
-                0, 100, size=(100, 4)), columns=list("ABCD"))
+            pd.DataFrame(np.random.randint(0, 100, size=(100, 4)), columns=list("ABCD"))
             for _ in range(4)
         ]
 
@@ -58,8 +57,7 @@ class LimitExecutorTest(unittest.TestCase):
         This will also leave a warning"""
 
         dfs = [
-            pd.DataFrame(np.random.randint(
-                0, 100, size=(100, 4)), columns=list("ABCD"))
+            pd.DataFrame(np.random.randint(0, 100, size=(100, 4)), columns=list("ABCD"))
             for _ in range(4)
         ]
 
@@ -101,8 +99,7 @@ class LimitExecutorTest(unittest.TestCase):
         """
 
         df1 = pd.DataFrame(np.array([[1, 1, 1]]), columns=["A", "B", "C"])
-        df2 = pd.DataFrame(
-            np.array([[1, 5, 6], [4, 7, 10]]), columns=["A", "B", "C"])
+        df2 = pd.DataFrame(np.array([[1, 5, 6], [4, 7, 10]]), columns=["A", "B", "C"])
         df3 = pd.DataFrame(
             np.array([[2, 9, 7], [4, 1, 2], [4, 2, 4]]), columns=["A", "B", "C"]
         )

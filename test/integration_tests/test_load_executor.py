@@ -13,8 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (create_dummy_batches, create_dummy_csv_batches,
-                       create_sample_csv, create_sample_video, file_remove)
+from test.util import (
+    create_dummy_batches,
+    create_dummy_csv_batches,
+    create_sample_csv,
+    create_sample_video,
+    file_remove,
+)
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -39,7 +44,8 @@ class LoadExecutorTest(unittest.TestCase):
 
         select_query = """SELECT id, data FROM MyVideo;"""
 
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         expected_batch.modify_column_alias("myvideo")
         self.assertEqual(actual_batch, expected_batch)
@@ -74,7 +80,8 @@ class LoadExecutorTest(unittest.TestCase):
                           object_id
                           FROM MyVideoCSV;"""
 
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
 
         # assert the batches are equal
         expected_batch = create_dummy_csv_batches()

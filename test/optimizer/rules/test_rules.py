@@ -12,43 +12,50 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import unittest
 
 from mock import MagicMock
 
-from eva.optimizer.operators import (LogicalFilter, LogicalGet, LogicalJoin,
-                                     LogicalProject, LogicalQueryDerivedGet,
-                                     LogicalSample)
-from eva.optimizer.rules.rules import (EmbedFilterIntoDerivedGet,
-                                       EmbedFilterIntoGet,
-                                       EmbedProjectIntoDerivedGet,
-                                       EmbedProjectIntoGet,
-                                       LogicalCreateMaterializedViewToPhysical,
-                                       LogicalCreateToPhysical,
-                                       LogicalCreateUDFToPhysical,
-                                       LogicalDerivedGetToPhysical,
-                                       LogicalDropToPhysical,
-                                       LogicalDropUDFToPhysical,
-                                       LogicalFilterToPhysical,
-                                       LogicalFunctionScanToPhysical,
-                                       LogicalGetToSeqScan,
-                                       LogicalInnerJoinCommutativity,
-                                       LogicalInsertToPhysical,
-                                       LogicalJoinToPhysicalHashJoin,
-                                       LogicalLateralJoinToPhysical,
-                                       LogicalLimitToPhysical,
-                                       LogicalLoadToPhysical,
-                                       LogicalOrderByToPhysical,
-                                       LogicalProjectToPhysical,
-                                       LogicalRenameToPhysical,
-                                       LogicalSampleToUniformSample,
-                                       LogicalShowToPhysical,
-                                       LogicalUnionToPhysical,
-                                       LogicalUploadToPhysical, Promise,
-                                       PushdownFilterThroughSample,
-                                       PushdownProjectThroughSample,
-                                       RulesManager)
+from eva.optimizer.operators import (
+    LogicalFilter,
+    LogicalGet,
+    LogicalJoin,
+    LogicalProject,
+    LogicalQueryDerivedGet,
+    LogicalSample,
+)
+from eva.optimizer.rules.rules import (
+    EmbedFilterIntoDerivedGet,
+    EmbedFilterIntoGet,
+    EmbedProjectIntoDerivedGet,
+    EmbedProjectIntoGet,
+    LogicalCreateMaterializedViewToPhysical,
+    LogicalCreateToPhysical,
+    LogicalCreateUDFToPhysical,
+    LogicalDerivedGetToPhysical,
+    LogicalDropToPhysical,
+    LogicalDropUDFToPhysical,
+    LogicalFilterToPhysical,
+    LogicalFunctionScanToPhysical,
+    LogicalGetToSeqScan,
+    LogicalInnerJoinCommutativity,
+    LogicalInsertToPhysical,
+    LogicalJoinToPhysicalHashJoin,
+    LogicalLateralJoinToPhysical,
+    LogicalLimitToPhysical,
+    LogicalLoadToPhysical,
+    LogicalOrderByToPhysical,
+    LogicalProjectToPhysical,
+    LogicalRenameToPhysical,
+    LogicalSampleToUniformSample,
+    LogicalShowToPhysical,
+    LogicalUnionToPhysical,
+    LogicalUploadToPhysical,
+    Promise,
+    PushdownFilterThroughSample,
+    PushdownProjectThroughSample,
+    RulesManager,
+)
 
 
 class TestRules(unittest.TestCase):
@@ -130,8 +137,7 @@ class TestRules(unittest.TestCase):
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
             self.assertTrue(
-                any(isinstance(rule, type(x))
-                    for x in RulesManager().rewrite_rules)
+                any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
             )
 
         supported_logical_rules = [LogicalInnerJoinCommutativity()]
@@ -141,8 +147,7 @@ class TestRules(unittest.TestCase):
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(isinstance(rule, type(x))
-                    for x in RulesManager().logical_rules)
+                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
         supported_implementation_rules = [

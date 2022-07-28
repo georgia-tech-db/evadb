@@ -25,8 +25,7 @@ class PPScanExecutorTest(unittest.TestCase):
         dataframe = create_dataframe(3)
         batch = Batch(frames=dataframe)
         expression = type(
-            "AbstractExpression", (), {"evaluate": lambda x: [
-                False, False, True]}
+            "AbstractExpression", (), {"evaluate": lambda x: [False, False, True]}
         )
 
         plan = type("PPScanPlan", (), {"predicate": expression})

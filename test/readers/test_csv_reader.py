@@ -14,9 +14,14 @@
 # limitations under the License.
 import os
 import unittest
-from test.util import (FRAME_SIZE, NUM_FRAMES, PATH_PREFIX,
-                       create_dummy_csv_batches, create_sample_csv,
-                       file_remove)
+from test.util import (
+    FRAME_SIZE,
+    NUM_FRAMES,
+    PATH_PREFIX,
+    create_dummy_csv_batches,
+    create_sample_csv,
+    file_remove,
+)
 
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.readers.csv_reader import CSVReader

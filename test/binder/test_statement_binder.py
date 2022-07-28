@@ -135,8 +135,7 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(
-            udf_obj.impl_file_path, udf_obj.name)
+        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
         self.assertEqual(func_expr.output_objs, [obj1])
         self.assertEqual(
             func_expr.output_col_aliases,
@@ -151,8 +150,7 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(
-            udf_obj.impl_file_path, udf_obj.name)
+        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
         self.assertEqual(func_expr.output_objs, func_ouput_objs)
         self.assertEqual(
             func_expr.output_col_aliases, ["func_expr.out1", "func_expr.out2"]

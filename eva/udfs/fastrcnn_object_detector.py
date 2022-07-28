@@ -181,8 +181,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
                 for i in list(self.as_numpy(prediction["boxes"]))
             ]
             pred_score = list(self.as_numpy(prediction["scores"]))
-            valid_pred = [pred_score.index(x)
-                          for x in pred_score if x > self.threshold]
+            valid_pred = [pred_score.index(x) for x in pred_score if x > self.threshold]
 
             if valid_pred:
                 pred_t = valid_pred[-1]

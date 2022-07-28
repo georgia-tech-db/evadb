@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock, call
@@ -78,23 +77,19 @@ class ParserVisitorTests(unittest.TestCase):
         ctx = MagicMock()
         visitor = ParserVisitor()
 
-        self.assertEqual(visitor.visitLogicalOperator(ctx),
-                         ExpressionType.INVALID)
+        self.assertEqual(visitor.visitLogicalOperator(ctx), ExpressionType.INVALID)
 
         ctx.getText.return_value = "OR"
-        self.assertEqual(visitor.visitLogicalOperator(ctx),
-                         ExpressionType.LOGICAL_OR)
+        self.assertEqual(visitor.visitLogicalOperator(ctx), ExpressionType.LOGICAL_OR)
 
         ctx.getText.return_value = "AND"
-        self.assertEqual(visitor.visitLogicalOperator(ctx),
-                         ExpressionType.LOGICAL_AND)
+        self.assertEqual(visitor.visitLogicalOperator(ctx), ExpressionType.LOGICAL_AND)
 
     def test_comparison_operator(self):
         ctx = MagicMock()
         visitor = ParserVisitor()
 
-        self.assertEqual(visitor.visitComparisonOperator(ctx),
-                         ExpressionType.INVALID)
+        self.assertEqual(visitor.visitComparisonOperator(ctx), ExpressionType.INVALID)
 
         ctx.getText.return_value = "="
         self.assertEqual(
@@ -108,20 +103,17 @@ class ParserVisitorTests(unittest.TestCase):
 
         ctx.getText.return_value = ">"
         self.assertEqual(
-            visitor.visitComparisonOperator(
-                ctx), ExpressionType.COMPARE_GREATER
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_GREATER
         )
 
         ctx.getText.return_value = "@>"
         self.assertEqual(
-            visitor.visitComparisonOperator(
-                ctx), ExpressionType.COMPARE_CONTAINS
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_CONTAINS
         )
 
         ctx.getText.return_value = "<@"
         self.assertEqual(
-            visitor.visitComparisonOperator(
-                ctx), ExpressionType.COMPARE_IS_CONTAINED
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_IS_CONTAINED
         )
 
     # To be fixed
@@ -209,8 +201,7 @@ class ParserVisitorTests(unittest.TestCase):
         ctx.getText.return_value = "[1,2,3,4]"
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
-            expected.evaluate(), Batch(
-                pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
+            expected.evaluate(), Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
         )
 
     def test_visit_str_array_literal(self):
@@ -222,8 +213,7 @@ class ParserVisitorTests(unittest.TestCase):
         ctx.getText.return_value = "['person', 'car']"
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
-            expected.evaluate(), Batch(pd.DataFrame(
-                {0: [np.array(["person", "car"])]}))
+            expected.evaluate(), Batch(pd.DataFrame({0: [np.array(["person", "car"])]}))
         )
 
     def test_visit_query_specification_base_exception(self):
@@ -266,8 +256,7 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         actual = visitor.visitUdfFunction(ctx)
         visit_mock.assert_has_calls(
-            [call(ctx.simpleId()), call(ctx.dottedId()),
-             call(ctx.functionArgs())]
+            [call(ctx.simpleId()), call(ctx.dottedId()), call(ctx.functionArgs())]
         )
 
         func_mock.assert_called_with(None, name="name", output=udf_output)

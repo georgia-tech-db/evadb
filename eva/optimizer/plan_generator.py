@@ -16,8 +16,7 @@ from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
-from eva.optimizer.optimizer_tasks import (BottomUpRewrite, OptimizeGroup,
-                                           TopDownRewrite)
+from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules import RulesManager
 
@@ -58,28 +57,24 @@ class PlanGenerator:
 
         # TopDown Rewrite
         optimizer_context.task_stack.push(
-            TopDownRewrite(root_expr, RulesManager(
-            ).rewrite_rules, optimizer_context)
+            TopDownRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context)
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
         # BottomUp Rewrite
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
-            BottomUpRewrite(root_expr, RulesManager(
-            ).rewrite_rules, optimizer_context)
+            BottomUpRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context)
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
         # Optimize Expression (logical -> physical transformation)
         root_group = memo.get_group_by_id(root_grp_id)
-        optimizer_context.task_stack.push(
-            OptimizeGroup(root_group, optimizer_context))
+        optimizer_context.task_stack.push(OptimizeGroup(root_group, optimizer_context))
         self.execute_task_stack(optimizer_context.task_stack)
 
         # Build Optimal Tree
-        optimal_plan = self.build_optimal_physical_plan(
-            root_grp_id, optimizer_context)
+        optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
         return optimal_plan
 
     def build(self, logical_plan: Operator):

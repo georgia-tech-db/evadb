@@ -939,8 +939,7 @@ class LogicalCreateMaterializedView(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.view, tuple(
-                self.col_list), self.if_not_exists)
+            (super().__hash__(), self.view, tuple(self.col_list), self.if_not_exists)
         )
 
 

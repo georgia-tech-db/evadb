@@ -13,13 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# from eva.catalog.catalog_manager import CatalogManager
-# from eva.models.storage.batch import Batch
-# from eva.server.command_handler import execute_query_fetch_all
-# # from eva.udfs.ndarray_udfs.unnest import Unnest
-# from test.util import create_sample_video, load_inbuilt_udfs, file_remove
-# from test.util import NUM_FRAMES
-
 
 # class UnnestTests(unittest.TestCase):
 

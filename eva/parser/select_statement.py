@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
 
 import typing
@@ -118,8 +117,7 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {}".format(
-            self._target_list, self._from_table)
+        print_str = "SELECT {} FROM {}".format(self._target_list, self._from_table)
         print_str += " WHERE " + str(self._where_clause)
         if self._union_link is not None:
             if not self._union_all:

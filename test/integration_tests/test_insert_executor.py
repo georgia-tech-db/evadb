@@ -51,8 +51,7 @@ class InsertExecutorTest(unittest.TestCase):
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
-                np.array([[[40, 40, 40], [40, 40, 40]],
-                          [[40, 40, 40], [40, 40, 40]]]),
+                np.array([[[40, 40, 40], [40, 40, 40]], [[40, 40, 40], [40, 40, 40]]]),
             )
         )
 
@@ -61,7 +60,6 @@ class InsertExecutorTest(unittest.TestCase):
         self.assertIsNone(
             np.testing.assert_array_equal(
                 batch.frames["data"][0],
-                np.array([[[41, 41, 41], [41, 41, 41]],
-                          [[41, 41, 41], [41, 41, 41]]]),
+                np.array([[[41, 41, 41], [41, 41, 41]], [[41, 41, 41], [41, 41, 41]]]),
             )
         )

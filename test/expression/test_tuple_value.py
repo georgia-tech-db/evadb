@@ -46,8 +46,6 @@ class TupleValueExpressionsTest(unittest.TestCase):
             tup_val_exp1.evaluate(tuples, mask=mask1).frames[0].tolist(),
         )
         self.assertEqual(
-            [7, 9, 11], tup_val_exp2.evaluate(
-                tuples, mask=[0, 2, 4]).frames[1].tolist()
+            [7, 9, 11], tup_val_exp2.evaluate(tuples, mask=[0, 2, 4]).frames[1].tolist()
         )
-        self.assertEqual([], tup_val_exp3.evaluate(
-            tuples, mask=[]).frames[2].tolist())
+        self.assertEqual([], tup_val_exp3.evaluate(tuples, mask=[]).frames[2].tolist())

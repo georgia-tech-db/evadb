@@ -71,8 +71,7 @@ class PlanNodeTests(unittest.TestCase):
         dummy_plan_node = DropPlan([dummy_table], False)
 
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.DROP)
-        self.assertEqual(
-            dummy_plan_node.table_refs[0].table.table_name, "dummy")
+        self.assertEqual(dummy_plan_node.table_refs[0].table.table_name, "dummy")
 
     def test_insert_plan(self):
         video_id = 0
@@ -90,8 +89,7 @@ class PlanNodeTests(unittest.TestCase):
         outputs = [udfIO]
         impl_path = "test"
         ty = "classification"
-        node = CreateUDFPlan(udf_name, if_not_exists,
-                             inputs, outputs, impl_path, ty)
+        node = CreateUDFPlan(udf_name, if_not_exists, inputs, outputs, impl_path, ty)
         self.assertEqual(node.opr_type, PlanOprType.CREATE_UDF)
         self.assertEqual(node.if_not_exists, True)
         self.assertEqual(node.inputs, [udfIO, udfIO])

@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
-from eva.parser.create_mat_view_statement import \
-    CreateMaterializedViewStatement
-from eva.parser.create_statement import (ColConstraintInfo, ColumnDefinition,
-                                         CreateTableStatement)
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import (
+    ColConstraintInfo,
+    ColumnDefinition,
+    CreateTableStatement,
+)
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.table_ref import TableRef
@@ -52,8 +53,7 @@ class CreateTable(evaql_parserVisitor):
                 # stop parsing something bad happened
                 return None
 
-        create_stmt = CreateTableStatement(
-            table_ref, if_not_exists, create_definitions)
+        create_stmt = CreateTableStatement(table_ref, if_not_exists, create_definitions)
         return create_stmt
 
     def visitCreateDefinitions(self, ctx: evaql_parser.CreateDefinitionsContext):

@@ -13,8 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (create_dummy_batches, create_sample_video, create_table,
-                       file_remove, load_inbuilt_udfs)
+from test.util import (
+    create_dummy_batches,
+    create_sample_video,
+    create_table,
+    file_remove,
+    load_inbuilt_udfs,
+)
 
 import numpy as np
 import pandas as pd
@@ -79,7 +84,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_should_load_and_select_in_table(self):
         select_query = "SELECT id FROM MyVideo;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
         expected_rows = [{"myvideo.id": i} for i in range(NUM_FRAMES)]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
@@ -92,7 +98,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_should_select_star_in_table(self):
         select_query = "SELECT * FROM MyVideo;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
 
@@ -103,7 +110,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_should_select_star_in_nested_query(self):
         select_query = """SELECT * FROM (SELECT * FROM MyVideo) AS T;"""
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
@@ -129,7 +137,8 @@ class SelectExecutorTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         select_query = "SELECT * FROM UADETRAC;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
         video_reader = OpenCVReader(
             "data/ua_detrac/ua_detrac.mp4", batch_mem_size=30000000
         )
@@ -158,9 +167,9 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
-        expected_batch = list(create_dummy_batches(
-            filters=range(2, NUM_FRAMES)))[0]
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches(filters=range(2, NUM_FRAMES)))[0]
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
@@ -174,7 +183,8 @@ class SelectExecutorTest(unittest.TestCase):
         nested_select_query = """SELECT id, data FROM
             (SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5) AS T
             WHERE id >= 3;"""
-        actual_batch = sorted(execute_query_fetch_all(nested_select_query))
+        actual_batch = execute_query_fetch_all(nested_select_query)
+        actual_batch.sort()
         expected_batch = list(create_dummy_batches(filters=range(3, 5)))[0]
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
@@ -191,7 +201,8 @@ class SelectExecutorTest(unittest.TestCase):
     def test_select_and_union_video_in_table(self):
         select_query = """SELECT id, data FROM MyVideo WHERE id < 3
             UNION ALL SELECT id, data FROM MyVideo WHERE id > 7;"""
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
                 filters=[i for i in range(NUM_FRAMES) if i < 3 or i > 7]
@@ -206,27 +217,26 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
-                filters=[i for i in range(NUM_FRAMES)
-                         if i < 2 or i == 5 or i > 7]
+                filters=[i for i in range(NUM_FRAMES) if i < 2 or i == 5 or i > 7]
             )
         )[0]
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_limit(self):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
-        expected_batch = list(create_dummy_batches(
-            num_frames=10, batch_size=5))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        expected_batch = list(create_dummy_batches(num_frames=10, batch_size=5))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])
 
     def test_select_and_sample(self):
         select_query = "SELECT id,data FROM MyVideo SAMPLE 7 ORDER BY id;"
-        actual_batch = sorted(execute_query_fetch_all(select_query))
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
 
-        expected_batch = list(create_dummy_batches(
-            filters=range(0, NUM_FRAMES, 7)))
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         # Since frames are fetched in random order, this test might be flaky

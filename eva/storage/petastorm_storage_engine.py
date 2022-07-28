@@ -52,8 +52,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         empty_rdd = self.spark_context.emptyRDD()
 
         with materialize_dataset(
-            self.spark_session, self._spark_url(
-                table), table.schema.petastorm_schema
+            self.spark_session, self._spark_url(table), table.schema.petastorm_schema
         ):
 
             self.spark_session.createDataFrame(
@@ -84,8 +83,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         # Throw an error if the row schema doesn't match the table schema
 
         with materialize_dataset(
-            self.spark_session, self._spark_url(
-                table), table.schema.petastorm_schema
+            self.spark_session, self._spark_url(table), table.schema.petastorm_schema
         ):
 
             records = rows.frames

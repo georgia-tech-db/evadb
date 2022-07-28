@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import asyncio
 from typing import Iterator, Optional
 
@@ -65,8 +64,7 @@ def handle_request(transport, request_message):
         output_batch = execute_query_fetch_all(request_message)
     except Exception as e:
         logger.warn(e)
-        response = Response(status=ResponseStatus.FAIL,
-                            batch=None, error=str(e))
+        response = Response(status=ResponseStatus.FAIL, batch=None, error=str(e))
     else:
         response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
 

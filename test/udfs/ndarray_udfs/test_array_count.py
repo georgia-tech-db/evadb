@@ -13,8 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (NUM_FRAMES, create_sample_video, file_remove,
-                       load_inbuilt_udfs)
+from test.util import NUM_FRAMES, create_sample_video, file_remove, load_inbuilt_udfs
 
 import pandas as pd
 

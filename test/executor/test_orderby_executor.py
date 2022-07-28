@@ -41,8 +41,7 @@ class OrderByExecutorTest(unittest.TestCase):
         """
 
         df1 = pd.DataFrame(np.array([[1, 1, 1]]), columns=["A", "B", "C"])
-        df2 = pd.DataFrame(
-            np.array([[1, 5, 6], [4, 7, 10]]), columns=["A", "B", "C"])
+        df2 = pd.DataFrame(np.array([[1, 5, 6], [4, 7, 10]]), columns=["A", "B", "C"])
         df3 = pd.DataFrame(
             np.array([[2, 9, 7], [4, 1, 2], [4, 2, 4]]), columns=["A", "B", "C"]
         )
@@ -72,8 +71,7 @@ class OrderByExecutorTest(unittest.TestCase):
         4  4  2   4
         5  4  1   2
         """
-        expected_df1 = pd.DataFrame(
-            np.array([[1, 5, 6]]), columns=["A", "B", "C"])
+        expected_df1 = pd.DataFrame(np.array([[1, 5, 6]]), columns=["A", "B", "C"])
         expected_df2 = pd.DataFrame(
             np.array([[1, 1, 1], [2, 9, 7]]), columns=["A", "B", "C"]
         )

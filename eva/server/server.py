@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import asyncio
 import os
 import string
@@ -20,8 +19,7 @@ from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
-from eva.server.networking_utils import (realtime_server_status,
-                                         set_socket_io_timeouts)
+from eva.server.networking_utils import realtime_server_status, set_socket_io_timeouts
 from eva.utils.logging_manager import logger
 
 
@@ -56,8 +54,7 @@ class EvaServer(asyncio.Protocol):
         # Each client connection creates a new protocol instance
         peername = transport.get_extra_info("peername")
         logger.debug(
-            "Connection from client: " +
-            str(peername) + str(self._socket_timeout)
+            "Connection from client: " + str(peername) + str(self._socket_timeout)
         )
         EvaServer.__connections__ += 1
 
@@ -84,8 +81,7 @@ class EvaServer(asyncio.Protocol):
                 return self.transport.close()
             else:
                 logger.debug("Handle request")
-                asyncio.create_task(handle_request(
-                    self.transport, request_message))
+                asyncio.create_task(handle_request(self.transport, request_message))
 
 
 def start_server(
@@ -119,15 +115,13 @@ def start_server(
 
     for socket in server.sockets:
         logger.critical(
-            "PID(" + str(os.getpid()) + ") serving on " +
-            str(socket.getsockname())
+            "PID(" + str(os.getpid()) + ") serving on " + str(socket.getsockname())
         )
 
     server_closed = loop.create_task(server.wait_closed())
 
     # Start the realtime status monitor
-    monitor = loop.create_task(
-        realtime_server_status(EvaServer, server_closed))
+    monitor = loop.create_task(realtime_server_status(EvaServer, server_closed))
 
     try:
         loop.run_until_complete(stop_server_future)

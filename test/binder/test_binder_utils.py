@@ -16,8 +16,11 @@ import unittest
 
 from mock import MagicMock, call, patch
 
-from eva.binder.binder_utils import (bind_table_info, create_video_metadata,
-                                     handle_if_not_exists)
+from eva.binder.binder_utils import (
+    bind_table_info,
+    create_video_metadata,
+    handle_if_not_exists,
+)
 from eva.catalog.column_type import ColumnType, NdArrayType
 
 
@@ -60,8 +63,7 @@ class BinderUtilsTest(unittest.TestCase):
 
         calls = [
             call("id", ColumnType.INTEGER, None, [], "cci"),
-            call("data", ColumnType.NDARRAY,
-                 NdArrayType.UINT8, [None, None, None]),
+            call("data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]),
         ]
 
         actual = create_video_metadata(name)

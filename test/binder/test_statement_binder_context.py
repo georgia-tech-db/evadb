@@ -62,8 +62,7 @@ class StatementBinderTests(unittest.TestCase):
         ctx.add_derived_table_alias("alias", exprs)
 
         mock_check.assert_called_with("alias")
-        self.assertEqual(
-            ctx._derived_table_alias_map["alias"], ["A", "B", "C"])
+        self.assertEqual(ctx._derived_table_alias_map["alias"], ["A", "B", "C"])
 
     def test_get_binded_column_should_search_all(self):
         ctx = StatementBinderContext()

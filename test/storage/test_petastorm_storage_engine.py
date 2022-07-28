@@ -81,7 +81,6 @@ class PetastormStorageEngineTest(unittest.TestCase):
             )
         )
         expected_batch = list(
-            create_dummy_batches(
-                filters=[i for i in range(NUM_FRAMES) if i % 2 == 0])
+            create_dummy_batches(filters=[i for i in range(NUM_FRAMES) if i % 2 == 0])
         )
         self.assertTrue(read_batch, expected_batch)

@@ -119,8 +119,7 @@ class CreateTableStatement(AbstractStatement):
         self._column_list = column_list
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ({}) ".format(
-            self._table_ref, self._if_not_exists)
+        print_str = "CREATE TABLE {} ({}) ".format(self._table_ref, self._if_not_exists)
         return print_str
 
     @property

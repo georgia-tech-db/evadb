@@ -24,8 +24,7 @@ from eva.models.storage.batch import Batch
 class FunctionScanExecutorTest(unittest.TestCase):
     def test_simple_function_scan(self):
         values = Batch(pd.DataFrame([1, 2, 3], columns=["a"]))
-        expression = FunctionExpression(
-            lambda x: x + 1, name="test", alias="test")
+        expression = FunctionExpression(lambda x: x + 1, name="test", alias="test")
         expression.output_col_aliases = ["test.a"]
         plan = type("FunctionScanPlan", (), {"func_expr": expression})
         function_scan_executor = FunctionScanExecutor(plan)

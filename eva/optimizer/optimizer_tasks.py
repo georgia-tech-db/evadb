@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
 
 from enum import IntEnum, auto
@@ -82,30 +81,26 @@ class TopDownRewrite(OptimizerTask):
         # sort the rules by promise
         valid_rules = sorted(valid_rules, key=lambda x: x.promise())
         for rule in valid_rules:
-            binder = Binder(self.root_expr, rule.pattern,
-                            self.optimizer_context.memo)
+            binder = Binder(self.root_expr, rule.pattern, self.optimizer_context.memo)
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
                 logger.info(
-                    "In TopDown, Rule {} matched for {}".format(
-                        rule, self.root_expr)
+                    "In TopDown, Rule {} matched for {}".format(rule, self.root_expr)
                 )
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.replace_expression(
                     after, self.root_expr.group_id
                 )
                 self.optimizer_context.task_stack.push(
-                    TopDownRewrite(new_expr, self.rule_set,
-                                   self.optimizer_context)
+                    TopDownRewrite(new_expr, self.rule_set, self.optimizer_context)
                 )
 
                 self.root_expr.mark_rule_explored(rule.rule_type)
         for child in self.root_expr.children:
             child_expr = self.optimizer_context.memo.groups[child].logical_exprs[0]
             self.optimizer_context.task_stack.push(
-                TopDownRewrite(child_expr, self.rule_set,
-                               self.optimizer_context)
+                TopDownRewrite(child_expr, self.rule_set, self.optimizer_context)
             )
 
 
@@ -132,8 +127,7 @@ class BottomUpRewrite(OptimizerTask):
             for child in self.root_expr.children:
                 child_expr = self.optimizer_context.memo.groups[child].logical_exprs[0]
                 self.optimizer_context.task_stack.push(
-                    BottomUpRewrite(child_expr, self.rule_set,
-                                    self.optimizer_context)
+                    BottomUpRewrite(child_expr, self.rule_set, self.optimizer_context)
                 )
             return
         valid_rules = []
@@ -146,14 +140,12 @@ class BottomUpRewrite(OptimizerTask):
         # sort the rules by promise
         sorted(valid_rules, key=lambda x: x.promise())
         for rule in valid_rules:
-            binder = Binder(self.root_expr, rule.pattern,
-                            self.optimizer_context.memo)
+            binder = Binder(self.root_expr, rule.pattern, self.optimizer_context.memo)
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
                 logger.info(
-                    "In BottomUp, Rule {} matched for {}".format(
-                        rule, self.root_expr)
+                    "In BottomUp, Rule {} matched for {}".format(rule, self.root_expr)
                 )
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.replace_expression(
@@ -161,8 +153,7 @@ class BottomUpRewrite(OptimizerTask):
                 )
                 logger.info("After rewiting {}".format(self.root_expr))
                 self.optimizer_context.task_stack.push(
-                    BottomUpRewrite(new_expr, self.rule_set,
-                                    self.optimizer_context)
+                    BottomUpRewrite(new_expr, self.rule_set, self.optimizer_context)
                 )
             self.root_expr.mark_rule_explored(rule.rule_type)
 
@@ -194,16 +185,14 @@ class OptimizeExpression(OptimizerTask):
         for rule in valid_rules:
             # apply the rule
             self.optimizer_context.task_stack.push(
-                ApplyRule(rule, self.root_expr,
-                          self.optimizer_context, self.explore)
+                ApplyRule(rule, self.root_expr, self.optimizer_context, self.explore)
             )
 
             # explore the input group if necessary
             for idx, child in enumerate(rule.pattern.children):
                 if len(child.children):
                     child_grp_id = self.root_expr.children[idx]
-                    group = self.optimizer_context.memo.get_group_by_id(
-                        child_grp_id)
+                    group = self.optimizer_context.memo.get_group_by_id(child_grp_id)
                     self.optimizer_context.task_stack.push(
                         ExploreGroup(group, self.optimizer_context)
                     )
@@ -228,8 +217,7 @@ class ApplyRule(OptimizerTask):
         # return if already explored
         if self.root_expr.is_rule_explored(self.rule.rule_type):
             return
-        binder = Binder(self.root_expr, self.rule.pattern,
-                        self.optimizer_context.memo)
+        binder = Binder(self.root_expr, self.rule.pattern, self.optimizer_context.memo)
         for match in iter(binder):
             if not self.rule.check(match, self.optimizer_context):
                 continue
@@ -241,8 +229,7 @@ class ApplyRule(OptimizerTask):
             if new_expr.is_logical():
                 # optimize expressions
                 self.optimizer_context.task_stack.push(
-                    OptimizeExpression(
-                        new_expr, self.optimizer_context, self.explore)
+                    OptimizeExpression(new_expr, self.optimizer_context, self.explore)
                 )
             else:
                 # cost the physical expressions
@@ -298,8 +285,7 @@ class OptimizeInputs(OptimizerTask):
                 )
                 return
 
-        cost += self.optimizer_context.cost_model.calculate_cost(
-            self.root_expr)
+        cost += self.optimizer_context.cost_model.calculate_cost(self.root_expr)
         grp.add_expr_cost(self.root_expr, PropertyType.DEFAULT, cost)
 
 

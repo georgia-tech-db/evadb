@@ -13,8 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (DummyObjectDetector, create_dummy_batches,
-                       create_sample_video, file_remove)
+from test.util import (
+    DummyObjectDetector,
+    create_dummy_batches,
+    create_sample_video,
+    file_remove,
+)
 
 import numpy as np
 import pandas as pd
@@ -67,8 +71,7 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [
-            {"myvideo.id": i * 2,
-                "dummyobjectdetector.label": np.array(["person"])}
+            {"myvideo.id": i * 2, "dummyobjectdetector.label": np.array(["person"])}
             for i in range(NUM_FRAMES // 2)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -87,17 +90,16 @@ class UDFExecutorTest(unittest.TestCase):
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [
-            {"myvideo.id": i * 2,
-                "dummyobjectdetector.label": np.array(["person"])}
+            {"myvideo.id": i * 2, "dummyobjectdetector.label": np.array(["person"])}
             for i in range(NUM_FRAMES // 2)
         ]
         expected += [
-            {"myvideo.id": i, "dummyobjectdetector.label": np.array([
-                                                                    "bicycle"])}
+            {"myvideo.id": i, "dummyobjectdetector.label": np.array(["bicycle"])}
             for i in range(NUM_FRAMES)
             if i % 2 + 1 == 2
         ]
-        expected_batch = sorted(Batch(frames=pd.DataFrame(expected)))
+        expected_batch = Batch(frames=pd.DataFrame(expected))
+        expected_batch.sort()
         self.assertEqual(actual_batch, expected_batch)
 
         nested_select_query = """SELECT id, data FROM

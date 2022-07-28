@@ -32,8 +32,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_SUM, None, columnName
         )
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(6, batch.frames.iloc[0][0])
 
@@ -43,8 +42,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_COUNT, None, columnName
         )
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
 
@@ -54,8 +52,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_AVG, None, columnName
         )
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(2, batch.frames.iloc[0][0])
 
@@ -65,8 +62,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_MIN, None, columnName
         )
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(1, batch.frames.iloc[0][0])
 
@@ -76,7 +72,6 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(
             ExpressionType.AGGREGATION_MAX, None, columnName
         )
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])

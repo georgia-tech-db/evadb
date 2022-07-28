@@ -14,8 +14,14 @@
 # limitations under the License.
 import os
 import unittest
-from test.util import (FRAME_SIZE, NUM_FRAMES, PATH_PREFIX,
-                       create_dummy_batches, create_sample_video, file_remove)
+from test.util import (
+    FRAME_SIZE,
+    NUM_FRAMES,
+    PATH_PREFIX,
+    create_dummy_batches,
+    create_sample_video,
+    file_remove,
+)
 
 from eva.readers.opencv_reader import OpenCVReader
 
@@ -51,8 +57,7 @@ class VideoLoaderTest(unittest.TestCase):
             offset=2,
         )
         batches = list(video_loader.read())
-        expected = list(create_dummy_batches(
-            filters=[i for i in range(2, NUM_FRAMES)]))
+        expected = list(create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)]))
 
         self.assertTrue(batches, expected)
 
@@ -63,8 +68,7 @@ class VideoLoaderTest(unittest.TestCase):
             offset=2,
         )
         batches = list(video_loader.read())
-        expected = list(create_dummy_batches(
-            filters=[i for i in range(2, NUM_FRAMES)]))
+        expected = list(create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)]))
         self.assertTrue(batches, expected)
 
     def test_should_start_frame_number_from_two(self):
@@ -75,8 +79,7 @@ class VideoLoaderTest(unittest.TestCase):
         )
         batches = list(video_loader.read())
         expected = list(
-            create_dummy_batches(
-                filters=[i for i in range(0, NUM_FRAMES)], start_id=2)
+            create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES)], start_id=2)
         )
         self.assertTrue(batches, expected)
 
@@ -89,7 +92,6 @@ class VideoLoaderTest(unittest.TestCase):
         )
         batches = list(video_loader.read())
         expected = list(
-            create_dummy_batches(
-                filters=[i for i in range(1, NUM_FRAMES)], start_id=2)
+            create_dummy_batches(filters=[i for i in range(1, NUM_FRAMES)], start_id=2)
         )
         self.assertTrue(batches, expected)

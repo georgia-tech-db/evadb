@@ -180,8 +180,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
         res = pd.DataFrame()
 
         for batch in encoded:
-            bboxes, classes, confidences = [
-                x.detach().cpu().numpy() for x in batch]
+            bboxes, classes, confidences = [x.detach().cpu().numpy() for x in batch]
             best = np.argwhere(confidences > self.threshold).squeeze()
 
             # deal with empty detection
@@ -194,8 +193,7 @@ class SSDObjectDetector(PytorchAbstractUDF):
             label, bbox, conf = [], [], []
             for idx in best:
                 left, top, right, bottom = bboxes[idx]
-                x, y, w, h = [v * 300 for v in [left,
-                                                top, right - left, bottom - top]]
+                x, y, w, h = [v * 300 for v in [left, top, right - left, bottom - top]]
                 label.append(self.labels[classes[idx]])
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
@@ -297,8 +295,7 @@ class Encoder(object):
             bboxes_in[:, :, :2] * self.dboxes_xywh[:, :, 2:]
             + self.dboxes_xywh[:, :, :2]
         )
-        bboxes_in[:, :, 2:] = bboxes_in[:, :, 2:].exp() * \
-            self.dboxes_xywh[:, :, 2:]
+        bboxes_in[:, :, 2:] = bboxes_in[:, :, 2:].exp() * self.dboxes_xywh[:, :, 2:]
 
         # Transform format to ltrb
         l, t, r, b = (
@@ -355,8 +352,7 @@ class Encoder(object):
                 idx = score_idx_sorted[-1].item()
                 bboxes_sorted = bboxes[score_idx_sorted, :]
                 bboxes_idx = bboxes[idx, :].unsqueeze(dim=0)
-                iou_sorted = calc_iou_tensor(
-                    bboxes_sorted, bboxes_idx).squeeze()
+                iou_sorted = calc_iou_tensor(bboxes_sorted, bboxes_idx).squeeze()
                 # we only need iou < criteria
                 score_idx_sorted = score_idx_sorted[iou_sorted < criteria]
                 candidates.append(idx)

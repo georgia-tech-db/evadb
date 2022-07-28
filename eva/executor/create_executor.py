@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from eva.binder.binder_utils import create_table_metadata, handle_if_not_exists
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.create_plan import CreatePlan
