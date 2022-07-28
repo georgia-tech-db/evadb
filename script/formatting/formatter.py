@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ def is_tool(name):
     else:
         installed_version = pkg_resources.get_distribution(name).version
         if installed_version != req_version:
-            LOG.warn(
+            LOG.warning(
                 f"EVA uses {name} {req_version}. The installed version is"
                 " {installed_version} which can result in different results."
             )
@@ -274,7 +274,6 @@ if __name__ == "__main__":
     is_tool(ISORT_BINARY)
 
     if args.format_modified_code:
-
         MERGEBASE = subprocess.check_output(
             "git merge-base origin/master HEAD", shell=True, text=True
         ).rstrip()
@@ -283,10 +282,9 @@ if __name__ == "__main__":
             f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'",
             shell=True,
             text=True,
-        ).split("\n")
+        ).rstrip().split("\n")
         # print(files)
         for file in files:
-            print(file)
             format_file(file, args.add_header, args.strip_header, True)
     elif args.file_name:
         LOG.info("Scanning file: " + "".join(args.file_name))
