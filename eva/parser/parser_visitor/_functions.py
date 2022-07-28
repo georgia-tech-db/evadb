@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ class Functions(evaql_parserVisitor):
             if not isinstance(child, TerminalNode):
                 args.append(self.visit(child))
         return args
-    
+
     # Get UDF information from context
     def getUDFInfo(self, ctx):
         udf_name = None
@@ -73,7 +73,7 @@ class Functions(evaql_parserVisitor):
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
                     if_not_exists = True
-                
+
                 elif rule_idx == evaql_parser.RULE_ifExists:
                     if_exists = True
 

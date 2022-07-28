@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,8 +46,7 @@ class CascadeOptimizer(unittest.TestCase):
                     FROM MyVideo
                     WHERE DummyObjectDetector(data).label = ['person'];
         """
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch = sorted(execute_query_fetch_all(select_query))
         expected = [{'myvideo.id': i * 2,
                      'dummyobjectdetector.label': ['person']}
                     for i in range(NUM_FRAMES // 2)]

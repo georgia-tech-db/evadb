@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ class DropExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Drop table executor"""        
+        """Drop table executor"""
         catalog_manager = CatalogManager()
         if len(self.node.table_refs) > 1:
             logger.exception('Drop supports only single table')

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,7 +67,6 @@ class PytorchTest(unittest.TestCase):
             with mock.patch.dict(sys.modules, {'torch': None}):
                 from eva.udfs.ssd_object_detector\
                     import SSDObjectDetector  # noqa: F401
-                pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
@@ -75,4 +74,3 @@ class PytorchTest(unittest.TestCase):
                                  {'torchvision.transforms': None}):
                 from eva.udfs.ssd_object_detector\
                     import SSDObjectDetector  # noqa: F401
-                pass

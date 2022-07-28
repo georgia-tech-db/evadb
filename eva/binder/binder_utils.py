@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -134,7 +134,7 @@ def extend_star(binder_context: StatementBinderContext) \
     col_objs = binder_context._get_all_alias_and_col_name()
 
     target_list = list(
-        [TupleValueExpression(col_name=col_name, table_alias=alias) 
+        [TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs]
     )
     return target_list

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,8 +84,7 @@ class UDFExecutorTest(unittest.TestCase):
         expected += [{'myvideo.id': i,
                       'dummyobjectdetector.label': np.array(['bicycle'])}
                      for i in range(NUM_FRAMES) if i % 2 + 1 == 2]
-        expected_batch = Batch(frames=pd.DataFrame(expected))
-        expected_batch.sort()
+        expected_batch = sorted(Batch(frames=pd.DataFrame(expected)))
         self.assertEqual(actual_batch, expected_batch)
 
         nested_select_query = """SELECT id, data FROM

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2021 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,6 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
             with mock.patch.dict(sys.modules, {'torch': None}):
                 from eva.udfs.fastrcnn_object_detector\
                     import FastRCNNObjectDetector  # noqa: F401
-                pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
@@ -48,7 +47,6 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
                                  {'torchvision': None}):
                 from eva.udfs.fastrcnn_object_detector\
                     import FastRCNNObjectDetector  # noqa: F401
-                pass
 
     @unittest.skip("disable test due to model downloading time")
     def test_should_return_batches_equivalent_to_number_of_frames(self):
