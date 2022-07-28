@@ -22,6 +22,7 @@ from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.expression.expression_utils import (
+    conjuction_list_to_expression_tree,
     contains_single_column,
     extract_range_list_from_comparison_expr,
     extract_range_list_from_predicate,
@@ -193,3 +194,11 @@ class ExpressionUtilsTest(unittest.TestCase):
             self.gen_cmp_expr(10, ExpressionType.COMPARE_GREATER, "y"),
         )
         self.assertFalse(is_simple_predicate(expr))
+
+    def test_conjuction_list_to_expression_tree(self):
+        expr1 = self.gen_cmp_expr(10)
+        expr2 = self.gen_cmp_expr(20)
+        new_expr = conjuction_list_to_expression_tree([expr1, expr2])
+        self.assertEqual(new_expr.etype, ExpressionType.LOGICAL_AND)
+        self.assertEqual(new_expr.children[0], expr1)
+        self.assertEqual(new_expr.children[1], expr2)
