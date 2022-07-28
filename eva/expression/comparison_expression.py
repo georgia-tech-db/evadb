@@ -15,9 +15,11 @@
 import numpy as np
 import pandas as pd
 
-from eva.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionReturnType,
-                                                ExpressionType)
+from eva.expression.abstract_expression import (
+    AbstractExpression,
+    ExpressionReturnType,
+    ExpressionType,
+)
 from eva.models.storage.batch import Batch
 
 
@@ -48,8 +50,7 @@ class ComparisonExpression(AbstractExpression):
             elif len(rvalues) == 1:
                 rvalues = np.repeat(rvalues, len(lvalues), axis=0)
             else:
-                raise Exception(
-                    "Left and Right batch does not have equal elements")
+                raise Exception("Left and Right batch does not have equal elements")
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
             return Batch(pd.DataFrame(lvalues == rvalues))

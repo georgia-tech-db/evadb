@@ -116,8 +116,7 @@ class DatasetService(BaseService):
         self, new_name: str, curr_database_name: str, curr_dataset_name: str
     ):
         try:
-            dataset = self.dataset_object_by_name(
-                curr_database_name, curr_dataset_name)
+            dataset = self.dataset_object_by_name(curr_database_name, curr_dataset_name)
             dataset.update(_name=new_name)
 
         except Exception as e:

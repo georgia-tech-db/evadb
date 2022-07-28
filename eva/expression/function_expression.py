@@ -19,8 +19,7 @@ import pandas as pd
 from eva.catalog.models.udf_io import UdfIO
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
-from eva.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionType)
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.models.storage.batch import Batch
 from eva.udfs.gpu_compatible import GPUCompatible
 
@@ -72,8 +71,7 @@ class FunctionExpression(AbstractExpression):
 
     def evaluate(self, batch: Batch, **kwargs):
         new_batch = batch
-        child_batches = [child.evaluate(batch, **kwargs)
-                         for child in self.children]
+        child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
 

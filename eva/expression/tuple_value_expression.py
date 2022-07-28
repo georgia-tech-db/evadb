@@ -15,8 +15,11 @@
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.models.storage.batch import Batch
 
-from .abstract_expression import (AbstractExpression, ExpressionReturnType,
-                                  ExpressionType)
+from .abstract_expression import (
+    AbstractExpression,
+    ExpressionReturnType,
+    ExpressionType,
+)
 
 
 class TupleValueExpression(AbstractExpression):

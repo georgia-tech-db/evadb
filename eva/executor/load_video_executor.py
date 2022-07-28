@@ -58,8 +58,7 @@ class LoadVideoExecutor(AbstractExecutor):
             logger.error(error)
             raise RuntimeError(error)
 
-        success = VideoStorageEngine.create(
-            self.node.table_metainfo, video_file_path)
+        success = VideoStorageEngine.create(self.node.table_metainfo, video_file_path)
 
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek

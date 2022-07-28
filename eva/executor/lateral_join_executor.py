@@ -37,8 +37,7 @@ class LateralJoinExecutor(AbstractExecutor):
         for outer_batch in outer.exec():
             for result_batch in inner.exec(lateral_input=outer_batch):
                 # merge
-                result_batch = Batch.merge_column_wise(
-                    [outer_batch, result_batch])
+                result_batch = Batch.merge_column_wise([outer_batch, result_batch])
                 result_batch = apply_predicate(result_batch, self.predicate)
                 result_batch = apply_project(result_batch, self.join_project)
                 if not result_batch.empty():

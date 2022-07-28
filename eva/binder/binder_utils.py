@@ -108,8 +108,7 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(
-        table_info.database_name, table_info.table_name)
+    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
     if obj:
         table_info.table_obj = obj
     else:

@@ -92,8 +92,7 @@ class CustomModel:
 
 
 # Custom Base Model to be inherited by all models
-BaseModel = declarative_base(
-    cls=CustomModel, constructor=None, bind=SQLConfig().engine)
+BaseModel = declarative_base(cls=CustomModel, constructor=None, bind=SQLConfig().engine)
 
 
 def init_db():

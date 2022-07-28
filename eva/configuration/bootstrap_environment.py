@@ -70,8 +70,7 @@ def bootstrap_environment():
             update_value_config(cfg, "core", "datasets_dir", dataset_location)
         if not database_uri:
             database_uri = DB_DEFAULT_URI
-            update_value_config(
-                cfg, "core", "catalog_database_uri", database_uri)
+            update_value_config(cfg, "core", "catalog_database_uri", database_uri)
 
         # update config on disk
         with open(config_path, "w") as ymlfile:

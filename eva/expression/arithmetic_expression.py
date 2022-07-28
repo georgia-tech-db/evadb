@@ -14,9 +14,11 @@
 # limitations under the License.
 import pandas as pd
 
-from eva.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionReturnType,
-                                                ExpressionType)
+from eva.expression.abstract_expression import (
+    AbstractExpression,
+    ExpressionReturnType,
+    ExpressionType,
+)
 from eva.models.storage.batch import Batch
 
 

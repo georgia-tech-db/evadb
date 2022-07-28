@@ -17,8 +17,7 @@ from typing import Any
 import pandas as pd
 
 from eva.catalog.column_type import ColumnType
-from eva.expression.abstract_expression import (AbstractExpression,
-                                                ExpressionType)
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.models.storage.batch import Batch
 
 

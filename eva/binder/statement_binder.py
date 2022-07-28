@@ -143,8 +143,7 @@ class StatementBinder:
     def _bind_tableref(self, node: TableRef):
         if node.is_table_atom():
             # Table
-            self._binder_context.add_table_alias(
-                node.alias, node.table.table_name)
+            self._binder_context.add_table_alias(node.alias, node.table.table_name)
             bind_table_info(node.table)
         elif node.is_select():
             current_context = self._binder_context

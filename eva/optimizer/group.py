@@ -80,8 +80,7 @@ class Group:
 
         if expr.group_id != self.group_id:
             logger.error(
-                "Expected group id {}, found {}".format(
-                    self.group_id, expr.group_id)
+                "Expected group id {}, found {}".format(self.group_id, expr.group_id)
             )
             return
 

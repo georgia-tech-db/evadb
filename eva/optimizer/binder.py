@@ -48,8 +48,7 @@ class Binder:
                 return
 
             for child_grp, pattern_child in zip(expr.children, pattern.children):
-                child_binders.append(Binder._grp_binder(
-                    child_grp, pattern_child, memo))
+                child_binders.append(Binder._grp_binder(child_grp, pattern_child, memo))
         else:
             # record the group id in a Dummy Opearator
             curr_iterator = iter([Dummy(expr.group_id)])

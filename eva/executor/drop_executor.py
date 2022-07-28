@@ -61,8 +61,7 @@ class DropExecutor(AbstractExecutor):
 
         yield Batch(
             pd.DataFrame(
-                {"Table Successfully dropped: {}".format(
-                    table_ref.table.table_name)},
+                {"Table Successfully dropped: {}".format(table_ref.table.table_name)},
                 index=[0],
             )
         )
