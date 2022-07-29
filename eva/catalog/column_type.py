@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum, auto, IntEnum
+from enum import Enum, IntEnum, auto
 
 
 class Dimension(IntEnum):
@@ -45,8 +45,9 @@ class NdArrayType(Enum):
 
     @classmethod
     def to_numpy_type(cls, t):
-        import numpy as np
         from decimal import Decimal
+
+        import numpy as np
 
         if t == cls.INT8:
             np_type = np.int8
@@ -75,6 +76,6 @@ class NdArrayType(Enum):
         elif t == cls.ANYTYPE:
             np_type = np.dtype(object)
         else:
-            raise ValueError('Can not auto convert %s to numpy type' % t)
+            raise ValueError("Can not auto convert %s to numpy type" % t)
 
         return np_type

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,26 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List, Tuple
-from eva.expression.abstract_expression import (
-    AbstractExpression,
-    ExpressionType,
-)
+
+from eva.catalog.catalog_manager import CatalogManager
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
     contains_single_column,
     expression_tree_to_conjunction_list,
-    is_simple_predicate
+    is_simple_predicate,
 )
-from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
 
 
-def column_definition_to_udf_io(
-    col_list: List[ColumnDefinition], is_input: bool
-):
+def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
     """Create the UdfIO object fro each column definition provided
 
     Arguments:
@@ -115,9 +110,7 @@ def extract_pushdown_predicate(
     rem_pred = []
     pred_list = expression_tree_to_conjunction_list(predicate)
     for pred in pred_list:
-        if contains_single_column(pred, column_alias) and is_simple_predicate(
-            pred
-        ):
+        if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
             pushdown_preds.append(pred)
         else:
             rem_pred.append(pred)

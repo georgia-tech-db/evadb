@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from enum import Flag, auto, IntEnum
+from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
+
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
 )
+from eva.optimizer.rules.pattern import Pattern
+from eva.parser.types import JoinType
+from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
@@ -29,49 +33,49 @@ from eva.planner.show_info_plan import ShowInfoPlan
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
-from eva.parser.types import JoinType
-from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.operators import Dummy, LogicalShow, OperatorType, Operator
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
+    Dummy,
     LogicalCreate,
-    LogicalDrop,
-    LogicalRename,
-    LogicalInsert,
-    LogicalLoadData,
-    LogicalUpload,
-    LogicalCreateUDF,
-    LogicalDropUDF,
-    LogicalProject,
-    LogicalGet,
-    LogicalFilter,
-    LogicalUnion,
-    LogicalOrderBy,
-    LogicalLimit,
-    LogicalQueryDerivedGet,
-    LogicalSample,
-    LogicalJoin,
-    LogicalFunctionScan,
     LogicalCreateMaterializedView,
+    LogicalCreateUDF,
+    LogicalDrop,
+    LogicalDropUDF,
+    LogicalFilter,
+    LogicalFunctionScan,
+    LogicalGet,
+    LogicalInsert,
+    LogicalJoin,
+    LogicalLimit,
+    LogicalLoadData,
+    LogicalOrderBy,
+    LogicalProject,
+    LogicalQueryDerivedGet,
+    LogicalRename,
+    LogicalSample,
+    LogicalShow,
+    LogicalUnion,
+    LogicalUpload,
+    Operator,
+    OperatorType,
 )
 from eva.planner.create_plan import CreatePlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.drop_plan import DropPlan
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.planner.function_scan_plan import FunctionScanPlan
+from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan
+from eva.planner.lateral_join_plan import LateralJoinPlan
+from eva.planner.limit_plan import LimitPlan
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.upload_plan import UploadPlan
+from eva.planner.orderby_plan import OrderByPlan
+from eva.planner.rename_plan import RenamePlan
+from eva.planner.sample_plan import SamplePlan
 from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
-from eva.planner.orderby_plan import OrderByPlan
-from eva.planner.limit_plan import LimitPlan
-from eva.planner.sample_plan import SamplePlan
-from eva.planner.lateral_join_plan import LateralJoinPlan
-from eva.planner.hash_join_probe_plan import HashJoinProbePlan
-from eva.planner.function_scan_plan import FunctionScanPlan
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.planner.upload_plan import UploadPlan
 
 # Modified
 
@@ -464,9 +468,7 @@ class LogicalCreateToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(
-            before.video, before.column_list, before.if_not_exists
-        )
+        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
         return after
 
 
@@ -553,9 +555,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(
-            before.table_metainfo, before.column_list, before.value_list
-        )
+        after = InsertPlan(before.table_metainfo, before.column_list, before.value_list)
         return after
 
 
@@ -820,9 +820,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(
-            RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern
-        )
+        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
@@ -830,9 +828,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def check(self, grp_id: int, context: OptimizerContext):
         return True
 
-    def apply(
-        self, before: LogicalCreateMaterializedView, context: OptimizerContext
-    ):
+    def apply(self, before: LogicalCreateMaterializedView, context: OptimizerContext):
         after = CreateMaterializedViewPlan(
             before.view,
             columns=before.col_list,
@@ -947,9 +943,7 @@ class RulesManager:
             LogicalShowToPhysical(),
         ]
         self._all_rules = (
-            self._rewrite_rules
-            + self._logical_rules
-            + self._implementation_rules
+            self._rewrite_rules + self._logical_rules + self._implementation_rules
         )
 
     @property

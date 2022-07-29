@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ from eva.expression.abstract_expression import ExpressionType
 from eva.expression.arithmetic_expression import ArithmeticExpression
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.expression.logical_expression import LogicalExpression
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
     contains_single_column,
@@ -28,6 +26,8 @@ from eva.expression.expression_utils import (
     extract_range_list_from_predicate,
     is_simple_predicate,
 )
+from eva.expression.logical_expression import LogicalExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class ExpressionUtilsTest(unittest.TestCase):
@@ -56,9 +56,7 @@ class ExpressionUtilsTest(unittest.TestCase):
         results = []
         for expr_type in expr_types:
             cmpr_exp = self.gen_cmp_expr(10, expr_type, const_first=True)
-            results.append(
-                extract_range_list_from_comparison_expr(cmpr_exp, 0, 100)
-            )
+            results.append(extract_range_list_from_comparison_expr(cmpr_exp, 0, 100))
         expected = [
             [(0, 9), (11, 100)],
             [(10, 10)],
@@ -72,9 +70,7 @@ class ExpressionUtilsTest(unittest.TestCase):
         results = []
         for expr_type in expr_types:
             cmpr_exp = self.gen_cmp_expr(10, expr_type)
-            results.append(
-                extract_range_list_from_comparison_expr(cmpr_exp, 0, 100)
-            )
+            results.append(extract_range_list_from_comparison_expr(cmpr_exp, 0, 100))
         expected = [
             [(0, 9), (11, 100)],
             [(10, 10)],
@@ -86,18 +82,14 @@ class ExpressionUtilsTest(unittest.TestCase):
         self.assertEqual(results, expected)
 
         with self.assertRaises(RuntimeError):
-            cmpr_exp = LogicalExpression(
-                ExpressionType.LOGICAL_AND, Mock(), Mock()
-            )
+            cmpr_exp = LogicalExpression(ExpressionType.LOGICAL_AND, Mock(), Mock())
             extract_range_list_from_comparison_expr(cmpr_exp, 0, 100)
 
         with self.assertRaises(RuntimeError):
             cmpr_exp = self.gen_cmp_expr(10, ExpressionType.COMPARE_CONTAINS)
             extract_range_list_from_comparison_expr(cmpr_exp, 0, 100)
         with self.assertRaises(RuntimeError):
-            cmpr_exp = self.gen_cmp_expr(
-                10, ExpressionType.COMPARE_IS_CONTAINED
-            )
+            cmpr_exp = self.gen_cmp_expr(10, ExpressionType.COMPARE_IS_CONTAINED)
             extract_range_list_from_comparison_expr(cmpr_exp, 0, 100)
 
     def test_extract_range_list_from_predicate(self):
@@ -107,18 +99,14 @@ class ExpressionUtilsTest(unittest.TestCase):
             self.gen_cmp_expr(10),
             self.gen_cmp_expr(20),
         )
-        self.assertEqual(
-            extract_range_list_from_predicate(expr, 0, 100), [(21, 100)]
-        )
+        self.assertEqual(extract_range_list_from_predicate(expr, 0, 100), [(21, 100)])
         # id > 10 OR id > 20 -> (11, 100)
         expr = LogicalExpression(
             ExpressionType.LOGICAL_OR,
             self.gen_cmp_expr(10),
             self.gen_cmp_expr(20),
         )
-        self.assertEqual(
-            extract_range_list_from_predicate(expr, 0, 100), [(11, 100)]
-        )
+        self.assertEqual(extract_range_list_from_predicate(expr, 0, 100), [(11, 100)])
 
         # (id > 10 OR id > 20) OR (id > 10 AND id < 5) -> (11, 100)
         expr1 = LogicalExpression(
@@ -132,9 +120,7 @@ class ExpressionUtilsTest(unittest.TestCase):
             self.gen_cmp_expr(5, ExpressionType.COMPARE_LESSER),
         )
         expr = LogicalExpression(ExpressionType.LOGICAL_OR, expr1, expr2)
-        self.assertEqual(
-            extract_range_list_from_predicate(expr, 0, 100), [(11, 100)]
-        )
+        self.assertEqual(extract_range_list_from_predicate(expr, 0, 100), [(11, 100)])
 
         # (id > 10 OR id > 20) AND (id > 10 AND id < 5) -> []
         expr = LogicalExpression(ExpressionType.LOGICAL_AND, expr1, expr2)
@@ -183,9 +169,7 @@ class ExpressionUtilsTest(unittest.TestCase):
     def test_is_simple_predicate(self):
         self.assertTrue(is_simple_predicate(self.gen_cmp_expr(10)))
 
-        expr = ArithmeticExpression(
-            ExpressionType.AGGREGATION_COUNT, Mock(), Mock()
-        )
+        expr = ArithmeticExpression(ExpressionType.AGGREGATION_COUNT, Mock(), Mock())
         self.assertFalse(is_simple_predicate(expr))
 
         expr = LogicalExpression(

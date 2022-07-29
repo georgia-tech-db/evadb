@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from antlr4 import InputStream, CommonTokenStream
+from antlr4 import CommonTokenStream, InputStream
 from antlr4.error.ErrorListener import ErrorListener
 
-from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_lexer import evaql_lexer
-
+from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor import ParserVisitor
 
 
@@ -31,8 +29,14 @@ class AntlrErrorListener(ErrorListener):
         super(AntlrErrorListener, self).__init__()
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        error_str = "ERROR: Syntax error - Line" + str(line) + ": Col " +\
-                    str(column) + " - " + str(msg)
+        error_str = (
+            "ERROR: Syntax error - Line"
+            + str(line)
+            + ": Col "
+            + str(column)
+            + " - "
+            + str(msg)
+        )
         raise Exception(error_str)
 
     # def reportAmbiguity(self, recognizer, dfa, startIndex, stopIndex,
@@ -55,6 +59,7 @@ class Parser(object):
     """
     Parser for eva; based on EVAQL grammar
     """
+
     _instance = None
     _visitor = None
     _error_listener = None

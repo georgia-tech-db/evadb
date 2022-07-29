@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@ class FrameInfo:
 
     """
 
-    def __init__(self, height=-1, width=-1, channels=3,
-                 color_space=ColorSpace.RGB):
+    def __init__(self, height=-1, width=-1, channels=3, color_space=ColorSpace.RGB):
         self._color_space = color_space
         self._width = width
         self._height = height
@@ -58,7 +57,9 @@ class FrameInfo:
         return self._channels
 
     def __eq__(self, other):
-        return self.color_space == other.color_space and \
-            self.width == other.width and \
-            self.height == other.height and \
-            self.num_channels == other.num_channels
+        return (
+            self.color_space == other.color_space
+            and self.width == other.width
+            and self.height == other.height
+            and self.num_channels == other.num_channels
+        )

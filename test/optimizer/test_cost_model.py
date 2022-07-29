@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import unittest
+from copy import copy
 
 from mock import MagicMock
-from copy import copy
 
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.operators import Operator
@@ -39,6 +38,7 @@ class CostModel(unittest.TestCase):
                 return 1
             elif value is grp_expr2:
                 return 2
+
         cm = CostModel()
         cm.calculate_cost = MagicMock(side_effect=side_effect_func)
         opt_cxt = OptimizerContext(cm)
@@ -51,21 +51,24 @@ class CostModel(unittest.TestCase):
         opt_cxt.memo.add_group_expr(grp_expr1)
         opt_cxt.memo.add_group_expr(grp_expr2, grp_expr1.group_id)
         grp = opt_cxt.memo.get_group_by_id(grp_expr1.group_id)
-        opt_cxt.task_stack.push(
-            OptimizeGroup(grp, opt_cxt))
+        opt_cxt.task_stack.push(OptimizeGroup(grp, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
-        plan = PlanGenerator().build_optimal_physical_plan(
-            grp_expr1.group_id, opt_cxt)
+        plan = PlanGenerator().build_optimal_physical_plan(grp_expr1.group_id, opt_cxt)
         self.assertEqual(plan, grp_expr1.opr)
         self.assertEqual(grp.get_best_expr_cost(PropertyType.DEFAULT), 1)
 
     def test_should_select_cheap_plan_with_tree(self):
         # mocking the cost model
         def side_effect_func(value):
-            cost = dict({
-                grp_expr00: 1, grp_expr01: 2, grp_expr10: 4,
-                grp_expr11: 3, grp_expr20: 5
-            })
+            cost = dict(
+                {
+                    grp_expr00: 1,
+                    grp_expr01: 2,
+                    grp_expr10: 4,
+                    grp_expr11: 3,
+                    grp_expr20: 5,
+                }
+            )
             return cost[value]
 
         cm = CostModel()
@@ -78,8 +81,7 @@ class CostModel(unittest.TestCase):
         grp_expr01 = GroupExpression(Operator(MagicMock()))
         grp_expr01.opr.is_logical = lambda: False
         opt_cxt.memo.add_group_expr(grp_expr00)
-        opt_cxt.memo.add_group_expr(
-            grp_expr01, grp_expr00.group_id)
+        opt_cxt.memo.add_group_expr(grp_expr01, grp_expr00.group_id)
 
         # group 1
         grp_expr10 = GroupExpression(Operator(MagicMock()))
@@ -87,8 +89,7 @@ class CostModel(unittest.TestCase):
         opt_cxt.memo.add_group_expr(grp_expr10)
         grp_expr11 = GroupExpression(Operator(MagicMock()))
         grp_expr11.opr.is_logical = lambda: False
-        opt_cxt.memo.add_group_expr(
-            grp_expr11, grp_expr10.group_id)
+        opt_cxt.memo.add_group_expr(grp_expr11, grp_expr10.group_id)
 
         # group 2
         grp_expr20 = GroupExpression(Operator(MagicMock()))
@@ -101,11 +102,9 @@ class CostModel(unittest.TestCase):
         grp_expr11.children = [grp_expr01.group_id]
         grp_expr20.children = [grp_expr10.group_id]
 
-        opt_cxt.task_stack.push(
-            OptimizeGroup(grp, opt_cxt))
+        opt_cxt.task_stack.push(OptimizeGroup(grp, opt_cxt))
         self.execute_task_stack(opt_cxt.task_stack)
-        plan = PlanGenerator().build_optimal_physical_plan(
-            grp_expr20.group_id, opt_cxt)
+        plan = PlanGenerator().build_optimal_physical_plan(grp_expr20.group_id, opt_cxt)
         subplan = copy(grp_expr11.opr)
         subplan.children = [copy(grp_expr01.opr)]
         expected_plan = copy(grp_expr20.opr)

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 
 from eva.parser.statement import AbstractStatement
-
 from eva.parser.types import StatementType
-from pathlib import Path
 
 
 class UploadStatement(AbstractStatement):
@@ -35,8 +34,7 @@ class UploadStatement(AbstractStatement):
         self._video_blob = video_blob
 
     def __str__(self) -> str:
-        print_str = "UPLOAD PATH {} BLOB {}".format(
-            self._path, "string of video blob")
+        print_str = "UPLOAD PATH {} BLOB {}".format(self._path, "string of video blob")
         return print_str
 
     @property
@@ -50,8 +48,7 @@ class UploadStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, UploadStatement):
             return False
-        return (self.path == other.path and
-                self.video_blob == other.video_blob)
+        return self.path == other.path and self.video_blob == other.video_blob
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.path, self.video_blob))

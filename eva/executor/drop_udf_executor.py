@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.drop_udf_plan import DropUDFPlan
@@ -20,7 +19,6 @@ from eva.utils.logging_manager import logger
 
 
 class DropUDFExecutor(AbstractExecutor):
-
     def __init__(self, node: DropUDFPlan):
         super().__init__(node)
 
@@ -36,8 +34,9 @@ class DropUDFExecutor(AbstractExecutor):
 
         # check catalog if it already has this udf entry
         if not catalog_manager.get_udf_by_name(self.node.name):
-            err_msg = "UDF {} does not exist and cannot be dropped."\
-                .format(self.node.name)
+            err_msg = "UDF {} does not exist and cannot be dropped.".format(
+                self.node.name
+            )
             if self.node.if_exists:
                 logger.warn(err_msg)
             else:

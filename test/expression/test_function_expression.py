@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ from eva.udfs.gpu_compatible import GPUCompatible
 
 
 class FunctionExpressionTest(unittest.TestCase):
-    @patch('eva.expression.function_expression.Context')
+    @patch("eva.expression.function_expression.Context")
     def test_function_move_the_device_to_gpu_if_compatible(self, context):
         context_instance = context.return_value
         mock_function = MagicMock(spec=GPUCompatible)
         gpu_mock_function = Mock(return_value=pd.DataFrame())
-        gpu_device_id = '2'
+        gpu_device_id = "2"
 
         mock_function.to_device.return_value = gpu_mock_function
         context_instance.gpu_device.return_value = gpu_device_id
@@ -50,11 +50,10 @@ class FunctionExpressionTest(unittest.TestCase):
         expression.evaluate(input_batch)
         mock_function.assert_called()
 
-    @patch('eva.expression.function_expression.Context')
+    @patch("eva.expression.function_expression.Context")
     def test_should_execute_same_function_if_no_gpu(self, context):
         context_instance = context.return_value
-        mock_function = MagicMock(spec=GPUCompatible,
-                                  return_value=pd.DataFrame())
+        mock_function = MagicMock(spec=GPUCompatible, return_value=pd.DataFrame())
 
         context_instance.gpu_device.return_value = NO_GPU
 

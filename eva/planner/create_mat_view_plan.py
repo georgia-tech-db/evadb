@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
+from eva.parser.create_statement import ColumnDefinition
+from eva.parser.table_ref import TableRef
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from eva.parser.table_ref import TableRef
-from eva.parser.create_statement import ColumnDefinition
-
-from typing import List
 
 
 class CreateMaterializedViewPlan(AbstractPlan):
@@ -31,9 +30,12 @@ class CreateMaterializedViewPlan(AbstractPlan):
         if_not_exists {bool} -- Whether to override if there is existing view
     """
 
-    def __init__(self, view: TableRef,
-                 columns: List[ColumnDefinition],
-                 if_not_exists: bool = False):
+    def __init__(
+        self,
+        view: TableRef,
+        columns: List[ColumnDefinition],
+        if_not_exists: bool = False,
+    ):
         super().__init__(PlanOprType.CREATE_MATERIALIZED_VIEW)
         self._view = view
         self._columns = columns
@@ -52,7 +54,6 @@ class CreateMaterializedViewPlan(AbstractPlan):
         return self._columns
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.view,
-                     self.if_not_exists,
-                     tuple(self.columns)))
+        return hash(
+            (super().__hash__(), self.view, self.if_not_exists, tuple(self.columns))
+        )

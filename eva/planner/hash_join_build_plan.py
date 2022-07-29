@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List
+
+from eva.catalog.models.df_column import DataFrameColumn
 from eva.parser.types import JoinType
 from eva.planner.abstract_plan import AbstractPlan
-
 from eva.planner.types import PlanOprType
-from eva.catalog.models.df_column import DataFrameColumn
 
 
 class HashJoinBuildPlan(AbstractPlan):
@@ -37,6 +36,4 @@ class HashJoinBuildPlan(AbstractPlan):
         super().__init__(PlanOprType.HASH_BUILD)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.join_type,
-                     tuple(self.build_keys or [])))
+        return hash((super().__hash__(), self.join_type, tuple(self.build_keys or [])))

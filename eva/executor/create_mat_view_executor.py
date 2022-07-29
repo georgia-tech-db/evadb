@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
+from eva.binder.binder_utils import create_table_metadata, handle_if_not_exists
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.expression.abstract_expression import ExpressionType
 from eva.parser.create_statement import ColumnDefinition
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType
-from eva.executor.abstract_executor import AbstractExecutor
 from eva.storage.storage_engine import StorageEngine
-from eva.expression.abstract_expression import ExpressionType
-from eva.binder.binder_utils import create_table_metadata, handle_if_not_exists
 from eva.utils.logging_manager import logger
 
 

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Iterator
-from pathlib import Path
-import struct
 import shutil
+import struct
+from pathlib import Path
+from typing import Iterator
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.expression.abstract_expression import AbstractExpression
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.readers.opencv_reader import OpenCVReader
-from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.abstract_expression import AbstractExpression
+from eva.models.storage.batch import Batch
+from eva.readers.opencv_reader import OpenCVReader
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.logging_manager import logger
 
 

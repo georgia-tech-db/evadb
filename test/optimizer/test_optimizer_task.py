@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import unittest
 from unittest.mock import patch
 
 from mock import MagicMock
-from eva.optimizer.cost_model import CostModel
 
-from eva.optimizer.optimizer_tasks import (
-    TopDownRewrite,
-    BottomUpRewrite,
-    OptimizeGroup,
-)
-from eva.optimizer.optimizer_context import OptimizerContext
+from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import (
-    LogicalGet,
     LogicalFilter,
+    LogicalGet,
     LogicalProject,
     LogicalQueryDerivedGet,
 )
+from eva.optimizer.optimizer_context import OptimizerContext
+from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules import RulesManager
 from eva.planner.predicate_plan import PredicatePlan
@@ -71,9 +66,7 @@ class TestOptimizerTask(unittest.TestCase):
     def test_simple_top_down_rewrite(self):
         predicate = MagicMock()
         video = MagicMock()
-        with patch(
-            "eva.optimizer.rules.rules.extract_pushdown_predicate"
-        ) as mock:
+        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
             mock.return_value = (predicate, None)
             child_opr = LogicalGet(video, MagicMock(), MagicMock())
             root_opr = LogicalFilter(predicate, [child_opr])
@@ -89,9 +82,7 @@ class TestOptimizerTask(unittest.TestCase):
     def test_nested_top_down_rewrite(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
-        with patch(
-            "eva.optimizer.rules.rules.extract_pushdown_predicate"
-        ) as mock:
+        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
             mock.side_effect = [
                 (root_predicate, None),
                 (root_predicate, None),
@@ -100,15 +91,11 @@ class TestOptimizerTask(unittest.TestCase):
             ]
             child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
             child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
-            child_project_opr = LogicalProject(
-                [MagicMock()], [child_filter_opr]
-            )
+            child_project_opr = LogicalProject([MagicMock()], [child_filter_opr])
             root_derived_get_opr = LogicalQueryDerivedGet(
                 MagicMock(), children=[child_project_opr]
             )
-            root_filter_opr = LogicalFilter(
-                root_predicate, [root_derived_get_opr]
-            )
+            root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
             root_project_opr = LogicalProject([MagicMock()], [root_filter_opr])
 
             opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
@@ -118,7 +105,7 @@ class TestOptimizerTask(unittest.TestCase):
                 LogicalFilter,
                 LogicalQueryDerivedGet,
                 LogicalProject,
-                LogicalGet
+                LogicalGet,
             ]
             curr_grp_id = root_grp_id
             idx = 0
@@ -133,9 +120,7 @@ class TestOptimizerTask(unittest.TestCase):
     def test_nested_bottom_up_rewrite(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
-        with patch(
-            "eva.optimizer.rules.rules.extract_pushdown_predicate"
-        ) as mock:
+        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
             mock.side_effect = [
                 (root_predicate, None),
                 (root_predicate, None),
@@ -145,18 +130,12 @@ class TestOptimizerTask(unittest.TestCase):
 
             child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
             child_filter_opr = LogicalFilter(child_predicate, [child_get_opr])
-            child_project_opr = LogicalProject(
-                [MagicMock()], [child_filter_opr]
-            )
+            child_project_opr = LogicalProject([MagicMock()], [child_filter_opr])
             root_derived_get_opr = LogicalQueryDerivedGet(
                 MagicMock(), children=[child_project_opr]
             )
-            root_filter_opr = LogicalFilter(
-                root_predicate, [root_derived_get_opr]
-            )
-            root_project_opr = LogicalProject(
-                [MagicMock()], children=[root_filter_opr]
-            )
+            root_filter_opr = LogicalFilter(root_predicate, [root_derived_get_opr])
+            root_project_opr = LogicalProject([MagicMock()], children=[root_filter_opr])
 
             opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
             opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
@@ -194,18 +173,14 @@ class TestOptimizerTask(unittest.TestCase):
     def test_nested_implementation(self):
         child_predicate = MagicMock()
         root_predicate = MagicMock()
-        with patch(
-            "eva.optimizer.rules.rules.extract_pushdown_predicate"
-        ) as mock:
+        with patch("eva.optimizer.rules.rules.extract_pushdown_predicate") as mock:
             mock.side_effect = [
                 (child_predicate, None),
                 (root_predicate, None),
             ]
 
             child_get_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-            child_filter_opr = LogicalFilter(
-                child_predicate, children=[child_get_opr]
-            )
+            child_filter_opr = LogicalFilter(child_predicate, children=[child_get_opr])
             child_project_opr = LogicalProject(
                 [MagicMock()], children=[child_filter_opr]
             )
@@ -215,9 +190,7 @@ class TestOptimizerTask(unittest.TestCase):
             root_filter_opr = LogicalFilter(
                 root_predicate, children=[root_derived_get_opr]
             )
-            root_project_opr = LogicalProject(
-                [MagicMock()], children=[root_filter_opr]
-            )
+            root_project_opr = LogicalProject([MagicMock()], children=[root_filter_opr])
 
             opt_cxt, root_grp_id = self.top_down_rewrite(root_project_opr)
             opt_cxt, root_grp_id = self.bottom_up_rewrite(root_grp_id, opt_cxt)
@@ -233,10 +206,8 @@ class TestOptimizerTask(unittest.TestCase):
             idx = 0
             while True:
                 root_grp = opt_cxt.memo.groups[curr_grp_id]
-                best_root_grp_expr = root_grp.get_best_expr(
-                    PropertyType.DEFAULT)
-                self.assertEqual(type(best_root_grp_expr.opr),
-                                 expected_expr_order[idx])
+                best_root_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
+                self.assertEqual(type(best_root_grp_expr.opr), expected_expr_order[idx])
                 idx += 1
                 if idx == len(expected_expr_order):
                     break

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +14,14 @@
 # limitations under the License.
 from typing import List
 
-from eva.parser.statement import AbstractStatement
-
-from eva.parser.types import StatementType
-from eva.parser.table_ref import TableRef
 from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
 
 class ColConstraintInfo:
-    def __init__(self, nullable=False, default_value=None,
-                 primary=False, unique=False):
+    def __init__(self, nullable=False, default_value=None, primary=False, unique=False):
         self.nullable = nullable
         self.default_value = default_value
         self.primary = primary
@@ -32,22 +30,26 @@ class ColConstraintInfo:
     def __eq__(self, other):
         if not isinstance(other, ColConstraintInfo):
             return False
-        return (self.nullable == other.nullable
-                and self.default_value == other.default_value
-                and self.primary == other.primary
-                and self.unique == other.unique)
+        return (
+            self.nullable == other.nullable
+            and self.default_value == other.default_value
+            and self.primary == other.primary
+            and self.unique == other.unique
+        )
 
     def __hash__(self) -> int:
-        return hash((self.nullable,
-                     self.default_value,
-                     self.primary,
-                     self.unique))
+        return hash((self.nullable, self.default_value, self.primary, self.unique))
 
 
 class ColumnDefinition:
-    def __init__(self, col_name: str, col_type: ColumnType,
-                 col_array_type: NdArrayType, col_dim: List[int],
-                 cci: ColConstraintInfo = ColConstraintInfo()):
+    def __init__(
+        self,
+        col_name: str,
+        col_type: ColumnType,
+        col_array_type: NdArrayType,
+        col_dim: List[int],
+        cci: ColConstraintInfo = ColConstraintInfo(),
+    ):
         self._name = col_name
         self._type = col_type
         self._array_type = col_array_type
@@ -75,25 +77,26 @@ class ColumnDefinition:
         return self._cci
 
     def __str__(self):
-        return '{} {} {} {}'.format(self._name, self._type, self.array_type,
-                                    self._dimension)
+        return "{} {} {} {}".format(
+            self._name, self._type, self.array_type, self._dimension
+        )
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):
             return False
 
-        return (self.name == other.name
-                and self.type == other.type
-                and self.array_type == other.array_type
-                and self.dimension == other.dimension
-                and self.cci == other.cci)
+        return (
+            self.name == other.name
+            and self.type == other.type
+            and self.array_type == other.array_type
+            and self.dimension == other.dimension
+            and self.cci == other.cci
+        )
 
     def __hash__(self) -> int:
-        return hash((self.name,
-                     self.type,
-                     self.array_type,
-                     tuple(self.dimension),
-                     self.cci))
+        return hash(
+            (self.name, self.type, self.array_type, tuple(self.dimension), self.cci)
+        )
 
 
 class CreateTableStatement(AbstractStatement):
@@ -104,18 +107,19 @@ class CreateTableStatement(AbstractStatement):
         ColumnList: list of columns
     """
 
-    def __init__(self,
-                 table_ref: TableRef,
-                 if_not_exists: bool,
-                 column_list: List[ColumnDefinition] = None):
+    def __init__(
+        self,
+        table_ref: TableRef,
+        if_not_exists: bool,
+        column_list: List[ColumnDefinition] = None,
+    ):
         super().__init__(StatementType.CREATE)
         self._table_ref = table_ref
         self._if_not_exists = if_not_exists
         self._column_list = column_list
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ({}) ".format(self._table_ref,
-                                                   self._if_not_exists)
+        print_str = "CREATE TABLE {} ({}) ".format(self._table_ref, self._if_not_exists)
         return print_str
 
     @property
@@ -133,12 +137,18 @@ class CreateTableStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, CreateTableStatement):
             return False
-        return (self.table_ref == other.table_ref
-                and self.if_not_exists == other.if_not_exists
-                and self.column_list == other.column_list)
+        return (
+            self.table_ref == other.table_ref
+            and self.if_not_exists == other.if_not_exists
+            and self.column_list == other.column_list
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table_ref,
-                     self.if_not_exists,
-                     tuple(self.column_list)))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.if_not_exists,
+                tuple(self.column_list),
+            )
+        )

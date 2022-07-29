@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-import mock
 import sys
+import unittest
+from test.util import copy_sample_video_to_prefix, file_remove, load_inbuilt_udfs
+
+import mock
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-
-from test.util import (copy_sample_video_to_prefix,
-                       file_remove, load_inbuilt_udfs)
 
 
 class PytorchTest(unittest.TestCase):
@@ -35,7 +34,7 @@ class PytorchTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        file_remove('ua_detrac.mp4')
+        file_remove("ua_detrac.mp4")
 
     def test_should_run_pytorch_and_fastrcnn(self):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
@@ -60,19 +59,18 @@ class PytorchTest(unittest.TestCase):
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
-            self.assertTrue('car' in res['ssdobjectdetector.label'][idx])
+            self.assertTrue("car" in res["ssdobjectdetector.label"][idx])
 
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
-            with mock.patch.dict(sys.modules, {'torch': None}):
-                from eva.udfs.ssd_object_detector\
-                    import SSDObjectDetector  # noqa: F401
+            with mock.patch.dict(sys.modules, {"torch": None}):
+                from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
+
                 pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
-            with mock.patch.dict(sys.modules,
-                                 {'torchvision.transforms': None}):
-                from eva.udfs.ssd_object_detector\
-                    import SSDObjectDetector  # noqa: F401
+            with mock.patch.dict(sys.modules, {"torchvision.transforms": None}):
+                from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
+
                 pass

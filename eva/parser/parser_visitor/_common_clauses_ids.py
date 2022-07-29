@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.table_ref import TableInfo
 from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
 
 ##################################################################
@@ -32,7 +31,7 @@ class CommonClauses(evaql_parserVisitor):
             table_info = TableInfo(table_name=table_name)
             return table_info
         else:
-            error = 'Invalid Table Name'
+            error = "Invalid Table Name"
             logger.error(error)
 
     def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):

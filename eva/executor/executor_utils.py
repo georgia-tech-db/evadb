@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 
@@ -27,6 +28,5 @@ def apply_project(batch: Batch, project_list: List[AbstractExpression]):
 def apply_predicate(batch: Batch, predicate: AbstractExpression):
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch).frames
-        batch = Batch(
-            batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True))
+        batch = Batch(batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True))
     return batch

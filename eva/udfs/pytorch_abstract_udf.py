@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from abc import ABC, abstractmethod
 from typing import List
 
 import numpy as np
 import pandas as pd
+import torch
 from PIL import Image
+from torch import Tensor, nn
+from torchvision.transforms import Compose, transforms
+
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
-from eva.configuration.configuration_manager import ConfigurationManager
-
-import torch
-from torch import nn, Tensor
-from torchvision.transforms import Compose, transforms
 
 
 class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
@@ -47,12 +46,12 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
 
     def transform(self, images: np.ndarray):
         # reverse the channels from opencv
-        return self.transforms(Image.fromarray(images[:, :, ::-1]))\
-            .unsqueeze(0)
+        return self.transforms(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
     def forward(self, frames: List[np.ndarray]):
-        tens_batch = torch.cat([self.transform(x) for x in frames])\
-            .to(self.get_device())
+        tens_batch = torch.cat([self.transform(x) for x in frames]).to(
+            self.get_device()
+        )
         return self.classify(tens_batch)
 
     @abstractmethod
@@ -75,15 +74,15 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         Returns:
             pd.DataFrame: outcome after prediction
         """
-        gpu_batch_size = ConfigurationManager()\
-            .get_value('executor', 'gpu_batch_size')
+        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
 
         if gpu_batch_size:
             chunks = torch.split(frames, gpu_batch_size)
             outcome = pd.DataFrame()
             for tensor in chunks:
-                outcome = outcome.append(self._get_predictions(tensor),
-                                         ignore_index=True)
+                outcome = outcome.append(
+                    self._get_predictions(tensor), ignore_index=True
+                )
             return outcome
         else:
             return self._get_predictions(frames)

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,36 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from unittest.mock import MagicMock, patch
+
 import pandas as pd
 
-from unittest.mock import patch, MagicMock
-
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.executor.plan_executor import PlanExecutor
-from eva.models.storage.batch import Batch
-from eva.planner.seq_scan_plan import SeqScanPlan
-from eva.planner.storage_plan import StoragePlan
-from eva.planner.pp_plan import PPScanPlan
-from eva.planner.insert_plan import InsertPlan
-from eva.planner.create_plan import CreatePlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.drop_plan import DropPlan
-from eva.planner.create_udf_plan import CreateUDFPlan
-from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.upload_plan import UploadPlan
-from eva.executor.load_executor import LoadDataExecutor
-from eva.executor.upload_executor import UploadExecutor
-from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.create_executor import CreateExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
 from eva.executor.insert_executor import InsertExecutor
+from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.plan_executor import PlanExecutor
 from eva.executor.pp_executor import PPExecutor
+from eva.executor.seq_scan_executor import SequentialScanExecutor
+from eva.executor.upload_executor import UploadExecutor
+from eva.models.storage.batch import Batch
+from eva.planner.create_plan import CreatePlan
+from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_plan import DropPlan
+from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.planner.insert_plan import InsertPlan
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.planner.pp_plan import PPScanPlan
+from eva.planner.rename_plan import RenamePlan
+from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.planner.storage_plan import StoragePlan
+from eva.planner.upload_plan import UploadPlan
 
 
 class PlanExecutorTest(unittest.TestCase):
-
     def test_tree_structure_for_build_execution_tree(self):
         """
             Build an Abastract Plan with nodes:
@@ -67,22 +66,22 @@ class PlanExecutorTest(unittest.TestCase):
 
         child_1_abs_plan.append_child(child_1_1_abs_plan)
 
-        '''Build Execution Tree and check the nodes
-            are of the same type'''
-        root_abs_executor = PlanExecutor(
-            plan=root_abs_plan)._build_execution_tree(plan=root_abs_plan)
+        """Build Execution Tree and check the nodes
+            are of the same type"""
+        root_abs_executor = PlanExecutor(plan=root_abs_plan)._build_execution_tree(
+            plan=root_abs_plan
+        )
 
         # Root Nodes
-        self.assertEqual(root_abs_plan.opr_type,
-                         root_abs_executor._node.opr_type)
+        self.assertEqual(root_abs_plan.opr_type, root_abs_executor._node.opr_type)
 
         # Children of Root
-        for child_abs, child_exec in zip(root_abs_plan.children,
-                                         root_abs_executor.children):
+        for child_abs, child_exec in zip(
+            root_abs_plan.children, root_abs_executor.children
+        ):
             self.assertEqual(child_abs.opr_type, child_exec._node.opr_type)
             # Grand Children of Root
-            for gc_abs, gc_exec in zip(child_abs.children,
-                                       child_exec.children):
+            for gc_abs, gc_exec in zip(child_abs.children, child_exec.children):
                 self.assertEqual(gc_abs.opr_type, gc_exec._node.opr_type)
 
     def test_build_execution_tree_should_create_correct_exec_node(self):
@@ -107,18 +106,19 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertIsInstance(executor, InsertExecutor)
 
         # CreateUDFExecutor
-        plan = CreateUDFPlan('test', False, [], [], MagicMock(), None)
+        plan = CreateUDFPlan("test", False, [], [], MagicMock(), None)
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, CreateUDFExecutor)
 
         # DropUDFExecutor
-        plan = DropUDFPlan('test', False)
+        plan = DropUDFPlan("test", False)
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, DropUDFExecutor)
 
         # LoadDataExecutor
-        plan = LoadDataPlan(MagicMock(), MagicMock(), MagicMock(),
-                            MagicMock(), MagicMock())
+        plan = LoadDataPlan(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, LoadDataExecutor)
 
@@ -126,15 +126,14 @@ class PlanExecutorTest(unittest.TestCase):
         executor = PlanExecutor(plan)._build_execution_tree(plan)
         self.assertIsInstance(executor, UploadExecutor)
 
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_seq_scan_plan(
-            self, mock_clean, mock_build):
+    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
+    def test_execute_plan_for_seq_scan_plan(self, mock_clean, mock_build):
 
         batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
-            Batch(pd.DataFrame([3]))
+            Batch(pd.DataFrame([3])),
         ]
 
         # SequentialScanExecutor
@@ -148,15 +147,14 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_pp_scan_plan(
-            self, mock_clean, mock_build):
+    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
+    def test_execute_plan_for_pp_scan_plan(self, mock_clean, mock_build):
 
         batch_list = [
             Batch(pd.DataFrame([1])),
             Batch(pd.DataFrame([2])),
-            Batch(pd.DataFrame([3]))
+            Batch(pd.DataFrame([3])),
         ]
         # PPExecutor
         tree = MagicMock(node=PPScanPlan(None))
@@ -169,10 +167,11 @@ class PlanExecutorTest(unittest.TestCase):
         tree.exec.assert_called_once()
         self.assertEqual(actual, batch_list)
 
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
+    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
     def test_execute_plan_for_create_insert_load_upload_plans(
-            self, mock_clean, mock_build):
+        self, mock_clean, mock_build
+    ):
 
         # CreateExecutor
         tree = MagicMock(node=CreatePlan(None, [], False))
@@ -208,8 +207,7 @@ class PlanExecutorTest(unittest.TestCase):
         # LoadDataExecutor
         mock_build.reset_mock()
         mock_clean.reset_mock()
-        tree = MagicMock(node=LoadDataPlan(None, None, None, None,
-                                           None))
+        tree = MagicMock(node=LoadDataPlan(None, None, None, None, None))
         mock_build.return_value = tree
         actual = list(PlanExecutor(None).execute_plan())
         tree.exec.assert_called_once()
@@ -228,10 +226,9 @@ class PlanExecutorTest(unittest.TestCase):
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_rename_plans(
-            self, mock_clean, mock_build):
+    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
+    def test_execute_plan_for_rename_plans(self, mock_clean, mock_build):
 
         # RenameExecutor
         tree = MagicMock(node=RenamePlan(None, None))
@@ -242,10 +239,9 @@ class PlanExecutorTest(unittest.TestCase):
         mock_clean.assert_called_once()
         self.assertEqual(actual, [])
 
-    @patch('eva.executor.plan_executor.PlanExecutor._build_execution_tree')
-    @patch('eva.executor.plan_executor.PlanExecutor._clean_execution_tree')
-    def test_execute_plan_for_drop_plans(
-            self, mock_clean, mock_build):
+    @patch("eva.executor.plan_executor.PlanExecutor._build_execution_tree")
+    @patch("eva.executor.plan_executor.PlanExecutor._clean_execution_tree")
+    def test_execute_plan_for_drop_plans(self, mock_clean, mock_build):
 
         # DropExecutor
         tree = MagicMock(node=DropPlan(None, None))
@@ -268,21 +264,19 @@ class PlanExecutorTest(unittest.TestCase):
         self.assertEqual(actual, [])
 
     @unittest.skip("disk_based_storage_depricated")
-    @patch('eva.executor.disk_based_storage_executor.Loader')
+    @patch("eva.executor.disk_based_storage_executor.Loader")
     def test_should_return_the_new_path_after_execution(self, mock_class):
         class_instatnce = mock_class.return_value
 
-        dummy_expr = type('dummy_expr', (),
-                          {"evaluate": lambda x=None: [True, False,
-                                                       True]})
+        dummy_expr = type(
+            "dummy_expr", (), {"evaluate": lambda x=None: [True, False, True]}
+        )
 
         # Build plan tree
         video = DataFrameMetadata("dataset", "dummy.avi")
-        batch_1 = Batch(pd.DataFrame({'data': [1, 2, 3]}))
-        batch_2 = Batch(pd.DataFrame({'data': [4, 5, 6]}))
-        class_instatnce.load.return_value = map(lambda x: x, [
-            batch_1,
-            batch_2])
+        batch_1 = Batch(pd.DataFrame({"data": [1, 2, 3]}))
+        batch_2 = Batch(pd.DataFrame({"data": [4, 5, 6]}))
+        class_instatnce.load.return_value = map(lambda x: x, [batch_1, batch_2])
 
         storage_plan = StoragePlan(video, batch_mem_size=3000)
         seq_scan = SeqScanPlan(predicate=dummy_expr, column_ids=[])
@@ -295,6 +289,4 @@ class PlanExecutorTest(unittest.TestCase):
 
         mock_class.assert_called_once()
 
-        self.assertEqual(
-            expected, actual
-        )
+        self.assertEqual(expected, actual)

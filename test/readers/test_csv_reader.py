@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,37 +14,40 @@
 # limitations under the License.
 import os
 import unittest
+from test.util import (
+    FRAME_SIZE,
+    NUM_FRAMES,
+    PATH_PREFIX,
+    create_dummy_csv_batches,
+    create_sample_csv,
+    file_remove,
+)
 
-from eva.readers.csv_reader import CSVReader
-
-from test.util import create_sample_csv
-from test.util import file_remove
-from test.util import NUM_FRAMES, PATH_PREFIX, FRAME_SIZE
-from test.util import create_dummy_csv_batches
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.readers.csv_reader import CSVReader
 
 
 class CSVLoaderTest(unittest.TestCase):
-
     def setUp(self):
         create_sample_csv()
 
     def tearDown(self):
-        file_remove('dummy.csv')
+        file_remove("dummy.csv")
 
     def test_should_return_one_batch(self):
 
         column_list = [
-            TupleValueExpression(col_name='id', table_alias='dummy'),
-            TupleValueExpression(col_name='frame_id', table_alias='dummy'),
-            TupleValueExpression(col_name='video_id', table_alias='dummy')
+            TupleValueExpression(col_name="id", table_alias="dummy"),
+            TupleValueExpression(col_name="frame_id", table_alias="dummy"),
+            TupleValueExpression(col_name="video_id", table_alias="dummy"),
         ]
 
         # call the CSVReader
         csv_loader = CSVReader(
-            file_url=os.path.join(PATH_PREFIX, 'dummy.csv'),
+            file_url=os.path.join(PATH_PREFIX, "dummy.csv"),
             column_list=column_list,
-            batch_mem_size=NUM_FRAMES * FRAME_SIZE)
+            batch_mem_size=NUM_FRAMES * FRAME_SIZE,
+        )
 
         # get the batches
         batches = list(csv_loader.read())
