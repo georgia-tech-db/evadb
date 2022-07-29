@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,13 +32,16 @@ class StoragePlan(AbstractPlan):
         curr_shard (int): current curr_shard if data is sharded
     """
 
-    def __init__(self, video: DataFrameMetadata,
-                 batch_mem_size: int,
-                 skip_frames: int = 0,
-                 offset: int = None,
-                 limit: int = None,
-                 total_shards: int = 0,
-                 curr_shard: int = 0):
+    def __init__(
+        self,
+        video: DataFrameMetadata,
+        batch_mem_size: int,
+        skip_frames: int = 0,
+        offset: int = None,
+        limit: int = None,
+        total_shards: int = 0,
+        curr_shard: int = 0,
+    ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._video = video
         self._batch_mem_size = batch_mem_size
@@ -77,10 +80,15 @@ class StoragePlan(AbstractPlan):
         return self._curr_shard
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.video,
-                     self.batch_mem_size,
-                     self.skip_frames,
-                     self.offset,
-                     self.limit,
-                     self.total_shards,
-                     self.curr_shard))
+        return hash(
+            (
+                super().__hash__(),
+                self.video,
+                self.batch_mem_size,
+                self.skip_frames,
+                self.offset,
+                self.limit,
+                self.total_shards,
+                self.curr_shard,
+            )
+        )

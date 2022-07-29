@@ -15,8 +15,8 @@
 from typing import List
 
 from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
 from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
 
 class DropTableStatement(AbstractStatement):
@@ -26,9 +26,7 @@ class DropTableStatement(AbstractStatement):
         TableRef: table reference in the drop table statement
     """
 
-    def __init__(self,
-                 table_refs: List[TableRef],
-                 if_exists: bool):
+    def __init__(self, table_refs: List[TableRef], if_exists: bool):
         super().__init__(StatementType.DROP)
         self._table_refs = table_refs
         self._if_exists = if_exists
@@ -51,10 +49,7 @@ class DropTableStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, DropTableStatement):
             return False
-        return (self.table_refs == other.table_refs
-                and self.if_exists == other.if_exists)
+        return self.table_refs == other.table_refs and self.if_exists == other.if_exists
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     tuple(self.table_refs),
-                     self.if_exists))
+        return hash((super().__hash__(), tuple(self.table_refs), self.if_exists))

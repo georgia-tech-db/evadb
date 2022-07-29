@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 """Abstract class for all the join planners
 """
 from eva.expression.abstract_expression import AbstractExpression
-from eva.planner.abstract_plan import AbstractPlan
 from eva.parser.types import JoinType
-
+from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
 
@@ -33,10 +30,12 @@ class AbstractJoin(AbstractPlan):
             An expression used for joining
     """
 
-    def __init__(self,
-                 node_type: PlanOprType,
-                 join_type: JoinType,
-                 join_predicate: AbstractExpression):
+    def __init__(
+        self,
+        node_type: PlanOprType,
+        join_type: JoinType,
+        join_predicate: AbstractExpression,
+    ):
         super().__init__(node_type)
         self._join_type = join_type
         self._join_predicate = join_predicate
@@ -50,6 +49,4 @@ class AbstractJoin(AbstractPlan):
         return self._join_predicate
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.join_type,
-                     self.join_predicate))
+        return hash((super().__hash__(), self.join_type, self.join_predicate))

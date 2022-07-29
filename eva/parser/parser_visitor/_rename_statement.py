@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.table_ref import TableRef, TableInfo
-
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.logging_manager import logger
 
 ##################################################################
@@ -33,7 +31,7 @@ class RenameTable(evaql_parserVisitor):
             table_info = TableInfo(table_name=table_name)
             return table_info
         else:
-            error = 'Invalid Old Table'
+            error = "Invalid Old Table"
             logger.error(error)
 
     def visitNewtableName(self, ctx: evaql_parser.NewtableNameContext):
@@ -43,7 +41,7 @@ class RenameTable(evaql_parserVisitor):
             table_info = TableInfo(table_name=table_name)
             return table_info
         else:
-            error = 'Invalid New Table'
+            error = "Invalid New Table"
             logger.error(error)
 
     def visitRenameTable(self, ctx: evaql_parser.RenameTableContext):

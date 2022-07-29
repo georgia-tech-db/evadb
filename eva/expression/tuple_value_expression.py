@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,16 +14,24 @@
 # limitations under the License.
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.models.storage.batch import Batch
-from .abstract_expression import AbstractExpression, ExpressionType, \
-    ExpressionReturnType
+
+from .abstract_expression import (
+    AbstractExpression,
+    ExpressionReturnType,
+    ExpressionType,
+)
 
 
 class TupleValueExpression(AbstractExpression):
-    def __init__(self, col_name: str = None, table_alias: str = None,
-                 col_idx: int = -1, col_object: DataFrameColumn = None,
-                 col_alias=None):
-        super().__init__(ExpressionType.TUPLE_VALUE,
-                         rtype=ExpressionReturnType.INVALID)
+    def __init__(
+        self,
+        col_name: str = None,
+        table_alias: str = None,
+        col_idx: int = -1,
+        col_object: DataFrameColumn = None,
+        col_alias=None,
+    ):
+        super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
         self._table_alias = table_alias
         self._table_metadata_id = None
@@ -76,18 +84,25 @@ class TupleValueExpression(AbstractExpression):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, TupleValueExpression):
             return False
-        return (is_subtree_equal and self.table_alias == other.table_alias
-                and self.table_metadata_id == other.table_metadata_id
-                and self.col_name == other.col_name
-                and self.col_alias == other.col_alias
-                and self.col_object == other.col_object
-                and self._col_idx == other._col_idx)
+        return (
+            is_subtree_equal
+            and self.table_alias == other.table_alias
+            and self.table_metadata_id == other.table_metadata_id
+            and self.col_name == other.col_name
+            and self.col_alias == other.col_alias
+            and self.col_object == other.col_object
+            and self._col_idx == other._col_idx
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table_alias,
-                     self.table_metadata_id,
-                     self.col_name,
-                     self.col_alias,
-                     self.col_object,
-                     self._col_idx))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_alias,
+                self.table_metadata_id,
+                self.col_name,
+                self.col_alias,
+                self.col_object,
+                self._col_idx,
+            )
+        )

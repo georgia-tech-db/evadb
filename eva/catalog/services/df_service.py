@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
@@ -92,9 +91,7 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata - metadata for given dataset_name
         """
-        return self.model.query.filter(
-            self.model._name == dataset_name
-        ).one_or_none()
+        return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
     def drop_dataset_by_name(self, database_name: str, dataset_name: str):
         """Delete dataset from the db
@@ -118,9 +115,7 @@ class DatasetService(BaseService):
         self, new_name: str, curr_database_name: str, curr_dataset_name: str
     ):
         try:
-            dataset = self.dataset_object_by_name(
-                curr_database_name, curr_dataset_name
-            )
+            dataset = self.dataset_object_by_name(curr_database_name, curr_dataset_name)
             dataset.update(_name=new_name)
 
         except Exception as e:

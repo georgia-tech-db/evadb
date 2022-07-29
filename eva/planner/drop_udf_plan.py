@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -29,9 +28,7 @@ class DropUDFPlan(AbstractPlan):
             else logs a warning
     """
 
-    def __init__(self,
-                 name: str,
-                 if_exists: bool):
+    def __init__(self, name: str, if_exists: bool):
         super().__init__(PlanOprType.DROP_UDF)
         self._name = name
         self._if_exists = if_exists
@@ -45,6 +42,4 @@ class DropUDFPlan(AbstractPlan):
         return self._if_exists
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.name,
-                     self.if_exists))
+        return hash((super().__hash__(), self.name, self.if_exists))

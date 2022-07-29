@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,25 +12,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import argparse
 import sys
-from os.path import dirname, abspath, join
+from os.path import abspath, dirname, join
+
 from eva.utils.logging_manager import logger
 
-'''
+"""
 To allow running eva_server from any location
-'''
+"""
 THIS_DIR = dirname(__file__)
-EVA_CODE_DIR = abspath(join(THIS_DIR, '..'))
+EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
 from eva.server.interpreter import start_cmd_client  # noqa: E402
 
 
-def eva_client(host='0.0.0.0', port=5432):
+def eva_client(host="0.0.0.0", port=5432):
     """
-        Start the eva system
+    Start the eva system
     """
 
     # Launch server
@@ -41,11 +41,18 @@ def eva_client(host='0.0.0.0', port=5432):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description='')
-    parser.add_argument('-H', '--host', dest='host', type=str,
-                        help='Host address for EVA server', default='0.0.0.0')
-    parser.add_argument('-P', '--port', dest='port', type=int,
-                        help='Port for EVA server', default=5432)
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "-H",
+        "--host",
+        dest="host",
+        type=str,
+        help="Host address for EVA server",
+        default="0.0.0.0",
+    )
+    parser.add_argument(
+        "-P", "--port", dest="port", type=int, help="Port for EVA server", default=5432
+    )
     return parser.parse_args(args)
 
 
@@ -54,5 +61,5 @@ def main():
     eva_client(host=args.host, port=args.port)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

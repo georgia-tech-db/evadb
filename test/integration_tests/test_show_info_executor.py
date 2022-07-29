@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-
-from eva.udfs.udf_bootstrap_queries import (
-    Fastrcnn_udf_query,
-    ArrayCount_udf_query,
-)
+from eva.udfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_query
 
 NUM_FRAMES = 10
 

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import os
 import random
 import socket
-from typing import Set, List
+from typing import List, Set
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.constants import NO_GPU
@@ -53,18 +53,18 @@ class Context:
         return result_address
 
     def _populate_gpu_from_config(self) -> List:
-        gpu_conf = self._config_manager.get_value('executor', 'gpus')
+        gpu_conf = self._config_manager.get_value("executor", "gpus")
         gpu_conf = gpu_conf if gpu_conf else {}
         this_address = self._possible_addresses()
         intersection_addresses = this_address.intersection(gpu_conf.keys())
         if len(intersection_addresses) != 0:
-            return [str(gpu) for gpu in
-                    gpu_conf.get(intersection_addresses.pop())]
+            return [str(gpu) for gpu in gpu_conf.get(intersection_addresses.pop())]
         return []
 
     def _populate_gpu_from_env(self) -> List:
-        gpus = map(lambda x: x.strip(),
-                   os.environ.get('GPU_DEVICES', '').strip().split(','))
+        gpus = map(
+            lambda x: x.strip(), os.environ.get("GPU_DEVICES", "").strip().split(",")
+        )
         return list(filter(lambda x: x, gpus))
 
     def _populate_gpu_ids(self) -> List:

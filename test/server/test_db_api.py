@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import unittest
-import mock
 import asyncio
+import unittest
 from unittest.mock import MagicMock
 
-from eva.server.db_api import EVACursor
+import mock
+
 from eva.models.server.response import Response
+from eva.server.db_api import EVACursor
 
 
 class AsyncMock(MagicMock):
@@ -28,7 +28,6 @@ class AsyncMock(MagicMock):
 
 
 class DBAPITests(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -44,7 +43,7 @@ class DBAPITests(unittest.TestCase):
         with self.assertRaises(SystemError):
             asyncio.run(eva_cursor.execute_async(query))
 
-    @mock.patch.object(Response, 'from_json')
+    @mock.patch.object(Response, "from_json")
     def test_eva_cursor_fetch_one_async(self, mock_response):
         protocol = AsyncMock()
         eva_cursor = EVACursor(protocol)

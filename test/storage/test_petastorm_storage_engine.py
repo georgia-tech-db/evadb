@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,25 @@
 # limitations under the License.
 import shutil
 import unittest
+from test.util import NUM_FRAMES, create_dummy_batches
 
+from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.storage.petastorm_storage_engine import PetastormStorageEngine
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.column_type import ColumnType, NdArrayType
-
-from test.util import create_dummy_batches
-from test.util import NUM_FRAMES
 
 
 class PetastormStorageEngineTest(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.table = None
 
     def create_sample_table(self):
-        table_info = DataFrameMetadata("dataset", 'dataset')
+        table_info = DataFrameMetadata("dataset", "dataset")
         column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn(
-            "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [
-                2, 2, 3])
+            "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
+        )
         table_info.schema = [column_1, column_2]
         return table_info
 
@@ -44,7 +41,7 @@ class PetastormStorageEngineTest(unittest.TestCase):
 
     def tearDown(self):
         try:
-            shutil.rmtree('dataset', ignore_errors=True)
+            shutil.rmtree("dataset", ignore_errors=True)
         except ValueError:
             pass
 
@@ -80,10 +77,10 @@ class PetastormStorageEngineTest(unittest.TestCase):
                 self.table,
                 batch_mem_size=3000,
                 columns=["id"],
-                predicate_func=lambda id: id %
-                2 == 0))
-        expected_batch = list(create_dummy_batches(
-            filters=[
-                i for i in range(NUM_FRAMES) if i %
-                2 == 0]))
+                predicate_func=lambda id: id % 2 == 0,
+            )
+        )
+        expected_batch = list(
+            create_dummy_batches(filters=[i for i in range(NUM_FRAMES) if i % 2 == 0])
+        )
         self.assertTrue(read_batch, expected_batch)

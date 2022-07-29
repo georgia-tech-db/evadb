@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.parser.statement import AbstractStatement
-from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.types import StatementType
-from eva.parser.table_ref import TableRef
 from pathlib import Path
 from typing import List
+
+from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
 
 class LoadDataStatement(AbstractStatement):
@@ -30,11 +30,13 @@ class LoadDataStatement(AbstractStatement):
     path (str): path from where data needs to be loaded
     """
 
-    def __init__(self,
-                 table_ref: TableRef,
-                 path: str,
-                 column_list: List[AbstractExpression] = None,
-                 file_options: dict = None):
+    def __init__(
+        self,
+        table_ref: TableRef,
+        path: str,
+        column_list: List[AbstractExpression] = None,
+        file_options: dict = None,
+    ):
         super().__init__(StatementType.LOAD_DATA)
         self._table_ref = table_ref
         self._path = Path(path)
@@ -43,7 +45,8 @@ class LoadDataStatement(AbstractStatement):
 
     def __str__(self) -> str:
         print_str = "LOAD DATA INFILE {} INTO {}({})".format(
-            self._path.name, self._table_ref, self._column_list)
+            self._path.name, self._table_ref, self._column_list
+        )
         return print_str
 
     @property
@@ -69,14 +72,20 @@ class LoadDataStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, LoadDataStatement):
             return False
-        return (self.table_ref == other.table_ref
-                and self.path == other.path
-                and self.column_list == other.column_list
-                and self.file_options == other.file_options)
+        return (
+            self.table_ref == other.table_ref
+            and self.path == other.path
+            and self.column_list == other.column_list
+            and self.file_options == other.file_options
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table_ref,
-                     self.path,
-                     tuple(self.column_list),
-                     frozenset(self.file_options.items())))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_ref,
+                self.path,
+                tuple(self.column_list),
+                frozenset(self.file_options.items()),
+            )
+        )

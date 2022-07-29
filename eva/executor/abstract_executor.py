@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ class AbstractExecutor(ABC):
         self._node = node
         self._children = []
 
-    def append_child(self, child: 'AbstractExecutor'):
+    def append_child(self, child: "AbstractExecutor"):
         """
         appends a child exector node
 
@@ -39,7 +39,7 @@ class AbstractExecutor(ABC):
         self._children.append(child)
 
     @property
-    def children(self) -> List['AbstractExecutor']:
+    def children(self) -> List["AbstractExecutor"]:
         """
         Returns the list of child executor
         Returns:
@@ -53,7 +53,7 @@ class AbstractExecutor(ABC):
 
     @abstractmethod
     def validate(self):
-        NotImplementedError('Must be implemented in subclasses.')
+        NotImplementedError("Must be implemented in subclasses.")
 
     @abstractmethod
     def exec(self):
@@ -63,4 +63,4 @@ class AbstractExecutor(ABC):
         For retrival based executor : It fetchs frame batches from
         child nodes and emits it to parent node.
         """
-        NotImplementedError('Must be implemented in subclasses.')
+        NotImplementedError("Must be implemented in subclasses.")

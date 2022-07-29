@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,34 +12,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from eva.expression.abstract_expression import AbstractExpression
-from eva.optimizer.operators import (LogicalCreateMaterializedView, LogicalGet,
-                                     LogicalFilter, LogicalProject,
-                                     LogicalCreate,
-                                     LogicalRename,
-                                     LogicalDrop, LogicalDropUDF,
-                                     LogicalCreateUDF, LogicalLoadData,
-                                     LogicalShow,
-                                     LogicalUpload, LogicalQueryDerivedGet,
-                                     LogicalUnion, LogicalOrderBy,
-                                     LogicalLimit, LogicalSample,
-                                     LogicalFunctionScan, LogicalJoin)
+from eva.optimizer.operators import (
+    LogicalCreate,
+    LogicalCreateMaterializedView,
+    LogicalCreateUDF,
+    LogicalDrop,
+    LogicalDropUDF,
+    LogicalFilter,
+    LogicalFunctionScan,
+    LogicalGet,
+    LogicalJoin,
+    LogicalLimit,
+    LogicalLoadData,
+    LogicalOrderBy,
+    LogicalProject,
+    LogicalQueryDerivedGet,
+    LogicalRename,
+    LogicalSample,
+    LogicalShow,
+    LogicalUnion,
+    LogicalUpload,
+)
+from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import CreateTableStatement
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
-from eva.parser.select_statement import SelectStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.create_statement import CreateTableStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.create_mat_view_statement \
-    import CreateMaterializedViewStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.upload_statement import UploadStatement
-from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.table_ref import TableRef
+from eva.parser.upload_statement import UploadStatement
 from eva.utils.logging_manager import logger
 
 
@@ -58,9 +66,7 @@ class StatementToPlanConvertor:
         if table_ref.is_table_atom():
             # Table
             catalog_vid_metadata = table_ref.table.table_obj
-            self._plan = LogicalGet(table_ref,
-                                    catalog_vid_metadata,
-                                    table_ref.alias)
+            self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
 
         elif table_ref.is_func_expr():
             self._plan = LogicalFunctionScan(func_expr=table_ref.func_expr)
@@ -74,8 +80,9 @@ class StatementToPlanConvertor:
 
         elif table_ref.is_join():
             join_node = table_ref.join_node
-            join_plan = LogicalJoin(join_type=join_node.join_type,
-                                    join_predicate=join_node.predicate)
+            join_plan = LogicalJoin(
+                join_type=join_node.join_type, join_predicate=join_node.predicate
+            )
             self.visit_table_ref(join_node.left)
             join_plan.append_child(self._plan)
             self.visit_table_ref(join_node.right)
@@ -94,7 +101,7 @@ class StatementToPlanConvertor:
 
         table_ref = statement.from_table
         if table_ref is None:
-            logger.error('From entry missing in select statement')
+            logger.error("From entry missing in select statement")
             return None
 
         self.visit_table_ref(table_ref)
@@ -160,7 +167,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [input insert statement]
         """
-        '''
+        """
         table_ref = statement.table
         table_metainfo = bind_dataset(table_ref.table)
         if table_metainfo is None:
@@ -181,7 +188,7 @@ class StatementToPlanConvertor:
         insert_opr = LogicalInsert(
             table_ref, table_metainfo, statement.column_list, value_list)
         self._plan = insert_opr
-        '''
+        """
 
     def visit_create(self, statement: AbstractStatement):
         """Convertor for parsed insert Statement
@@ -194,7 +201,8 @@ class StatementToPlanConvertor:
             logger.error("Missing Table Name In Create Statement")
 
         create_opr = LogicalCreate(
-            table_ref, statement.column_list, statement.if_not_exists)
+            table_ref, statement.column_list, statement.if_not_exists
+        )
         self._plan = create_opr
 
     def visit_rename(self, statement: RenameTableStatement):
@@ -202,8 +210,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement(RenameTableStatement): [Rename statement]
         """
-        rename_opr = LogicalRename(statement.old_table_ref,
-                                   statement.new_table_name)
+        rename_opr = LogicalRename(statement.old_table_ref, statement.new_table_name)
         self._plan = rename_opr
 
     def visit_drop(self, statement: DropTableStatement):
@@ -217,14 +224,16 @@ class StatementToPlanConvertor:
             statement {CreateUDFStatement} - - Create UDF Statement
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
-        annotated_outputs = column_definition_to_udf_io(
-            statement.outputs, False)
+        annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
 
-        create_udf_opr = LogicalCreateUDF(statement.name,
-                                          statement.if_not_exists,
-                                          annotated_inputs, annotated_outputs,
-                                          statement.impl_path,
-                                          statement.udf_type)
+        create_udf_opr = LogicalCreateUDF(
+            statement.name,
+            statement.if_not_exists,
+            annotated_inputs,
+            annotated_outputs,
+            statement.impl_path,
+            statement.udf_type,
+        )
         self._plan = create_udf_opr
 
     def visit_drop_udf(self, statement: DropUDFStatement):
@@ -241,10 +250,12 @@ class StatementToPlanConvertor:
             statement(LoadDataStatement): [Load data statement]
         """
         table_metainfo = statement.table_ref.table.table_obj
-        load_data_opr = LogicalLoadData(table_metainfo,
-                                        statement.path,
-                                        statement.column_list,
-                                        statement.file_options)
+        load_data_opr = LogicalLoadData(
+            table_metainfo,
+            statement.path,
+            statement.column_list,
+            statement.file_options,
+        )
         self._plan = load_data_opr
 
     def visit_upload(self, statement: UploadStatement):
@@ -256,10 +267,10 @@ class StatementToPlanConvertor:
         upload_opr = LogicalUpload(statement.path, statement.video_blob)
         self._plan = upload_opr
 
-    def visit_materialized_view(self,
-                                statement: CreateMaterializedViewStatement):
+    def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
-            statement.view_ref, statement.col_list, statement.if_not_exists)
+            statement.view_ref, statement.col_list, statement.if_not_exists
+        )
 
         self.visit_select(statement.query)
         mat_view_opr.append_child(self._plan)

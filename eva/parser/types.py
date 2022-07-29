@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, Enum, auto
+from enum import Enum, auto, unique
 
 
 class ColumnConstraintEnum(Enum):
@@ -27,16 +27,17 @@ class StatementType(Enum):
     """
     Manages enums for all the sql-like statements supported
     """
-    SELECT = auto(),
-    CREATE = auto(),
-    RENAME = auto(),
-    DROP = auto(),
-    INSERT = auto(),
-    CREATE_UDF = auto(),
-    LOAD_DATA = auto(),
-    UPLOAD = auto(),
-    CREATE_MATERIALIZED_VIEW = auto(),
-    SHOW = auto(),
+
+    SELECT = (auto(),)
+    CREATE = (auto(),)
+    RENAME = (auto(),)
+    DROP = (auto(),)
+    INSERT = (auto(),)
+    CREATE_UDF = (auto(),)
+    LOAD_DATA = (auto(),)
+    UPLOAD = (auto(),)
+    CREATE_MATERIALIZED_VIEW = (auto(),)
+    SHOW = (auto(),)
     DROP_UDF = auto()
     # add other types
 
@@ -46,6 +47,7 @@ class ParserOrderBySortType(Enum):
     """
     Manages enums for all order by sort types
     """
+
     ASC = auto()
     DESC = auto()
 
@@ -61,6 +63,7 @@ class FileFormatType(Enum):
     """
     Manages enums for all order by sort types
     """
+
     VIDEO = auto()
     CSV = auto()
 

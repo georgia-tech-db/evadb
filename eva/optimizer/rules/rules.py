@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from enum import Flag, auto, IntEnum
+from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
+
 from eva.optimizer.optimizer_utils import extract_equi_join_keys
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
@@ -26,36 +27,52 @@ from eva.planner.show_info_plan import ShowInfoPlan
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
-from eva.parser.types import JoinType
-from eva.optimizer.rules.pattern import Pattern
-from eva.optimizer.operators import Dummy, LogicalShow, OperatorType, Operator
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
-    LogicalCreate, LogicalDrop, LogicalRename,
-    LogicalInsert, LogicalLoadData, LogicalUpload,
-    LogicalCreateUDF, LogicalDropUDF,
-    LogicalProject, LogicalGet, LogicalFilter,
-    LogicalUnion, LogicalOrderBy, LogicalLimit, LogicalQueryDerivedGet,
-    LogicalSample, LogicalJoin, LogicalFunctionScan,
-    LogicalCreateMaterializedView)
-from eva.planner.create_plan import CreatePlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.drop_plan import DropPlan
-from eva.planner.create_udf_plan import CreateUDFPlan
-from eva.planner.drop_udf_plan import DropUDFPlan
+    Dummy,
+    LogicalCreate,
+    LogicalCreateMaterializedView,
+    LogicalCreateUDF,
+    LogicalDrop,
+    LogicalDropUDF,
+    LogicalFilter,
+    LogicalFunctionScan,
+    LogicalGet,
+    LogicalInsert,
+    LogicalJoin,
+    LogicalLimit,
+    LogicalLoadData,
+    LogicalOrderBy,
+    LogicalProject,
+    LogicalQueryDerivedGet,
+    LogicalRename,
+    LogicalSample,
+    LogicalShow,
+    LogicalUnion,
+    LogicalUpload,
+    Operator,
+    OperatorType,
+)
+from eva.optimizer.rules.pattern import Pattern
+from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.planner.create_plan import CreatePlan
+from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.drop_plan import DropPlan
+from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.planner.function_scan_plan import FunctionScanPlan
+from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan
+from eva.planner.lateral_join_plan import LateralJoinPlan
+from eva.planner.limit_plan import LimitPlan
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.upload_plan import UploadPlan
+from eva.planner.orderby_plan import OrderByPlan
+from eva.planner.rename_plan import RenamePlan
+from eva.planner.sample_plan import SamplePlan
 from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
-from eva.planner.orderby_plan import OrderByPlan
-from eva.planner.limit_plan import LimitPlan
-from eva.planner.sample_plan import SamplePlan
-from eva.planner.lateral_join_plan import LateralJoinPlan
-from eva.planner.hash_join_probe_plan import HashJoinProbePlan
-from eva.planner.function_scan_plan import FunctionScanPlan
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.planner.upload_plan import UploadPlan
 
 # Modified
 
@@ -64,6 +81,7 @@ class RuleType(Flag):
     """
     Manages enums for all the supported rules
     """
+
     # Don't move this enum, else will break rule exploration logic
     INVALID_RULE = 0
 
@@ -113,6 +131,7 @@ class Promise(IntEnum):
     Rule with a higher enum will be preferred in case of
     conflict
     """
+
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
@@ -205,6 +224,7 @@ class Rule(ABC):
         """
         raise NotImplementedError
 
+
 ##############################################
 # REWRITE RULES START
 
@@ -225,11 +245,14 @@ class EmbedFilterIntoGet(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         lget = before.children[0]
-        new_get_opr = LogicalGet(lget.video, lget.dataset_metadata,
-                                 alias=lget.alias,
-                                 predicate=predicate,
-                                 target_list=lget.target_list,
-                                 children=lget.children)
+        new_get_opr = LogicalGet(
+            lget.video,
+            lget.dataset_metadata,
+            alias=lget.alias,
+            predicate=predicate,
+            target_list=lget.target_list,
+            children=lget.children,
+        )
         return new_get_opr
 
 
@@ -249,13 +272,17 @@ class EmbedProjectIntoGet(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         target_list = before.target_list
         lget = before.children[0]
-        new_get_opr = LogicalGet(lget.video, lget.dataset_metadata,
-                                 alias=lget.alias,
-                                 predicate=lget.predicate,
-                                 target_list=target_list,
-                                 children=lget.children)
+        new_get_opr = LogicalGet(
+            lget.video,
+            lget.dataset_metadata,
+            alias=lget.alias,
+            predicate=lget.predicate,
+            target_list=target_list,
+            children=lget.children,
+        )
 
         return new_get_opr
+
 
 # For nested queries
 
@@ -278,10 +305,12 @@ class EmbedFilterIntoDerivedGet(Rule):
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(alias=ld_get.alias,
-                                         predicate=predicate,
-                                         target_list=ld_get.target_list,
-                                         children=ld_get.children)
+        new_opr = LogicalQueryDerivedGet(
+            alias=ld_get.alias,
+            predicate=predicate,
+            target_list=ld_get.target_list,
+            children=ld_get.children,
+        )
         return new_opr
 
 
@@ -303,10 +332,12 @@ class EmbedProjectIntoDerivedGet(Rule):
     def apply(self, before: LogicalProject, context: OptimizerContext):
         target_list = before.target_list
         ld_get = before.children[0]
-        new_opr = LogicalQueryDerivedGet(alias=ld_get.alias,
-                                         predicate=ld_get.predicate,
-                                         target_list=target_list,
-                                         children=ld_get.children)
+        new_opr = LogicalQueryDerivedGet(
+            alias=ld_get.alias,
+            predicate=ld_get.predicate,
+            target_list=target_list,
+            children=ld_get.children,
+        )
         return new_opr
 
 
@@ -412,8 +443,7 @@ class LogicalCreateToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(before.video, before.column_list,
-                           before.if_not_exists)
+        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
         return after
 
 
@@ -461,12 +491,14 @@ class LogicalCreateUDFToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreateUDF, context: OptimizerContext):
-        after = CreateUDFPlan(before.name,
-                              before.if_not_exists,
-                              before.inputs,
-                              before.outputs,
-                              before.impl_path,
-                              before.udf_type)
+        after = CreateUDFPlan(
+            before.name,
+            before.if_not_exists,
+            before.inputs,
+            before.outputs,
+            before.impl_path,
+            before.udf_type,
+        )
         return after
 
 
@@ -498,8 +530,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.table_metainfo,
-                           before.column_list, before.value_list)
+        after = InsertPlan(before.table_metainfo, before.column_list, before.value_list)
         return after
 
 
@@ -521,14 +552,17 @@ class LogicalLoadToPhysical(Rule):
 
         batch_mem_size = 30000000  # 30mb
         config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size")
+            "executor", "batch_mem_size"
+        )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = LoadDataPlan(before.table_metainfo,
-                             before.path,
-                             batch_mem_size,
-                             before.column_list,
-                             before.file_options)
+        after = LoadDataPlan(
+            before.table_metainfo,
+            before.path,
+            batch_mem_size,
+            before.column_list,
+            before.file_options,
+        )
         return after
 
 
@@ -566,12 +600,14 @@ class LogicalGetToSeqScan(Rule):
 
         batch_mem_size = 30000000  # 30mb
         config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size")
+            "executor", "batch_mem_size"
+        )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = SeqScanPlan(before.predicate, before.target_list, before.alias)
-        after.append_child(StoragePlan(
-            before.dataset_metadata, batch_mem_size=batch_mem_size))
+        after.append_child(
+            StoragePlan(before.dataset_metadata, batch_mem_size=batch_mem_size)
+        )
         return after
 
 
@@ -606,8 +642,7 @@ class LogicalDerivedGetToPhysical(Rule):
     def check(self, before: Operator, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalQueryDerivedGet,
-              context: OptimizerContext):
+    def apply(self, before: LogicalQueryDerivedGet, context: OptimizerContext):
         after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         after.append_child(before.children[0])
         return after
@@ -735,17 +770,15 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         a_table_aliases = context.memo.get_group_by_id(a.group_id).aliases
         b_table_aliases = context.memo.get_group_by_id(b.group_id).aliases
         join_predicates = join_node.join_predicate
-        a_join_keys, b_join_keys = extract_equi_join_keys(join_predicates,
-                                                          a_table_aliases,
-                                                          b_table_aliases)
+        a_join_keys, b_join_keys = extract_equi_join_keys(
+            join_predicates, a_table_aliases, b_table_aliases
+        )
 
-        build_plan = HashJoinBuildPlan(join_node.join_type,
-                                       a_join_keys)
+        build_plan = HashJoinBuildPlan(join_node.join_type, a_join_keys)
         build_plan.append_child(a)
-        probe_side = HashJoinProbePlan(join_node.join_type,
-                                       b_join_keys,
-                                       join_predicates,
-                                       join_node.join_project)
+        probe_side = HashJoinProbePlan(
+            join_node.join_type, b_join_keys, join_predicates, join_node.join_project
+        )
         probe_side.append_child(build_plan)
         probe_side.append_child(b)
         return probe_side
@@ -755,8 +788,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL,
-                         pattern)
+        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
@@ -764,11 +796,10 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def check(self, grp_id: int, context: OptimizerContext):
         return True
 
-    def apply(self, before: LogicalCreateMaterializedView,
-              context: OptimizerContext):
-        after = CreateMaterializedViewPlan(before.view,
-                                           columns=before.col_list,
-                                           if_not_exists=before.if_not_exists)
+    def apply(self, before: LogicalCreateMaterializedView, context: OptimizerContext):
+        after = CreateMaterializedViewPlan(
+            before.view, columns=before.col_list, if_not_exists=before.if_not_exists
+        )
         for child in before.children:
             after.append_child(child)
         return after
@@ -778,8 +809,7 @@ class LogicalFilterToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_FILTER_TO_PHYSICAL,
-                         pattern)
+        super().__init__(RuleType.LOGICAL_FILTER_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_FILTER_TO_PHYSICAL
@@ -798,8 +828,7 @@ class LogicalProjectToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALPROJECT)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_PROJECT_TO_PHYSICAL,
-                         pattern)
+        super().__init__(RuleType.LOGICAL_PROJECT_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_PROJECT_TO_PHYSICAL
@@ -817,8 +846,7 @@ class LogicalProjectToPhysical(Rule):
 class LogicalShowToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_SHOW)
-        super().__init__(RuleType.LOGICAL_SHOW_TO_PHYSICAL,
-                         pattern)
+        super().__init__(RuleType.LOGICAL_SHOW_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_SHOW_TO_PHYSICAL
@@ -830,13 +858,14 @@ class LogicalShowToPhysical(Rule):
         after = ShowInfoPlan(before.show_type)
         return after
 
+
 # IMPLEMENTATION RULES END
 ##############################################
 
 
 class RulesManager:
-    """Singelton class to manage all the rules in our system
-    """
+    """Singelton class to manage all the rules in our system"""
+
     _instance = None
 
     def __new__(cls):
@@ -845,9 +874,7 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
-        self._logical_rules = [
-            LogicalInnerJoinCommutativity()
-        ]
+        self._logical_rules = [LogicalInnerJoinCommutativity()]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
@@ -855,7 +882,7 @@ class RulesManager:
             PushdownFilterThroughSample(),
             EmbedProjectIntoGet(),
             EmbedProjectIntoDerivedGet(),
-            PushdownProjectThroughSample()
+            PushdownProjectThroughSample(),
         ]
 
         self._implementation_rules = [
@@ -879,10 +906,11 @@ class RulesManager:
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
-            LogicalShowToPhysical()
+            LogicalShowToPhysical(),
         ]
-        self._all_rules = self._rewrite_rules + \
-            self._logical_rules + self._implementation_rules
+        self._all_rules = (
+            self._rewrite_rules + self._logical_rules + self._implementation_rules
+        )
 
     @property
     def rewrite_rules(self):
