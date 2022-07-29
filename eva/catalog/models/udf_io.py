@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from ast import literal_eval
 from typing import List
 
-from sqlalchemy import (
-    Column,
-    String,
-    Integer,
-    Boolean,
-    UniqueConstraint,
-    ForeignKey,
-)
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
-from ast import literal_eval
 
 from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
@@ -119,10 +112,7 @@ class UdfIO(BaseModel):
                 data_type, self.array_type.name, self.array_dimensions
             )
 
-        return {
-            "name": self.name,
-            "data_type": data_type
-        }
+        return {"name": self.name, "data_type": data_type}
 
     def __str__(self):
         column_str = "\tColumn: (%s, %s, %s, %s" % (

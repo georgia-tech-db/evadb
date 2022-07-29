@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import (
+    create_dummy_batches,
+    create_sample_video,
+    create_table,
+    file_remove,
+    load_inbuilt_udfs,
+)
 
 import numpy as np
 import pandas as pd
@@ -21,14 +28,6 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.server.command_handler import execute_query_fetch_all
-
-from test.util import (
-    create_sample_video,
-    create_dummy_batches,
-    file_remove,
-    load_inbuilt_udfs,
-    create_table,
-)
 
 NUM_FRAMES = 10
 
@@ -170,9 +169,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(
-            create_dummy_batches(filters=range(2, NUM_FRAMES))
-        )[0]
+        expected_batch = list(create_dummy_batches(filters=range(2, NUM_FRAMES)))[0]
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
@@ -220,9 +217,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
-                filters=[
-                    i for i in range(NUM_FRAMES) if i < 2 or i == 5 or i > 7
-                ]
+                filters=[i for i in range(NUM_FRAMES) if i < 2 or i == 5 or i > 7]
             )
         )[0]
         self.assertEqual(actual_batch, expected_batch)
@@ -231,9 +226,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(
-            create_dummy_batches(num_frames=10, batch_size=5)
-        )
+        expected_batch = list(create_dummy_batches(num_frames=10, batch_size=5))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])
@@ -243,9 +236,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
 
-        expected_batch = list(
-            create_dummy_batches(filters=range(0, NUM_FRAMES, 7))
-        )
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         # Since frames are fetched in random order, this test might be flaky

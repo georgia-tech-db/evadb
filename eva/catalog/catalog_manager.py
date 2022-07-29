@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,20 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from typing import List
 
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.models.base_model import init_db, drop_db
+from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
-from eva.catalog.services.udf_service import UdfService
 from eva.catalog.services.udf_io_service import UdfIOService
+from eva.catalog.services.udf_service import UdfService
 from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
 
@@ -259,9 +257,7 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(
-        self, database_name: str, table_name: str
-    ) -> bool:
+    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -272,9 +268,7 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(
-            database_name, table_name
-        )
+        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
 
     def drop_udf(self, udf_name: str) -> bool:
         """

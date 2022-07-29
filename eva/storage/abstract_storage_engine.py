@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Iterator
 from abc import ABCMeta, abstractmethod
+from typing import Iterator
 
 from eva.models.storage.batch import Batch
 
@@ -26,6 +25,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     This contains a minimal set of APIs that each engine should implement
 
     """
+
     @abstractmethod
     def create(self, table):
         """Interface that implements all the necessary task required for

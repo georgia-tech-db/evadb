@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import json
-import numpy as np
-import pandas as pd
-
 from typing import Iterable, NoReturn
 
+import numpy as np
+import pandas as pd
 from pandas import DataFrame
 
 from eva.utils.logging_manager import logger
@@ -49,9 +47,7 @@ class Batch:
 
     """
 
-    def __init__(self,
-                 frames=pd.DataFrame(),
-                 identifier_column=None):
+    def __init__(self, frames=pd.DataFrame(), identifier_column=None):
         super().__init__()
         self.frames = frames
         self._identifier_column = identifier_column
@@ -65,9 +61,11 @@ class Batch:
         if isinstance(values, DataFrame):
             self._frames = values
         else:
-            logger.debug('Batch constructor not properly called!')
-            raise ValueError('Batch constructor not properly called. \
-                Expected pandas.DataFrame')
+            logger.debug("Batch constructor not properly called!")
+            raise ValueError(
+                "Batch constructor not properly called. \
+                Expected pandas.DataFrame"
+            )
         self._batch_size = len(values)
 
     @property
@@ -81,36 +79,40 @@ class Batch:
     def identifier_column(self):
         return self._identifier_column
 
-    def column_as_numpy_array(self, column_name='data'):
+    def column_as_numpy_array(self, column_name="data"):
         return np.array(self._frames[column_name])
 
     def to_json(self):
-        obj = {'frames': self.frames,
-               'batch_size': self.batch_size,
-               'identifier_column': self.identifier_column}
+        obj = {
+            "frames": self.frames,
+            "batch_size": self.batch_size,
+            "identifier_column": self.identifier_column,
+        }
         return json.dumps(obj, cls=BatchEncoder)
 
     @classmethod
     def from_json(cls, json_str: str):
         obj = json.loads(json_str, object_hook=as_batch)
-        return cls(frames=obj['frames'],
-                   identifier_column=obj['identifier_column'])
+        return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
 
     def __str__(self):
         """
         For debug propose
         """
-        return 'Batch Object:\n' \
-               '@dataframe: %s\n' \
-               '@batch_size: %d\n' \
-               '@identifier_column: %s' \
-               % (self._frames, self._batch_size, self.identifier_column)
+        return (
+            "Batch Object:\n"
+            "@dataframe: %s\n"
+            "@batch_size: %d\n"
+            "@identifier_column: %s"
+            % (self._frames, self._batch_size, self.identifier_column)
+        )
 
-    def __eq__(self, other: 'Batch'):
-        return self.frames[sorted(self.frames.columns)]\
-            .equals(other.frames[sorted(other.frames.columns)])
+    def __eq__(self, other: "Batch"):
+        return self.frames[sorted(self.frames.columns)].equals(
+            other.frames[sorted(other.frames.columns)]
+        )
 
-    def __getitem__(self, indices) -> 'Batch':
+    def __getitem__(self, indices) -> "Batch":
         """
         Returns a batch with the desired frames
 
@@ -132,7 +134,7 @@ class Batch:
         elif isinstance(indices, int):
             return self._get_frames_from_indices([indices])
         else:
-            raise TypeError('Invalid argument type: {}'.format(type(indices)))
+            raise TypeError("Invalid argument type: {}".format(type(indices)))
 
     def _get_frames_from_indices(self, required_frame_ids):
         new_frames = self.frames.iloc[required_frame_ids, :]
@@ -149,7 +151,7 @@ class Batch:
             elif not self.empty():
                 by = self.frames.columns[0]
             else:
-                logger.warn('Sorting an empty batch')
+                logger.warn("Sorting an empty batch")
                 return
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
@@ -172,19 +174,19 @@ class Batch:
             for column in by:
                 if column not in self._frames.columns:
                     logger.error(
-                        'Can not orderby non-projected column: {}'.format(
-                            column))
+                        "Can not orderby non-projected column: {}".format(column)
+                    )
                     raise KeyError(
-                        'Can not orderby non-projected column: {}'.format(
-                            column))
+                        "Can not orderby non-projected column: {}".format(column)
+                    )
 
             self._frames.sort_values(
-                by, ascending=sort_type, ignore_index=True, inplace=True)
+                by, ascending=sort_type, ignore_index=True, inplace=True
+            )
         else:
-            logger.warn(
-                'Columns and Sort Type are required for orderby')
+            logger.warn("Columns and Sort Type are required for orderby")
 
-    def project(self, cols: []) -> 'Batch':
+    def project(self, cols: []) -> "Batch":
         """
         Takes as input the column list, returns the projection.
         We do a copy for now.
@@ -192,14 +194,15 @@ class Batch:
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
         if len(unknown_cols):
-            logger.warn("Unexpected columns %s\n\
-                                 Frames: %s" % (unknown_cols, self._frames))
+            logger.warn(
+                "Unexpected columns %s\n\
+                                 Frames: %s"
+                % (unknown_cols, self._frames)
+            )
         return Batch(self._frames[verfied_cols], self._identifier_column)
 
     @classmethod
-    def merge_column_wise(cls,
-                          batches: ['Batch'],
-                          auto_renaming=False) -> 'Batch':
+    def merge_column_wise(cls, batches: ["Batch"], auto_renaming=False) -> "Batch":
         """
         Merge list of batch frames column_wise and return a new batch frame
         Arguments:
@@ -215,11 +218,10 @@ class Batch:
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1, copy=False)
         if new_frames.columns.duplicated().any():
-            logger.warn(
-                'Duplicated column name detected {}'.format(new_frames))
+            logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
-    def __add__(self, other: 'Batch'):
+    def __add__(self, other: "Batch"):
         """
         Adds two batch frames and return a new batch frame
         Arguments:
@@ -242,8 +244,8 @@ class Batch:
         return Batch(new_frames)
 
     @classmethod
-    def concat(cls, batch_list: Iterable['Batch'], copy=True) -> 'Batch':
-        """ Concat a list of batches. Avoid the extra copying overhead by
+    def concat(cls, batch_list: Iterable["Batch"], copy=True) -> "Batch":
+        """Concat a list of batches. Avoid the extra copying overhead by
         the append operation in __add__.
         Notice: only frames are considered.
         """
@@ -265,12 +267,12 @@ class Batch:
         return self.batch_size == 0
 
     def reverse(self):
-        """ Reverses dataframe """
+        """Reverses dataframe"""
         self._frames = self._frames[::-1]
         self._frames.reset_index(drop=True, inplace=True)
 
     def reset_index(self):
-        """ Resets the index of the data frame in the batch"""
+        """Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
 
     def modify_column_alias(self, alias: str) -> NoReturn:
@@ -278,11 +280,10 @@ class Batch:
         # t1.a -> t2.a
         new_col_names = []
         for col_name in self.frames.columns:
-            if '.' in col_name:
-                new_col_names.append('{}.{}'.format(
-                    alias, col_name.split('.')[1]))
+            if "." in col_name:
+                new_col_names.append("{}.{}".format(alias, col_name.split(".")[1]))
             else:
-                new_col_names.append('{}.{}'.format(alias, col_name))
+                new_col_names.append("{}.{}".format(alias, col_name))
 
         self.frames.columns = new_col_names
 
@@ -290,8 +291,8 @@ class Batch:
         # table1.a, table1.b, table1.c -> a, b, c
         new_col_names = []
         for col_name in self.frames.columns:
-            if '.' in col_name:
-                new_col_names.append(col_name.split('.')[1])
+            if "." in col_name:
+                new_col_names.append(col_name.split(".")[1])
             else:
                 new_col_names.append(col_name)
 

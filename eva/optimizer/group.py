@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
 
 from typing import Dict, List
-from eva.optimizer.property import Property
-from eva.optimizer.group_expression import GroupExpression
+
 from eva.constants import UNDEFINED_GROUP_ID
+from eva.optimizer.group_expression import GroupExpression
+from eva.optimizer.property import Property
 from eva.utils.logging_manager import logger
 
 
@@ -37,7 +37,6 @@ class Winner:
 
 
 class Group:
-
     def __init__(self, group_id: int, aliases: List[str] = None):
         self._group_id = group_id
         self._aliases = aliases
@@ -69,9 +68,9 @@ class Group:
         self._is_explored = True
 
     def __str__(self) -> str:
-        return '%s(%s)' % (
+        return "%s(%s)" % (
             type(self).__name__,
-            ', '.join('%s=%s' % item for item in vars(self).items())
+            ", ".join("%s=%s" % item for item in vars(self).items()),
         )
 
     def add_expr(self, expr: GroupExpression):
@@ -79,8 +78,9 @@ class Group:
             expr.group_id = self.group_id
 
         if expr.group_id != self.group_id:
-            logger.error('Expected group id {}, found {}'.format(
-                self.group_id, expr.group_id))
+            logger.error(
+                "Expected group id {}, found {}".format(self.group_id, expr.group_id)
+            )
             return
 
         if expr.opr.is_logical():

@@ -9,7 +9,7 @@ if [ -f ./__init__.py ]; then
 fi
 
 # Run linter (checks code style)
-flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql
+flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql --max-line-length 88
 linter_code=$?
 # Run unit tests
 PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING

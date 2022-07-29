@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,10 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-from eva.planner.abstract_plan import AbstractPlan
-from eva.expression.abstract_expression import AbstractExpression
-from eva.planner.types import PlanOprType
+
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.abstract_expression import AbstractExpression
+from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
 class InsertPlan(AbstractPlan):
@@ -31,16 +32,23 @@ class InsertPlan(AbstractPlan):
                                                 for the values to insert
     """
 
-    def __init__(self, table_metainfo: DataFrameMetadata,
-                 column_list: List[AbstractExpression],
-                 value_list: List[AbstractExpression]):
+    def __init__(
+        self,
+        table_metainfo: DataFrameMetadata,
+        column_list: List[AbstractExpression],
+        value_list: List[AbstractExpression],
+    ):
         super().__init__(PlanOprType.INSERT)
         self.table_metainfo = table_metainfo
         self.columns_list = column_list
         self.value_list = value_list
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table_metainfo,
-                     tuple(self.column_list),
-                     tuple(self.value_list)))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_metainfo,
+                tuple(self.column_list),
+                tuple(self.value_list),
+            )
+        )
