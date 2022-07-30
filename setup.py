@@ -57,7 +57,7 @@ minimal_requirement = [
     "petastorm==0.9.8",
     "antlr4-python3-runtime==4.8",
     "pyyaml==5.1",
-    "pymysql==0.10.1",
+    "pymysql==0.10.1"
 ]
 
 formatter_libs = [
@@ -66,10 +66,11 @@ formatter_libs = [
 ]
 
 extra_test_libs = [
-    "flake8==3.9.1",
+    "flake8==3.9.1"
 ]
 
-integration_test_libs = []
+integration_test_libs = [
+]
 
 core_test_libs = [
     "pytest==6.1.2",
@@ -77,7 +78,7 @@ core_test_libs = [
     "pytest-cov==2.11.1",
     "pytest-virtualenv",
     "coveralls==3.0.1",
-    "mock=4.0.3"
+    "mock==4.0.3"
 ]
 benchmark_libs = [
 ]
