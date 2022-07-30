@@ -48,16 +48,13 @@ minimal_requirement = [
     "numpy==1.20.1",
     "opencv-python==4.5.1.48",
     "pandas==1.2.3",
-    "torch==1.7.1",
-    "torchvision==0.8.2",
     "Pillow==8.1.2",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
     "pyspark==3.0.2",
     "petastorm==0.9.8",
     "antlr4-python3-runtime==4.8",
-    "pyyaml==5.1",
-    "pymysql==0.10.1"
+    "pyyaml==5.1"
 ]
 
 formatter_libs = [
@@ -65,28 +62,30 @@ formatter_libs = [
     "isort==5.10.1"
 ]
 
-extra_test_libs = [
-    "flake8==3.9.1"
-]
-
-integration_test_libs = [
-]
-
-core_test_libs = [
+test_libs = [
     "pytest==6.1.2",
-    "coverage[toml]<6.0",
     "pytest-cov==2.11.1",
     "pytest-virtualenv",
     "coveralls==3.0.1",
     "mock==4.0.3"
+    "flake8==3.9.1"    
 ]
+
+### NEEDED FOR INTEGRATION TESTS ONLY
+integration_test_libs = [
+    "torch==1.7.1",
+    "torchvision==0.8.2",
+]
+
 benchmark_libs = [
 ]
 
 doc_libs = [
 ]
 
+### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = [
+    "pymysql==0.10.1"
 ]
 
 MINIMAL_REQUIRES = minimal_requirement
@@ -95,12 +94,11 @@ DATABASE_REQUIRES = INSTALL_REQUIRES + database_libs
 DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
-    + database_libs
+    + test_libs
     + integration_test_libs
-    + extra_test_libs
-    + core_test_libs
     + benchmark_libs
     + doc_libs
+    + database_libs
 )
 
 EXTRA_REQUIRES = {
