@@ -1,0 +1,21 @@
+# Jekyll configuration
+#
+
+logo: Logo.png
+
+title: EVA
+blank: 
+description: Video Database System -- Think MySQL for videos!
+
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://georgia-tech-db.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+
+show_downloads: true
+google_analytics: EVA
+
+# Build settings
+# theme: jekyll-theme-minimal
+plugins:
+  - jekyll-feed
+
+#not default stuff
