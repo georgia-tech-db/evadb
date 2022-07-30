@@ -25,8 +25,8 @@ emptyStatement
     ;
 
 ddlStatement
-    : createDatabase | createTable | createIndex | createUdf
-    | dropDatabase | dropTable | dropIndex
+    : createDatabase | createTable | createIndex | createUdf | createMaterializedView
+    | dropDatabase | dropTable | dropUdf | dropIndex | renameTable
     ;
 
 dmlStatement
@@ -35,7 +35,7 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement
+    : simpleDescribeStatement | helpStatement | showStatement
     ;
 
 // Data Definition Language
@@ -59,6 +59,13 @@ createTable
       tableName createDefinitions                                  #columnCreateTable
     ;
 
+// Rename statements
+renameTable
+    : RENAME TABLE
+      oldtableName
+      TO newtableName
+    ;
+
 // Create UDFs
 createUdf
     : CREATE UDF
@@ -70,6 +77,14 @@ createUdf
       IMPL   udfImpl
     ;
 
+// Create Materialized View
+createMaterializedView
+    : CREATE MATERIALIZED VIEW
+      ifNotExists?
+      tableName ('(' columns=uidList ')')
+      AS
+      selectStatement
+      ;
 
 // details
 udfName
@@ -129,6 +144,11 @@ dropTable
       tables
     ;
 
+dropUdf
+    : DROP UDF ifExists?
+      udfName
+    ;
+
 // Data Manipulation Language
 
 //    Primary DML Statements
@@ -154,10 +174,19 @@ updateStatement
     : singleUpdateStatement
     ;
 
+
 loadStatement
     : LOAD DATA
       INFILE fileName
       INTO tableName
+        (
+            ('(' columns=uidList ')')
+        )?
+      (WITH fileOptions)?
+    ;
+
+fileOptions
+    : FORMAT fileFormat=(CSV|VIDEO)
     ;
 
 uploadStatement
@@ -212,25 +241,34 @@ orderByClause
 orderByExpression
     : expression order=(ASC | DESC)?
     ;
-
+// Forcing EXPLICIT JOIN KEYWORD
 tableSources
-    : tableSource (',' tableSource)*
+    : tableSource
     ;
+
+//tableSources
+//    : tableSource (',' tableSource)*
+//    ;
 
 tableSource
     : tableSourceItemWithSample joinPart*                #tableSourceBase
     ;
 
 tableSourceItemWithSample
-    : tableSourceItem sampleClause?
+    : tableSourceItem (AS? uid)? sampleClause?
     ;
 
 tableSourceItem
-    : tableName                                  #atomTableItem
-    | (
+    : tableName                                         #atomTableItem
+    | subqueryTableSourceItem                           #subqueryTableItem
+    | LATERAL functionCall                              #lateralFunctionCallItem
+    ;
+
+subqueryTableSourceItem
+    : (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )                                                            #subqueryTableItem
+      )
     ;
 
 sampleClause
@@ -242,7 +280,7 @@ joinPart
     : JOIN tableSourceItemWithSample
       (
         ON expression
-        | USING '(' uidList ')'
+        | USING LR_BRACKET uidList RR_BRACKET
       )?                                                            #innerJoin
     ;
 
@@ -319,6 +357,10 @@ helpStatement
     : HELP STRING_LITERAL
     ;
 
+showStatement
+    : SHOW (UDFS | TABLES)
+    ;
+
 // Common Clauses
 
 //    DB Objects
@@ -328,6 +370,12 @@ fullId
     ;
 
 tableName
+    : fullId
+    ;
+oldtableName
+    : fullId
+    ;
+newtableName
     : fullId
     ;
 

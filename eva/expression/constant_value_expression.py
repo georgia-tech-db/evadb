@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 from typing import Any
-from eva.expression.abstract_expression import AbstractExpression, \
-    ExpressionType
-from eva.models.storage.batch import Batch
+
+import pandas as pd
+
 from eva.catalog.column_type import ColumnType
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.models.storage.batch import Batch
 
 
 class ConstantValueExpression(AbstractExpression):
@@ -40,6 +41,7 @@ class ConstantValueExpression(AbstractExpression):
     @property
     def v_type(self):
         return self._v_type
+
     # ToDo implement other functionalities like maintaining hash
     # comparing two objects of this class(==)
 
@@ -55,3 +57,6 @@ class ConstantValueExpression(AbstractExpression):
             return is_equal and all(self.value == other.value)
         else:
             return is_equal and self.value == other.value
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.v_type, str(self.value)))

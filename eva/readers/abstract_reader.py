@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Iterator, Dict
+from typing import Dict, Iterator
+
 import pandas as pd
 
 from eva.models.storage.batch import Batch
+from eva.utils.generic_utils import get_size
 
 
 class AbstractReader(metaclass=ABCMeta):
@@ -31,10 +33,9 @@ class AbstractReader(metaclass=ABCMeta):
         batch_mem_size (int): used to compute the #frames to
                                             read in batch from video
         offset (int, optional): Start frame location in video
-        """
+    """
 
-    def __init__(self, file_url: str, batch_mem_size: int,
-                 offset=None):
+    def __init__(self, file_url: str, batch_mem_size: int, offset=None):
         # Opencv doesn't support pathlib.Path so convert to raw str
         if isinstance(file_url, Path):
             file_url = str(file_url)
@@ -52,7 +53,8 @@ class AbstractReader(metaclass=ABCMeta):
         row_size = None
         for data in self._read():
             if row_size is None:
-                row_size = data['data'].nbytes
+                row_size = 0
+                row_size = get_size(data)
             data_batch.append(data)
             if len(data_batch) * row_size >= self.batch_mem_size:
                 yield Batch(pd.DataFrame(data_batch))

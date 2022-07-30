@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,31 +12,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import unittest
-import pandas as pd
-import numpy as np
-
 from unittest import mock
 from unittest.mock import MagicMock, call
 
-from eva.models.storage.batch import Batch
-from eva.parser.parser_visitor import ParserVisitor
-from eva.parser.evaql.evaql_parser import evaql_parser
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.function_expression import ExecutionMode
-from eva.parser.table_ref import TableRef
+import numpy as np
+import pandas as pd
 from antlr4 import TerminalNode
+
+from eva.expression.abstract_expression import ExpressionType
+from eva.models.storage.batch import Batch
+from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.parser_visitor import ParserVisitor
+from eva.parser.table_ref import TableRef
+from eva.parser.types import FileFormatType
 
 
 class ParserVisitorTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch.object(ParserVisitor, "visit")
     def test_should_query_specification_visitor(self, mock_visit):
-        mock_visit.side_effect = ["columns",
-                                  {"from": ["tables"], "where": "predicates"}]
+        mock_visit.side_effect = [
+            "columns",
+            {"from": "table_ref", "where": "predicates"},
+        ]
 
         visitor = ParserVisitor()
         ctx = MagicMock()
@@ -51,11 +52,11 @@ class ParserVisitorTests(unittest.TestCase):
 
         mock_visit.assert_has_calls([call(child_1), call(child_2)])
 
-        self.assertEqual(expected.from_table, "tables")
+        self.assertEqual(expected.from_table, "table_ref")
         self.assertEqual(expected.where_clause, "predicates")
         self.assertEqual(expected.target_list, "columns")
 
-    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch.object(ParserVisitor, "visit")
     def test_from_clause_visitor(self, mock_visit):
         mock_visit.side_effect = ["tables", "predicates"]
 
@@ -69,64 +70,50 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitFromClause(ctx)
         mock_visit.assert_has_calls([call(tableSources), call(whereExpr)])
 
-        self.assertEqual(expected.get('where'), 'predicates')
-        self.assertEqual(expected.get('from'), 'tables')
+        self.assertEqual(expected.get("where"), "predicates")
+        self.assertEqual(expected.get("from"), "tables")
 
     def test_logical_operator(self):
         ctx = MagicMock()
         visitor = ParserVisitor()
 
-        self.assertEqual(
-            visitor.visitLogicalOperator(ctx),
-            ExpressionType.INVALID)
+        self.assertEqual(visitor.visitLogicalOperator(ctx), ExpressionType.INVALID)
 
-        ctx.getText.return_value = 'OR'
-        self.assertEqual(
-            visitor.visitLogicalOperator(ctx),
-            ExpressionType.LOGICAL_OR)
+        ctx.getText.return_value = "OR"
+        self.assertEqual(visitor.visitLogicalOperator(ctx), ExpressionType.LOGICAL_OR)
 
-        ctx.getText.return_value = 'AND'
-        self.assertEqual(
-            visitor.visitLogicalOperator(ctx),
-            ExpressionType.LOGICAL_AND)
+        ctx.getText.return_value = "AND"
+        self.assertEqual(visitor.visitLogicalOperator(ctx), ExpressionType.LOGICAL_AND)
 
     def test_comparison_operator(self):
         ctx = MagicMock()
         visitor = ParserVisitor()
 
+        self.assertEqual(visitor.visitComparisonOperator(ctx), ExpressionType.INVALID)
+
+        ctx.getText.return_value = "="
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx),
-            ExpressionType.INVALID
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_EQUAL
         )
 
-        ctx.getText.return_value = '='
+        ctx.getText.return_value = "<"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_EQUAL
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_LESSER
         )
 
-        ctx.getText.return_value = '<'
+        ctx.getText.return_value = ">"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_LESSER
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_GREATER
         )
 
-        ctx.getText.return_value = '>'
+        ctx.getText.return_value = "@>"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_GREATER
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_CONTAINS
         )
 
-        ctx.getText.return_value = '@>'
+        ctx.getText.return_value = "<@"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_CONTAINS
-        )
-
-        ctx.getText.return_value = '<@'
-        self.assertEqual(
-            visitor.visitComparisonOperator(ctx),
-            ExpressionType.COMPARE_IS_CONTAINED
+            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_IS_CONTAINED
         )
 
     # To be fixed
@@ -153,9 +140,9 @@ class ParserVisitorTests(unittest.TestCase):
     #        visitor.visitTableName(ctx)
 
     def test_logical_expression(self):
-        ''' Testing for break in code if len(children) < 3
-            Function : visitLogicalExpression
-        '''
+        """Testing for break in code if len(children) < 3
+        Function : visitLogicalExpression
+        """
         ctx = MagicMock()
         visitor = ParserVisitor()
 
@@ -177,11 +164,11 @@ class ParserVisitorTests(unittest.TestCase):
         expected = visitor.visitLogicalExpression(ctx)
         self.assertEqual(expected, None)
 
-    @mock.patch.object(ParserVisitor, 'visitChildren')
+    @mock.patch.object(ParserVisitor, "visitChildren")
     def test_visit_string_literal_none(self, mock_visit):
-        ''' Testing when string literal is None
-            Function: visitStringLiteral
-        '''
+        """Testing when string literal is None
+        Function: visitStringLiteral
+        """
         visitor = ParserVisitor()
         ctx = MagicMock()
         ctx.STRING_LITERAL.return_value = None
@@ -193,48 +180,46 @@ class ParserVisitorTests(unittest.TestCase):
         mock_visit.assert_has_calls([call(ctx)])
 
     def test_visit_constant(self):
-        ''' Testing for value of returned constant
-            when real literal is not None
-            Function: visitConstant
-        '''
+        """Testing for value of returned constant
+        when real literal is not None
+        Function: visitConstant
+        """
         ctx = MagicMock()
         visitor = ParserVisitor()
-        ctx.REAL_LITERAL.return_value = '5'
+        ctx.REAL_LITERAL.return_value = "5"
         expected = visitor.visitConstant(ctx)
         self.assertEqual(
-            expected.evaluate(),
-            Batch(pd.DataFrame([float(ctx.getText())])))
+            expected.evaluate(), Batch(pd.DataFrame([float(ctx.getText())]))
+        )
 
     def test_visit_int_array_literal(self):
-        ''' Testing int array literal
-            Function: visitArrayLiteral
-        '''
+        """Testing int array literal
+        Function: visitArrayLiteral
+        """
         ctx = MagicMock()
         visitor = ParserVisitor()
-        ctx.getText.return_value = '[1,2,3,4]'
+        ctx.getText.return_value = "[1,2,3,4]"
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
-            expected.evaluate(),
-            Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
+            expected.evaluate(), Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
         )
 
     def test_visit_str_array_literal(self):
-        ''' Testing str array literal
-            Function: visitArrayLiteral
-        '''
+        """Testing str array literal
+        Function: visitArrayLiteral
+        """
         ctx = MagicMock()
         visitor = ParserVisitor()
         ctx.getText.return_value = "['person', 'car']"
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
-            expected.evaluate(),
-            Batch(pd.DataFrame({0: [np.array(['person', 'car'])]}))
+            expected.evaluate(), Batch(pd.DataFrame({0: [np.array(["person", "car"])]}))
         )
 
     def test_visit_query_specification_base_exception(self):
-        ''' Testing Base Exception error handling
-            Function: visitQuerySpecification
-        '''
+        """Testing Base Exception error handling
+        Function: visitQuerySpecification
+        """
         visitor = ParserVisitor()
         ctx = MagicMock()
         child_1 = MagicMock()
@@ -250,16 +235,18 @@ class ParserVisitorTests(unittest.TestCase):
     # UDFs
     ##################################################################
 
-    @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('eva.parser.parser_visitor._functions.FunctionExpression')
+    @mock.patch.object(ParserVisitor, "visit")
+    @mock.patch("eva.parser.parser_visitor._functions.FunctionExpression")
     def test_visit_udf_function_call(self, func_mock, visit_mock):
         ctx = MagicMock()
-        udf_name = 'name'
-        udf_output = 'label'
+        udf_name = "name"
+        udf_output = "label"
         func_args = [MagicMock(), MagicMock()]
-        values = {ctx.simpleId.return_value: udf_name,
-                  ctx.functionArgs.return_value: func_args,
-                  ctx.dottedId.return_value: udf_output}
+        values = {
+            ctx.simpleId.return_value: udf_name,
+            ctx.functionArgs.return_value: func_args,
+            ctx.dottedId.return_value: udf_output,
+        }
 
         def side_effect(arg):
             return values[arg]
@@ -269,53 +256,51 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         actual = visitor.visitUdfFunction(ctx)
         visit_mock.assert_has_calls(
-            [call(ctx.simpleId()), call(ctx.dottedId()),
-             call(ctx.functionArgs())])
+            [call(ctx.simpleId()), call(ctx.dottedId()), call(ctx.functionArgs())]
+        )
 
-        func_mock.assert_called_with(None, mode=ExecutionMode.EXEC,
-                                     name='name', output=udf_output)
+        func_mock.assert_called_with(None, name="name", output=udf_output)
 
         for arg in func_args:
             func_mock.return_value.append_child.assert_any_call(arg)
         self.assertEqual(actual, func_mock.return_value)
 
-    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch.object(ParserVisitor, "visit")
     def test_visit_function_args(self, visit_mock):
         ctx = MagicMock()
         obj = MagicMock(spec=TerminalNode())
-        ctx.children = ['arg1', obj, 'arg2']
+        ctx.children = ["arg1", obj, "arg2"]
         visit_mock.side_effect = [1, 2]
 
         visitor = ParserVisitor()
         actual = visitor.visitFunctionArgs(ctx)
 
-        visit_mock.assert_has_calls([call('arg1'), call('arg2')])
+        visit_mock.assert_has_calls([call("arg1"), call("arg2")])
         self.assertEqual(actual, [1, 2])
 
-    @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('eva.parser.parser_visitor._functions.CreateUDFStatement')
+    @mock.patch.object(ParserVisitor, "visit")
+    @mock.patch("eva.parser.parser_visitor._functions.CreateUDFStatement")
     def test_visit_create_udf(self, create_udf_mock, visit_mock):
         ctx = MagicMock()
         ctx.children = [MagicMock() for i in range(5)]
         ctx.children[0].getRuleIndex.return_value = evaql_parser.RULE_udfName
-        ctx.children[1].getRuleIndex.return_value = evaql_parser. \
-            RULE_ifNotExists
-        ctx.children[2].getRuleIndex.return_value = evaql_parser. \
-            RULE_createDefinitions
+        ctx.children[1].getRuleIndex.return_value = evaql_parser.RULE_ifNotExists
+        ctx.children[2].getRuleIndex.return_value = evaql_parser.RULE_createDefinitions
         ctx.children[3].getRuleIndex.return_value = evaql_parser.RULE_udfType
         ctx.children[4].getRuleIndex.return_value = evaql_parser.RULE_udfImpl
 
         ctx.createDefinitions.return_value.__len__.return_value = 2
 
-        udf_name = 'name'
-        udf_type = 'classification'
+        udf_name = "name"
+        udf_type = "classification"
         udf_impl = MagicMock()
-        udf_impl.value = 'udf_impl'
+        udf_impl.value = "udf_impl"
         values = {
             ctx.udfName.return_value: udf_name,
             ctx.udfType.return_value: udf_type,
             ctx.udfImpl.return_value: udf_impl,
-            ctx.createDefinitions.return_value: 'col'}
+            ctx.createDefinitions.return_value: "col",
+        }
 
         def side_effect(arg):
             return values[arg]
@@ -326,30 +311,42 @@ class ParserVisitorTests(unittest.TestCase):
         actual = visitor.visitCreateUdf(ctx)
 
         visit_mock.assert_has_calls(
-            [call(ctx.udfName()),
-             call(ctx.createDefinitions(0)),
-             call(ctx.createDefinitions(1)),
-             call(ctx.udfType()),
-             call(ctx.udfImpl())])
+            [
+                call(ctx.udfName()),
+                call(ctx.createDefinitions(0)),
+                call(ctx.createDefinitions(1)),
+                call(ctx.udfType()),
+                call(ctx.udfImpl()),
+            ]
+        )
 
         create_udf_mock.assert_called_once()
         create_udf_mock.assert_called_with(
-            udf_name, True, 'col', 'col', 'udf_impl', udf_type)
+            udf_name, True, "col", "col", "udf_impl", udf_type
+        )
 
         self.assertEqual(actual, create_udf_mock.return_value)
 
     ##################################################################
     # LOAD DATA Statement
     ##################################################################
-    @mock.patch.object(ParserVisitor, 'visit')
-    @mock.patch('eva.parser.parser_visitor._load_statement.LoadDataStatement')
+    @mock.patch.object(ParserVisitor, "visit")
+    @mock.patch("eva.parser.parser_visitor._load_statement.LoadDataStatement")
     def test_visit_load_statement(self, mock_load, mock_visit):
         ctx = MagicMock()
-        table = 'myVideo'
+        table = "myVideo"
         path = MagicMock()
-        path.value = 'video.mp4'
-        params = {ctx.fileName.return_value: path,
-                  ctx.tableName.return_value: table}
+        path.value = "video.mp4"
+        column_list = None
+        file_format = FileFormatType.VIDEO
+        file_options = {}
+        file_options["file_format"] = file_format
+        params = {
+            ctx.fileName.return_value: path,
+            ctx.tableName.return_value: table,
+            ctx.fileOptions.return_value: file_options,
+            ctx.uidList.return_value: column_list,
+        }
 
         def side_effect(arg):
             return params[arg]
@@ -358,6 +355,14 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         visitor.visitLoadStatement(ctx)
         mock_visit.assert_has_calls(
-            [call(ctx.fileName()), call(ctx.tableName())])
+            [
+                call(ctx.fileName()),
+                call(ctx.tableName()),
+                call(ctx.fileOptions()),
+                call(ctx.uidList()),
+            ]
+        )
         mock_load.assert_called_once()
-        mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4')
+        mock_load.assert_called_with(
+            TableRef("myVideo"), "video.mp4", column_list, file_options
+        )

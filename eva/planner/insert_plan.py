@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-from eva.planner.abstract_plan import AbstractPlan
+
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
+from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
 
@@ -24,27 +26,29 @@ class InsertPlan(AbstractPlan):
     operations.
 
     Arguments:
-        video_id{int} -- video metadata id to insert into
+        table_metainfo{int} -- video metadata id to insert into
         column_list{List[AbstractExpression]} -- list of annotated column
         value_list{List[AbstractExpression]} -- list of abstract expression
                                                 for the values to insert
     """
 
-    def __init__(self, video_id: int, column_list: List[AbstractExpression],
-                 value_list: List[AbstractExpression]):
+    def __init__(
+        self,
+        table_metainfo: DataFrameMetadata,
+        column_list: List[AbstractExpression],
+        value_list: List[AbstractExpression],
+    ):
         super().__init__(PlanOprType.INSERT)
-        self._video_id = video_id
-        self._columns_list = column_list
-        self._value_list = value_list
+        self.table_metainfo = table_metainfo
+        self.columns_list = column_list
+        self.value_list = value_list
 
-    @property
-    def video_id(self):
-        return self._video_id
-
-    @property
-    def column_list(self):
-        return self._columns_list
-
-    @property
-    def value_list(self):
-        return self._value_list
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.table_metainfo,
+                tuple(self.column_list),
+                tuple(self.value_list),
+            )
+        )

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.udf import UdfMetadata
-from eva.catalog.services.base_service import BaseService
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.services.base_service import BaseService
+from eva.utils.logging_manager import logger
 
 
 class UdfService(BaseService):
@@ -64,8 +64,8 @@ class UdfService(BaseService):
         except NoResultFound:
             return None
 
-    def delete_udf_by_name(self, name: str):
-        """Delete a udf entry from the catalog udfmetadata
+    def drop_udf_by_name(self, name: str):
+        """Drop a udf entry from the catalog udfmetadata
 
         Arguments:
             name (str): udf name to be deleted
@@ -75,11 +75,14 @@ class UdfService(BaseService):
         """
         try:
             udf_record = self.udf_by_name(name)
-            if udf_record:
-                udf_record.delete()
+            udf_record.delete()
         except Exception:
-            LoggingManager().log(
-                "delete udf failed with name {}".format(name),
-                LoggingLevel.ERROR)
+            logger.exception("Delete udf failed for name {}".format(name))
             return False
         return True
+
+    def get_all_udfs(self):
+        try:
+            return self.model.query.all()
+        except NoResultFound:
+            return []

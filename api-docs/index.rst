@@ -17,16 +17,3 @@ What does EVA do?
 * EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
 
 * EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
-
-.. toctree::
-   :maxdepth: 2
-
-   guide/index
-
-.. autosummary::
-   :toctree: _autosummary
-   :caption: API Reference
-   :template: custom-module-template.rst
-   :recursive:
-
-   src

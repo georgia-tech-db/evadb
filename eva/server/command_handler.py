@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import pandas as pd
-
 from typing import Iterator, Optional
 
-from eva.parser.parser import Parser
-from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from eva.optimizer.plan_generator import PlanGenerator
+from eva.binder.statement_binder import StatementBinder
+from eva.binder.statement_binder_context import StatementBinderContext
 from eva.executor.plan_executor import PlanExecutor
-from eva.models.server.response import ResponseStatus, Response
+from eva.models.server.response import Response, ResponseStatus
 from eva.models.storage.batch import Batch
-
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.optimizer.plan_generator import PlanGenerator
+from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.parser.parser import Parser
+from eva.utils.logging_manager import logger
 
 
 def execute_query(query) -> Iterator[Batch]:
@@ -32,6 +31,10 @@ def execute_query(query) -> Iterator[Batch]:
     Execute the query and return a result generator.
     """
     stmt = Parser().parse(query)[0]
+    try:
+        StatementBinder(StatementBinderContext()).bind(stmt)
+    except Exception as error:
+        raise RuntimeError(f"Binder failed: {error}")
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()
@@ -50,29 +53,32 @@ def execute_query_fetch_all(query) -> Optional[Batch]:
 @asyncio.coroutine
 def handle_request(transport, request_message):
     """
-        Reads a request from a client and processes it
+    Reads a request from a client and processes it
 
-        If user inputs 'quit' stops the event loop
-        otherwise just echoes user input
+    If user inputs 'quit' stops the event loop
+    otherwise just echoes user input
     """
-    LoggingManager().log('Receive request: --|' + str(request_message) + '|--')
+    logger.debug("Receive request: --|" + str(request_message) + "|--")
 
     try:
         output_batch = execute_query_fetch_all(request_message)
     except Exception as e:
-        LoggingManager().log(e, LoggingLevel.WARNING)
-        output_batch = Batch(pd.DataFrame([{'error': str(e)}]))
-        response = Response(status=ResponseStatus.FAIL, batch=output_batch)
+        logger.warn(e)
+        response = Response(status=ResponseStatus.FAIL, batch=None, error=str(e))
     else:
         response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
 
     responseData = response.to_json()
     # Send data length, because response can be very large
-    data = (str(len(responseData)) + '|' + responseData).encode('ascii')
+    data = (str(len(responseData)) + "|" + responseData).encode("ascii")
 
-    LoggingManager().log('Response to client: --|' +
-                         str(response) + '|--\n' +
-                         'Length: ' + str(len(responseData)))
+    logger.debug(
+        "Response to client: --|"
+        + str(response)
+        + "|--\n"
+        + "Length: "
+        + str(len(responseData))
+    )
 
     transport.write(data)
 

@@ -52,6 +52,7 @@ INSERT:                              'INSERT';
 IS:                                  'IS';
 JOIN:                                'JOIN';
 KEY:                                 'KEY';
+LATERAL:                             'LATERAL';
 LIKE:                                'LIKE';
 LIMIT:                               'LIMIT';
 LOAD:                                'LOAD';
@@ -65,13 +66,18 @@ ORDER:                               'ORDER';
 PATH:                                'PATH';
 PRIMARY:                             'PRIMARY';
 REFERENCES:                          'REFERENCES';
+RENAME:                              'RENAME';
 SAMPLE:                              'SAMPLE';
 SELECT:                              'SELECT';
 SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
+SHOW:                                'SHOW';
 SOME:                                'SOME';
 TABLE:                               'TABLE';
+TABLES:                              'TABLES';
+TO:                                  'TO';
 TRUE:                                'TRUE';
+UDFS:                                'UDFS';
 UNION:                               'UNION';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';
@@ -83,6 +89,12 @@ USING:                               'USING';
 VALUES:                              'VALUES';
 WHERE:                               'WHERE';
 XOR:                                 'XOR';
+
+// File Formats
+WITH:                 'WITH';
+FORMAT:               'FORMAT';
+CSV:                  'CSV';
+VIDEO:                'VIDEO';
 
 // EVAQL keywords
 
@@ -144,6 +156,10 @@ INPUT:                          'INPUT';
 OUTPUT:                         'OUTPUT';
 TYPE:                           'TYPE';
 IMPL:                           'IMPL';
+
+// MATERIALIZED
+MATERIALIZED:                   'MATERIALIZED';
+VIEW:                           'VIEW';
 
 // Common function names
 
