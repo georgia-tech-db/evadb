@@ -60,22 +60,24 @@ minimal_requirement = [
     "pymysql==0.10.1",
 ]
 
-formatter_libs = ["black", "isort"]
+formatter_libs = [
+    "black==22.6.0", 
+    "isort==5.10.1"
+]
 
 extra_test_libs = [
-    "flake8",
+    "flake8==3.9.1",
 ]
 
 integration_test_libs = []
 
 core_test_libs = [
-    "pytest",
-    # Coveralls doesn't work with 6.0
-    # https://github.com/TheKevJames/coveralls-python/issues/326
+    "pytest==6.1.2",
     "coverage[toml]<6.0",
-    "pytest-cov",
+    "pytest-cov==2.11.1",
     "pytest-virtualenv",
-    "coveralls",
+    "coveralls==3.0.1",
+    "mock=4.0.3"
 ]
 benchmark_libs = [
 ]
@@ -132,7 +134,7 @@ setup(
         "eva_server=eva.eva_server:main",
         "eva_client=eva.eva_cmd_client:main"
     ]},
-    python_requires=">=3.8",
+    python_requires=">=3.7",
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
