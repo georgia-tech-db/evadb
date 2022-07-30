@@ -67,7 +67,7 @@ test_libs = [
     "pytest-cov==2.11.1",
     "pytest-virtualenv",
     "coveralls==3.0.1",
-    "mock==4.0.3"
+    "mock==4.0.3",
     "flake8==3.9.1"    
 ]
 

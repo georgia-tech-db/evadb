@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import unittest
+import pytest
 from pathlib import Path
 
 from mock import MagicMock, patch
@@ -41,6 +42,7 @@ class ModulePathTest(unittest.TestCase):
         self.assertEqual(vl, OpenCVReader)
 
     @patch("eva.utils.generic_utils.torch")
+    @pytest.mark.torchtest
     def test_should_use_torch_to_check_if_gpu_is_available(self, torch):
         is_gpu_available()
         torch.cuda.is_available.assert_called()
