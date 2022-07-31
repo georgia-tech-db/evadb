@@ -6,9 +6,9 @@ parts:
       - file: source/overview/index
       - file: source/overview/installation
 
-  - caption: Tutorial
-    chapters:
-      - file: source/tutorials/tutorial
+  # - caption: Tutorial
+  #   chapters:
+  #     - file: source/tutorials/tutorials
 
   - caption: Reference
     chapters:
@@ -21,13 +21,14 @@ parts:
       - file: source/reference/udf
         title: Register UDFs
 
-
-
   - caption: Developer Guides
     chapters:
-      - file: source/contribute/contributing
+      - file: source/contribute/index
+        title: Contributing
         sections:
-          - file: source/contribute/new_operator
-          - file: source/contribute/new_ddl_command
+          # - file: source/contribute/new_operator
+          - file: source/contribute/new_command
           - file: source/contribute/debugging
+          - file: source/contribute/release
       - file: source/contribute/packaging
+        title: Packaging

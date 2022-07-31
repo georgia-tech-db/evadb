@@ -1,4 +1,4 @@
-# Extending a new DDL command to EVA
+# Adding new command
 This document is the note of tracing implementation of CREATE command. We also list all the file that need to be modified or added to extend a new DDL command to EVA. We hope this tutorial will be helpful when future users trying to implement new command in EVA.
 ## command_handler
 An input query string is handled by **Parser**, **StatementTOPlanConvertor**, **PlanGenerator**, and **PlanExcutor**. So let's discuss each part separately.
@@ -22,7 +22,7 @@ The parser firstly generate **syntax tree** from the input string, and then tans
 
 The first part of Parser is build from two ANTLR file.
 ### parser/evaql
-* `evaql_lexer.g4` - add key words(eg. CREATE, TABLE) under **Common Keywords**
+* `evaql_lexer.g4` - add keywords(eg. CREATE, TABLE) under **Common Keywords**
 * `evaql_parser.g4`
     * Add new grammar name(eg. createTable) under **ddlStatement**
     * Write a new grammar, for example:
