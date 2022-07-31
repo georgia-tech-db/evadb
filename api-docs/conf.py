@@ -32,10 +32,13 @@ copyright = str(datetime.now().year) + ', Georgia Tech Database Group'
 author = 'Georgia Tech Database Group'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+VERSION_DICT = {}
+with open("../eva/version.py", "r") as version_file:
+    exec(version_file.read(), VERSION_DICT)
+
+release = VERSION_DICT["VERSION"]
 
 master_doc = 'index'
-
 
 # -- General configuration ---------------------------------------------------
 
