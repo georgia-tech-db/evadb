@@ -18,8 +18,6 @@ import sys
 import uuid
 from pathlib import Path
 
-import torch
-
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
 
@@ -78,7 +76,11 @@ def is_gpu_available() -> bool:
     Returns:
         [bool] True if system has GPUs, else False
     """
-    return torch.cuda.is_available()
+    try:
+        import torch
+        return torch.cuda.is_available()
+    except ImportError:
+        return False
 
 
 def generate_file_path(name: str = "") -> Path:

@@ -14,6 +14,8 @@
 # limitations under the License.
 import sys
 import unittest
+import pytest
+
 from test.util import copy_sample_video_to_prefix, file_remove, load_inbuilt_udfs
 
 import mock
@@ -36,12 +38,14 @@ class PytorchTest(unittest.TestCase):
     def tearDownClass(cls):
         file_remove("ua_detrac.mp4")
 
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
 
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_ssd(self):
         create_udf_query = """CREATE UDF SSDObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))

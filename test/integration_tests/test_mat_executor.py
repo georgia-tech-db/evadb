@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pytest
+
 from test.util import (
     DummyObjectDetector,
     copy_sample_video_to_prefix,
@@ -94,6 +96,7 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
+    @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn(self):
         select_query = """SELECT id, FastRCNNObjectDetector(data).labels
                             FROM UATRAC WHERE id < 5;"""
