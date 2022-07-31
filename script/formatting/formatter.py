@@ -120,16 +120,17 @@ def is_tool(name):
     elif name is ISORT_BINARY:
         req_version = ISORT_VERSION_REQUIRED
     if which(name) is None:
-        sys.exit(
+        LOG.error(
             f"{name} is not installed. Install the python package with:"
-            " pip install {name}=={req_version}"
+            f"pip install {name}=={req_version}"
         )
+        sys.exit(1)
     else:
         installed_version = pkg_resources.get_distribution(name).version
         if installed_version != req_version:
             LOG.warning(
                 f"EVA uses {name} {req_version}. The installed version is"
-                " {installed_version} which can result in different results."
+                f" {installed_version} which can result in different results."
             )
 
 
@@ -137,7 +138,6 @@ def format_file(file_path, add_header, strip_header, format_code):
 
     abs_path = os.path.abspath(file_path)
     LOG.info(file_path)
-
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
         if add_header:
@@ -175,8 +175,9 @@ def format_file(file_path, add_header, strip_header, format_code):
             # AUTOFLAKE
             autoflake_command = FLAKE_BINARY + " --max-line-length 88 " + file_path
             # LOG.info(autoflake_command)
-            os.system(autoflake_command)
-
+            ret_val = os.system(autoflake_command)
+            if ret_val:
+                sys.exit(1)
     # END WITH
 
     fd.close()
@@ -286,11 +287,12 @@ if __name__ == "__main__":
         )
 
         for file in files:
-            LOG.info("Stripping headers : " + file)
-            format_file(file, False, True, False)
+            if file != "script/formatting/formatter.py":
+                LOG.info("Stripping headers : " + file)
+                format_file(file, False, True, False)
 
-            LOG.info("Adding headers : " + file)
-            format_file(file, True, False, False)
+                LOG.info("Adding headers : " + file)
+                format_file(file, True, False, False)
 
             LOG.info("Formatting File : " + file)
             format_file(file, False, False, True)
