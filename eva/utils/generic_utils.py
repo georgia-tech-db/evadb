@@ -79,8 +79,9 @@ def is_gpu_available() -> bool:
     try:
         import torch
         return torch.cuda.is_available()
-    except ImportError as e:
+    except ImportError:
         return False
+
 
 def generate_file_path(name: str = "") -> Path:
     """Generates a arbitrary file_path(md5 hash) based on the a random salt
