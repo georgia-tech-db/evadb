@@ -123,7 +123,7 @@ Documentation for EVA is located [here](https://evagatech.readthedocs.io/).
 
 ### Installation Instructions for Developers
 
-To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser. Detailed development guide is available [here](https://evagatech.readthedocs.io/en/latest/source/contribute/contributing.html).
+To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser. Detailed development guide is available [here](https://evagatech.readthedocs.io/en/latest/source/contribute/index.html).
 
 ```shell
 git clone https://github.com/georgia-tech-db/eva.git && cd eva

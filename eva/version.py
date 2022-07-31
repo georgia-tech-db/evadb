@@ -13,5 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = "0.0.3"
+_MAJOR = "0"
+_MINOR = "0"
+_REVISION = "3"
 
+VERSION_SHORT = f"{_MAJOR}.{_MINOR}"
+VERSION = f"{_MAJOR}.{_MINOR}.{_REVISION}"
