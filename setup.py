@@ -8,6 +8,7 @@ import re
 
 # to read contents of README file
 from pathlib import Path
+from typing import Dict
 
 from setuptools import find_packages, setup
 
@@ -27,22 +28,14 @@ def read(path, encoding="utf-8"):
         return fp.read()
 
 
-def version(path):
-    """Obtain the package version from a python file e.g. pkg/__init__.py
-    See <https://packaging.python.org/en/latest/single_source_version.html>.
-    """
-    version_file = read(path)
-    version_match = re.search(
-        r"""^__version__ = ['"]([^'"]*)['"]""", version_file, re.M
-    )
-    if version_match:
-        return version_match.group(1)
-    raise RuntimeError("Unable to find version string.")
-
+# version.py defines the VERSION and VERSION_SHORT variables
+VERSION_DICT: Dict[str, str] = {}
+with open("eva/version.py", "r") as version_file:
+    exec(version_file.read(), VERSION_DICT)
 
 DOWNLOAD_URL = "https://github.com/georgia-tech-db/eva"
 LICENSE = "Apache License 2.0"
-VERSION = version("eva/version.py")
+VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
     "numpy==1.20.1",
