@@ -49,8 +49,7 @@ minimal_requirement = [
     "pyspark==3.0.2",
     "petastorm==0.9.8",
     "antlr4-python3-runtime==4.8",
-    "pyyaml==5.1",
-    "pymysql==0.10.1"
+    "pyyaml==5.1"
 ]
 
 formatter_libs = [
@@ -58,28 +57,30 @@ formatter_libs = [
     "isort==5.10.1"
 ]
 
-extra_test_libs = [
-    "flake8==3.9.1"
-]
-
-integration_test_libs = [
-]
-
-core_test_libs = [
+test_libs = [
     "pytest==6.1.2",
-    "coverage[toml]<6.0",
     "pytest-cov==2.11.1",
     "pytest-virtualenv",
     "coveralls==3.0.1",
-    "mock==4.0.3"
+    "mock==4.0.3",
+    "flake8==3.9.1"    
 ]
+
+### NEEDED FOR INTEGRATION TESTS ONLY
+integration_test_libs = [
+    "torch==1.7.1",
+    "torchvision==0.8.2",
+]
+
 benchmark_libs = [
 ]
 
 doc_libs = [
 ]
 
+### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = [
+    "pymysql==0.10.1"
 ]
 
 MINIMAL_REQUIRES = minimal_requirement
@@ -88,12 +89,11 @@ DATABASE_REQUIRES = INSTALL_REQUIRES + database_libs
 DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
-    + database_libs
+    + test_libs
     + integration_test_libs
-    + extra_test_libs
-    + core_test_libs
     + benchmark_libs
     + doc_libs
+    + database_libs
 )
 
 EXTRA_REQUIRES = {
@@ -114,9 +114,11 @@ setup(
     download_url=DOWNLOAD_URL,
     license=LICENSE,
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License"
+        "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent"
     ],
     packages=find_packages(exclude=[
