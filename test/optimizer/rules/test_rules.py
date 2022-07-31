@@ -125,10 +125,10 @@ class TestRules(unittest.TestCase):
         # adding/removing rules should update this test
         supported_rewrite_rules = [
             EmbedFilterIntoGet(),
-            EmbedFilterIntoDerivedGet(),
+            #    EmbedFilterIntoDerivedGet(),
             PushdownFilterThroughSample(),
             EmbedProjectIntoGet(),
-            EmbedProjectIntoDerivedGet(),
+            #    EmbedProjectIntoDerivedGet(),
             PushdownProjectThroughSample(),
         ]
         self.assertEqual(

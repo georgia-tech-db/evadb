@@ -58,9 +58,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
         frame_dog = {
             "id": 1,
-            "data": self._load_image(
-                os.path.join(self.base_path, "data", "dog.jpeg")
-            ),
+            "data": self._load_image(os.path.join(self.base_path, "data", "dog.jpeg")),
         }
         frame_dog_cat = {
             "id": 2,

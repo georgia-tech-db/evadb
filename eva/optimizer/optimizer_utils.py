@@ -16,7 +16,12 @@ from typing import List, Tuple
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
-from eva.expression.expression_utils import expression_tree_to_conjunction_list
+from eva.expression.expression_utils import (
+    conjuction_list_to_expression_tree,
+    contains_single_column,
+    expression_tree_to_conjunction_list,
+    is_simple_predicate,
+)
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
 
@@ -80,3 +85,37 @@ def extract_equi_join_keys(
                     right_join_keys.append(left_child)
 
     return (left_join_keys, right_join_keys)
+
+
+def extract_pushdown_predicate(
+    predicate: AbstractExpression, column_alias: str
+) -> Tuple[AbstractExpression, AbstractExpression]:
+    """Decompose the predicate into pushdown predicate and remaining predicate
+
+    Args:
+        predicate (AbstractExpression): predicate that needs to be decomposed
+        column (str): column_alias to extract predicate
+    Returns:
+        Tuple[AbstractExpression, AbstractExpression]: (pushdown predicate,
+        remaining predicate)
+    """
+    if predicate is None:
+        return None, None
+
+    if contains_single_column(predicate, column_alias):
+        if is_simple_predicate(predicate):
+            return predicate, None
+
+    pushdown_preds = []
+    rem_pred = []
+    pred_list = expression_tree_to_conjunction_list(predicate)
+    for pred in pred_list:
+        if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
+            pushdown_preds.append(pred)
+        else:
+            rem_pred.append(pred)
+
+    return (
+        conjuction_list_to_expression_tree(pushdown_preds),
+        conjuction_list_to_expression_tree(rem_pred),
+    )

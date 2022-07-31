@@ -33,10 +33,17 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
         """Create materialized view executor"""
         if not handle_if_not_exists(self.node.view, self.node.if_not_exists):
             child = self.children[0]
+            project_cols = None
             # only support seq scan based materialization
-            if child.node.opr_type != PlanOprType.SEQUENTIAL_SCAN:
-                err_msg = "Invalid query {}, expected {}".format(
-                    child.node.opr_type, PlanOprType.SEQUENTIAL_SCAN
+            if child.node.opr_type == PlanOprType.SEQUENTIAL_SCAN:
+                project_cols = child.project_expr
+            elif child.node.opr_type == PlanOprType.PROJECT:
+                project_cols = child.target_list
+            else:
+                err_msg = "Invalid query {}, expected {} or {}".format(
+                    child.node.opr_type,
+                    PlanOprType.SEQUENTIAL_SCAN,
+                    PlanOprType.PROJECT,
                 )
 
                 logger.error(err_msg)
@@ -44,7 +51,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
 
             # gather child projected column objects
             child_objs = []
-            for child_col in child.project_expr:
+            for child_col in project_cols:
                 if child_col.etype == ExpressionType.TUPLE_VALUE:
                     child_objs.append(child_col.col_object)
                 elif child_col.etype == ExpressionType.FUNCTION_EXPRESSION:
