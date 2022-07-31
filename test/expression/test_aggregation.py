@@ -14,13 +14,13 @@
 # limitations under the License.
 import unittest
 
-
+import pandas as pd
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
-import pandas as pd
+
 
 class AggregationExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
