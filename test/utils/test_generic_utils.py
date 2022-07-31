@@ -41,11 +41,10 @@ class ModulePathTest(unittest.TestCase):
         vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    @patch("eva.utils.generic_utils.torch")
     @pytest.mark.torchtest
+    @patch("eva.utils.generic_utils.torch", create=True)
     def test_should_use_torch_to_check_if_gpu_is_available(self, torch):
-        is_gpu_available()
-        torch.cuda.is_available.assert_called()
+        self.assertEqual(is_gpu_available(), True)
 
     @patch("eva.utils.generic_utils.ConfigurationManager")
     def test_should_return_a_random_full_path(self, mock_conf):
