@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import unittest
-import pytest
 from pathlib import Path
 
 from mock import MagicMock, patch
