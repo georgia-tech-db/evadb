@@ -114,9 +114,11 @@ setup(
     download_url=DOWNLOAD_URL,
     license=LICENSE,
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+        "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache Software License"
+        "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent"
     ],
     packages=find_packages(exclude=[
