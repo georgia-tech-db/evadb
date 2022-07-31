@@ -50,7 +50,7 @@ minimal_requirement = [
     "pandas==1.2.3",
     "torch==1.7.1",
     "torchvision==0.8.2",
-    "Pillow==8.1.2",
+    "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
     "pyspark==3.0.2",
