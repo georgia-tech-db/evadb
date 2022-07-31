@@ -25,7 +25,7 @@ import warnings
 #
 from datetime import datetime
 
-from eva.version import __version__ as version
+from eva.version import VERSION as version
 
 sys.path.append(os.path.abspath("."))
 sys.path.append(os.path.abspath("../"))
