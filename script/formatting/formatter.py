@@ -130,7 +130,7 @@ def is_tool(name):
         if installed_version != req_version:
             LOG.warning(
                 f"EVA uses {name} {req_version}. The installed version is"
-                " {installed_version} which can result in different results."
+                f" {installed_version} which can result in different results."
             )
 
 
