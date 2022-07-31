@@ -14,7 +14,6 @@ from datetime import datetime
 import warnings
 import os
 import sys
-
 sys.path.append(os.path.abspath('.'))
 sys.path.append(os.path.abspath('../'))
 
@@ -26,13 +25,13 @@ warnings.filterwarnings(
 
 
 # -- Project information -----------------------------------------------------
-
-project = 'EVA'
-copyright = str(datetime.now().year) + ', Georgia Tech Database Group'
-author = 'Georgia Tech Database Group'
+project = "evadb"
+author = "Georgia Tech Database Group"
+copyright = str(datetime.now().year) + f', {author}'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+from eva.version import __version__ as version
+release =  version
 
 master_doc = 'index'
 

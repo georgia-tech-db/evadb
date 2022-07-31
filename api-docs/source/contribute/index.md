@@ -16,7 +16,7 @@ python3 -m venv env38                                # to create a virtual envir
 pip install --upgrade pip
 sudo -E apt install -y openjdk-8-jdk openjdk-8-jre   # to install JAVA
 sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
-python -m pip install install -e .[dev]
+python -m pip install -e .
 ```
 
 #### Submitting a contribution
