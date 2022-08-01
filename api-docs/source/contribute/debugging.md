@@ -35,9 +35,7 @@ Use the following approach for debugging the eva set-up:
             "program": "${workspaceFolder}/test/integration_tests/test_pytorch.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
-            "env": {"PYTHONPATH": "${workspaceRoot}",
-                    "PYSPARK_PYTHON" : "/nethome/username/miniconda/envs/eva/bin/python",
-                    "PYSPARK_DRIVER_PYTHON": "/nethome/username/miniconda/envs/eva/bin/python"}
+            "env": {"PYTHONPATH": "${workspaceRoot}"}
         }
 
     ]

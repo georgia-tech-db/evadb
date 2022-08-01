@@ -1,35 +1,47 @@
-# Configuration file for the Sphinx documentation builder.
+# coding=utf-8
+# Copyright 2018-2022 EVA
 #
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 # -- Path setup --------------------------------------------------------------
+
+import os
+import sys
+import warnings
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 from datetime import datetime
-import warnings
-import os
-import sys
 
-sys.path.append(os.path.abspath('.'))
-sys.path.append(os.path.abspath('../'))
+from eva.version import VERSION as version
+
+sys.path.append(os.path.abspath("."))
+sys.path.append(os.path.abspath("../"))
 
 
 # Temp. workaround for
 # https://github.com/agronholm/sphinx-autodoc-typehints/issues/133
 warnings.filterwarnings(
-    'ignore', message='sphinx.util.inspect.Signature\(\) is deprecated')
+    "ignore", message="sphinx.util.inspect.Signature() is deprecated"
+)
 
 
 # -- Project information -----------------------------------------------------
-
-project = 'EVA'
-copyright = str(datetime.now().year) + ', Georgia Tech Database Group'
-author = 'Georgia Tech Database Group'
+project = "evadb"
+author = "Georgia Tech Database Group"
+copyright = str(datetime.now().year) + f", {author}"
 
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
@@ -47,17 +59,17 @@ master_doc = 'index'
 # ones.
 extensions = [
     "sphinx_external_toc",
-    'sphinx.ext.autosummary',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.graphviz',
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.todo",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.graphviz",
     "myst_nb",
-    "sphinx-jsonschema"
+    "sphinx-jsonschema",
 ]
 
 myst_enable_extensions = [
@@ -85,27 +97,37 @@ numpydoc_show_class_members = False
 
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 # highlight_language = 'python'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
 
-autodoc_mock_imports = ["numpy", "sqlalchemy", "sqlalchemy_utils",
-                        "sqlalchemy.orm", "sqlalchemy.orm.exc",
-                        "sqlalchemy.types",
-                        "petastorm", "yaml", "pyspark", "torch",
-                        "pandas", "cv2", "eva.catalog"]
+autodoc_mock_imports = [
+    "numpy",
+    "sqlalchemy",
+    "sqlalchemy_utils",
+    "sqlalchemy.orm",
+    "sqlalchemy.orm.exc",
+    "sqlalchemy.types",
+    "petastorm",
+    "yaml",
+    "pyspark",
+    "torch",
+    "pandas",
+    "cv2",
+    "eva.catalog",
+]
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -123,7 +145,7 @@ html_theme_options = {
     "use_issues_button": True,
     "use_edit_page_button": True,
     "path_to_docs": "api-docs/",
-    "home_page_in_toc": False
+    "home_page_in_toc": False,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -133,22 +155,29 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
-autodoc_default_flags = ['members', 'private-members', 'special-members',
-                         # 'undoc-members',
-                         'show-inheritance']
+autodoc_default_flags = [
+    "members",
+    "private-members",
+    "special-members",
+    # 'undoc-members',
+    "show-inheritance",
+]
 
 
 def autodoc_skip_member(app, what, name, obj, skip, options):
     # Ref: https://stackoverflow.com/a/21449475/
-    exclusions = ('__weakref__',  # special-members
-                  '__doc__', '__module__', '__dict__',  # undoc-members
-                  )
+    exclusions = (
+        "__weakref__",  # special-members
+        "__doc__",
+        "__module__",
+        "__dict__",  # undoc-members
+    )
     exclude = name in exclusions
     return True if exclude else None
 
 
 def setup(app):
-    app.connect('autodoc-skip-member', autodoc_skip_member)
-    app.add_css_file('custom.css')
+    app.connect("autodoc-skip-member", autodoc_skip_member)
+    app.add_css_file("custom.css")
