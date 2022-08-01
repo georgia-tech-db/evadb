@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 import pkg_resources
 
@@ -258,7 +259,6 @@ if __name__ == "__main__":
     is_tool(BLACK_BINARY)
     is_tool(FLAKE_BINARY)
     is_tool(ISORT_BINARY)
-
     if args.file_name:
         LOG.info("Scanning file: " + "".join(args.file_name))
         format_file(
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         format_dir(args.dir_name, args.add_header, args.strip_header, args.format_code)
     # BY DEFAULT, WE FIX THE MODIFIED FILES
     else:
-        LOG.info("Default fix modified files")
+        # LOG.info("Default fix modified files")
         MERGEBASE = subprocess.check_output(
             "git merge-base origin/master HEAD", shell=True, text=True
         ).rstrip()
@@ -285,14 +285,21 @@ if __name__ == "__main__":
             .rstrip()
             .split("\n")
         )
-
         for file in files:
-            if file != "script/formatting/formatter.py":
+            valid = False
+            ## only format the defualt directories
+            file_path = str(Path(file).absolute())
+            for source_dir in DEFAULT_DIRS:
+                source_path = str(Path(source_dir).resolve())
+                if file_path.startswith(source_path):
+                    valid = True
+            
+            if valid:
                 LOG.info("Stripping headers : " + file)
                 format_file(file, False, True, False)
 
                 LOG.info("Adding headers : " + file)
                 format_file(file, True, False, False)
 
-            LOG.info("Formatting File : " + file)
-            format_file(file, False, False, True)
+                LOG.info("Formatting File : " + file)
+                format_file(file, False, False, True)

@@ -41,7 +41,7 @@ minimal_requirement = [
     "numpy==1.20.1",
     "opencv-python==4.5.1.48",
     "pandas==1.2.3",
-    "Pillow==8.1.2",
+    "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
     "pyspark==3.0.2",
