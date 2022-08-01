@@ -1,0 +1,9 @@
+<div class="secondary-side-nav custom-scroll-bar">
+    {% include 'contribute.html' %}
+    {% if not hide_toc %}
+        <div class="secondary-side-nav__content">
+            <p class="topic-title">On this page</p>
+            {{ toc }}
+        </div>
+    {% endif %}
+</div>

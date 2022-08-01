@@ -1,0 +1,15 @@
+<section class="promo-banner">
+    <div class="promo-banner-wrapper">
+        {% if theme_banner_icon_path %}
+            <div class="promo-banner__icon">
+                <img src="{{ pathto(theme_banner_icon_path, 1) }}" />
+            </div>
+        {% endif %}
+        <div class="promo-banner__title">{{theme_banner_title_text}}</div>
+        <a class="promo-banner__button button button--reverse" href="{{theme_banner_button_url}}"
+            target="_blank" rel="noopener noreferrer">{{theme_banner_button_text}}</a>
+        <button class="promo-banner__close">
+            <i class="scylla-icon scylla-icon--close"></i>
+        </button>
+    </div>
+</section>

@@ -1,0 +1,17 @@
+<div id="side-nav" class="side-nav custom-scroll-bar" data-closable data-toggler=".show">
+    <button class="collapsible-button">
+        <i class="scylla-icon scylla-icon--chevron-left"></i>
+    </button>
+    <div class="side-nav-content">
+        <div class="side-nav__search">
+            <div class="search-box">
+                <ci-search></ci-search>
+            </div>
+        </div>
+        <div class="side-nav__versions">{% if versions %}{% include 'versions.html' %}{% endif %}</div>
+        <div class="side-nav__content">
+            {{ navigation_tree(toctree, maxdepth=theme_navigation_depth|int,
+            collapse=theme_collapse_navigation|tobool)}}
+        </div>
+    </div>
+</div>

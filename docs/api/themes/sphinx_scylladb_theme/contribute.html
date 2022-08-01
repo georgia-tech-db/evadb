@@ -1,0 +1,26 @@
+{% if theme_github_repository %}
+    <ul class="contribute">
+        <li class="contribute__item">
+            <a href="https://github.com/{{ theme_github_issues_repository}}/issues/new?title=doc:%20Issue in page {{ title|striptags|e }}&&body=I%20would%20like%20to%20report%20an%20issue%20in%20page%20{{html_baseurl}}/{% if versions and current_version %}{{ current_version.name }}/{% endif %}{{ pagename }}%0A%0A%23%23%23%20Problem%0A%0A%23%23%23%20%20Suggest%20a%20fix&labels=documentation"
+                target="_blank">
+                <i class="icon fab fa-github" aria-hidden="true"></i>Create an issue
+            </a>
+        </li>
+        {% if theme_hide_edit_this_page_button|lower == 'false'%}
+            <li class="contribute__item">
+                {% set branch = theme_default_branch %}
+                {% if current_version %}
+                    {% if current_version.name == rename_latest_version %}
+                        {%set branch = latest_version %}
+                    {% else %}
+                        {% set branch = current_version.name %}
+                    {% endif %}
+                {% endif %}
+                <a href="https://github.com/{{ theme_github_repository }}/edit/{{ branch }}/{{ theme_conf_py_path }}{{ pagename }}{{ page_source_suffix }}"
+                    target="_blank">
+                    <i class="icon fa fa-edit" aria-hidden="true"></i>Edit this page
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+{% endif %}
