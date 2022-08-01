@@ -1,4 +1,14 @@
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   new_operator
+   packaging
+   debugging
+
+
 ###  Contributing
+
 We welcome all kinds of contributions to EVA.
 - New features
 - Code reviewing of PR

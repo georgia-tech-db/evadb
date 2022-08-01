@@ -1,7 +1,4 @@
-.. EVA documentation master file, created by
-   sphinx-quickstart on Thu Apr  2 21:04:37 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. title:: EVA 
 
 Welcome to Exploratory Video Analytics
 =======================================
@@ -17,3 +14,9 @@ What does EVA do?
 * EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
 
 * EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   
+   contribute/index
