@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,26 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import pandas as pd
 from pathlib import Path
 
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import VideoStorageEngine
-from eva.models.storage.batch import Batch
+import pandas as pd
+
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
-from eva.utils.logging_manager import LoggingLevel
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.storage_engine import VideoStorageEngine
+from eva.utils.logging_manager import logger
 
 
 class LoadVideoExecutor(AbstractExecutor):
-
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        self.upload_path = Path(ConfigurationManager().get_value(
-            'storage',
-            'path_prefix'))
+        self.upload_path = Path(
+            ConfigurationManager().get_value("storage", "path_prefix")
+        )
 
     def validate(self):
         pass
@@ -53,16 +51,24 @@ class LoadVideoExecutor(AbstractExecutor):
                 video_file_path = video_path
 
         if video_file_path is None:
-            error = 'Failed to find the video file {}'.format(
-                self.node.file_path)
-            LoggingManager().log(error, LoggingLevel.ERROR)
+            error = "Failed to find a video file at location: {}".format(
+                self.node.file_path
+            )
+            logger.error(error)
             raise RuntimeError(error)
 
-        success = VideoStorageEngine.create(
-            self.node.table_metainfo, video_file_path)
+        success = VideoStorageEngine.create(self.node.table_metainfo, video_file_path)
 
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek
         if success:
-            yield Batch(pd.DataFrame({'Video': str(self.node.file_path)},
-                                     index=[0]))
+            yield Batch(
+                pd.DataFrame(
+                    {
+                        "Video successfully added at location: ": str(
+                            self.node.file_path
+                        )
+                    },
+                    index=[0],
+                )
+            )

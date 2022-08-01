@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 import unittest
 
 from eva.expression.abstract_expression import ExpressionType
-from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.arithmetic_expression import ArithmeticExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
 
 
 class ArithmeticExpressionsTest(unittest.TestCase):
@@ -28,9 +28,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(5)
 
         cmpr_exp = ArithmeticExpression(
-            ExpressionType.ARITHMETIC_ADD,
-            const_exp1,
-            const_exp2
+            ExpressionType.ARITHMETIC_ADD, const_exp1, const_exp2
         )
 
         self.assertEqual([7], cmpr_exp.evaluate(None).frames[0].tolist())
@@ -40,9 +38,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(2)
 
         cmpr_exp = ArithmeticExpression(
-            ExpressionType.ARITHMETIC_SUBTRACT,
-            const_exp1,
-            const_exp2
+            ExpressionType.ARITHMETIC_SUBTRACT, const_exp1, const_exp2
         )
 
         self.assertEqual([3], cmpr_exp.evaluate(None).frames[0].tolist())
@@ -52,9 +48,7 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(5)
 
         cmpr_exp = ArithmeticExpression(
-            ExpressionType.ARITHMETIC_MULTIPLY,
-            const_exp1,
-            const_exp2
+            ExpressionType.ARITHMETIC_MULTIPLY, const_exp1, const_exp2
         )
 
         self.assertEqual([15], cmpr_exp.evaluate(None).frames[0].tolist())
@@ -64,9 +58,29 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(5)
 
         cmpr_exp = ArithmeticExpression(
-            ExpressionType.ARITHMETIC_DIVIDE,
-            const_exp1,
-            const_exp2
+            ExpressionType.ARITHMETIC_DIVIDE, const_exp1, const_exp2
         )
 
         self.assertEqual([1], cmpr_exp.evaluate(None).frames[0].tolist())
+
+    def test_aaequality(self):
+        const_exp1 = ConstantValueExpression(5)
+        const_exp2 = ConstantValueExpression(15)
+
+        cmpr_exp = ArithmeticExpression(
+            ExpressionType.ARITHMETIC_DIVIDE, const_exp1, const_exp2
+        )
+
+        cmpr_exp2 = ArithmeticExpression(
+            ExpressionType.ARITHMETIC_MULTIPLY, const_exp1, const_exp2
+        )
+        cmpr_exp3 = ArithmeticExpression(
+            ExpressionType.ARITHMETIC_MULTIPLY, const_exp2, const_exp1
+        )
+
+        self.assertNotEqual(cmpr_exp, cmpr_exp2)
+        self.assertNotEqual(cmpr_exp2, cmpr_exp3)
+
+
+if __name__ == "__main__":
+    unittest.main()

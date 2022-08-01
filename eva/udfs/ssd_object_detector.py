@@ -1,18 +1,45 @@
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import itertools
+from math import sqrt
+from typing import List
+
 import numpy as np
 import pandas as pd
-
-from typing import List
-from math import sqrt
-
-import torch
-import torch.nn.functional as F
-from torch import Tensor
-from torchvision.transforms import Compose, transforms
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+
+try:
+    import torch
+    import torch.nn.functional as F
+    from torch import Tensor
+except ImportError as e:
+    raise ImportError(
+        f"Failed to import with error {e}, \
+        please try `pip install torch`"
+    )
+
+try:
+    from torchvision.transforms import Compose, transforms
+except ImportError as e:
+    raise ImportError(
+        f"Failed to import with error {e}, \
+        please try `pip install torchvision`"
+    )
 
 
 class SSDObjectDetector(PytorchAbstractUDF):
@@ -29,39 +56,102 @@ class SSDObjectDetector(PytorchAbstractUDF):
             "NVIDIA/DeepLearningExamples:torchhub",
             "nvidia_ssd",
             pretrained=False,
-            precision='fp16')
+            precision="fp16",
+        )
         model_state_dict = torch.hub.load_state_dict_from_url(
-            ("https://api.ngc.nvidia.com/v2/models/"
-                "nvidia/ssd_pyt_ckpt_amp/versions/19.09.0/zip"),
-            map_location=torch.device("cpu"))["model"]
+            (
+                "https://api.ngc.nvidia.com/v2/models/"
+                "nvidia/ssd_pyt_ckpt_amp/versions/19.09.0/zip"
+            ),
+            map_location=torch.device("cpu"),
+        )["model"]
         self.model.load_state_dict(model_state_dict)
         self.model.eval()
 
     @property
     def labels(self) -> List[str]:
         return [
-            "__background__", "person", "bicycle", "car", "motorcycle",
-            "airplane", "bus",
-            "train", "truck", "boat", "traffic light", "fire hydrant",
+            "__background__",
+            "person",
+            "bicycle",
+            "car",
+            "motorcycle",
+            "airplane",
+            "bus",
+            "train",
+            "truck",
+            "boat",
+            "traffic light",
+            "fire hydrant",
             "stop sign",
-            "parking meter", "bench", "bird", "cat", "dog", "horse", "sheep",
+            "parking meter",
+            "bench",
+            "bird",
+            "cat",
+            "dog",
+            "horse",
+            "sheep",
             "cow",
-            "elephant", "bear", "zebra", "giraffe", "backpack", "umbrella",
-            "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard",
+            "elephant",
+            "bear",
+            "zebra",
+            "giraffe",
+            "backpack",
+            "umbrella",
+            "handbag",
+            "tie",
+            "suitcase",
+            "frisbee",
+            "skis",
+            "snowboard",
             "sports ball",
-            "kite", "baseball bat", "baseball glove", "skateboard",
-            "surfboard", "tennis racket",
-            "bottle", "wine glass", "cup", "fork", "knife", "spoon",
+            "kite",
+            "baseball bat",
+            "baseball glove",
+            "skateboard",
+            "surfboard",
+            "tennis racket",
+            "bottle",
+            "wine glass",
+            "cup",
+            "fork",
+            "knife",
+            "spoon",
             "bowl",
-            "banana", "apple", "sandwich", "orange", "broccoli", "carrot",
-            "hot dog", "pizza",
-            "donut", "cake", "chair", "couch", "potted plant", "bed",
+            "banana",
+            "apple",
+            "sandwich",
+            "orange",
+            "broccoli",
+            "carrot",
+            "hot dog",
+            "pizza",
+            "donut",
+            "cake",
+            "chair",
+            "couch",
+            "potted plant",
+            "bed",
             "dining table",
-            "toilet", "tv", "laptop", "mouse", "remote", "keyboard",
+            "toilet",
+            "tv",
+            "laptop",
+            "mouse",
+            "remote",
+            "keyboard",
             "cell phone",
-            "microwave", "oven", "toaster", "sink", "refrigerator", "book",
-            "clock", "vase", "scissors", "teddy bear", "hair drier",
-            "toothbrush"
+            "microwave",
+            "oven",
+            "toaster",
+            "sink",
+            "refrigerator",
+            "book",
+            "clock",
+            "vase",
+            "scissors",
+            "teddy bear",
+            "hair drier",
+            "toothbrush",
         ]
 
     @property
@@ -70,10 +160,12 @@ class SSDObjectDetector(PytorchAbstractUDF):
 
     @property
     def transforms(self) -> Compose:
-        return Compose([
-            transforms.Resize([300, 300]),
-            transforms.ToTensor(),
-        ])
+        return Compose(
+            [
+                transforms.Resize([300, 300]),
+                transforms.ToTensor(),
+            ]
+        )
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         assert frames.size()[-1] == frames.size()[-2] == 300
@@ -88,33 +180,28 @@ class SSDObjectDetector(PytorchAbstractUDF):
         res = pd.DataFrame()
 
         for batch in encoded:
-            bboxes, classes, confidences = [
-                x.detach().cpu().numpy() for x in batch]
+            bboxes, classes, confidences = [x.detach().cpu().numpy() for x in batch]
             best = np.argwhere(confidences > self.threshold).squeeze()
 
             # deal with empty detection
             if len(best.shape) == 0:
-                res = res.append({
-                    "label": [],
-                    "pred_score": [],
-                    "pred_boxes": []
-                }, ignore_index=True)
+                res = res.append(
+                    {"label": [], "pred_score": [], "pred_boxes": []}, ignore_index=True
+                )
                 continue
 
             label, bbox, conf = [], [], []
             for idx in best:
                 left, top, right, bottom = bboxes[idx]
-                x, y, w, h = \
-                    [v * 300 for v in [left, top, right - left, bottom - top]]
+                x, y, w, h = [v * 300 for v in [left, top, right - left, bottom - top]]
                 label.append(self.labels[classes[idx]])
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
 
-            res = res.append({
-                "label": label,
-                "pred_score": conf,
-                "pred_boxes": bbox
-            }, ignore_index=True)
+            res = res.append(
+                {"label": label, "pred_score": conf, "pred_boxes": bbox},
+                ignore_index=True,
+            )
 
         return res
 
@@ -128,13 +215,13 @@ class SSDObjectDetector(PytorchAbstractUDF):
 
 # This function is from https://github.com/kuangliu/pytorch-ssd.
 def calc_iou_tensor(box1, box2):
-    """ Calculation of IoU based on two boxes tensor,
-        Reference to https://github.com/kuangliu/pytorch-src
-        input:
-            box1 (N, 4)
-            box2 (M, 4)
-        output:
-            IoU (N, M)
+    """Calculation of IoU based on two boxes tensor,
+    Reference to https://github.com/kuangliu/pytorch-src
+    input:
+        box1 (N, 4)
+        box2 (M, 4)
+    output:
+        IoU (N, M)
     """
     N = box1.size(0)
     M = box2.size(0)
@@ -162,21 +249,21 @@ def calc_iou_tensor(box1, box2):
 # This function is from https://github.com/kuangliu/pytorch-ssd.
 class Encoder(object):
     """
-        Inspired by https://github.com/kuangliu/pytorch-src
-        Transform between (bboxes, lables) <-> SSD output
-        dboxes: default boxes in size 8732 x 4,
-            encoder: input ltrb format, output xywh format
-            decoder: input xywh format, output ltrb format
-        encode:
-            input  : bboxes_in (Tensor nboxes x 4), labels_in (Tensor nboxes)
-            output : bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
-            criteria : IoU threshold of bboexes
-        decode:
-            input  : bboxes_in (Tensor 8732 x 4),
-                     scores_in (Tensor 8732 x nitems)
-            output : bboxes_out (Tensor nboxes x 4), labels_out (Tensor nboxes)
-            criteria : IoU threshold of bboexes
-            max_output : maximum number of output bboxes
+    Inspired by https://github.com/kuangliu/pytorch-src
+    Transform between (bboxes, lables) <-> SSD output
+    dboxes: default boxes in size 8732 x 4,
+        encoder: input ltrb format, output xywh format
+        decoder: input xywh format, output ltrb format
+    encode:
+        input  : bboxes_in (Tensor nboxes x 4), labels_in (Tensor nboxes)
+        output : bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
+        criteria : IoU threshold of bboexes
+    decode:
+        input  : bboxes_in (Tensor 8732 x 4),
+                 scores_in (Tensor 8732 x nitems)
+        output : bboxes_out (Tensor nboxes x 4), labels_out (Tensor nboxes)
+        criteria : IoU threshold of bboexes
+        max_output : maximum number of output bboxes
     """
 
     def __init__(self, dboxes):
@@ -186,39 +273,10 @@ class Encoder(object):
         self.scale_xy = dboxes.scale_xy
         self.scale_wh = dboxes.scale_wh
 
-    def encode(self, bboxes_in, labels_in, criteria=0.5):
-
-        ious = calc_iou_tensor(bboxes_in, self.dboxes)
-        best_dbox_ious, best_dbox_idx = ious.max(dim=0)
-        best_bbox_ious, best_bbox_idx = ious.max(dim=1)
-
-        # set best ious 2.0
-        best_dbox_ious.index_fill_(0, best_bbox_idx, 2.0)
-
-        idx = torch.arange(0, best_bbox_idx.size(0), dtype=torch.int64)
-        best_dbox_idx[best_bbox_idx[idx]] = idx
-
-        # filter IoU > 0.5
-        masks = best_dbox_ious > criteria
-        labels_out = torch.zeros(self.nboxes, dtype=torch.long)
-        labels_out[masks] = labels_in[best_dbox_idx[masks]]
-        bboxes_out = self.dboxes.clone()
-        bboxes_out[masks, :] = bboxes_in[best_dbox_idx[masks], :]
-        # Transform format to xywh format
-        x, y, w, h = 0.5 * (bboxes_out[:, 0] + bboxes_out[:, 2]), \
-            0.5 * (bboxes_out[:, 1] + bboxes_out[:, 3]), \
-            - bboxes_out[:, 0] + bboxes_out[:, 2], \
-            - bboxes_out[:, 1] + bboxes_out[:, 3]
-        bboxes_out[:, 0] = x
-        bboxes_out[:, 1] = y
-        bboxes_out[:, 2] = w
-        bboxes_out[:, 3] = h
-        return bboxes_out, labels_out
-
     def scale_back_batch(self, bboxes_in, scores_in):
         """
-            Do scale and transform from xywh to ltrb
-            suppose input Nx4xnum_bbox Nxlabel_numxnum_bbox
+        Do scale and transform from xywh to ltrb
+        suppose input Nx4xnum_bbox Nxlabel_numxnum_bbox
         """
         if bboxes_in.device == torch.device("cpu"):
             self.dboxes = self.dboxes.cpu()
@@ -233,16 +291,19 @@ class Encoder(object):
         bboxes_in[:, :, :2] = self.scale_xy * bboxes_in[:, :, :2]
         bboxes_in[:, :, 2:] = self.scale_wh * bboxes_in[:, :, 2:]
 
-        bboxes_in[:, :, :2] = bboxes_in[:, :, :2] * \
-            self.dboxes_xywh[:, :, 2:] + self.dboxes_xywh[:, :, :2]
-        bboxes_in[:, :, 2:] = \
-            bboxes_in[:, :, 2:].exp() * self.dboxes_xywh[:, :, 2:]
+        bboxes_in[:, :, :2] = (
+            bboxes_in[:, :, :2] * self.dboxes_xywh[:, :, 2:]
+            + self.dboxes_xywh[:, :, :2]
+        )
+        bboxes_in[:, :, 2:] = bboxes_in[:, :, 2:].exp() * self.dboxes_xywh[:, :, 2:]
 
         # Transform format to ltrb
-        l, t, r, b = bboxes_in[:, :, 0] - 0.5 * bboxes_in[:, :, 2],\
-            bboxes_in[:, :, 1] - 0.5 * bboxes_in[:, :, 3],\
-            bboxes_in[:, :, 0] + 0.5 * bboxes_in[:, :, 2],\
-            bboxes_in[:, :, 1] + 0.5 * bboxes_in[:, :, 3]
+        l, t, r, b = (
+            bboxes_in[:, :, 0] - 0.5 * bboxes_in[:, :, 2],
+            bboxes_in[:, :, 1] - 0.5 * bboxes_in[:, :, 3],
+            bboxes_in[:, :, 0] + 0.5 * bboxes_in[:, :, 2],
+            bboxes_in[:, :, 1] + 0.5 * bboxes_in[:, :, 3],
+        )
 
         bboxes_in[:, :, 0] = l
         bboxes_in[:, :, 1] = t
@@ -251,11 +312,7 @@ class Encoder(object):
 
         return bboxes_in, F.softmax(scores_in, dim=-1)
 
-    def decode_batch(self,
-                     bboxes_in,
-                     scores_in,
-                     criteria=0.45,
-                     max_output=200):
+    def decode_batch(self, bboxes_in, scores_in, criteria=0.45, max_output=200):
         bboxes, probs = self.scale_back_batch(bboxes_in, scores_in)
 
         output = []
@@ -266,12 +323,7 @@ class Encoder(object):
         return output
 
     # perform non-maximum suppression
-    def decode_single(self,
-                      bboxes_in,
-                      scores_in,
-                      criteria,
-                      max_output,
-                      max_num=200):
+    def decode_single(self, bboxes_in, scores_in, criteria, max_output, max_num=200):
         # Reference to https://github.com/amdegroot/ssd.pytorch
 
         bboxes_out = []
@@ -300,8 +352,7 @@ class Encoder(object):
                 idx = score_idx_sorted[-1].item()
                 bboxes_sorted = bboxes[score_idx_sorted, :]
                 bboxes_idx = bboxes[idx, :].unsqueeze(dim=0)
-                iou_sorted = calc_iou_tensor(
-                    bboxes_sorted, bboxes_idx).squeeze()
+                iou_sorted = calc_iou_tensor(bboxes_sorted, bboxes_idx).squeeze()
                 # we only need iou < criteria
                 score_idx_sorted = score_idx_sorted[iou_sorted < criteria]
                 candidates.append(idx)
@@ -313,9 +364,11 @@ class Encoder(object):
         if not bboxes_out:
             return [torch.tensor([]) for _ in range(3)]
 
-        bboxes_out, labels_out, scores_out = torch.cat(bboxes_out, dim=0), \
-            torch.tensor(labels_out, dtype=torch.long), \
-            torch.cat(scores_out, dim=0)
+        bboxes_out, labels_out, scores_out = (
+            torch.cat(bboxes_out, dim=0),
+            torch.tensor(labels_out, dtype=torch.long),
+            torch.cat(scores_out, dim=0),
+        )
 
         _, max_ids = scores_out.sort(dim=0)
         max_ids = max_ids[-max_output:]
@@ -323,8 +376,16 @@ class Encoder(object):
 
 
 class DefaultBoxes(object):
-    def __init__(self, fig_size, feat_size, steps, scales, aspect_ratios,
-                 scale_xy=0.1, scale_wh=0.2):
+    def __init__(
+        self,
+        fig_size,
+        feat_size,
+        steps,
+        scales,
+        aspect_ratios,
+        scale_xy=0.1,
+        scale_wh=0.2,
+    ):
 
         self.feat_size = feat_size
         self.fig_size = fig_size

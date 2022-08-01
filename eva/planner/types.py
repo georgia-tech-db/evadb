@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,16 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, IntEnum, auto
+from enum import Enum, auto, unique
 
 
+# Modified, add RENAME
 @unique
-class PlanOprType(IntEnum):
+class PlanOprType(Enum):
     SEQUENTIAL_SCAN = auto()
     STORAGE_PLAN = auto()
     PP_FILTER = auto()
     INSERT = auto()
     CREATE = auto()
+    RENAME = auto()
+    DROP = auto()
     CREATE_UDF = auto()
     LOAD_DATA = auto()
     UPLOAD = auto()
@@ -29,6 +32,14 @@ class PlanOprType(IntEnum):
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
+    FUNCTION_SCAN = auto()
+    HASH_JOIN = auto()
+    LATERAL_JOIN = auto()
+    HASH_BUILD = auto()
     CREATE_MATERIALIZED_VIEW = auto()
     EXCHANGE = auto()
+    PREDICATE_FILTER = auto()
+    PROJECT = auto()
+    SHOW_INFO = auto()
+    DROP_UDF = auto()
     # add other types

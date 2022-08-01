@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,21 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List
 
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.models.base_model import init_db, drop_db
+from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
-from eva.catalog.services.udf_service import UdfService
 from eva.catalog.services.udf_io_service import UdfIOService
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
+from eva.catalog.services.udf_service import UdfService
+from eva.parser.table_ref import TableInfo
+from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
@@ -62,7 +61,7 @@ class CatalogManager(object):
         it includes only one task ie. initializing database. It creates the
         catalog database and tables if they do not exist.
         """
-        LoggingManager().log("Bootstrapping catalog", LoggingLevel.INFO)
+        logger.info("Bootstrapping catalog")
         init_db()
 
     def _shutdown_catalog(self):
@@ -70,14 +69,17 @@ class CatalogManager(object):
         This method is responsible for gracefully shutting the
         catalog manager. Currently, it includes dropping the catalog database
         """
-        LoggingManager().log("Shutting catalog", LoggingLevel.INFO)
+        logger.info("Shutting catalog")
         drop_db()
 
-    def create_metadata(self, name: str, file_url: str,
-                        column_list: List[DataFrameColumn],
-                        identifier_column='id',
-                        is_video=False) -> \
-            DataFrameMetadata:
+    def create_metadata(
+        self,
+        name: str,
+        file_url: str,
+        column_list: List[DataFrameColumn],
+        identifier_column="id",
+        is_video=False,
+    ) -> DataFrameMetadata:
         """Creates metadata object
 
         Creates a metadata object and column objects and persists them in
@@ -94,34 +96,20 @@ class CatalogManager(object):
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column, is_video=is_video)
+            name, file_url, identifier_id=identifier_column, is_video=is_video
+        )
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
         metadata.schema = column_list
         return metadata
 
-    def get_metadata(self, metadata_id: int,
-                     col_id_list: List[int] = None) -> DataFrameMetadata:
-        """This method returns the metadata object given a metadata_id.
-
-        Arguments:
-            metadata_id: metadata id of the table
-            col_id_list: optional column ids of the table referred.
-                         If none all the columns are required
-
-        Returns:
-            metadata object with all the details of video/dataset
-        """
-        metadata = self._dataset_service.dataset_by_id(metadata_id)
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata_id, col_id_list)
-        metadata.schema = df_columns
-        return metadata
-
     def create_column_metadata(
-        self, column_name: str, data_type: ColumnType, array_type: NdArrayType,
-        dimensions: List[int]
+        self,
+        column_name: str,
+        data_type: ColumnType,
+        array_type: NdArrayType,
+        dimensions: List[int],
     ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
@@ -134,11 +122,16 @@ class CatalogManager(object):
             array_type {NdArrayType} -- type of ndarray
             dimensions {List[int]} -- dimensions of the column created
         """
-        return DataFrameColumn(column_name, data_type, array_type=array_type,
-                               array_dimensions=dimensions)
+        return DataFrameColumn(
+            column_name,
+            data_type,
+            array_type=array_type,
+            array_dimensions=dimensions,
+        )
 
-    def get_dataset_metadata(self, database_name: str, dataset_name: str) -> \
-            DataFrameMetadata:
+    def get_dataset_metadata(
+        self, database_name: str, dataset_name: str
+    ) -> DataFrameMetadata:
         """
         Returns the Dataset metadata for the given dataset name
         Arguments:
@@ -149,19 +142,41 @@ class CatalogManager(object):
         """
 
         metadata = self._dataset_service.dataset_object_by_name(
-            database_name, dataset_name)
+            database_name, dataset_name
+        )
         if metadata is None:
             return None
         # we are forced to set schema every time metadata is fetched
         # ToDo: maybe keep schema as a part of persistent metadata object
         df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata.id, None)
+            metadata.id, None
+        )
         metadata.schema = df_columns
         return metadata
 
+    def get_column_object(
+        self, table_obj: DataFrameMetadata, col_name: str
+    ) -> DataFrameColumn:
+        col_objs = self._column_service.columns_by_dataset_id_and_names(
+            table_obj.id, column_names=[col_name]
+        )
+        if col_objs:
+            return col_objs[0]
+        else:
+            return None
+
+    def get_all_column_objects(self, table_obj: DataFrameMetadata):
+        col_objs = self._column_service.get_dataset_columns(table_obj)
+        return col_objs
+
     def udf_io(
-            self, io_name: str, data_type: ColumnType, array_type: NdArrayType,
-            dimensions: List[int], is_input: bool):
+        self,
+        io_name: str,
+        data_type: ColumnType,
+        array_type: NdArrayType,
+        dimensions: List[int],
+        is_input: bool,
+    ):
         """Constructs an in memory udf_io object with given info.
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog call create_udf with
@@ -174,11 +189,21 @@ class CatalogManager(object):
             dimensions(List[int]):dimensions of the io created
             is_input(bool): whether a input or output, if true it is an input
         """
-        return UdfIO(io_name, data_type, array_type=array_type,
-                     array_dimensions=dimensions, is_input=is_input)
+        return UdfIO(
+            io_name,
+            data_type,
+            array_type=array_type,
+            array_dimensions=dimensions,
+            is_input=is_input,
+        )
 
-    def create_udf(self, name: str, impl_file_path: str,
-                   type: str, udf_io_list: List[UdfIO]) -> UdfMetadata:
+    def create_udf(
+        self,
+        name: str,
+        impl_file_path: str,
+        type: str,
+        udf_io_list: List[UdfIO],
+    ) -> UdfMetadata:
         """Creates an udf metadata object and udf_io objects and persists them
         in database.
 
@@ -212,7 +237,27 @@ class CatalogManager(object):
         """
         return self._udf_service.udf_by_name(name)
 
-    def delete_metadata(self, table_name: str) -> bool:
+    def get_udf_inputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
+        if not isinstance(udf_obj, UdfMetadata):
+            raise ValueError(
+                """Expected UdfMetadata object, got
+                             {}""".format(
+                    type(udf_obj)
+                )
+            )
+        return self._udf_io_service.get_inputs_by_udf_id(udf_obj.id)
+
+    def get_udf_outputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
+        if not isinstance(udf_obj, UdfMetadata):
+            raise ValueError(
+                """Expected UdfMetadata object, got
+                             {}""".format(
+                    type(udf_obj)
+                )
+            )
+        return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
+
+    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -223,12 +268,12 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        metadata_id = self._dataset_service.dataset_by_name(table_name)
-        return self._dataset_service.delete_dataset_by_id(metadata_id)
+        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
 
-    def delete_udf(self, udf_name: str) -> bool:
+    def drop_udf(self, udf_name: str) -> bool:
         """
-        This method drops the udf entry from the catalog
+        This method drops the udf entry and corresponding udf_io
+        from the catalog
 
         Arguments:
            udf_name: udf name to be dropped.
@@ -236,22 +281,23 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._udf_service.delete_udf_by_name(udf_name)
+        return self._udf_service.drop_udf_by_name(udf_name)
 
-    def get_udf_io_by_name(self, udf: UdfMetadata, udf_io_name: str) -> UdfIO:
-        """Returns the catalog object for the input udfio name
-        Args:
-            udf (UDF): corresponding udf object
-            udf_io_name (str): name to query the UDFIO catalog table
-        Returns:
-            UdfIO: catalog object found
-        """
-        return self._udf_io_service.udf_io_by_name(udf.id, udf_io_name)
+    def rename_table(self, new_name: TableInfo, curr_table: TableInfo):
+        return self._dataset_service.rename_dataset_by_name(
+            new_name.table_name,
+            curr_table.database_name,
+            curr_table.table_name,
+        )
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(
-            database_name, table_name)
+            database_name, table_name
+        )
         if metadata is None:
             return False
         else:
             return True
+
+    def get_all_udf_entries(self):
+        return self._udf_service.get_all_udfs()

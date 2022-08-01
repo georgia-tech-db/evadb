@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,80 +14,65 @@
 # limitations under the License.
 import unittest
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 
+from eva.optimizer.operators import (
+    LogicalCreate,
+    LogicalCreateUDF,
+    LogicalDrop,
+    LogicalDropUDF,
+    LogicalFilter,
+    LogicalFunctionScan,
+    LogicalGet,
+    LogicalInsert,
+    LogicalJoin,
+    LogicalLoadData,
+    LogicalOrderBy,
+    LogicalQueryDerivedGet,
+    LogicalRename,
+    LogicalSample,
+    LogicalShow,
+    LogicalUnion,
+)
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.create_statement import CreateTableStatement
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.parser import Parser
-
-from eva.optimizer.operators import (LogicalProject, LogicalGet, LogicalFilter,
-                                     LogicalQueryDerivedGet, LogicalCreate,
-                                     LogicalCreateUDF, LogicalInsert,
-                                     LogicalLoadData, LogicalUnion,
-                                     LogicalOrderBy, LogicalLimit,
-                                     LogicalSample)
-
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.abstract_expression import ExpressionType
-
-from eva.parser.types import ParserOrderBySortType, FileFormatType
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_statement import SelectStatement
+from eva.parser.table_ref import TableInfo, TableRef
 
 
 class StatementToOprTest(unittest.TestCase):
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalGet')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    def test_visit_table_ref_should_create_logical_get_opr(self,
-                                                           mock,
-                                                           mock_lget):
+    @patch("eva.optimizer.statement_to_opr_convertor.LogicalGet")
+    def test_visit_table_ref_should_create_logical_get_opr(self, mock_lget):
         converter = StatementToPlanConvertor()
-        table_ref = TableRef(TableInfo("test"))
+        table_ref = MagicMock(spec=TableRef, alias="alias")
+        table_ref.is_select.return_value = False
+        table_ref.sample_freq = None
         converter.visit_table_ref(table_ref)
-        mock.assert_called_with(table_ref.table)
-        mock_lget.assert_called_with(table_ref, mock.return_value)
+        mock_lget.assert_called_with(table_ref, table_ref.table.table_obj, "alias")
         self.assertEqual(mock_lget.return_value, converter._plan)
 
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalGet')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    def test_visit_table_ref_populates_column_mapping(self, mock,
-                                                      mock_lget):
-        converter = StatementToPlanConvertor()
-        converter._populate_column_map = MagicMock()
-        table_ref = TableRef(TableInfo("test"))
-        converter.visit_table_ref(table_ref)
-
-        converter._populate_column_map.assert_called_with(mock.return_value)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalFilter')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_predicate_should_add_logical_filter(self, mock,
-                                                              mock_lfilter):
+    @patch("eva.optimizer.statement_to_opr_convertor.LogicalFilter")
+    def test_visit_select_predicate_should_add_logical_filter(self, mock_lfilter):
         converter = StatementToPlanConvertor()
         select_predicate = MagicMock()
         converter._visit_select_predicate(select_predicate)
 
         mock_lfilter.assert_called_with(select_predicate)
-        mock.assert_called_with(select_predicate, converter._column_map)
         mock_lfilter.return_value.append_child.assert_called()
         self.assertEqual(mock_lfilter.return_value, converter._plan)
 
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalProject')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    def test_visit_projection_should_add_logical_predicate(self, mock,
-                                                           mock_lproject):
+    @patch("eva.optimizer.statement_to_opr_convertor.LogicalProject")
+    def test_visit_projection_should_add_logical_predicate(self, mock_lproject):
         converter = StatementToPlanConvertor()
         projects = MagicMock()
 
         converter._visit_projection(projects)
-
         mock_lproject.assert_called_with(projects)
-        mock.assert_called_with(projects, converter._column_map)
         mock_lproject.return_value.append_child.assert_called()
         self.assertEqual(mock_lproject.return_value, converter._plan)
 
@@ -104,8 +89,7 @@ class StatementToOprTest(unittest.TestCase):
 
         converter.visit_table_ref.assert_called_with(statement.from_table)
         converter._visit_projection.assert_called_with(statement.target_list)
-        converter._visit_select_predicate.assert_called_with(
-            statement.where_clause)
+        converter._visit_select_predicate.assert_called_with(statement.where_clause)
 
     def test_visit_select_should_not_call_visits_for_null_values(self):
         converter = StatementToPlanConvertor()
@@ -122,32 +106,21 @@ class StatementToOprTest(unittest.TestCase):
         converter._visit_projection.assert_not_called()
         converter._visit_select_predicate.assert_not_called()
 
-    def test_populate_column_map_should_populate_correctly(self):
-        converter = StatementToPlanConvertor()
-        dataset = MagicMock()
-        dataset.columns = [MagicMock() for i in range(5)]
-        expected = {}
-        for i, column in enumerate(dataset.columns):
-            column.name = "NAME" + str(i)
-            expected[column.name.lower()] = column
-
-        converter._populate_column_map(dataset)
-
-        self.assertEqual(converter._column_map, expected)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalCreateUDF')
-    @patch('eva.optimizer.\
-statement_to_opr_convertor.column_definition_to_udf_io')
+    @patch("eva.optimizer.statement_to_opr_convertor.LogicalCreateUDF")
+    @patch(
+        "eva.optimizer.\
+statement_to_opr_convertor.column_definition_to_udf_io"
+    )
     def test_visit_create_udf(self, mock, l_create_udf_mock):
         convertor = StatementToPlanConvertor()
         stmt = MagicMock()
-        stmt.name = 'name'
+        stmt.name = "name"
         stmt.if_not_exists = True
-        stmt.inputs = ['inp']
-        stmt.outputs = ['out']
-        stmt.impl_path = 'tmp.py'
-        stmt.udf_type = 'classification'
-        mock.side_effect = ['inp', 'out']
+        stmt.inputs = ["inp"]
+        stmt.outputs = ["out"]
+        stmt.impl_path = "tmp.py"
+        stmt.udf_type = "classification"
+        mock.side_effect = ["inp", "out"]
         convertor.visit_create_udf(stmt)
         mock.assert_any_call(stmt.inputs, True)
         mock.assert_any_call(stmt.outputs, False)
@@ -155,16 +128,41 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         l_create_udf_mock.assert_called_with(
             stmt.name,
             stmt.if_not_exists,
-            'inp',
-            'out',
+            "inp",
+            "out",
             stmt.impl_path,
-            stmt.udf_type)
+            stmt.udf_type,
+        )
 
     def test_visit_should_call_create_udf(self):
         stmt = MagicMock(spec=CreateUDFStatement)
         convertor = StatementToPlanConvertor()
         mock = MagicMock()
         convertor.visit_create_udf = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    @patch("eva.optimizer.statement_to_opr_convertor.LogicalDropUDF")
+    @patch(
+        "eva.optimizer.\
+statement_to_opr_convertor.column_definition_to_udf_io"
+    )
+    def test_visit_drop_udf(self, mock, l_drop_udf_mock):
+        convertor = StatementToPlanConvertor()
+        stmt = MagicMock()
+        stmt.name = "name"
+        stmt.if_exists = True
+        convertor.visit_drop_udf(stmt)
+        l_drop_udf_mock.assert_called_once()
+        l_drop_udf_mock.assert_called_with(stmt.name, stmt.if_exists)
+
+    def test_visit_should_call_drop_udf(self):
+        stmt = MagicMock(spec=DropUDFStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_drop_udf = mock
 
         convertor.visit(stmt)
         mock.assert_called_once()
@@ -190,294 +188,68 @@ statement_to_opr_convertor.column_definition_to_udf_io')
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    def test_visit_should_call_load_data(self):
-        stmt = MagicMock(spec=LoadDataStatement)
+    def test_visit_should_call_rename(self):
+        stmt = MagicMock(spec=RenameTableStatement)
         convertor = StatementToPlanConvertor()
         mock = MagicMock()
-        convertor.visit_load_data = mock
+        convertor.visit_rename = mock
 
         convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.create_video_metadata')
-    def test_visit_load_data_when_bind_returns_valid(
-            self, mock_create, mock_bind, mock_load):
-        mock_bind.return_value = MagicMock()
-        table_ref = TableRef(TableInfo("test"))
-        column_list = []
-        file_format = FileFormatType.VIDEO
-        file_options = {}
-        file_options['file_format'] = file_format
-        stmt = MagicMock(table=table_ref, path='path',
-                         column_list=column_list,
-                         file_options=file_options)
-        StatementToPlanConvertor().visit_load_data(stmt)
-        mock_bind.assert_called_once_with(table_ref.table)
-        mock_load.assert_called_once_with(mock_bind.return_value, 'path',
-                                          column_list, file_options)
-        mock_create.assert_not_called()
+    def test_visit_should_call_drop(self):
+        stmt = MagicMock(spec=DropTableStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_drop = mock
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
 
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.create_video_metadata')
-    def test_visit_load_data_when_bind_returns_None(
-            self, mock_create, mock_bind, mock_load):
-        mock_bind.return_value = None
-        table_ref = TableRef(TableInfo("test"))
-        column_list = []
-        file_format = FileFormatType.VIDEO
-        file_options = {}
-        file_options['file_format'] = file_format
-        stmt = MagicMock(table=table_ref, path='path',
-                         column_list=column_list,
-                         file_options=file_options)
-        StatementToPlanConvertor().visit_load_data(stmt)
-        mock_create.assert_called_once_with(table_ref.table.table_name)
-        mock_bind.assert_called_with(table_ref.table)
-        mock_load.assert_called_with(mock_create.return_value, 'path',
-                                     column_list, file_options)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.LogicalLoadData')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.create_video_metadata')
-    def test_visit_load_data_when_bind_returns_None_raises(
-            self, mock_create, mock_bind, mock_load):
-        mock_bind.return_value = None
-        table_ref = TableRef(TableInfo("test"))
-        column_list = []
-        file_format = FileFormatType.CSV
-        file_options = {}
-        file_options['file_format'] = file_format
-        stmt = MagicMock(table=table_ref, path='path',
-                         column_list=column_list,
-                         file_options=file_options)
-        with self.assertRaises(RuntimeError):
-            StatementToPlanConvertor().visit_load_data(stmt)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    def test_should_visit_select_if_nested_query(self, mock_c, mock_d):
-        m = MagicMock()
-        mock_c.return_value = mock_d.return_value = m
-        stmt = Parser().parse(""" SELECT id FROM (SELECT data, id FROM video \
-            WHERE data > 2) WHERE id>3;""")[0]
-        converter = StatementToPlanConvertor()
-        actual_plan = converter.visit(stmt)
-        plans = [LogicalProject([TupleValueExpression('id')])]
-        plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_GREATER,
-                    TupleValueExpression('id'),
-                    ConstantValueExpression(3))))
-        plans.append(LogicalQueryDerivedGet())
-        plans.append(LogicalProject(
-            [TupleValueExpression('data'), TupleValueExpression('id')]))
-        plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_GREATER,
-                    TupleValueExpression('data'),
-                    ConstantValueExpression(2))))
-
-        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
-        expected_plan = None
-        for plan in reversed(plans):
-            if expected_plan:
-                plan.append_child(expected_plan),
-
-            expected_plan = plan
-        self.assertEqual(expected_plan, actual_plan)
-        wrong_plan = plans[0]
-        for plan in plans[1:]:
-            wrong_plan.append_child(plan)
-        self.assertNotEqual(wrong_plan, actual_plan)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_orderby(self, mock_p, mock_c, mock_d):
-        m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
-        stmt = Parser().parse(""" SELECT data, id FROM video \
-            WHERE data > 2 ORDER BY data, id DESC;""")[0]
-
-        converter = StatementToPlanConvertor()
-        actual_plan = converter.visit(stmt)
+    def test_should_return_false_for_unequal_plans_and_true_for_equal_plans(
+        self,
+    ):
         plans = []
+        create_plan = LogicalCreate(TableRef(TableInfo("video")), [MagicMock()])
+        create_udf_plan = LogicalCreateUDF("udf", False, None, None, None)
+        insert_plan = LogicalInsert(MagicMock(), 0, [MagicMock()], [MagicMock()])
+        query_derived_plan = LogicalQueryDerivedGet(alias="T")
+        load_plan = LogicalLoadData(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        rename_plan = LogicalRename(TableRef(TableInfo("old")), TableInfo("new"))
 
-        plans.append(LogicalOrderBy(
-            [(TupleValueExpression('data'), ParserOrderBySortType.ASC),
-             (TupleValueExpression('id'), ParserOrderBySortType.DESC)]))
+        show_plan = LogicalShow(MagicMock())
+        drop_plan = LogicalDrop([MagicMock()], True)
+        drop_udf_plan = LogicalDropUDF("FakeUDF", False)
+        get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
+        sample_plan = LogicalSample(MagicMock())
+        filter_plan = LogicalFilter(MagicMock())
+        order_by_plan = LogicalOrderBy(MagicMock())
+        union_plan = LogicalUnion(MagicMock())
+        function_scan_plan = LogicalFunctionScan(MagicMock())
+        join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
 
-        plans.append(LogicalProject(
-            [TupleValueExpression('data'), TupleValueExpression('id')]))
-
-        plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_GREATER,
-                    TupleValueExpression('data'),
-                    ConstantValueExpression(2))))
-
-        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
-
-        expected_plan = None
-        for plan in reversed(plans):
-            if expected_plan:
-                plan.append_child(expected_plan)
-            expected_plan = plan
-
-        self.assertEqual(expected_plan, actual_plan)
-
-        wrong_plan = plans[0]
-        for plan in plans[1:]:
-            wrong_plan.append_child(plan)
-        self.assertNotEqual(wrong_plan, actual_plan)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_limit(self, mock_p, mock_c, mock_d):
-        m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
-        stmt = Parser().parse(""" SELECT data, id FROM video \
-                   WHERE data > 2 LIMIT 3;""")[0]
-
-        converter = StatementToPlanConvertor()
-        actual_plan = converter.visit(stmt)
-        plans = []
-
-        plans.append(LogicalLimit(ConstantValueExpression(3)))
-
-        plans.append(LogicalProject(
-            [TupleValueExpression('data'), TupleValueExpression('id')]))
-
-        plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_GREATER,
-                    TupleValueExpression('data'),
-                    ConstantValueExpression(2))))
-
-        plans.append(LogicalGet(TableRef(TableInfo('video')), m))
-
-        expected_plan = None
-        for plan in reversed(plans):
-            if expected_plan:
-                plan.append_child(expected_plan)
-            expected_plan = plan
-
-        self.assertEqual(expected_plan, actual_plan)
-
-        wrong_plan = plans[0]
-        for plan in plans[1:]:
-            wrong_plan.append_child(plan)
-        self.assertNotEqual(wrong_plan, actual_plan)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_visit_select_sample(self, mock_p, mock_c, mock_d):
-        m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
-        stmt = Parser().parse(""" SELECT data, id FROM video SAMPLE 2 \
-                   WHERE id > 2 LIMIT 3;""")[0]
-
-        converter = StatementToPlanConvertor()
-        actual_plan = converter.visit(stmt)
-        plans = []
-
-        plans.append(LogicalLimit(ConstantValueExpression(3)))
-
-        plans.append(LogicalProject(
-            [TupleValueExpression('data'), TupleValueExpression('id')]))
-
-        plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_GREATER,
-                    TupleValueExpression('id'),
-                    ConstantValueExpression(2))))
-
-        plans.append(LogicalSample(ConstantValueExpression(2)))
-
-        plans.append(LogicalGet(TableRef(TableInfo('video'),
-                                         ConstantValueExpression(2)), m))
-
-        expected_plan = None
-        for plan in reversed(plans):
-            if expected_plan:
-                plan.append_child(expected_plan)
-            expected_plan = plan
-
-        self.assertEqual(expected_plan, actual_plan)
-
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_dataset')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_columns_expr')
-    @patch('eva.optimizer.statement_to_opr_convertor.bind_predicate_expr')
-    def test_should_visit_select_union_if_union_query(self, mock_p, mock_c,
-                                                      mock_d):
-        m = MagicMock()
-        mock_p.return_value = mock_c.return_value = mock_d.return_value = m
-        stmt = Parser().parse(""" SELECT id FROM video WHERE id>3
-                              UNION ALL
-                              SELECT id FROM video WHERE id<=3;""")[0]
-        converter = StatementToPlanConvertor()
-        actual_plan = converter.visit(stmt)
-        left_plans = [LogicalProject([TupleValueExpression('id')])]
-        left_plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_GREATER,
-                    TupleValueExpression('id'),
-                    ConstantValueExpression(3))))
-        left_plans.append(LogicalGet(TableRef(TableInfo('video')), m))
-
-        def reverse_plan(plans):
-            return_plan = None
-            for plan in reversed(plans):
-                if return_plan:
-                    plan.append_child(return_plan)
-                return_plan = plan
-            return return_plan
-        expect_left_plan = reverse_plan(left_plans)
-
-        right_plans = [LogicalProject([TupleValueExpression('id')])]
-        right_plans.append(
-            LogicalFilter(
-                ComparisonExpression(
-                    ExpressionType.COMPARE_LEQ,
-                    TupleValueExpression('id'),
-                    ConstantValueExpression(3))))
-        right_plans.append(LogicalGet(TableRef(TableInfo('video')), m))
-        expect_right_plan = reverse_plan(right_plans)
-        expected_plan = LogicalUnion(True)
-        expected_plan.append_child(expect_right_plan)
-        expected_plan.append_child(expect_left_plan)
-
-        self.assertEqual(expected_plan, actual_plan)
-
-    def test_should_return_false_for_unequal_plans(self):
-        create_plan = LogicalCreate(
-            TableRef(TableInfo('video')), [MagicMock()])
-        create_udf_plan = LogicalCreateUDF('udf', False, None, None, None)
-        insert_plan = LogicalInsert(
-            MagicMock(), 0, [
-                MagicMock()], [
-                MagicMock()])
-        query_derived_plan = LogicalQueryDerivedGet()
-        load_plan = LogicalLoadData(MagicMock(), MagicMock(),
-                                    MagicMock(), MagicMock())
-        self.assertEqual(create_plan, create_plan)
-        self.assertEqual(create_udf_plan, create_udf_plan)
-        self.assertNotEqual(create_plan, create_udf_plan)
-        self.assertNotEqual(create_udf_plan, create_plan)
         create_plan.append_child(create_udf_plan)
-        self.assertNotEqual(create_plan, create_udf_plan)
-        self.assertNotEqual(query_derived_plan, create_plan)
-        self.assertNotEqual(insert_plan, query_derived_plan)
-        self.assertNotEqual(load_plan, insert_plan)
+
+        plans.append(create_plan)
+        plans.append(create_udf_plan)
+        plans.append(insert_plan)
+        plans.append(query_derived_plan)
+        plans.append(load_plan)
+        plans.append(rename_plan)
+        plans.append(drop_plan)
+        plans.append(drop_udf_plan)
+        plans.append(get_plan)
+        plans.append(sample_plan)
+        plans.append(filter_plan)
+        plans.append(order_by_plan)
+        plans.append(union_plan)
+        plans.append(function_scan_plan)
+        plans.append(join_plan)
+        plans.append(show_plan)
+
+        length = len(plans)
+        for i in range(length):
+            self.assertEqual(plans[i], plans[i])
+            if i >= 1:  # compare against next plan
+                self.assertNotEqual(plans[i - 1], plans[i])

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import NUM_FRAMES, create_sample_video, file_remove, load_inbuilt_udfs
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import create_sample_video, load_inbuilt_udfs, file_remove
-from test.util import NUM_FRAMES
 
 
 class ArrayCountTests(unittest.TestCase):
-
     def setUp(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
@@ -32,7 +31,7 @@ class ArrayCountTests(unittest.TestCase):
         load_inbuilt_udfs()
 
     def tearDown(self):
-        file_remove('dummy.avi')
+        file_remove("dummy.avi")
 
     # integration test
 
@@ -41,8 +40,10 @@ class ArrayCountTests(unittest.TestCase):
         select_query = "SELECT id,DummyObjectDetector(data) FROM MyVideo \
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i * 2, 'label': ['person']}
-                    for i in range(NUM_FRAMES // 2)]
+        expected = [
+            {"myvideo.id": i * 2, "dummyobjectdetector.label": ["person"]}
+            for i in range(NUM_FRAMES // 2)
+        ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -55,7 +56,7 @@ class ArrayCountTests(unittest.TestCase):
         select_query = "SELECT id FROM MyVideo WHERE \
             DummyMultiObjectDetector(data).labels @> ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i} for i in range(0, NUM_FRAMES, 3)]
+        expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -64,7 +65,7 @@ class ArrayCountTests(unittest.TestCase):
             Array_Count(DummyMultiObjectDetector(data).labels, 'person') = 2
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i} for i in range(0, NUM_FRAMES, 3)]
+        expected = [{"myvideo.id": i} for i in range(0, NUM_FRAMES, 3)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
@@ -72,6 +73,6 @@ class ArrayCountTests(unittest.TestCase):
             WHERE Array_Count(DummyObjectDetector(data).label, 'bicycle') = 1
             ORDER BY id;"""
         actual_batch = execute_query_fetch_all(select_query)
-        expected = [{'id': i} for i in range(1, NUM_FRAMES, 2)]
+        expected = [{"myvideo.id": i} for i in range(1, NUM_FRAMES, 2)]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,17 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from __future__ import annotations
-from typing import Union, List
+
 import typing
+from typing import List, Union
+
 if typing.TYPE_CHECKING:
     from eva.parser.table_ref import TableRef
-from eva.parser.statement import AbstractStatement
 
-from eva.parser.types import StatementType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.parser.statement import AbstractStatement
+from eva.parser.types import StatementType
 
 
 class SelectStatement(AbstractStatement):
@@ -42,17 +43,20 @@ class SelectStatement(AbstractStatement):
     **kwargs : to support other functionality, Orderby, Distinct, Groupby.
     """
 
-    def __init__(self, target_list: List[AbstractExpression] = None,
-                 from_table: Union[TableRef, SelectStatement] = None,
-                 where_clause: AbstractExpression = None,
-                 **kwargs):
+    def __init__(
+        self,
+        target_list: List[AbstractExpression] = None,
+        from_table: Union[TableRef, SelectStatement] = None,
+        where_clause: AbstractExpression = None,
+        **kwargs,
+    ):
         super().__init__(StatementType.SELECT)
         self._from_table = from_table
         self._where_clause = where_clause
         self._target_list = target_list
         self._union_link = None
         self._union_all = False
-        self._orderby_list = kwargs.get('orderby_clause_list', None)
+        self._orderby_list = kwargs.get("orderby_clause_list", None)
         self._limit_count = kwargs.get("limit_count", None)
 
     @property
@@ -60,7 +64,7 @@ class SelectStatement(AbstractStatement):
         return self._union_link
 
     @union_link.setter
-    def union_link(self, next_select: 'SelectStatement'):
+    def union_link(self, next_select: "SelectStatement"):
         self._union_link = next_select
 
     @property
@@ -113,8 +117,7 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {}".format(
-            self._target_list, self._from_table)
+        print_str = "SELECT {} FROM {}".format(self._target_list, self._from_table)
         print_str += " WHERE " + str(self._where_clause)
         if self._union_link is not None:
             if not self._union_all:
@@ -133,20 +136,26 @@ class SelectStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, SelectStatement):
             return False
-        return (self.from_table == other.from_table
-                and self.target_list == other.target_list
-                and self.where_clause == other.where_clause
-                and self.union_link == other.union_link
-                and self.union_all == other.union_all
-                and self.orderby_list == other.orderby_list
-                and self.limit_count == other.limit_count)
+        return (
+            self.from_table == other.from_table
+            and self.target_list == other.target_list
+            and self.where_clause == other.where_clause
+            and self.union_link == other.union_link
+            and self.union_all == other.union_all
+            and self.orderby_list == other.orderby_list
+            and self.limit_count == other.limit_count
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.from_table,
-                     tuple(self.target_list or []),
-                     self.where_clause,
-                     self.union_link,
-                     self.union_all,
-                     tuple(self.orderby_list or []),
-                     self.limit_count))
+        return hash(
+            (
+                super().__hash__(),
+                self.from_table,
+                tuple(self.target_list or []),
+                self.where_clause,
+                self.union_link,
+                self.union_all,
+                tuple(self.orderby_list or []),
+                self.limit_count,
+            )
+        )

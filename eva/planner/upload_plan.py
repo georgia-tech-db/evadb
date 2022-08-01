@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from pathlib import Path
 
 
 class UploadPlan(AbstractPlan):
@@ -26,7 +27,7 @@ class UploadPlan(AbstractPlan):
         path(Path): file path (with prefix prepended) where
                     the data is uploaded
         video_blob(str): base64 encoded video string
-        """
+    """
 
     def __init__(self, file_path: Path, video_blob: str):
         super().__init__(PlanOprType.UPLOAD)
@@ -42,8 +43,9 @@ class UploadPlan(AbstractPlan):
         return self._video_blob
 
     def __str__(self):
-        return 'UploadPlan(file_path={} video_blob={})'.format(
-            self.file_path, "string of video blob")
+        return "UploadPlan(file_path={} video_blob={})".format(
+            self.file_path, "string of video blob"
+        )
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.file_path, self.video_blob))

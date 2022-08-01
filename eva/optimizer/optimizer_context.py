@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,25 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
-from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
+
+from eva.constants import UNDEFINED_GROUP_ID
+from eva.optimizer.cost_model import CostModel
+from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.memo import Memo
 from eva.optimizer.operators import Dummy, Operator
-from eva.optimizer.group_expression import GroupExpression
-from eva.constants import UNDEFINED_GROUP_ID
+from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 
 
 class OptimizerContext:
     """
-        Maintain context information for the optimizer
+    Maintain context information for the optimizer
 
-        Arguments:
-            _task_queue(OptimizerTaskStack):
-                stack to keep track outstanding tasks
+    Arguments:
+        _task_queue(OptimizerTaskStack):
+            stack to keep track outstanding tasks
     """
 
-    def __init__(self):
+    def __init__(self, cost_model: CostModel):
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
+        self._cost_model = cost_model
+
+    @property
+    def cost_model(self):
+        return self._cost_model
 
     @property
     def task_stack(self):
@@ -41,10 +48,7 @@ class OptimizerContext:
     def memo(self):
         return self._memo
 
-    def _xform_opr_to_group_expr(
-        self,
-        opr: Operator
-    ) -> GroupExpression:
+    def _xform_opr_to_group_expr(self, opr: Operator) -> GroupExpression:
         """
         Note: Internal function Generate a group expressions from a
         logical operator tree. Caller is responsible for assigning
@@ -82,15 +86,13 @@ class OptimizerContext:
         """
         self.memo.erase_group(group_id)
         new_expr = self._xform_opr_to_group_expr(opr)
-        self.memo.add_group_expr(new_expr, group_id)
+        new_expr = self.memo.add_group_expr(new_expr, group_id)
         return new_expr
 
-    def add_opr_to_group(self,
-                         opr: Operator,
-                         group_id: int = UNDEFINED_GROUP_ID):
+    def add_opr_to_group(self, opr: Operator, group_id: int = UNDEFINED_GROUP_ID):
         """
         Convert opertator to group_expression and add to the group
         """
         grp_expr = self._xform_opr_to_group_expr(opr)
-        self.memo.add_group_expr(grp_expr, group_id)
+        grp_expr = self.memo.add_group_expr(grp_expr, group_id)
         return grp_expr

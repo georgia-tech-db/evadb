@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@ from typing import Iterator, Generator
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
 from eva.planner.storage_plan import StoragePlan
 from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
 
 
 class StorageExecutor(AbstractExecutor):
-
     def __init__(self, node: StoragePlan):
         super().__init__(node)
 
@@ -30,11 +30,13 @@ class StorageExecutor(AbstractExecutor):
 
     def exec(self) -> Iterator[Batch]:
         if self.node.video.is_video:
-            return VideoStorageEngine.read(self.node.video,
-                                           self.node.batch_mem_size)
+            return VideoStorageEngine.read(
+                self.node.video,
+                self.node.batch_mem_size,
+                predicate=self.node.predicate,
+            )
         else:
-            return StorageEngine.read(self.node.video,
-                                      self.node.batch_mem_size)
+            return StorageEngine.read(self.node.video, self.node.batch_mem_size)
 
     def __call__(self, **kwargs) -> Generator[Batch, None, None]:
         yield from self.exec()

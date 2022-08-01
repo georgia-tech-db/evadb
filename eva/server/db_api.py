@@ -1,9 +1,23 @@
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import asyncio
-import random
 import base64
+import random
 
-from eva.server.async_protocol import EvaClient
 from eva.models.server.response import Response
+from eva.server.async_protocol import EvaClient
 
 
 class EVAConnection:
@@ -20,7 +34,6 @@ class EVAConnection:
 
 
 class EVACursor(object):
-
     def __init__(self, protocol):
         self._protocol = protocol
         self._pending_query = False
@@ -31,8 +44,9 @@ class EVACursor(object):
         """
         if self._pending_query:
             raise SystemError(
-                'EVA does not support concurrent queries. \
-                    Call fetch_all() to complete the pending query')
+                "EVA does not support concurrent queries. \
+                    Call fetch_all() to complete the pending query"
+            )
         query = self._upload_transformation(query)
         await self._protocol.send_message(query)
         self._pending_query = True
@@ -61,16 +75,22 @@ class EVACursor(object):
          - UPLOAD: the client read the file and uses base64 to encode
          the content into a string.
         """
-        if 'UPLOAD' in query:
+        if "UPLOAD" in query:
             file_path = query.split()[2][1:-1]
             dst_path = query.split()[-1][1:-2]
             with open(file_path, "rb") as f:
                 bytes_read = f.read()
                 b64_string = str(base64.b64encode(bytes_read))
-                query = 'UPLOAD PATH ' + \
-                        '\'' + dst_path + '\'' + \
-                        ' BLOB ' + \
-                        '\"' + b64_string + '\";'
+                query = (
+                    "UPLOAD PATH "
+                    + "'"
+                    + dst_path
+                    + "'"
+                    + " BLOB "
+                    + '"'
+                    + b64_string
+                    + '";'
+                )
         return query
 
     def __getattr__(self, name):
@@ -78,7 +98,7 @@ class EVACursor(object):
         Auto generate sync function calls from async
         Sync function calls should not be used in an async environment.
         """
-        func = object.__getattribute__(self, '%s_async' % name)
+        func = object.__getattribute__(self, "%s_async" % name)
         if not asyncio.iscoroutinefunction(func):
             raise AttributeError
 
@@ -90,8 +110,7 @@ class EVACursor(object):
         return func_sync
 
 
-async def connect_async(host: str, port: int,
-                        max_retry_count: int = 3, loop=None):
+async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=None):
     if loop is None:
         loop = asyncio.get_event_loop()
 
@@ -99,8 +118,9 @@ async def connect_async(host: str, port: int,
 
     while True:
         try:
-            transport, protocol = await \
-                loop.create_connection(lambda: EvaClient(loop), host, port)
+            transport, protocol = await loop.create_connection(
+                lambda: EvaClient(loop), host, port
+            )
 
         except Exception as e:
             if not retries:

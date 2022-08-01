@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+from typing import List
+
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from pathlib import Path
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from typing import List
 
 
 class LoadDataPlan(AbstractPlan):
@@ -29,13 +30,16 @@ class LoadDataPlan(AbstractPlan):
         table_metainfo(DataFrameMetadata): table metadata info to load into
         file_path(Path): file path from where we will load the data
         batch_mem_size(int): memory size of the batch loaded from disk
-        """
+    """
 
-    def __init__(self,
-                 table_metainfo: DataFrameMetadata, file_path: Path,
-                 batch_mem_size: int,
-                 column_list: List[AbstractExpression] = None,
-                 file_options: dict = None):
+    def __init__(
+        self,
+        table_metainfo: DataFrameMetadata,
+        file_path: Path,
+        batch_mem_size: int,
+        column_list: List[AbstractExpression] = None,
+        file_options: dict = None,
+    ):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
         self._file_path = file_path
@@ -64,18 +68,25 @@ class LoadDataPlan(AbstractPlan):
         return self._file_options
 
     def __str__(self):
-        return 'LoadDataPlan(table_id={}, file_path={}, \
+        return "LoadDataPlan(table_id={}, file_path={}, \
             batch_mem_size={}, \
             column_list={}, \
-            file_options={})'.format(self.table_metainfo,
-                                     self.file_path,
-                                     self.batch_mem_size,
-                                     self.column_list,
-                                     self.file_options)
+            file_options={})".format(
+            self.table_metainfo,
+            self.file_path,
+            self.batch_mem_size,
+            self.column_list,
+            self.file_options,
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.table_metainfo,
-                     self.file_path,
-                     self.batch_mem_size,
-                     tuple(self.column_list),
-                     frozenset(self.file_options.items())))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_metainfo,
+                self.file_path,
+                self.batch_mem_size,
+                tuple(self.column_list),
+                frozenset(self.file_options.items()),
+            )
+        )

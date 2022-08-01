@@ -26,7 +26,7 @@ emptyStatement
 
 ddlStatement
     : createDatabase | createTable | createIndex | createUdf | createMaterializedView
-    | dropDatabase | dropTable | dropIndex
+    | dropDatabase | dropTable | dropUdf | dropIndex | renameTable
     ;
 
 dmlStatement
@@ -35,7 +35,7 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement
+    : simpleDescribeStatement | helpStatement | showStatement
     ;
 
 // Data Definition Language
@@ -57,6 +57,13 @@ createTable
     : CREATE TABLE
       ifNotExists?
       tableName createDefinitions                                  #columnCreateTable
+    ;
+
+// Rename statements
+renameTable
+    : RENAME TABLE
+      oldtableName
+      TO newtableName
     ;
 
 // Create UDFs
@@ -135,6 +142,11 @@ dropIndex
 dropTable
     : DROP TABLE ifExists?
       tables
+    ;
+
+dropUdf
+    : DROP UDF ifExists?
+      udfName
     ;
 
 // Data Manipulation Language
@@ -229,25 +241,34 @@ orderByClause
 orderByExpression
     : expression order=(ASC | DESC)?
     ;
-
+// Forcing EXPLICIT JOIN KEYWORD
 tableSources
-    : tableSource (',' tableSource)*
+    : tableSource
     ;
+
+//tableSources
+//    : tableSource (',' tableSource)*
+//    ;
 
 tableSource
     : tableSourceItemWithSample joinPart*                #tableSourceBase
     ;
 
 tableSourceItemWithSample
-    : tableSourceItem sampleClause?
+    : tableSourceItem (AS? uid)? sampleClause?
     ;
 
 tableSourceItem
-    : tableName                                  #atomTableItem
-    | (
+    : tableName                                         #atomTableItem
+    | subqueryTableSourceItem                           #subqueryTableItem
+    | LATERAL functionCall                              #lateralFunctionCallItem
+    ;
+
+subqueryTableSourceItem
+    : (
       selectStatement |
       LR_BRACKET selectStatement RR_BRACKET
-      )                                                            #subqueryTableItem
+      )
     ;
 
 sampleClause
@@ -259,7 +280,7 @@ joinPart
     : JOIN tableSourceItemWithSample
       (
         ON expression
-        | USING '(' uidList ')'
+        | USING LR_BRACKET uidList RR_BRACKET
       )?                                                            #innerJoin
     ;
 
@@ -336,6 +357,10 @@ helpStatement
     : HELP STRING_LITERAL
     ;
 
+showStatement
+    : SHOW (UDFS | TABLES)
+    ;
+
 // Common Clauses
 
 //    DB Objects
@@ -345,6 +370,12 @@ fullId
     ;
 
 tableName
+    : fullId
+    ;
+oldtableName
+    : fullId
+    ;
+newtableName
     : fullId
     ;
 

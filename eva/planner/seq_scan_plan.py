@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,22 +25,25 @@ class SeqScanPlan(AbstractScan):
     operations.
 
     Arguments:
-        column_ids: List[AbstractExpression]
+        columns: List[AbstractExpression]
             list of column names string in the plan
         predicate: AbstractExpression
             An expression used for filtering
     """
 
-    def __init__(self,
-                 predicate: AbstractExpression,
-                 column_ids: List[AbstractExpression]):
-        self._column_ids = column_ids
-        super().__init__(PlanOprType.SEQUENTIAL_SCAN,
-                         predicate)
+    def __init__(
+        self,
+        predicate: AbstractExpression,
+        columns: List[AbstractExpression],
+        alias: str = None,
+    ):
+        self._columns = columns
+        self.alias = alias
+        super().__init__(PlanOprType.SEQUENTIAL_SCAN, predicate)
 
     @property
     def columns(self):
-        return self._column_ids
+        return self._columns
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self.columns)))
+        return hash((super().__hash__(), tuple(self.columns or []), self.alias))
