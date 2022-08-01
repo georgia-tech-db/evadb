@@ -37,6 +37,7 @@ extensions = [
     "sphinx_sitemap",
     "sphinx_multiversion",  # optional
     "recommonmark",  # optional
+    "sphinx_external_toc"
 ]
 
 # The suffix(es) of source filenames.
@@ -98,6 +99,10 @@ html_baseurl = "https://evadb.readthedocs.io"
 # Dictionary of values to pass into the template engine’s context for all pages
 html_context = {"html_baseurl": html_baseurl}
 
+external_toc_path = "_toc.yml"  # optional, default: _toc.yml
+external_toc_exclude_missing = False  # optional, default: False
+
+html_logo = "_static/mascots/Logo.png"
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):
