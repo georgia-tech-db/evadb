@@ -85,6 +85,9 @@ html_theme = "furo"
 # further.  For a list of options available for the theme, see the
 # documentation.
 html_theme_options = {
+    "sidebar_hide_name": True,
+    "navigation_with_keys": True,
+    "top_of_page_button": "edit",
 }
 
 # Last updated format
