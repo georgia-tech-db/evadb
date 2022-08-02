@@ -5,6 +5,8 @@ Packaging
 
     This section describes practices to follow when packaging your own models or datasets to be used along with EVA.
 
+.. tableofcontents::
+
 Models
 --------
 
