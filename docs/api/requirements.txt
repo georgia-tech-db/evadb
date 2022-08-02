@@ -17,7 +17,7 @@ sphinx-external-toc==0.3.0
 sphinx-thebe==0.1.1
 sphinx-jsonschema==1.17.2
 sphinx_multiversion==0.2.4
-furo==3.8.1
+furo==2022.4.7
 
 # MyST
 myst-parser==0.15.2
