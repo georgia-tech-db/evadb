@@ -76,19 +76,20 @@ html_theme_options = {
     "top_of_page_button": "edit",
 }
 
-# Last updated format
-html_last_updated_fmt = "%d %b %Y"
-
-# URL which points to the root of the HTML documentation.
-html_baseurl = "https://evadb.readthedocs.io"
-
-# Dictionary of values to pass into the template engine’s context for all pages
-html_context = {"html_baseurl": html_baseurl}
-
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
 html_logo = "_static/mascots/Logo.png"
+
+html_sidebars = {
+    "**": [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/scroll-end.html",
+    ]
+}
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):
