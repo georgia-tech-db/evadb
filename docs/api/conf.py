@@ -8,15 +8,6 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Global variables
 
-# Build documentation for the following tags and branches
-TAGS = []
-BRANCHES = []
-
-# Set which versions are not released yet.
-UNSTABLE_VERSIONS = ["master"]
-# Set which versions are deprecated
-DEPRECATED_VERSIONS = [""]
-
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
 with open("../../eva/version.py", "r") as version_file:
@@ -35,7 +26,6 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
-    "sphinx_multiversion",  # optional
     "recommonmark",  # optional
     "sphinx_external_toc"
 ]
@@ -70,10 +60,6 @@ notfound_template = "404.html"
 # Prefix added to all the URLs generated in the 404 page.
 notfound_urls_prefix = ""
 
-# -- Options for sitemap extension ---------------------------------------
-
-sitemap_url_scheme = "stable/{link}"
-
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for pages.
@@ -92,9 +78,6 @@ html_theme_options = {
 
 # Last updated format
 html_last_updated_fmt = "%d %b %Y"
-
-# Output file base name for HTML help builder.
-htmlhelp_basename = "ScyllaDocumentationdoc"
 
 # URL which points to the root of the HTML documentation.
 html_baseurl = "https://evadb.readthedocs.io"
