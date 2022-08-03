@@ -117,14 +117,11 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 DROP UDF IF EXISTS MyUDF;
 ```
 
+## Contributing
 
-## Documentation
+## Environment Setup
 
-Documentation for EVA is located [here](https://evadb.readthedocs.io/).
-
-### Installation Instructions for Developers
-
-To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser. Detailed development guide is available [here](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
+To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
 
 ```shell
 git clone https://github.com/georgia-tech-db/eva.git && cd eva
@@ -136,16 +133,22 @@ sh script/antlr4/generate_parser.sh                  # to generate the EVA parse
 pip install -e ".[dev]"
 ```
 
-</p>
-</details>
+To verify that installation was successfull, run the test suite.
 
+```shell
+bash script/test/test.sh
+```
 
-## Contributing
+### Troubleshooting
+
+If the tests fail with `PermissionDenied` exceptions, change the `path_prefix` attribute
+under `storage` in `~/.eva/eva.yml` to a directory you have write privileges in.
+
+### Contributing Guidelines
 
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-
 For information on installing from source and contributing to EVA, see our
-[contributing guidelines](./CONTRIBUTING.md).
+[contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
 ## Contributors
 
