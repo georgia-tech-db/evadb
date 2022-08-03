@@ -119,7 +119,7 @@ DROP UDF IF EXISTS MyUDF;
 
 ## Contributing
 
-## Environment Setup
+### Environment Setup
 
 To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
 
@@ -139,15 +139,10 @@ To verify that installation was successfull, run the test suite.
 bash script/test/test.sh
 ```
 
-### Troubleshooting
-
-If the tests fail with `PermissionDenied` exceptions, change the `path_prefix` attribute
-under `storage` in `~/.eva/eva.yml` to a directory you have write privileges in.
-
 ### Contributing Guidelines
 
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-For information on installing from source and contributing to EVA, see our
+For more information on installing from source, troublshooting,and contributing to EVA, see our
 [contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
 ## Contributors
