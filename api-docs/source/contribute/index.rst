@@ -26,24 +26,6 @@ package manager. EVA requires JAVA 8 for generating the parser.
    sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
    pip install -e ".[dev]"
 
-Submitting a contribution
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Follow the following steps to contribute to EVA:
-
--  Merge the most recent changes from the master branch
-
-::
-
-       git remote add origin git@github.com:georgia-tech-db/eva.git
-       git pull . origin/master
-
--  Run the `test script <#testing>`__ to ensure all the test cases pass.
--  Run the ``setup_git_hooks.sh`` to add a git pre-push hook so that it
-   runs the linter before pushing any changes.
--  If you are adding a new SQL command, please add the example usage to
-   the documentation.
-
 Testing
 ^^^^^^^
 
@@ -66,6 +48,30 @@ file.
 ::
 
    python -m pytest test/integration_tests/test_select_executor.py -k 'test_should_load_and_select_in_table'
+
+Troubleshooting
+^^^^^^^^^^^^^^^
+
+If the tests fail with `PermissionDenied` exceptions, change the `path_prefix` attribute
+under `storage` in ``~/.eva/eva.yml`` to a directory you have write privileges in.
+
+Submitting a contribution
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Follow the following steps to contribute to EVA:
+
+-  Merge the most recent changes from the master branch
+
+::
+
+       git remote add origin git@github.com:georgia-tech-db/eva.git
+       git pull . origin/master
+
+-  Run the `test script <#testing>`__ to ensure all the test cases pass.
+-  Run the ``setup_git_hooks.sh`` to add a git pre-push hook so that it
+   runs the linter before pushing any changes.
+-  If you are adding a new SQL command, please add the example usage to
+   the documentation.
 
 Code Style
 ^^^^^^^^^^
