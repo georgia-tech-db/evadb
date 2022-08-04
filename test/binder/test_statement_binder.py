@@ -15,6 +15,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.parser.types import FileFormatType
@@ -83,7 +84,7 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_bind_tableref_should_raise(self):
         with patch.object(StatementBinder, "bind"):
-            with self.assertRaises(ValueError):
+            with self.assertRaises(BinderError):
                 binder = StatementBinder(StatementBinderContext())
                 tableref = MagicMock()
                 tableref.is_select.return_value = False
@@ -235,7 +236,7 @@ class StatementBinderTests(unittest.TestCase):
         column = MagicMock()
         load_statement.column_list = [column]
         load_statement.table_ref.table.table_obj = None
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(BinderError):
             with patch.object(StatementBinder, "bind"):
                 binder = StatementBinder(StatementBinderContext())
                 binder._bind_load_data_statement(load_statement)

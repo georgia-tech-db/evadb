@@ -2,7 +2,7 @@ core:
   datasets_dir: ""
   catalog_database_uri: ""
   application: "eva"
-  mode: "release" #debug
+  mode: "debug" #release
 
 executor:
   # batch_mem_size configures the number of rows processed by the execution engine in one iteration
