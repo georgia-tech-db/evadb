@@ -80,7 +80,9 @@ class Functions(evaql_parserVisitor):
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
                     if len(ctx.createDefinitions()) != 2:
-                        logger.error("UDF Input or Output Missing")
+                        err_msg = "Mising UDF Input or Output"
+                        logger.error(err_msg)
+                        raise SyntaxError(err_msg)
                     input_definitions = self.visit(ctx.createDefinitions(0))
                     output_definitions = self.visit(ctx.createDefinitions(1))
 
