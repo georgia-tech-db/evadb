@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from eva.binder.binder_utils import BinderError
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
@@ -47,8 +48,14 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
-        expected_batch.modify_column_alias("myvideo")
         self.assertEqual(actual_batch, expected_batch)
+
+        # Try adding video to an existing table
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception), "Video Table MyVideo already exists."
+        )
 
     # integration test for csv
     def test_should_load_csv_in_table(self):

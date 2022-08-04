@@ -12,7 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib
+import os
+from pathlib import Path
+import shutil
 import unittest
+from eva.binder.binder_utils import BinderError
 from test.util import (
     DummyObjectDetector,
     create_dummy_batches,
@@ -154,6 +159,30 @@ class UDFExecutorTest(unittest.TestCase):
         new_udf = "TestUDF"
         actual = execute_query_fetch_all(create_udf_query.format(new_udf))
         expected = Batch(
-            pd.DataFrame([f"UDF {new_udf} successfully added to the database."])
+            pd.DataFrame(
+                [f"UDF {new_udf} successfully added to the database."]
+            )
         )
         self.assertEqual(actual, expected)
+
+    def test_should_raise_using_missing_udf(self):
+        select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
+            ORDER BY id;"
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(select_query)
+
+        err_msg = (
+            "UDF with name DummyObjectDetector1 does not exist in the catalog. "
+            "Please create the UDF using CREATE UDF command."
+        )
+        self.assertEqual(str(cm.exception), err_msg)
+
+    def test_should_raise_for_udf_name_mismatch(self):
+        create_udf_query = """CREATE UDF TestUDF
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        with self.assertRaises(RuntimeError):
+            execute_query_fetch_all(create_udf_query)

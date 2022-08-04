@@ -195,7 +195,7 @@ class StatementBinder:
         if udf_obj is None:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "
-                "Please create the UDF using CREATE UDF command"
+                "Please create the UDF using CREATE UDF command."
             )
             logger.error(err_msg)
             raise BinderError(err_msg)
