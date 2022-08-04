@@ -40,10 +40,26 @@ class ModulePathTest(unittest.TestCase):
         vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    @patch("eva.utils.generic_utils.torch")
-    def test_should_use_torch_to_check_if_gpu_is_available(self, torch):
+    def test_should_use_torch_to_check_if_gpu_is_available(self):
+        # Emulate a missing import
+        # Ref: https://stackoverflow.com/a/2481588
+        try:
+            import builtins
+        except ImportError:
+            import __builtin__ as builtins
+        realimport = builtins.__import__
+
+        def missing_import(name, globals, locals, fromlist, level):
+            if name == "torch":
+                raise ImportError
+            return realimport(name, globals, locals, fromlist, level)
+
+        builtins.__import__ = missing_import
+        self.assertFalse(is_gpu_available())
+
+        # Switch back to builtin import
+        builtins.__import__ = realimport
         is_gpu_available()
-        torch.cuda.is_available.assert_called()
 
     @patch("eva.utils.generic_utils.ConfigurationManager")
     def test_should_return_a_random_full_path(self, mock_conf):
