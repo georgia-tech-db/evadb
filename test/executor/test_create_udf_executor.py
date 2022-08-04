@@ -21,13 +21,15 @@ from eva.executor.create_udf_executor import CreateUDFExecutor
 
 class CreateUdfExecutorTest(unittest.TestCase):
     @patch("eva.executor.create_udf_executor.CatalogManager")
-    def test_should_create_udf(self, mock):
+    @patch("eva.executor.create_udf_executor.path_to_class")
+    def test_should_create_udf(self, path_to_class_mock, mock):
         catalog_instance = mock.return_value
         catalog_instance.get_udf_by_name.return_value = None
         catalog_instance.create_udf.return_value = "udf"
         impl_path = MagicMock()
         abs_path = impl_path.absolute.return_value = MagicMock()
         abs_path.as_posix.return_value = "test.py"
+        path_to_class_mock.return_value.return_value = "mock_class"
         plan = type(
             "CreateUDFPlan",
             (),
