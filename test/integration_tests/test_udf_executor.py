@@ -71,7 +71,10 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [
-            {"myvideo.id": i * 2, "dummyobjectdetector.label": np.array(["person"])}
+            {
+                "myvideo.id": i * 2,
+                "dummyobjectdetector.label": np.array(["person"]),
+            }
             for i in range(NUM_FRAMES // 2)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -90,11 +93,17 @@ class UDFExecutorTest(unittest.TestCase):
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [
-            {"myvideo.id": i * 2, "dummyobjectdetector.label": np.array(["person"])}
+            {
+                "myvideo.id": i * 2,
+                "dummyobjectdetector.label": np.array(["person"]),
+            }
             for i in range(NUM_FRAMES // 2)
         ]
         expected += [
-            {"myvideo.id": i, "dummyobjectdetector.label": np.array(["bicycle"])}
+            {
+                "myvideo.id": i,
+                "dummyobjectdetector.label": np.array(["bicycle"]),
+            }
             for i in range(NUM_FRAMES)
             if i % 2 + 1 == 2
         ]
@@ -117,3 +126,33 @@ class UDFExecutorTest(unittest.TestCase):
         )[0]
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_create_udf(self):
+        udf_name = "DummyObjectDetector"
+        create_udf_query = """CREATE UDF {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        # Try to create duplicate UDF
+        actual = execute_query_fetch_all(create_udf_query.format(udf_name))
+        expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
+        self.assertEqual(actual, expected)
+
+        # Try to create UDF if not exists
+        actual = execute_query_fetch_all(
+            create_udf_query.format("IF NOT EXISTS " + udf_name)
+        )
+        expected = Batch(
+            pd.DataFrame([f"UDF {udf_name} already exists, nothing added."])
+        )
+        self.assertEqual(actual, expected)
+
+        # Try to create new UDF
+        new_udf = "TestUDF"
+        actual = execute_query_fetch_all(create_udf_query.format(new_udf))
+        expected = Batch(
+            pd.DataFrame([f"UDF {new_udf} successfully added to the database."])
+        )
+        self.assertEqual(actual, expected)

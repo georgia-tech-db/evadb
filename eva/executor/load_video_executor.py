@@ -64,12 +64,6 @@ class LoadVideoExecutor(AbstractExecutor):
         if success:
             yield Batch(
                 pd.DataFrame(
-                    {
-                        (
-                            "Video successfully added at location:"
-                            f"{str(self.node.file_path)}"
-                        )
-                    },
-                    index=[0],
+                    [f"Video successfully added at location: {video_file_path}"]
                 )
             )

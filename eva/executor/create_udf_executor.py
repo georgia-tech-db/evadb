@@ -37,12 +37,12 @@ class CreateUDFExecutor(AbstractExecutor):
         # check catalog if it already has this udf entry
         if catalog_manager.get_udf_by_name(self.node.name):
             if self.node.if_not_exists:
-                msg = f"UDF {self.node.name} already exists, not updated"
+                msg = f"UDF {self.node.name} already exists, nothing added."
                 logger.warn(msg)
                 yield Batch(pd.DataFrame([msg]))
                 return
             else:
-                msg = f"UDF {self.node.name} already exists"
+                msg = f"UDF {self.node.name} already exists."
                 logger.error(msg)
                 raise RuntimeError(msg)
         io_list = []
@@ -53,5 +53,5 @@ class CreateUDFExecutor(AbstractExecutor):
             self.node.name, impl_path, self.node.udf_type, io_list
         )
         yield Batch(
-            pd.DataFrame([f"UDF {self.node.name} successfully added to the database"])
+            pd.DataFrame([f"UDF {self.node.name} successfully added to the database."])
         )
