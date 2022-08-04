@@ -11,8 +11,6 @@ if [ $exit_status -ne 0 ]; then
 fi
 
 if git diff-index --quiet HEAD --; then
-    exit 0
-else
     echo "Code was reformatted. Please verify and stage the changes."
     echo "List of files updated."
     git --no-pager diff --name-only
