@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pytest
 from test.util import (
     create_dummy_batches,
     create_sample_video,
@@ -243,6 +244,7 @@ class SelectExecutorTest(unittest.TestCase):
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
 
+    @pytest.mark.torchtest
     def test_lateral_join(self):
         select_query = """SELECT id FROM MyVideo JOIN LATERAL
                         FastRCNNObjectDetector(data) WHERE id < 5;"""
@@ -250,6 +252,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
         self.assertEqual(actual_batch.batch_size, 5)
 
+    @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
         select_query = """SELECT id, labels FROM MyVideo JOIN LATERAL
                         FastRCNNObjectDetector(data) WHERE id < 5;"""
