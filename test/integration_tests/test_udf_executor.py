@@ -136,9 +136,10 @@ class UDFExecutorTest(unittest.TestCase):
                   IMPL  'test/util.py';
         """
         # Try to create duplicate UDF
-        actual = execute_query_fetch_all(create_udf_query.format(udf_name))
-        expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
-        self.assertEqual(actual, expected)
+        with self.assertRaises(RuntimeError):
+            actual = execute_query_fetch_all(create_udf_query.format(udf_name))
+            expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
+            self.assertEqual(actual, expected)
 
         # Try to create UDF if not exists
         actual = execute_query_fetch_all(
