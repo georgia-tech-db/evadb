@@ -64,7 +64,5 @@ class CreateUDFExecutor(AbstractExecutor):
             self.node.name, impl_path, self.node.udf_type, io_list
         )
         yield Batch(
-            pd.DataFrame(
-                [f"UDF {self.node.name} successfully added to the database."]
-            )
+            pd.DataFrame([f"UDF {self.node.name} successfully added to the database."])
         )

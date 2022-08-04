@@ -12,12 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import importlib
-import os
-from pathlib import Path
-import shutil
 import unittest
-from eva.binder.binder_utils import BinderError
 from test.util import (
     DummyObjectDetector,
     create_dummy_batches,
@@ -28,6 +23,7 @@ from test.util import (
 import numpy as np
 import pandas as pd
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -159,9 +155,7 @@ class UDFExecutorTest(unittest.TestCase):
         new_udf = "TestUDF"
         actual = execute_query_fetch_all(create_udf_query.format(new_udf))
         expected = Batch(
-            pd.DataFrame(
-                [f"UDF {new_udf} successfully added to the database."]
-            )
+            pd.DataFrame([f"UDF {new_udf} successfully added to the database."])
         )
         self.assertEqual(actual, expected)
 
