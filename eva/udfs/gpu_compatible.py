@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Protocol, runtime_checkable
+from abc import ABCMeta, abstractmethod
 
 
-@runtime_checkable
-class GPUCompatible(Protocol):
+class GPUCompatible(metaclass=ABCMeta):
+    @abstractmethod
     def to_device(self, device: str) -> object:
         """
         Implement this method to enable GPU for the function being executed.
@@ -26,4 +26,3 @@ class GPUCompatible(Protocol):
         Returns:
             A GPU compatible object
         """
-        ...
