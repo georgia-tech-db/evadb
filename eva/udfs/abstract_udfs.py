@@ -21,10 +21,9 @@ import pandas as pd
 from eva.models.catalog.frame_info import FrameInfo
 
 
-class AbstractClassifierUDF(metaclass=ABCMeta):
+class AbstractUDF(metaclass=ABCMeta):
     """
-    Abstract class for UDFs. All the UDFs which perform classification
-    inherit this calls.
+    Abstract class for UDFs. All the UDFs in EVA will inherit from this.
 
     Load and initialize the machine learning model in the __init__.
 
@@ -43,6 +42,8 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
     def name(self) -> str:
         pass
 
+
+class AbstractClassifierUDF(AbstractUDF):
     @property
     @abstractmethod
     def labels(self) -> List[str]:
@@ -67,3 +68,22 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
 
     def __call__(self, *args, **kwargs):
         return self.classify(*args, **kwargs)
+
+
+class AbstractTransformationUDF(AbstractUDF):
+    @abstractmethod
+    def transform(self, frames: np.ndarray) -> np.ndarray:
+        """
+        Takes as input a batch of frames and transforms them
+        by applying the frame transformation model.
+
+        Arguments:
+            frames (np.ndarray): Input batch of frames on which prediction
+            needs to be made
+
+        Returns:
+            np.ndarray: Transformed frames (output must have the same size as input)
+        """
+
+    def __call__(self, *args, **kwargs):
+        return self.transform(*args, **kwargs)
