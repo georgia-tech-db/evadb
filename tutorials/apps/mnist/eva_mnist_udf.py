@@ -1,13 +1,13 @@
 import pandas as pd
 from torch import Tensor
 import torch
-from eva.udfs.pytorch_abstract_udf import PytorchClassifierAbstractUDF
+from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from torchvision.transforms import Compose, ToTensor, Normalize, Grayscale
 
 
-class MnistCNN(PytorchClassifierAbstractUDF):
+class MnistCNN(PytorchAbstractClassifierUDF):
 
     @property
     def name(self) -> str:
