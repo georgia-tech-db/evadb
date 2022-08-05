@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
+from typing import Protocol, runtime_checkable
 
-
-class GPUCompatible(ABC):
-    @abstractmethod
+@runtime_checkable
+class GPUCompatible(Protocol):
     def to_device(self, device: str):
         """
         Implement this method to enable GPU for the function being executed.
@@ -26,3 +26,4 @@ class GPUCompatible(ABC):
         Returns:
             A GPU compatible object
         """
+        ...
