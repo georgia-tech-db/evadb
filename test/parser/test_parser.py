@@ -85,6 +85,18 @@ class ParserTests(unittest.TestCase):
         drop_stmt = eva_statement_list[0]
         self.assertEqual(drop_stmt, expected_stmt)
 
+    def test_drop_udf_statement(self):
+        parser = Parser()
+        drop_udf_query = """DROP UDF FastRCNN;"""
+
+        expected_stmt = DropUDFStatement("FastRCNN", False)
+        eva_statement_list = parser.parse(drop_udf_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_UDF)
+        drop_udf_stmt = eva_statement_list[0]
+        self.assertEqual(drop_udf_stmt, expected_stmt)
+
     def test_drop_udf_statement_str(self):
         drop_udf_query1 = """DROP UDF MyUDF;"""
         drop_udf_query2 = """DROP UDF IF EXISTS MyUDF;"""
