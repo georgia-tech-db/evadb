@@ -110,6 +110,5 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
         * For `latest`
 
 
-## Credit
-* [AllenNLP](https://github.com/allenai/allennlp/blob/master/setup.py)
-* [Altair](https://github.com/altair-viz/altair/blob/master/RELEASING.md)
+## Credits
+* [Snorkel](https://github.com/snorkel-team/snorkel/blob/main/RELEASING.md)
