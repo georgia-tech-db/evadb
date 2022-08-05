@@ -67,7 +67,7 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, Unnest_udf_query, ArrayCount_udf_query]
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query]
     if mode == "debug":
         queries.extend(
             [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]

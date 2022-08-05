@@ -23,6 +23,7 @@ from test.util import (
 import numpy as np
 import pandas as pd
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
@@ -71,7 +72,10 @@ class UDFExecutorTest(unittest.TestCase):
             WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [
-            {"myvideo.id": i * 2, "dummyobjectdetector.label": np.array(["person"])}
+            {
+                "myvideo.id": i * 2,
+                "dummyobjectdetector.label": np.array(["person"]),
+            }
             for i in range(NUM_FRAMES // 2)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -90,11 +94,17 @@ class UDFExecutorTest(unittest.TestCase):
             ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected = [
-            {"myvideo.id": i * 2, "dummyobjectdetector.label": np.array(["person"])}
+            {
+                "myvideo.id": i * 2,
+                "dummyobjectdetector.label": np.array(["person"]),
+            }
             for i in range(NUM_FRAMES // 2)
         ]
         expected += [
-            {"myvideo.id": i, "dummyobjectdetector.label": np.array(["bicycle"])}
+            {
+                "myvideo.id": i,
+                "dummyobjectdetector.label": np.array(["bicycle"]),
+            }
             for i in range(NUM_FRAMES)
             if i % 2 + 1 == 2
         ]
@@ -117,3 +127,48 @@ class UDFExecutorTest(unittest.TestCase):
         )[0]
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
+
+    def test_create_udf(self):
+        udf_name = "DummyObjectDetector"
+        create_udf_query = """CREATE UDF {}
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        # Try to create duplicate UDF
+        with self.assertRaises(RuntimeError):
+            actual = execute_query_fetch_all(create_udf_query.format(udf_name))
+            expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
+            self.assertEqual(actual, expected)
+
+        # Try to create UDF if not exists
+        actual = execute_query_fetch_all(
+            create_udf_query.format("IF NOT EXISTS " + udf_name)
+        )
+        expected = Batch(
+            pd.DataFrame([f"UDF {udf_name} already exists, nothing added."])
+        )
+        self.assertEqual(actual, expected)
+
+    def test_should_raise_using_missing_udf(self):
+        select_query = "SELECT id,DummyObjectDetector1(data) FROM MyVideo \
+            ORDER BY id;"
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(select_query)
+
+        err_msg = (
+            "UDF with name DummyObjectDetector1 does not exist in the catalog. "
+            "Please create the UDF using CREATE UDF command."
+        )
+        self.assertEqual(str(cm.exception), err_msg)
+
+    def test_should_raise_for_udf_name_mismatch(self):
+        create_udf_query = """CREATE UDF TestUDF
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+        with self.assertRaises(RuntimeError):
+            execute_query_fetch_all(create_udf_query)
