@@ -97,7 +97,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         """
         return val.detach().cpu().numpy()
 
-    def to_device(self, device: str) -> object:
+    def to_device(self, device: str) -> GPUCompatible:
         """
         Required to make class a member of GPUCompatible Protocol.
         """

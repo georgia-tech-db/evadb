@@ -13,11 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
+from typing import TypeVar
+
+
+GPUCompatible = TypeVar("GPUCompatible")
 
 
 class GPUCompatible(metaclass=ABCMeta):
     @abstractmethod
-    def to_device(self, device: str) -> object:
+    def to_device(self, device: str) -> GPUCompatible:
         """
         Implement this method to enable GPU for the function being executed.
         Arguments:
