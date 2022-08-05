@@ -14,8 +14,10 @@
 # limitations under the License.
 from cmd import Cmd
 from contextlib import ExitStack
-from os import path
+import os
+import io
 from readline import read_history_file, set_history_length, write_history_file
+from typing import Dict
 
 from eva.server.db_api import connect
 
@@ -30,7 +32,7 @@ class EvaCommandInterpreter(Cmd):
 
     def preloop(self):
         # To retain command history across multiple client sessions
-        if path.exists(histfile):
+        if os.path.exists(histfile):
             read_history_file(histfile)
 
     def postloop(self):
@@ -67,6 +69,18 @@ class EvaCommandInterpreter(Cmd):
         return False
 
 
+def read(path, encoding="utf-8"):
+    path = os.path.join(os.path.dirname(__file__), path)
+    with io.open(path, encoding=encoding) as fp:
+        return fp.read()
+
+
+# version.py defines the VERSION and VERSION_SHORT variables
+VERSION_DICT: Dict[str, str] = {}
+with open("eva/version.py", "r") as version_file:
+    exec(version_file.read(), VERSION_DICT)
+
+
 def handle_user_input(connection):
     """
     Reads from stdin in separate thread
@@ -81,7 +95,9 @@ def handle_user_input(connection):
 
     prompt.set_connection(connection)
 
-    prompt.cmdloop('eva (v 0.0.1)\nType "help" for help')
+    VERSION = VERSION_DICT["VERSION"]
+
+    prompt.cmdloop('eva (v ' + VERSION + ')\nType "help" for help')
 
 
 def start_cmd_client(host: str, port: int):

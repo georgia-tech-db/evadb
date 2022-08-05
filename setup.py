@@ -76,6 +76,11 @@ benchmark_libs = [
 doc_libs = [
 ]
 
+dist_libs = [
+    "wheel==0.37.1",
+    "scriv==0.16.0"
+]
+
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
 database_libs = [
     "pymysql==0.10.1"
@@ -92,6 +97,7 @@ DEV_REQUIRES = (
     + benchmark_libs
     + doc_libs
     + database_libs
+    + dist_libs
 )
 
 EXTRA_REQUIRES = {

@@ -18,6 +18,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
 
@@ -37,21 +38,31 @@ class CreateUDFExecutor(AbstractExecutor):
         # check catalog if it already has this udf entry
         if catalog_manager.get_udf_by_name(self.node.name):
             if self.node.if_not_exists:
-                msg = f"UDF {self.node.name} already exists, not updated"
+                msg = f"UDF {self.node.name} already exists, nothing added."
                 logger.warn(msg)
                 yield Batch(pd.DataFrame([msg]))
                 return
             else:
-                msg = f"UDF {self.node.name} already exists"
+                msg = f"UDF {self.node.name} already exists."
                 logger.error(msg)
                 raise RuntimeError(msg)
         io_list = []
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
         impl_path = self.node.impl_path.absolute().as_posix()
+        # check if we can create the udf object
+        try:
+            path_to_class(impl_path, self.node.name)()
+        except Exception as e:
+            err_msg = (
+                f"{str(e)}. Please verify that the UDF class name in the "
+                f"implementation file matches the provided UDF name {self.node.name}."
+            )
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
         catalog_manager.create_udf(
             self.node.name, impl_path, self.node.udf_type, io_list
         )
         yield Batch(
-            pd.DataFrame([f"UDF {self.node.name} successfully added to the database"])
+            pd.DataFrame([f"UDF {self.node.name} successfully added to the database."])
         )

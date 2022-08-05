@@ -158,6 +158,21 @@ class StatementBinderTests(unittest.TestCase):
         )
         self.assertEqual(func_expr.function, "path_to_class")
 
+        # Raise error if the class object cannot be created
+        mock_path_to_class.reset_mock()
+        mock_error_msg = "mock_path_to_class_error"
+        mock_path_to_class.side_effect = MagicMock(
+            side_effect=RuntimeError(mock_error_msg)
+        )
+        binder = StatementBinder(StatementBinderContext())
+        with self.assertRaises(BinderError) as cm:
+            binder._bind_func_expr(func_expr)
+        err_msg = (
+            f"{mock_error_msg}. Please verify that the UDF class name in the"
+            "implementation file matches the UDF name."
+        )
+        self.assertEqual(str(cm.exception), err_msg)
+
     def test_bind_select_statement(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
@@ -206,7 +221,9 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_any_call(load_statement.table_ref)
             mock_create.assert_any_call("table_name")
             mock_tve.assert_called_with(
-                col_name=column.name, table_alias="table_alias", col_object=column
+                col_name=column.name,
+                table_alias="table_alias",
+                col_object=column,
             )
             mock_binder.assert_any_call(tve_return_value)
             self.assertEqual(load_statement.column_list, [tve_return_value])
