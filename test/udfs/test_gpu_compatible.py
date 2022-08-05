@@ -12,18 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Protocol, runtime_checkable
+import unittest
+
+from eva.udfs.gpu_compatible import GPUCompatible
 
 
-@runtime_checkable
-class GPUCompatible(Protocol):
+class GPUCompatibleExample:
     def to_device(self, device: str) -> object:
-        """
-        Implement this method to enable GPU for the function being executed.
-        Arguments:
-            device (str): device details
+        return self
 
-        Returns:
-            A GPU compatible object
-        """
-        ...
+
+class GPUCompatibleTest(unittest.TestCase):
+    def test_is_member_of_protocol(self):
+        gpu_compat = GPUCompatibleExample()
+        assert isinstance(gpu_compat, GPUCompatible)

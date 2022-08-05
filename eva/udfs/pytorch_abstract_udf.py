@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List
 
 import numpy as np
@@ -27,7 +27,7 @@ from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
+class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
     """
     A pytorch based classifier. Used to make sure we make maximum
     utilization of features provided by pytorch without reinventing the wheel.
