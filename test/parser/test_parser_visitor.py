@@ -239,10 +239,11 @@ class ParserVisitorTests(unittest.TestCase):
             "ANYTYPE": NdArrayType.ANYTYPE,
         }
 
-        def _mock_set_attr(ctx, correct_attr):
+        def _mock_set_attr(ctx, correct_attr=None):
             for attr in attr_list.keys():
                 setattr(ctx, attr, lambda: None)
-            setattr(ctx, correct_attr, lambda: True)
+            if correct_attr:
+                setattr(ctx, correct_attr, lambda: True)
 
         ctx = MagicMock(return_value=None)
         visitor = ParserVisitor()
@@ -250,6 +251,13 @@ class ParserVisitorTests(unittest.TestCase):
             _mock_set_attr(ctx, attr)
             expected = visitor.visitArrayType(ctx)
             self.assertEqual(expected, attr_list[attr])
+
+        _mock_set_attr(ctx)
+        with self.assertRaises(RuntimeError) as cm:
+            visitor.visitArrayType(ctx)
+        self.assertEqual(
+            str(cm.exception), "Unsupported NdArray datatype found in the query"
+        )
 
     def test_visit_query_specification_base_exception(self):
         """Testing Base Exception error handling
