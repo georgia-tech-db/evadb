@@ -23,7 +23,8 @@ DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   IMPL  'test/util.py';
         """
 
-DummyMultiObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS  DummyMultiObjectDetector
+DummyMultiObjectDetector_udf_query = """CREATE UDF 
+                  IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification

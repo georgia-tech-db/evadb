@@ -100,7 +100,8 @@ class MaterializedViewTest(unittest.TestCase):
     def test_should_mat_view_with_fastrcnn(self):
         select_query = """SELECT id, FastRCNNObjectDetector(data).labels
                             FROM UATRAC WHERE id < 5;"""
-        query = """CREATE MATERIALIZED VIEW IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
+        query = """CREATE MATERIALIZED VIEW 
+                   IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
         AS {}""".format(
             select_query
         )
