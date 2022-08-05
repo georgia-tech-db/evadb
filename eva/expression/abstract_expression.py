@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from enum import IntEnum, unique, auto
-
-from eva.utils import generic_utils
+from enum import IntEnum, auto, unique
 
 
 @unique
@@ -65,17 +63,15 @@ class ExpressionReturnType(IntEnum):
 
 
 class AbstractExpression(ABC):
-
-    def __init__(self, exp_type: ExpressionType, **kwargs):
-        allowed_kwargs = {
-            'rtype',
-            'children'
-        }
-        generic_utils.validate_kwargs(kwargs, allowed_kwargs)
+    def __init__(
+        self,
+        exp_type: ExpressionType,
+        rtype: ExpressionReturnType = ExpressionReturnType.INVALID,
+        children=None,
+    ):
         self._etype = exp_type
-        self._rtype = kwargs.get('rtype', ExpressionReturnType.INVALID)
-        self._children = kwargs.get('children', [])
-        self._predicates = []
+        self._rtype = rtype
+        self._children = children or []
 
     def get_child(self, index: int):
         if index < 0 or index >= len(self._children):
@@ -102,23 +98,12 @@ class AbstractExpression(ABC):
         self._etype = expr_type
 
     @property
-    # def predicates(self) -> List[Predicate]:
-    def predicates(self):
-        return self._predicates
+    def rtype(self) -> ExpressionReturnType:
+        return self._rtype
 
-    def clear_predicates(self):
-        self._predicates.clear()
-
-    def get_predicate_count(self) -> int:
-        return len(self._predicates)
-
-    @property
-    def return_type(self) -> ExpressionReturnType:
-        return self._return_type
-
-    @return_type.setter
-    def return_type(self, return_type: ExpressionReturnType):
-        self._return_type = return_type
+    @rtype.setter
+    def r_type(self, rtype: ExpressionReturnType):
+        self._rtype = rtype
 
     # todo define a generic return type for this function
     # not sure if we should keep tuple1, tuple2 explicitly
@@ -127,7 +112,7 @@ class AbstractExpression(ABC):
     # refactor if need be
     @abstractmethod
     def evaluate(self, *args, **kwargs):
-        NotImplementedError('Must be implemented in subclasses.')
+        NotImplementedError("Must be implemented in subclasses.")
 
     def __eq__(self, other):
         is_subtree_equal = True
@@ -138,3 +123,6 @@ class AbstractExpression(ABC):
         for child1, child2 in zip(self.children, other.children):
             is_subtree_equal = is_subtree_equal and (child1 == child2)
         return is_subtree_equal
+
+    def __hash__(self) -> int:
+        return hash((self.etype, self.rtype, tuple(self.children)))

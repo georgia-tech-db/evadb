@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,28 +18,31 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
-from eva.utils.logging_manager import LoggingManager, LoggingLevel
+from eva.utils.logging_manager import logger
 
 
 class DatasetService(BaseService):
     def __init__(self):
         super().__init__(DataFrameMetadata)
 
-    def create_dataset(self, name, file_url,
-                       identifier_id='id') -> DataFrameMetadata:
+    def create_dataset(
+        self, name, file_url, identifier_id="id", is_video=False
+    ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
             name (str): name of the dataset
             file_url (str): file path of the dataset.
-
+            is_video (bool): True if the table is a video
         Returns:
             DataFrameMetadata object
         """
         metadata = self.model(
             name=name,
             file_url=file_url,
-            identifier_id=identifier_id)
+            identifier_id=identifier_id,
+            is_video=is_video,
+        )
         metadata = metadata.save()
         return metadata
 
@@ -54,14 +57,14 @@ class DatasetService(BaseService):
             int (dataset id)
         """
         try:
-            result = self.model.query \
-                .with_entities(self.model._id) \
-                .filter(self.model._name == name).one()
+            result = (
+                self.model.query.with_entities(self.model._id)
+                .filter(self.model._name == name)
+                .one()
+            )
             return result[0]
         except NoResultFound:
-            LoggingManager().log(
-                "get_id_from_name failed with name {}".format(name),
-                LoggingLevel.ERROR)
+            logger.error("get_id_from_name failed with name {}".format(name))
 
     def dataset_by_id(self, dataset_id) -> DataFrameMetadata:
         """
@@ -71,12 +74,11 @@ class DatasetService(BaseService):
         Returns:
            DataFrameMetadata
         """
-        return self.model.query \
-            .filter(self.model._id == dataset_id) \
-            .one()
+        return self.model.query.filter(self.model._id == dataset_id).one()
 
-    def dataset_object_by_name(self, database_name, dataset_name,
-                               column_name: List[str] = None):
+    def dataset_object_by_name(
+        self, database_name, dataset_name, column_name: List[str] = None
+    ):
         """
         Get the metadata for the given table.
         Arguments:
@@ -89,22 +91,36 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata - metadata for given dataset_name
         """
-        return self.model.query.filter(
-            self.model._name == dataset_name).one_or_none()
+        return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
-    def delete_dataset_by_id(self, metadata_id: int) -> bool:
-        """ Delete dataset from the db
-            Arguments:
-                metadata_id(int): id to be removed
-            Returns:
-                True if successfully removed else false
+    def drop_dataset_by_name(self, database_name: str, dataset_name: str):
+        """Delete dataset from the db
+        Arguments:
+            database_name  (str): Database to which dataset belongs
+            dataset_name (str): name of the dataset
+        Returns:
+            True if successfully removed else false
         """
         try:
-            dataset = self.dataset_by_id(metadata_id)
+            dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
-        except Exception:
-            LoggingManager().log(
-                "detele datset failed with id {}".format(metadata_id),
-                LoggingLevel.ERROR)
-            return False
-        return True
+        except Exception as e:
+            err_msg = "Delete dataset failed for name {} with error {}".format(
+                dataset_name, str(e)
+            )
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
+
+    def rename_dataset_by_name(
+        self, new_name: str, curr_database_name: str, curr_dataset_name: str
+    ):
+        try:
+            dataset = self.dataset_object_by_name(curr_database_name, curr_dataset_name)
+            dataset.update(_name=new_name)
+
+        except Exception as e:
+            err_msg = "Update dataset name failed for {} with error {}".format(
+                curr_dataset_name, str(e)
+            )
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)

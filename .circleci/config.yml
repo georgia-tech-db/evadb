@@ -9,16 +9,16 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "setup.cfg" }}
+            - v1-dependencies-{{ checksum "setup.py" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: Install Package
+          name: Install EVA package with test dependencies
           command: |
-            python -m venv env37
-            . env37/bin/activate
+            python -m venv eva_dev_env
+            . eva_dev_env/bin/activate
             pip install --upgrade pip
-            python setup.py install 
+            pip install ".[dev]"
 
       - run:
           name: Generate Parser Files
@@ -28,15 +28,9 @@ jobs:
             sh script/antlr4/generate_parser.sh
 
       - run:
-          name: Install Test Dependencies
-          command: |
-            . env37/bin/activate
-            pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1
-
-      - run:
           name: Test
           command: |
-            . env37/bin/activate
+            . eva_dev_env/bin/activate
             sh script/test/test.sh
             coveralls
 

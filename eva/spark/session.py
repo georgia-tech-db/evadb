@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from pyspark.sql import SparkSession
 from pyspark.conf import SparkConf
+from pyspark.sql import SparkSession
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.utils.logging_manager import LoggingManager
 
 
 class Session(object):
@@ -36,7 +33,7 @@ class Session(object):
 
     def __init__(self):
         self._config = ConfigurationManager()
-        name = self._config.get_value('core', 'application')
+        name = self._config.get_value("core", "application")
         self.init_spark_session(name)
 
     def init_spark_session(self, application_name, spark_master=None):
@@ -51,14 +48,13 @@ class Session(object):
         """
 
         eva_spark_conf = SparkConf()
-        pyspark_config = self._config.get_value('pyspark', 'property')
+        pyspark_config = self._config.get_value("pyspark", "property")
         for key, value in pyspark_config.items():
             eva_spark_conf.set(key, value)
 
-        session_builder = SparkSession \
-            .builder \
-            .appName(application_name) \
-            .config(conf=eva_spark_conf)
+        session_builder = SparkSession.builder.appName(application_name).config(
+            conf=eva_spark_conf
+        )
 
         if spark_master:
             session_builder.master(spark_master)
@@ -69,9 +65,8 @@ class Session(object):
         self._session = session_builder.getOrCreate()
 
         # Configure logging
-        log4j_level = LoggingManager().getLog4JLevel()
         spark_context = self._session.sparkContext
-        spark_context.setLogLevel(log4j_level)
+        spark_context.setLogLevel("OFF")
 
     def get_session(self):
         return self._session

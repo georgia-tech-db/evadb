@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -32,13 +33,17 @@ class StoragePlan(AbstractPlan):
         curr_shard (int): current curr_shard if data is sharded
     """
 
-    def __init__(self, video: DataFrameMetadata,
-                 batch_mem_size: int,
-                 skip_frames: int = 0,
-                 offset: int = None,
-                 limit: int = None,
-                 total_shards: int = 0,
-                 curr_shard: int = 0):
+    def __init__(
+        self,
+        video: DataFrameMetadata,
+        batch_mem_size: int,
+        skip_frames: int = 0,
+        offset: int = None,
+        limit: int = None,
+        total_shards: int = 0,
+        curr_shard: int = 0,
+        predicate: AbstractExpression = None,
+    ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._video = video
         self._batch_mem_size = batch_mem_size
@@ -47,6 +52,7 @@ class StoragePlan(AbstractPlan):
         self._limit = limit
         self._total_shards = total_shards
         self._curr_shard = curr_shard
+        self._predicate = predicate
 
     @property
     def video(self):
@@ -75,3 +81,22 @@ class StoragePlan(AbstractPlan):
     @property
     def curr_shard(self):
         return self._curr_shard
+
+    @property
+    def predicate(self):
+        return self._predicate
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.video,
+                self.batch_mem_size,
+                self.skip_frames,
+                self.offset,
+                self.limit,
+                self.total_shards,
+                self.curr_shard,
+                self.predicate,
+            )
+        )

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,39 +14,60 @@
 # limitations under the License.
 
 import unittest
-from mock import patch, MagicMock
 from pathlib import Path
 
-from eva.utils.generic_utils import (str_to_class, path_to_class,
-                                     is_gpu_available, generate_file_path)
+from mock import MagicMock, patch
+
 from eva.readers.opencv_reader import OpenCVReader
+from eva.utils.generic_utils import (
+    generate_file_path,
+    is_gpu_available,
+    path_to_class,
+    str_to_class,
+)
 
 
 class ModulePathTest(unittest.TestCase):
-
     def test_should_return_correct_class_for_string(self):
-        vl = str_to_class('eva.readers.opencv_reader.OpenCVReader')
+        vl = str_to_class("eva.readers.opencv_reader.OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    @unittest.skip('This returns opecv_reader.OpenCVReader \
-                   instead of eva.readers.opencv_reader.OpenCVReader')
+    @unittest.skip(
+        "This returns opecv_reader.OpenCVReader \
+                   instead of eva.readers.opencv_reader.OpenCVReader"
+    )
     def test_should_return_correct_class_for_path(self):
-        vl = path_to_class('eva/readers/opencv_reader.py', 'OpenCVReader')
+        vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
-    @patch('eva.utils.generic_utils.torch')
-    def test_should_use_torch_to_check_if_gpu_is_available(self,
-                                                           torch):
-        is_gpu_available()
-        torch.cuda.is_available.assert_called()
+    def test_should_use_torch_to_check_if_gpu_is_available(self):
+        # Emulate a missing import
+        # Ref: https://stackoverflow.com/a/2481588
+        try:
+            import builtins
+        except ImportError:
+            import __builtin__ as builtins
+        realimport = builtins.__import__
 
-    @patch('eva.utils.generic_utils.ConfigurationManager')
-    def test_should_return_a_randon_full_path(self, mock_conf):
+        def missing_import(name, globals, locals, fromlist, level):
+            if name == "torch":
+                raise ImportError
+            return realimport(name, globals, locals, fromlist, level)
+
+        builtins.__import__ = missing_import
+        self.assertFalse(is_gpu_available())
+
+        # Switch back to builtin import
+        builtins.__import__ = realimport
+        is_gpu_available()
+
+    @patch("eva.utils.generic_utils.ConfigurationManager")
+    def test_should_return_a_random_full_path(self, mock_conf):
         mock_conf_inst = MagicMock()
         mock_conf.return_value = mock_conf_inst
-        mock_conf_inst.get_value.return_value = 'eva_datasets'
-        expected = Path('eva_datasets').resolve()
-        actual = generate_file_path('test')
+        mock_conf_inst.get_value.return_value = "eva_datasets"
+        expected = Path("eva_datasets").resolve()
+        actual = generate_file_path("test")
         self.assertTrue(actual.is_absolute())
         # Root directory must be the same, filename is random
         self.assertTrue(expected.match(str(actual.parent)))

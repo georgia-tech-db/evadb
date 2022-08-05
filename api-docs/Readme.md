@@ -1,5 +1,5 @@
-## EVA Documentation
-Run the following commands from this directory to compile the documentation. Note that eva must be already installed.
+## EVA Read-the-Docs Documentation
+Run the following commands from this directory to compile the documentation.
 
 ```
 pip install -r requirements.txt

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from abc import ABC
-from eva.planner.types import PlanOprType
 from typing import List
+
+from eva.planner.types import PlanOprType
 
 
 class AbstractPlan(ABC):
-
     def __init__(self, opr_type):
         self._children = []
         self._parent = None
@@ -44,7 +42,7 @@ class AbstractPlan(ABC):
         return self._parent
 
     @parent.setter
-    def parent(self, node: 'AbstractPlan'):
+    def parent(self, node: "AbstractPlan"):
         """sets parent of current node
 
         Arguments:
@@ -55,13 +53,8 @@ class AbstractPlan(ABC):
         self._parent = node
 
     @property
-    def children(self) -> List['AbstractPlan']:
-        """returns children list of current node
-
-        Returns:
-            List[AbstractPlan] -- children list
-        """
-        return self._children[:]
+    def children(self) -> List["AbstractPlan"]:
+        return self._children
 
     @property
     def opr_type(self) -> PlanOprType:
@@ -73,11 +66,22 @@ class AbstractPlan(ABC):
         """
         return self._opr_type
 
-    def __str__(self, level=0):
-        out_string = "\t" * level + '' + "\n"
-        for child in self.children:
-            out_string += child.__str__(level + 1)
-        return out_string
+    def clear_children(self):
+        self.children.clear()
 
     def is_logical(self):
         return False
+
+    def __hash__(self) -> int:
+        return hash(self.opr_type)
+
+    def __copy__(self):
+        # deepcopy the children
+        cls = self.__class__
+        result = cls.__new__(cls)
+        for k, v in self.__dict__.items():
+            if k == "_children":
+                setattr(result, k, [])
+            else:
+                setattr(result, k, v)
+        return result

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
 # limitations under the License.
 import numpy as np
 import pandas as pd
-
-from petastorm.codecs import NdarrayCodec
-from petastorm.codecs import ScalarCodec
-from petastorm.unischema import Unischema
-from petastorm.unischema import UnischemaField
-from pyspark.sql.types import IntegerType, FloatType, StringType
+from petastorm.codecs import NdarrayCodec, ScalarCodec
+from petastorm.unischema import Unischema, UnischemaField
+from pyspark.sql.types import FloatType, IntegerType, StringType
 
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
+from eva.utils.logging_manager import logger
 
 
 class SchemaUtils(object):
-
     @staticmethod
     def get_petastorm_column(df_column):
 
@@ -43,33 +38,36 @@ class SchemaUtils(object):
 
         petastorm_column = None
         if column_type == ColumnType.INTEGER:
-            petastorm_column = UnischemaField(column_name,
-                                              np.int32,
-                                              (),
-                                              ScalarCodec(IntegerType()),
-                                              column_is_nullable)
+            petastorm_column = UnischemaField(
+                column_name,
+                np.int32,
+                (),
+                ScalarCodec(IntegerType()),
+                column_is_nullable,
+            )
         elif column_type == ColumnType.FLOAT:
-            petastorm_column = UnischemaField(column_name,
-                                              np.float64,
-                                              (),
-                                              ScalarCodec(FloatType()),
-                                              column_is_nullable)
+            petastorm_column = UnischemaField(
+                column_name,
+                np.float64,
+                (),
+                ScalarCodec(FloatType()),
+                column_is_nullable,
+            )
         elif column_type == ColumnType.TEXT:
-            petastorm_column = UnischemaField(column_name,
-                                              np.str_,
-                                              (),
-                                              ScalarCodec(StringType()),
-                                              column_is_nullable)
+            petastorm_column = UnischemaField(
+                column_name, np.str_, (), ScalarCodec(StringType()), column_is_nullable
+            )
         elif column_type == ColumnType.NDARRAY:
             np_type = NdArrayType.to_numpy_type(column_array_type)
-            petastorm_column = UnischemaField(column_name,
-                                              np_type,
-                                              column_array_dimensions,
-                                              NdarrayCodec(),
-                                              column_is_nullable)
+            petastorm_column = UnischemaField(
+                column_name,
+                np_type,
+                column_array_dimensions,
+                NdarrayCodec(),
+                column_is_nullable,
+            )
         else:
-            LoggingManager().log("Invalid column type: " + str(column_type),
-                                 LoggingLevel.ERROR)
+            logger.error("Invalid column type: " + str(column_type))
 
         return petastorm_column
 
@@ -84,8 +82,7 @@ class SchemaUtils(object):
         return petastorm_schema
 
     @staticmethod
-    def petastorm_type_cast(schema: Unischema, df: pd.DataFrame) \
-            -> pd.DataFrame:
+    def petastorm_type_cast(schema: Unischema, df: pd.DataFrame) -> pd.DataFrame:
         """
         Try to cast the type if schema defined in UnischemeField for
         Petastorm is not consistent with panda DataFrame provided.
@@ -99,7 +96,5 @@ class SchemaUtils(object):
             try:
                 df[col] = df[col].apply(lambda x: x.astype(dtype, copy=False))
             except Exception:
-                LoggingManager().exception(
-                    'Failed to cast %s to %s for Petastorm' % (col, dtype)
-                )
+                logger.exception("Failed to cast %s to %s for Petastorm" % (col, dtype))
         return df

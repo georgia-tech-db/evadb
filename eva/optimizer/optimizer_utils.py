@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,157 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from typing import List, Tuple
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.expression.function_expression import FunctionExpression
-from eva.parser.table_ref import TableInfo
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType
-
-from eva.expression.abstract_expression import AbstractExpression
-from eva.expression.tuple_value_expression import ExpressionType, \
-    TupleValueExpression
-
-from eva.parser.create_statement import ColumnDefinition, \
-    ColConstraintInfo
-from eva.utils.generic_utils import path_to_class, generate_file_path
-
-from eva.utils.logging_manager import LoggingLevel
-from eva.utils.logging_manager import LoggingManager
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.expression.expression_utils import (
+    conjuction_list_to_expression_tree,
+    contains_single_column,
+    expression_tree_to_conjunction_list,
+    is_simple_predicate,
+)
+from eva.parser.create_statement import ColumnDefinition
+from eva.utils.logging_manager import logger
 
 
-def bind_dataset(video_info: TableInfo) -> DataFrameMetadata:
-    """
-    Uses catalog to bind the dataset information for given video string.
-
-    Arguments:
-         video_info (TableInfo): video information obtained in SQL query
-
-    Returns:
-        DataFrameMetadata  -  corresponding metadata for the input table info
-    """
-    catalog = CatalogManager()
-    return catalog.get_dataset_metadata(video_info.database_name,
-                                        video_info.table_name)
-
-
-def bind_table_ref(video_info: TableInfo) -> int:
-    """Grab the metadata id from the catalog for
-    input video
-
-    Arguments:
-        video_info {TableInfo} -- [input parsed video info]
-    Return:
-        catalog_entry for input table
-    """
-
-    catalog = CatalogManager()
-    catalog_entry_id, _ = catalog.get_table_bindings(video_info.database_name,
-                                                     video_info.table_name,
-                                                     None)
-    return catalog_entry_id
-
-
-def bind_columns_expr(target_columns: List[AbstractExpression],
-                      column_mapping):
-    if target_columns is None:
-        return
-
-    for column_exp in target_columns:
-        child_count = column_exp.get_children_count()
-        for i in range(child_count):
-            bind_columns_expr([column_exp.get_child(i)], column_mapping)
-
-        if column_exp.etype == ExpressionType.TUPLE_VALUE:
-            bind_tuple_value_expr(column_exp, column_mapping)
-        if column_exp.etype == ExpressionType.FUNCTION_EXPRESSION:
-            bind_function_expr(column_exp, column_mapping)
-
-
-def bind_tuple_value_expr(expr: TupleValueExpression, column_mapping):
-    if not column_mapping:
-        # TODO: Remove this and bring uniform interface throughout the system.
-        _old_bind_tuple_value_expr(expr)
-        return
-
-    expr.col_object = column_mapping.get(expr.col_name.lower(), None)
-
-
-def _old_bind_tuple_value_expr(expr):
-    """
-    NOTE: No tests for this  should be combined with latest interface
-    """
-    catalog = CatalogManager()
-    table_id, column_ids = catalog.get_table_bindings(None,
-                                                      expr.table_name,
-                                                      [expr.col_name])
-    expr.table_metadata_id = table_id
-    if not isinstance(column_ids, list) or len(column_ids) == 0:
-        LoggingManager().log(
-            "Optimizer Utils:: bind_tuple_expr: \
-            Cannot bind column name provided", LoggingLevel.ERROR)
-    expr.col_metadata_id = column_ids.pop()
-
-
-def bind_predicate_expr(predicate: AbstractExpression, column_mapping):
-    # This function will be expanded as we add support for
-    # complex predicate expressions and sub select predicates
-
-    child_count = predicate.get_children_count()
-    for i in range(child_count):
-        bind_predicate_expr(predicate.get_child(i), column_mapping)
-
-    if predicate.etype == ExpressionType.TUPLE_VALUE:
-        bind_tuple_value_expr(predicate, column_mapping)
-
-    if predicate.etype == ExpressionType.FUNCTION_EXPRESSION:
-        bind_function_expr(predicate, column_mapping)
-
-
-def bind_function_expr(expr: FunctionExpression, column_mapping):
-    catalog = CatalogManager()
-    udf_obj = catalog.get_udf_by_name(expr.name)
-    # bind if the user queried a physical functional expression
-    if udf_obj:
-        if expr.output:
-            expr.output_obj = catalog.get_udf_io_by_name(udf_obj, expr.output)
-            if expr.output_obj is None:
-                LoggingManager().log(
-                    'Invalid output {} selected for UDF {}'.format(
-                        expr.output, expr.name), LoggingLevel().ERROR)
-        expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
-
-
-def create_column_metadata(col_list: List[ColumnDefinition]):
-    """Create column metadata for the input parsed column list. This function
-    will not commit the provided column into catalog table.
-    Will only return in memory list of ColumnDataframe objects
-
-    Arguments:
-        col_list {List[ColumnDefinition]} -- parsed col list to be created
-    """
-    if isinstance(col_list, ColumnDefinition):
-        col_list = [col_list]
-
-    result_list = []
-    for col in col_list:
-        if col is None:
-            LoggingManager().log(
-                "Empty column while creating column metadata",
-                LoggingLevel.ERROR)
-            result_list.append(col)
-        result_list.append(
-            CatalogManager().create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension
-            )
-        )
-
-    return result_list
-
-
-def column_definition_to_udf_io(
-        col_list: List[ColumnDefinition], is_input: bool):
+def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
     """Create the UdfIO object fro each column definition provided
 
     Arguments:
@@ -175,44 +39,83 @@ def column_definition_to_udf_io(
     result_list = []
     for col in col_list:
         if col is None:
-            LoggingManager().log(
-                "Empty column definition while creating udf io",
-                LoggingLevel.ERROR)
+            logger.error("Empty column definition while creating udf io")
             result_list.append(col)
         result_list.append(
-            CatalogManager().udf_io(col.name, col.type,
-                                    array_type=col.array_type,
-                                    dimensions=col.dimension,
-                                    is_input=is_input)
+            CatalogManager().udf_io(
+                col.name,
+                col.type,
+                array_type=col.array_type,
+                dimensions=col.dimension,
+                is_input=is_input,
+            )
         )
     return result_list
 
 
-def create_video_metadata(name: str) -> DataFrameMetadata:
-    """Create video metadata object.
-        We have predefined columns for such a object
-        id:  the frame id
-        data: the frame data
+def extract_equi_join_keys(
+    join_predicate: AbstractExpression,
+    left_table_aliases: List[str],
+    right_table_aliases: List[str],
+) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
 
-    Arguments:
-        name (str): name of the metadata to be added to the catalog
+    pred_list = expression_tree_to_conjunction_list(join_predicate)
+    left_join_keys = []
+    right_join_keys = []
+    for pred in pred_list:
+        if pred.etype == ExpressionType.COMPARE_EQUAL:
+            left_child = pred.children[0]
+            right_child = pred.children[1]
+            # only extract if both are TupleValueExpression
+            if (
+                left_child.etype == ExpressionType.TUPLE_VALUE
+                and right_child.etype == ExpressionType.TUPLE_VALUE
+            ):
+                if (
+                    left_child.table_alias in left_table_aliases
+                    and right_child.table_alias in right_table_aliases
+                ):
+                    left_join_keys.append(left_child)
+                    right_join_keys.append(right_child)
+                elif (
+                    left_child.table_alias in right_table_aliases
+                    and right_child.table_alias in left_table_aliases
+                ):
+                    left_join_keys.append(right_child)
+                    right_join_keys.append(left_child)
 
+    return (left_join_keys, right_join_keys)
+
+
+def extract_pushdown_predicate(
+    predicate: AbstractExpression, column_alias: str
+) -> Tuple[AbstractExpression, AbstractExpression]:
+    """Decompose the predicate into pushdown predicate and remaining predicate
+
+    Args:
+        predicate (AbstractExpression): predicate that needs to be decomposed
+        column (str): column_alias to extract predicate
     Returns:
-        DataFrameMetadata:  corresponding metadata for the input table info
+        Tuple[AbstractExpression, AbstractExpression]: (pushdown predicate,
+        remaining predicate)
     """
-    catalog = CatalogManager()
-    columns = [ColumnDefinition('id', ColumnType.INTEGER, None,
-                                [], ColConstraintInfo(unique=True))]
-    # the ndarray dimensions are set as None. We need to fix this as we
-    # cannot assume. Either ask the user to provide this with load or
-    # we infer this from the provided video.
-    columns.append(
-        ColumnDefinition(
-            'data', ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-        )
+    if predicate is None:
+        return None, None
+
+    if contains_single_column(predicate, column_alias):
+        if is_simple_predicate(predicate):
+            return predicate, None
+
+    pushdown_preds = []
+    rem_pred = []
+    pred_list = expression_tree_to_conjunction_list(predicate)
+    for pred in pred_list:
+        if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
+            pushdown_preds.append(pred)
+        else:
+            rem_pred.append(pred)
+
+    return (
+        conjuction_list_to_expression_tree(pushdown_preds),
+        conjuction_list_to_expression_tree(rem_pred),
     )
-    col_metadata = create_column_metadata(columns)
-    uri = str(generate_file_path(name))
-    metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column='id')
-    return metadata
