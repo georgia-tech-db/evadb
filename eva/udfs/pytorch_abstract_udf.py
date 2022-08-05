@@ -23,7 +23,7 @@ from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformationUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -97,11 +97,9 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
         """
         return val.detach().cpu().numpy()
 
-    def to_device(self, device: str):
+    def to_device(self, device: str) -> object:
         """
-
-        :param device:
-        :return:
+        Required to make class a member of GPUCompatible Protocol.
         """
         return self.to(torch.device("cuda:{}".format(device)))
 
@@ -112,3 +110,11 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
         return nn.Module.__call__(self, frames, **kwargs)
+
+
+class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
+    def __init__(self, transforms):
+        Compose.__init__(self, transforms)
+
+    def transform(self, frames: np.ndarray) -> np.ndarray:
+        return Compose(frames)
