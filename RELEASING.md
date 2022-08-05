@@ -39,7 +39,6 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
 
 1. Update version to, e.g. 0.0.6 (remove the `+dev` label) in `eva/version.py`.
 
-
 1. Commit these changes and create a PR:
 
        git checkout -b release-v0.0.6
