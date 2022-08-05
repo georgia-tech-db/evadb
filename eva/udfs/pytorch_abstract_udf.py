@@ -27,7 +27,7 @@ from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformation
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
+class PytorchClassifierAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
     """
     A pytorch based classifier. Used to make sure we make maximum
     utilization of features provided by pytorch without reinventing the wheel.
