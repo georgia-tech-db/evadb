@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+## [0.0.6] - 2022-08-05
+### [Added]
+
+* PR #295: Improve Error Messages and Query responses 
+* PR #292: Upating read the docs + website
+* PR #288: Update README.md
+
+
 ## [0.0.3] - 2022-07-31
 ### [Added]
 

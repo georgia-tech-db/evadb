@@ -61,7 +61,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
-with open("../eva/version.py", "r") as version_file:
+with open("../../eva/version.py", "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 >>>>>>> 765cef70afcf21336b68936d4651e153026d2c91
 

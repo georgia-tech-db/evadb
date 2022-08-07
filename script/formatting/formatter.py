@@ -138,7 +138,6 @@ def is_tool(name):
 def format_file(file_path, add_header, strip_header, format_code):
 
     abs_path = os.path.abspath(file_path)
-    LOG.info(file_path)
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
         if add_header:
@@ -150,7 +149,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif strip_header:
-
+            LOG.info("Stripping headers : " + file)               
             header_match = header_regex.match(file_data)
             if header_match is None:
                 return
@@ -164,6 +163,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
+            LOG.info("Formatting File : " + file)
             # ISORT
             isort_command = f"{ISORT_BINARY}  {file_path}"
             os.system(isort_command)
@@ -295,11 +295,6 @@ if __name__ == "__main__":
                     valid = True
             
             if valid:
-                LOG.info("Stripping headers : " + file)
                 format_file(file, False, True, False)
-
-                LOG.info("Adding headers : " + file)
                 format_file(file, True, False, False)
-
-                LOG.info("Formatting File : " + file)
                 format_file(file, False, False, True)

@@ -15,6 +15,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -25,12 +26,12 @@ class StatementBinderTests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_check_duplicate_alias(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(BinderError):
             ctx = StatementBinderContext()
             ctx._derived_table_alias_map["alias"] = MagicMock()
             ctx._check_duplicate_alias("alias")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(BinderError):
             ctx = StatementBinderContext()
             ctx._table_alias_map["alias"] = MagicMock()
             ctx._check_duplicate_alias("alias")
@@ -95,13 +96,13 @@ class StatementBinderTests(unittest.TestCase):
 
     def test_get_binded_column_raise_error(self):
         # no alias
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(BinderError):
             ctx = StatementBinderContext()
             mock_search_all = ctx._search_all_alias_maps = MagicMock()
             mock_search_all.return_value = (None, None)
             ctx.get_binded_column("col_name")
         # with alias
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(BinderError):
             ctx = StatementBinderContext()
             mock_table_map = ctx._check_table_alias_map = MagicMock()
             mock_table_map.return_value = None
@@ -168,7 +169,7 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(result, ("alias", "derived_col_obj"))
 
     def test_search_all_alias_raise_duplicate_error(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(BinderError):
             ctx = StatementBinderContext()
             ctx._check_table_alias_map = MagicMock()
             ctx._check_derived_table_alias_map = MagicMock()

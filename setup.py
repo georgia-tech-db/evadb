@@ -38,7 +38,7 @@ LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
-    "numpy==1.20.1",
+    "numpy==1.21.6",
     "opencv-python==4.5.1.48",
     "pandas==1.2.3",
 <<<<<<< HEAD
@@ -71,14 +71,19 @@ test_libs = [
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
-    "torch==1.7.1",
-    "torchvision==0.8.2",
+    "torch==1.10.2",
+    "torchvision==0.11.3",
 ]
 
 benchmark_libs = [
 ]
 
 doc_libs = [
+]
+
+dist_libs = [
+    "wheel==0.37.1",
+    "scriv==0.16.0"
 ]
 
 ### NEEDED FOR AN ALTERNATE DATA SYSTEM OTHER THAN SQLITE
@@ -97,6 +102,7 @@ DEV_REQUIRES = (
     + benchmark_libs
     + doc_libs
     + database_libs
+    + dist_libs
 )
 
 EXTRA_REQUIRES = {

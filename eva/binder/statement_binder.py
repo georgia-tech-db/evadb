@@ -14,7 +14,12 @@
 # limitations under the License.
 import sys
 
-from eva.binder.binder_utils import bind_table_info, create_video_metadata, extend_star
+from eva.binder.binder_utils import (
+    BinderError,
+    bind_table_info,
+    create_video_metadata,
+    extend_star,
+)
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
@@ -97,20 +102,25 @@ class StatementBinder:
     @bind.register(LoadDataStatement)
     def _bind_load_data_statement(self, node: LoadDataStatement):
         table_ref = node.table_ref
+        name = table_ref.table.table_name
         if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Create a new metadata object
-            create_video_metadata(table_ref.table.table_name)
-
+            # Sanity check to make sure there is no existing video table with same name
+            if self._catalog.check_table_exists(
+                table_ref.table.database_name, table_ref.table.table_name
+            ):
+                err_msg = f"Video Table {name} already exists."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+            else:
+                # Create a new metadata object
+                create_video_metadata(name)
         self.bind(table_ref)
 
         table_ref_obj = table_ref.table.table_obj
         if table_ref_obj is None:
-            error = "{} does not exists. Create the table using \
-                            CREATE TABLE.".format(
-                table_ref.table.table_name
-            )
+            error = f"{name} does not exists."
             logger.error(error)
-            raise RuntimeError(error)
+            raise BinderError(error)
 
         # if query had columns specified, we just copy them
         if node.column_list is not None:
@@ -164,7 +174,7 @@ class StatementBinder:
                 node.func_expr.alias, [node.func_expr]
             )
         else:
-            raise ValueError(f"Unsupported node {type(node)}")
+            raise BinderError(f"Unsupported node {type(node)}")
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
@@ -182,10 +192,13 @@ class StatementBinder:
 
         node.alias = node.alias or node.name.lower()
         udf_obj = self._catalog.get_udf_by_name(node.name)
-        assert udf_obj is not None, (
-            "UDF with name {} does not exist in the catalog. Please "
-            "create the UDF using CREATE UDF command".format(node.name)
-        )
+        if udf_obj is None:
+            err_msg = (
+                f"UDF with name {node.name} does not exist in the catalog. "
+                "Please create the UDF using CREATE UDF command."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
 
         output_objs = self._catalog.get_udf_outputs(udf_obj)
         if node.output:
@@ -195,13 +208,21 @@ class StatementBinder:
                         "{}.{}".format(node.alias, obj.name.lower())
                     )
                     node.output_objs = [obj]
-            assert (
-                len(node.output_col_aliases) == 1
-            ), "Duplicate columns {} in UDF {}".format(node.output, udf_obj.name)
+            if len(node.output_col_aliases) != 1:
+                err_msg = f"Duplicate columns {node.output} in UDF {udf_obj.name}"
+                logger.error(err_msg)
+                raise BinderError(err_msg)
         else:
             node.output_col_aliases = [
                 "{}.{}".format(node.alias, obj.name.lower()) for obj in output_objs
             ]
             node.output_objs = output_objs
-
-        node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        try:
+            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        except Exception as e:
+            err_msg = (
+                f"{str(e)}. Please verify that the UDF class name in the"
+                "implementation file matches the UDF name."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
