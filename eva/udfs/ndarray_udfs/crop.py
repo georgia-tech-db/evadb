@@ -29,9 +29,9 @@ class Crop(AbstractNdarrayUDF):
         Crop(frame, bbox)
         """
         def crop(row: pd.Series) -> np.ndarray:
-            frame = row['data']
+            frame = row[0]
+            bboxes = row[1]
             h, w, _ = frame.shape
-            #bboxes = list(map(int, map(float, row['bboxes'][1:-1].split(','))))
             x0, y0, x1, y1 = bboxes
             if y0 > y1:
                 y0, y1 = y1, y0
