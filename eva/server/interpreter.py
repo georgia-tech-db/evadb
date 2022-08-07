@@ -15,7 +15,6 @@
 from cmd import Cmd
 from contextlib import ExitStack
 import os
-import io
 from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
 
@@ -67,12 +66,6 @@ class EvaCommandInterpreter(Cmd):
         print(self.cursor.fetch_all())
 
         return False
-
-
-def read(path, encoding="utf-8"):
-    path = os.path.join(os.path.dirname(__file__), path)
-    with io.open(path, encoding=encoding) as fp:
-        return fp.read()
 
 
 # version.py defines the VERSION and VERSION_SHORT variables
