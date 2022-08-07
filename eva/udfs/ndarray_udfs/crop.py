@@ -31,24 +31,7 @@ class Crop(AbstractNdarrayUDF):
         def crop(row: pd.Series) -> np.ndarray:
             frame = row[0]
             bboxes = row[1]
-            h, w, _ = frame.shape
             x0, y0, x1, y1 = bboxes
-            if y0 > y1:
-                y0, y1 = y1, y0
-            if x0 > x1:
-                x0, x1 = x1, x0
-
-            if y0 == y1:
-                if y1 + 1 < h:
-                    y1 = y1 + 1
-                else:
-                    y0 = y0 - 1
-            if x0 == x1:
-                if x1 + 1 < w:
-                    x1 = x1 + 1
-                else:
-                    x0 = x0 - 1
-
             return frame[y0:y1, x0:x1]
 
         ret = pd.DataFrame()
