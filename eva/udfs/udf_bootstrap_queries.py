@@ -40,6 +40,16 @@ ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
     EVA_INSTALLATION_DIR
 )
 
+Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
+                INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                        bboxes NDARRAY FLOAT32(ANYDIM, 4))
+                OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE  Ndarray
+                IMPL  "{}/udfs/ndarray_udfs/crop.py";
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
@@ -68,7 +78,7 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, ArrayCount_udf_query]
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
     if mode == "debug":
         queries.extend(
             [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]

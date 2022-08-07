@@ -50,6 +50,6 @@ class CropTests(unittest.TestCase):
             [imarray[0:20, 30:60]]], columns=['data'])
         self.assertTrue(expected_image.equals(cropped_image))
 
-
-
+    def test_udf_name_crop(self):
+        self.assertEqual(self.crop_instance.name(), 'Crop')
     
