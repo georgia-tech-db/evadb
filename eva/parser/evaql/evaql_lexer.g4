@@ -82,6 +82,7 @@ UNION:                               'UNION';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';
 UNLOCK:                              'UNLOCK';
+UNNEST:                              'UNNEST';
 UNSIGNED:                            'UNSIGNED';
 UPDATE:                              'UPDATE';
 UPLOAD:                              'UPLOAD';

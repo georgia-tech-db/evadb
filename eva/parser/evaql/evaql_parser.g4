@@ -261,7 +261,11 @@ tableSourceItemWithSample
 tableSourceItem
     : tableName                                         #atomTableItem
     | subqueryTableSourceItem                           #subqueryTableItem
-    | LATERAL functionCall                              #lateralFunctionCallItem
+    ;
+
+tableValuedFunction
+    : functionCall                                
+    | UNNEST LR_BRACKET functionCall RR_BRACKET   
     ;
 
 subqueryTableSourceItem
@@ -281,7 +285,9 @@ joinPart
       (
         ON expression
         | USING LR_BRACKET uidList RR_BRACKET
-      )?                                                            #innerJoin
+      )?                                                #innerJoin
+    |
+      JOIN LATERAL tableValuedFunction                  #lateralJoin
     ;
 
 //    Select Statement's Details

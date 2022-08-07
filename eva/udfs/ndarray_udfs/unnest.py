@@ -31,16 +31,24 @@ class Unnest(AbstractNdarrayUDF):
     def name(self):
         return 'UNNEST'
 
-    def xplode(self, df, explode, zipped=True):
+    def xplode(self, df, explode):
         # https://stackoverflow.com/questions/53218931/how-to-unnest-explode-a-column-in-a-pandas-dataframe   # noqa
-        rest = {*df} - {*explode}
-        zipped = zip(zip(*map(df.get, rest)), zip(*map(df.get, explode)))
-        tups = [tup + exploded
-                for tup, pre in zipped
-                for exploded in zip_longest(*pre)]
+        zipped = zip(*map(df.get, explode))
+        tups = [exploded
+                for pre in zipped
+                for exploded in zip(*pre)]
 
-        return pd.DataFrame(tups, columns=[*rest, *explode])[[*df]]
+        return pd.DataFrame(tups, columns=[*explode])[[*df]]
 
+    def xplode(self, df, explode):
+        # https://stackoverflow.com/questions/53218931/how-to-unnest-explode-a-column-in-a-pandas-dataframe   # noqa
+        zipped = zip(*map(df.get, explode))
+        tups = [exploded
+                for pre in zipped
+                for exploded in zip(*pre)]
+
+        return pd.DataFrame(tups, columns=[*explode])[[*df]]
+        
     def exec(self, inp: pd.DataFrame) -> pd.DataFrame:
         # 1. infer using the first row, design a better way without
         #    compromising speed

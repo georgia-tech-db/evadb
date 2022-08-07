@@ -30,15 +30,34 @@ class LateralJoinExecutor(AbstractExecutor):
         pass
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
-
         outer = self.children[0]
         inner = self.children[1]
-
         for outer_batch in outer.exec():
             for result_batch in inner.exec(lateral_input=outer_batch):
-                # merge
-                result_batch = Batch.merge_column_wise([outer_batch, result_batch])
+                result_batch = outer_batch.frames.merge(
+                    result_batch.frames,
+                    left_index=True,
+                    right_index=True,
+                    how="inner",
+                )
+                result_batch.reset_index(drop=True, inplace=True)
                 result_batch = apply_predicate(result_batch, self.predicate)
                 result_batch = apply_project(result_batch, self.join_project)
                 if not result_batch.empty():
-                    return result_batch
+                    yield result_batch
+
+    # def _exec(self):
+    #     # Merge: the Function Scan is assumed to return one row for each
+    #     # input row
+    #     outer = self.children[0]
+    #     inner = self.children[1]
+
+    #     for outer_batch in outer.exec():
+    #         for result_batch in inner.exec(lateral_input=outer_batch):
+    #             result_batch = Batch.merge_column_wise(
+    #                 [outer_batch, result_batch]
+    #             )
+    #             result_batch = apply_predicate(result_batch, self.predicate)
+    #             result_batch = apply_project(result_batch, self.join_project)
+    #             if not result_batch.empty():
+    #                 yield result_batch

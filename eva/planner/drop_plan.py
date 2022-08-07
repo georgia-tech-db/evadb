@@ -40,3 +40,6 @@ class DropPlan(AbstractPlan):
     @property
     def if_exists(self):
         return self._if_exists
+
+    def __hash__(self) -> int:
+        return hash(super().__hash__(), tuple(self._table_refs), self.if_exists)

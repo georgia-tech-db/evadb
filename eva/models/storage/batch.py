@@ -79,9 +79,14 @@ class Batch:
     def identifier_column(self):
         return self._identifier_column
 
+    @property
+    def columns(self):
+        return self._frames.columns
+
     def column_as_numpy_array(self, column_name="data"):
         return np.array(self._frames[column_name])
 
+        
     def to_json(self):
         obj = {
             "frames": self.frames,

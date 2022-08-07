@@ -17,6 +17,8 @@ from typing import List
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 
+class ExecutorError(Exception):
+    pass
 
 def apply_project(batch: Batch, project_list: List[AbstractExpression]):
     if not batch.empty() and project_list:

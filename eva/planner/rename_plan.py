@@ -39,3 +39,6 @@ class RenamePlan(AbstractPlan):
     @property
     def new_name(self):
         return self._new_name
+
+    def __hash__(self) -> int:
+        return hash(super().__hash__(), self.old_table, self.new_name)

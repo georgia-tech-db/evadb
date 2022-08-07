@@ -24,12 +24,21 @@ class FunctionScanPlan(AbstractPlan):
     Arguments:
         func_expr(FunctionExpression): parameterized function expression that
             reference columns from a table expression that precedes it.
+        do_unnest(bool): if True perform unnest operation on the output of FunctionScan
     """
 
-    def __init__(self, func_expr: FunctionExpression):
+    def __init__(self, func_expr: FunctionExpression, do_unnest: bool = False):
         self._func_expr = func_expr
+        self._do_unnest = do_unnest
         super().__init__(PlanOprType.FUNCTION_SCAN)
 
     @property
     def func_expr(self):
         return self._func_expr
+    
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+    
+    def __hash__(self) -> int:
+        return super().__hash__((self.func_expr, self.do_unnest))

@@ -212,7 +212,9 @@ class LogicalQueryDerivedGet(Operator):
         target_list: List[AbstractExpression] = None,
         children: List = None,
     ):
-        super().__init__(OperatorType.LOGICALQUERYDERIVEDGET, children=children)
+        super().__init__(
+            OperatorType.LOGICALQUERYDERIVEDGET, children=children
+        )
         self._alias = alias
         self.predicate = predicate
         self.target_list = target_list or []
@@ -234,7 +236,12 @@ class LogicalQueryDerivedGet(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.alias, self.predicate, tuple(self.target_list))
+            (
+                super().__hash__(),
+                self.alias,
+                self.predicate,
+                tuple(self.target_list),
+            )
         )
 
 
@@ -296,7 +303,9 @@ class LogicalOrderBy(Operator):
 
 
 class LogicalLimit(Operator):
-    def __init__(self, limit_count: ConstantValueExpression, children: List = None):
+    def __init__(
+        self, limit_count: ConstantValueExpression, children: List = None
+    ):
         super().__init__(OperatorType.LOGICALLIMIT, children)
         self._limit_count = limit_count
 
@@ -315,7 +324,9 @@ class LogicalLimit(Operator):
 
 
 class LogicalSample(Operator):
-    def __init__(self, sample_freq: ConstantValueExpression, children: List = None):
+    def __init__(
+        self, sample_freq: ConstantValueExpression, children: List = None
+    ):
         super().__init__(OperatorType.LOGICALSAMPLE, children)
         self._sample_freq = sample_freq
 
@@ -473,7 +484,9 @@ class LogicalRename(Operator):
         new_name {TableInfo}: [new name for the old table]
     """
 
-    def __init__(self, old_table_ref: TableRef, new_name: TableInfo, children=None):
+    def __init__(
+        self, old_table_ref: TableRef, new_name: TableInfo, children=None
+    ):
         super().__init__(OperatorType.LOGICALRENAME, children)
         self._new_name = new_name
         self._old_table_ref = old_table_ref
@@ -505,7 +518,9 @@ class LogicalDrop(Operator):
     Logical node for drop table operations
     """
 
-    def __init__(self, table_refs: List[TableRef], if_exists: bool, children=None):
+    def __init__(
+        self, table_refs: List[TableRef], if_exists: bool, children=None
+    ):
         super().__init__(OperatorType.LOGICALDROP, children)
         self._table_refs = table_refs
         self._if_exists = if_exists
@@ -529,7 +544,9 @@ class LogicalDrop(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self._table_refs), self._if_exists))
+        return hash(
+            (super().__hash__(), tuple(self._table_refs), self._if_exists)
+        )
 
 
 class LogicalCreateUDF(Operator):
@@ -770,7 +787,9 @@ class LogicalUpload(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.path, self.path, self.video_blob))
+        return hash(
+            (super().__hash__(), self.path, self.path, self.video_blob)
+        )
 
 
 class LogicalFunctionScan(Operator):
@@ -782,22 +801,36 @@ class LogicalFunctionScan(Operator):
             function_expression that yield a table like output
     """
 
-    def __init__(self, func_expr: AbstractExpression, children: List = None):
+    def __init__(
+        self,
+        func_expr: AbstractExpression,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
         super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
         self._func_expr = func_expr
+        self._do_unnest = do_unnest
 
     @property
     def func_expr(self):
         return self._func_expr
 
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalFunctionScan):
             return False
-        return is_subtree_equal and self.func_expr == other.func_expr
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr))
+        return hash((super().__hash__(), self.func_expr, self.do_unnest))
 
 
 class LogicalJoin(Operator):
@@ -909,7 +942,9 @@ class LogicalCreateMaterializedView(Operator):
         if_not_exists: bool = False,
         children=None,
     ):
-        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children)
+        super().__init__(
+            OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children
+        )
         self._view = view
         self._col_list = col_list
         self._if_not_exists = if_not_exists
@@ -939,7 +974,12 @@ class LogicalCreateMaterializedView(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.view, tuple(self.col_list), self.if_not_exists)
+            (
+                super().__hash__(),
+                self.view,
+                tuple(self.col_list),
+                self.if_not_exists,
+            )
         )
 
 
