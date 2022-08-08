@@ -15,7 +15,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-import numpy as np
+from numpy.typing import ArrayLike
 import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
@@ -53,7 +53,7 @@ class AbstractClassifierUDF(AbstractUDF):
         """
 
     @abstractmethod
-    def classify(self, frames: np.ndarray) -> pd.DataFrame:
+    def classify(self, frames: ArrayLike) -> pd.DataFrame:
         """
         Takes as input a batch of frames and returns the predictions by
         applying the classification model.
@@ -72,17 +72,17 @@ class AbstractClassifierUDF(AbstractUDF):
 
 class AbstractTransformationUDF(AbstractUDF):
     @abstractmethod
-    def transform(self, frames: np.ndarray) -> np.ndarray:
+    def transform(self, frames: ArrayLike) -> ArrayLike:
         """
         Takes as input a batch of frames and transforms them
         by applying the frame transformation model.
 
         Arguments:
-            frames (np.ndarray): Input batch of frames on which prediction
+            frames: Input batch of frames on which prediction
             needs to be made
 
         Returns:
-            np.ndarray: Transformed frames (output must have the same size as input)
+            Transformed frames
         """
 
     def __call__(self, *args, **kwargs):
