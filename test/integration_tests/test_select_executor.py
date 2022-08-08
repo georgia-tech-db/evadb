@@ -245,7 +245,7 @@ class SelectExecutorTest(unittest.TestCase):
         # self.assertEqual(actual_batch, expected_batch[0])
 
     @pytest.mark.torchtest
-    def test_lateral_join(self):
+    def test_aalateral_join(self):
         select_query = """SELECT id FROM MyVideo JOIN LATERAL
                         FastRCNNObjectDetector(data) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)

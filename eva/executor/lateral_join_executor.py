@@ -41,6 +41,7 @@ class LateralJoinExecutor(AbstractExecutor):
                     how="inner",
                 )
                 result_batch.reset_index(drop=True, inplace=True)
+                result_batch = Batch(result_batch)
                 result_batch = apply_predicate(result_batch, self.predicate)
                 result_batch = apply_project(result_batch, self.join_project)
                 if not result_batch.empty():

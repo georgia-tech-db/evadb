@@ -35,10 +35,10 @@ class FunctionScanPlan(AbstractPlan):
     @property
     def func_expr(self):
         return self._func_expr
-    
+
     @property
     def do_unnest(self):
         return self._do_unnest
-    
+
     def __hash__(self) -> int:
-        return super().__hash__((self.func_expr, self.do_unnest))
+        return hash((super().__hash__(), self.func_expr, self.do_unnest))

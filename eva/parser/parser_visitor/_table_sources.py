@@ -71,12 +71,12 @@ class TableSources(evaql_parserVisitor):
         tve = self.visit(ctx.tableValuedFunction())
         join_type = JoinType.LATERAL_JOIN
 
-        return TableRef(JoinNode(None, tve, join_type=join_type))
+        return TableRef(JoinNode(None, TableRef(tve), join_type=join_type))
 
     def visitTableValuedFunction(
         self, ctx: evaql_parser.TableValuedFunctionContext
     ):
-        func_expr = ctx.functionCall()
+        func_expr = self.visit(ctx.functionCall())
         has_unnest = False
         if ctx.UNNEST():
             has_unnest = True

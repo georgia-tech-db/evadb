@@ -169,9 +169,10 @@ class StatementBinder:
             if node.join_node.predicate:
                 self.bind(node.join_node.predicate)
         elif node.is_table_valued_expr():
-            self.bind(node.func_expr)
+            func_expr = node.table_valued_expr.func_expr
+            self.bind(func_expr)
             self._binder_context.add_derived_table_alias(
-                node.func_expr.alias, [node.func_expr]
+                func_expr.alias, [func_expr]
             )
         else:
             raise BinderError(f"Unsupported node {type(node)}")
