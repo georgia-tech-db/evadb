@@ -176,8 +176,8 @@ updateStatement
 
 
 loadStatement
-    : LOAD DATA
-      INFILE fileName
+    : LOAD 
+      FILE fileName
       INTO tableName
         (
             ('(' columns=uidList ')')

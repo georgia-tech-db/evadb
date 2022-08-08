@@ -39,7 +39,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo
+        query = """LOAD FILE 'dummy.avi' INTO MyVideo
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
 
@@ -75,7 +75,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD DATA INFILE 'dummy.csv' INTO MyVideoCSV
+        load_query = """LOAD FILE 'dummy.csv' INTO MyVideoCSV
                    WITH FORMAT CSV;"""
         execute_query_fetch_all(load_query)
 
