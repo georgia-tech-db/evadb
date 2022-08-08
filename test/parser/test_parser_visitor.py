@@ -375,7 +375,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(actual, create_udf_mock.return_value)
 
     ##################################################################
-    # LOAD DATA Statement
+    # LOAD Statement
     ##################################################################
     @mock.patch.object(ParserVisitor, "visit")
     @mock.patch("eva.parser.parser_visitor._load_statement.LoadDataStatement")

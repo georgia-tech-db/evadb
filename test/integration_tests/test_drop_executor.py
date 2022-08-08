@@ -32,7 +32,7 @@ class DropExecutorTest(unittest.TestCase):
     # integration test
     def test_should_drop_table(self):
         catalog_manager = CatalogManager()
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         metadata_obj = catalog_manager.get_dataset_metadata(None, "MyVideo")

@@ -114,7 +114,7 @@ def create_table(table_name, num_rows, num_columns):
     columns = ['a{}'.format(i) for i in range(num_columns)]
     df = create_csv(num_rows, columns)
     # load the CSV
-    load_query = """LOAD DATA INFILE 'dummy.csv' INTO {}
+    load_query = """LOAD FILE 'dummy.csv' INTO {}
                    WITH FORMAT CSV;""".format(table_name)
     execute_query_fetch_all(load_query)
     df.columns = [f'{table_name}.{col}' for col in df.columns]
