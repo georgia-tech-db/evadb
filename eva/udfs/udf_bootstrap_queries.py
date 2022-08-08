@@ -45,7 +45,7 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
                 INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM),
                         bboxes NDARRAY FLOAT32(ANYDIM, 4))
                 OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                TYPE  Ndarray
+                TYPE  NdarrayUDF
                 IMPL  "{}/udfs/ndarray_udfs/crop.py";
         """.format(
     EVA_INSTALLATION_DIR
