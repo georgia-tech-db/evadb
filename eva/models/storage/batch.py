@@ -86,7 +86,6 @@ class Batch:
     def column_as_numpy_array(self, column_name="data"):
         return np.array(self._frames[column_name])
 
-        
     def to_json(self):
         obj = {
             "frames": self.frames,

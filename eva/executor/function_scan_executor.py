@@ -45,5 +45,5 @@ class FunctionScanExecutor(AbstractExecutor):
             if not res.empty():
                 if self.do_unnest:
                     res = Batch(res.frames.explode(list(res.columns)))
-                
+
                 yield res

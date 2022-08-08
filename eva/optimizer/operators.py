@@ -212,9 +212,7 @@ class LogicalQueryDerivedGet(Operator):
         target_list: List[AbstractExpression] = None,
         children: List = None,
     ):
-        super().__init__(
-            OperatorType.LOGICALQUERYDERIVEDGET, children=children
-        )
+        super().__init__(OperatorType.LOGICALQUERYDERIVEDGET, children=children)
         self._alias = alias
         self.predicate = predicate
         self.target_list = target_list or []
@@ -303,9 +301,7 @@ class LogicalOrderBy(Operator):
 
 
 class LogicalLimit(Operator):
-    def __init__(
-        self, limit_count: ConstantValueExpression, children: List = None
-    ):
+    def __init__(self, limit_count: ConstantValueExpression, children: List = None):
         super().__init__(OperatorType.LOGICALLIMIT, children)
         self._limit_count = limit_count
 
@@ -324,9 +320,7 @@ class LogicalLimit(Operator):
 
 
 class LogicalSample(Operator):
-    def __init__(
-        self, sample_freq: ConstantValueExpression, children: List = None
-    ):
+    def __init__(self, sample_freq: ConstantValueExpression, children: List = None):
         super().__init__(OperatorType.LOGICALSAMPLE, children)
         self._sample_freq = sample_freq
 
@@ -484,9 +478,7 @@ class LogicalRename(Operator):
         new_name {TableInfo}: [new name for the old table]
     """
 
-    def __init__(
-        self, old_table_ref: TableRef, new_name: TableInfo, children=None
-    ):
+    def __init__(self, old_table_ref: TableRef, new_name: TableInfo, children=None):
         super().__init__(OperatorType.LOGICALRENAME, children)
         self._new_name = new_name
         self._old_table_ref = old_table_ref
@@ -518,9 +510,7 @@ class LogicalDrop(Operator):
     Logical node for drop table operations
     """
 
-    def __init__(
-        self, table_refs: List[TableRef], if_exists: bool, children=None
-    ):
+    def __init__(self, table_refs: List[TableRef], if_exists: bool, children=None):
         super().__init__(OperatorType.LOGICALDROP, children)
         self._table_refs = table_refs
         self._if_exists = if_exists
@@ -544,9 +534,7 @@ class LogicalDrop(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (super().__hash__(), tuple(self._table_refs), self._if_exists)
-        )
+        return hash((super().__hash__(), tuple(self._table_refs), self._if_exists))
 
 
 class LogicalCreateUDF(Operator):
@@ -787,9 +775,7 @@ class LogicalUpload(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (super().__hash__(), self.path, self.path, self.video_blob)
-        )
+        return hash((super().__hash__(), self.path, self.path, self.video_blob))
 
 
 class LogicalFunctionScan(Operator):
@@ -942,9 +928,7 @@ class LogicalCreateMaterializedView(Operator):
         if_not_exists: bool = False,
         children=None,
     ):
-        super().__init__(
-            OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children
-        )
+        super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children)
         self._view = view
         self._col_list = col_list
         self._if_not_exists = if_not_exists

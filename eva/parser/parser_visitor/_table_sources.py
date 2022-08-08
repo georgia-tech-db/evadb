@@ -53,9 +53,7 @@ class TableSources(evaql_parserVisitor):
     def visitInnerJoin(self, ctx: evaql_parser.InnerJoinContext):
         table = self.visit(ctx.tableSourceItemWithSample())
         if ctx.ON() is None:
-            raise Exception(
-                "ERROR: Syntax error: Join should specify the ON columns"
-            )
+            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
         join_predicates = self.visit(ctx.expression())
         return TableRef(
             JoinNode(
@@ -73,9 +71,7 @@ class TableSources(evaql_parserVisitor):
 
         return TableRef(JoinNode(None, TableRef(tve), join_type=join_type))
 
-    def visitTableValuedFunction(
-        self, ctx: evaql_parser.TableValuedFunctionContext
-    ):
+    def visitTableValuedFunction(self, ctx: evaql_parser.TableValuedFunctionContext):
         func_expr = self.visit(ctx.functionCall())
         has_unnest = False
         if ctx.UNNEST():
@@ -95,9 +91,7 @@ class TableSources(evaql_parserVisitor):
         return TableRef(table, alias, sample_freq)
 
     # Nested sub query
-    def visitSubqueryTableItem(
-        self, ctx: evaql_parser.SubqueryTableItemContext
-    ):
+    def visitSubqueryTableItem(self, ctx: evaql_parser.SubqueryTableItemContext):
         return self.visit(ctx.subqueryTableSourceItem())
 
     def visitSubqueryTableSourceItem(
@@ -120,9 +114,7 @@ class TableSources(evaql_parserVisitor):
             right_selectStatement.union_all = True
         return right_selectStatement
 
-    def visitQuerySpecification(
-        self, ctx: evaql_parser.QuerySpecificationContext
-    ):
+    def visitQuerySpecification(self, ctx: evaql_parser.QuerySpecificationContext):
         target_list = None
         from_clause = None
         where_clause = None

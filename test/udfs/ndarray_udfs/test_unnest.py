@@ -14,19 +14,14 @@
 # limitations under the License.
 
 import unittest
-import numpy as np
+from test.util import NUM_FRAMES, create_sample_video, file_remove, load_inbuilt_udfs
 
+import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import (
-    NUM_FRAMES,
-    create_sample_video,
-    file_remove,
-    load_inbuilt_udfs,
-)
 
 
 class UnnestTests(unittest.TestCase):

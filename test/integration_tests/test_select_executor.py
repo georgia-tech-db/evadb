@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pytest
 from test.util import (
     create_dummy_batches,
     create_sample_video,
@@ -24,6 +23,7 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
@@ -140,9 +140,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT * FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        video_reader = OpenCVReader(
-            "data/mnist/mnist.mp4", batch_mem_size=30000000
-        )
+        video_reader = OpenCVReader("data/mnist/mnist.mp4", batch_mem_size=30000000)
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
