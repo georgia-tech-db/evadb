@@ -136,9 +136,11 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
 
-def copy_sample_video_to_prefix():
+def copy_sample_videos_to_prefix():
     shutil.copyfile('data/ua_detrac/ua_detrac.mp4',
                     os.path.join(PATH_PREFIX, 'ua_detrac.mp4'))
+    shutil.copyfile('data/mnist/mnist.mp4',
+                    os.path.join(PATH_PREFIX, 'mnist.mp4'))
 
 
 def file_remove(path):
