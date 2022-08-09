@@ -19,6 +19,7 @@ from numpy.typing import ArrayLike
 import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
+from eva.models.catalog.properties import ColorSpace
 
 
 class AbstractUDF(metaclass=ABCMeta):
@@ -33,14 +34,12 @@ class AbstractUDF(metaclass=ABCMeta):
         pass
 
     @property
-    @abstractmethod
-    def input_format(self) -> FrameInfo:
-        pass
+    def name(self) -> str:
+        return str(self)
 
     @property
-    @abstractmethod
-    def name(self) -> str:
-        pass
+    def input_format(self) -> FrameInfo:
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
 
 class AbstractClassifierUDF(AbstractUDF):
