@@ -16,18 +16,16 @@
 from typing import List
 
 import pandas as pd
-import numpy as np
-
 import torch
-
 from torch import Tensor
+import torchvision.transforms as T
+
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
-import torchvision.transforms as T
-
 from facenet_pytorch import MTCNN
+
 
 class FaceDetector(PytorchAbstractUDF):
     """
@@ -55,7 +53,6 @@ class FaceDetector(PytorchAbstractUDF):
             "face"
         ]
 
-
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
@@ -71,7 +68,6 @@ class FaceDetector(PytorchAbstractUDF):
         copy2 = transform(copy)
 
         bboxes, scores = self.model.detect(img=copy2)
-
 
         outcome = pd.DataFrame()
         outcome = outcome.append(
