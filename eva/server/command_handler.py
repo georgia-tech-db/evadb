@@ -31,10 +31,7 @@ def execute_query(query) -> Iterator[Batch]:
     Execute the query and return a result generator.
     """
     stmt = Parser().parse(query)[0]
-    try:
-        StatementBinder(StatementBinderContext()).bind(stmt)
-    except Exception as error:
-        raise RuntimeError(f"Binder failed: {error}")
+    StatementBinder(StatementBinderContext()).bind(stmt)
     l_plan = StatementToPlanConvertor().visit(stmt)
     p_plan = PlanGenerator().build(l_plan)
     return PlanExecutor(p_plan).execute_plan()

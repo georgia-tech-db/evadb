@@ -23,6 +23,7 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
+from eva.utils.logging_manager import logger
 
 
 ##################################################################
@@ -150,6 +151,8 @@ class CreateTable(evaql_parserVisitor):
         dimensions = None
         if ctx.arrayType():
             array_type = self.visit(ctx.arrayType())
+        else:
+            array_type = NdArrayType.ANYTYPE
         if ctx.lengthDimensionList():
             dimensions = self.visit(ctx.lengthDimensionList())
         return data_type, array_type, dimensions
@@ -186,6 +189,10 @@ class CreateTable(evaql_parserVisitor):
             array_type = NdArrayType.DATETIME
         elif ctx.ANYTYPE() is not None:
             array_type = NdArrayType.ANYTYPE
+        else:
+            err_msg = "Unsupported NdArray datatype found in the query"
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
         return array_type
 
     def visitLengthOneDimension(self, ctx: evaql_parser.LengthOneDimensionContext):

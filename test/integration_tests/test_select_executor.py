@@ -38,7 +38,7 @@ class SelectExecutorTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -133,20 +133,20 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
-                   INTO UADETRAC;"""
+        query = """LOAD FILE 'data/mnist/mnist.mp4'
+                   INTO MNIST;"""
         execute_query_fetch_all(query)
 
-        select_query = "SELECT * FROM UADETRAC;"
+        select_query = "SELECT * FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         video_reader = OpenCVReader(
-            "data/ua_detrac/ua_detrac.mp4", batch_mem_size=30000000
+            "data/mnist/mnist.mp4", batch_mem_size=30000000
         )
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
-        expected_batch.modify_column_alias("uadetrac")
+        expected_batch.modify_column_alias("mnist")
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
