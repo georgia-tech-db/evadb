@@ -1,5 +1,6 @@
 
 lexer grammar evaql_lexer;
+options { caseInsensitive=true; }
 
 channels { EVAQLCOMMENT, ERRORCHANNEL }
 
@@ -27,7 +28,6 @@ BLOB:                                'BLOB';
 BY:                                  'BY';
 COLUMN:                              'COLUMN';
 CREATE:                              'CREATE';
-DATA:                                'DATA';
 DATABASE:                            'DATABASE';
 DEFAULT:                             'DEFAULT';
 DELETE:                              'DELETE';
@@ -44,7 +44,7 @@ GROUP:                               'GROUP';
 HAVING:                              'HAVING';
 IF:                                  'IF';
 IN:                                  'IN';
-INFILE:                              'INFILE';
+FILE:                                'FILE';
 INDIR:                               'INDIR';
 INTO:                                'INTO';
 INDEX:                               'INDEX';
@@ -274,7 +274,7 @@ GLOBAL_ID:                           '@' '@'
 // Fragments for Literal primitives
 
 fragment EXPONENT_NUM_PART:          'E' '-'? DEC_DIGIT+;
-fragment ID_LITERAL:                 [A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*;
+fragment ID_LITERAL options { caseInsensitive=false; }:                 [A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*;
 fragment DQUOTA_STRING:              '"' ( '\\'. | '""' | ~('"'| '\\') )* '"';
 fragment SQUOTA_STRING:              '\'' ('\\'. | '\'\'' | ~('\'' | '\\'))* '\'';
 fragment BQUOTA_STRING:              '`' ( '\\'. | '``' | ~('`'|'\\'))* '`';

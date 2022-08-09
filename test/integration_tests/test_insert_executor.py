@@ -33,7 +33,7 @@ class InsertExecutorTest(unittest.TestCase):
     # integration test
     @unittest.skip("Not supported in current version")
     def test_should_load_video_in_table(self):
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         insert_query = """ INSERT INTO MyVideo (id, data) VALUES (40,

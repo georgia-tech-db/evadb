@@ -51,7 +51,7 @@ minimal_requirement = [
     "sqlalchemy-utils==0.36.6",
     "pyspark==3.0.2",
     "petastorm==0.9.8",
-    "antlr4-python3-runtime==4.8",
+    "antlr4-python3-runtime==4.10",
     "pyyaml==5.1"
 ]
 
