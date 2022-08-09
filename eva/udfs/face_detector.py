@@ -27,7 +27,7 @@ from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
 
 import torchvision.transforms as T
 
-from dlib import get_frontal_face_detector
+from facenet_pytorch import MTCNN
 
 class FaceDetector(PytorchAbstractUDF):
     """
@@ -42,6 +42,8 @@ class FaceDetector(PytorchAbstractUDF):
     def __init__(self, threshold=0.85):
         super().__init__()
         self.threshold = threshold
+        self.model = MTCNN()
+        self.model.eval()
 
     @property
     def input_format(self) -> FrameInfo:
@@ -53,12 +55,6 @@ class FaceDetector(PytorchAbstractUDF):
             "face"
         ]
 
-    def rect_to_bb(self, rect):
-        x = rect.left()
-        y = rect.top()
-        w = rect.right() - x 
-        h = rect.bottom() - y 
-        return (x, y, w, h)
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
@@ -69,25 +65,20 @@ class FaceDetector(PytorchAbstractUDF):
         Returns:
             face boxes (List[List[BoundingBox]])
         """
-        detector = get_frontal_face_detector()
 
         copy = torch.squeeze(frames)
         transform = T.ToPILImage()
         copy2 = transform(copy)
-        copy3 = np.array(copy2)
-        detections, scores, _ = detector(copy3, 1, -1)
 
-        bboxes = []
-        for i, d in enumerate(detections):
-            if scores[i] > self.threshold:
-                bbox = rect_to_bb(d)
-                bboxes.append(bbox)
+        bboxes, scores = self.model.detect(img=copy2)
+
 
         outcome = pd.DataFrame()
         outcome = outcome.append(
             {
                 "bboxes": bboxes,
+                "scores": scores
             },
             ignore_index=True)
-
+        
         return outcome

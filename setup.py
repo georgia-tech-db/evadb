@@ -88,7 +88,6 @@ database_libs = [
 
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 udf_libs = [
-    "dlib==19.23.0",
     "facenet-pytorch==2.5.2"
 ]
 
