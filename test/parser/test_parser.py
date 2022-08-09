@@ -389,7 +389,7 @@ class ParserTests(unittest.TestCase):
 
     def test_load_video_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD DATA INFILE 'data/video.mp4'
+        load_data_query = """LOAD FILE 'data/video.mp4'
                              INTO MyVideo WITH FORMAT VIDEO;"""
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -410,7 +410,7 @@ class ParserTests(unittest.TestCase):
 
     def test_load_csv_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD DATA INFILE 'data/meta.csv'
+        load_data_query = """LOAD FILE 'data/meta.csv'
                              INTO
                              MyMeta (id, frame_id, video_id, label)
                              WITH FORMAT CSV;"""

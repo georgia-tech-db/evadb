@@ -12,9 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from __future__ import annotations
 
-from eva.binder.statement_binder_context import StatementBinderContext
+from typing import TYPE_CHECKING, List
+
+if TYPE_CHECKING:
+    from eva.binder.statement_binder_context import StatementBinderContext
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -23,6 +27,10 @@ from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
+
+
+class BinderError(Exception):
+    pass
 
 
 def create_video_metadata(name: str) -> DataFrameMetadata:
@@ -85,7 +93,7 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
     result_list = []
     for col in col_list:
         if col is None:
-            logger.error("Empty column while creating column metadata")
+            logger.warn("Empty column while creating column metadata")
             result_list.append(col)
         result_list.append(
             CatalogManager().create_column_metadata(
@@ -116,7 +124,7 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
             table_info.table_name
         )
         logger.error(error)
-        raise RuntimeError(error)
+        raise BinderError(error)
 
 
 def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
@@ -129,12 +137,14 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
             return True
         else:
             logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            raise BinderError(err_msg)
     else:
         return False
 
 
-def extend_star(binder_context: StatementBinderContext) -> List[TupleValueExpression]:
+def extend_star(
+    binder_context: StatementBinderContext,
+) -> List[TupleValueExpression]:
     col_objs = binder_context._get_all_alias_and_col_name()
 
     target_list = list(

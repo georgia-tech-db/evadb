@@ -21,6 +21,7 @@ from test.util import (
     file_remove,
 )
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -38,7 +39,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo
+        query = """LOAD FILE 'dummy.avi' INTO MyVideo
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
 
@@ -47,8 +48,12 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
-        expected_batch.modify_column_alias("myvideo")
         self.assertEqual(actual_batch, expected_batch)
+
+        # Try adding video to an existing table
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(str(cm.exception), "Video Table MyVideo already exists.")
 
     # integration test for csv
     def test_should_load_csv_in_table(self):
@@ -70,7 +75,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD DATA INFILE 'dummy.csv' INTO MyVideoCSV
+        load_query = """LOAD FILE 'dummy.csv' INTO MyVideoCSV
                    WITH FORMAT CSV;"""
         execute_query_fetch_all(load_query)
 

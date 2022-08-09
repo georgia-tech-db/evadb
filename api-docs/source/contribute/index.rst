@@ -22,7 +22,7 @@ package manager. EVA requires JAVA 8 for generating the parser.
    python3 -m venv env38                                # to create a virtual environment
    . env38/bin/activate
    pip install --upgrade pip
-   sudo -E apt install -y openjdk-8-jdk openjdk-8-jre   # to install JAVA
+   sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
    sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
    pip install -e ".[dev]"
 

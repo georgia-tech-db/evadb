@@ -50,14 +50,10 @@ class LoadExecutorTest(unittest.TestCase):
             mock_exists.return_value = True
             batch = next(load_executor.exec())
             create_mock.assert_called_once_with(table_metainfo, file_path)
-            self.assertEqual(
-                batch,
-                Batch(
-                    pd.DataFrame(
-                        [{"Video successfully added at location: ": file_path}]
-                    )
-                ),
+            expected = Batch(
+                pd.DataFrame([{f"Video successfully added at location: {file_path}"}])
             )
+            self.assertEqual(batch, expected)
 
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_search_in_upload_directory(self, create_mock):
@@ -84,17 +80,12 @@ class LoadExecutorTest(unittest.TestCase):
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.side_effect = [False, True]
             batch = next(load_executor.exec())
-            create_mock.assert_called_once_with(
-                table_metainfo, self.upload_path / file_path
+            location = self.upload_path / file_path
+            create_mock.assert_called_once_with(table_metainfo, location)
+            expected = Batch(
+                pd.DataFrame([{f"Video successfully added at location: {location}"}])
             )
-            self.assertEqual(
-                batch,
-                Batch(
-                    pd.DataFrame(
-                        [{"Video successfully added at location: ": file_path}]
-                    )
-                ),
-            )
+            self.assertEqual(batch, expected)
 
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_fail_to_find_file(self, create_mock):
@@ -154,7 +145,8 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
         write_mock.has_calls(
-            call(table_metainfo, batch_frames[0]), call(table_metainfo, batch_frames[1])
+            call(table_metainfo, batch_frames[0]),
+            call(table_metainfo, batch_frames[1]),
         )
 
         # Note: We call exec() from the child classes.

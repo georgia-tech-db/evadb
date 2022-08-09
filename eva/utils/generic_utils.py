@@ -64,9 +64,9 @@ def path_to_class(filepath: str, classname: str):
         spec.loader.exec_module(module)
         classobj = getattr(module, classname)
     except Exception as e:
-        logger.error(
-            "Failed to import %s from %s\nException: %s" % (classname, filepath, e)
-        )
+        err_msg = f"Failed to import {classname} from {filepath}\nException: {str(e)}"
+        logger.error(err_msg)
+        raise RuntimeError(err_msg)
     return classobj
 
 
@@ -78,6 +78,7 @@ def is_gpu_available() -> bool:
     """
     try:
         import torch
+
         return torch.cuda.is_available()
     except ImportError:
         return False

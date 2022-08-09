@@ -44,7 +44,7 @@ class LoadDataStatement(AbstractStatement):
         self._file_options = file_options
 
     def __str__(self) -> str:
-        print_str = "LOAD DATA INFILE {} INTO {}({})".format(
+        print_str = "LOAD FILE {} INTO {}({})".format(
             self._path.name, self._table_ref, self._column_list
         )
         return print_str

@@ -31,7 +31,7 @@ class CascadeOptimizer(unittest.TestCase):
         file_remove("dummy.avi")
 
     def test_logical_to_physical_udf(self):
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
