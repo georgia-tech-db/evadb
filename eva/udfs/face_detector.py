@@ -65,9 +65,9 @@ class FaceDetector(PytorchAbstractUDF):
 
         copy = torch.squeeze(frames)
         transform = T.ToPILImage()
-        copy2 = transform(copy)
+        pil_image = transform(copy)
 
-        bboxes, scores = self.model.detect(img=copy2)
+        bboxes, scores = self.model.detect(img=pil_image)
 
         outcome = pd.DataFrame()
         outcome = outcome.append(
