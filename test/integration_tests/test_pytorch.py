@@ -16,7 +16,7 @@ import sys
 import unittest
 import pytest
 
-from test.util import copy_sample_video_to_prefix, file_remove, load_inbuilt_udfs
+from test.util import copy_sample_videos_to_prefix, file_remove, load_inbuilt_udfs
 
 import mock
 
