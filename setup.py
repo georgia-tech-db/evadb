@@ -88,7 +88,8 @@ database_libs = [
 
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 udf_libs = [
-    "facenet-pytorch==2.5.2"
+    "facenet-pytorch==2.5.2",
+    "easyocr=1.5.0"
 ]
 
 MINIMAL_REQUIRES = minimal_requirement
