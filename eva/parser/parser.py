@@ -54,7 +54,6 @@ class AntlrErrorListener(ErrorListener):
     #     error_str = "ERROR: Context Sensitivity -" + str(configs)
     #     raise Exception(error_str)
 
-
 class Parser(object):
     """
     Parser for eva; based on EVAQL grammar

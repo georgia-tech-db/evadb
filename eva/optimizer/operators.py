@@ -23,6 +23,7 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
+from eva.parser.alias import Alias
 from eva.parser.types import JoinType, ShowType
 
 
@@ -138,7 +139,7 @@ class LogicalGet(Operator):
         self,
         video: TableRef,
         dataset_metadata: DataFrameMetadata,
-        alias: str,
+        alias: Alias,
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
         children=None,
@@ -207,7 +208,7 @@ class LogicalGet(Operator):
 class LogicalQueryDerivedGet(Operator):
     def __init__(
         self,
-        alias: str,
+        alias: Alias,
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
         children: List = None,

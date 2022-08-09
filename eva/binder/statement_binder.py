@@ -25,11 +25,14 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_mat_view_statement import (
+    CreateMaterializedViewStatement,
+)
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
+from eva.parser.alias import Alias
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
@@ -95,7 +98,9 @@ class StatementBinder:
             self._binder_context = current_context
 
     @bind.register(CreateMaterializedViewStatement)
-    def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
+    def _bind_create_mat_statement(
+        self, node: CreateMaterializedViewStatement
+    ):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
 
@@ -133,7 +138,7 @@ class StatementBinder:
                 column_list.append(
                     TupleValueExpression(
                         col_name=column.name,
-                        table_alias=table_ref_obj.name.lower(),
+                        table_alias=Alias(table_ref_obj.name.lower()),
                         col_object=column,
                     )
                 )
@@ -153,7 +158,9 @@ class StatementBinder:
     def _bind_tableref(self, node: TableRef):
         if node.is_table_atom():
             # Table
-            self._binder_context.add_table_alias(node.alias, node.table.table_name)
+            self._binder_context.add_table_alias(
+                node.alias, node.table.table_name
+            )
             bind_table_info(node.table)
         elif node.is_select():
             current_context = self._binder_context
@@ -171,7 +178,9 @@ class StatementBinder:
         elif node.is_table_valued_expr():
             func_expr = node.table_valued_expr.func_expr
             self.bind(func_expr)
-            self._binder_context.add_derived_table_alias(func_expr.alias, [func_expr])
+            self._binder_context.add_derived_table_alias(
+                func_expr.alias, [func_expr]
+            )
         else:
             raise BinderError(f"Unsupported node {type(node)}")
 
@@ -189,7 +198,6 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        node.alias = node.alias or node.name.lower()
         udf_obj = self._catalog.get_udf_by_name(node.name)
         if udf_obj is None:
             err_msg = (
@@ -199,29 +207,48 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        output_objs = self._catalog.get_udf_outputs(udf_obj)
-        if node.output:
-            for obj in output_objs:
-                if obj.name.lower() == node.output:
-                    node.output_col_aliases.append(
-                        "{}.{}".format(node.alias, obj.name.lower())
-                    )
-                    node.output_objs = [obj]
-            if len(node.output_col_aliases) != 1:
-                err_msg = f"Duplicate columns {node.output} in UDF {udf_obj.name}"
-                logger.error(err_msg)
-                raise BinderError(err_msg)
-        else:
-            node.output_col_aliases = [
-                "{}.{}".format(node.alias, obj.name.lower()) for obj in output_objs
-            ]
-            node.output_objs = output_objs
         try:
-            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+            node.function = path_to_class(
+                udf_obj.impl_file_path, udf_obj.name
+            )()
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the UDF class name in the"
                 "implementation file matches the UDF name."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
+
+        output_objs = self._catalog.get_udf_outputs(udf_obj)
+        if node.output:
+            for obj in output_objs:
+                if obj.name.lower() == node.output:
+                    node.output_objs = [obj]
+            if not node.output_objs:
+                err_msg = f"Output {node.output} does not exist in the  {udf_obj.name}"
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+        else:
+            node.output_objs = output_objs
+
+        default_alias_name = node.name.lower()
+        default_output_col_aliases = [
+            "{}.{}".format(default_alias_name, obj.name.lower())
+            for obj in output_objs
+        ]
+
+        if not node.alias:
+            node.alias = Alias(default_alias_name, default_output_col_aliases)
+        else:
+            if not node.alias.col_names:
+                node.alias = Alias(
+                    node.alias.alias_name, default_output_col_aliases
+                )
+
+        if len(node.alias.col_names) != len(node.output_objs):
+            err_msg = (
+                f"Expected {len(node.output_objs)} output columns in the alias"
+                f"{node.alias.alias_name}, got {len(node.alias.col_names)}"
             )
             logger.error(err_msg)
             raise BinderError(err_msg)

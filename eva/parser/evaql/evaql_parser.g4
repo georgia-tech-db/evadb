@@ -287,8 +287,14 @@ joinPart
         | USING LR_BRACKET uidList RR_BRACKET
       )?                                                #innerJoin
     |
-      JOIN LATERAL tableValuedFunction                  #lateralJoin
+      JOIN LATERAL tableValuedFunction aliasClause?     #lateralJoin
     ;
+
+aliasClause
+    : AS? uid '(' uidList ')'
+    | AS? uid
+    ;
+
 
 //    Select Statement's Details
 

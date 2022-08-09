@@ -21,6 +21,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
 
 CatalogColumnType = Union[DataFrameColumn, UdfIO]
@@ -45,7 +46,7 @@ class StatementBinderContext:
         self._derived_table_alias_map: Dict[str, List[CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
 
-    def _check_duplicate_alias(self, alias: str):
+    def _check_duplicate_alias(self, alias: Alias):
         """
         Sanity check: no duplicate alias in table and derived_table
         Arguments:
@@ -59,7 +60,7 @@ class StatementBinderContext:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-    def add_table_alias(self, alias: str, table_name: str):
+    def add_table_alias(self, alias: Alias, table_name: str):
         """
         Add a alias -> table_name mapping
         Arguments:
@@ -72,7 +73,7 @@ class StatementBinderContext:
 
     def add_derived_table_alias(
         self,
-        alias: str,
+        alias: Alias,
         target_list: List[Union[TupleValueExpression, FunctionExpression]],
     ):
         """
@@ -92,7 +93,7 @@ class StatementBinderContext:
         self._derived_table_alias_map[alias] = col_list
 
     def get_binded_column(
-        self, col_name: str, alias: str = None
+        self, col_name: str, alias: Alias = None
     ) -> Tuple[str, CatalogColumnType]:
         """
         Find the binded column object
