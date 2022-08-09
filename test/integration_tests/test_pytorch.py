@@ -28,7 +28,7 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        copy_sample_video_to_prefix()
+        copy_sample_videos_to_prefix()
         query = """LOAD FILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
