@@ -86,9 +86,16 @@ database_libs = [
     "pymysql==0.10.1"
 ]
 
+### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
+udf_libs = [
+    "facenet-pytorch==2.5.2",
+    "easyocr==1.5.0"
+]
+
 MINIMAL_REQUIRES = minimal_requirement
 INSTALL_REQUIRES = minimal_requirement + formatter_libs
 DATABASE_REQUIRES = INSTALL_REQUIRES + database_libs
+UDF_REQUIRES = INSTALL_REQUIRES + integration_test_libs + udf_libs
 DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
@@ -98,12 +105,14 @@ DEV_REQUIRES = (
     + doc_libs
     + database_libs
     + dist_libs
+    + udf_libs
 )
 
 EXTRA_REQUIRES = {
     "dev": DEV_REQUIRES,
     "database": DATABASE_REQUIRES,
     "minimal": MINIMAL_REQUIRES,
+    "udf": UDF_REQUIRES
 }
 
 setup(
