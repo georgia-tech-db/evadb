@@ -3,7 +3,8 @@
 [![Build Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evagatech.readthedocs.io/en/latest/index.html) [![Join the chat at https://gitter.im/georgia-tech-db/eva](https://badges.gitter.im/georgia-tech-db/eva.svg)](https://gitter.im/georgia-tech-db/eva?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
+
 
 ## What is EVA?
 
@@ -20,7 +21,7 @@ EVA is a visual data management system (think MySQL for videos). It supports a d
 ## Links
 * [Demo](https://ada-00.cc.gatech.edu/eva/playground)
 * [Website](https://georgia-tech-db.github.io/eva/index.html)
-* [Documentation](https://evagatech.readthedocs.io/en/latest/)
+* [Documentation](https://evadb.readthedocs.io/en/latest/)
 * [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
 * [Chat](https://gitter.im/georgia-tech-db/eva)
 
@@ -116,12 +117,9 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 DROP UDF IF EXISTS MyUDF;
 ```
 
+## Contributing
 
-## Documentation
-
-Documentation for EVA is located [here](https://evagatech.readthedocs.io/).
-
-### Installation Instructions for Developers
+### Environment Setup
 
 To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
 
@@ -130,21 +128,22 @@ git clone https://github.com/georgia-tech-db/eva.git && cd eva
 python3 -m venv env38                                # to create a virtual environment
 . env38/bin/activate
 pip install --upgrade pip
-sudo -E apt install -y openjdk-8-jdk openjdk-8-jre   # to install JAVA
+sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
 sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
-pip install .
+pip install -e ".[dev]"
 ```
 
-</p>
-</details>
+To verify that installation was successfull, run the test suite.
 
+```shell
+bash script/test/test.sh
+```
 
-## Contributing
+### Contributing Guidelines
 
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-
-For information on installing from source and contributing to EVA, see our
-[contributing guidelines](./CONTRIBUTING.md).
+For more information on installing from source, troublshooting,and contributing to EVA, see our
+[contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
 ## Contributors
 

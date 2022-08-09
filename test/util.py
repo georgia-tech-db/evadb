@@ -114,7 +114,7 @@ def create_table(table_name, num_rows, num_columns):
     columns = ['a{}'.format(i) for i in range(num_columns)]
     df = create_csv(num_rows, columns)
     # load the CSV
-    load_query = """LOAD DATA INFILE 'dummy.csv' INTO {}
+    load_query = """LOAD FILE 'dummy.csv' INTO {}
                    WITH FORMAT CSV;""".format(table_name)
     execute_query_fetch_all(load_query)
     df.columns = [f'{table_name}.{col}' for col in df.columns]
@@ -136,9 +136,11 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
 
-def copy_sample_video_to_prefix():
+def copy_sample_videos_to_prefix():
     shutil.copyfile('data/ua_detrac/ua_detrac.mp4',
                     os.path.join(PATH_PREFIX, 'ua_detrac.mp4'))
+    shutil.copyfile('data/mnist/mnist.mp4',
+                    os.path.join(PATH_PREFIX, 'mnist.mp4'))
 
 
 def file_remove(path):

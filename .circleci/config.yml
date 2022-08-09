@@ -3,40 +3,34 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.8
+      - image: cimg/python:3.7
     resource_class: large
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "setup.cfg" }}
+            - v1-dependencies-{{ checksum "setup.py" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
-          name: Install Package
+          name: Install EVA package with test dependencies
           command: |
-            python -m venv env37
-            . env37/bin/activate
+            python -m venv eva_dev_env
+            . eva_dev_env/bin/activate
             pip install --upgrade pip
-            python setup.py install
+            pip install ".[dev]"
 
       - run:
           name: Generate Parser Files
           command: |
             sudo add-apt-repository ppa:openjdk-r/ppa
-            sudo -E apt install -y openjdk-8-jdk openjdk-8-jre
+            sudo -E apt install -y openjdk-11-jdk openjdk-11-jre
             sh script/antlr4/generate_parser.sh
-
-      - run:
-          name: Install Test Dependencies
-          command: |
-            . env37/bin/activate
-            pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1
 
       - run:
           name: Test
           command: |
-            . env37/bin/activate
+            . eva_dev_env/bin/activate
             sh script/test/test.sh
             coveralls
 

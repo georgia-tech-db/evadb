@@ -18,7 +18,13 @@ from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
 
-from eva.optimizer.optimizer_utils import extract_equi_join_keys
+from eva.optimizer.optimizer_utils import (
+    extract_equi_join_keys,
+    extract_pushdown_predicate,
+)
+from eva.optimizer.rules.pattern import Pattern
+from eva.parser.types import JoinType
+from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
@@ -53,9 +59,6 @@ from eva.optimizer.operators import (
     Operator,
     OperatorType,
 )
-from eva.optimizer.rules.pattern import Pattern
-from eva.parser.types import JoinType
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
@@ -238,22 +241,44 @@ class EmbedFilterIntoGet(Rule):
     def promise(self):
         return Promise.EMBED_FILTER_INTO_GET
 
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        # System supports predicate pushdown only while reading video data
+        predicate = before.predicate
+        lget: LogicalGet = before.children[0]
+        if predicate and lget.dataset_metadata.is_video:
+            # System only supports pushing basic range predicates on id
+            video_alias = lget.video.alias
+            col_alias = f"{video_alias}.id"
+            pushdown_pred, _ = extract_pushdown_predicate(predicate, col_alias)
+            if pushdown_pred:
+                return True
+        return False
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
         predicate = before.predicate
         lget = before.children[0]
-        new_get_opr = LogicalGet(
-            lget.video,
-            lget.dataset_metadata,
-            alias=lget.alias,
-            predicate=predicate,
-            target_list=lget.target_list,
-            children=lget.children,
+        # System only supports pushing basic range predicates on id
+        video_alias = lget.video.alias
+        col_alias = f"{video_alias}.id"
+        pushdown_pred, unsupported_pred = extract_pushdown_predicate(
+            predicate, col_alias
         )
-        return new_get_opr
+        if pushdown_pred:
+            new_get_opr = LogicalGet(
+                lget.video,
+                lget.dataset_metadata,
+                alias=lget.alias,
+                predicate=pushdown_pred,
+                target_list=lget.target_list,
+                children=lget.children,
+            )
+            if unsupported_pred:
+                unsupported_opr = LogicalFilter(unsupported_pred)
+                unsupported_opr.append_child(new_get_opr)
+                return unsupported_opr
+            return new_get_opr
+        else:
+            return before
 
 
 class EmbedProjectIntoGet(Rule):
@@ -604,9 +629,13 @@ class LogicalGetToSeqScan(Rule):
         )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = SeqScanPlan(before.predicate, before.target_list, before.alias)
+        after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
-            StoragePlan(before.dataset_metadata, batch_mem_size=batch_mem_size)
+            StoragePlan(
+                before.dataset_metadata,
+                batch_mem_size=batch_mem_size,
+                predicate=before.predicate,
+            )
         )
         return after
 
@@ -777,7 +806,10 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         build_plan = HashJoinBuildPlan(join_node.join_type, a_join_keys)
         build_plan.append_child(a)
         probe_side = HashJoinProbePlan(
-            join_node.join_type, b_join_keys, join_predicates, join_node.join_project
+            join_node.join_type,
+            b_join_keys,
+            join_predicates,
+            join_node.join_project,
         )
         probe_side.append_child(build_plan)
         probe_side.append_child(b)
@@ -798,7 +830,9 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
 
     def apply(self, before: LogicalCreateMaterializedView, context: OptimizerContext):
         after = CreateMaterializedViewPlan(
-            before.view, columns=before.col_list, if_not_exists=before.if_not_exists
+            before.view,
+            columns=before.col_list,
+            if_not_exists=before.if_not_exists,
         )
         for child in before.children:
             after.append_child(child)
@@ -878,10 +912,10 @@ class RulesManager:
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
-            EmbedFilterIntoDerivedGet(),
+            # EmbedFilterIntoDerivedGet(),
             PushdownFilterThroughSample(),
             EmbedProjectIntoGet(),
-            EmbedProjectIntoDerivedGet(),
+            # EmbedProjectIntoDerivedGet(),
             PushdownProjectThroughSample(),
         ]
 

@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pytest
+
 from test.util import (
     DummyObjectDetector,
-    copy_sample_video_to_prefix,
+    copy_sample_videos_to_prefix,
     create_sample_video,
     file_remove,
     load_inbuilt_udfs,
@@ -36,10 +38,10 @@ class MaterializedViewTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        copy_sample_video_to_prefix()
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        copy_sample_videos_to_prefix()
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
-        query = """LOAD DATA INFILE 'ua_detrac.mp4'
+        query = """LOAD FILE 'ua_detrac.mp4'
                    INTO UATRAC;"""
         execute_query_fetch_all(query)
         load_inbuilt_udfs()
@@ -94,10 +96,12 @@ class MaterializedViewTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
 
+    @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn(self):
         select_query = """SELECT id, FastRCNNObjectDetector(data).labels
                             FROM UATRAC WHERE id < 5;"""
-        query = """CREATE MATERIALIZED VIEW IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
+        query = """CREATE MATERIALIZED VIEW 
+                   IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
         AS {}""".format(
             select_query
         )

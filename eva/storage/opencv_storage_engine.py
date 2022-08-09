@@ -19,6 +19,7 @@ from typing import Iterator
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -59,13 +60,18 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         pass
 
     def read(
-        self, table: DataFrameMetadata, batch_mem_size: int, predicate_func=None
+        self,
+        table: DataFrameMetadata,
+        batch_mem_size: int,
+        predicate: AbstractExpression = None,
     ) -> Iterator[Batch]:
 
         metadata_file = Path(table.file_url) / self.metadata
         video_file_name = self._get_video_file_path(metadata_file)
         video_file = Path(table.file_url) / video_file_name
-        reader = OpenCVReader(str(video_file), batch_mem_size=batch_mem_size)
+        reader = OpenCVReader(
+            str(video_file), batch_mem_size=batch_mem_size, predicate=predicate
+        )
         for batch in reader.read():
             yield batch
 
@@ -88,7 +94,10 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)
             data = struct.pack(
-                "!HH%ds" % (length,), self.curr_version, length, file_path_bytes
+                "!HH%ds" % (length,),
+                self.curr_version,
+                length,
+                file_path_bytes,
             )
             f.write(data)
 

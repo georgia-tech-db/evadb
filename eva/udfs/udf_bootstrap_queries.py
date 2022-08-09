@@ -23,18 +23,30 @@ DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   IMPL  'test/util.py';
         """
 
-DummyMultiObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS  DummyMultiObjectDetector
+DummyMultiObjectDetector_udf_query = """CREATE UDF 
+                  IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
 
-ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
-            INPUT(Input NDARRAY ANYTYPE, Key ANYTYPE)
-            OUTPUT(count INTEGER)
-            TYPE Ndarray
+ArrayCount_udf_query = """CREATE UDF 
+            IF NOT EXISTS  Array_Count
+            INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
+            OUTPUT (key_count INTEGER)
+            TYPE NdarrayUDF
             IMPL "{}/udfs/ndarray_udfs/array_count.py";
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
+Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
+                INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                        bboxes NDARRAY FLOAT32(ANYDIM, 4))
+                OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE  NdarrayUDF
+                IMPL  "{}/udfs/ndarray_udfs/crop.py";
         """.format(
     EVA_INSTALLATION_DIR
 )
@@ -42,7 +54,7 @@ ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
-                TYPE  Ndarray
+                TYPE  NdarrayUDF
                 IMPL  "{}/udfs/ndarray_udfs/unnest.py";
         """.format(
     EVA_INSTALLATION_DIR
@@ -67,11 +79,10 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, Unnest_udf_query, ArrayCount_udf_query]
-    if mode == "debug":
-        queries.extend(
-            [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]
-        )
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
+    queries.extend(
+        [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]
+    )
 
     for query in queries:
         execute_query_fetch_all(query)

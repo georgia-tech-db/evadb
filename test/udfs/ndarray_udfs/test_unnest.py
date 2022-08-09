@@ -19,7 +19,7 @@
 #     def setUp(self):
 #         CatalogManager().reset()
 #         create_sample_video(NUM_FRAMES)
-#         load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+#         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
 #         execute_query_fetch_all(load_query)
 #         load_inbuilt_udfs()
 

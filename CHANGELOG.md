@@ -4,16 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.0.3] - 2022-07-03 
+## [Unreleased]
 ### [Breaking Changes]
-
 ### [Added]
-
 ### [Changed]
-* PR 263 : Updates to logger for more informative messages
-* PR 261 : Improving clarity in README.md
-
 ### [Deprecated]
-
 ### [Removed]
 
+## [0.0.6] - 2022-08-05
+### [Added]
+
+* PR #295: Improve Error Messages and Query responses 
+* PR #292: Upating read the docs + website
+* PR #288: Update README.md
+
+
+## [0.0.3] - 2022-07-31
+### [Added]
+
+* PR #283: Updated README
+* PR #278: Updated development guide
+* PR #275: Updated setup.py
+* PR #273: Predicate pushdown for video table
+* PR #272: Add support for DROP and SHOW UDFs
+* PR #262: Error message enhancement
+* PR #276: Website updates
+* PR #257: Interpreter updates
+
+### [Contributors]
+
+Thanks to @gaurav274, @jarulraj, @xzdandy, @EDGAhab, and @kaushikravichandran for contributions!

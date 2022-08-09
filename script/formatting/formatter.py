@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 import pkg_resources
 
@@ -120,24 +121,23 @@ def is_tool(name):
     elif name is ISORT_BINARY:
         req_version = ISORT_VERSION_REQUIRED
     if which(name) is None:
-        sys.exit(
+        LOG.error(
             f"{name} is not installed. Install the python package with:"
-            " pip install {name}=={req_version}"
+            f"pip install {name}=={req_version}"
         )
+        sys.exit(1)
     else:
         installed_version = pkg_resources.get_distribution(name).version
         if installed_version != req_version:
             LOG.warning(
                 f"EVA uses {name} {req_version}. The installed version is"
-                " {installed_version} which can result in different results."
+                f" {installed_version} which can result in different results."
             )
 
 
 def format_file(file_path, add_header, strip_header, format_code):
 
     abs_path = os.path.abspath(file_path)
-    LOG.info(file_path)
-
     with open(abs_path, "r+") as fd:
         file_data = fd.read()
         if add_header:
@@ -149,7 +149,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif strip_header:
-
+            LOG.info("Stripping headers : " + file)               
             header_match = header_regex.match(file_data)
             if header_match is None:
                 return
@@ -163,6 +163,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
+            LOG.info("Formatting File : " + file)
             # ISORT
             isort_command = f"{ISORT_BINARY}  {file_path}"
             os.system(isort_command)
@@ -175,8 +176,9 @@ def format_file(file_path, add_header, strip_header, format_code):
             # AUTOFLAKE
             autoflake_command = FLAKE_BINARY + " --max-line-length 88 " + file_path
             # LOG.info(autoflake_command)
-            os.system(autoflake_command)
-
+            ret_val = os.system(autoflake_command)
+            if ret_val:
+                sys.exit(1)
     # END WITH
 
     fd.close()
@@ -257,7 +259,6 @@ if __name__ == "__main__":
     is_tool(BLACK_BINARY)
     is_tool(FLAKE_BINARY)
     is_tool(ISORT_BINARY)
-
     if args.file_name:
         LOG.info("Scanning file: " + "".join(args.file_name))
         format_file(
@@ -271,7 +272,7 @@ if __name__ == "__main__":
         format_dir(args.dir_name, args.add_header, args.strip_header, args.format_code)
     # BY DEFAULT, WE FIX THE MODIFIED FILES
     else:
-        LOG.info("Default fix modified files")
+        # LOG.info("Default fix modified files")
         MERGEBASE = subprocess.check_output(
             "git merge-base origin/master HEAD", shell=True, text=True
         ).rstrip()
@@ -284,13 +285,16 @@ if __name__ == "__main__":
             .rstrip()
             .split("\n")
         )
-
         for file in files:
-            LOG.info("Stripping headers : " + file)
-            format_file(file, False, True, False)
-
-            LOG.info("Adding headers : " + file)
-            format_file(file, True, False, False)
-
-            LOG.info("Formatting File : " + file)
-            format_file(file, False, False, True)
+            valid = False
+            ## only format the defualt directories
+            file_path = str(Path(file).absolute())
+            for source_dir in DEFAULT_DIRS:
+                source_path = str(Path(source_dir).resolve())
+                if file_path.startswith(source_path):
+                    valid = True
+            
+            if valid:
+                format_file(file, False, True, False)
+                format_file(file, True, False, False)
+                format_file(file, False, False, True)

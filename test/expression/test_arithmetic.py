@@ -82,5 +82,5 @@ class ArithmeticExpressionsTest(unittest.TestCase):
         self.assertNotEqual(cmpr_exp2, cmpr_exp3)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

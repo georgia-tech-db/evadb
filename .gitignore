@@ -166,3 +166,6 @@ eva.history
 nohup.out
 *mp4*
 develop.sh
+*build/
+eva_dev_env/
+test_eva/

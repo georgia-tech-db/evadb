@@ -55,7 +55,7 @@ class Array_Count(AbstractNdarrayUDF):
             lambda x: self.count_in_row(x[0], search_element), axis=1
         )
 
-        return pd.DataFrame({"count": count_result.values})
+        return pd.DataFrame({"key_count": count_result.values})
 
     def count_in_row(self, row_val, search_element):
         # change the row and search element to numpy array

@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Dict, List, Tuple, Union
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -54,7 +55,9 @@ class StatementBinderContext:
             Raise exception if found duplication
         """
         if alias in self._derived_table_alias_map or alias in self._table_alias_map:
-            raise RuntimeError("Found duplicate alias {}".format(alias))
+            err_msg = f"Found duplicate alias {alias}"
+            logger.error(err_msg)
+            raise BinderError(err_msg)
 
     def add_table_alias(self, alias: str, table_name: str):
         """
@@ -102,9 +105,9 @@ class StatementBinderContext:
         """
 
         def raise_error():
-            err_msg = "Invalid column = {}".format(col_name)
+            err_msg = f"Found invalid column {col_name}"
             logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            raise BinderError(err_msg)
 
         if not alias:
             alias, col_obj = self._search_all_alias_maps(col_name)
@@ -189,8 +192,8 @@ class StatementBinderContext:
                 alias_match = alias
 
         if num_alias_matches > 1:
-            err_msg = "Ambiguous Column name = {}".format(col_name)
+            err_msg = "Ambiguous Column name {col_name}"
             logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            raise BinderError(err_msg)
 
         return alias_match, match_obj

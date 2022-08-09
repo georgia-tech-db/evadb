@@ -39,7 +39,7 @@ class ShowExecutorTest(unittest.TestCase):
             "name": ["FastRCNNObjectDetector", "Array_Count"],
             "inputs": [
                 ["Frame_Array NDARRAY UINT8 [3, None, None]"],
-                ["Input NDARRAY ANYTYPE []", "Key ANY"],
+                ["Input_Array NDARRAY ANYTYPE []", "Search_Key ANY"],
             ],
             "outputs": [
                 [
@@ -47,9 +47,9 @@ class ShowExecutorTest(unittest.TestCase):
                     "bboxes NDARRAY FLOAT32 [None, 4]",
                     "scores NDARRAY FLOAT32 [None]",
                 ],
-                ["count INTEGER"],
+                ["key_count INTEGER"],
             ],
-            "type": ["Classification", "Ndarray"],
+            "type": ["Classification", "NdarrayUDF"],
         }
         expected_df = pd.DataFrame(expected)
         self.assertTrue(all(expected_df.inputs == result.frames.inputs))
