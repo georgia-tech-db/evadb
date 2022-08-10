@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from typing import Iterable, NoReturn
+from typing import Iterable, NoReturn, Union
 
 import numpy as np
 import pandas as pd
@@ -290,27 +290,31 @@ class Batch:
         """Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
 
-    def modify_column_alias(self, alias: Alias) -> NoReturn:
+    def modify_column_alias(self, alias: Union[Alias, str]) -> NoReturn:
         # a, b, c -> table1.a, table1.b, table1.c
         # t1.a -> t2.a
+        if isinstance(alias, str):
+            alias = Alias(alias)
         new_col_names = []
         if len(alias.col_names):
             if len(self.frames.columns) != len(alias.col_names):
                 err_msg = (
-                    f"Expected col names {len(alias.col_names)},"
-                    f"got {len(self.frames.columns)}"
+                    f"Expected {len(alias.col_names)} columns {alias.col_names},"
+                    f"got {len(self.frames.columns)} columns {self.frames.columns}."
                 )
                 logger.error(err_msg)
                 raise RuntimeError(err_msg)
-            for col_name in alias.col_names:
-                new_col_names.append(
-                    "{}.{}".format(alias.alias_name, col_name)
-                )
+            new_col_names = [
+                "{}.{}".format(alias.alias_name, col_name)
+                for col_name in alias.col_names
+            ]
         else:
             for col_name in self.frames.columns:
                 if "." in col_name:
                     new_col_names.append(
-                        "{}.{}".format(alias, col_name.split(".")[1])
+                        "{}.{}".format(
+                            alias.alias_name, col_name.split(".")[1]
+                        )
                     )
                 else:
                     new_col_names.append(

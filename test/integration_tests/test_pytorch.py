@@ -49,7 +49,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(actual_batch.batch_size, 5)
 
     @pytest.mark.torchtest
-    def test_should_run_pytorch_and_ssd(self):
+    def test_aaashould_run_pytorch_and_ssd(self):
         create_udf_query = """CREATE UDF SSDObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
@@ -62,7 +62,6 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
-
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
@@ -124,3 +123,7 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
 
                 pass
+
+
+if __name__ == '__main__':
+    unittest.main()

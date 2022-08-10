@@ -35,8 +35,8 @@ class FunctionExpression(AbstractExpression):
     `output`: If the user wants only subset of ouputs. Eg,
     ObjDetector.lables the parser with set output to 'labels'
 
-    `output_col_aliases`: It is populated by the binder. In case the
-    output is None, the binder sets output_col_aliases to list of all
+    `output_objs`: It is populated by the binder. In case the
+    output is None, the binder sets output_objs to list of all
     output columns of the FunctionExpression. Eg, ['labels',
     'boxes']. Otherwise, only the output columns.
 
@@ -62,6 +62,7 @@ class FunctionExpression(AbstractExpression):
         self._output = output
         self.alias = alias
         self.output_objs: List[UdfIO] = []
+        self.projection_columns: List[str] = []
 
     @property
     def name(self):
@@ -90,10 +91,9 @@ class FunctionExpression(AbstractExpression):
         func = self._gpu_enabled_function()
         outcomes = func(new_batch.frames)
         outcomes = Batch(pd.DataFrame(outcomes))
-
+        outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
-
-        return outcomes.project(self.output_col_aliases)
+        return outcomes
 
     def _gpu_enabled_function(self):
         if isinstance(self._function, GPUCompatible):

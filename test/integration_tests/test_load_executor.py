@@ -91,4 +91,6 @@ class LoadExecutorTest(unittest.TestCase):
         # assert the batches are equal
         expected_batch = create_dummy_csv_batches()
         expected_batch.modify_column_alias("myvideocsv")
+        from pandas.testing import assert_frame_equal
+        assert_frame_equal(expected_batch.frames, actual_batch.frames)
         self.assertEqual(actual_batch, expected_batch)

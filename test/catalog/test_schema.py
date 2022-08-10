@@ -35,13 +35,13 @@ class SchemaTests(unittest.TestCase):
         col_name = "frame_id"
         col = DataFrameColumn(col_name, ColumnType.INTEGER, False)
         petastorm_col = UnischemaField(
-            col_name, np.int32, (), ScalarCodec(IntegerType()), False
+            col_name, np.int64, (), ScalarCodec(IntegerType()), False
         )
         self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
 
         col = DataFrameColumn(col_name, ColumnType.FLOAT, True)
         petastorm_col = UnischemaField(
-            col_name, np.float64, (), ScalarCodec(FloatType()), True
+            col_name, np.float32, (), ScalarCodec(FloatType()), True
         )
         self.assertEqual(SchemaUtils.get_petastorm_column(col), petastorm_col)
 

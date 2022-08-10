@@ -15,7 +15,6 @@
 from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.alias import Alias
 from eva.planner.abstract_scan_plan import AbstractScan
 from eva.planner.types import PlanOprType
 
@@ -36,7 +35,7 @@ class SeqScanPlan(AbstractScan):
         self,
         predicate: AbstractExpression,
         columns: List[AbstractExpression],
-        alias: Alias = None,
+        alias: str = None,
     ):
         self._columns = columns
         self.alias = alias

@@ -63,7 +63,7 @@ class MaterializedViewTest(unittest.TestCase):
 
         labels = DummyObjectDetector().labels
         expected = [
-            {"dummy_view.id": i, "dummy_view.label": labels[1 + i % 2]}
+            {"dummy_view.id": i, "dummy_view.label": [labels[1 + i % 2]]}
             for i in range(NUM_FRAMES)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -90,7 +90,7 @@ class MaterializedViewTest(unittest.TestCase):
 
         labels = DummyObjectDetector().labels
         expected = [
-            {"dummy_view2.id": i, "dummy_view2.label": labels[1 + i % 2]}
+            {"dummy_view2.id": i, "dummy_view2.label": [labels[1 + i % 2]]}
             for i in range(5)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))

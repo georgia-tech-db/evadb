@@ -138,7 +138,7 @@ class StatementBinder:
                 column_list.append(
                     TupleValueExpression(
                         col_name=column.name,
-                        table_alias=Alias(table_ref_obj.name.lower()),
+                        table_alias=table_ref_obj.name.lower(),
                         col_object=column,
                     )
                 )
@@ -159,7 +159,7 @@ class StatementBinder:
         if node.is_table_atom():
             # Table
             self._binder_context.add_table_alias(
-                node.alias, node.table.table_name
+                node.alias.alias_name, node.table.table_name
             )
             bind_table_info(node.table)
         elif node.is_select():
@@ -168,7 +168,7 @@ class StatementBinder:
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
-                node.alias, node.select_statement.target_list
+                node.alias.alias_name, node.select_statement.target_list
             )
         elif node.is_join():
             self.bind(node.join_node.left)
@@ -177,9 +177,23 @@ class StatementBinder:
                 self.bind(node.join_node.predicate)
         elif node.is_table_valued_expr():
             func_expr = node.table_valued_expr.func_expr
+            func_expr.alias = node.alias
             self.bind(func_expr)
+            output_cols = []
+            for obj, alias in zip(
+                func_expr.output_objs, func_expr.alias.col_names
+            ):
+                alias_obj = self._catalog.udf_io(
+                    alias,
+                    data_type=obj.type,
+                    array_type=obj.array_type,
+                    dimensions=obj.array_dimensions,
+                    is_input=obj.is_input,
+                )
+
+                output_cols.append(alias_obj)
             self._binder_context.add_derived_table_alias(
-                func_expr.alias, [func_expr]
+                func_expr.alias.alias_name, output_cols
             )
         else:
             raise BinderError(f"Unsupported node {type(node)}")
@@ -228,27 +242,32 @@ class StatementBinder:
                 err_msg = f"Output {node.output} does not exist in the  {udf_obj.name}"
                 logger.error(err_msg)
                 raise BinderError(err_msg)
+            node.projection_columns = [node.output]
         else:
             node.output_objs = output_objs
+            node.projection_columns = [obj.name.lower() for obj in output_objs]
 
         default_alias_name = node.name.lower()
         default_output_col_aliases = [
-            "{}.{}".format(default_alias_name, obj.name.lower())
-            for obj in output_objs
+            str(obj.name.lower()) for obj in node.output_objs
         ]
-
         if not node.alias:
             node.alias = Alias(default_alias_name, default_output_col_aliases)
         else:
-            if not node.alias.col_names:
+            if not len(node.alias.col_names):
                 node.alias = Alias(
                     node.alias.alias_name, default_output_col_aliases
                 )
+            else:
+                output_aliases = [
+                    str(col_name.lower()) for col_name in node.alias.col_names
+                ]
+                node.alias = Alias(node.alias.alias_name, output_aliases)
 
         if len(node.alias.col_names) != len(node.output_objs):
             err_msg = (
-                f"Expected {len(node.output_objs)} output columns in the alias"
-                f"{node.alias.alias_name}, got {len(node.alias.col_names)}"
+                f"Expected {len(node.output_objs)} output columns for "
+                f"{node.alias.alias_name}, got {len(node.alias.col_names)}."
             )
             logger.error(err_msg)
             raise BinderError(err_msg)

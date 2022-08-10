@@ -28,6 +28,8 @@ from eva.utils.logging_manager import logger
 ##################################################################
 # TABLE SOURCES
 ##################################################################
+
+
 class TableSources(evaql_parserVisitor):
     def visitTableSources(self, ctx: evaql_parser.TableSourcesContext):
         return self.visit(ctx.tableSource())
@@ -75,13 +77,15 @@ class TableSources(evaql_parserVisitor):
         if ctx.aliasClause():
             alias = self.visit(ctx.aliasClause())
         else:
-            err_msg = "TableValuedFunction should have alias."
+            err_msg = (
+                f"TableValuedFunction {tve.func_expr.name} should have alias."
+            )
             logger.error(err_msg)
             raise SyntaxError(err_msg)
         join_type = JoinType.LATERAL_JOIN
 
         return TableRef(
-            JoinNode(None, TableRef(tve), alias=alias, join_type=join_type)
+            JoinNode(None, TableRef(tve, alias=alias), join_type=join_type)
         )
 
     def visitTableValuedFunction(
@@ -205,5 +209,6 @@ class TableSources(evaql_parserVisitor):
         column_list = []
         if ctx.uidList():
             column_list = self.visit(ctx.uidList())
+            column_list = [col.col_name for col in column_list]
 
         return Alias(alias_name, column_list)
