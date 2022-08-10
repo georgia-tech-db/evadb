@@ -79,7 +79,7 @@ class StatementBinderContext:
         Add a alias -> derived table column mapping
         Arguments:
             alias (str): name of alias
-            target_list: list of Tuplevalue Expression or FunctionExpression or str
+            target_list: list of Tuplevalue Expression or FunctionExpression or UdfIO
         """
         self._check_duplicate_alias(alias)
         col_list = []

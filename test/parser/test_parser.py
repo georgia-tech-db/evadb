@@ -22,9 +22,7 @@ from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
-from eva.parser.create_mat_view_statement import (
-    CreateMaterializedViewStatement,
-)
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
@@ -35,12 +33,7 @@ from eva.parser.parser import Parser
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement, StatementType
-from eva.parser.table_ref import (
-    JoinNode,
-    TableInfo,
-    TableRef,
-    TableValuedExpression,
-)
+from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 from eva.parser.upload_statement import UploadStatement
 
@@ -85,9 +78,7 @@ class ParserTests(unittest.TestCase):
     def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
-        expected_stmt = DropTableStatement(
-            [TableRef(TableInfo("student_info"))], False
-        )
+        expected_stmt = DropTableStatement([TableRef(TableInfo("student_info"))], False)
         eva_statement_list = parser.parse(drop_queries)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -103,9 +94,7 @@ class ParserTests(unittest.TestCase):
         eva_statement_list = parser.parse(drop_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(
-            eva_statement_list[0].stmt_type, StatementType.DROP_UDF
-        )
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.DROP_UDF)
         drop_udf_stmt = eva_statement_list[0]
         self.assertEqual(drop_udf_stmt, expected_stmt)
 
@@ -175,12 +164,8 @@ class ParserTests(unittest.TestCase):
         # target List
         self.assertIsNotNone(select_stmt.target_list)
         self.assertEqual(len(select_stmt.target_list), 2)
-        self.assertEqual(
-            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE
-        )
-        self.assertEqual(
-            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE
-        )
+        self.assertEqual(select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
 
         # from_table
         self.assertIsNotNone(select_stmt.from_table)
@@ -219,9 +204,7 @@ class ParserTests(unittest.TestCase):
         select_stmt_new.target_list = select_stmt.target_list
         select_stmt_new.from_table = select_stmt.from_table
 
-        self.assertEqual(
-            select_stmt_new.where_clause, select_stmt.where_clause
-        )
+        self.assertEqual(select_stmt_new.where_clause, select_stmt.where_clause)
         self.assertEqual(select_stmt_new.target_list, select_stmt.target_list)
         self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
@@ -247,12 +230,8 @@ class ParserTests(unittest.TestCase):
         # target List
         self.assertIsNotNone(select_stmt.target_list)
         self.assertEqual(len(select_stmt.target_list), 2)
-        self.assertEqual(
-            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE
-        )
-        self.assertEqual(
-            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE
-        )
+        self.assertEqual(select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
 
         # from_table
         self.assertIsNotNone(select_stmt.from_table)
@@ -266,13 +245,9 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
         self.assertEqual(select_stmt.orderby_list[0][0].col_name, "CLASS")
-        self.assertEqual(
-            select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC
-        )
+        self.assertEqual(select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
         self.assertEqual(select_stmt.orderby_list[1][0].col_name, "REDNESS")
-        self.assertEqual(
-            select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC
-        )
+        self.assertEqual(select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
     def test_select_statement_limit_class(self):
         """Testing limit clause in select statement
@@ -294,12 +269,8 @@ class ParserTests(unittest.TestCase):
         # target List
         self.assertIsNotNone(select_stmt.target_list)
         self.assertEqual(len(select_stmt.target_list), 2)
-        self.assertEqual(
-            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE
-        )
-        self.assertEqual(
-            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE
-        )
+        self.assertEqual(select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
 
         # from_table
         self.assertIsNotNone(select_stmt.from_table)
@@ -313,13 +284,9 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.orderby_list)
         self.assertEqual(len(select_stmt.orderby_list), 2)
         self.assertEqual(select_stmt.orderby_list[0][0].col_name, "CLASS")
-        self.assertEqual(
-            select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC
-        )
+        self.assertEqual(select_stmt.orderby_list[0][1], ParserOrderBySortType.ASC)
         self.assertEqual(select_stmt.orderby_list[1][0].col_name, "REDNESS")
-        self.assertEqual(
-            select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC
-        )
+        self.assertEqual(select_stmt.orderby_list[1][1], ParserOrderBySortType.DESC)
 
         # limit_count
         self.assertIsNotNone(select_stmt.limit_count)
@@ -342,12 +309,8 @@ class ParserTests(unittest.TestCase):
         # target List
         self.assertIsNotNone(select_stmt.target_list)
         self.assertEqual(len(select_stmt.target_list), 2)
-        self.assertEqual(
-            select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE
-        )
-        self.assertEqual(
-            select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE
-        )
+        self.assertEqual(select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
 
         # from_table
         self.assertIsNotNone(select_stmt.from_table)
@@ -355,9 +318,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt.from_table.table.table_name, "TAIPAI")
 
         # sample_freq
-        self.assertEqual(
-            select_stmt.from_table.sample_freq, ConstantValueExpression(5)
-        )
+        self.assertEqual(select_stmt.from_table.sample_freq, ConstantValueExpression(5))
 
     def test_table_ref(self):
         """Testing table info in TableRef
@@ -368,12 +329,8 @@ class ParserTests(unittest.TestCase):
         select_stmt_new = SelectStatement()
         select_stmt_new.from_table = table_ref_obj
         self.assertEqual(select_stmt_new.from_table.table.table_name, "TAIPAI")
-        self.assertEqual(
-            select_stmt_new.from_table.table.schema_name, "Schema"
-        )
-        self.assertEqual(
-            select_stmt_new.from_table.table.database_name, "Database"
-        )
+        self.assertEqual(select_stmt_new.from_table.table.schema_name, "Schema")
+        self.assertEqual(select_stmt_new.from_table.table.database_name, "Database")
 
     def test_insert_statement(self):
         parser = Parser()
@@ -420,9 +377,7 @@ class ParserTests(unittest.TestCase):
                 )
             ],
             [
-                ColumnDefinition(
-                    "Labels", ColumnType.NDARRAY, NdArrayType.STR, [10]
-                ),
+                ColumnDefinition("Labels", ColumnType.NDARRAY, NdArrayType.STR, [10]),
                 ColumnDefinition(
                     "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4]
                 ),
@@ -433,9 +388,7 @@ class ParserTests(unittest.TestCase):
         eva_statement_list = parser.parse(create_udf_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(
-            eva_statement_list[0].stmt_type, StatementType.CREATE_UDF
-        )
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.CREATE_UDF)
 
         create_udf_stmt = eva_statement_list[0]
 
@@ -457,9 +410,7 @@ class ParserTests(unittest.TestCase):
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(
-            eva_statement_list[0].stmt_type, StatementType.LOAD_DATA
-        )
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.LOAD_DATA)
 
         load_data_stmt = eva_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
@@ -486,9 +437,7 @@ class ParserTests(unittest.TestCase):
         eva_statement_list = parser.parse(load_data_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(
-            eva_statement_list[0].stmt_type, StatementType.LOAD_DATA
-        )
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.LOAD_DATA)
 
         load_data_stmt = eva_statement_list[0]
         self.assertEqual(load_data_stmt, expected_stmt)
@@ -556,11 +505,7 @@ class ParserTests(unittest.TestCase):
                     [3, 256, 256],
                 )
             ],
-            [
-                ColumnDefinition(
-                    "labels", ColumnType.NDARRAY, NdArrayType.STR, [10]
-                )
-            ],
+            [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, [10])],
             Path("data/fastrcnn.py"),
             "Classification",
         )
