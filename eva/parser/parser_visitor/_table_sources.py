@@ -16,12 +16,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import (
-    Alias,
-    JoinNode,
-    TableRef,
-    TableValuedExpression,
-)
+from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
 from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
 
@@ -58,9 +53,7 @@ class TableSources(evaql_parserVisitor):
     def visitInnerJoin(self, ctx: evaql_parser.InnerJoinContext):
         table = self.visit(ctx.tableSourceItemWithSample())
         if ctx.ON() is None:
-            raise Exception(
-                "ERROR: Syntax error: Join should specify the ON columns"
-            )
+            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
         join_predicates = self.visit(ctx.expression())
         return TableRef(
             JoinNode(
@@ -77,20 +70,14 @@ class TableSources(evaql_parserVisitor):
         if ctx.aliasClause():
             alias = self.visit(ctx.aliasClause())
         else:
-            err_msg = (
-                f"TableValuedFunction {tve.func_expr.name} should have alias."
-            )
+            err_msg = f"TableValuedFunction {tve.func_expr.name} should have alias."
             logger.error(err_msg)
             raise SyntaxError(err_msg)
         join_type = JoinType.LATERAL_JOIN
 
-        return TableRef(
-            JoinNode(None, TableRef(tve, alias=alias), join_type=join_type)
-        )
+        return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
 
-    def visitTableValuedFunction(
-        self, ctx: evaql_parser.TableValuedFunctionContext
-    ):
+    def visitTableValuedFunction(self, ctx: evaql_parser.TableValuedFunctionContext):
         func_expr = self.visit(ctx.functionCall())
         has_unnest = False
         if ctx.UNNEST():
@@ -110,9 +97,7 @@ class TableSources(evaql_parserVisitor):
         return TableRef(table, alias, sample_freq)
 
     # Nested sub query
-    def visitSubqueryTableItem(
-        self, ctx: evaql_parser.SubqueryTableItemContext
-    ):
+    def visitSubqueryTableItem(self, ctx: evaql_parser.SubqueryTableItemContext):
         return self.visit(ctx.subqueryTableSourceItem())
 
     def visitSubqueryTableSourceItem(
@@ -135,9 +120,7 @@ class TableSources(evaql_parserVisitor):
             right_selectStatement.union_all = True
         return right_selectStatement
 
-    def visitQuerySpecification(
-        self, ctx: evaql_parser.QuerySpecificationContext
-    ):
+    def visitQuerySpecification(self, ctx: evaql_parser.QuerySpecificationContext):
         target_list = None
         from_clause = None
         where_clause = None

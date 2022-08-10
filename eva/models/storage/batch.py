@@ -18,8 +18,8 @@ from typing import Iterable, NoReturn, Union
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
-from eva.parser.alias import Alias
 
+from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
 
 
@@ -98,9 +98,7 @@ class Batch:
     @classmethod
     def from_json(cls, json_str: str):
         obj = json.loads(json_str, object_hook=as_batch)
-        return cls(
-            frames=obj["frames"], identifier_column=obj["identifier_column"]
-        )
+        return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
 
     def __str__(self):
         """
@@ -181,14 +179,10 @@ class Batch:
             for column in by:
                 if column not in self._frames.columns:
                     logger.error(
-                        "Can not orderby non-projected column: {}".format(
-                            column
-                        )
+                        "Can not orderby non-projected column: {}".format(column)
                     )
                     raise KeyError(
-                        "Can not orderby non-projected column: {}".format(
-                            column
-                        )
+                        "Can not orderby non-projected column: {}".format(column)
                     )
 
             self._frames.sort_values(
@@ -213,9 +207,7 @@ class Batch:
         return Batch(self._frames[verfied_cols], self._identifier_column)
 
     @classmethod
-    def merge_column_wise(
-        cls, batches: ["Batch"], auto_renaming=False
-    ) -> "Batch":
+    def merge_column_wise(cls, batches: ["Batch"], auto_renaming=False) -> "Batch":
         """
         Merge list of batch frames column_wise and return a new batch frame
         Arguments:
@@ -231,9 +223,7 @@ class Batch:
         frames = [batch.frames for batch in batches]
         new_frames = pd.concat(frames, axis=1, copy=False)
         if new_frames.columns.duplicated().any():
-            logger.warn(
-                "Duplicated column name detected {}".format(new_frames)
-            )
+            logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
     def __add__(self, other: "Batch"):
@@ -312,14 +302,10 @@ class Batch:
             for col_name in self.frames.columns:
                 if "." in col_name:
                     new_col_names.append(
-                        "{}.{}".format(
-                            alias.alias_name, col_name.split(".")[1]
-                        )
+                        "{}.{}".format(alias.alias_name, col_name.split(".")[1])
                     )
                 else:
-                    new_col_names.append(
-                        "{}.{}".format(alias.alias_name, col_name)
-                    )
+                    new_col_names.append("{}.{}".format(alias.alias_name, col_name))
 
         self.frames.columns = new_col_names
 

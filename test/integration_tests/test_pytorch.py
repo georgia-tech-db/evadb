@@ -14,11 +14,10 @@
 # limitations under the License.
 import sys
 import unittest
-import pytest
-
 from test.util import copy_sample_videos_to_prefix, file_remove, load_inbuilt_udfs
 
 import mock
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -107,7 +106,7 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for UADETRAC
         res = actual_batch.frames
-        self.assertTrue(res["ocrextractor.labels"][0][0] == '4')
+        self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
     def test_should_raise_import_error_with_missing_torch(self):
@@ -123,7 +122,3 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
 
                 pass
-
-
-if __name__ == '__main__':
-    unittest.main()

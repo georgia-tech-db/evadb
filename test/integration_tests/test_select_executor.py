@@ -418,7 +418,3 @@ class SelectExecutorTest(unittest.TestCase):
                 expected_batch.sort_orderby(["table1.a0"]),
                 actual_batch.sort_orderby(["table1.a0"]),
             )
-
-
-if __name__ == "__main__":
-    unittest.main()

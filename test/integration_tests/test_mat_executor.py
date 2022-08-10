@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pytest
-
 from test.util import (
     DummyObjectDetector,
     copy_sample_videos_to_prefix,
@@ -24,6 +22,7 @@ from test.util import (
 )
 
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
@@ -98,12 +97,12 @@ class MaterializedViewTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn(self):
-        select_query = """SELECT id, FastRCNNObjectDetector(data).labels
-                            FROM UATRAC WHERE id < 5;"""
-        query = """CREATE MATERIALIZED VIEW 
-                   IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
-        AS {}""".format(
-            select_query
+        select_query = (
+            "SELECT id, FastRCNNObjectDetector(data).labels FROM UATRAC" "WHERE id < 5;"
+        )
+        query = (
+            "CREATE MATERIALIZED VIEW "
+            f"IF NOT EXISTS uadtrac_fastRCNN (id, labels) AS {select_query}"
         )
         execute_query_fetch_all(query)
 

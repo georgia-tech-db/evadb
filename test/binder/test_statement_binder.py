@@ -73,9 +73,7 @@ class StatementBinderTests(unittest.TestCase):
             tableref.is_select.return_value = False
             tableref.is_join.return_value = False
             binder._bind_tableref(tableref)
-            mock_binder.assert_called_with(
-                tableref.table_valued_expr.func_expr
-            )
+            mock_binder.assert_called_with(tableref.table_valued_expr.func_expr)
 
     def test_bind_tableref_with_join(self):
         with patch.object(StatementBinder, "bind") as mock_binder:
@@ -145,9 +143,7 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(
-            udf_obj.impl_file_path, udf_obj.name
-        )
+        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
         self.assertEqual(func_expr.output_objs, [obj1])
         print(str(func_expr.alias))
         self.assertEqual(
@@ -164,9 +160,7 @@ class StatementBinderTests(unittest.TestCase):
 
         mock_get_name.assert_called_with(func_expr.name)
         mock_get_udf_outputs.assert_called_with(udf_obj)
-        mock_path_to_class.assert_called_with(
-            udf_obj.impl_file_path, udf_obj.name
-        )
+        mock_path_to_class.assert_called_with(udf_obj.impl_file_path, udf_obj.name)
         self.assertEqual(func_expr.output_objs, func_ouput_objs)
         self.assertEqual(
             func_expr.alias,

@@ -18,9 +18,9 @@ from typing import Union
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
+from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 from eva.parser.types import JoinType
-from eva.parser.alias import Alias
 
 
 class TableInfo:
@@ -110,9 +110,7 @@ class JoinNode:
 
 
 class TableValuedExpression:
-    def __init__(
-        self, func_expr: FunctionExpression, do_unnest: bool = False
-    ) -> None:
+    def __init__(self, func_expr: FunctionExpression, do_unnest: bool = False) -> None:
         self._func_expr = func_expr
         self._do_unnest = do_unnest
 
@@ -127,10 +125,7 @@ class TableValuedExpression:
     def __eq__(self, other):
         if not isinstance(other, TableValuedExpression):
             return False
-        return (
-            self.func_expr == other.func_expr
-            and self.do_unnest == other.do_unnest
-        )
+        return self.func_expr == other.func_expr and self.do_unnest == other.do_unnest
 
     def __hash__(self) -> int:
         return hash((self.func_expr, self.do_unnest))
@@ -149,9 +144,7 @@ class TableRef:
 
     def __init__(
         self,
-        table: Union[
-            TableInfo, TableValuedExpression, SelectStatement, JoinNode
-        ],
+        table: Union[TableInfo, TableValuedExpression, SelectStatement, JoinNode],
         alias: Alias = None,
         sample_freq: float = None,
     ):

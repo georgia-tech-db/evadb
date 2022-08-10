@@ -25,14 +25,12 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_mat_view_statement import (
-    CreateMaterializedViewStatement,
-)
+from eva.parser.alias import Alias
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
-from eva.parser.alias import Alias
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
@@ -98,9 +96,7 @@ class StatementBinder:
             self._binder_context = current_context
 
     @bind.register(CreateMaterializedViewStatement)
-    def _bind_create_mat_statement(
-        self, node: CreateMaterializedViewStatement
-    ):
+    def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
 
@@ -180,9 +176,7 @@ class StatementBinder:
             func_expr.alias = node.alias
             self.bind(func_expr)
             output_cols = []
-            for obj, alias in zip(
-                func_expr.output_objs, func_expr.alias.col_names
-            ):
+            for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
                 alias_obj = self._catalog.udf_io(
                     alias,
                     data_type=obj.type,
@@ -222,9 +216,7 @@ class StatementBinder:
             raise BinderError(err_msg)
 
         try:
-            node.function = path_to_class(
-                udf_obj.impl_file_path, udf_obj.name
-            )()
+            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the UDF class name in the"
@@ -248,16 +240,12 @@ class StatementBinder:
             node.projection_columns = [obj.name.lower() for obj in output_objs]
 
         default_alias_name = node.name.lower()
-        default_output_col_aliases = [
-            str(obj.name.lower()) for obj in node.output_objs
-        ]
+        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
         if not node.alias:
             node.alias = Alias(default_alias_name, default_output_col_aliases)
         else:
             if not len(node.alias.col_names):
-                node.alias = Alias(
-                    node.alias.alias_name, default_output_col_aliases
-                )
+                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
             else:
                 output_aliases = [
                     str(col_name.lower()) for col_name in node.alias.col_names

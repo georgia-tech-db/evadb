@@ -55,7 +55,6 @@ class ParserOrderBySortType(Enum):
 @unique
 class JoinType(Enum):
     LATERAL_JOIN = auto()
-    LATERAL_JOIN_WITH_UNNEST = auto()
     INNER_JOIN = auto()
 
 

@@ -35,10 +35,7 @@ class Alias:
     def __eq__(self, other):
         if not isinstance(other, Alias):
             return False
-        return (
-            self.alias_name == other.alias_name
-            and self.col_names == other.col_names
-        )
+        return self.alias_name == other.alias_name and self.col_names == other.col_names
 
     def __str__(self):
         msg = f"{self.alias_name}"
