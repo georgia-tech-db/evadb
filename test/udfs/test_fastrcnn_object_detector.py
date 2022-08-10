@@ -16,11 +16,12 @@ import os
 import sys
 import unittest
 
-import cv2
 import mock
 import pandas as pd
 
 from eva.models.storage.batch import Batch
+
+from test.udfs.test_utils import load_image
 
 NUM_FRAMES = 10
 
@@ -30,9 +31,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         self.base_path = os.path.dirname(os.path.abspath(__file__))
 
-    def _load_image(self, path):
-        img = cv2.imread(path)
-        return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    
 
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
@@ -58,11 +57,11 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
         frame_dog = {
             "id": 1,
-            "data": self._load_image(os.path.join(self.base_path, "data", "dog.jpeg")),
+            "data": load_image(os.path.join(self.base_path, "data", "dog.jpeg")),
         }
         frame_dog_cat = {
             "id": 2,
-            "data": self._load_image(
+            "data": load_image(
                 os.path.join(self.base_path, "data", "dog_cat.jpg")
             ),
         }
