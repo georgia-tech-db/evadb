@@ -43,6 +43,7 @@ class AbstractUDF(metaclass=ABCMeta):
 
 
 class AbstractClassifierUDF(AbstractUDF):
+
     @property
     @abstractmethod
     def labels(self) -> List[str]:
@@ -50,6 +51,7 @@ class AbstractClassifierUDF(AbstractUDF):
         Returns:
             List[str]: list of labels the classifier predicts
         """
+        return []
 
     @abstractmethod
     def classify(self, frames: ArrayLike) -> pd.DataFrame:
