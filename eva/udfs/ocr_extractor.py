@@ -67,7 +67,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
             frames (tensor): Frames on which OCR needs
             to be performed
         Returns:
-            tuple containing predicted_labels (List[List[str]]),
+            tuple containing OCR labels (List[List[str]]),
             predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
         """
