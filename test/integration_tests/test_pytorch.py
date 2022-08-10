@@ -104,10 +104,30 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
 
-        # non-trivial test case for UADETRAC
+        # non-trivial test case for MNIST
         res = actual_batch.frames
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_resnet50(self):
+        create_udf_query = """CREATE UDF FeatureExtractor
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (features NDARRAY FLOAT32(ANYDIM))
+                  TYPE  Classification
+                  IMPL  'eva/udfs/feature_extractor.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT FeatureExtractor(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(actual_batch.batch_size, 5)
+
+        # non-trivial test case for Resnet50
+        res = actual_batch.frames
+        self.assertEqual(res["featureextractor.features"][0].shape, (1, 2048))
+        self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
 
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):

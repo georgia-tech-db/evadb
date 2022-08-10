@@ -19,8 +19,6 @@ import numpy as np
 import easyocr
 
 from typing import List
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
@@ -30,10 +28,6 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
     Arguments:
         threshold (float): Threshold for classifier confidence score
     """
-
-    @property
-    def name(self) -> str:
-        return "OCRExtractor"
 
     def to_device(self, device: str):
         """
@@ -47,10 +41,6 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         super().__init__()
         self.threshold = threshold
         self.model = easyocr.Reader(['en'])
-
-    @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self) -> List[str]:
@@ -67,7 +57,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
             frames (tensor): Frames on which OCR needs
             to be performed
         Returns:
-            tuple containing predicted_labels (List[List[str]]),
+            tuple containing OCR labels (List[List[str]]),
             predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
         """

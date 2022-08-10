@@ -22,9 +22,9 @@ Implementing a custom UDF
 
     UDFs packaged along with EVA are located inside the `eva/udfs/` folder
 
-2. Next, create and implement a class that derives from `PytorchAbstractUDF`.
+2. Next, create and implement a class that derives from `PytorchClassifierAbstractUDF`.
 
-    * The `PytorchAbstractUDF` is a parent class that defines and implements standard methods for model inference.
+    * The `PytorchClassifierAbstractUDF` is a parent class that defines and implements standard methods for model inference.
 
     * `_get_predictions()` - an abstract method that needs to be implemented in your child class.
 
