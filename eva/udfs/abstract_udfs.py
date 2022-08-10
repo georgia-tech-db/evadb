@@ -15,16 +15,16 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-import numpy as np
+from numpy.typing import ArrayLike
 import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
+from eva.models.catalog.properties import ColorSpace
 
 
-class AbstractClassifierUDF(metaclass=ABCMeta):
+class AbstractUDF(metaclass=ABCMeta):
     """
-    Abstract class for UDFs. All the UDFs which perform classification
-    inherit this calls.
+    Abstract class for UDFs. All the UDFs in EVA will inherit from this.
 
     Load and initialize the machine learning model in the __init__.
 
@@ -34,15 +34,15 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         pass
 
     @property
-    @abstractmethod
-    def input_format(self) -> FrameInfo:
-        pass
+    def name(self) -> str:
+        return str(self)
 
     @property
-    @abstractmethod
-    def name(self) -> str:
-        pass
+    def input_format(self) -> FrameInfo:
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
+
+class AbstractClassifierUDF(AbstractUDF):
     @property
     @abstractmethod
     def labels(self) -> List[str]:
@@ -52,7 +52,7 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def classify(self, frames: np.ndarray) -> pd.DataFrame:
+    def classify(self, frames: ArrayLike) -> pd.DataFrame:
         """
         Takes as input a batch of frames and returns the predictions by
         applying the classification model.
@@ -67,3 +67,22 @@ class AbstractClassifierUDF(metaclass=ABCMeta):
 
     def __call__(self, *args, **kwargs):
         return self.classify(*args, **kwargs)
+
+
+class AbstractTransformationUDF(AbstractUDF):
+    @abstractmethod
+    def transform(self, frames: ArrayLike) -> ArrayLike:
+        """
+        Takes as input a batch of frames and transforms them
+        by applying the frame transformation model.
+
+        Arguments:
+            frames: Input batch of frames on which prediction
+            needs to be made
+
+        Returns:
+            Transformed frames
+        """
+
+    def __call__(self, *args, **kwargs):
+        return self.transform(*args, **kwargs)
