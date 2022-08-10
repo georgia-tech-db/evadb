@@ -20,7 +20,7 @@ from test.util import (
     file_remove,
     load_inbuilt_udfs,
 )
-
+from eva.binder.binder_utils import BinderError
 import numpy as np
 import pandas as pd
 import pytest
@@ -266,10 +266,7 @@ class SelectExecutorTest(unittest.TestCase):
                         FastRCNNObjectDetector(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertTrue(
-            all(
-                actual_batch.frames.columns
-                == ["myvideo.id", "T.labels"]
-            )
+            all(actual_batch.frames.columns == ["myvideo.id", "T.labels"])
         )
         self.assertEqual(actual_batch.batch_size, 5)
 
@@ -353,6 +350,26 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(
             str(cm.exception),
             f"TableValuedFunction {udf_name} should have alias.",
+        )
+
+    def test_should_raise_error_with_invalid_number_of_aliases(self):
+        udf_name = "DummyMultiObjectDetector"
+        query = """SELECT id, labels
+                  FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data).bboxes AS T;"""
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception),
+            f"Output bboxes does not exist for {udf_name}.",
+        )
+
+    def test_should_raise_error_with_invalid_output_lateral_join(self):
+        query = """SELECT id, a
+                  FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data) AS T(a, b);"""
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception), f"Expected 1 output columns for T, got 2."
         )
 
     def test_hash_join_with_one_on(self):

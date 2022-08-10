@@ -48,7 +48,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(actual_batch.batch_size, 5)
 
     @pytest.mark.torchtest
-    def test_aaashould_run_pytorch_and_ssd(self):
+    def test_should_run_pytorch_and_ssd(self):
         create_udf_query = """CREATE UDF SSDObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
@@ -70,7 +70,7 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_pytorch_and_facenet(self):
         create_udf_query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4), 
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
                   IMPL  'eva/udfs/face_detector.py';
@@ -92,7 +92,7 @@ class PytorchTest(unittest.TestCase):
         create_udf_query = """CREATE UDF OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
-                          bboxes NDARRAY FLOAT32(ANYDIM, 4), 
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
                   IMPL  'eva/udfs/ocr_extractor.py';

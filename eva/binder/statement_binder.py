@@ -231,7 +231,7 @@ class StatementBinder:
                 if obj.name.lower() == node.output:
                     node.output_objs = [obj]
             if not node.output_objs:
-                err_msg = f"Output {node.output} does not exist in the  {udf_obj.name}"
+                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
                 logger.error(err_msg)
                 raise BinderError(err_msg)
             node.projection_columns = [node.output]
