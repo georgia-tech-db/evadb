@@ -13,56 +13,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
-
 import pandas as pd
+
 import torch
 from torch import Tensor
-import torchvision.transforms as T
+from torchvision import models
+from torchvision.transforms import Compose, transforms
 
+from typing import List
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
-from facenet_pytorch import MTCNN
 
-
-class FaceDetector(PytorchAbstractClassifierUDF):
+class FeatureExtractor(PytorchAbstractClassifierUDF):
     """
-    Arguments:
-        threshold (float): Threshold for classifier confidence score
     """
 
-    def __init__(self, threshold=0.85):
+    def __init__(self):
         super().__init__()
-        self.threshold = threshold
-        self.model = MTCNN()
+        self.model = models.resnet50(pretrained=True)
+        for param in self.model.parameters():
+            param.requires_grad = False
+        self.model.fc = torch.nn.Identity()
         self.model.eval()
 
     @property
     def labels(self) -> List[str]:
         return []
 
+    @property
+    def transforms(self) -> Compose:
+        return Compose([
+            transforms.ToTensor()
+        ])
+
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
-        Performs predictions on input frames
+        Performs feature extraction on input frames
         Arguments:
             frames (np.ndarray): Frames on which predictions need
             to be performed
+
         Returns:
-            face boxes (List[List[BoundingBox]])
+            features (List[float])
         """
-
-        copy = torch.squeeze(frames)
-        transform = T.ToPILImage()
-        pil_image = transform(copy)
-
-        bboxes, scores = self.model.detect(img=pil_image)
-
         outcome = pd.DataFrame()
-        outcome = outcome.append(
-            {
-                "bboxes": bboxes,
-                "scores": scores
-            },
-            ignore_index=True)
-        
+        for f in frames:
+            with torch.no_grad():
+                outcome = outcome.append(
+                    {
+                        "features": self.model(torch.unsqueeze(f, 0))
+                    },
+                    ignore_index=True)
         return outcome
+

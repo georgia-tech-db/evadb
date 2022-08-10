@@ -21,7 +21,7 @@ import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
     import torch
@@ -42,7 +42,7 @@ except ImportError as e:
     )
 
 
-class SSDObjectDetector(PytorchAbstractUDF):
+class SSDObjectDetector(PytorchAbstractClassifierUDF):
     @property
     def name(self) -> str:
         return "ssd"
