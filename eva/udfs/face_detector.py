@@ -20,22 +20,16 @@ import torch
 from torch import Tensor
 import torchvision.transforms as T
 
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 from facenet_pytorch import MTCNN
 
 
-class FaceDetector(PytorchAbstractUDF):
+class FaceDetector(PytorchAbstractClassifierUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
     """
-
-    @property
-    def name(self) -> str:
-        return "FaceDetector"
 
     def __init__(self, threshold=0.85):
         super().__init__()
@@ -44,14 +38,8 @@ class FaceDetector(PytorchAbstractUDF):
         self.model.eval()
 
     @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
     def labels(self) -> List[str]:
-        return [
-            "face"
-        ]
+        return []
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """

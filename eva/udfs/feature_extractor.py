@@ -21,18 +21,12 @@ from torchvision import models
 from torchvision.transforms import Compose, transforms
 
 from typing import List
-from eva.models.catalog.frame_info import FrameInfo
-from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
-class FeatureExtractor(PytorchAbstractUDF):
+class FeatureExtractor(PytorchAbstractClassifierUDF):
     """
     """
-
-    @property
-    def name(self) -> str:
-        return "FeatureExtractor"
 
     def __init__(self):
         super().__init__()
@@ -43,18 +37,14 @@ class FeatureExtractor(PytorchAbstractUDF):
         self.model.eval()
 
     @property
-    def transforms(self) -> Compose:
-        return Compose([
-            transforms.ToTensor()
-        ])
-
-    @property
     def labels(self) -> List[str]:
         return []
 
     @property
-    def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+    def transforms(self) -> Compose:
+        return Compose([
+            transforms.ToTensor()
+        ])
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
