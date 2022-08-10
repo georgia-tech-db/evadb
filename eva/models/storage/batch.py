@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from typing import Iterable, NoReturn
+from typing import Iterable, NoReturn, Union
 
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
+from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
 
 
@@ -78,6 +79,10 @@ class Batch:
     @property
     def identifier_column(self):
         return self._identifier_column
+
+    @property
+    def columns(self):
+        return self._frames.columns
 
     def column_as_numpy_array(self, column_name="data"):
         return np.array(self._frames[column_name])
@@ -275,15 +280,32 @@ class Batch:
         """Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
 
-    def modify_column_alias(self, alias: str) -> NoReturn:
+    def modify_column_alias(self, alias: Union[Alias, str]) -> NoReturn:
         # a, b, c -> table1.a, table1.b, table1.c
         # t1.a -> t2.a
+        if isinstance(alias, str):
+            alias = Alias(alias)
         new_col_names = []
-        for col_name in self.frames.columns:
-            if "." in col_name:
-                new_col_names.append("{}.{}".format(alias, col_name.split(".")[1]))
-            else:
-                new_col_names.append("{}.{}".format(alias, col_name))
+        if len(alias.col_names):
+            if len(self.frames.columns) != len(alias.col_names):
+                err_msg = (
+                    f"Expected {len(alias.col_names)} columns {alias.col_names},"
+                    f"got {len(self.frames.columns)} columns {self.frames.columns}."
+                )
+                logger.error(err_msg)
+                raise RuntimeError(err_msg)
+            new_col_names = [
+                "{}.{}".format(alias.alias_name, col_name)
+                for col_name in alias.col_names
+            ]
+        else:
+            for col_name in self.frames.columns:
+                if "." in col_name:
+                    new_col_names.append(
+                        "{}.{}".format(alias.alias_name, col_name.split(".")[1])
+                    )
+                else:
+                    new_col_names.append("{}.{}".format(alias.alias_name, col_name))
 
         self.frames.columns = new_col_names
 

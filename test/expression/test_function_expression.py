@@ -34,7 +34,7 @@ class FunctionExpressionTest(unittest.TestCase):
         mock_function.to_device.return_value = gpu_mock_function
         context_instance.gpu_device.return_value = gpu_device_id
 
-        expression = FunctionExpression(mock_function, name="test")
+        expression = FunctionExpression(mock_function, name="test", alias="func_expr")
 
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
@@ -44,7 +44,7 @@ class FunctionExpressionTest(unittest.TestCase):
     def test_should_use_the_same_function_if_not_gpu_compatible(self):
         mock_function = MagicMock(return_value=pd.DataFrame())
 
-        expression = FunctionExpression(mock_function, name="test")
+        expression = FunctionExpression(mock_function, name="test", alias="func_expr")
 
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
@@ -57,7 +57,7 @@ class FunctionExpressionTest(unittest.TestCase):
 
         context_instance.gpu_device.return_value = NO_GPU
 
-        expression = FunctionExpression(mock_function, name="test")
+        expression = FunctionExpression(mock_function, name="test", alias="func_expr")
 
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)

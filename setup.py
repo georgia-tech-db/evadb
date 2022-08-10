@@ -40,12 +40,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy==1.21.6",
     "opencv-python==4.5.1.48",
-    "pandas==1.2.3",
-<<<<<<< HEAD
-    "torch==1.7.1",
-    "torchvision==0.8.2",
-=======
->>>>>>> 765cef70afcf21336b68936d4651e153026d2c91
+    "pandas==1.3.5",
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",

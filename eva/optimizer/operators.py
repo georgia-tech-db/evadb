@@ -234,7 +234,12 @@ class LogicalQueryDerivedGet(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.alias, self.predicate, tuple(self.target_list))
+            (
+                super().__hash__(),
+                self.alias,
+                self.predicate,
+                tuple(self.target_list),
+            )
         )
 
 
@@ -782,22 +787,36 @@ class LogicalFunctionScan(Operator):
             function_expression that yield a table like output
     """
 
-    def __init__(self, func_expr: AbstractExpression, children: List = None):
+    def __init__(
+        self,
+        func_expr: AbstractExpression,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
         super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
         self._func_expr = func_expr
+        self._do_unnest = do_unnest
 
     @property
     def func_expr(self):
         return self._func_expr
 
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalFunctionScan):
             return False
-        return is_subtree_equal and self.func_expr == other.func_expr
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr))
+        return hash((super().__hash__(), self.func_expr, self.do_unnest))
 
 
 class LogicalJoin(Operator):
@@ -939,7 +958,12 @@ class LogicalCreateMaterializedView(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.view, tuple(self.col_list), self.if_not_exists)
+            (
+                super().__hash__(),
+                self.view,
+                tuple(self.col_list),
+                self.if_not_exists,
+            )
         )
 
 

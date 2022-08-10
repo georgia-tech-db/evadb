@@ -21,6 +21,7 @@ from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.create_udf_statement import CreateUDFStatement
@@ -32,7 +33,7 @@ from eva.parser.parser import Parser
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement, StatementType
-from eva.parser.table_ref import JoinNode, TableInfo, TableRef
+from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 from eva.parser.upload_statement import UploadStatement
 
@@ -338,7 +339,10 @@ class ParserTests(unittest.TestCase):
                         """
         expected_stmt = InsertTableStatement(
             TableRef(TableInfo("MyVideo")),
-            [TupleValueExpression("Frame_ID"), TupleValueExpression("Frame_Path")],
+            [
+                TupleValueExpression("Frame_ID"),
+                TupleValueExpression("Frame_Path"),
+            ],
             [
                 ConstantValueExpression(1),
                 ConstantValueExpression("/mnt/frames/1.png", ColumnType.TEXT),
@@ -366,7 +370,10 @@ class ParserTests(unittest.TestCase):
             False,
             [
                 ColumnDefinition(
-                    "Frame_Array", ColumnType.NDARRAY, NdArrayType.UINT8, [3, 256, 256]
+                    "Frame_Array",
+                    ColumnType.NDARRAY,
+                    NdArrayType.UINT8,
+                    [3, 256, 256],
                 )
             ],
             [
@@ -455,7 +462,9 @@ class ParserTests(unittest.TestCase):
         actual_stmt = parser.parse(nested_query)[0]
         self.assertEqual(actual_stmt.stmt_type, StatementType.SELECT)
         self.assertEqual(actual_stmt.target_list[0].col_name, "ID")
-        self.assertEqual(actual_stmt.from_table, TableRef(parsed_sub_query, alias="T"))
+        self.assertEqual(
+            actual_stmt.from_table, TableRef(parsed_sub_query, alias=Alias("T"))
+        )
 
         sub_query = """SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
                               WHERE Yolo(frame).label = 'vehicle'"""
@@ -473,7 +482,9 @@ class ParserTests(unittest.TestCase):
         query_stmt = parser.parse(query)[0]
         actual_stmt = parser.parse(nested_query)[0]
         sub_query_stmt = parser.parse(sub_query)[0]
-        self.assertEqual(actual_stmt.from_table, TableRef(sub_query_stmt, alias="T"))
+        self.assertEqual(
+            actual_stmt.from_table, TableRef(sub_query_stmt, alias=Alias("T"))
+        )
         self.assertEqual(actual_stmt.where_clause, query_stmt.where_clause)
         self.assertEqual(actual_stmt.target_list, query_stmt.target_list)
 
@@ -488,7 +499,10 @@ class ParserTests(unittest.TestCase):
             False,
             [
                 ColumnDefinition(
-                    "frame", ColumnType.NDARRAY, NdArrayType.UINT8, [3, 256, 256]
+                    "frame",
+                    ColumnType.NDARRAY,
+                    NdArrayType.UINT8,
+                    [3, 256, 256],
                 )
             ],
             [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, [10])],
@@ -562,7 +576,9 @@ class ParserTests(unittest.TestCase):
             )
         )
         where_clause = ComparisonExpression(
-            ExpressionType.COMPARE_LEQ, table1_col_a, ConstantValueExpression(5)
+            ExpressionType.COMPARE_LEQ,
+            table1_col_a,
+            ConstantValueExpression(5),
         )
         expected_stmt = SelectStatement(select_list, from_table, where_clause)
         self.assertEqual(select_stmt, expected_stmt)
@@ -599,7 +615,9 @@ class ParserTests(unittest.TestCase):
             )
         )
         where_clause = ComparisonExpression(
-            ExpressionType.COMPARE_LEQ, table1_col_a, ConstantValueExpression(5)
+            ExpressionType.COMPARE_LEQ,
+            table1_col_a,
+            ConstantValueExpression(5),
         )
         expected_stmt = SelectStatement(select_list, from_table, where_clause)
         self.assertEqual(select_stmt, expected_stmt)
@@ -613,7 +631,7 @@ class ParserTests(unittest.TestCase):
 
     def test_lateral_join(self):
         select_query = """SELECT frame FROM MyVideo JOIN LATERAL
-                            ObjectDet(frame);"""
+                            ObjectDet(frame) AS OD;"""
         parser = Parser()
         select_stmt = parser.parse(select_query)[0]
         tuple_frame = TupleValueExpression("frame")
@@ -623,26 +641,7 @@ class ParserTests(unittest.TestCase):
         from_table = TableRef(
             JoinNode(
                 TableRef(TableInfo("MyVideo")),
-                TableRef(func_expr),
-                join_type=JoinType.LATERAL_JOIN,
-            )
-        )
-        expected_stmt = SelectStatement([tuple_frame], from_table)
-        self.assertEqual(select_stmt, expected_stmt)
-
-    def test_lateral_join_with_where(self):
-        select_query = """SELECT frame FROM MyVideo JOIN LATERAL
-                            ObjectDet(frame);"""
-        parser = Parser()
-        select_stmt = parser.parse(select_query)[0]
-        tuple_frame = TupleValueExpression("frame")
-        func_expr = FunctionExpression(
-            func=None, name="ObjectDet", children=[tuple_frame]
-        )
-        from_table = TableRef(
-            JoinNode(
-                TableRef(TableInfo("MyVideo")),
-                TableRef(func_expr),
+                TableRef(TableValuedExpression(func_expr), alias=Alias("OD")),
                 join_type=JoinType.LATERAL_JOIN,
             )
         )

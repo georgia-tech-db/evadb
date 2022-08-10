@@ -13,24 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
+from typing import List
 
+import pandas as pd
 import torch
 from torch import Tensor
 from torchvision import models
 from torchvision.transforms import Compose, transforms
 
-from typing import List
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class FeatureExtractor(PytorchAbstractClassifierUDF):
-    """
-    """
+    """ """
 
     def __init__(self):
         super().__init__()
-        self.model = models.resnet50(pretrained=True)
+        self.model = models.resnet50(pretrained=True, progress=False)
         for param in self.model.parameters():
             param.requires_grad = False
         self.model.fc = torch.nn.Identity()
@@ -42,9 +41,7 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
 
     @property
     def transforms(self) -> Compose:
-        return Compose([
-            transforms.ToTensor()
-        ])
+        return Compose([transforms.ToTensor()])
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
@@ -60,9 +57,6 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
         for f in frames:
             with torch.no_grad():
                 outcome = outcome.append(
-                    {
-                        "features": self.model(torch.unsqueeze(f, 0))
-                    },
-                    ignore_index=True)
+                    {"features": self.model(torch.unsqueeze(f, 0))}, ignore_index=True
+                )
         return outcome
-

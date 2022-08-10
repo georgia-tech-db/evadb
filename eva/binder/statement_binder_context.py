@@ -73,21 +73,23 @@ class StatementBinderContext:
     def add_derived_table_alias(
         self,
         alias: str,
-        target_list: List[Union[TupleValueExpression, FunctionExpression]],
+        target_list: List[Union[TupleValueExpression, FunctionExpression, UdfIO]],
     ):
         """
         Add a alias -> derived table column mapping
         Arguments:
             alias (str): name of alias
-            target_list: list of Tuplevalue Expression or FunctionExpression
+            target_list: list of Tuplevalue Expression or FunctionExpression or UdfIO
         """
         self._check_duplicate_alias(alias)
         col_list = []
         for expr in target_list:
             if isinstance(expr, FunctionExpression):
                 col_list.extend(expr.output_objs)
-            else:
+            elif isinstance(expr, TupleValueExpression):
                 col_list.append(expr.col_object)
+            else:
+                col_list.append(expr)
 
         self._derived_table_alias_map[alias] = col_list
 
