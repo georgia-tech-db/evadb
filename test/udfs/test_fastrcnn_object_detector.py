@@ -31,8 +31,6 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         super().__init__(*args, **kwargs)
         self.base_path = os.path.dirname(os.path.abspath(__file__))
 
-    
-
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
@@ -61,9 +59,7 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
         }
         frame_dog_cat = {
             "id": 2,
-            "data": load_image(
-                os.path.join(self.base_path, "data", "dog_cat.jpg")
-            ),
+            "data": load_image(os.path.join(self.base_path, "data", "dog_cat.jpg")),
         }
         frame_batch = Batch(pd.DataFrame([frame_dog, frame_dog_cat]))
         detector = FastRCNNObjectDetector()

@@ -16,6 +16,7 @@
 import cv2
 import numpy as np
 
+
 def load_image(self, path) -> np.array:
-        img = cv2.imread(path)
-        return np.ndarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    img = cv2.imread(path)
+    return np.ndarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
