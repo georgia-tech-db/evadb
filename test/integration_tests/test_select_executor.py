@@ -261,7 +261,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_lateral_join_with_unnest(self):
         query = """SELECT id, label
-                  FROM MyVideo JOIN LATERAL 
+                  FROM MyVideo JOIN LATERAL
                     UNNEST(DummyObjectDetector(data)) AS T(label)
                   WHERE id < 2 ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(query)
@@ -277,7 +277,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(unnest_batch, expected)
 
         query = """SELECT id, label
-                  FROM MyVideo JOIN LATERAL 
+                  FROM MyVideo JOIN LATERAL
                     UNNEST(DummyObjectDetector(data)) AS T
                   WHERE id < 2 ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(query)
@@ -294,7 +294,7 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_lateral_join_with_unnest_on_subset_of_outputs(self):
         query = """SELECT id, label
-                  FROM MyVideo JOIN LATERAL 
+                  FROM MyVideo JOIN LATERAL
                     UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
                   WHERE id < 2 ORDER BY id;"""
         unnest_batch = execute_query_fetch_all(query)
@@ -321,7 +321,7 @@ class SelectExecutorTest(unittest.TestCase):
         )
 
         query = """SELECT id, labels
-                  FROM MyVideo JOIN LATERAL 
+                  FROM MyVideo JOIN LATERAL
                     UNNEST(DummyMultiObjectDetector(data).labels);"""
         with self.assertRaises(SyntaxError) as cm:
             execute_query_fetch_all(query)
@@ -342,7 +342,8 @@ class SelectExecutorTest(unittest.TestCase):
     def test_should_raise_error_with_invalid_number_of_aliases(self):
         udf_name = "DummyMultiObjectDetector"
         query = """SELECT id, labels
-                  FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data).bboxes AS T;"""
+                  FROM MyVideo JOIN LATERAL
+                    DummyMultiObjectDetector(data).bboxes AS T;"""
         with self.assertRaises(BinderError) as cm:
             execute_query_fetch_all(query)
         self.assertEqual(
@@ -352,10 +353,12 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_should_raise_error_with_invalid_output_lateral_join(self):
         query = """SELECT id, a
-                  FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data) AS T(a, b);"""
+                  FROM MyVideo JOIN LATERAL
+                    DummyMultiObjectDetector(data) AS T(a, b);
+                """
         with self.assertRaises(BinderError) as cm:
             execute_query_fetch_all(query)
-        self.assertEqual(str(cm.exception), f"Expected 1 output columns for T, got 2.")
+        self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 
     def test_hash_join_with_one_on(self):
         select_query = """SELECT * FROM table1 JOIN
