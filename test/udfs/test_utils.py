@@ -13,10 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+
 import cv2
 import numpy as np
 
+def get_udf_data_path():
+    return os.path.dirname(os.path.abspath(__file__))
 
-def load_image(self, path) -> np.array:
+def load_image(path) -> np.array:
     img = cv2.imread(path)
     return np.ndarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))

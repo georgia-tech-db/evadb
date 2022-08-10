@@ -21,7 +21,7 @@ import pandas as pd
 
 from eva.models.storage.batch import Batch
 
-from test.udfs.test_utils import load_image
+from test.udfs.test_utils import load_image, get_udf_data_path
 
 NUM_FRAMES = 10
 
@@ -29,7 +29,7 @@ NUM_FRAMES = 10
 class FastRCNNObjectDetectorTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.base_path = os.path.dirname(os.path.abspath(__file__))
+        self.base_path = get_udf_data_path()
 
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
@@ -55,11 +55,11 @@ class FastRCNNObjectDetectorTest(unittest.TestCase):
 
         frame_dog = {
             "id": 1,
-            "data": load_image(os.path.join(self.base_path, "data", "dog.jpeg")),
+            "data": load_image(os.path.join(self.base_path, "dog.jpeg")),
         }
         frame_dog_cat = {
             "id": 2,
-            "data": load_image(os.path.join(self.base_path, "data", "dog_cat.jpg")),
+            "data": load_image(os.path.join(self.base_path, "dog_cat.jpg")),
         }
         frame_batch = Batch(pd.DataFrame([frame_dog, frame_dog_cat]))
         detector = FastRCNNObjectDetector()
