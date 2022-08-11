@@ -25,9 +25,10 @@
 [![PyPI Status](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
 [![CI Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache)](https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt)
 [![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
-
+[![Discuss](https://img.shields.io/badge/-Discuss!-blueviolet)](https://github.com/georgia-tech-db/eva/discussions)
+![Python Versions](https://img.shields.io/badge/Python--versions-3.7+-brightgreen)
 
 ## What is EVA?
 
@@ -49,7 +50,7 @@ EVA is a new database system tailored for video analytics -- think MySQL for vid
 
 ## QuickStart
 
-1. EVA requires Python 3.8+. To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA requires Python 3.7+. To install EVA, we recommend using an virtual environment and the pip package manager:
 
 ```shell
 pip install evadb
