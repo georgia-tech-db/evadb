@@ -63,7 +63,7 @@ class InterpreterTests(unittest.TestCase):
         with io.StringIO() as buf:
             with contextlib.redirect_stdout(buf):
                 self.assertFalse(prompt.onecmd(query))
-                prompt.cursor.execute.assert_called_once_with(query, report_time = True)
+                prompt.cursor.execute.assert_called_once_with(query, report_time=True)
                 prompt.cursor.fetch_all.assert_called_once_with()
                 self.assertTrue("123" in buf.getvalue())
 
