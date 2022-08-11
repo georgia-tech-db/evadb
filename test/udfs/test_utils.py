@@ -18,9 +18,11 @@ import os
 import cv2
 import numpy as np
 
+
 def get_udf_data_path():
-    return os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
+
 
 def load_image(path) -> np.array:
     img = cv2.imread(path)
-    return np.ndarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+    return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
