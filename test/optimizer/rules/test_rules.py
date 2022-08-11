@@ -13,11 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import (
+    copy_sample_videos_to_prefix,
+    create_sample_video,
+    get_logical_query_plan,
+    get_physical_query_plan,
+    load_inbuilt_udfs,
+)
 
 from mock import MagicMock
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
-
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
@@ -59,13 +66,6 @@ from eva.optimizer.rules.rules import (
     RulesManager,
 )
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import (
-    copy_sample_videos_to_prefix,
-    create_sample_video,
-    get_logical_query_plan,
-    get_physical_query_plan,
-    load_inbuilt_udfs,
-)
 
 
 class TestRules(unittest.TestCase):
@@ -82,20 +82,16 @@ class TestRules(unittest.TestCase):
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
         self.assertTrue(
-            Promise.EMBED_FILTER_INTO_DERIVED_GET
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.EMBED_FILTER_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.EMBED_PROJECT_INTO_DERIVED_GET
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.EMBED_PROJECT_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE
-            > Promise.IMPLEMENTATION_DELIMETER
+            Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.EMBED_FILTER_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
@@ -106,50 +102,40 @@ class TestRules(unittest.TestCase):
 
         # Promise of implementation rules should be lesser than rewrite rules
         self.assertTrue(
-            Promise.LOGICAL_CREATE_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_CREATE_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_CREATE_UDF_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_DERIVED_GET_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_GET_TO_SEQSCAN < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_INSERT_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_INSERT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_LIMIT_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_ORDERBY_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_SAMPLE_TO_UNIFORMSAMPLE < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_LOAD_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_UPLOAD_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_UPLOAD_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_UNION_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_UNION_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_RENAME_TO_PHYSICAL
-            < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_RENAME_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
@@ -172,10 +158,7 @@ class TestRules(unittest.TestCase):
         # check all the rule instance exists
         for rule in supported_rewrite_rules:
             self.assertTrue(
-                any(
-                    isinstance(rule, type(x))
-                    for x in RulesManager().rewrite_rules
-                )
+                any(isinstance(rule, type(x)) for x in RulesManager().rewrite_rules)
             )
 
         supported_logical_rules = [LogicalInnerJoinCommutativity()]
@@ -185,10 +168,7 @@ class TestRules(unittest.TestCase):
 
         for rule in supported_logical_rules:
             self.assertTrue(
-                any(
-                    isinstance(rule, type(x))
-                    for x in RulesManager().logical_rules
-                )
+                any(isinstance(rule, type(x)) for x in RulesManager().logical_rules)
             )
 
         supported_implementation_rules = [
@@ -315,9 +295,7 @@ class TestRules(unittest.TestCase):
         p_plan = get_physical_query_plan(query)
         join_node = p_plan.children[0]
         original_predicate = l_plan.children[0].predicate
-        pred_1, pred_2 = expression_tree_to_conjunction_list(
-            original_predicate
-        )
+        pred_1, pred_2 = expression_tree_to_conjunction_list(original_predicate)
         storage_plan = join_node.children[0].children[0]
         right_subtree_filter = join_node.children[1]
         # storage_plan should have the correct predicate

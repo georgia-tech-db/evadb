@@ -17,8 +17,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
-from eva.expression.expression_utils import conjuction_list_to_expression_tree
 
+from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -448,12 +448,8 @@ class PushDownFilterThroughJoin(Rule):
             join.left_keys,
             join.right_keys,
         )
-        left_group_aliases = context.memo.get_group_by_id(
-            left.group_id
-        ).aliases
-        right_group_aliases = context.memo.get_group_by_id(
-            right.group_id
-        ).aliases
+        left_group_aliases = context.memo.get_group_by_id(left.group_id).aliases
+        right_group_aliases = context.memo.get_group_by_id(right.group_id).aliases
 
         left_pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
             predicate, left_group_aliases
@@ -536,9 +532,7 @@ class LogicalCreateToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
-        after = CreatePlan(
-            before.video, before.column_list, before.if_not_exists
-        )
+        after = CreatePlan(before.video, before.column_list, before.if_not_exists)
         return after
 
 
@@ -625,9 +619,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(
-            before.table_metainfo, before.column_list, before.value_list
-        )
+        after = InsertPlan(before.table_metainfo, before.column_list, before.value_list)
         return after
 
 
@@ -894,9 +886,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(
-            RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern
-        )
+        super().__init__(RuleType.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL
@@ -904,9 +894,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
     def check(self, grp_id: int, context: OptimizerContext):
         return True
 
-    def apply(
-        self, before: LogicalCreateMaterializedView, context: OptimizerContext
-    ):
+    def apply(self, before: LogicalCreateMaterializedView, context: OptimizerContext):
         after = CreateMaterializedViewPlan(
             before.view,
             columns=before.col_list,
@@ -1022,9 +1010,7 @@ class RulesManager:
             LogicalShowToPhysical(),
         ]
         self._all_rules = (
-            self._rewrite_rules
-            + self._logical_rules
-            + self._implementation_rules
+            self._rewrite_rules + self._logical_rules + self._implementation_rules
         )
 
     @property

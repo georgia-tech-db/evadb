@@ -15,10 +15,7 @@
 
 from typing import List, Set
 
-from eva.expression.abstract_expression import (
-    AbstractExpression,
-    ExpressionType,
-)
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
@@ -55,9 +52,7 @@ def conjuction_list_to_expression_tree(
         return None
     prev_expr = expression_list[0]
     for expr in expression_list[1:]:
-        prev_expr = LogicalExpression(
-            ExpressionType.LOGICAL_AND, prev_expr, expr
-        )
+        prev_expr = LogicalExpression(ExpressionType.LOGICAL_AND, prev_expr, expr)
     return prev_expr
 
 
@@ -85,9 +80,7 @@ def extract_range_list_from_comparison_expr(
     """
 
     if not isinstance(expr, ComparisonExpression):
-        raise RuntimeError(
-            f"Expected Comparision Expression, got {type(expr)}"
-        )
+        raise RuntimeError(f"Expected Comparision Expression, got {type(expr)}")
     left = expr.children[0]
     right = expr.children[1]
     expr_type = expr.etype
@@ -205,15 +198,11 @@ def extract_range_list_from_predicate(
 
     elif isinstance(predicate, ComparisonExpression):
         return union(
-            extract_range_list_from_comparison_expr(
-                predicate, lower_bound, upper_bound
-            )
+            extract_range_list_from_comparison_expr(predicate, lower_bound, upper_bound)
         )
 
     else:
-        raise RuntimeError(
-            f"Contains unsuporrted expression {type(predicate)}"
-        )
+        raise RuntimeError(f"Contains unsuporrted expression {type(predicate)}")
 
 
 def get_columns_in_predicate(predicate: AbstractExpression) -> Set[str]:
@@ -235,9 +224,7 @@ def get_columns_in_predicate(predicate: AbstractExpression) -> Set[str]:
     return cols
 
 
-def contains_single_column(
-    predicate: AbstractExpression, column: str = None
-) -> bool:
+def contains_single_column(predicate: AbstractExpression, column: str = None) -> bool:
     """Checks if predicate contains conditions on single predicate
 
     Args:
@@ -287,6 +274,4 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
         ConstantValueExpression,
     ]
 
-    return _has_simple_expressions(predicate) and contains_single_column(
-        predicate
-    )
+    return _has_simple_expressions(predicate) and contains_single_column(predicate)

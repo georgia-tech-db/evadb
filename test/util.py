@@ -1,14 +1,30 @@
-import numpy as np
-import pandas as pd
-import cv2
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 import shutil
+
+import cv2
+import numpy as np
+import pandas as pd
+
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
-
-from eva.models.storage.batch import Batch
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
+from eva.models.storage.batch import Batch
 from eva.optimizer.operators import Operator
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
@@ -17,8 +33,6 @@ from eva.planner.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
-from eva.configuration.configuration_manager import ConfigurationManager
-
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
@@ -143,9 +157,7 @@ def create_csv(num_rows, columns):
 
 def create_table(table_name, num_rows, num_columns):
     # creates a table with num_rows tuples and columns = [a1, a2, a3, ...]
-    columns = "".join(
-        "a{} INTEGER, ".format(i) for i in range(num_columns - 1)
-    )
+    columns = "".join("a{} INTEGER, ".format(i) for i in range(num_columns - 1))
     columns += "a{} INTEGER".format(num_columns - 1)
     create_table_query = "CREATE TABLE IF NOT EXISTS {} ( {} );".format(
         table_name, columns
@@ -176,9 +188,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
         (2, 2),
     )
     for i in range(num_frames):
-        frame = np.array(
-            np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
-        )
+        frame = np.array(np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8)
         out.write(frame)
 
 
@@ -187,18 +197,14 @@ def copy_sample_videos_to_prefix():
         "data/ua_detrac/ua_detrac.mp4",
         os.path.join(PATH_PREFIX, "ua_detrac.mp4"),
     )
-    shutil.copyfile(
-        "data/mnist/mnist.mp4", os.path.join(PATH_PREFIX, "mnist.mp4")
-    )
+    shutil.copyfile("data/mnist/mnist.mp4", os.path.join(PATH_PREFIX, "mnist.mp4"))
 
 
 def file_remove(path):
     os.remove(os.path.join(PATH_PREFIX, path))
 
 
-def create_dummy_batches(
-    num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0
-):
+def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
     if not filters:
         filters = range(num_frames)
     data = []

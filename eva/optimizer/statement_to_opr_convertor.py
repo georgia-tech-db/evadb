@@ -35,9 +35,7 @@ from eva.optimizer.operators import (
     LogicalUpload,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
-from eva.parser.create_mat_view_statement import (
-    CreateMaterializedViewStatement,
-)
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
@@ -68,9 +66,7 @@ class StatementToPlanConvertor:
         if table_ref.is_table_atom():
             # Table
             catalog_vid_metadata = table_ref.table.table_obj
-            self._plan = LogicalGet(
-                table_ref, catalog_vid_metadata, table_ref.alias
-            )
+            self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
@@ -220,9 +216,7 @@ class StatementToPlanConvertor:
         Arguments:
             statement(RenameTableStatement): [Rename statement]
         """
-        rename_opr = LogicalRename(
-            statement.old_table_ref, statement.new_table_name
-        )
+        rename_opr = LogicalRename(statement.old_table_ref, statement.new_table_name)
         self._plan = rename_opr
 
     def visit_drop(self, statement: DropTableStatement):
@@ -236,9 +230,7 @@ class StatementToPlanConvertor:
             statement {CreateUDFStatement} - - Create UDF Statement
         """
         annotated_inputs = column_definition_to_udf_io(statement.inputs, True)
-        annotated_outputs = column_definition_to_udf_io(
-            statement.outputs, False
-        )
+        annotated_outputs = column_definition_to_udf_io(statement.outputs, False)
 
         create_udf_opr = LogicalCreateUDF(
             statement.name,
@@ -281,9 +273,7 @@ class StatementToPlanConvertor:
         upload_opr = LogicalUpload(statement.path, statement.video_blob)
         self._plan = upload_opr
 
-    def visit_materialized_view(
-        self, statement: CreateMaterializedViewStatement
-    ):
+    def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
             statement.view_ref, statement.col_list, statement.if_not_exists
         )

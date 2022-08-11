@@ -141,9 +141,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT * FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        video_reader = OpenCVReader(
-            "data/mnist/mnist.mp4", batch_mem_size=30000000
-        )
+        video_reader = OpenCVReader("data/mnist/mnist.mp4", batch_mem_size=30000000)
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
@@ -171,9 +169,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(
-            create_dummy_batches(filters=range(2, NUM_FRAMES))
-        )[0]
+        expected_batch = list(create_dummy_batches(filters=range(2, NUM_FRAMES)))[0]
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
@@ -221,9 +217,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(
             create_dummy_batches(
-                filters=[
-                    i for i in range(NUM_FRAMES) if i < 2 or i == 5 or i > 7
-                ]
+                filters=[i for i in range(NUM_FRAMES) if i < 2 or i == 5 or i > 7]
             )
         )[0]
         self.assertEqual(actual_batch, expected_batch)
@@ -232,9 +226,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT id,data FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(
-            create_dummy_batches(num_frames=10, batch_size=5)
-        )
+        expected_batch = list(create_dummy_batches(num_frames=10, batch_size=5))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         self.assertEqual(actual_batch, expected_batch[0])
@@ -244,9 +236,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
 
-        expected_batch = list(
-            create_dummy_batches(filters=range(0, NUM_FRAMES, 7))
-        )
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
 
         self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
         # Since frames are fetched in random order, this test might be flaky
@@ -266,9 +256,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT id, T.labels FROM MyVideo JOIN LATERAL
                         FastRCNNObjectDetector(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertTrue(
-            all(actual_batch.frames.columns == ["myvideo.id", "T.labels"])
-        )
+        self.assertTrue(all(actual_batch.frames.columns == ["myvideo.id", "T.labels"]))
         self.assertEqual(actual_batch.batch_size, 5)
 
     def test_lateral_join_with_unnest(self):
@@ -314,9 +302,7 @@ class SelectExecutorTest(unittest.TestCase):
             pd.DataFrame(
                 {
                     "myvideo.id": np.array([0, 0, 1, 1]),
-                    "T.label": np.array(
-                        ["person", "person", "bicycle", "bicycle"]
-                    ),
+                    "T.label": np.array(["person", "person", "bicycle", "bicycle"]),
                 }
             )
         )
@@ -372,9 +358,7 @@ class SelectExecutorTest(unittest.TestCase):
                 """
         with self.assertRaises(BinderError) as cm:
             execute_query_fetch_all(query)
-        self.assertEqual(
-            str(cm.exception), "Expected 1 output columns for T, got 2."
-        )
+        self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 
     def test_hash_join_with_one_on(self):
         select_query = """SELECT * FROM table1 JOIN
