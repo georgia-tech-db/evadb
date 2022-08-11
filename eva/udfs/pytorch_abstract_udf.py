@@ -21,6 +21,7 @@ import torch
 from PIL import Image
 from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
+from numpy.typing import ArrayLike
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformationUDF
@@ -116,5 +117,5 @@ class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
     def __init__(self, transforms):
         Compose.__init__(self, transforms)
 
-    def transform(self, frames: np.ndarray) -> np.ndarray:
-        return Compose(frames)
+    def transform(self, frames: ArrayLike) -> ArrayLike:
+        return Compose.__call__(self, frames)
