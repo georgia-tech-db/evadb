@@ -15,18 +15,25 @@
 from typing import List, Tuple
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.expression.abstract_expression import (
+    AbstractExpression,
+    ExpressionType,
+)
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
     contains_single_column,
     expression_tree_to_conjunction_list,
+    get_columns_in_predicate,
     is_simple_predicate,
 )
+from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
 
 
-def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
+def column_definition_to_udf_io(
+    col_list: List[ColumnDefinition], is_input: bool
+):
     """Create the UdfIO object fro each column definition provided
 
     Arguments:
@@ -110,11 +117,45 @@ def extract_pushdown_predicate(
     rem_pred = []
     pred_list = expression_tree_to_conjunction_list(predicate)
     for pred in pred_list:
-        if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
+        if contains_single_column(pred, column_alias) and is_simple_predicate(
+            pred
+        ):
             pushdown_preds.append(pred)
         else:
             rem_pred.append(pred)
 
+    return (
+        conjuction_list_to_expression_tree(pushdown_preds),
+        conjuction_list_to_expression_tree(rem_pred),
+    )
+
+
+def extract_pushdown_predicate_for_alias(
+    predicate: AbstractExpression, aliases: List[Alias]
+):
+    """Extract predicate that can be pushed down based on the input aliases.
+
+    Atomic predicates on the table columns that are the subset of the input aliases are
+    considered as candidates for pushdown.
+
+    Args:
+        predicate (AbstractExpression): input predicate
+        aliases (List[str]): aliases for which predicate can be pushed
+    """
+    if predicate is None:
+        return None, None
+
+    pred_list = expression_tree_to_conjunction_list(predicate)
+    pushdown_preds = []
+    rem_pred = []
+    aliases = [alias.alias_name for alias in aliases]
+    for pred in pred_list:
+        column_aliases = get_columns_in_predicate(pred)
+        table_aliases = set([col.split(".")[0] for col in column_aliases])
+        if table_aliases.issubset(set(aliases)):
+            pushdown_preds.append(pred)
+        else:
+            rem_pred.append(pred)
     return (
         conjuction_list_to_expression_tree(pushdown_preds),
         conjuction_list_to_expression_tree(rem_pred),

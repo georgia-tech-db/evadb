@@ -16,7 +16,11 @@ from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
-from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
+from eva.optimizer.optimizer_tasks import (
+    BottomUpRewrite,
+    OptimizeGroup,
+    TopDownRewrite,
+)
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules import RulesManager
 
@@ -25,6 +29,12 @@ class PlanGenerator:
     """
     Used for building Physical Plan from Logical Plan.
     """
+
+    def __init__(
+        self, rules_manager: RulesManager = None, cost_model: CostModel = None
+    ) -> None:
+        self.rules_manager = rules_manager or RulesManager()
+        self.cost_model = cost_model or CostModel()
 
     def execute_task_stack(self, task_stack: OptimizerTaskStack):
         while not task_stack.empty():
@@ -48,8 +58,7 @@ class PlanGenerator:
         return physical_plan
 
     def optimize(self, logical_plan: Operator):
-        cost_model = CostModel()
-        optimizer_context = OptimizerContext(cost_model)
+        optimizer_context = OptimizerContext(self.cost_model)
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
         root_grp_id = grp_expr.group_id
@@ -57,24 +66,32 @@ class PlanGenerator:
 
         # TopDown Rewrite
         optimizer_context.task_stack.push(
-            TopDownRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context)
+            TopDownRewrite(
+                root_expr, self.rules_manager.rewrite_rules, optimizer_context
+            )
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
         # BottomUp Rewrite
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
-            BottomUpRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context)
+            BottomUpRewrite(
+                root_expr, self.rules_manager.rewrite_rules, optimizer_context
+            )
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
         # Optimize Expression (logical -> physical transformation)
         root_group = memo.get_group_by_id(root_grp_id)
-        optimizer_context.task_stack.push(OptimizeGroup(root_group, optimizer_context))
+        optimizer_context.task_stack.push(
+            OptimizeGroup(root_group, optimizer_context)
+        )
         self.execute_task_stack(optimizer_context.task_stack)
 
         # Build Optimal Tree
-        optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
+        optimal_plan = self.build_optimal_physical_plan(
+            root_grp_id, optimizer_context
+        )
         return optimal_plan
 
     def build(self, logical_plan: Operator):
