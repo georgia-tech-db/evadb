@@ -62,9 +62,8 @@ class EvaCommandInterpreter(Cmd):
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
 
-        self.cursor.execute(query)
+        self.cursor.execute(query, report_time=True)
         print(self.cursor.fetch_all())
-
         return False
 
 
