@@ -1,23 +1,46 @@
+<div align="center" style="display:flex;flex-direction:column;">
+  <a href="https://georgia-tech-db.github.io/eva/index.html">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="600px" margin-left="-5px">
+  </a>
+  <h3>Quickly capture information embedded in videos!</h3>
+  <p>
+  </p>
+  <p>
+</div>
+
+<div align="center" style="display:flex;flex-direction:column;">
+    <h3>🌟 Try It Out! 🌟</h3>
+    <div>
+        <a href="https://colab.research.google.com/drive/1H0HNOoCqvO5RFr0ousWku6YJK3qeApCN#scrollTo=B4gcnpDu5q4n">
+            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
+        </a>
+        <a href="https://github.com/georgia-tech-db/eva/discussions">
+            <img alt="Discuss on Github!" src="https://img.shields.io/badge/-Discuss%20on%20Github!-blueviolet">
+        </a>
+    </div>
+</div>
+
 # EVA Video Analytics System
 
 [![PyPI Status](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
 [![CI Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache)](https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt)
 [![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 [![Discuss](https://img.shields.io/badge/-Discuss!-blueviolet)](https://github.com/georgia-tech-db/eva/discussions)
+![Python Versions](https://img.shields.io/badge/Python--versions-3.7+-brightgreen)
 
 ## What is EVA?
 
-EVA is a video database system (think MySQL for videos). It supports a SQL-like language for querying videos (e.g., find frames in a movie with your favorite actor or find touchdowns in a football game). It supports a wide range of commonly used  computer vision models.
+EVA is a new database system tailored for video analytics -- think MySQL for videos. It supports a simple SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or find touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
 
 ## Why EVA? ##
 
-👀 EVA **enables querying of visual data** in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models.
+👀 Easily query videos in user-facing applications with a simple SQL-like interface for commonly used computer vision models.
 
-🚅 EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
+🚅 Speed up queries and save money spent on model inference using in-built sampling, caching, and filtering optimizations.
 
-✨ EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+✨ Hit your target accuracy using state-of-the-art model selection and query optimization algorithms.
 
 ## Links
 * [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
@@ -27,7 +50,7 @@ EVA is a video database system (think MySQL for videos). It supports a SQL-like 
 
 ## QuickStart
 
-1. EVA requires Python 3.8+. To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA requires Python 3.7+. To install EVA, we recommend using an virtual environment and the pip package manager:
 
 ```shell
 pip install evadb
