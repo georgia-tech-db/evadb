@@ -23,7 +23,6 @@ class AbstractPlan(ABC):
         self._children = []
         self._parent = None
         self._opr_type = opr_type
-        self.metrics = None
 
     def append_child(self, child):
         """append node to children list

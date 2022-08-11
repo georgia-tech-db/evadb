@@ -14,7 +14,6 @@
 # limitations under the License.
 import asyncio
 from typing import Iterator, Optional
-from xmlrpc.client import Boolean
 
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -28,7 +27,7 @@ from eva.utils.logging_manager import logger
 from eva.utils.timer import start_timer, end_timer, elapsed_time
 
 
-def execute_query(query, report_time: Boolean = False) -> Iterator[Batch]:
+def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
     """
@@ -54,12 +53,12 @@ def execute_query(query, report_time: Boolean = False) -> Iterator[Batch]:
     return output
 
 
-def execute_query_fetch_all(query) -> Optional[
-        Batch]:
+def execute_query_fetch_all(query) ->\
+        Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    output = execute_query(query)
+    output = execute_query(query, report_time=True)
     if output:
         batch_list = list(output)
         return Batch.concat(batch_list, copy=False)

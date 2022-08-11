@@ -27,26 +27,26 @@ def start_timer():
     global _START_TIME
     global _END_TIME
 
-    _START_TIME = time.perf_counter_ns()
+    _START_TIME = time.perf_counter()
 
 
 def end_timer():
     global _START_TIME
     global _END_TIME
 
-    _END_TIME = time.perf_counter_ns()
+    _END_TIME = time.perf_counter()
 
 
 def elapsed_time(context: str = None, report_time: bool = True):
     global _START_TIME
     global _END_TIME
 
-    elapsed_time = (_END_TIME - _START_TIME) / 1000  # convert ns to ms
+    elapsed_time = (_END_TIME - _START_TIME)  
     if report_time is True:
         if context is None:
-            logger.warn("elapsed time: {:0.4f} msec".format(elapsed_time))
+            logger.warn("elapsed time: {:0.4f} sec".format(elapsed_time))
         else:
-            logger.warn("{:s}: {:0.4f} msec".format(context, elapsed_time))
+            logger.warn("{:s}: {:0.4f} sec".format(context, elapsed_time))
 
     # Reset
     _START_TIME = None
