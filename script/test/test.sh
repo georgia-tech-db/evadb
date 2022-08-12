@@ -18,7 +18,7 @@ fi
 
 # Keeping the duplicate linting for time being
 # Run linter (checks code style)
-flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql --max-line-length 88 --max-line-length 88 --ignore=E203
+flake8 --config=.flake8 eva/ test/ 
 linter_code=$?
 
 if [ $linter_code -ne 0 ];
