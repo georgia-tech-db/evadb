@@ -8,10 +8,25 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Configure apt cache
+          command: |
+              echo 'APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
+              echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >>/etc/apt/apt.conf.d/01keep-debs
+              rm /etc/apt/apt.conf.d/docker-clean
+              apt install -y ca-certificates
+
       - restore_cache:
-          keys:
-            - v2-model_cache
+          key:
+            - v4-model_cache-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          key:
             - v3-pip-cache-{{ checksum "setup.py" }}
+
+      - restore_cache:
+          key:
+            - v1-debian-package-cache-{{ checksum "config.yml" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -36,14 +51,19 @@ jobs:
             coveralls
 
       - save_cache:
-          key: v2-model_cache
+          key: v4-model_cache-{{ checksum "setup.py" }}
           paths:
-            - /home/circleci/.cache/torch/hub/checkpoints
+            - /home/circleci/.cache/torch/hub/
 
       - save_cache:
           key: v3-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./eva_dev_env/
+
+      - save_cache:
+          key: v1-debian-package-cache-{{ checksum "config.yml" }}
+          paths:
+            - "/var/cache/apt/archives"
 
 workflows:
   main:
