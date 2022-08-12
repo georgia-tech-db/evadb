@@ -64,7 +64,6 @@ class EvaCommandInterpreter(Cmd):
 
         self.cursor.execute(query)
         print(self.cursor.fetch_all())
-
         return False
 
 

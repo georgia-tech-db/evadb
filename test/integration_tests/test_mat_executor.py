@@ -15,7 +15,7 @@
 import unittest
 from test.util import (
     DummyObjectDetector,
-    copy_sample_videos_to_prefix,
+    copy_sample_videos_to_upload_dir,
     create_sample_video,
     file_remove,
     load_inbuilt_udfs,
@@ -37,7 +37,7 @@ class MaterializedViewTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        copy_sample_videos_to_prefix()
+        copy_sample_videos_to_upload_dir()
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         query = """LOAD FILE 'ua_detrac.mp4'

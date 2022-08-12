@@ -58,10 +58,9 @@ class LoadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_search_in_upload_directory(self, create_mock):
         self.upload_path = Path(
-            ConfigurationManager().get_value("storage", "path_prefix")
-        )
-        file_path = "video"
-        table_metainfo = "info"
+            ConfigurationManager().get_value('storage', 'upload_dir'))
+        file_path = 'video'
+        table_metainfo = 'info'
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -156,4 +155,4 @@ class LoadExecutorTest(unittest.TestCase):
         )
 
         # remove the dummy.csv
-        file_remove("dummy.csv")
+        file_remove('dummy.csv')
