@@ -11,6 +11,10 @@ fi
 # Run black, isort, linter 
 sh script/formatting/pre-push.sh
 return_code=$?
+if [ $return_code -ne 0 ];
+then
+    exit $return_code
+fi
 
 # Keeping the duplicate linting for time being
 # Run linter (checks code style)
