@@ -7,17 +7,20 @@ jobs:
     resource_class: large
     steps:
       - checkout
+
+      - restore_cache:
+          keys:
+            - v1-model_cache
+            - v1-pip-cache-{{ checksum "setup.py" }}
+
       - save_cache:
           key: v1-model_cache
           paths:
             - /home/circleci/.cache/torch/hub/checkpoints
 
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "setup.py" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-            - v1-model_cache
+          key: v1-pip-cache-{{ checksum "setup.py" }}
+          paths:
+            - /home/circleci/.cache/pip
 
       - run:
           name: Install EVA package with test dependencies
@@ -35,7 +38,7 @@ jobs:
             sh script/antlr4/generate_parser.sh
 
       - run:
-          name: Test
+          name: Test and upload coverage report to coveralls
           command: |
             . eva_dev_env/bin/activate
             sh script/test/test.sh
