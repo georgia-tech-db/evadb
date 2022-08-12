@@ -30,7 +30,7 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         copy_sample_videos_to_upload_dir()
-        query = """LOAD DATA INFILE 'ua_detrac.mp4'
+        query = """LOAD FILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
         query = """LOAD FILE 'mnist.mp4'

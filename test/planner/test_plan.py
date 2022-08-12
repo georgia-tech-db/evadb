@@ -176,8 +176,3 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.view, dummy_view)
         self.assertEqual(plan.columns, columns)
 
-
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(PlanNodeTests('test_upload_plan'))
-    unittest.TextTestRunner().run(suite)

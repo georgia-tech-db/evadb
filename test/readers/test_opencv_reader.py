@@ -64,7 +64,7 @@ class VideoLoaderTest(unittest.TestCase):
         video_loader = OpenCVReader(
             file_url=os.path.join(UPLOAD_DIR, 'dummy.avi'),
             batch_mem_size=FRAME_SIZE * NUM_FRAMES,
-            start_frame_id=2)
+            offset=2)
         batches = list(video_loader.read())
         expected = list(create_dummy_batches(
             filters=[i for i in range(0, NUM_FRAMES)], start_id=2))

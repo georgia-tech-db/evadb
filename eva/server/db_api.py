@@ -83,10 +83,7 @@ class EVACursor(object):
             with open(file_path, "rb") as f:
                 bytes_read = f.read()
                 b64_string = str(base64.b64encode(bytes_read))
-                query = 'UPLOAD PATH ' + \
-                        '\'' + dst_path + '\'' + \
-                        ' BLOB ' + \
-                        '\"' + b64_string + '\" '
+                query = f'UPLOAD PATH \'{dst_path}\' BLOB \"{b64_string}\"'
 
                 for token in query_list[3:]:
                     query += token + ' '

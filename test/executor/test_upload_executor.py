@@ -50,13 +50,18 @@ class UploadExecutorTest(unittest.TestCase):
             batch = next(upload_executor.exec())
             create_mock.assert_called_once_with(table_metainfo,
                                                 file_path)
-            self.assertEqual(batch, Batch(pd.DataFrame(
-                [{'Video successfully added at location: ': file_path}])))
+
+            location = file_path
+            expected = Batch(
+                pd.DataFrame([{f"Video successfully added at location: {location}"}])
+            )
+
+            self.assertEqual(batch, expected)
 
     @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_search_in_upload_directory(
             self, create_mock):
-        self.upload_path = Path(
+        self.upload_dir = Path(
             ConfigurationManager().get_value('storage', 'upload_dir'))
         file_path = 'video'
         video_blob = "b'AAAA'"
@@ -76,11 +81,16 @@ class UploadExecutorTest(unittest.TestCase):
         with patch.object(Path, 'exists') as mock_exists:
             mock_exists.side_effect = [False, True]
             batch = next(upload_executor.exec())
+            location = self.upload_dir / file_path
+
             create_mock.assert_called_once_with(
                 table_metainfo,
-                self.upload_path / file_path)
-            self.assertEqual(batch, Batch(pd.DataFrame(
-                [{'Video successfully added at location: ': file_path}])))
+                location)
+
+            expected = Batch(
+                pd.DataFrame([{f"Video successfully added at location: {location}"}])
+            )
+            self.assertEqual(batch, expected)
 
     @patch('eva.executor.load_video_executor.VideoStorageEngine.create')
     def test_should_fail_to_find_file(self, create_mock):
@@ -144,17 +154,3 @@ class UploadExecutorTest(unittest.TestCase):
 
         # remove the dummy.csv
         file_remove('dummy.csv')
-
-
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(UploadExecutorTest(
-        'test_should_call_opencv_reader_and_storage_engine'))
-    suite.addTest(UploadExecutorTest(
-        'test_should_search_in_upload_directory'))
-    suite.addTest(UploadExecutorTest(
-        'test_should_fail_to_find_file'))
-    suite.addTest(UploadExecutorTest(
-        'test_should_call_csv_reader_and_storage_engine'))
-
-    unittest.TextTestRunner().run(suite)

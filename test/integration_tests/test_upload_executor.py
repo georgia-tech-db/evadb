@@ -48,6 +48,17 @@ class UploadExecutorTest(unittest.TestCase):
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
 
+    def test_should_upload_file_to_location_without_format(self):
+        query = 'UPLOAD PATH "dummy.avi" BLOB ' + \
+                '\"' + self.video_blob + '\" ' + \
+                'INTO MyVideo;'
+        execute_query_fetch_all(query)
+        expected_blob = self.video_blob
+        with open(os.path.join(UPLOAD_DIR, 'dummy.avi'), 'rb') as f:
+            bytes_read = f.read()
+            actual_blob = str(base64.b64encode(bytes_read))
+        self.assertEqual(actual_blob, expected_blob)
+
     # integration test for video
     def test_should_upload_video_to_table(self):
         query = 'UPLOAD PATH "dummy.avi" BLOB ' + \
@@ -64,9 +75,7 @@ class UploadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     # integration test for csv
-
     def test_should_upload_csv_to_table(self):
-
         # loading a csv requires a table to be created first
         create_table_query = """
 
@@ -104,9 +113,3 @@ class UploadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
 
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(UploadExecutorTest('test_should_upload_file_to_location'))
-    suite.addTest(UploadExecutorTest('test_should_upload_video_to_table'))
-    suite.addTest(UploadExecutorTest('test_should_upload_csv_to_table'))
-    unittest.TextTestRunner().run(suite)

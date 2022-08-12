@@ -92,9 +92,3 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = create_dummy_csv_batches()
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
-
-
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(LoadExecutorTest('test_should_load_video_in_table'))
-    unittest.TextTestRunner().run(suite)
