@@ -14,10 +14,9 @@
 # limitations under the License.
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.parser.upload_statement import UploadStatement
-
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
+from eva.parser.upload_statement import UploadStatement
 
 
 class Upload(evaql_parserVisitor):
@@ -29,7 +28,7 @@ class Upload(evaql_parserVisitor):
         # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
         file_options = {}
-        file_options['file_format'] = file_format
+        file_options["file_format"] = file_format
 
         if ctx.fileOptions():
             file_options = self.visit(ctx.fileOptions())
@@ -39,6 +38,5 @@ class Upload(evaql_parserVisitor):
         if ctx.uidList():
             column_list = self.visit(ctx.uidList())
 
-        stmt = UploadStatement(srv_path, video_blob, table,
-                               column_list, file_options)
+        stmt = UploadStatement(srv_path, video_blob, table, column_list, file_options)
         return stmt

@@ -40,5 +40,5 @@ class SampleExecutor(AbstractExecutor):
 
         current = 0
         for batch in child_executor.exec():
-            yield batch[current:: self._sample_freq]
+            yield batch[current :: self._sample_freq]
             current = (current - len(batch)) % self._sample_freq

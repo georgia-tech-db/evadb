@@ -14,17 +14,16 @@
 # limitations under the License.
 
 import unittest
+from test.util import create_sample_video, file_remove
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.timer import start_timer, end_timer, elapsed_time
-from test.util import create_sample_video, file_remove
+from eva.utils.timer import elapsed_time, end_timer, start_timer
 
 NUM_FRAMES = 10
 
 
 class TimerTests(unittest.TestCase):
-    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -48,5 +47,4 @@ class TimerTests(unittest.TestCase):
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
-        file_remove('dummy.avi')
-
+        file_remove("dummy.avi")

@@ -28,7 +28,7 @@ class LoadVideoExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
         config = ConfigurationManager()
-        self.upload_dir = Path(config.get_value('storage', 'upload_dir'))
+        self.upload_dir = Path(config.get_value("storage", "upload_dir"))
 
     def validate(self):
         pass

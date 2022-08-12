@@ -17,12 +17,11 @@ from typing import List
 
 import pandas as pd
 import torch
-from torch import Tensor
 import torchvision.transforms as T
+from facenet_pytorch import MTCNN
+from torch import Tensor
 
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-
-from facenet_pytorch import MTCNN
 
 
 class FaceDetector(PytorchAbstractClassifierUDF):
@@ -59,10 +58,7 @@ class FaceDetector(PytorchAbstractClassifierUDF):
 
         outcome = pd.DataFrame()
         outcome = outcome.append(
-            {
-                "bboxes": bboxes,
-                "scores": scores
-            },
-            ignore_index=True)
-        
+            {"bboxes": bboxes, "scores": scores}, ignore_index=True
+        )
+
         return outcome

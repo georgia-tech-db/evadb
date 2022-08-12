@@ -15,10 +15,10 @@
 import importlib.resources as importlib_resources
 import os
 import shutil
+import tempfile
 from pathlib import Path
 
 import yaml
-import tempfile
 
 from eva.configuration.config_utils import read_value_config, update_value_config
 from eva.configuration.dictionary import (
@@ -65,9 +65,7 @@ def bootstrap_environment():
     database_uri = read_value_config(cfg, "core", "catalog_database_uri")
     upload_location = None
 
-    if not dataset_location or \
-       not database_uri or \
-       not upload_location:
+    if not dataset_location or not database_uri or not upload_location:
         if not dataset_location:
             dataset_location = str(eva_home_directory / EVA_DATASET_DIR)
             update_value_config(cfg, "core", "datasets_dir", dataset_location)
@@ -77,8 +75,7 @@ def bootstrap_environment():
 
         # Ref: https://stackoverflow.com/a/847866
         upload_location = str(eva_home_directory / tempfile.gettempdir())
-        update_value_config(cfg, "storage", "upload_dir",
-                            upload_location)
+        update_value_config(cfg, "storage", "upload_dir", upload_location)
 
         # Create upload directory in eva home directory if it does not exist
         upload_location = Path(upload_location)
