@@ -7,11 +7,18 @@ jobs:
     resource_class: large
     steps:
       - checkout
+      - save_cache:
+          key: v1-model_cache
+          paths:
+            - /home/circleci/.cache/torch/hub/checkpoints
+
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "setup.py" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
+            - v1-model_cache
+
       - run:
           name: Install EVA package with test dependencies
           command: |
