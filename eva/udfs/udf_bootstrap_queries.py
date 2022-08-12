@@ -70,6 +70,11 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
+Gaussianblur_udf_query = """CREATE UDF IF NOT EXISTS GaussianBlur
+      INPUT  (Frame_Array_In NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUPUT (Frame_Array_Out NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      TYPE  Transformation
+      IMPL  '{}/udfs/gaussian_blur.py';""".format(EVA_INSTALLATION_DIR)
 
 def init_builtin_udfs(mode="debug"):
     """
@@ -79,7 +84,7 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query, Gaussianblur_udf_query]
     queries.extend(
         [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]
     )
