@@ -14,13 +14,15 @@
 # limitations under the License.
 import sys
 import unittest
-from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
+import pytest
 
 import mock
-import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
+
+from test.util import (copy_sample_videos_to_upload_dir,
+                       file_remove, load_inbuilt_udfs)
 
 
 class PytorchTest(unittest.TestCase):

@@ -855,6 +855,10 @@ class LogicalFunctionScan(Operator):
     def do_unnest(self):
         return self._do_unnest
 
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalFunctionScan):
@@ -867,7 +871,7 @@ class LogicalFunctionScan(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
+        return hash((super().__hash__(), self.func_expr))
 
 
 class LogicalJoin(Operator):
