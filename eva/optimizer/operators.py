@@ -855,10 +855,6 @@ class LogicalFunctionScan(Operator):
     def do_unnest(self):
         return self._do_unnest
 
-    @property
-    def do_unnest(self):
-        return self._do_unnest
-
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalFunctionScan):

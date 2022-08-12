@@ -35,14 +35,9 @@ class FunctionExpressionTest(unittest.TestCase):
         mock_function.to_device.return_value = gpu_mock_function
         context_instance.gpu_device.return_value = gpu_device_id
 
-<<<<<<< HEAD
-        expression = FunctionExpression(mock_function, name="test", alias="func_expr")
-=======
         expression = FunctionExpression(
             mock_function, name="test", alias=Alias("func_expr")
         )
->>>>>>> 4a92406611f49388843fca62f54cb381176ce4e1
-
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
         mock_function.to_device.assert_called_with(gpu_device_id)
@@ -51,14 +46,9 @@ class FunctionExpressionTest(unittest.TestCase):
     def test_should_use_the_same_function_if_not_gpu_compatible(self):
         mock_function = MagicMock(return_value=pd.DataFrame())
 
-<<<<<<< HEAD
-        expression = FunctionExpression(mock_function, name="test", alias="func_expr")
-=======
         expression = FunctionExpression(
             mock_function, name="test", alias=Alias("func_expr")
         )
->>>>>>> 4a92406611f49388843fca62f54cb381176ce4e1
-
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
         mock_function.assert_called()
@@ -66,19 +56,13 @@ class FunctionExpressionTest(unittest.TestCase):
     @patch("eva.expression.function_expression.Context")
     def test_should_execute_same_function_if_no_gpu(self, context):
         context_instance = context.return_value
-        mock_function = MagicMock(
-            spec=GPUCompatible, return_value=pd.DataFrame()
-        )
+        mock_function = MagicMock(spec=GPUCompatible, return_value=pd.DataFrame())
 
         context_instance.gpu_device.return_value = NO_GPU
 
-<<<<<<< HEAD
-        expression = FunctionExpression(mock_function, name="test", alias="func_expr")
-=======
         expression = FunctionExpression(
             mock_function, name="test", alias=Alias("func_expr")
         )
->>>>>>> 4a92406611f49388843fca62f54cb381176ce4e1
 
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)

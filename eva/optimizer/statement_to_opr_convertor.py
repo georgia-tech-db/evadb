@@ -87,8 +87,7 @@ class StatementToPlanConvertor:
             join_node = table_ref.join_node
             join_plan = LogicalJoin(
                 join_type=join_node.join_type,
-               
-                join_predicate=join_node.predicate,,
+                join_predicate=join_node.predicate,
             )
             self.visit_table_ref(join_node.left)
             join_plan.append_child(self._plan)
