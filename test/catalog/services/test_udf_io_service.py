@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 from unittest import TestCase
 
 from mock import MagicMock, patch
@@ -76,7 +75,3 @@ class UdfServiceTest(TestCase):
         service.add_udf_io(io_list)
         for mock in io_list:
             mock.save.assert_called_once()
-
-
-if __name__ == "__main__":
-    unittest.main()
