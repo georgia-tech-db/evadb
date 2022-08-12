@@ -14,7 +14,7 @@
 # limitations under the License.
 import sys
 import unittest
-from test.util import copy_sample_videos_to_prefix, file_remove, load_inbuilt_udfs
+from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
 import mock
 import pytest
@@ -27,7 +27,7 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        copy_sample_videos_to_prefix()
+        copy_sample_videos_to_upload_dir()
         query = """LOAD FILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)

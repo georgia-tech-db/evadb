@@ -14,74 +14,83 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from test.util import create_sample_csv, file_remove
+from test.util import create_sample_csv_as_blob, file_remove
 
 import pandas as pd
 from mock import call, patch
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.upload_executor import UploadExecutor
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 
 
-class LoadExecutorTest(unittest.TestCase):
+class UploadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_call_opencv_reader_and_storage_engine(self, create_mock):
         file_path = "video"
+        video_blob = "b'AAAA'"
         table_metainfo = "info"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
         plan = type(
-            "LoadDataPlan",
+            "UploadPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
                 "file_path": file_path,
+                "video_blob": video_blob,
+                "table_metainfo": table_metainfo,
                 "batch_mem_size": batch_mem_size,
                 "file_options": file_options,
             },
         )
 
-        load_executor = LoadDataExecutor(plan)
+        upload_executor = UploadExecutor(plan)
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.return_value = True
-            batch = next(load_executor.exec())
+            batch = next(upload_executor.exec())
             create_mock.assert_called_once_with(table_metainfo, file_path)
+
+            location = file_path
             expected = Batch(
-                pd.DataFrame([{f"Video successfully added at location: {file_path}"}])
+                pd.DataFrame([{f"Video successfully added at location: {location}"}])
             )
+
             self.assertEqual(batch, expected)
 
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_search_in_upload_directory(self, create_mock):
-        self.upload_path = Path(
+        self.upload_dir = Path(
             ConfigurationManager().get_value("storage", "upload_dir")
         )
         file_path = "video"
+        video_blob = "b'AAAA'"
         table_metainfo = "info"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
         plan = type(
-            "LoadDataPlan",
+            "UploadPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
                 "file_path": file_path,
+                "video_blob": video_blob,
+                "table_metainfo": table_metainfo,
                 "batch_mem_size": batch_mem_size,
                 "file_options": file_options,
             },
         )
 
-        load_executor = LoadDataExecutor(plan)
+        upload_executor = UploadExecutor(plan)
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.side_effect = [False, True]
-            batch = next(load_executor.exec())
-            location = self.upload_path / file_path
+            batch = next(upload_executor.exec())
+            location = self.upload_dir / file_path
+
             create_mock.assert_called_once_with(table_metainfo, location)
+
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {location}"}])
             )
@@ -90,35 +99,37 @@ class LoadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_fail_to_find_file(self, create_mock):
         file_path = "video"
+        video_blob = "b'AAAA'"
         table_metainfo = "info"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
         column_list = None
         plan = type(
-            "LoadDataPlan",
+            "UploadPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
                 "file_path": file_path,
+                "video_blob": video_blob,
+                "table_metainfo": table_metainfo,
                 "batch_mem_size": batch_mem_size,
                 "column_list": column_list,
                 "file_options": file_options,
             },
         )
 
-        load_executor = LoadDataExecutor(plan)
+        upload_executor = UploadExecutor(plan)
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.side_effect = [False, False]
             with self.assertRaises(RuntimeError):
-                next(load_executor.exec())
+                next(upload_executor.exec())
 
     @patch("eva.storage.storage_engine.StorageEngine.write")
     def test_should_call_csv_reader_and_storage_engine(self, write_mock):
         batch_frames = [list(range(5))] * 2
 
         # creates a dummy.csv
-        create_sample_csv()
+        csv_blob = create_sample_csv_as_blob()
 
         file_path = "dummy.csv"
         table_metainfo = "info"
@@ -131,22 +142,22 @@ class LoadExecutorTest(unittest.TestCase):
             TupleValueExpression(col_name="video_id", table_alias="dummy"),
         ]
         plan = type(
-            "LoadDataPlan",
+            "UploadPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
                 "file_path": file_path,
+                "video_blob": csv_blob,
+                "table_metainfo": table_metainfo,
                 "batch_mem_size": batch_mem_size,
                 "column_list": column_list,
                 "file_options": file_options,
             },
         )
 
-        load_executor = LoadDataExecutor(plan)
-        batch = next(load_executor.exec())
+        upload_executor = UploadExecutor(plan)
+        batch = next(upload_executor.exec())
         write_mock.has_calls(
-            call(table_metainfo, batch_frames[0]),
-            call(table_metainfo, batch_frames[1]),
+            call(table_metainfo, batch_frames[0]), call(table_metainfo, batch_frames[1])
         )
 
         # Note: We call exec() from the child classes.

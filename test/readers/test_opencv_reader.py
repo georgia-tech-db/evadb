@@ -17,7 +17,7 @@ import unittest
 from test.util import (
     FRAME_SIZE,
     NUM_FRAMES,
-    PATH_PREFIX,
+    UPLOAD_DIR,
     create_dummy_batches,
     create_sample_video,
     file_remove,
@@ -35,7 +35,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_return_one_batch(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(PATH_PREFIX, "dummy.avi"),
+            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"),
             batch_mem_size=NUM_FRAMES * FRAME_SIZE,
         )
         batches = list(video_loader.read())
@@ -44,7 +44,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(PATH_PREFIX, "dummy.avi"), batch_mem_size=FRAME_SIZE
+            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"), batch_mem_size=FRAME_SIZE
         )
         batches = list(video_loader.read())
         expected = list(create_dummy_batches(batch_size=1))
@@ -52,7 +52,7 @@ class VideoLoaderTest(unittest.TestCase):
 
     def test_should_skip_first_two_frames_with_offset_two(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(PATH_PREFIX, "dummy.avi"),
+            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"),
             batch_mem_size=FRAME_SIZE * (NUM_FRAMES - 2),
             offset=2,
         )
@@ -61,9 +61,21 @@ class VideoLoaderTest(unittest.TestCase):
 
         self.assertTrue(batches, expected)
 
+    def test_should_start_frame_number_from_two(self):
+        video_loader = OpenCVReader(
+            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"),
+            batch_mem_size=FRAME_SIZE * NUM_FRAMES,
+            offset=2,
+        )
+        batches = list(video_loader.read())
+        expected = list(
+            create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES)], start_id=2)
+        )
+        self.assertTrue(batches, expected)
+
     def test_should_skip_first_two_frames_and_batch_size_equal_to_no_of_frames(self):
         video_loader = OpenCVReader(
-            file_url=os.path.join(PATH_PREFIX, "dummy.avi"),
+            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"),
             batch_mem_size=FRAME_SIZE * NUM_FRAMES,
             offset=2,
         )
