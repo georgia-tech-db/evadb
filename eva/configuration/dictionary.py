@@ -20,6 +20,7 @@ import eva
 EVA_INSTALLATION_DIR = os.path.dirname(eva.__file__)
 EVA_DEFAULT_DIR = str(Path.home()) + "/.eva/"
 EVA_DATASET_DIR = "eva_datasets"
+EVA_UPLOAD_DIR = "tmp"
 EVA_CONFIG_FILE = "eva.yml"
 CATALOG_DIR = "catalog"
 DATASET_DATAFRAME_NAME = "dataset"

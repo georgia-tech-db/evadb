@@ -18,13 +18,16 @@ import os
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.upload_plan import UploadPlan
+from eva.executor.load_csv_executor import LoadCSVExecutor
+from eva.executor.load_video_executor import LoadVideoExecutor
+from eva.parser.types import FileFormatType
 
 
 class UploadExecutor(AbstractExecutor):
     def __init__(self, node: UploadPlan):
         super().__init__(node)
         config = ConfigurationManager()
-        self.path_prefix = config.get_value("storage", "path_prefix")
+        self.upload_dir = config.get_value('storage', 'upload_dir')
 
     def validate(self):
         pass
@@ -40,5 +43,18 @@ class UploadExecutor(AbstractExecutor):
         video_blob = self.node.video_blob
         path = self.node.file_path
         video_bytes = base64.b64decode(video_blob[1:])
-        with open(os.path.join(self.path_prefix, path), "wb") as f:
+        with open(os.path.join(self.upload_dir, path), 'wb') as f:
             f.write(video_bytes)
+
+        # invoke the appropriate executor
+        if self.node.file_options['file_format'] == FileFormatType.VIDEO:
+            executor = LoadVideoExecutor(self.node)
+        elif self.node.file_options['file_format'] == FileFormatType.CSV:
+            executor = LoadCSVExecutor(self.node)
+
+        # for each batch, exec the executor
+        for batch in executor.exec():
+            yield batch
+
+        # Delete the video from ~/.eva ?
+        # os.remove(os.path.join(EVA_DEFAULT_DIR, path))
