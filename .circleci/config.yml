@@ -18,6 +18,7 @@ jobs:
           paths:
             - /home/circleci/.cache/torch/hub/checkpoints
 
+      - save_cache:
           key: v1-pip-cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/pip
