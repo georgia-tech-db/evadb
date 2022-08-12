@@ -57,6 +57,7 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
             "nvidia_ssd",
             pretrained=False,
             precision="fp16",
+            verbose=False,
         )
         model_state_dict = torch.hub.load_state_dict_from_url(
             (

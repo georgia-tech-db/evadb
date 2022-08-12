@@ -97,11 +97,12 @@ def generate_file_path(name: str = "") -> Path:
     """
     dataset_location = ConfigurationManager().get_value("core", "datasets_dir")
     if dataset_location is None:
-        logger.error("Missing location key in eva.yml")
-        raise KeyError("Missing datasets_dir key in eva.yml")
+        logger.error('Missing dataset location key in eva.yml')
+        raise KeyError('Missing datasets_dir key in eva.yml')
 
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
+
     salt = uuid.uuid4().hex
     file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
     path = dataset_location / file_name

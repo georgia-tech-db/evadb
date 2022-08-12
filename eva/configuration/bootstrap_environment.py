@@ -18,6 +18,7 @@ import shutil
 from pathlib import Path
 
 import yaml
+import tempfile
 
 from eva.configuration.config_utils import read_value_config, update_value_config
 from eva.configuration.dictionary import (
@@ -59,17 +60,29 @@ def bootstrap_environment():
     with open(config_path, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    # fill default values for dataset and database if not present
+    # fill default values for dataset, database and upload loc if not present
     dataset_location = read_value_config(cfg, "core", "datasets_dir")
     database_uri = read_value_config(cfg, "core", "catalog_database_uri")
+    upload_location = None
 
-    if not dataset_location or not database_uri:
+    if not dataset_location or \
+       not database_uri or \
+       not upload_location:
         if not dataset_location:
             dataset_location = str(eva_home_directory / EVA_DATASET_DIR)
             update_value_config(cfg, "core", "datasets_dir", dataset_location)
         if not database_uri:
             database_uri = DB_DEFAULT_URI
             update_value_config(cfg, "core", "catalog_database_uri", database_uri)
+
+        # Ref: https://stackoverflow.com/a/847866
+        upload_location = str(eva_home_directory / tempfile.gettempdir())
+        update_value_config(cfg, "storage", "upload_dir",
+                            upload_location)
+
+        # Create upload directory in eva home directory if it does not exist
+        upload_location = Path(upload_location)
+        upload_location.mkdir(parents=True, exist_ok=True)
 
         # update config on disk
         with open(config_path, "w") as ymlfile:

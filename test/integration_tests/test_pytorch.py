@@ -14,22 +14,21 @@
 # limitations under the License.
 import sys
 import unittest
-import pytest
 import PIL
-
-from test.util import copy_sample_videos_to_prefix, file_remove, load_inbuilt_udfs
-
 import mock
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
+from test.util import (copy_sample_videos_to_upload_dir,
+                       file_remove, load_inbuilt_udfs)
 
 
 class PytorchTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        copy_sample_videos_to_prefix()
+        copy_sample_videos_to_upload_dir()
         query = """LOAD FILE 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
@@ -84,7 +83,6 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
-
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
@@ -94,7 +92,7 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_pytorch_and_facenet(self):
         create_udf_query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4), 
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  FaceDetection
                   IMPL  'eva/udfs/face_detector.py';
@@ -115,8 +113,8 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_pytorch_and_ocr(self):
         create_udf_query = """CREATE UDF OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (labels NDARRAY STR(100),
-                          bboxes NDARRAY FLOAT32(ANYDIM, 4), 
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
                   TYPE  OCRExtraction
                   IMPL  'eva/udfs/ocr_extractor.py';
@@ -135,7 +133,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_resnet50(self):
-        create_udf_query = """CREATE UDF FeatureExtractor 
+        create_udf_query = """CREATE UDF FeatureExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification

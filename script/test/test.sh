@@ -11,6 +11,12 @@ fi
 # Run linter (checks code style)
 flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql --max-line-length 88
 linter_code=$?
+
+if [ $linter_code -ne 0 ];
+then
+    exit $linter_code
+fi
+
 # Run unit tests
 PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-}
 test_code=$?
