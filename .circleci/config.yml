@@ -18,7 +18,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-debian-package-cache-{{ checksum "config.yml" }}
+            - v1-debian-package-cache-{{ checksum ".circleci/config.yml" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -53,7 +53,7 @@ jobs:
             - ./eva_dev_env/
 
       - save_cache:
-          key: v1-debian-package-cache-{{ checksum "config.yml" }}
+          key: v1-debian-package-cache-{{ checksum ".circleci/config.yml" }}
           paths:
             - /var/cache/apt/archives
 
