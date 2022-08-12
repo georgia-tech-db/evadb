@@ -76,17 +76,21 @@ class EVACursor(object):
          - UPLOAD: the client read the file and uses base64 to encode
          the content into a string.
         """
-        if 'UPLOAD' in query:
+        if "UPLOAD" in query:
             query_list = query.split()
             file_path = query_list[2][1:-1]
             dst_path = os.path.basename(file_path)
-            with open(file_path, "rb") as f:
-                bytes_read = f.read()
-                b64_string = str(base64.b64encode(bytes_read))
-                query = f'UPLOAD PATH \'{dst_path}\' BLOB \"{b64_string}\"'
 
-                for token in query_list[3:]:
-                    query += token + ' '
+            try:
+                with open(file_path, "rb") as f:
+                    bytes_read = f.read()
+                    b64_string = str(base64.b64encode(bytes_read))
+                    query = f"UPLOAD PATH '{dst_path}' BLOB \"{b64_string}\""
+
+                    for token in query_list[3:]:
+                        query += token + " "
+            except Exception as e:
+                raise e
 
         return query
 

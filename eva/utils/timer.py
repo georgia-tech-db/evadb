@@ -17,8 +17,7 @@ import time
 
 from eva.utils.logging_manager import logger
 
-
-# GLOBAL CONSTANTS 
+# GLOBAL CONSTANTS
 _START_TIME = None
 _END_TIME = None
 
@@ -41,7 +40,7 @@ def elapsed_time(context: str = None, report_time: bool = True):
     global _START_TIME
     global _END_TIME
 
-    elapsed_time = (_END_TIME - _START_TIME)  
+    elapsed_time = _END_TIME - _START_TIME
     if report_time is True:
         if context is None:
             logger.warn("elapsed time: {:0.4f} sec".format(elapsed_time))

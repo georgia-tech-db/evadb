@@ -78,7 +78,7 @@ class OrderByExecutor(AbstractExecutor):
         #  on self.batch_sizes which holds the input batches sizes
         index = 0
         for i in self.batch_sizes:
-            batch = aggregated_batch[index: index + i]
+            batch = aggregated_batch[index : index + i]
             batch.reset_index()
             index += i
             yield batch
