@@ -2,7 +2,6 @@ import os
 import PIL
 
 import torch
-import numpy as np
 
 from eva.udfs.gaussian_blur import GaussianBlur
 
