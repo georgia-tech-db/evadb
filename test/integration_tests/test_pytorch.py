@@ -15,6 +15,7 @@
 import sys
 import unittest
 import pytest
+import PIL
 
 from test.util import copy_sample_videos_to_prefix, file_remove, load_inbuilt_udfs
 
@@ -40,6 +41,7 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         file_remove("ua_detrac.mp4")
+        file_remove("mnist.mp4")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -47,6 +49,26 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_gaussian_blur(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS GaussianBlur
+                INPUT  (Frame_Array_In NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                OUTPUT (Frame_Array_Out NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE  Transformation
+                IMPL  'eva/udfs/gaussian_blur.py';"""
+
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT GaussianBlur(data) FROM MyVideo
+                        WHERE id < 5;"""
+
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(actual_batch.batch_size, 5)
+
+        res = actual_batch.frames
+        for idx in res.index:
+            self.assertIsInstance(res["gaussianblur.Frame_Array_Out"][idx], PIL.Image)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ssd(self):
@@ -108,7 +130,7 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for MNIST
         res = actual_batch.frames
-        self.assertTrue(res["ocrextractor.labels"][0][0] == '4')
+        self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
     @pytest.mark.torchtest
@@ -128,8 +150,7 @@ class PytorchTest(unittest.TestCase):
 
         # non-trivial test case for Resnet50
         res = actual_batch.frames
-        self.assertEqual(res["featureextractor.features"][0].shape, 
-                         (1, 2048))
+        self.assertEqual(res["featureextractor.features"][0].shape, (1, 2048))
         self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
 
     def test_should_raise_import_error_with_missing_torch(self):
