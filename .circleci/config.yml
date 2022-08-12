@@ -11,7 +11,7 @@ jobs:
       - restore_cache:
           keys:
             - v1-model_cache
-            - v1-pip-cache-{{ checksum "setup.py" }}
+            - v2-pip-cache-{{ checksum "setup.py" }}
 
       - save_cache:
           key: v1-model_cache
@@ -19,9 +19,9 @@ jobs:
             - /home/circleci/.cache/torch/hub/checkpoints
 
       - save_cache:
-          key: v1-pip-cache-{{ checksum "setup.py" }}
+          key: v2-pip-cache-{{ checksum "setup.py" }}
           paths:
-            - /home/circleci/.cache/pip
+            - ./eva_dev_env/
 
       - run:
           name: Install EVA package with test dependencies
