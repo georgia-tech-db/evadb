@@ -30,6 +30,12 @@ class GaussianBlur(PytorchAbstractTransformationUDF, tv_transforms.GaussianBlur)
     Gaussian Blur documentation:
     https://pytorch.org/vision/0.8/_modules/torchvision/transforms/transforms.html#GaussianBlur
     """
-    def __init__(self, kernel_size: int = 3, sigma: float = 0.5):
+
+    def __init__(self, kernel_size: int = 3, sigma: float = 1.0):
+        """
+        Arguments:
+            kernel_size: side length of square kernel used to perform gaussian
+            sigma: standard deviation of the filter
+        """
         blur = tv_transforms.GaussianBlur(kernel_size=kernel_size, sigma=sigma)
         PytorchAbstractTransformationUDF.__init__(self, [blur])
