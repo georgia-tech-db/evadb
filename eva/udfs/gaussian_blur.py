@@ -19,6 +19,17 @@ from eva.udfs.pytorch_abstract_udf import PytorchAbstractTransformationUDF
 
 
 class GaussianBlur(PytorchAbstractTransformationUDF, tv_transforms.GaussianBlur):
+    """
+    Conversion of GaussianBlur effect from torchvision.transforms into EVA UDF.
+
+    UDF accepts input frames of type torch.Tensor and PIL.Image just like the
+    torchvision class.
+
+    Returns a blurred frame of the same size and type of the input frame.
+
+    Gaussian Blur documentation:
+    https://pytorch.org/vision/0.8/_modules/torchvision/transforms/transforms.html#GaussianBlur
+    """
     def __init__(self, kernel_size: int = 3, sigma: float = 0.5):
         blur = tv_transforms.GaussianBlur(kernel_size=kernel_size, sigma=sigma)
         PytorchAbstractTransformationUDF.__init__(self, [blur])
