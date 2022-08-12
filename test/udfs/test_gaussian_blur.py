@@ -15,6 +15,10 @@ def test_gaussian_blur_PIL():
     blur = GaussianBlur(kernel_size=3, sigma=0.5)
 
     blurred_img = blur.transform(img)
+
+    # UDF accepts inputs of type PIL and torch.Tensor
+    # If PIL is passed in, the output should also be of
+    # type PIL, not Tensor
     assert type(img) == type(blurred_img)
 
 
@@ -25,4 +29,11 @@ def test_gaussian_blur_on_torch_array():
 
     blurred_arr = blur.transform(arr)
 
+    # Ensure transformation produces output that is the same shape
+    # as input but not the exact same
+    # We are not doing anything fancier to avoid coupling the test
+    # to torchvision's gaussian implementation
+    # Our job is to make sure the UDF is valid, not that gaussian
+    # was implemented correctly
     assert arr.shape == blurred_arr.shape
+    assert not torch.equal(arr, blurred_arr)
