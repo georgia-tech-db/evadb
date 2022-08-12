@@ -17,10 +17,8 @@ import unittest
 import mock
 import pytest
 
-from test.util import copy_sample_videos_to_prefix, file_remove, load_inbuilt_udfs
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-
 from test.util import (copy_sample_videos_to_upload_dir,
                        file_remove, load_inbuilt_udfs)
 
