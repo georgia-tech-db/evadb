@@ -8,14 +8,6 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Configure apt cache
-          command: |
-              echo 'APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
-              echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >>/etc/apt/apt.conf.d/01keep-debs
-              rm /etc/apt/apt.conf.d/docker-clean
-              apt install -y ca-certificates
-
       - restore_cache:
           keys:
             - v4-model_cache-{{ checksum "setup.py" }}
@@ -63,7 +55,7 @@ jobs:
       - save_cache:
           key: v1-debian-package-cache-{{ checksum "config.yml" }}
           paths:
-            - "/var/cache/apt/archives"
+            - /var/cache/apt/archives
 
 workflows:
   main:
