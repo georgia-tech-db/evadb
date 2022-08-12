@@ -189,7 +189,7 @@ def format_file(file_path, add_header, strip_header, format_code):
 
             # AUTOFLAKE
             autoflake_command = (
-                FLAKE_BINARY + " --max-line-length 88 " + file_path
+                FLAKE_BINARY + " --max-line-length 88 --ignore=[E203]" + file_path
             )
             # LOG.info(autoflake_command)
             ret_val = os.system(autoflake_command)
