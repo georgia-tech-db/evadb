@@ -763,7 +763,7 @@ class LogicalFunctionScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
-        after = FunctionScanPlan(before.func_expr)
+        after = FunctionScanPlan(before.func_expr, before.do_unnest)
         return after
 
 

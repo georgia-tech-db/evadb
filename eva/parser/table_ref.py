@@ -18,6 +18,7 @@ from typing import Union
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
+from eva.parser.alias import Alias
 from eva.parser.select_statement import SelectStatement
 from eva.parser.types import JoinType
 
@@ -70,7 +71,12 @@ class TableInfo:
 
     def __hash__(self) -> int:
         return hash(
-            (self.table_name, self.schema_name, self.database_name, self.table_obj)
+            (
+                self.table_name,
+                self.schema_name,
+                self.database_name,
+                self.table_obj,
+            )
         )
 
 
@@ -103,12 +109,34 @@ class JoinNode:
         )
 
 
+class TableValuedExpression:
+    def __init__(self, func_expr: FunctionExpression, do_unnest: bool = False) -> None:
+        self._func_expr = func_expr
+        self._do_unnest = do_unnest
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
+    def __eq__(self, other):
+        if not isinstance(other, TableValuedExpression):
+            return False
+        return self.func_expr == other.func_expr and self.do_unnest == other.do_unnest
+
+    def __hash__(self) -> int:
+        return hash((self.func_expr, self.do_unnest))
+
+
 class TableRef:
     """
     Attributes:
         : can be one of the following based on the query type:
             TableInfo: expression of table name and database name,
-            FunctionExpression: lateral function calls
+            TableValuedExpression: lateral function calls
             SelectStatement: select statement in case of nested queries,
             JoinNode: join node in case of join queries
         sample_freq: sampling frequency for the table reference
@@ -116,8 +144,8 @@ class TableRef:
 
     def __init__(
         self,
-        table: Union[TableInfo, FunctionExpression, SelectStatement, JoinNode],
-        alias: str = None,
+        table: Union[TableInfo, TableValuedExpression, SelectStatement, JoinNode],
+        alias: Alias = None,
         sample_freq: float = None,
     ):
 
@@ -132,8 +160,8 @@ class TableRef:
     def is_table_atom(self) -> bool:
         return isinstance(self._ref_handle, TableInfo)
 
-    def is_func_expr(self) -> bool:
-        return isinstance(self._ref_handle, FunctionExpression)
+    def is_table_valued_expr(self) -> bool:
+        return isinstance(self._ref_handle, TableValuedExpression)
 
     def is_select(self) -> bool:
         return isinstance(self._ref_handle, SelectStatement)
@@ -152,11 +180,11 @@ class TableRef:
         return self._ref_handle
 
     @property
-    def func_expr(self) -> FunctionExpression:
+    def table_valued_expr(self) -> TableValuedExpression:
         assert isinstance(
-            self._ref_handle, FunctionExpression
+            self._ref_handle, TableValuedExpression
         ), "Expected \
-                FunctionExpression, got {}".format(
+                TableValuedExpression, got {}".format(
             type(self._ref_handle)
         )
         return self._ref_handle
@@ -186,7 +214,7 @@ class TableRef:
         # TableInfo -> table_name.lower()
         # SelectStatement -> select
         if isinstance(self._ref_handle, TableInfo):
-            return self._ref_handle.table_name.lower()
+            return Alias(self._ref_handle.table_name.lower())
         elif isinstance(self._ref_handle, SelectStatement):
             raise RuntimeError("Nested select should have alias")
 

@@ -68,8 +68,11 @@ class StatementToPlanConvertor:
             catalog_vid_metadata = table_ref.table.table_obj
             self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
 
-        elif table_ref.is_func_expr():
-            self._plan = LogicalFunctionScan(func_expr=table_ref.func_expr)
+        elif table_ref.is_table_valued_expr():
+            tve = table_ref.table_valued_expr
+            self._plan = LogicalFunctionScan(
+                func_expr=tve.func_expr, do_unnest=tve.do_unnest
+            )
 
         elif table_ref.is_select():
             # NestedQuery
@@ -81,7 +84,8 @@ class StatementToPlanConvertor:
         elif table_ref.is_join():
             join_node = table_ref.join_node
             join_plan = LogicalJoin(
-                join_type=join_node.join_type, join_predicate=join_node.predicate
+                join_type=join_node.join_type,
+                join_predicate=join_node.predicate,
             )
             self.visit_table_ref(join_node.left)
             join_plan.append_child(self._plan)
