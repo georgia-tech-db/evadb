@@ -17,15 +17,15 @@ jobs:
               apt install -y ca-certificates
 
       - restore_cache:
-          key:
+          keys:
             - v4-model_cache-{{ checksum "setup.py" }}
 
       - restore_cache:
-          key:
+          keys:
             - v3-pip-cache-{{ checksum "setup.py" }}
 
       - restore_cache:
-          key:
+          keys:
             - v1-debian-package-cache-{{ checksum "config.yml" }}
 
       - run:
