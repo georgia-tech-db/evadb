@@ -72,7 +72,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
 
 Gaussianblur_udf_query = """CREATE UDF IF NOT EXISTS GaussianBlur
       INPUT  (Frame_Array_In NDARRAY UINT8(3, ANYDIM, ANYDIM))
-      OUPUT (Frame_Array_Out NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUTPUT (Frame_Array_Out NDARRAY UINT8(3, ANYDIM, ANYDIM))
       TYPE  Transformation
       IMPL  '{}/udfs/gaussian_blur.py';""".format(
     EVA_INSTALLATION_DIR
