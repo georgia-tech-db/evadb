@@ -18,7 +18,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
+            - v2-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -54,7 +54,7 @@ jobs:
             - ./eva_dev_env/
 
       - save_cache:
-          key: v1-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
+          key: v2-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
           paths:
             - /var/cache/apt/archives/
 
