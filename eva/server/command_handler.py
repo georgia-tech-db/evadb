@@ -79,7 +79,7 @@ def handle_request(transport, request_message):
         response = Response(
             status=ResponseStatus.SUCCESS,
             batch=output_batch,
-            time_stat=query_runtime.total_elapsed_time,
+            query_time=query_runtime.total_elapsed_time,
         )
     else:
         response = Response(
