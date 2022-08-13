@@ -76,13 +76,16 @@ def handle_request(transport, request_message):
             error = True
 
     if not error:
-        response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
+        response = Response(
+            status=ResponseStatus.SUCCESS,
+            batch=output_batch,
+            time_stat=query_runtime.total_elapsed_time,
+        )
     else:
         response = Response(
             status=ResponseStatus.FAIL,
             batch=None,
             error=error_msg,
-            time_stat=query_runtime.total_elapsed_time,
         )
 
     responseData = response.to_json()

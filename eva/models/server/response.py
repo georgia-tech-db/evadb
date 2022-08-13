@@ -57,9 +57,9 @@ class Response:
     def to_json(self):
         obj = {"status": self.status, "batch": self.batch}
         if self.error != "":
-            obj.update("error", self.error)
+            obj["error"] = self.error
         if self.time_stat:
-            obj.update("query time", self.time_stat)
+            obj["query time"] = self.time_stat
 
         return json.dumps(obj, cls=ResponseEncoder)
 
