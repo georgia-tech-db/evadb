@@ -3,7 +3,6 @@ version: 2.1
 jobs:
   build-and-test:
     docker:
-      - image: cimg/python:3.7
       - image: cimg/openjdk:11.0
 
     resource_class: large
