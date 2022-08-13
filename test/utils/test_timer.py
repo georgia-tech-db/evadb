@@ -37,6 +37,7 @@ class TimerTests(unittest.TestCase):
             time.sleep(5)
 
         self.assertTrue(sleep_time.total_elapsed_time < 5.2)
+        self.assertTrue(sleep_time.total_elapsed_time > 4.9)
 
     def test_timer_with_query(self):
         CatalogManager().reset()
