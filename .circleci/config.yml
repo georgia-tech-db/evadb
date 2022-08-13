@@ -1,5 +1,11 @@
 version: 2.1
 
+dependencies:
+  cache_directories:
+    - "~/.apt-cache"
+  pre:
+    - sudo rm -rf /var/cache/apt/archives && sudo ln -s ~/.apt-cache /var/cache/apt/archives && mkdir -p ~/.apt-cache/partial
+
 jobs:
   build-and-test:
     docker:
@@ -15,10 +21,6 @@ jobs:
       - restore_cache:
           keys:
             - v3-pip-cache-{{ checksum "setup.py" }}
-
-      - restore_cache:
-          keys:
-            - v1-debian-package-cache-{{ checksum ".circleci/config.yml" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -53,10 +55,6 @@ jobs:
           paths:
             - ./eva_dev_env/
 
-      - save_cache:
-          key: v1-debian-package-cache-{{ checksum ".circleci/config.yml" }}
-          paths:
-            - /var/cache/apt/archives
 
 workflows:
   main:
