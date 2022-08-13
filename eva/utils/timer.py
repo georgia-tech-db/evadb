@@ -33,8 +33,8 @@ class Timer:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         assert self._start_time is not None, "exit called with starting the context"
-        time_elaped = time.perf_counter() - self._start_time
-        self._total_time += time_elaped
+        time_elapsed = time.perf_counter() - self._start_time
+        self._total_time += time_elapsed
         self._start_time = None
 
     @property
