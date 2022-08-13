@@ -42,13 +42,25 @@ class Response:
     Data model for EVA server response
     """
 
-    def __init__(self, status: ResponseStatus, batch: Batch, error: str = ""):
+    def __init__(
+        self,
+        status: ResponseStatus,
+        batch: Batch,
+        error: str = "",
+        time_stat: float = None,
+    ):
         self._status = status
         self._batch = batch
         self._error = error
+        self._time_stat = time_stat
 
     def to_json(self):
-        obj = {"status": self.status, "batch": self.batch, "error": self.error}
+        obj = {"status": self.status, "batch": self.batch}
+        if self.error != "":
+            obj.update("error", self.error)
+        if self.time_stat:
+            obj.update("query time", self.time_stat)
+
         return json.dumps(obj, cls=ResponseEncoder)
 
     @classmethod
@@ -61,15 +73,11 @@ class Response:
             self.status == other.status
             and self.batch == other.batch
             and self.error == other.error
+            and self.time_stat == other.time_stat
         )
 
     def __str__(self):
-        return (
-            "Response Object:\n"
-            "@status: %s\n"
-            "@batch: %s\n"
-            "@error: %s" % (self.status, self.batch, self.error)
-        )
+        return str(self.to_json())
 
     @property
     def status(self):
@@ -82,3 +90,7 @@ class Response:
     @property
     def error(self):
         return self._error
+
+    @property
+    def time_stat(self):
+        return self._time_stat
