@@ -24,7 +24,7 @@ from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.utils.logging_manager import logger
-from eva.utils.timer import start_timer, end_timer, elapsed_time
+from eva.utils.timer import elapsed_time, end_timer, start_timer
 
 
 def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
@@ -53,8 +53,7 @@ def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
     return output
 
 
-def execute_query_fetch_all(query) ->\
-        Optional[Batch]:
+def execute_query_fetch_all(query) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
@@ -80,8 +79,7 @@ def handle_request(transport, request_message):
         logger.warn(e)
         response = Response(status=ResponseStatus.FAIL, batch=None, error=str(e))
     else:
-        response = Response(status=ResponseStatus.SUCCESS,
-                            batch=output_batch)
+        response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
 
     responseData = response.to_json()
     # Send data length, because response can be very large

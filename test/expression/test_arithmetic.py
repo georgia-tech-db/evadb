@@ -80,4 +80,3 @@ class ArithmeticExpressionsTest(unittest.TestCase):
 
         self.assertNotEqual(cmpr_exp, cmpr_exp2)
         self.assertNotEqual(cmpr_exp2, cmpr_exp3)
-
