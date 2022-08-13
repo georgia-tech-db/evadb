@@ -14,6 +14,7 @@
 # limitations under the License.
 import importlib.resources as importlib_resources
 import shutil
+from logging import DEBUG, WARN
 from pathlib import Path
 
 import yaml
@@ -27,6 +28,7 @@ from eva.configuration.dictionary import (
     EVA_INSTALLATION_DIR,
     EVA_UPLOAD_DIR,
 )
+from eva.utils.logging_manager import logger
 
 
 def get_base_config() -> Path:
@@ -58,6 +60,18 @@ def bootstrap_environment():
 
     with config_path.open("r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    # set logging level
+    mode = read_value_config(cfg, "core", "mode")
+    assert mode == "debug" or mode == "release"
+    level = None
+    if mode == "debug":
+        level = DEBUG
+    else:
+        level = WARN
+
+    logger.setLevel(level)
+    logger.debug("Setting logging level to: " + str(level))
 
     # fill default values for dataset, database and upload loc if not present
     dataset_location = read_value_config(cfg, "core", "datasets_dir")

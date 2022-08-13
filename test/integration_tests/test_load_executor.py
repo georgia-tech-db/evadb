@@ -53,7 +53,7 @@ class LoadExecutorTest(unittest.TestCase):
         # Try adding video to an existing table
         with self.assertRaises(BinderError) as cm:
             execute_query_fetch_all(query)
-        self.assertEqual(str(cm.exception), "Video Table MyVideo already exists.")
+        self.assertEqual(str(cm.exception), "Video table MyVideo already exists.")
 
     # integration test for csv
     def test_should_load_csv_in_table(self):
