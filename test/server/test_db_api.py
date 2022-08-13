@@ -19,7 +19,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock
 
 import mock
-import socket
 
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
