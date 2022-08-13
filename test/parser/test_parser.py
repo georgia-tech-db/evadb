@@ -448,23 +448,21 @@ class ParserTests(unittest.TestCase):
                           INTO MyVideo WITH FORMAT VIDEO;"""
 
         file_options = {}
-        file_options['file_format'] = FileFormatType.VIDEO
+        file_options["file_format"] = FileFormatType.VIDEO
         column_list = None
 
         expected_stmt = UploadStatement(
-            Path('data/video.mp4'),
+            Path("data/video.mp4"),
             "b'AAAA'",
-            TableRef(
-                TableInfo('MyVideo')),
+            TableRef(TableInfo("MyVideo")),
             column_list,
-            file_options)
+            file_options,
+        )
 
         eva_statement_list = parser.parse(upload_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
-        self.assertEqual(
-            eva_statement_list[0].stmt_type,
-            StatementType.UPLOAD)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.UPLOAD)
 
         upload_stmt = eva_statement_list[0]
         self.assertEqual(upload_stmt, expected_stmt)
@@ -478,17 +476,19 @@ class ParserTests(unittest.TestCase):
                           WITH FORMAT CSV;"""
 
         file_options = {}
-        file_options['file_format'] = FileFormatType.CSV
+        file_options["file_format"] = FileFormatType.CSV
         expected_stmt = UploadStatement(
-            Path('data/meta.csv'),
+            Path("data/meta.csv"),
             "b'AAAA'",
-            TableRef(
-                TableInfo('MyMeta')), [
-                TupleValueExpression('id'),
-                TupleValueExpression('frame_id'),
-                TupleValueExpression('video_id'),
-                TupleValueExpression('label')],
-            file_options)
+            TableRef(TableInfo("MyMeta")),
+            [
+                TupleValueExpression("id"),
+                TupleValueExpression("frame_id"),
+                TupleValueExpression("video_id"),
+                TupleValueExpression("label"),
+            ],
+            file_options,
+        )
         eva_statement_list = parser.parse(upload_query)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

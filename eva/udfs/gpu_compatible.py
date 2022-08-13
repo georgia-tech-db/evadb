@@ -15,7 +15,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import TypeVar
 
-
 GPUCompatible = TypeVar("GPUCompatible")
 
 

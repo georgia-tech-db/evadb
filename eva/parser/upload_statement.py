@@ -13,13 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
-
-from eva.parser.statement import AbstractStatement
-from eva.expression.abstract_expression import AbstractExpression
-
-from eva.parser.types import StatementType
-from eva.parser.table_ref import TableRef
 from typing import List
+
+from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
 
 class UploadStatement(AbstractStatement):
@@ -32,12 +31,14 @@ class UploadStatement(AbstractStatement):
         video_blob(str): base64 encoded video string
     """
 
-    def __init__(self,
-                 path: str,
-                 video_blob: str,
-                 table_ref: str,
-                 column_list: List[AbstractExpression] = None,
-                 file_options: dict = None):
+    def __init__(
+        self,
+        path: str,
+        video_blob: str,
+        table_ref: str,
+        column_list: List[AbstractExpression] = None,
+        file_options: dict = None,
+    ):
         super().__init__(StatementType.UPLOAD)
         self._path = Path(path)
         self._video_blob = video_blob
@@ -47,8 +48,12 @@ class UploadStatement(AbstractStatement):
 
     def __str__(self) -> str:
         print_str = "UPLOAD PATH {} BLOB {} INTO {}({}) WITH {}".format(
-            self._path, "string of video blob", self._table_ref,
-            self._column_list, self._file_options)
+            self._path,
+            "string of video blob",
+            self._table_ref,
+            self._column_list,
+            self._file_options,
+        )
         return print_str
 
     @property
@@ -78,16 +83,22 @@ class UploadStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, UploadStatement):
             return False
-        return (self.path == other.path
-                and self.video_blob == other.video_blob
-                and self.table_ref == other.table_ref
-                and self.column_list == other.column_list
-                and self.file_options == other.file_options)
+        return (
+            self.path == other.path
+            and self.video_blob == other.video_blob
+            and self.table_ref == other.table_ref
+            and self.column_list == other.column_list
+            and self.file_options == other.file_options
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.path,
-                     self.video_blob,
-                     self.table_ref,
-                     tuple(self.column_list),
-                     frozenset(self.file_options.items())))
+        return hash(
+            (
+                super().__hash__(),
+                self.path,
+                self.video_blob,
+                self.table_ref,
+                tuple(self.column_list),
+                frozenset(self.file_options.items()),
+            )
+        )
