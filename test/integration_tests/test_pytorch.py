@@ -20,8 +20,7 @@ import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import (copy_sample_videos_to_upload_dir,
-                       file_remove, load_inbuilt_udfs)
+from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
 
 class PytorchTest(unittest.TestCase):

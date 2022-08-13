@@ -119,3 +119,11 @@ class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
 
     def transform(self, frames: ArrayLike) -> ArrayLike:
         return Compose.__call__(self, frames)
+
+    def __call__(self, *args, **kwargs):
+        frames = None
+        if len(args):
+            frames = args[0]
+        if isinstance(frames, pd.DataFrame):
+            frames = frames.transpose().values.tolist()[0]
+        return Compose.__call__(self, frames, **kwargs)
