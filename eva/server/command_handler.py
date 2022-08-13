@@ -24,7 +24,7 @@ from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.utils.logging_manager import logger
-from eva.utils.timer import elapsed_time, end_timer, start_timer
+from eva.utils.timer import Timer
 
 
 def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
@@ -32,24 +32,15 @@ def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
     Execute the query and return a result generator.
     """
 
-    start_timer()
+    query_compile_time = Timer()
+    with query_compile_time:
+        stmt = Parser().parse(query)[0]
+        StatementBinder(StatementBinderContext()).bind(stmt)
+        l_plan = StatementToPlanConvertor().visit(stmt)
+        p_plan = PlanGenerator().build(l_plan)
+        output = PlanExecutor(p_plan).execute_plan()
 
-    stmt = Parser().parse(query)[0]
-    StatementBinder(StatementBinderContext()).bind(stmt)
-
-    l_plan = StatementToPlanConvertor().visit(stmt)
-    p_plan = PlanGenerator().build(l_plan)
-
-    end_timer()
-    elapsed_time("Planning time", report_time)
-
-    start_timer()
-
-    output = PlanExecutor(p_plan).execute_plan()
-
-    end_timer()
-    elapsed_time("Execution time", report_time)
-
+    query_compile_time.log_elapsed_time("Query Compile Time")
     return output
 
 
@@ -73,13 +64,31 @@ def handle_request(transport, request_message):
     """
     logger.debug("Receive request: --|" + str(request_message) + "|--")
 
-    try:
-        output_batch = execute_query_fetch_all(request_message)
-    except Exception as e:
-        logger.warn(e)
-        response = Response(status=ResponseStatus.FAIL, batch=None, error=str(e))
+    error = False
+    error_msg = None
+    query_runtime = Timer()
+    with query_runtime:
+        try:
+            output_batch = execute_query_fetch_all(request_message)
+        except Exception as e:
+            error_msg = str(e)
+            logger.warn(error_msg)
+            error = True
+
+    if not error:
+        response = Response(
+            status=ResponseStatus.SUCCESS,
+            batch=output_batch,
+            time_stat=query_runtime.total_elapsed_time,
+        )
     else:
-        response = Response(status=ResponseStatus.SUCCESS, batch=output_batch)
+        response = Response(
+            status=ResponseStatus.FAIL,
+            batch=None,
+            error=error_msg,
+        )
+
+    query_runtime.log_elapsed_time("Query Response Time")
 
     responseData = response.to_json()
     # Send data length, because response can be very large

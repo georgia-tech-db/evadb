@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+import time
 import unittest
 from test.util import create_sample_video, file_remove
+from unittest.mock import MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.server.command_handler import execute_query_fetch_all
-from eva.utils.timer import elapsed_time, end_timer, start_timer
+from eva.server.command_handler import handle_request
+from eva.utils.timer import Timer
 
 NUM_FRAMES = 10
 
@@ -29,22 +32,29 @@ class TimerTests(unittest.TestCase):
 
     def test_timer(self):
 
-        start_timer()
-        end_timer()
-        t1 = elapsed_time()
+        sleep_time = Timer()
+        with sleep_time:
+            time.sleep(5)
 
-        self.assertTrue(t1 < 5)
-
-        start_timer()
-        end_timer()
-        t2 = elapsed_time("abc", False)
-
-        self.assertTrue(t2 < 10)
+        self.assertTrue(sleep_time.total_elapsed_time < 5.2)
+        self.assertTrue(sleep_time.total_elapsed_time > 4.9)
 
     def test_timer_with_query(self):
-
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
-        execute_query_fetch_all(load_query)
+        transport = MagicMock()
+        transport.write = MagicMock(return_value="response_message")
+        response = asyncio.run(handle_request(transport, load_query))
+        self.assertTrue("query time" in response.to_json())
+        self.assertTrue("error" not in response.to_json())
+
+        # If response is an error, we do not report time
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        transport = MagicMock()
+        transport.write = MagicMock(return_value="response_message")
+        response = asyncio.run(handle_request(transport, load_query))
+        self.assertTrue("error" in response.to_json())
+        self.assertTrue("query time" not in response.to_json())
+
         file_remove("dummy.avi")

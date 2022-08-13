@@ -17,38 +17,29 @@ import time
 
 from eva.utils.logging_manager import logger
 
-# GLOBAL CONSTANTS
-_START_TIME = None
-_END_TIME = None
 
+class Timer:
+    """Class used for logging time metrics.
 
-def start_timer():
-    global _START_TIME
-    global _END_TIME
+    This is not thread safe"""
 
-    _START_TIME = time.perf_counter()
+    def __init__(self):
+        self._start_time = None
+        self._total_time = 0.0
 
+    def __enter__(self):
+        assert self._start_time is None, "Concurrent calls are not supported"
+        self._start_time = time.perf_counter()
 
-def end_timer():
-    global _START_TIME
-    global _END_TIME
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        assert self._start_time is not None, "exit called with starting the context"
+        time_elaped = time.perf_counter() - self._start_time
+        self._total_time += time_elaped
+        self._start_time = None
 
-    _END_TIME = time.perf_counter()
+    @property
+    def total_elapsed_time(self):
+        return self._total_time
 
-
-def elapsed_time(context: str = None, report_time: bool = True):
-    global _START_TIME
-    global _END_TIME
-
-    elapsed_time = _END_TIME - _START_TIME
-    if report_time is True:
-        if context is None:
-            logger.warn("elapsed time: {:0.4f} sec".format(elapsed_time))
-        else:
-            logger.warn("{:s}: {:0.4f} sec".format(context, elapsed_time))
-
-    # Reset
-    _START_TIME = None
-    _END_TIME = None
-
-    return elapsed_time
+    def log_elapsed_time(self, context: str):
+        logger.info("{:s}: {:0.4f} sec".format(context, self.total_elapsed_time))
