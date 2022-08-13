@@ -18,10 +18,10 @@ from typing import List
 import numpy as np
 import pandas as pd
 import torch
+from numpy.typing import ArrayLike
 from PIL import Image
 from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
-from numpy.typing import ArrayLike
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformationUDF

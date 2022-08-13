@@ -15,13 +15,12 @@
 import os
 import sys
 import unittest
+from test.udfs.test_utils import get_udf_data_path, load_image
 
 import mock
 import pandas as pd
 
 from eva.models.storage.batch import Batch
-
-from test.udfs.test_utils import load_image, get_udf_data_path
 
 NUM_FRAMES = 10
 
