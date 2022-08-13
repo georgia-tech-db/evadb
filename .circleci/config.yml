@@ -4,6 +4,7 @@ jobs:
   build-and-test:
     docker:
       - image: cimg/openjdk:11.0
+      - image: cimg/python:3.7
 
     resource_class: large
     steps:
