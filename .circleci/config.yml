@@ -4,6 +4,8 @@ jobs:
   build-and-test:
     resource_class: large
     docker:
+      # https://circleci.com/docs/circleci-images#language-image-variants
+      # This comes with python and openjdk11
       - image: cimg/python:3.7-browsers
     steps:
       - checkout
