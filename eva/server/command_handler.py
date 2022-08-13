@@ -88,6 +88,8 @@ def handle_request(transport, request_message):
             error=error_msg,
         )
 
+    query_runtime.log_elapsed_time("Query Response Time")
+
     responseData = response.to_json()
     # Send data length, because response can be very large
     data = (str(len(responseData)) + "|" + responseData).encode("ascii")
