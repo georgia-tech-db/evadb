@@ -23,7 +23,7 @@ DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   IMPL  'test/util.py';
         """
 
-DummyMultiObjectDetector_udf_query = """CREATE UDF 
+DummyMultiObjectDetector_udf_query = """CREATE UDF
                   IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
@@ -31,7 +31,7 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
                   IMPL  'test/util.py';
         """
 
-ArrayCount_udf_query = """CREATE UDF 
+ArrayCount_udf_query = """CREATE UDF
             IF NOT EXISTS  Array_Count
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
@@ -93,6 +93,7 @@ def init_builtin_udfs(mode="debug"):
         Crop_udf_query,
         Gaussianblur_udf_query,
     ]
+
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:

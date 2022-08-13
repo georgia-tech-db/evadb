@@ -64,6 +64,7 @@ FLAKE_BINARY = "flake8"
 PYLINT_BINARY = "pylint"
 ISORT_BINARY = "isort"
 
+FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
 # ==============================================
 # HEADER CONFIGURATION
 # ==============================================
@@ -135,6 +136,20 @@ def is_tool(name):
             )
 
 
+def check_header(file_path):
+    abs_path = os.path.abspath(file_path)
+    with open(abs_path, "r+") as fd:
+        file_data = fd.read()
+        header_match = header_regex.match(file_data)
+        if header_match is None:
+            return False
+        header_comment = header_match.group(1)
+        if header_comment == header:
+            return True
+        else:
+            return False
+
+
 def format_file(file_path, add_header, strip_header, format_code):
 
     abs_path = os.path.abspath(file_path)
@@ -149,7 +164,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif strip_header:
-            LOG.info("Stripping headers : " + file)               
+            LOG.info("Stripping headers : " + file)
             header_match = header_regex.match(file_data)
             if header_match is None:
                 return
@@ -165,7 +180,7 @@ def format_file(file_path, add_header, strip_header, format_code):
         elif format_code:
             LOG.info("Formatting File : " + file)
             # ISORT
-            isort_command = f"{ISORT_BINARY}  {file_path}"
+            isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)
 
             # AUTOPEP
@@ -174,8 +189,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             os.system(black_command)
 
             # AUTOFLAKE
-            autoflake_command = FLAKE_BINARY + " --max-line-length 88 " + file_path
-            # LOG.info(autoflake_command)
+            autoflake_command = f"{FLAKE_BINARY} --config={FLAKE8_CONFIG} {file_path}"
             ret_val = os.system(autoflake_command)
             if ret_val:
                 sys.exit(1)
@@ -269,7 +283,9 @@ if __name__ == "__main__":
         )
     elif args.dir_name:
         LOG.info("Scanning directory " + "".join(args.dir_name))
-        format_dir(args.dir_name, args.add_header, args.strip_header, args.format_code)
+        format_dir(
+            args.dir_name, args.add_header, args.strip_header, args.format_code
+        )
     # BY DEFAULT, WE FIX THE MODIFIED FILES
     else:
         # LOG.info("Default fix modified files")
@@ -286,15 +302,17 @@ if __name__ == "__main__":
             .split("\n")
         )
         for file in files:
+            print(file)
             valid = False
-            ## only format the defualt directories
+            # only format the defualt directories
             file_path = str(Path(file).absolute())
             for source_dir in DEFAULT_DIRS:
                 source_path = str(Path(source_dir).resolve())
                 if file_path.startswith(source_path):
                     valid = True
-            
+
             if valid:
-                format_file(file, False, True, False)
-                format_file(file, True, False, False)
+                if not check_header(file):
+                    format_file(file, False, True, False)
+                    format_file(file, True, False, False)
                 format_file(file, False, False, True)

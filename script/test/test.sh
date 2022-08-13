@@ -8,8 +8,17 @@ if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
 fi
 
+# Run black, isort, linter 
+sh script/formatting/pre-push.sh
+return_code=$?
+if [ $return_code -ne 0 ];
+then
+    exit $return_code
+fi
+
+# Keeping the duplicate linting for time being
 # Run linter (checks code style)
-flake8 --select E,F eva/ test/ --exclude eva/filters,eva/parser/evaql --max-line-length 88
+flake8 --config=.flake8 eva/ test/ 
 linter_code=$?
 
 if [ $linter_code -ne 0 ];

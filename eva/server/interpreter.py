@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from cmd import Cmd
 from contextlib import ExitStack
-import os
 from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
 
@@ -89,7 +89,7 @@ def handle_user_input(connection):
 
     VERSION = VERSION_DICT["VERSION"]
 
-    prompt.cmdloop('eva (v ' + VERSION + ')\nType "help" for help')
+    prompt.cmdloop("eva (v " + VERSION + ')\nType "help" for help')
 
 
 def start_cmd_client(host: str, port: int):

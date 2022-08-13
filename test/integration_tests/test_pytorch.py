@@ -15,6 +15,7 @@
 import sys
 import unittest
 import PIL
+
 import mock
 import pytest
 

@@ -122,4 +122,3 @@ class DatasetServiceTest(unittest.TestCase):
             )
             mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
             mock_func.return_value.delete.assert_not_called()
-

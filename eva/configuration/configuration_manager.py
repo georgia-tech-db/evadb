@@ -29,8 +29,8 @@ class ConfigurationManager(object):
 
             bootstrap_environment()  # Setup eva in home directory
 
-            ymlpath = EVA_DEFAULT_DIR + EVA_CONFIG_FILE
-            with open(ymlpath, "r") as ymlfile:
+            ymlpath = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
+            with ymlpath.open("r") as ymlfile:
                 cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         return cls._instance

@@ -42,13 +42,25 @@ class Response:
     Data model for EVA server response
     """
 
-    def __init__(self, status: ResponseStatus, batch: Batch, error: str = ""):
+    def __init__(
+        self,
+        status: ResponseStatus,
+        batch: Batch,
+        error: str = "",
+        query_time: float = None,
+    ):
         self._status = status
         self._batch = batch
         self._error = error
+        self._query_time = query_time
 
     def to_json(self):
-        obj = {"status": self.status, "batch": self.batch, "error": self.error}
+        obj = {"status": self._status, "batch": self._batch}
+        if self._error != "":
+            obj["error"] = self._error
+        if self._query_time is not None:
+            obj["query_time"] = self._query_time
+
         return json.dumps(obj, cls=ResponseEncoder)
 
     @classmethod
@@ -58,18 +70,25 @@ class Response:
 
     def __eq__(self, other: "Response"):
         return (
-            self.status == other.status
-            and self.batch == other.batch
-            and self.error == other.error
+            self._status == other._status
+            and self._batch == other._batch
+            and self._error == other._error
+            and self._query_time == other._query_time
         )
 
     def __str__(self):
-        return (
-            "Response Object:\n"
-            "@status: %s\n"
-            "@batch: %s\n"
-            "@error: %s" % (self.status, self.batch, self.error)
-        )
+        if self._query_time is not None:
+            return (
+                "@status: %s\n"
+                "@batch: %s\n"
+                "@query_time: %s" % (self._status, self._batch, self._query_time)
+            )
+        else:
+            return (
+                "@status: %s\n"
+                "@batch: %s\n"
+                "@error: %s" % (self._status, self._batch, self._error)
+            )
 
     @property
     def status(self):
@@ -82,3 +101,7 @@ class Response:
     @property
     def error(self):
         return self._error
+
+    @property
+    def query_time(self):
+        return self._query_time

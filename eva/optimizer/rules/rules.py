@@ -609,15 +609,18 @@ class LogicalUploadToPhysical(Rule):
 
         batch_mem_size = 30000000  # 30mb
         config_batch_mem_size = ConfigurationManager().get_value(
-            "executor", "batch_mem_size")
+            "executor", "batch_mem_size"
+        )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = UploadPlan(before.path, 
-                           before.video_blob,
-                           before.table_metainfo,
-                           batch_mem_size,
-                           before.column_list,
-                           before.file_options)
+        after = UploadPlan(
+            before.path,
+            before.video_blob,
+            before.table_metainfo,
+            batch_mem_size,
+            before.column_list,
+            before.file_options,
+        )
 
         return after
 

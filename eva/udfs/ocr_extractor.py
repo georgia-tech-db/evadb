@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
-import numpy as np
+from typing import List
 
 import easyocr
+import numpy as np
+import pandas as pd
 
-from typing import List
 from eva.udfs.abstract_udfs import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
@@ -34,19 +34,19 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         :param device:
         :return:
         """
-        self.model = easyocr.Reader(['en'], gpu="cuda:{}".format(device))
+        self.model = easyocr.Reader(["en"], gpu="cuda:{}".format(device))
         return self
-    
+
     def __init__(self, threshold=0.85):
         super().__init__()
         self.threshold = threshold
-        self.model = easyocr.Reader(['en'])
+        self.model = easyocr.Reader(["en"])
 
     @property
     def labels(self) -> List[str]:
         """
-            Empty as there are no labels required for
-            optical character recognition
+        Empty as there are no labels required for
+        optical character recognition
         """
         return
 
@@ -61,10 +61,10 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
             predicted_boxes (List[List[BoundingBox]]),
             predicted_scores (List[List[float]])
         """
-        
+
         frames_list = frames.values.tolist()
         frames = np.array(frames_list)
-        
+
         # Get detections
         detections_in_frames = self.model.readtext_batched(np.vstack(frames))
 
@@ -78,13 +78,14 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
                 labels.append(detection[1])
                 bboxes.append(detection[0])
                 scores.append(detection[2])
-            
+
             outcome = outcome.append(
                 {
                     "labels": list(labels),
                     "bboxes": list(bboxes),
-                    "scores": list(scores)
+                    "scores": list(scores),
                 },
-                ignore_index=True)
+                ignore_index=True,
+            )
 
         return outcome
