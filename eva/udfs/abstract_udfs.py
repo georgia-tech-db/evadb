@@ -15,8 +15,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-from numpy.typing import ArrayLike
 import pandas as pd
+from numpy.typing import ArrayLike
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
@@ -43,7 +43,6 @@ class AbstractUDF(metaclass=ABCMeta):
 
 
 class AbstractClassifierUDF(AbstractUDF):
-
     @property
     @abstractmethod
     def labels(self) -> List[str]:

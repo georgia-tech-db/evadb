@@ -136,9 +136,45 @@ def create_sample_csv(num_frames=NUM_FRAMES):
     df_sample_meta.to_csv(os.path.join(UPLOAD_DIR, "dummy.csv"), index=False)
 
 
+def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
+    try:
+        os.remove(os.path.join(UPLOAD_DIR, "dummy.csv"))
+    except FileNotFoundError:
+        pass
+
+    sample_meta = {}
+
+    index = 0
+    sample_labels = ["car", "pedestrian", "bicycle"]
+    num_videos = 2
+    for video_id in range(num_videos):
+        for frame_id in range(num_frames):
+            random_coords = 200 + 300 * np.random.random(4)
+            sample_meta[index] = {
+                "id": index,
+                "frame_id": frame_id,
+                "video_id": video_id,
+                "dataset_name": "test_dataset",
+                "label": sample_labels[np.random.choice(len(sample_labels))],
+                "bbox": ",".join([str(coord) for coord in random_coords]),
+                "object_id": np.random.choice(3),
+            }
+
+            index += 1
+
+    df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
+    df_sample_meta.to_csv(os.path.join(UPLOAD_DIR, "dummy.csv"), index=False)
+
+    with open(os.path.join(UPLOAD_DIR, "dummy.csv"), "rb") as f:
+        bytes_read = f.read()
+        b64_string = str(base64.b64encode(bytes_read))
+    return b64_string
+
+
 def create_dummy_csv_batches():
     df = pd.read_csv(
-        os.path.join(UPLOAD_DIR, "dummy.csv"), converters={"bbox": convert_bbox}
+        os.path.join(UPLOAD_DIR, "dummy.csv"),
+        converters={"bbox": convert_bbox},
     )
     return Batch(df)
 
@@ -220,7 +256,8 @@ def create_sample_video_as_blob(num_frames=NUM_FRAMES):
 
 def copy_sample_videos_to_upload_dir():
     shutil.copyfile(
-        "data/ua_detrac/ua_detrac.mp4", os.path.join(UPLOAD_DIR, "ua_detrac.mp4")
+        "data/ua_detrac/ua_detrac.mp4",
+        os.path.join(UPLOAD_DIR, "ua_detrac.mp4"),
     )
     shutil.copyfile("data/mnist/mnist.mp4", os.path.join(UPLOAD_DIR, "mnist.mp4"))
 

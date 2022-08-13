@@ -74,7 +74,7 @@ def bootstrap_environment():
             update_value_config(cfg, "core", "catalog_database_uri", database_uri)
 
         # Ref: https://stackoverflow.com/a/847866
-        upload_location = tempfile.gettempdir()
+        upload_location = str(eva_home_directory / tempfile.gettempdir())
         update_value_config(cfg, "storage", "upload_dir", upload_location)
 
         # Create upload directory in eva home directory if it does not exist

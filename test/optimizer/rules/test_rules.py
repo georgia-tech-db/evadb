@@ -14,7 +14,6 @@
 # limitations under the License.
 import unittest
 from test.util import (
-    copy_sample_videos_to_prefix,
     create_sample_video,
     get_logical_query_plan,
     get_physical_query_plan,
@@ -74,7 +73,6 @@ class TestRules(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        copy_sample_videos_to_prefix()
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()

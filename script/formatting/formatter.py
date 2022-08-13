@@ -64,6 +64,7 @@ FLAKE_BINARY = "flake8"
 PYLINT_BINARY = "pylint"
 ISORT_BINARY = "isort"
 
+FLAKE8_CONFIG = Path(os.path.join(EVA_DIR, ".flake8")).resolve()
 # ==============================================
 # HEADER CONFIGURATION
 # ==============================================
@@ -163,7 +164,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif strip_header:
-            LOG.info("Stripping headers : " + file)
+            LOG.info("Stripping headers : " + file_path)
             header_match = header_regex.match(file_data)
             if header_match is None:
                 return
@@ -177,7 +178,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
-            LOG.info("Formatting File : " + file)
+            LOG.info("Formatting File : " + file_path)
             # ISORT
             isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)
@@ -188,10 +189,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             os.system(black_command)
 
             # AUTOFLAKE
-            autoflake_command = (
-                FLAKE_BINARY + " --max-line-length 88 " + file_path
-            )
-            # LOG.info(autoflake_command)
+            autoflake_command = f"{FLAKE_BINARY} --config={FLAKE8_CONFIG} {file_path}"
             ret_val = os.system(autoflake_command)
             if ret_val:
                 sys.exit(1)
@@ -304,6 +302,7 @@ if __name__ == "__main__":
             .split("\n")
         )
         for file in files:
+            print(file)
             valid = False
             # only format the defualt directories
             file_path = str(Path(file).absolute())
