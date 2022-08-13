@@ -4,6 +4,8 @@ jobs:
   build-and-test:
     docker:
       - image: cimg/python:3.7
+      - image: cimg/openjdk:11.0
+
     resource_class: large
     steps:
       - checkout
@@ -15,10 +17,6 @@ jobs:
       - restore_cache:
           keys:
             - v3-pip-cache-{{ checksum "setup.py" }}
-
-      - restore_cache:
-          keys:
-            - v2-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -52,11 +50,6 @@ jobs:
           key: v3-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./eva_dev_env/
-
-      - save_cache:
-          key: v2-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
-          paths:
-            - /var/cache/apt/archives/
 
 
 workflows:
