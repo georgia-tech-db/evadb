@@ -110,7 +110,7 @@ class StatementBinder:
             if self._catalog.check_table_exists(
                 table_ref.table.database_name, table_ref.table.table_name
             ):
-                err_msg = f"Video Table {name} already exists."
+                err_msg = f"Video table {name} already exists."
                 logger.error(err_msg)
                 raise BinderError(err_msg)
             else:
@@ -120,7 +120,7 @@ class StatementBinder:
 
         table_ref_obj = table_ref.table.table_obj
         if table_ref_obj is None:
-            error = f"{name} does not exists."
+            error = f"{name} does not exist."
             logger.error(error)
             raise BinderError(error)
 
@@ -157,8 +157,8 @@ class StatementBinder:
 
         table_ref_obj = table_ref.table.table_obj
         if table_ref_obj is None:
-            error = "{} does not exists. Create the table using \
-                            CREATE TABLE.".format(
+            error = "{} does not exist. Create the table using \
+                            CREATE TABLE statement.".format(
                 table_ref.table.table_name
             )
             logger.error(error)
