@@ -18,7 +18,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v1-deb-cache-{{ checksum "setup.py" }}
+            - v1-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -54,9 +54,9 @@ jobs:
             - ./eva_dev_env/
 
       - save_cache:
-          key: v1-deb-cache-{{ checksum "setup.py" }}
+          key: v1-deb-cache-{{ checksum "script/antlr4/generate_parser.sh" }}
           paths:
-            - /home/circleci/.apt-cache/
+            - /var/cache/apt/archives/
 
 
 workflows:
