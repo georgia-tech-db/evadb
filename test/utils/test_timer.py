@@ -46,7 +46,7 @@ class TimerTests(unittest.TestCase):
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
         response = asyncio.run(handle_request(transport, load_query))
-        self.assertTrue("query time" in response.to_json())
+        self.assertTrue("query_time" in response.to_json())
         self.assertTrue("error" not in response.to_json())
 
         # If response is an error, we do not report time
@@ -55,6 +55,6 @@ class TimerTests(unittest.TestCase):
         transport.write = MagicMock(return_value="response_message")
         response = asyncio.run(handle_request(transport, load_query))
         self.assertTrue("error" in response.to_json())
-        self.assertTrue("query time" not in response.to_json())
+        self.assertTrue("query_time" not in response.to_json())
 
         file_remove("dummy.avi")
