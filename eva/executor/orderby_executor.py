@@ -68,7 +68,8 @@ class OrderByExecutor(AbstractExecutor):
         # sorts the batch
         try:
             aggregated_batch.sort_orderby(
-                by=self.extract_column_names(), sort_type=self.extract_sort_types()
+                by=self.extract_column_names(),
+                sort_type=self.extract_sort_types(),
             )
         except KeyError:
             # pass for now
@@ -78,7 +79,7 @@ class OrderByExecutor(AbstractExecutor):
         #  on self.batch_sizes which holds the input batches sizes
         index = 0
         for i in self.batch_sizes:
-            batch = aggregated_batch[index: index + i]
+            batch = aggregated_batch[index : index + i]
             batch.reset_index()
             index += i
             yield batch

@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import socket
 import unittest
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock
 
 import mock
@@ -22,12 +24,11 @@ import socket
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
 from eva.server.db_api import EVACursor, connect
-from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 def get_free_port():
     s = socket.socket(socket.AF_INET, type=socket.SOCK_STREAM)
-    s.bind(('localhost', 0))
+    s.bind(("localhost", 0))
     address, port = s.getsockname()
     s.close()
     return port
@@ -66,7 +67,7 @@ class DBAPITests(unittest.TestCase):
         self.assertEqual(expected, response)
 
     def test_eva_connection(self):
-        hostname = 'localhost'
+        hostname = "localhost"
 
         mock_server_port = get_free_port()
         mock_server = HTTPServer((hostname, mock_server_port), BaseHTTPRequestHandler)
@@ -82,7 +83,7 @@ class DBAPITests(unittest.TestCase):
 
         # test upload transformation with non-existing file
         with self.assertRaises(FileNotFoundError):
-            cursor._upload_transformation("UPLOAD PATH \"foo\" BLOB")
+            cursor._upload_transformation('UPLOAD PATH "foo" BLOB')
 
         # test attr
         with self.assertRaises(AttributeError):
