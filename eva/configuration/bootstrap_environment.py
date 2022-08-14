@@ -40,25 +40,32 @@ def get_base_config() -> Path:
         return EVA_INSTALLATION_DIR / EVA_CONFIG_FILE
 
 
-def bootstrap_environment():
-    # create eva directory in user home
-    EVA_DEFAULT_DIR.mkdir(parents=True, exist_ok=True)
+def bootstrap_environment(eva_config_dir: Path, eva_repo_dir: Path):
+    """
+    Populates necessary configuration for EVA to be able to run.
 
-    # copy default config to eva directory
-    config_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
-    if not config_path.exists():
+    Arguments:
+        eva_config_dir: path to user's .eva/ dir
+        default location ~/.eva
+        eva_repo_dir: path to eva project base directory
+    """
+    yml_path = eva_config_dir / EVA_CONFIG_FILE
+
+    # create eva config directory if not exists
+    eva_config_dir.mkdir(parents=True, exist_ok=True)
+
+    # copy eva.yml into config path
+    if not yml_path.exists():
         default_config_path = get_base_config().resolve()
-        shutil.copy(
-            str(default_config_path.resolve()), str(config_path.parent.resolve())
-        )
+        shutil.copy(str(default_config_path.resolve()), str(eva_config_dir.resolve()))
 
     # copy udfs to eva directory
-    udfs_path = EVA_DEFAULT_DIR / "udfs"
+    udfs_path = eva_config_dir / "udfs"
     if not udfs_path.exists():
-        default_udfs_path = EVA_INSTALLATION_DIR / "udfs"
+        default_udfs_path = eva_repo_dir / "eva" / "udfs"
         shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
 
-    with config_path.open("r") as ymlfile:
+    with yml_path.open("r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # set logging level
@@ -88,14 +95,11 @@ def bootstrap_environment():
             database_uri = DB_DEFAULT_URI
             update_value_config(cfg, "core", "catalog_database_uri", database_uri)
 
-        upload_location = EVA_DEFAULT_DIR / EVA_UPLOAD_DIR
-        update_value_config(
-            cfg, "storage", "upload_dir", str(upload_location.resolve())
-        )
-
+        upload_dir = eva_config_dir / EVA_UPLOAD_DIR
+        update_value_config(cfg, "storage", "upload_dir", str(upload_dir.resolve()))
         # Create upload directory in eva home directory if it does not exist
-        upload_location.mkdir(parents=True, exist_ok=True)
+        upload_dir.mkdir(parents=True, exist_ok=True)
 
         # update config on disk
-        with config_path.open("w") as ymlfile:
+        with yml_path.open("w") as ymlfile:
             ymlfile.write(yaml.dump(cfg))
