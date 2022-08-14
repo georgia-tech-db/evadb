@@ -30,8 +30,8 @@ from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
-CONFIG = ConfigurationManager()
-UPLOAD_DIR = CONFIG.get_value("storage", "upload_dir")
+config = ConfigurationManager()
+upload_dir_from_config = config.get_value("storage", "upload_dir")
 
 
 def create_dataframe(num_frames=1) -> pd.DataFrame:
@@ -70,7 +70,7 @@ def convert_bbox(bbox):
 
 def create_sample_csv(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(UPLOAD_DIR, "dummy.csv"))
+        os.remove(os.path.join(upload_dir_from_config, "dummy.csv"))
     except FileNotFoundError:
         pass
 
@@ -95,12 +95,14 @@ def create_sample_csv(num_frames=NUM_FRAMES):
             index += 1
 
     df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(os.path.join(UPLOAD_DIR, "dummy.csv"), index=False)
+    df_sample_meta.to_csv(
+        os.path.join(upload_dir_from_config, "dummy.csv"), index=False
+    )
 
 
 def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(UPLOAD_DIR, "dummy.csv"))
+        os.remove(os.path.join(upload_dir_from_config, "dummy.csv"))
     except FileNotFoundError:
         pass
 
@@ -125,9 +127,11 @@ def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
             index += 1
 
     df_sample_meta = pd.DataFrame.from_dict(sample_meta, "index")
-    df_sample_meta.to_csv(os.path.join(UPLOAD_DIR, "dummy.csv"), index=False)
+    df_sample_meta.to_csv(
+        os.path.join(upload_dir_from_config, "dummy.csv"), index=False
+    )
 
-    with open(os.path.join(UPLOAD_DIR, "dummy.csv"), "rb") as f:
+    with open(os.path.join(upload_dir_from_config, "dummy.csv"), "rb") as f:
         bytes_read = f.read()
         b64_string = str(base64.b64encode(bytes_read))
     return b64_string
@@ -135,20 +139,21 @@ def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
 
 def create_dummy_csv_batches():
     df = pd.read_csv(
-        os.path.join(UPLOAD_DIR, "dummy.csv"), converters={"bbox": convert_bbox}
+        os.path.join(upload_dir_from_config, "dummy.csv"),
+        converters={"bbox": convert_bbox},
     )
     return Batch(df)
 
 
 def create_csv(num_rows, columns):
     try:
-        os.remove(os.path.join(UPLOAD_DIR, "dummy.csv"))
+        os.remove(os.path.join(upload_dir_from_config, "dummy.csv"))
     except FileNotFoundError:
         pass
     df = pd.DataFrame(columns=columns)
     for col in columns:
         df[col] = np.random.randint(1, 100, num_rows)
-    df.to_csv(os.path.join(UPLOAD_DIR, "dummy.csv"), index=False)
+    df.to_csv(os.path.join(upload_dir_from_config, "dummy.csv"), index=False)
     return df
 
 
@@ -174,12 +179,12 @@ def create_table(table_name, num_rows, num_columns):
 
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(UPLOAD_DIR, "dummy.avi"))
+        os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
     except FileNotFoundError:
         pass
 
     out = cv2.VideoWriter(
-        os.path.join(UPLOAD_DIR, "dummy.avi"),
+        os.path.join(upload_dir_from_config, "dummy.avi"),
         cv2.VideoWriter_fourcc("M", "J", "P", "G"),
         10,
         (2, 2),
@@ -193,12 +198,12 @@ def create_sample_video(num_frames=NUM_FRAMES):
 
 def create_sample_video_as_blob(num_frames=NUM_FRAMES):
     try:
-        os.remove(os.path.join(UPLOAD_DIR, "dummy.avi"))
+        os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
     except FileNotFoundError:
         pass
 
     out = cv2.VideoWriter(
-        os.path.join(UPLOAD_DIR, "dummy.avi"),
+        os.path.join(upload_dir_from_config, "dummy.avi"),
         cv2.VideoWriter_fourcc("M", "J", "P", "G"),
         10,
         (2, 2),
@@ -209,7 +214,7 @@ def create_sample_video_as_blob(num_frames=NUM_FRAMES):
 
     out.release()
 
-    with open(os.path.join(UPLOAD_DIR, "dummy.avi"), "rb") as f:
+    with open(os.path.join(upload_dir_from_config, "dummy.avi"), "rb") as f:
         bytes_read = f.read()
         b64_string = str(base64.b64encode(bytes_read))
     return b64_string
@@ -217,13 +222,16 @@ def create_sample_video_as_blob(num_frames=NUM_FRAMES):
 
 def copy_sample_videos_to_upload_dir():
     shutil.copyfile(
-        "data/ua_detrac/ua_detrac.mp4", os.path.join(UPLOAD_DIR, "ua_detrac.mp4")
+        "data/ua_detrac/ua_detrac.mp4",
+        os.path.join(upload_dir_from_config, "ua_detrac.mp4"),
     )
-    shutil.copyfile("data/mnist/mnist.mp4", os.path.join(UPLOAD_DIR, "mnist.mp4"))
+    shutil.copyfile(
+        "data/mnist/mnist.mp4", os.path.join(upload_dir_from_config, "mnist.mp4")
+    )
 
 
 def file_remove(path):
-    os.remove(os.path.join(UPLOAD_DIR, path))
+    os.remove(os.path.join(upload_dir_from_config, path))
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
