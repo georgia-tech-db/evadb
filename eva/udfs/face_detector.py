@@ -17,7 +17,6 @@ from typing import List
 
 import pandas as pd
 import torch
-import torchvision.transforms as T
 from facenet_pytorch import MTCNN
 from torch import Tensor
 
@@ -50,11 +49,10 @@ class FaceDetector(PytorchAbstractClassifierUDF):
             face boxes (List[List[BoundingBox]])
         """
 
-        copy = torch.squeeze(frames)
-        transform = T.ToPILImage()
-        pil_image = transform(copy)
+        # https://github.com/timesler/facenet-pytorch/issues/177
+        frames = torch.permute(frames, (0, 2, 3, 1)) * 255.0
 
-        bboxes, scores = self.model.detect(img=pil_image)
+        bboxes, scores = self.model.detect(img=frames)
 
         outcome = pd.DataFrame()
         outcome = outcome.append(
