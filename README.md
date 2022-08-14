@@ -127,6 +127,8 @@ sh script/antlr4/generate_parser.sh                     # to generate the EVA pa
 pip install -e ".[dev]"
 ```
 
+Note: If you face Pytorch CUDA compatibility issues after installation, refer this [link](https://pytorch.org/get-started/previous-versions/) and re-install the correct `torch` and `torchvision` packages with `pip` 
+
 To verify that installation is successful, run the test suite.
 
 ```shell
