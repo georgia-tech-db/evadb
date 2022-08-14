@@ -62,7 +62,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_repo_dir: Path):
     # copy udfs to eva directory
     udfs_path = eva_config_dir / "udfs"
     if not udfs_path.exists():
-        default_udfs_path = eva_repo_dir / "eva" / "udfs"
+        default_udfs_path = eva_repo_dir / "udfs"
         shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
 
     with yml_path.open("r") as ymlfile:
