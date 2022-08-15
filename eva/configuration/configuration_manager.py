@@ -32,7 +32,8 @@ class ConfigurationManager(object):
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
 
             bootstrap_environment(
-                eva_config_dir=EVA_DEFAULT_DIR, eva_repo_dir=EVA_INSTALLATION_DIR
+                eva_config_dir=EVA_DEFAULT_DIR,
+                eva_installation_dir=EVA_INSTALLATION_DIR,
             )  # Setup eva in home directory
 
             ymlpath = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
