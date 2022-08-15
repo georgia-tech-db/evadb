@@ -13,6 +13,7 @@ if [ $exit_status -ne 0 ]; then
     echo "In case you want to force push, use the '--no-verify' flag while commiting.${NC}"
     exit 1
 fi
+
 if ! git diff-index --quiet HEAD --; then
     echo "Code was reformatted or you have unstaged changes." 
     echo "Please verify and stage the changes."

@@ -38,7 +38,6 @@ class FunctionExpressionTest(unittest.TestCase):
         expression = FunctionExpression(
             mock_function, name="test", alias=Alias("func_expr")
         )
-
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
         mock_function.to_device.assert_called_with(gpu_device_id)
@@ -50,7 +49,6 @@ class FunctionExpressionTest(unittest.TestCase):
         expression = FunctionExpression(
             mock_function, name="test", alias=Alias("func_expr")
         )
-
         input_batch = Batch(frames=pd.DataFrame())
         expression.evaluate(input_batch)
         mock_function.assert_called()
