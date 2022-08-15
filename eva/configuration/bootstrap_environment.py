@@ -49,13 +49,13 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         default location ~/.eva
         eva_installation_dir: path to eva module
     """
-    yml_path = eva_config_dir / EVA_CONFIG_FILE
+    config_file_path = eva_config_dir / EVA_CONFIG_FILE
 
     # create eva config directory if not exists
     eva_config_dir.mkdir(parents=True, exist_ok=True)
 
     # copy eva.yml into config path
-    if not yml_path.exists():
+    if not config_file_path.exists():
         default_config_path = get_base_config().resolve()
         shutil.copy(str(default_config_path.resolve()), str(eva_config_dir.resolve()))
 
@@ -65,7 +65,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         default_udfs_path = eva_installation_dir / "udfs"
         shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
 
-    with yml_path.open("r") as ymlfile:
+    with config_file_path.open("r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # set logging level
@@ -101,5 +101,5 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         upload_dir.mkdir(parents=True, exist_ok=True)
 
         # update config on disk
-        with yml_path.open("w") as ymlfile:
+        with config_file_path.open("w") as ymlfile:
             ymlfile.write(yaml.dump(cfg))
