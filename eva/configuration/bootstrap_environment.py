@@ -40,14 +40,14 @@ def get_base_config() -> Path:
         return EVA_INSTALLATION_DIR / EVA_CONFIG_FILE
 
 
-def bootstrap_environment(eva_config_dir: Path, eva_repo_dir: Path):
+def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     """
     Populates necessary configuration for EVA to be able to run.
 
     Arguments:
         eva_config_dir: path to user's .eva/ dir
         default location ~/.eva
-        eva_repo_dir: path to eva project base directory
+        eva_installation_dir: path to eva module
     """
     yml_path = eva_config_dir / EVA_CONFIG_FILE
 
@@ -62,7 +62,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_repo_dir: Path):
     # copy udfs to eva directory
     udfs_path = eva_config_dir / "udfs"
     if not udfs_path.exists():
-        default_udfs_path = eva_repo_dir / "udfs"
+        default_udfs_path = eva_installation_dir / "udfs"
         shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
 
     with yml_path.open("r") as ymlfile:
