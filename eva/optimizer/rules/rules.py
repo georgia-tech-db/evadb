@@ -18,9 +18,11 @@ from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
 
+from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
+    extract_pushdown_predicate_for_alias,
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.parser.types import JoinType
@@ -95,6 +97,7 @@ class RuleType(Flag):
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     REWRITE_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -169,6 +172,7 @@ class Promise(IntEnum):
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
     PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
+    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
 
 
 class Rule(ABC):
@@ -414,6 +418,66 @@ class PushdownProjectThroughSample(Rule):
         sample.clear_children()
         sample.append_child(new_project)
         return sample
+
+
+# Join Queries
+class PushDownFilterThroughJoin(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern_join = Pattern(OperatorType.LOGICALJOIN)
+        pattern_join.append_child(Pattern(OperatorType.DUMMY))
+        pattern_join.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(pattern_join)
+        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_JOIN, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_FILTER_THROUGH_JOIN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        predicate = before.predicate
+        join: LogicalJoin = before.children[0]
+        left: Dummy = join.children[0]
+        right: Dummy = join.children[1]
+
+        new_join_node = LogicalJoin(
+            join.join_type,
+            join.join_predicate,
+            join.left_keys,
+            join.right_keys,
+        )
+        left_group_aliases = context.memo.get_group_by_id(left.group_id).aliases
+        right_group_aliases = context.memo.get_group_by_id(right.group_id).aliases
+
+        left_pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
+            predicate, left_group_aliases
+        )
+        right_pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
+            rem_pred, right_group_aliases
+        )
+
+        if left_pushdown_pred:
+            left_filter = LogicalFilter(predicate=left_pushdown_pred)
+            left_filter.append_child(left)
+            new_join_node.append_child(left_filter)
+        else:
+            new_join_node.append_child(left)
+
+        if right_pushdown_pred:
+            right_filter = LogicalFilter(predicate=right_pushdown_pred)
+            right_filter.append_child(right)
+            new_join_node.append_child(right_filter)
+        else:
+            new_join_node.append_child(right)
+
+        if rem_pred:
+            new_join_node.join_predicate = conjuction_list_to_expression_tree(
+                [rem_pred, new_join_node.join_predicate]
+            )
+
+        return new_join_node
 
 
 # REWRITE RULES END
@@ -774,15 +838,17 @@ class LogicalLateralJoinToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALJOIN)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_LATERAL_JOIN_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_LATERAL_JOIN_TO_PHYSICAL
 
     def check(self, before: Operator, context: OptimizerContext):
-        assert before.join_type == JoinType.LATERAL_JOIN
-        return True
+        if before.join_type == JoinType.LATERAL_JOIN:
+            return True
+        else:
+            return False
 
     def apply(self, join_node: LogicalJoin, context: OptimizerContext):
         lateral_join_plan = LateralJoinPlan(join_node.join_predicate)
@@ -935,6 +1001,7 @@ class RulesManager:
             EmbedProjectIntoGet(),
             # EmbedProjectIntoDerivedGet(),
             PushdownProjectThroughSample(),
+            PushDownFilterThroughJoin(),
         ]
 
         self._implementation_rules = [

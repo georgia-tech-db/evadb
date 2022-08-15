@@ -226,7 +226,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         filter_plan = LogicalFilter(MagicMock())
         order_by_plan = LogicalOrderBy(MagicMock())
         union_plan = LogicalUnion(MagicMock())
-        function_scan_plan = LogicalFunctionScan(MagicMock())
+        function_scan_plan = LogicalFunctionScan(MagicMock(), MagicMock())
         join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
 
         create_plan.append_child(create_udf_plan)

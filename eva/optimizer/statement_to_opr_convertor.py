@@ -71,7 +71,9 @@ class StatementToPlanConvertor:
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
             self._plan = LogicalFunctionScan(
-                func_expr=tve.func_expr, do_unnest=tve.do_unnest
+                func_expr=tve.func_expr,
+                alias=table_ref.alias,
+                do_unnest=tve.do_unnest,
             )
 
         elif table_ref.is_select():

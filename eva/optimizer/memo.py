@@ -69,7 +69,8 @@ class Memo:
             or expr.opr.opr_type == OperatorType.LOGICALQUERYDERIVEDGET
         ):
             aliases.append(expr.opr.alias)
-
+        elif expr.opr.opr_type == OperatorType.LOGICALFUNCTIONSCAN:
+            aliases.append(expr.opr.alias)
         return aliases
 
     def _create_new_group(self, expr: GroupExpression):

@@ -98,15 +98,17 @@ class MaterializedViewTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn(self):
         select_query = (
-            "SELECT id, FastRCNNObjectDetector(data).labels FROM UATRAC WHERE id < 5;"
+            "SELECT id, FastRCNNObjectDetector(data).labels, "
+            "FastRCNNObjectDetector(data).bboxes "
+            "FROM UATRAC WHERE id < 5;"
         )
         query = (
-            "CREATE MATERIALIZED VIEW "
-            f"IF NOT EXISTS uadtrac_fastRCNN (id, labels) AS {select_query}"
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS "
+            f"uadtrac_fastRCNN (id, labels, bboxes) AS {select_query}"
         )
         execute_query_fetch_all(query)
 
-        select_view_query = "SELECT id, labels FROM uadtrac_fastRCNN"
+        select_view_query = "SELECT id, labels, bboxes FROM uadtrac_fastRCNN"
         actual_batch = execute_query_fetch_all(select_view_query)
         actual_batch.sort()
 
@@ -115,3 +117,25 @@ class MaterializedViewTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.labels"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_mat_view_with_fastrcnn_lateral_join(self):
+        select_query = (
+            "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
+            "FastRCNNObjectDetector(data) AS T(label, bbox, score) WHERE id < 5;"
+        )
+        query = (
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS "
+            f"uadtrac_fastRCNN_new (id, label, bbox) AS {select_query};"
+        )
+        execute_query_fetch_all(query)
+
+        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN_new"
+        actual_batch = execute_query_fetch_all(select_view_query)
+        actual_batch.sort()
+
+        self.assertEqual(actual_batch.batch_size, 5)
+        # non-trivial test case
+        res = actual_batch.frames
+        for idx in res.index:
+            self.assertTrue("car" in res["uadtrac_fastrcnn_new.label"][idx])
