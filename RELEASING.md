@@ -34,6 +34,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
        ### [Changed]
        ### [Deprecated]
        ### [Removed]
+
   Make sure `CHANGELOG.md` is up to date for the release: compare against PRs
   merged since the last release.
 

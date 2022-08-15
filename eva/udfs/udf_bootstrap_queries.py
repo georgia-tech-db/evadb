@@ -20,16 +20,20 @@ DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
-                  IMPL  'test/util.py';
-        """
+                  IMPL  '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
 DummyMultiObjectDetector_udf_query = """CREATE UDF
                   IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
-                  IMPL  'test/util.py';
-        """
+                  IMPL  '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
 ArrayCount_udf_query = """CREATE UDF
             IF NOT EXISTS  Array_Count
