@@ -14,7 +14,7 @@
 # limitations under the License.
 import os
 import unittest
-from test.util import UPLOAD_DIR
+from test.util import upload_dir_from_config
 from unittest.mock import patch
 
 import numpy as np
@@ -48,7 +48,7 @@ class PetastormLoaderTest(unittest.TestCase):
     @patch("eva.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_correct_params(self, mock):
         petastorm_reader = PetastormReader(
-            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"),
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
             batch_mem_size=3000,
             cur_shard=2,
             shard_count=3,
@@ -56,7 +56,7 @@ class PetastormLoaderTest(unittest.TestCase):
         )
         list(petastorm_reader._read())
         mock.assert_called_once_with(
-            os.path.join(UPLOAD_DIR, "dummy.avi"),
+            os.path.join(upload_dir_from_config, "dummy.avi"),
             shard_count=3,
             cur_shard=2,
             predicate="pred",
@@ -69,7 +69,7 @@ class PetastormLoaderTest(unittest.TestCase):
     @patch("eva.readers.petastorm_reader.make_reader")
     def test_should_call_petastorm_make_reader_with_negative_shards(self, mock):
         petastorm_reader = PetastormReader(
-            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"),
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
             batch_mem_size=3000,
             cur_shard=-1,
             shard_count=-2,
@@ -77,7 +77,7 @@ class PetastormLoaderTest(unittest.TestCase):
         list(petastorm_reader._read())
         petastorm_config = ConfigurationManager().get_value("storage", "petastorm")
         mock.assert_called_once_with(
-            os.path.join(UPLOAD_DIR, "dummy.avi"),
+            os.path.join(upload_dir_from_config, "dummy.avi"),
             shard_count=None,
             cur_shard=None,
             predicate=None,
@@ -92,7 +92,8 @@ class PetastormLoaderTest(unittest.TestCase):
     @patch("eva.readers.petastorm_reader.make_reader")
     def test_should_read_data_using_petastorm_reader(self, mock):
         petastorm_reader = PetastormReader(
-            file_url=os.path.join(UPLOAD_DIR, "dummy.avi"), batch_mem_size=3000
+            file_url=os.path.join(upload_dir_from_config, "dummy.avi"),
+            batch_mem_size=3000,
         )
         dummy_values = map(lambda i: self.DummyRow(i, np.ones((2, 2, 3)) * i), range(3))
         mock.return_value = self.DummyReader(dummy_values)
