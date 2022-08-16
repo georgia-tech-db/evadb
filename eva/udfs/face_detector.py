@@ -57,7 +57,6 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         frames_list = frames.transpose().values.tolist()[0]
         frames = np.asarray(frames_list)
         detections = self.model.detect(frames)
-        print(detections[0].shape)
         boxes, scores = detections
         outcome = pd.DataFrame()
         for frame_boxes, frame_scores in zip(boxes, scores):
