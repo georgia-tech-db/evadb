@@ -14,6 +14,7 @@
 # limitations under the License.
 import sys
 from pathlib import Path
+from typing import Union
 
 from eva.binder.binder_utils import (
     BinderError,
@@ -104,7 +105,10 @@ class StatementBinder:
         # Todo Verify if the number projected columns matches table
 
     @bind.register(LoadDataStatement)
-    def _bind_load_data_statement(self, node: LoadDataStatement):
+    @bind.register(UploadStatement)
+    def _bind_load_and_upload_data_statement(
+        self, node: Union[LoadDataStatement, UploadStatement]
+    ):
         table_ref = node.table_ref
         name = table_ref.table.table_name
         if node.file_options["file_format"] == FileFormatType.VIDEO:
@@ -131,7 +135,7 @@ class StatementBinder:
                 else:
                     err_msg = f"Video file {node.path} does not exist."
                     logger.error(err_msg)
-                    raise RuntimeError(err_msg)
+                    raise BinderError(err_msg)
 
         self.bind(table_ref)
 
@@ -140,46 +144,6 @@ class StatementBinder:
             error = f"{name} does not exist."
             logger.error(error)
             raise BinderError(error)
-
-        # if query had columns specified, we just copy them
-        if node.column_list is not None:
-            column_list = node.column_list
-
-        # else we curate the column list from the metadata
-        else:
-            column_list = []
-            for column in table_ref_obj.columns:
-                column_list.append(
-                    TupleValueExpression(
-                        col_name=column.name,
-                        table_alias=table_ref_obj.name.lower(),
-                        col_object=column,
-                    )
-                )
-
-        # bind the columns
-        for expr in column_list:
-            self.bind(expr)
-
-        node.column_list = column_list
-
-    @bind.register(UploadStatement)
-    def _bind_upload_statement(self, node: UploadStatement):
-        table_ref = node.table_ref
-        if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Create a new metadata object
-            create_video_metadata(table_ref.table.table_name)
-
-        self.bind(table_ref)
-
-        table_ref_obj = table_ref.table.table_obj
-        if table_ref_obj is None:
-            error = "{} does not exist. Create the table using \
-                            CREATE TABLE statement.".format(
-                table_ref.table.table_name
-            )
-            logger.error(error)
-            raise RuntimeError(error)
 
         # if query had columns specified, we just copy them
         if node.column_list is not None:
