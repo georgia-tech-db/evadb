@@ -23,6 +23,7 @@ import pandas as pd
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.configuration.dictionary import EVA_INSTALLATION_DIR
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.models.storage.batch import Batch
@@ -39,6 +40,9 @@ NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
 config = ConfigurationManager()
 upload_dir_from_config = config.get_value("storage", "upload_dir")
+
+
+EVA_TEST_DATA_DIR = EVA_INSTALLATION_DIR.parent
 
 
 def get_logical_query_plan(query: str) -> Operator:
@@ -264,7 +268,8 @@ def copy_sample_videos_to_upload_dir():
         os.path.join(upload_dir_from_config, "ua_detrac.mp4"),
     )
     shutil.copyfile(
-        "data/mnist/mnist.mp4", os.path.join(upload_dir_from_config, "mnist.mp4")
+        "data/mnist/mnist.mp4",
+        os.path.join(upload_dir_from_config, "mnist.mp4"),
     )
 
 
