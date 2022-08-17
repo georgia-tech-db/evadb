@@ -16,12 +16,12 @@ import base64
 import os
 import unittest
 from test.util import (
-    UPLOAD_DIR,
     create_dummy_batches,
     create_dummy_csv_batches,
     create_sample_csv_as_blob,
     create_sample_video_as_blob,
     file_remove,
+    upload_dir_from_config,
 )
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -50,7 +50,7 @@ class UploadExecutorTest(unittest.TestCase):
         )
         execute_query_fetch_all(query)
         expected_blob = self.video_blob
-        with open(os.path.join(UPLOAD_DIR, "dummy.avi"), "rb") as f:
+        with open(os.path.join(upload_dir_from_config, "dummy.avi"), "rb") as f:
             bytes_read = f.read()
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
@@ -65,7 +65,7 @@ class UploadExecutorTest(unittest.TestCase):
         )
         execute_query_fetch_all(query)
         expected_blob = self.video_blob
-        with open(os.path.join(UPLOAD_DIR, "dummy.avi"), "rb") as f:
+        with open(os.path.join(upload_dir_from_config, "dummy.avi"), "rb") as f:
             bytes_read = f.read()
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
