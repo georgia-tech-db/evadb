@@ -16,6 +16,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import pytest
+
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.dictionary import EVA_CONFIG_FILE, EVA_INSTALLATION_DIR
 
@@ -31,3 +33,8 @@ class BootstrapEnvironmentTests(unittest.TestCase):
 
             udfs_dir = temp_dir_path / "udfs"
             assert udfs_dir.exists()
+
+    def test_invalid_eva_path_setup(self):
+        with pytest.raises(OSError):
+            with tempfile.TemporaryDirectory() as temp_dir:
+                bootstrap_environment(Path(temp_dir), Path("invalid", "dir"))
