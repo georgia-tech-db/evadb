@@ -25,7 +25,6 @@ from eva.configuration.dictionary import (
     EVA_CONFIG_FILE,
     EVA_DATASET_DIR,
     EVA_DEFAULT_DIR,
-    EVA_INSTALLATION_DIR,
     EVA_UPLOAD_DIR,
 )
 from eva.utils.logging_manager import logger
