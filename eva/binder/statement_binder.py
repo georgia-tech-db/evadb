@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from pathlib import Path
 
 from eva.binder.binder_utils import (
     BinderError,
@@ -23,7 +22,6 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -116,23 +114,8 @@ class StatementBinder:
                 logger.error(err_msg)
                 raise BinderError(err_msg)
             else:
-
-                # create catalog entry only if the file path exists
-                upload_dir = Path(
-                    ConfigurationManager().get_value("storage", "upload_dir")
-                )
-                if (
-                    Path(node.path).exists()
-                    or Path(Path(upload_dir) / node.path).exists()
-                ):
-                    create_video_metadata(name)
-
-                # else raise error
-                else:
-                    err_msg = f"Video file {node.path} does not exist."
-                    logger.error(err_msg)
-                    raise RuntimeError(err_msg)
-
+                # Create a new metadata object
+                create_video_metadata(name)
         self.bind(table_ref)
 
         table_ref_obj = table_ref.table.table_obj
