@@ -36,7 +36,7 @@ class FunctionExpressionTest(unittest.TestCase):
         context_instance.gpu_device.return_value = gpu_device_id
 
         expression = FunctionExpression(
-            mock_function, name="test", alias=Alias("func_expr")
+            lambda: mock_function, name="test", alias=Alias("func_expr")
         )
 
         input_batch = Batch(frames=pd.DataFrame())
@@ -48,7 +48,7 @@ class FunctionExpressionTest(unittest.TestCase):
         mock_function = MagicMock(return_value=pd.DataFrame())
 
         expression = FunctionExpression(
-            mock_function, name="test", alias=Alias("func_expr")
+            lambda: mock_function, name="test", alias=Alias("func_expr")
         )
 
         input_batch = Batch(frames=pd.DataFrame())
@@ -65,7 +65,7 @@ class FunctionExpressionTest(unittest.TestCase):
         context_instance.gpu_device.return_value = NO_GPU
 
         expression = FunctionExpression(
-            mock_function, name="test", alias=Alias("func_expr")
+            lambda: mock_function, name="test", alias=Alias("func_expr")
         )
 
         input_batch = Batch(frames=pd.DataFrame())

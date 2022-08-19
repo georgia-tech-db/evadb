@@ -253,7 +253,7 @@ class StatementBinder:
             raise BinderError(err_msg)
 
         try:
-            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)
         except Exception as e:
             err_msg = (
                 f"{str(e)}. Please verify that the UDF class name in the"
