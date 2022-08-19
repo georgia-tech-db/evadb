@@ -25,19 +25,23 @@ from eva.configuration.dictionary import (
     EVA_CONFIG_FILE,
     EVA_DATASET_DIR,
     EVA_DEFAULT_DIR,
-    EVA_INSTALLATION_DIR,
     EVA_UPLOAD_DIR,
 )
 from eva.utils.logging_manager import logger
 
 
-def get_base_config() -> Path:
+def get_base_config(eva_installation_dir: Path) -> Path:
+    """
+    Get path to .eva.yml source path.
+    This file will be copied to user's .eva directory.
+    """
+    # if eva package is installed into environment
     if importlib_resources.is_resource("eva", EVA_CONFIG_FILE):
         with importlib_resources.path("eva", EVA_CONFIG_FILE) as yml_path:
             return yml_path
     else:
         # For local dev environments without package installed
-        return EVA_INSTALLATION_DIR / EVA_CONFIG_FILE
+        return eva_installation_dir / EVA_CONFIG_FILE
 
 
 def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
@@ -45,7 +49,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     Populates necessary configuration for EVA to be able to run.
 
     Arguments:
-        eva_config_dir: path to user's .eva/ dir
+        eva_config_dir: path to user's .eva dir
         default location ~/.eva
         eva_installation_dir: path to eva module
     """
@@ -56,7 +60,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
 
     # copy eva.yml into config path
     if not config_file_path.exists():
-        default_config_path = get_base_config().resolve()
+        default_config_path = get_base_config(eva_installation_dir).resolve()
         shutil.copy(str(default_config_path.resolve()), str(eva_config_dir.resolve()))
 
     # copy udfs to eva directory
@@ -68,6 +72,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     with config_file_path.open("r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
+    if cfg is None:
+        raise OSError(f"Eva configuration file not found at {ymlfile}")
     # set logging level
     mode = read_value_config(cfg, "core", "mode")
     assert mode == "debug" or mode == "release"
