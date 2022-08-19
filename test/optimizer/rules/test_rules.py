@@ -58,6 +58,7 @@ from eva.optimizer.rules.rules import (
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
+    LogicalExchangeToPhysical,
     Promise,
     PushDownFilterThroughJoin,
     PushdownFilterThroughSample,
@@ -191,6 +192,7 @@ class TestRules(unittest.TestCase):
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalExchangeToPhysical(),
         ]
         self.assertEqual(
             len(supported_implementation_rules),
