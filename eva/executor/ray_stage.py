@@ -16,7 +16,7 @@ def ray_stage_wait_and_alert(tasks: ray.ObjectRef, output_queue: Queue):
 
 @ray.remote
 def ray_stage(
-    exectuor: Callable, 
+    exectuor: Callable,
     input_queues: List[Queue],
     output_queues: List[Queue]
 ):

@@ -39,4 +39,3 @@ class StorageExecutor(AbstractExecutor):
 
     def __call__(self, **kwargs) -> Generator[Batch, None, None]:
         yield from self.exec()
-
