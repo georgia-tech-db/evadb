@@ -16,7 +16,6 @@ from typing import Iterator, Generator
 
 from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.models.storage.batch import Batch
 from eva.planner.storage_plan import StoragePlan
 from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
 

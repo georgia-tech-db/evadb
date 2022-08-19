@@ -16,3 +16,4 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
+__all__ = ('DataFrameMetadata', 'DataFrameColumn', 'UdfMetadata', 'UdfIO')

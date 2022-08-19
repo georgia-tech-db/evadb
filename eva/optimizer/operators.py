@@ -1018,6 +1018,7 @@ class LogicalShow(Operator):
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type))
 
+
 class LogicalExchange(Operator):
 
     def __init__(self, children=None):

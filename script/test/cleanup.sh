@@ -1,9 +1,8 @@
 #!/bin/bash
 
-USER=${1:-root}
+read -p "Remove the directory ~/.eva/* [Y/n]?" yn
+case $yn in
+	[Yy]* ) rm -rf ~/.eva/*;;
+        * ) exit;;
+esac
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-rm -rf $DIR/../../eva_datasets
-
-mysql -u $USER -e 'Drop DATABASE eva_catalog;'
-mysql -u $USER -e 'CREATE DATABASE IF NOT EXISTS eva_catalog;'

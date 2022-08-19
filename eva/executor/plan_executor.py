@@ -38,9 +38,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
-
 from eva.executor.exchange_executor import ExchangeExecutor
-from eva.executor.ray_stage import *
 
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
@@ -138,34 +136,6 @@ class PlanExecutor:
         """
         # ToDo
         # clear all the nodes from the execution tree
-
-    def ray_execute_plan(self, execution_tree: AbstractExecutor) \
-            -> Iterator[Batch]:
-        from ray.util.queue import Queue
-        """
-        This is a hard-coded convertor now!!!
-        """
-        queue = Queue(maxsize=100)
-        output_queue = Queue(maxsize=100)
-        
-        consumer = execution_tree
-        producer = execution_tree.children[0]
-
-        consumer_tasks = []
-        for _ in range(2): 
-            consumer_tasks.append(ray_stage.options(num_gpus=1).remote([consumer], [queue], [output_queue]))
-        ray_stage_wait_and_alert.remote(consumer_tasks, [output_queue])
-
-        producer_task = ray_stage.remote([producer], [], [queue])
-        ray_stage_wait_and_alert.remote([producer_task], [queue])
-
-        while True:
-            res = output_queue.get(block=True)
-            if res is StageCompleteSignal:
-                break
-            else:
-                yield res
-
 
     def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree"""

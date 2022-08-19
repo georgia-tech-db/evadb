@@ -79,6 +79,7 @@ from eva.planner.union_plan import UnionPlan
 from eva.planner.exchange_plan import ExchangePlan
 from eva.planner.upload_plan import UploadPlan
 
+
 class RuleType(Flag):
     """
     Manages enums for all the supported rules
@@ -645,25 +646,26 @@ class LogicalGetToSeqScan(Rule):
         )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = SeqScanPlan(before.predicate, before.target_list)
-        ex2 = ExchangePlan(parallelism = 1)
-        ex2.append_child(StoragePlan(
-            before.dataset_metadata, batch_mem_size=batch_mem_size))
-        after.append_child(ex2)
-        ex1 = ExchangePlan(parallelism = 2, ray_conf = {'num_gpus': 1})
-        ex1.append_child(after)
-        return ex1
-        """ Master's code
-        after = SeqScanPlan(None, before.target_list, before.alias)
-        after.append_child(
-            StoragePlan(
-                before.dataset_metadata,
-                batch_mem_size=batch_mem_size,
-                predicate=before.predicate,
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        if ray_enabled:
+            after = SeqScanPlan(before.predicate, before.target_list)
+            ex2 = ExchangePlan(parallelism=1)
+            ex2.append_child(StoragePlan(
+                before.dataset_metadata, batch_mem_size=batch_mem_size))
+            after.append_child(ex2)
+            ex1 = ExchangePlan(parallelism=2, ray_conf={'num_gpus': 1})
+            ex1.append_child(after)
+            return ex1
+        else:
+            after = SeqScanPlan(None, before.target_list, before.alias)
+            after.append_child(
+                StoragePlan(
+                    before.dataset_metadata,
+                    batch_mem_size=batch_mem_size,
+                    predicate=before.predicate,
+                )
             )
-        )
-        return after
-        """
+            return after
 
 
 class LogicalSampleToUniformSample(Rule):
@@ -902,6 +904,7 @@ class LogicalProjectToPhysical(Rule):
             after.append_child(child)
         return after
 
+
 class LogicalExchangeToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALEXCHANGE)
@@ -920,6 +923,7 @@ class LogicalExchangeToPhysical(Rule):
         for child in before.children:
             after.append_child(child)
         return after
+
 
 class LogicalShowToPhysical(Rule):
     def __init__(self):

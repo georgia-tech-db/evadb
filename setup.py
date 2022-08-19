@@ -47,7 +47,8 @@ minimal_requirement = [
     "pyspark==3.0.2",
     "petastorm==0.9.8",
     "antlr4-python3-runtime==4.10",
-    "pyyaml==5.1"
+    "pyyaml==5.1",
+    "ray==1.10.0" # TODO: not minimal requirement
 ]
 
 formatter_libs = [

@@ -29,7 +29,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
-from eva.server.command_handler import execute_query_fetch_all, execute_query
+from eva.server.command_handler import execute_query_fetch_all
 
 NUM_FRAMES = 10
 

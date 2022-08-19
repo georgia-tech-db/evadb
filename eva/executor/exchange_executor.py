@@ -19,7 +19,11 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.exchange_plan import ExchangePlan
 
 from ray.util.queue import Queue
-from eva.executor.ray_stage import *
+from eva.executor.ray_stage import (
+    StageCompleteSignal,
+    ray_stage_wait_and_alert, 
+    ray_stage
+)
 
 
 class QueueReaderExecutor(AbstractExecutor):
@@ -31,18 +35,20 @@ class QueueReaderExecutor(AbstractExecutor):
         pass
 
     def exec(self, **kwargs) -> Iterator[Batch]:
-        assert 'input_queues' in kwargs, 'Invalid ray exectuion stage. No input_queue found'
+        assert 'input_queues' in kwargs, \
+            'Invalid ray exectuion stage. No input_queue found'
         input_queues = kwargs['input_queues']
         assert len(input_queues) == 1, 'Not support mulitple input queues yet'
         iq = input_queues[0]
 
         while True:
-            next_item =iq.get(block=True)
+            next_item = iq.get(block=True)
             if next_item is StageCompleteSignal:
                 iq.put(StageCompleteSignal)
                 break
             else:
                 yield next_item
+
 
 class ExchangeExecutor(AbstractExecutor):
     """
@@ -61,13 +67,16 @@ class ExchangeExecutor(AbstractExecutor):
         pass
 
     def exec(self, is_top=True) -> Iterator[Batch]:
-        assert len(self.children) == 1, 'Exchange executor does not support children != 1'
+        assert len(self.children) == 1, \
+            'Exchange executor does not support children != 1'
 
         # Find the exchange exector below the tree
         curr_exec = self
         input_queues = []
-        while len(curr_exec.children) > 0 and not isinstance(curr_exec.children[0], ExchangeExecutor):
-            assert len(curr_exec.children) == 1, 'Exchange executor does not support children != 1'
+        while (len(curr_exec.children) > 0 and 
+                not isinstance(curr_exec.children[0], ExchangeExecutor)):
+            assert len(curr_exec.children) == 1, \
+                'Exchange executor does not support children != 1'
             curr_exec = curr_exec.children[0]
 
         if len(curr_exec.children) > 0:
@@ -79,7 +88,13 @@ class ExchangeExecutor(AbstractExecutor):
         output_queue = Queue(maxsize=100)        
         ray_task = []
         for _ in range(self.parallelism):
-            ray_task.append(ray_stage.options(**self.ray_conf).remote(self.children[0], input_queues, [output_queue]))
+            ray_task.append(
+                ray_stage.options(**self.ray_conf).remote(
+                    self.children[0],
+                    input_queues, 
+                    [output_queue]
+                )
+            )
         ray_stage_wait_and_alert.remote(ray_task, [output_queue])
        
         while is_top:

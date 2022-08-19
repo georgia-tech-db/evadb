@@ -35,3 +35,6 @@ server:
   host: "0.0.0.0"
   port: 5432
   socket_timeout: 60
+
+experimental:
+  ray: False
