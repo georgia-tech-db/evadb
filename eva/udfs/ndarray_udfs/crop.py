@@ -29,12 +29,13 @@ class Crop(AbstractNdarrayUDF):
         """
 
         def crop(row: pd.Series) -> np.ndarray:
+
             frame = row[0]
             bboxes = row[1]
-            x0, y0, x1, y1 = bboxes
+            x0, y0, x1, y1 = np.asarray(bboxes, dtype="int")
             return frame[y0:y1, x0:x1]
 
         ret = pd.DataFrame()
-        ret["data"] = df.apply(crop, axis=1)
+        ret["cropped_frame_array"] = df.apply(crop, axis=1)
 
         return ret
