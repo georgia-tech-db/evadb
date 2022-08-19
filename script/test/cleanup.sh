@@ -5,4 +5,3 @@ case $yn in
 	[Yy]* ) rm -rf ~/.eva/*;;
         * ) exit;;
 esac
-

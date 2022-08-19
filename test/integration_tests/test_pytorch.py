@@ -14,13 +14,13 @@
 # limitations under the License.
 import sys
 import unittest
+from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
+
 import mock
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-from test.util import (copy_sample_videos_to_upload_dir,
-                       file_remove, load_inbuilt_udfs)
 
 
 class PytorchTest(unittest.TestCase):
@@ -81,11 +81,6 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
-
-        # non-trivial test case for UADETRAC
-        res = actual_batch.frames
-        self.assertEqual(res["facedetector.bboxes"][0], None)
-        self.assertTrue(res["facedetector.scores"][2] > 0.9)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ocr(self):

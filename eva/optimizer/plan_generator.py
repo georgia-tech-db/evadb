@@ -26,6 +26,12 @@ class PlanGenerator:
     Used for building Physical Plan from Logical Plan.
     """
 
+    def __init__(
+        self, rules_manager: RulesManager = None, cost_model: CostModel = None
+    ) -> None:
+        self.rules_manager = rules_manager or RulesManager()
+        self.cost_model = cost_model or CostModel()
+
     def execute_task_stack(self, task_stack: OptimizerTaskStack):
         while not task_stack.empty():
             task = task_stack.pop()
@@ -48,8 +54,7 @@ class PlanGenerator:
         return physical_plan
 
     def optimize(self, logical_plan: Operator):
-        cost_model = CostModel()
-        optimizer_context = OptimizerContext(cost_model)
+        optimizer_context = OptimizerContext(self.cost_model)
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
         root_grp_id = grp_expr.group_id
@@ -57,14 +62,18 @@ class PlanGenerator:
 
         # TopDown Rewrite
         optimizer_context.task_stack.push(
-            TopDownRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context)
+            TopDownRewrite(
+                root_expr, self.rules_manager.rewrite_rules, optimizer_context
+            )
         )
         self.execute_task_stack(optimizer_context.task_stack)
 
         # BottomUp Rewrite
         root_expr = memo.groups[root_grp_id].logical_exprs[0]
         optimizer_context.task_stack.push(
-            BottomUpRewrite(root_expr, RulesManager().rewrite_rules, optimizer_context)
+            BottomUpRewrite(
+                root_expr, self.rules_manager.rewrite_rules, optimizer_context
+            )
         )
         self.execute_task_stack(optimizer_context.task_stack)
 

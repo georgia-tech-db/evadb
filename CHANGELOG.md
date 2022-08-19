@@ -4,12 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-### [Breaking Changes]
+## [0.0.9] - 2022-08-13
 ### [Added]
-### [Changed]
-### [Deprecated]
-### [Removed]
+
+* PR #323: Fix EVA Configuration
+* PR #321: CI: Caching dependencies
+* PR #315: Unified load 
+* PR #313: Logo update
+* PR #309: UNNEST operator
+* PR #307: Feature extractor UDF
+* PR #303: Face detector and OCR extractor UDFs
+
+### [Contributors]
+
+Thanks to @gaurav274, @jarulraj, @xzdandy, @LordDarkula, @eloyekunle, and @devshreebharatia for contributions!
 
 ## [0.0.6] - 2022-08-05
 ### [Added]

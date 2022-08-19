@@ -20,18 +20,22 @@ DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
-                  IMPL  'test/util.py';
-        """
+                  IMPL  '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
-DummyMultiObjectDetector_udf_query = """CREATE UDF 
+DummyMultiObjectDetector_udf_query = """CREATE UDF
                   IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
-                  IMPL  'test/util.py';
-        """
+                  IMPL  '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
-ArrayCount_udf_query = """CREATE UDF 
+ArrayCount_udf_query = """CREATE UDF
             IF NOT EXISTS  Array_Count
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
@@ -80,9 +84,7 @@ def init_builtin_udfs(mode="debug"):
         mode (str): 'debug' or 'release'
     """
     queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
-    queries.extend(
-        [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]
-    )
+    queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:
         execute_query_fetch_all(query)

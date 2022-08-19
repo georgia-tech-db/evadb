@@ -71,7 +71,9 @@ class StatementToPlanConvertor:
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
             self._plan = LogicalFunctionScan(
-                func_expr=tve.func_expr, do_unnest=tve.do_unnest
+                func_expr=tve.func_expr,
+                alias=table_ref.alias,
+                do_unnest=tve.do_unnest,
             )
 
         elif table_ref.is_select():
@@ -268,11 +270,13 @@ class StatementToPlanConvertor:
             statement(UploadStatement): [Upload statement]
         """
         table_metainfo = statement.table_ref.table.table_obj
-        upload_opr = LogicalUpload(statement.path,
-                                   statement.video_blob,
-                                   table_metainfo,
-                                   statement.column_list,
-                                   statement.file_options)
+        upload_opr = LogicalUpload(
+            statement.path,
+            statement.video_blob,
+            table_metainfo,
+            statement.column_list,
+            statement.file_options,
+        )
         self._plan = upload_opr
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):

@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import List, Set
 
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
@@ -205,6 +205,25 @@ def extract_range_list_from_predicate(
         raise RuntimeError(f"Contains unsuporrted expression {type(predicate)}")
 
 
+def get_columns_in_predicate(predicate: AbstractExpression) -> Set[str]:
+    """Get columns accessed in the predicate
+
+    Args:
+        predicate (AbstractExpression): input predicate
+
+    Returns:
+        Set[str]: list of column aliases used in the predicate
+    """
+    if isinstance(predicate, TupleValueExpression):
+        return set([predicate.col_alias])
+    cols = set()
+    for child in predicate.children:
+        child_cols = get_columns_in_predicate(child)
+        if len(child_cols):
+            cols.update(child_cols)
+    return cols
+
+
 def contains_single_column(predicate: AbstractExpression, column: str = None) -> bool:
     """Checks if predicate contains conditions on single predicate
 
@@ -217,20 +236,10 @@ def contains_single_column(predicate: AbstractExpression, column: str = None) ->
             if predicate is None, return False
     """
 
-    def get_columns(predicate):
-        if isinstance(predicate, TupleValueExpression):
-            return set([predicate.col_alias])
-        cols = set()
-        for child in predicate.children:
-            child_cols = get_columns(child)
-            if len(child_cols):
-                cols.update(child_cols)
-        return cols
-
     if not predicate:
         return False
 
-    cols = get_columns(predicate)
+    cols = get_columns_in_predicate(predicate)
     if len(cols) == 1:
         if column is None:
             return True
