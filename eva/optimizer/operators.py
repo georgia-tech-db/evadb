@@ -1039,10 +1039,8 @@ class LogicalShow(Operator):
 
 
 class LogicalExchange(Operator):
-
     def __init__(self, children=None):
-        super().__init__(OperatorType.LOGICALEXCHANGE,
-                         children)
+        super().__init__(OperatorType.LOGICALEXCHANGE, children)
 
     def __eq__(self, other):
         if not isinstance(other, LogicalExchange):

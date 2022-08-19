@@ -48,5 +48,5 @@ class LimitExecutor(AbstractExecutor):
             yield batch
 
             if remaining_tuples <= 0:
-                assert(remaining_tuples == 0)
+                assert remaining_tuples == 0
                 return

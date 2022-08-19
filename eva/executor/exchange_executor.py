@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,20 +14,19 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.models.storage.batch import Batch
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.exchange_plan import ExchangePlan
-
 from ray.util.queue import Queue
+
+from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.ray_stage import (
     StageCompleteSignal,
+    ray_stage,
     ray_stage_wait_and_alert,
-    ray_stage
 )
+from eva.models.storage.batch import Batch
+from eva.planner.exchange_plan import ExchangePlan
 
 
 class QueueReaderExecutor(AbstractExecutor):
-
     def __init__(self):
         super().__init__(None)
 
@@ -35,10 +34,11 @@ class QueueReaderExecutor(AbstractExecutor):
         pass
 
     def exec(self, **kwargs) -> Iterator[Batch]:
-        assert 'input_queues' in kwargs, \
-            'Invalid ray exectuion stage. No input_queue found'
-        input_queues = kwargs['input_queues']
-        assert len(input_queues) == 1, 'Not support mulitple input queues yet'
+        assert (
+            "input_queues" in kwargs
+        ), "Invalid ray exectuion stage. No input_queue found"
+        input_queues = kwargs["input_queues"]
+        assert len(input_queues) == 1, "Not support mulitple input queues yet"
         iq = input_queues[0]
 
         while True:
@@ -67,16 +67,19 @@ class ExchangeExecutor(AbstractExecutor):
         pass
 
     def exec(self, is_top=True) -> Iterator[Batch]:
-        assert len(self.children) == 1, \
-            'Exchange executor does not support children != 1'
+        assert (
+            len(self.children) == 1
+        ), "Exchange executor does not support children != 1"
 
         # Find the exchange exector below the tree
         curr_exec = self
         input_queues = []
-        while (len(curr_exec.children) > 0
-                and not isinstance(curr_exec.children[0], ExchangeExecutor)):
-            assert len(curr_exec.children) == 1, \
-                'Exchange executor does not support children != 1'
+        while len(curr_exec.children) > 0 and not isinstance(
+            curr_exec.children[0], ExchangeExecutor
+        ):
+            assert (
+                len(curr_exec.children) == 1
+            ), "Exchange executor does not support children != 1"
             curr_exec = curr_exec.children[0]
 
         if len(curr_exec.children) > 0:
@@ -90,9 +93,7 @@ class ExchangeExecutor(AbstractExecutor):
         for _ in range(self.parallelism):
             ray_task.append(
                 ray_stage.options(**self.ray_conf).remote(
-                    self.children[0],
-                    input_queues,
-                    [output_queue]
+                    self.children[0], input_queues, [output_queue]
                 )
             )
         ray_stage_wait_and_alert.remote(ray_task, [output_queue])

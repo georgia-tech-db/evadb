@@ -66,6 +66,7 @@ from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.planner.exchange_plan import ExchangePlan
 from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan
@@ -78,7 +79,6 @@ from eva.planner.sample_plan import SamplePlan
 from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
-from eva.planner.exchange_plan import ExchangePlan
 from eva.planner.upload_plan import UploadPlan
 
 
@@ -717,10 +717,11 @@ class LogicalGetToSeqScan(Rule):
         if ray_enabled:
             after = SeqScanPlan(before.predicate, before.target_list)
             ex2 = ExchangePlan(parallelism=1)
-            ex2.append_child(StoragePlan(
-                before.dataset_metadata, batch_mem_size=batch_mem_size))
+            ex2.append_child(
+                StoragePlan(before.dataset_metadata, batch_mem_size=batch_mem_size)
+            )
             after.append_child(ex2)
-            ex1 = ExchangePlan(parallelism=2, ray_conf={'num_gpus': 1})
+            ex1 = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
             ex1.append_child(after)
             return ex1
         else:
@@ -978,8 +979,7 @@ class LogicalExchangeToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALEXCHANGE)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_EXCHANGE_TO_PHYSICAL,
-                         pattern)
+        super().__init__(RuleType.LOGICAL_EXCHANGE_TO_PHYSICAL, pattern)
 
     def promise(self):
         return Promise.LOGICAL_EXCHANGE_TO_PHYSICAL

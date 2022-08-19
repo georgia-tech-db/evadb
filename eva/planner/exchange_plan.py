@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, Any
-from eva.planner.types import PlanOprType
+from typing import Any, Dict
+
 from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
 class ExchangePlan(AbstractPlan):

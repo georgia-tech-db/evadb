@@ -48,7 +48,7 @@ class AbstractExecutor(ABC):
         return self._children
 
     @children.setter
-    def children(self, children: List['AbstractExecutor']):
+    def children(self, children: List["AbstractExecutor"]):
         self._children = children
 
     @property
