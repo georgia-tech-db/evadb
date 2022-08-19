@@ -25,3 +25,6 @@ class ShowInfoPlan(AbstractPlan):
     @property
     def show_type(self):
         return self._show_type
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.show_type))

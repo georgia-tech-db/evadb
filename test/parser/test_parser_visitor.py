@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 from antlr4 import TerminalNode
 
+from eva.catalog.column_type import NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.models.storage.batch import Batch
 from eva.parser.evaql.evaql_parser import evaql_parser
@@ -103,17 +104,20 @@ class ParserVisitorTests(unittest.TestCase):
 
         ctx.getText.return_value = ">"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_GREATER
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_GREATER,
         )
 
         ctx.getText.return_value = "@>"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_CONTAINS
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_CONTAINS,
         )
 
         ctx.getText.return_value = "<@"
         self.assertEqual(
-            visitor.visitComparisonOperator(ctx), ExpressionType.COMPARE_IS_CONTAINED
+            visitor.visitComparisonOperator(ctx),
+            ExpressionType.COMPARE_IS_CONTAINED,
         )
 
     # To be fixed
@@ -201,7 +205,8 @@ class ParserVisitorTests(unittest.TestCase):
         ctx.getText.return_value = "[1,2,3,4]"
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
-            expected.evaluate(), Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]}))
+            expected.evaluate(),
+            Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]})),
         )
 
     def test_visit_str_array_literal(self):
@@ -213,7 +218,45 @@ class ParserVisitorTests(unittest.TestCase):
         ctx.getText.return_value = "['person', 'car']"
         expected = visitor.visitArrayLiteral(ctx)
         self.assertEqual(
-            expected.evaluate(), Batch(pd.DataFrame({0: [np.array(["person", "car"])]}))
+            expected.evaluate(),
+            Batch(pd.DataFrame({0: [np.array(["person", "car"])]})),
+        )
+
+    def test_visit_array_type(self):
+        attr_list = {
+            "INT8": NdArrayType.INT8,
+            "UINT8": NdArrayType.UINT8,
+            "INT16": NdArrayType.INT16,
+            "INT32": NdArrayType.INT32,
+            "INT64": NdArrayType.INT64,
+            "UNICODE": NdArrayType.UNICODE,
+            "BOOL": NdArrayType.BOOL,
+            "FLOAT32": NdArrayType.FLOAT32,
+            "FLOAT64": NdArrayType.FLOAT64,
+            "DECIMAL": NdArrayType.DECIMAL,
+            "STR": NdArrayType.STR,
+            "DATETIME": NdArrayType.DATETIME,
+            "ANYTYPE": NdArrayType.ANYTYPE,
+        }
+
+        def _mock_set_attr(ctx, correct_attr=None):
+            for attr in attr_list.keys():
+                setattr(ctx, attr, lambda: None)
+            if correct_attr:
+                setattr(ctx, correct_attr, lambda: True)
+
+        ctx = MagicMock(return_value=None)
+        visitor = ParserVisitor()
+        for attr in attr_list.keys():
+            _mock_set_attr(ctx, attr)
+            expected = visitor.visitArrayType(ctx)
+            self.assertEqual(expected, attr_list[attr])
+
+        _mock_set_attr(ctx)
+        with self.assertRaises(RuntimeError) as cm:
+            visitor.visitArrayType(ctx)
+        self.assertEqual(
+            str(cm.exception), "Unsupported NdArray datatype found in the query"
         )
 
     def test_visit_query_specification_base_exception(self):
@@ -256,7 +299,11 @@ class ParserVisitorTests(unittest.TestCase):
         visitor = ParserVisitor()
         actual = visitor.visitUdfFunction(ctx)
         visit_mock.assert_has_calls(
-            [call(ctx.simpleId()), call(ctx.dottedId()), call(ctx.functionArgs())]
+            [
+                call(ctx.simpleId()),
+                call(ctx.dottedId()),
+                call(ctx.functionArgs()),
+            ]
         )
 
         func_mock.assert_called_with(None, name="name", output=udf_output)
@@ -328,7 +375,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(actual, create_udf_mock.return_value)
 
     ##################################################################
-    # LOAD DATA Statement
+    # LOAD Statement
     ##################################################################
     @mock.patch.object(ParserVisitor, "visit")
     @mock.patch("eva.parser.parser_visitor._load_statement.LoadDataStatement")
@@ -363,6 +410,47 @@ class ParserVisitorTests(unittest.TestCase):
             ]
         )
         mock_load.assert_called_once()
-        mock_load.assert_called_with(
-            TableRef("myVideo"), "video.mp4", column_list, file_options
-        )
+        mock_load.assert_called_with(TableRef('myVideo'), 'video.mp4',
+                                     column_list,
+                                     file_options)
+
+    ##################################################################
+    # UPLOAD Statement
+    ##################################################################
+    @mock.patch.object(ParserVisitor, 'visit')
+    @mock.patch('eva.parser.parser_visitor._upload_statement.UploadStatement')
+    def test_visit_upload_statement(self, mock_upload, mock_visit):
+        ctx = MagicMock()
+        table = 'myVideo'
+        video_blob = MagicMock()
+        video_blob.value = "b'AAAA'"
+        path = MagicMock()
+        path.value = 'video.mp4'
+        column_list = None
+        file_format = FileFormatType.VIDEO
+        file_options = {}
+        file_options['file_format'] = file_format
+        params = {ctx.fileName.return_value: path,
+                  ctx.videoBlob.return_value: video_blob,
+                  ctx.tableName.return_value: table,
+                  ctx.fileOptions.return_value: file_options,
+                  ctx.uidList.return_value: column_list}
+
+        def side_effect(arg):
+            return params[arg]
+
+        mock_visit.side_effect = side_effect
+        visitor = ParserVisitor()
+        visitor.visitUploadStatement(ctx)
+        mock_visit.assert_has_calls([call(ctx.fileName()),
+                                     call(ctx.videoBlob()),
+                                     call(ctx.tableName()),
+                                     call(ctx.fileOptions()),
+                                     call(ctx.uidList())])
+        mock_upload.assert_called_once()
+        mock_upload.assert_called_with('video.mp4',
+                                       "b'AAAA'",
+                                       TableRef('myVideo'),
+                                       column_list,
+                                       file_options)
+

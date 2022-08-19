@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pytest
 from test.util import (
     create_dummy_batches,
     create_sample_video,
@@ -24,7 +23,9 @@ from test.util import (
 
 import numpy as np
 import pandas as pd
+import pytest
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
@@ -38,7 +39,7 @@ class SelectExecutorTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -133,20 +134,18 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD DATA INFILE 'data/ua_detrac/ua_detrac.mp4'
-                   INTO UADETRAC;"""
+        query = """LOAD FILE 'data/mnist/mnist.mp4'
+                   INTO MNIST;"""
         execute_query_fetch_all(query)
 
-        select_query = "SELECT * FROM UADETRAC;"
+        select_query = "SELECT * FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        video_reader = OpenCVReader(
-            "data/ua_detrac/ua_detrac.mp4", batch_mem_size=30000000
-        )
+        video_reader = OpenCVReader("data/mnist/mnist.mp4", batch_mem_size=30000000)
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
             expected_batch += batch
-        expected_batch.modify_column_alias("uadetrac")
+        expected_batch.modify_column_alias("mnist")
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
@@ -247,24 +246,120 @@ class SelectExecutorTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_lateral_join(self):
-        select_query = """SELECT id FROM MyVideo JOIN LATERAL
-                        FastRCNNObjectDetector(data) WHERE id < 5;"""
+        select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
+                        FastRCNNObjectDetector(data) AS T(a,b,c) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
+        self.assertEqual(list(actual_batch.columns), ["myvideo.id", "T.a"])
         self.assertEqual(actual_batch.batch_size, 5)
 
     @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
-        select_query = """SELECT id, labels FROM MyVideo JOIN LATERAL
-                        FastRCNNObjectDetector(data) WHERE id < 5;"""
+        select_query = """SELECT id, T.labels FROM MyVideo JOIN LATERAL
+                        FastRCNNObjectDetector(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertTrue(
-            all(
-                actual_batch.frames.columns
-                == ["myvideo.id", "fastrcnnobjectdetector.labels"]
+        self.assertTrue(all(actual_batch.frames.columns == ["myvideo.id", "T.labels"]))
+        self.assertEqual(actual_batch.batch_size, 5)
+
+    def test_lateral_join_with_unnest(self):
+        query = """SELECT id, label
+                  FROM MyVideo JOIN LATERAL
+                    UNNEST(DummyObjectDetector(data)) AS T(label)
+                  WHERE id < 2 ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 1]),
+                    "T.label": np.array(["person", "bicycle"]),
+                }
             )
         )
-        self.assertEqual(actual_batch.batch_size, 5)
+
+        self.assertEqual(unnest_batch, expected)
+
+        query = """SELECT id, label
+                  FROM MyVideo JOIN LATERAL
+                    UNNEST(DummyObjectDetector(data)) AS T
+                  WHERE id < 2 ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 1]),
+                    "T.label": np.array(["person", "bicycle"]),
+                }
+            )
+        )
+
+        self.assertEqual(unnest_batch, expected)
+
+    def test_lateral_join_with_unnest_on_subset_of_outputs(self):
+        query = """SELECT id, label
+                  FROM MyVideo JOIN LATERAL
+                    UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                  WHERE id < 2 ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 0, 1, 1]),
+                    "T.label": np.array(["person", "person", "bicycle", "bicycle"]),
+                }
+            )
+        )
+
+        self.assertEqual(unnest_batch, expected)
+
+    def test_should_raise_error_with_missing_alias_in_lateral_join(self):
+        udf_name = "DummyMultiObjectDetector"
+        query = """SELECT id, labels
+                  FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data).labels;"""
+        with self.assertRaises(SyntaxError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception),
+            f"TableValuedFunction {udf_name} should have alias.",
+        )
+
+        query = """SELECT id, labels
+                  FROM MyVideo JOIN LATERAL
+                    UNNEST(DummyMultiObjectDetector(data).labels);"""
+        with self.assertRaises(SyntaxError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception),
+            f"TableValuedFunction {udf_name} should have alias.",
+        )
+
+        query = """SELECT id, labels
+                  FROM MyVideo JOIN LATERAL DummyMultiObjectDetector(data);"""
+        with self.assertRaises(SyntaxError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception),
+            f"TableValuedFunction {udf_name} should have alias.",
+        )
+
+    def test_should_raise_error_with_invalid_number_of_aliases(self):
+        udf_name = "DummyMultiObjectDetector"
+        query = """SELECT id, labels
+                  FROM MyVideo JOIN LATERAL
+                    DummyMultiObjectDetector(data).bboxes AS T;"""
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(
+            str(cm.exception),
+            f"Output bboxes does not exist for {udf_name}.",
+        )
+
+    def test_should_raise_error_with_invalid_output_lateral_join(self):
+        query = """SELECT id, a
+                  FROM MyVideo JOIN LATERAL
+                    DummyMultiObjectDetector(data) AS T(a, b);
+                """
+        with self.assertRaises(BinderError) as cm:
+            execute_query_fetch_all(query)
+        self.assertEqual(str(cm.exception), "Expected 1 output columns for T, got 2.")
 
     def test_hash_join_with_one_on(self):
         select_query = """SELECT * FROM table1 JOIN

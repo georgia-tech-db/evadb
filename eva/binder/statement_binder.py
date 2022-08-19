@@ -14,15 +14,22 @@
 # limitations under the License.
 import sys
 
-from eva.binder.binder_utils import bind_table_info, create_video_metadata, extend_star
+from eva.binder.binder_utils import (
+    BinderError,
+    bind_table_info,
+    create_video_metadata,
+    extend_star,
+)
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.upload_statement import UploadStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
@@ -97,20 +104,25 @@ class StatementBinder:
     @bind.register(LoadDataStatement)
     def _bind_load_data_statement(self, node: LoadDataStatement):
         table_ref = node.table_ref
+        name = table_ref.table.table_name
         if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Create a new metadata object
-            create_video_metadata(table_ref.table.table_name)
-
+            # Sanity check to make sure there is no existing video table with same name
+            if self._catalog.check_table_exists(
+                table_ref.table.database_name, table_ref.table.table_name
+            ):
+                err_msg = f"Video Table {name} already exists."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+            else:
+                # Create a new metadata object
+                create_video_metadata(name)
         self.bind(table_ref)
 
         table_ref_obj = table_ref.table.table_obj
         if table_ref_obj is None:
-            error = "{} does not exists. Create the table using \
-                            CREATE TABLE.".format(
-                table_ref.table.table_name
-            )
+            error = f"{name} does not exists."
             logger.error(error)
-            raise RuntimeError(error)
+            raise BinderError(error)
 
         # if query had columns specified, we just copy them
         if node.column_list is not None:
@@ -134,6 +146,42 @@ class StatementBinder:
 
         node.column_list = column_list
 
+    @bind.register(UploadStatement)
+    def _bind_upload_statement(self, node: UploadStatement):
+        table_ref = node.table_ref
+        if node.file_options['file_format'] == FileFormatType.VIDEO:
+            # Create a new metadata object
+            create_video_metadata(table_ref.table.table_name)
+
+        self.bind(table_ref)
+
+        table_ref_obj = table_ref.table.table_obj
+        if table_ref_obj is None:
+            error = '{} does not exists. Create the table using \
+                            CREATE TABLE.'.format(table_ref.table.table_name)
+            logger.error(error)
+            raise RuntimeError(error)
+
+        # if query had columns specified, we just copy them
+        if node.column_list is not None:
+            column_list = node.column_list
+
+        # else we curate the column list from the metadata
+        else:
+            column_list = []
+            for column in table_ref_obj.columns:
+                column_list.append(
+                    TupleValueExpression(
+                        col_name=column.name,
+                        table_alias=table_ref_obj.name.lower(),
+                        col_object=column))
+
+        # bind the columns
+        for expr in column_list:
+            self.bind(expr)
+
+        node.column_list = column_list
+
     @bind.register(DropTableStatement)
     def _bind_drop_table_statement(self, node: DropTableStatement):
         for table in node.table_refs:
@@ -143,7 +191,9 @@ class StatementBinder:
     def _bind_tableref(self, node: TableRef):
         if node.is_table_atom():
             # Table
-            self._binder_context.add_table_alias(node.alias, node.table.table_name)
+            self._binder_context.add_table_alias(
+                node.alias.alias_name, node.table.table_name
+            )
             bind_table_info(node.table)
         elif node.is_select():
             current_context = self._binder_context
@@ -151,20 +201,33 @@ class StatementBinder:
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
-                node.alias, node.select_statement.target_list
+                node.alias.alias_name, node.select_statement.target_list
             )
         elif node.is_join():
             self.bind(node.join_node.left)
             self.bind(node.join_node.right)
             if node.join_node.predicate:
                 self.bind(node.join_node.predicate)
-        elif node.is_func_expr():
-            self.bind(node.func_expr)
+        elif node.is_table_valued_expr():
+            func_expr = node.table_valued_expr.func_expr
+            func_expr.alias = node.alias
+            self.bind(func_expr)
+            output_cols = []
+            for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
+                alias_obj = self._catalog.udf_io(
+                    alias,
+                    data_type=obj.type,
+                    array_type=obj.array_type,
+                    dimensions=obj.array_dimensions,
+                    is_input=obj.is_input,
+                )
+
+                output_cols.append(alias_obj)
             self._binder_context.add_derived_table_alias(
-                node.func_expr.alias, [node.func_expr]
+                func_expr.alias.alias_name, output_cols
             )
         else:
-            raise ValueError(f"Unsupported node {type(node)}")
+            raise BinderError(f"Unsupported node {type(node)}")
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
@@ -180,28 +243,56 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        node.alias = node.alias or node.name.lower()
         udf_obj = self._catalog.get_udf_by_name(node.name)
-        assert udf_obj is not None, (
-            "UDF with name {} does not exist in the catalog. Please "
-            "create the UDF using CREATE UDF command".format(node.name)
-        )
+        if udf_obj is None:
+            err_msg = (
+                f"UDF with name {node.name} does not exist in the catalog. "
+                "Please create the UDF using CREATE UDF command."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
+
+        try:
+            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        except Exception as e:
+            err_msg = (
+                f"{str(e)}. Please verify that the UDF class name in the"
+                "implementation file matches the UDF name."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
 
         output_objs = self._catalog.get_udf_outputs(udf_obj)
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:
-                    node.output_col_aliases.append(
-                        "{}.{}".format(node.alias, obj.name.lower())
-                    )
                     node.output_objs = [obj]
-            assert (
-                len(node.output_col_aliases) == 1
-            ), "Duplicate columns {} in UDF {}".format(node.output, udf_obj.name)
+            if not node.output_objs:
+                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+            node.projection_columns = [node.output]
         else:
-            node.output_col_aliases = [
-                "{}.{}".format(node.alias, obj.name.lower()) for obj in output_objs
-            ]
             node.output_objs = output_objs
+            node.projection_columns = [obj.name.lower() for obj in output_objs]
 
-        node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        default_alias_name = node.name.lower()
+        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
+        if not node.alias:
+            node.alias = Alias(default_alias_name, default_output_col_aliases)
+        else:
+            if not len(node.alias.col_names):
+                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
+            else:
+                output_aliases = [
+                    str(col_name.lower()) for col_name in node.alias.col_names
+                ]
+                node.alias = Alias(node.alias.alias_name, output_aliases)
+
+        if len(node.alias.col_names) != len(node.output_objs):
+            err_msg = (
+                f"Expected {len(node.output_objs)} output columns for "
+                f"{node.alias.alias_name}, got {len(node.alias.col_names)}."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)

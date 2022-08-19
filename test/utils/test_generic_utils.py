@@ -40,6 +40,10 @@ class ModulePathTest(unittest.TestCase):
         vl = path_to_class("eva/readers/opencv_reader.py", "OpenCVReader")
         self.assertEqual(vl, OpenCVReader)
 
+    def test_should_raise_if_class_does_not_exists(self):
+        with self.assertRaises(RuntimeError):
+            path_to_class("eva/readers/opencv_reader.py", "OpenCV")
+
     def test_should_use_torch_to_check_if_gpu_is_available(self):
         # Emulate a missing import
         # Ref: https://stackoverflow.com/a/2481588

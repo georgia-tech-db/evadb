@@ -604,7 +604,22 @@ class LogicalUploadToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalUpload, context: OptimizerContext):
-        after = UploadPlan(before.path, before.video_blob)
+        # Configure the batch_mem_size.
+        # We assume the optimizer decides the batch_mem_size.
+        # ToDO: Experiment heuristics.
+
+        batch_mem_size = 30000000  # 30mb
+        config_batch_mem_size = ConfigurationManager().get_value(
+            "executor", "batch_mem_size")
+        if config_batch_mem_size:
+            batch_mem_size = config_batch_mem_size
+        after = UploadPlan(before.path, 
+                           before.video_blob,
+                           before.table_metainfo,
+                           batch_mem_size,
+                           before.column_list,
+                           before.file_options)
+
         return after
 
 
@@ -759,7 +774,7 @@ class LogicalFunctionScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
-        after = FunctionScanPlan(before.func_expr)
+        after = FunctionScanPlan(before.func_expr, before.do_unnest)
         return after
 
 

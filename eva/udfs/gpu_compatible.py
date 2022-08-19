@@ -12,12 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
+from typing import TypeVar
 
 
-class GPUCompatible(ABC):
+GPUCompatible = TypeVar("GPUCompatible")
+
+
+class GPUCompatible(metaclass=ABCMeta):
     @abstractmethod
-    def to_device(self, device: str):
+    def to_device(self, device: str) -> GPUCompatible:
         """
         Implement this method to enable GPU for the function being executed.
         Arguments:

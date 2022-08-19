@@ -64,9 +64,9 @@ def path_to_class(filepath: str, classname: str):
         spec.loader.exec_module(module)
         classobj = getattr(module, classname)
     except Exception as e:
-        logger.error(
-            "Failed to import %s from %s\nException: %s" % (classname, filepath, e)
-        )
+        err_msg = f"Failed to import {classname} from {filepath}\nException: {str(e)}"
+        logger.error(err_msg)
+        raise RuntimeError(err_msg)
     return classobj
 
 
@@ -78,6 +78,7 @@ def is_gpu_available() -> bool:
     """
     try:
         import torch
+
         return torch.cuda.is_available()
     except ImportError:
         return False
@@ -96,11 +97,12 @@ def generate_file_path(name: str = "") -> Path:
     """
     dataset_location = ConfigurationManager().get_value("core", "datasets_dir")
     if dataset_location is None:
-        logger.error("Missing location key in eva.yml")
-        raise KeyError("Missing datasets_dir key in eva.yml")
+        logger.error('Missing dataset location key in eva.yml')
+        raise KeyError('Missing datasets_dir key in eva.yml')
 
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
+
     salt = uuid.uuid4().hex
     file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
     path = dataset_location / file_name

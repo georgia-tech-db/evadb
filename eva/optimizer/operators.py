@@ -235,7 +235,12 @@ class LogicalQueryDerivedGet(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.alias, self.predicate, tuple(self.target_list))
+            (
+                super().__hash__(),
+                self.alias,
+                self.predicate,
+                tuple(self.target_list),
+            )
         )
 
 
@@ -742,10 +747,18 @@ class LogicalUpload(Operator):
         video_blob(str): base64 encoded video string
     """
 
-    def __init__(self, path: Path, video_blob: str, children=None):
+    def __init__(self, path: Path,
+                 video_blob: str,
+                 table_metainfo: DataFrameMetadata,
+                 column_list: List[AbstractExpression] = None,
+                 file_options: dict = dict(),
+                 children: List = None):
         super().__init__(OperatorType.LOGICALUPLOAD, children=children)
         self._path = path
         self._video_blob = video_blob
+        self._table_metainfo = table_metainfo
+        self._column_list = column_list or []
+        self._file_options = file_options
 
     @property
     def path(self):
@@ -755,23 +768,47 @@ class LogicalUpload(Operator):
     def video_blob(self):
         return self._video_blob
 
+    @property
+    def table_metainfo(self):
+        return self._table_metainfo
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    @property
+    def file_options(self):
+        return self._file_options
+
     def __str__(self):
-        return "LogicalUpload(path: {} blob: {})".format(
-            self.path, "string of video blob"
-        )
+        return 'LogicalUpload(path: {}, \
+                blob: {}, \
+                table: {}, \
+                column_list: {}, \
+                file_options: {})'.format(self.path,
+                                          "string of video blob",
+                                          self.table_metainfo,
+                                          self.column_list,
+                                          self.file_options)
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalUpload):
             return False
-        return (
-            is_subtree_equal
-            and self.path == other.path
-            and self.video_blob == other.video_blob
-        )
+        return (is_subtree_equal
+                and self.path == other.path
+                and self.video_blob == other.video_blob
+                and self.table_metainfo == other.table_metainfo
+                and self.column_list == other.column_list
+                and self.file_options == other.file_options)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.path, self.path, self.video_blob))
+        return hash((super().__hash__(),
+                     self.path,
+                     self.video_blob,
+                     self.table_metainfo,
+                     tuple(self.column_list),
+                     frozenset(self.file_options.items())))
 
 
 class LogicalFunctionScan(Operator):
@@ -783,22 +820,36 @@ class LogicalFunctionScan(Operator):
             function_expression that yield a table like output
     """
 
-    def __init__(self, func_expr: AbstractExpression, children: List = None):
+    def __init__(
+        self,
+        func_expr: AbstractExpression,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
         super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
         self._func_expr = func_expr
+        self._do_unnest = do_unnest
 
     @property
     def func_expr(self):
         return self._func_expr
 
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalFunctionScan):
             return False
-        return is_subtree_equal and self.func_expr == other.func_expr
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr))
+        return hash((super().__hash__(), self.func_expr, self.do_unnest))
 
 
 class LogicalJoin(Operator):
@@ -940,7 +991,12 @@ class LogicalCreateMaterializedView(Operator):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.view, tuple(self.col_list), self.if_not_exists)
+            (
+                super().__hash__(),
+                self.view,
+                tuple(self.col_list),
+                self.if_not_exists,
+            )
         )
 
 

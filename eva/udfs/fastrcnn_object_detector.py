@@ -19,7 +19,7 @@ import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
     from torch import Tensor
@@ -38,7 +38,7 @@ except ImportError as e:
     )
 
 
-class FastRCNNObjectDetector(PytorchAbstractUDF):
+class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -53,7 +53,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
         super().__init__()
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True
+            pretrained=True, progress=False
         )
         self.model.eval()
 
