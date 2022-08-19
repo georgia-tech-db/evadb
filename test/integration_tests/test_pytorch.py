@@ -82,11 +82,6 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.batch_size, 5)
 
-        # non-trivial test case for UADETRAC
-        res = actual_batch.frames
-        self.assertEqual(res["facedetector.bboxes"][0], None)
-        self.assertTrue(res["facedetector.scores"][2] > 0.9)
-
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ocr(self):
         create_udf_query = """CREATE UDF OCRExtractor
