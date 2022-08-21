@@ -16,8 +16,8 @@ import asyncio
 import base64
 import os
 import random
-
 from signal import SIGINT, SIGTERM
+
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
 
