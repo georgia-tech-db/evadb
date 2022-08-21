@@ -17,6 +17,7 @@ import base64
 import os
 import random
 
+from signal import SIGINT, SIGTERM
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
 
@@ -56,11 +57,8 @@ class EVACursor(object):
         """
         fetch_one returns one batch instead of one row for now.
         """
-        try:
-            message = await self._protocol.queue.get()
-            response = await asyncio.coroutine(Response.from_json)(message)
-        except Exception as e:
-            raise e
+        message = await self._protocol.queue.get()
+        response = await asyncio.coroutine(Response.from_json)(message)
         self._pending_query = False
         return response
 
@@ -105,7 +103,10 @@ class EVACursor(object):
 
         def func_sync(*args, **kwargs):
             loop = self._protocol.loop
-            res = loop.run_until_complete(func(*args, **kwargs))
+            task = asyncio.ensure_future(func(*args, **kwargs))
+            for signal in [SIGINT, SIGTERM]:
+                loop.add_signal_handler(signal, task.cancel)
+            res = loop.run_until_complete(task)
             return res
 
         return func_sync
