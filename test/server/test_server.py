@@ -100,9 +100,5 @@ class ServerTests(unittest.TestCase):
             eva_server.data_received(data), "closed", "transport not closed"
         )
 
-        asyncio.set_event_loop(None)
-
-        with self.assertRaises(RuntimeError):
-            data.decode = MagicMock(return_value="5|query")
-            # error due to lack of asyncio loop
-            eva_server.data_received(data)
+        data.decode = MagicMock(return_value="5|query")
+        eva_server.data_received(data)
