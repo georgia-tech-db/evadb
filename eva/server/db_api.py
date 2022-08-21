@@ -68,6 +68,14 @@ class EVACursor(object):
         """
         return await self.fetch_one_async()
 
+    async def kill_async(self):
+        """
+        kill the current pending query
+        """
+        if self._pending_query:
+            await self._protocol.send_message("kill")
+            self._pending_query = False
+
     def _upload_transformation(self, query: str) -> str:
         """
         Special case:

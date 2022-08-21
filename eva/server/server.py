@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import multiprocessing
 import os
 import string
 from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
@@ -42,6 +43,7 @@ class EvaServer(asyncio.Protocol):
         self.transport = None
         self._socket_timeout = socket_timeout
         self.buffer = EvaProtocolBuffer()
+        self.pending_task = None
 
     def connection_made(self, transport):
         self.transport = transport
@@ -75,13 +77,20 @@ class EvaServer(asyncio.Protocol):
         self.buffer.feed_data(message)
         while self.buffer.has_complete_message():
             request_message = self.buffer.read_message()
-
             if request_message in ["quit", "exit"]:
                 logger.debug("Close client socket")
                 return self.transport.close()
+            elif request_message in ["kill"]:
+                logger.warn("Killing the pending query")
+                if self.pending_task is not None:
+                    self.pending_task.terminate()
+                    self.pending_task = None
             else:
                 logger.debug("Handle request")
-                asyncio.create_task(handle_request(self.transport, request_message))
+                self.pending_task = multiprocessing.Process(
+                    target=handle_request, args=(self.transport, request_message)
+                )
+                self.pending_task.start()
 
 
 def start_server(
