@@ -65,6 +65,21 @@ class DBAPITests(unittest.TestCase):
         protocol.queue.get.assert_called_once()
         self.assertEqual(expected, response)
 
+    @mock.patch.object(Response, "from_json")
+    def test_eva_cursor_fetch_one_sync(self, mock_response):
+        protocol = AsyncMock()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        protocol.loop = loop
+
+        eva_cursor = EVACursor(protocol)
+        response = "test_response"
+        mock_response.side_effect = [response]
+        expected = eva_cursor.fetch_one()
+        self.assertEqual(eva_cursor._pending_query, False)
+        protocol.queue.get.assert_called_once()
+        self.assertEqual(expected, response)
+
     def test_eva_connection(self):
         hostname = "localhost"
 
