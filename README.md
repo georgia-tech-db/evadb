@@ -65,16 +65,10 @@ eva_client    # launch client
 2. UPLOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
-UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
+UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;
 ```
 
-3. LOAD the video using the following command:
-
-```mysql
-LOAD FILE 'test_video.mp4' INTO MyVideo;
-```
-
-4. That's it. You can now start issuing queries over the loaded video:
+3. That's it. You can now start issuing queries over the loaded video:
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
