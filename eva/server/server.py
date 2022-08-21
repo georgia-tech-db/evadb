@@ -88,7 +88,8 @@ class EvaServer(asyncio.Protocol):
             else:
                 logger.debug("Handle request")
                 self.pending_task = multiprocessing.Process(
-                    target=handle_request, args=(self.transport, request_message)
+                    target=handle_request,
+                    args=(self.transport, request_message),
                 )
                 self.pending_task.start()
 
@@ -104,7 +105,7 @@ def start_server(
     stop_server_future: future for externally stopping the server
     """
 
-    logger.critical("Start Server")
+    logger.debug("Start Server")
 
     # Register signal handler
     def raiseSystemExit(_, __):
@@ -123,9 +124,9 @@ def start_server(
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        logger.critical(
-            "PID(" + str(os.getpid()) + ") serving on " + str(socket.getsockname())
-        )
+        info = f"PID({str(os.getpid())}) serving on {str(socket.getsockname())}"
+        logger.debug(info)
+        print(info)
 
     server_closed = loop.create_task(server.wait_closed())
 
@@ -137,7 +138,7 @@ def start_server(
 
     except KeyboardInterrupt:
 
-        logger.debug("Server process interrupted")
+        logger.warn("Server process interrupted")
 
     finally:
         # Stop monitor

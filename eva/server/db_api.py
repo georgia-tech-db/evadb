@@ -46,8 +46,7 @@ class EVACursor(object):
         """
         if self._pending_query:
             raise SystemError(
-                "EVA does not support concurrent queries. \
-                    Call fetch_all() to complete the pending query"
+                "EVA does not support concurrent queries. Call fetch_all() to complete the pending query."
             )
         query = self._upload_transformation(query)
         await self._protocol.send_message(query)
