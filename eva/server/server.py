@@ -80,8 +80,8 @@ class EvaServer(asyncio.Protocol):
             if request_message in ["quit", "exit"]:
                 logger.debug("Close client socket")
                 return self.transport.close()
-            elif request_message in ["kill"]:
-                logger.warn("Killing the pending query")
+            elif request_message in ["interrupt"]:
+                logger.warn("Abort the pending query")
                 if self.pending_task is not None:
                     self.pending_task.terminate()
                     self.pending_task = None

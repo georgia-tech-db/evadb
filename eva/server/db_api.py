@@ -26,9 +26,22 @@ class EVAConnection:
     def __init__(self, transport, protocol):
         self._transport = transport
         self._protocol = protocol
+        self._cursor = None
 
     def cursor(self):
-        return EVACursor(self._protocol)
+        # Unqiue cursor for every connection
+        if self._cursor is None:
+            self._cursor = EVACursor(self)
+        return self._cursor
+
+    def interrupt(self):
+        """
+        Abort the current pending queries
+        """
+        loop = self.protocol.loop
+        task = asyncio.ensure_future(self.protocol.send_message("interrupt"))
+        loop.run_until_complete(task)
+        self.cursor().reset()
 
     @property
     def protocol(self):
@@ -36,9 +49,14 @@ class EVAConnection:
 
 
 class EVACursor(object):
-    def __init__(self, protocol):
-        self._protocol = protocol
+    def __init__(self, connection):
+        self._connection = connection
         self._pending_query = False
+        self._pending_tasks = set()  # Only for sync APIs
+
+    @property
+    def connection(self):
+        return self._connection
 
     async def execute_async(self, query: str):
         """
@@ -49,14 +67,14 @@ class EVACursor(object):
                 "EVA does not support concurrent queries. Call fetch_all() to complete the pending query."
             )
         query = self._upload_transformation(query)
-        await self._protocol.send_message(query)
+        await self.connection.protocol.send_message(query)
         self._pending_query = True
 
     async def fetch_one_async(self) -> Response:
         """
         fetch_one returns one batch instead of one row for now.
         """
-        message = await self._protocol.queue.get()
+        message = await self.connection.protocol.queue.get()
         response = await asyncio.coroutine(Response.from_json)(message)
         self._pending_query = False
         return response
@@ -66,14 +84,6 @@ class EVACursor(object):
         fetch_all is the same as fetch_one for now.
         """
         return await self.fetch_one_async()
-
-    async def kill_async(self):
-        """
-        kill the current pending query
-        """
-        if self._pending_query:
-            await self._protocol.send_message("kill")
-            self._pending_query = False
 
     def _upload_transformation(self, query: str) -> str:
         """
@@ -99,6 +109,11 @@ class EVACursor(object):
 
         return query
 
+    def reset(self):
+        self._pending_query = False
+        for t in self._pending_tasks:
+            t.cancel()
+
     def __getattr__(self, name):
         """
         Auto generate sync function calls from async
@@ -109,11 +124,13 @@ class EVACursor(object):
             raise AttributeError
 
         def func_sync(*args, **kwargs):
-            loop = self._protocol.loop
+            loop = self.connection.protocol.loop
             task = asyncio.ensure_future(func(*args, **kwargs))
+            self._pending_tasks.add(task)
             for signal in [SIGINT, SIGTERM]:
                 loop.add_signal_handler(signal, task.cancel)
             res = loop.run_until_complete(task)
+            self._pending_tasks.remove(task)
             return res
 
         return func_sync
