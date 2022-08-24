@@ -726,7 +726,7 @@ class LogicalGetToSeqScan(Rule):
             )
             scan.append_child(lower)
             # Check whether the projection contains a UDF
-            if not any([isinstance(expr, FunctionExpression) for expr in before.target_list]):
+            if before.target_list is None or not any([isinstance(expr, FunctionExpression) for expr in before.target_list]):
                 return scan
             upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
             upper.append_child(scan)
