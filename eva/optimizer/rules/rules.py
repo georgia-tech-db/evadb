@@ -715,7 +715,7 @@ class LogicalGetToSeqScan(Rule):
             batch_mem_size = config_batch_mem_size
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
-            scan_with_udf = SeqScanPlan(None, before.target_list, before.alias)
+            scan = SeqScanPlan(None, before.target_list, before.alias)
             lower = ExchangePlan(parallelism=1)
             lower.append_child(
                 StoragePlan(
@@ -724,10 +724,12 @@ class LogicalGetToSeqScan(Rule):
                     predicate=before.predicate,
                 )
             )
-            scan_with_udf.append_child(lower)
-            #return scan_with_udf
+            scan.append_child(lower)
+            # Check whether the projection contains a UDF
+            if not any([isinstance(expr, FunctionExpression) for expr in before.target_list]):
+                return scan
             upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
-            upper.append_child(scan_with_udf)
+            upper.append_child(scan)
             return upper
         else:
             after = SeqScanPlan(None, before.target_list, before.alias)
