@@ -715,15 +715,20 @@ class LogicalGetToSeqScan(Rule):
             batch_mem_size = config_batch_mem_size
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
-            after = SeqScanPlan(before.predicate, before.target_list)
-            ex2 = ExchangePlan(parallelism=1)
-            ex2.append_child(
-                StoragePlan(before.dataset_metadata, batch_mem_size=batch_mem_size)
+            scan_with_udf = SeqScanPlan(None, before.target_list, before.alias)
+            lower = ExchangePlan(parallelism=1)
+            lower.append_child(
+                StoragePlan(
+                    before.dataset_metadata,
+                    batch_mem_size=batch_mem_size,
+                    predicate=before.predicate,
+                )
             )
-            after.append_child(ex2)
-            ex1 = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
-            ex1.append_child(after)
-            return ex1
+            scan_with_udf.append_child(lower)
+            #return scan_with_udf
+            upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
+            upper.append_child(scan_with_udf)
+            return upper
         else:
             after = SeqScanPlan(None, before.target_list, before.alias)
             after.append_child(
@@ -972,7 +977,13 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        return after
+        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
+        upper.append_child(after)
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        if ray_enabled:
+            return upper
+        else:
+            return after
 
 
 class LogicalExchangeToPhysical(Rule):

@@ -32,3 +32,6 @@ class ExchangePlan(AbstractPlan):
         self.parallelism = parallelism
         self.ray_conf = ray_conf
         super().__init__(PlanOprType.EXCHANGE)
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.parallelism, frozenset(self.ray_conf.items())))

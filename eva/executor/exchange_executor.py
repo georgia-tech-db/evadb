@@ -77,9 +77,11 @@ class ExchangeExecutor(AbstractExecutor):
         while len(curr_exec.children) > 0 and not isinstance(
             curr_exec.children[0], ExchangeExecutor
         ):
+            """
             assert (
                 len(curr_exec.children) == 1
             ), "Exchange executor does not support children != 1"
+            """
             curr_exec = curr_exec.children[0]
 
         if len(curr_exec.children) > 0:

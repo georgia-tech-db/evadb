@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Generator, Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_project
@@ -30,10 +30,13 @@ class ProjectExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
-        for batch in child_executor.exec():
+        for batch in child_executor.exec(**kwargs):
             batch = apply_project(batch, self.target_list)
 
             if not batch.empty():
                 yield batch
+
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec(**kwargs)
