@@ -717,15 +717,15 @@ class LogicalGetToSeqScan(Rule):
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
             scan = SeqScanPlan(None, before.target_list, before.alias)
-            #lower = ExchangePlan(parallelism=1)
-            scan.append_child(
+            lower = ExchangePlan(parallelism=1)
+            lower.append_child(
                 StoragePlan(
                     before.dataset_metadata,
                     batch_mem_size=batch_mem_size,
                     predicate=before.predicate,
                 )
             )
-            #scan.append_child(lower)
+            scan.append_child(lower)
             # Check whether the projection contains a UDF
             if before.target_list is None or not any([isinstance(expr, FunctionExpression) for expr in before.target_list]):
                 return scan
@@ -877,14 +877,7 @@ class LogicalLateralJoinToPhysical(Rule):
         lateral_join_plan.join_project = join_node.join_project
         lateral_join_plan.append_child(join_node.lhs())
         lateral_join_plan.append_child(join_node.rhs())
-
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
-        if ray_enabled:
-            upper = ExchangePlan(parallelism=1, ray_conf={"num_gpus": 1})
-            upper.append_child(lateral_join_plan)
-            return upper
-        else:
-            return lateral_join_plan
+        return lateral_join_plan
 
 
 class LogicalJoinToPhysicalHashJoin(Rule):
@@ -987,7 +980,7 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=1, ray_conf={"num_gpus": 1})
+        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
         upper.append_child(after)
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
         if ray_enabled:
