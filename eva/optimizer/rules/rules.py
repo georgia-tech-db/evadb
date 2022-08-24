@@ -81,6 +81,7 @@ from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
 
+from eva.expression.function_expression import FunctionExpression
 
 class RuleType(Flag):
     """
