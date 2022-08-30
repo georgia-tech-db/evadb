@@ -24,9 +24,8 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
-from eva.parser.table_ref import TableInfo
-from eva.parser.types import ColumnConstraintEnum
 from eva.parser.create_statement import ColConstraintInfo
+from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
 
 
@@ -130,7 +129,7 @@ class CatalogManager(object):
             data_type,
             array_type=array_type,
             array_dimensions=dimensions,
-            is_nullable=cci.nullable
+            is_nullable=cci.nullable,
         )
 
     def get_dataset_metadata(

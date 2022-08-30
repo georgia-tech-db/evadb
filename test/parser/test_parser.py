@@ -23,7 +23,7 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import ColumnDefinition
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
@@ -365,6 +365,8 @@ class ParserTests(unittest.TestCase):
                   IMPL  'data/fastrcnn.py';
         """
 
+        expected_cci = ColConstraintInfo()
+        expected_cci.nullable = True
         expected_stmt = CreateUDFStatement(
             "FastRCNN",
             False,
@@ -374,12 +376,15 @@ class ParserTests(unittest.TestCase):
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
                     [3, 256, 256],
+                    expected_cci,
                 )
             ],
             [
-                ColumnDefinition("Labels", ColumnType.NDARRAY, NdArrayType.STR, [10]),
                 ColumnDefinition(
-                    "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4]
+                    "Labels", ColumnType.NDARRAY, NdArrayType.STR, [10], expected_cci
+                ),
+                ColumnDefinition(
+                    "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4], expected_cci
                 ),
             ],
             Path("data/fastrcnn.py"),

@@ -115,9 +115,7 @@ class CreateTable(evaql_parserVisitor):
     ):
         return ColumnConstraintEnum.UNIQUE
 
-    def visitNullColumnConstraint(
-        self, ctx: evaql_parser.NullColumnConstraintContext
-    ):
+    def visitNullColumnConstraint(self, ctx: evaql_parser.NullColumnConstraintContext):
         return ColumnConstraintEnum.NULLNOTNULL
 
     def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
