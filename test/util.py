@@ -179,11 +179,20 @@ def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
     return b64_string
 
 
-def create_dummy_csv_batches():
-    df = pd.read_csv(
-        os.path.join(upload_dir_from_config, "dummy.csv"),
-        converters={"bbox": convert_bbox},
-    )
+def create_dummy_csv_batches(target_columns=None):
+    
+    if target_columns:
+        df = pd.read_csv(
+            os.path.join(upload_dir_from_config, "dummy.csv"),
+            converters={"bbox": convert_bbox},
+            usecols=target_columns
+        )
+    else:
+        df = pd.read_csv(
+            os.path.join(upload_dir_from_config, "dummy.csv"),
+            converters={"bbox": convert_bbox}
+        )
+        
     return Batch(df)
 
 
