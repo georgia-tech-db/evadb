@@ -30,7 +30,9 @@ class CropTests(unittest.TestCase):
         df = pd.DataFrame([[imarray, bbox]])
         cropped_image = self.crop_instance.exec(df)
 
-        expected_image = pd.DataFrame([[imarray[0:60, 0:30]]], columns=["data"])
+        expected_image = pd.DataFrame(
+            [[imarray[0:60, 0:30]]], columns=["cropped_frame_array"]
+        )
         self.assertTrue(expected_image.equals(cropped_image))
 
     def test_should_crop_multi_frame(self):
@@ -43,7 +45,7 @@ class CropTests(unittest.TestCase):
 
         expected_image = pd.DataFrame(
             [[imarray[0:60, 0:30]], [imarray[50:70, 50:70]], [imarray[0:20, 30:60]]],
-            columns=["data"],
+            columns=["cropped_frame_array"],
         )
         self.assertTrue(expected_image.equals(cropped_image))
 
