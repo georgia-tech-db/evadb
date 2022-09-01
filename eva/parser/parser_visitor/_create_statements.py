@@ -101,7 +101,7 @@ class CreateTable(evaql_parserVisitor):
                 column_constraint_information.unique = True
                 column_constraint_information.nullable = False
                 not_null_set = True
-            elif return_type == ColumnConstraintEnum.NULLNOTNULL:
+            elif return_type == ColumnConstraintEnum.NOTNULL:
                 column_constraint_information.nullable = False
                 not_null_set = True
 
@@ -116,7 +116,7 @@ class CreateTable(evaql_parserVisitor):
         return ColumnConstraintEnum.UNIQUE
 
     def visitNullColumnConstraint(self, ctx: evaql_parser.NullColumnConstraintContext):
-        return ColumnConstraintEnum.NULLNOTNULL
+        return ColumnConstraintEnum.NOTNULL
 
     def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
 
