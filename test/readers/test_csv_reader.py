@@ -17,10 +17,10 @@ import unittest
 from test.util import (
     FRAME_SIZE,
     NUM_FRAMES,
-    PATH_PREFIX,
     create_dummy_csv_batches,
     create_sample_csv,
     file_remove,
+    upload_dir_from_config,
 )
 
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -44,7 +44,7 @@ class CSVLoaderTest(unittest.TestCase):
 
         # call the CSVReader
         csv_loader = CSVReader(
-            file_url=os.path.join(PATH_PREFIX, "dummy.csv"),
+            file_url=os.path.join(upload_dir_from_config, "dummy.csv"),
             column_list=column_list,
             batch_mem_size=NUM_FRAMES * FRAME_SIZE,
         )

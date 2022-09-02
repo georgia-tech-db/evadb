@@ -13,13 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import (
+    create_sample_video,
+    get_logical_query_plan,
+    get_physical_query_plan,
+    load_inbuilt_udfs,
+)
 
 from mock import MagicMock
 
+from eva.catalog.catalog_manager import CatalogManager
+from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.optimizer.operators import (
     LogicalFilter,
     LogicalGet,
-    LogicalJoin,
     LogicalProject,
     LogicalQueryDerivedGet,
     LogicalSample,
@@ -52,13 +59,24 @@ from eva.optimizer.rules.rules import (
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
     Promise,
+    PushDownFilterThroughJoin,
     PushdownFilterThroughSample,
     PushdownProjectThroughSample,
     RulesManager,
 )
+from eva.server.command_handler import execute_query_fetch_all
 
 
 class TestRules(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # reset the catalog manager before running each test
+        CatalogManager().reset()
+        create_sample_video()
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        execute_query_fetch_all(load_query)
+        load_inbuilt_udfs()
+
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
         self.assertTrue(
@@ -130,6 +148,7 @@ class TestRules(unittest.TestCase):
             EmbedProjectIntoGet(),
             #    EmbedProjectIntoDerivedGet(),
             PushdownProjectThroughSample(),
+            PushDownFilterThroughJoin(),
         ]
         self.assertEqual(
             len(supported_rewrite_rules), len(RulesManager().rewrite_rules)
@@ -265,16 +284,20 @@ class TestRules(unittest.TestCase):
         self.assertTrue(logi_get is rewrite_opr.children[0].children[0])
         self.assertEqual(rewrite_opr.children[0].target_list, target_list)
 
-    # PushdownProjectThroughJoin
-    def PushdownProjectThroughJoin(self):
-        rule = EmbedProjectIntoGet()
-        expr1 = MagicMock()
-        expr2 = MagicMock()
-        expr3 = MagicMock()
+    def test_should_pushdown_filter_through_join(self):
+        query = """SELECT id, label
+                  FROM MyVideo JOIN LATERAL
+                    UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                  WHERE id < 2 AND label = 'car';"""
+        l_plan = get_logical_query_plan(query)
+        p_plan = get_physical_query_plan(query)
+        join_node = p_plan.children[0]
+        original_predicate = l_plan.children[0].predicate
+        pred_1, pred_2 = expression_tree_to_conjunction_list(original_predicate)
+        storage_plan = join_node.children[0].children[0]
+        right_subtree_filter = join_node.children[1]
+        # storage_plan should have the correct predicate
+        self.assertEqual(storage_plan.predicate, pred_1)
 
-        logi_join = LogicalJoin(MagicMock())
-        logi_project = LogicalProject([expr1, expr2, expr3], [logi_join])
-
-        rewrite_opr = rule.apply(logi_project, MagicMock())
-        self.assertEqual(rewrite_opr, logi_join)
-        self.assertEqual(rewrite_opr.target_list, [expr1, expr2, expr3])
+        # Right subtree should have the correct predicate
+        self.assertEqual(right_subtree_filter.predicate, pred_2)

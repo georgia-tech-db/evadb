@@ -12,22 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List
 
 import numpy as np
 import pandas as pd
 import torch
+from numpy.typing import ArrayLike
 from PIL import Image
 from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformationUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
+class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatible):
     """
     A pytorch based classifier. Used to make sure we make maximum
     utilization of features provided by pytorch without reinventing the wheel.
@@ -97,18 +98,40 @@ class PytorchAbstractUDF(AbstractClassifierUDF, nn.Module, GPUCompatible, ABC):
         """
         return val.detach().cpu().numpy()
 
-    def to_device(self, device: str):
+    def to_device(self, device: str) -> GPUCompatible:
         """
-
-        :param device:
-        :return:
+        Required to make class a member of GPUCompatible Protocol.
         """
         return self.to(torch.device("cuda:{}".format(device)))
 
     def __call__(self, *args, **kwargs):
-        frames = None
-        if len(args):
-            frames = args[0]
+        if len(args) == 0:
+            return nn.Module.__call__(self, *args, **kwargs)
+
+        frames = args[0]
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
+
         return nn.Module.__call__(self, frames, **kwargs)
+
+
+class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
+    """
+    Use PyTorch torchvision transforms as EVA transforms.
+    """
+
+    def __init__(self, transforms):
+        Compose.__init__(self, transforms)
+
+    def transform(self, frames: ArrayLike) -> ArrayLike:
+        return Compose.__call__(self, frames)
+
+    def __call__(self, *args, **kwargs):
+        if len(args) == 0:
+            return nn.Module.__call__(self, *args, **kwargs)
+
+        frames = args[0]
+        if isinstance(frames, pd.DataFrame):
+            frames = frames.transpose().values.tolist()[0]
+
+        return Compose.__call__(self, frames, **kwargs)

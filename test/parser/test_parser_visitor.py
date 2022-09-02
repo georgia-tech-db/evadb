@@ -375,7 +375,7 @@ class ParserVisitorTests(unittest.TestCase):
         self.assertEqual(actual, create_udf_mock.return_value)
 
     ##################################################################
-    # LOAD DATA Statement
+    # LOAD Statement
     ##################################################################
     @mock.patch.object(ParserVisitor, "visit")
     @mock.patch("eva.parser.parser_visitor._load_statement.LoadDataStatement")
@@ -412,4 +412,48 @@ class ParserVisitorTests(unittest.TestCase):
         mock_load.assert_called_once()
         mock_load.assert_called_with(
             TableRef("myVideo"), "video.mp4", column_list, file_options
+        )
+
+    ##################################################################
+    # UPLOAD Statement
+    ##################################################################
+    @mock.patch.object(ParserVisitor, "visit")
+    @mock.patch("eva.parser.parser_visitor._upload_statement.UploadStatement")
+    def test_visit_upload_statement(self, mock_upload, mock_visit):
+        ctx = MagicMock()
+        table = "myVideo"
+        video_blob = MagicMock()
+        video_blob.value = "b'AAAA'"
+        path = MagicMock()
+        path.value = "video.mp4"
+        column_list = None
+        file_format = FileFormatType.VIDEO
+        file_options = {}
+        file_options["file_format"] = file_format
+        params = {
+            ctx.fileName.return_value: path,
+            ctx.videoBlob.return_value: video_blob,
+            ctx.tableName.return_value: table,
+            ctx.fileOptions.return_value: file_options,
+            ctx.uidList.return_value: column_list,
+        }
+
+        def side_effect(arg):
+            return params[arg]
+
+        mock_visit.side_effect = side_effect
+        visitor = ParserVisitor()
+        visitor.visitUploadStatement(ctx)
+        mock_visit.assert_has_calls(
+            [
+                call(ctx.fileName()),
+                call(ctx.videoBlob()),
+                call(ctx.tableName()),
+                call(ctx.fileOptions()),
+                call(ctx.uidList()),
+            ]
+        )
+        mock_upload.assert_called_once()
+        mock_upload.assert_called_with(
+            "video.mp4", "b'AAAA'", TableRef("myVideo"), column_list, file_options
         )

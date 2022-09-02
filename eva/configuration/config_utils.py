@@ -12,11 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-def read_value_config(cfg, category, key):
+from typing import Any
+
+
+def read_value_config(cfg: Any, category: str, key: str) -> Any:
     return cfg.get(category, {}).get(key)
 
 
-def update_value_config(cfg, category, key, value):
+def update_value_config(cfg: Any, category: str, key: str, value: str):
     category_data = cfg.get(category, None)
     if category_data:
         category_data[key] = value

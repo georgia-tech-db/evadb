@@ -12,10 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from cmd import Cmd
 from contextlib import ExitStack
-import os
-import io
 from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
 
@@ -65,14 +64,7 @@ class EvaCommandInterpreter(Cmd):
 
         self.cursor.execute(query)
         print(self.cursor.fetch_all())
-
         return False
-
-
-def read(path, encoding="utf-8"):
-    path = os.path.join(os.path.dirname(__file__), path)
-    with io.open(path, encoding=encoding) as fp:
-        return fp.read()
 
 
 # version.py defines the VERSION and VERSION_SHORT variables
@@ -97,7 +89,7 @@ def handle_user_input(connection):
 
     VERSION = VERSION_DICT["VERSION"]
 
-    prompt.cmdloop('eva (v ' + VERSION + ')\nType "help" for help')
+    prompt.cmdloop("eva (v " + VERSION + ')\nType "help" for help')
 
 
 def start_cmd_client(host: str, port: int):

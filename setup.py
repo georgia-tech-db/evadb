@@ -38,15 +38,15 @@ LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
-    "numpy==1.20.1",
+    "numpy==1.21.6",
     "opencv-python==4.5.1.48",
-    "pandas==1.2.3",
+    "pandas==1.3.5",
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
     "pyspark==3.0.2",
-    "petastorm==0.9.8",
-    "antlr4-python3-runtime==4.8",
+    "petastorm==0.11.5",
+    "antlr4-python3-runtime==4.10",
     "pyyaml==5.1"
 ]
 
@@ -66,8 +66,8 @@ test_libs = [
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
-    "torch==1.7.1",
-    "torchvision==0.8.2",
+    "torch==1.10.2",
+    "torchvision==0.11.3",
 ]
 
 benchmark_libs = [
@@ -86,9 +86,16 @@ database_libs = [
     "pymysql==0.10.1"
 ]
 
+### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
+udf_libs = [
+    "facenet-pytorch==2.5.2",
+    "easyocr==1.5.0"
+]
+
 MINIMAL_REQUIRES = minimal_requirement
 INSTALL_REQUIRES = minimal_requirement + formatter_libs
 DATABASE_REQUIRES = INSTALL_REQUIRES + database_libs
+UDF_REQUIRES = INSTALL_REQUIRES + integration_test_libs + udf_libs
 DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
@@ -98,12 +105,14 @@ DEV_REQUIRES = (
     + doc_libs
     + database_libs
     + dist_libs
+    + udf_libs
 )
 
 EXTRA_REQUIRES = {
     "dev": DEV_REQUIRES,
     "database": DATABASE_REQUIRES,
     "minimal": MINIMAL_REQUIRES,
+    "udf": UDF_REQUIRES
 }
 
 setup(

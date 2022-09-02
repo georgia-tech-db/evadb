@@ -35,7 +35,7 @@ class UDFExecutorTest(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
@@ -110,8 +110,8 @@ class UDFExecutorTest(unittest.TestCase):
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         expected_batch.sort()
-        self.assertEqual(actual_batch, expected_batch)
 
+        self.assertEqual(actual_batch, expected_batch)
         nested_select_query = """SELECT id, data FROM
             (SELECT id, data, DummyObjectDetector(data) FROM MyVideo
                 WHERE id >= 2
