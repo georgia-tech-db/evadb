@@ -39,10 +39,6 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
     def labels(self) -> List[str]:
         return []
 
-    @property
-    def transforms(self) -> Compose:
-        return Compose([transforms.ToTensor()])
-
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs feature extraction on input frames
