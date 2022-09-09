@@ -16,7 +16,7 @@ from enum import Enum, auto, unique
 
 
 class ColumnConstraintEnum(Enum):
-    NULLNOTNULL = auto()
+    NOTNULL = auto()
     DEFAULT = auto()
     PRIMARY = auto()
     UNIQUE = auto()
