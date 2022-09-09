@@ -33,7 +33,7 @@ from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.planner.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10

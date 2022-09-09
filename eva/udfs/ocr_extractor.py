@@ -19,7 +19,7 @@ import easyocr
 import numpy as np
 import pandas as pd
 
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
