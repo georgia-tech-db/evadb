@@ -34,7 +34,7 @@ except ImportError as e:
     )
 
 try:
-    from torchvision.transforms import Compose, transforms
+    from torchvision.transforms import transforms
 except ImportError as e:
     raise ImportError(
         f"Failed to import with error {e}, \

@@ -19,7 +19,6 @@ import pandas as pd
 import torch
 from torch import Tensor
 from torchvision import models
-from torchvision.transforms import Compose, transforms
 
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
