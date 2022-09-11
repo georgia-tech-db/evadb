@@ -15,16 +15,16 @@
 
 from typing import List
 
+import numpy as np
 import pandas as pd
 import torch
-import torchvision.transforms as T
 from facenet_pytorch import MTCNN
-from torch import Tensor
 
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF
+from eva.udfs.gpu_compatible import GPUCompatible
 
 
-class FaceDetector(PytorchAbstractClassifierUDF):
+class FaceDetector(AbstractClassifierUDF, GPUCompatible):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -34,13 +34,17 @@ class FaceDetector(PytorchAbstractClassifierUDF):
         super().__init__()
         self.threshold = threshold
         self.model = MTCNN()
-        self.model.eval()
+
+    def to_device(self, device: str):
+        gpu = "cuda:{}".format(device)
+        self.model = MTCNN(device=torch.device(gpu))
+        return self
 
     @property
     def labels(self) -> List[str]:
         return []
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def classify(self, frames: pd.DataFrame) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
@@ -50,15 +54,20 @@ class FaceDetector(PytorchAbstractClassifierUDF):
             face boxes (List[List[BoundingBox]])
         """
 
-        copy = torch.squeeze(frames)
-        transform = T.ToPILImage()
-        pil_image = transform(copy)
-
-        bboxes, scores = self.model.detect(img=pil_image)
-
+        frames_list = frames.transpose().values.tolist()[0]
+        frames = np.asarray(frames_list)
+        detections = self.model.detect(frames)
+        boxes, scores = detections
         outcome = pd.DataFrame()
-        outcome = outcome.append(
-            {"bboxes": bboxes, "scores": scores}, ignore_index=True
-        )
+        for frame_boxes, frame_scores in zip(boxes, scores):
+            pred_boxes = []
+            pred_scores = []
+            if frame_boxes is not None and frame_scores is not None:
+                pred_boxes = frame_boxes
+                pred_scores = frame_scores
+            outcome = outcome.append(
+                {"bboxes": pred_boxes, "scores": pred_scores},
+                ignore_index=True,
+            )
 
         return outcome

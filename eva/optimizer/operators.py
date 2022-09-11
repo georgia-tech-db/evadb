@@ -21,6 +21,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import JoinType, ShowType
@@ -833,12 +834,18 @@ class LogicalFunctionScan(Operator):
     def __init__(
         self,
         func_expr: AbstractExpression,
+        alias: Alias,
         do_unnest: bool = False,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALFUNCTIONSCAN, children)
         self._func_expr = func_expr
         self._do_unnest = do_unnest
+        self._alias = alias
+
+    @property
+    def alias(self):
+        return self._alias
 
     @property
     def func_expr(self):
@@ -856,10 +863,11 @@ class LogicalFunctionScan(Operator):
             is_subtree_equal
             and self.func_expr == other.func_expr
             and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr, self.do_unnest))
+        return hash((super().__hash__(), self.func_expr))
 
 
 class LogicalJoin(Operator):

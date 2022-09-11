@@ -164,7 +164,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif strip_header:
-            LOG.info("Stripping headers : " + file)
+            LOG.info("Stripping headers : " + file_path)
             header_match = header_regex.match(file_data)
             if header_match is None:
                 return
@@ -178,7 +178,7 @@ def format_file(file_path, add_header, strip_header, format_code):
             fd.write(new_file_data)
 
         elif format_code:
-            LOG.info("Formatting File : " + file)
+            LOG.info("Formatting File : " + file_path)
             # ISORT
             isort_command = f"{ISORT_BINARY} --profile  black  {file_path}"
             os.system(isort_command)

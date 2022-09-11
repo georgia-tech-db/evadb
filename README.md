@@ -65,16 +65,10 @@ eva_client    # launch client
 2. UPLOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
-UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
+UPLOAD INFILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
 ```
 
-3. LOAD the video using the following command:
-
-```mysql
-LOAD FILE 'test_video.mp4' INTO MyVideo;
-```
-
-4. That's it. You can now start issuing queries over the loaded video:
+3. That's it. You can now start issuing queries over the loaded video:
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
@@ -126,6 +120,8 @@ sudo -E apt install -y openjdk-11-jdk openjdk-11-jre    # to install JAVA
 sh script/antlr4/generate_parser.sh                     # to generate the EVA parser
 pip install -e ".[dev]"
 ```
+
+Note: If you face Pytorch CUDA compatibility issues after installation, refer this [link](https://pytorch.org/get-started/previous-versions/) and re-install the correct `torch` and `torchvision` packages with `pip` 
 
 To verify that installation is successful, run the test suite.
 

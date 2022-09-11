@@ -97,7 +97,7 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
             result_list.append(col)
         result_list.append(
             CatalogManager().create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension
+                col.name, col.type, col.array_type, col.dimension, col.cci
             )
         )
 
