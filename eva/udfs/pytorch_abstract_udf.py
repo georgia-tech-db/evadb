@@ -18,12 +18,13 @@ from typing import List
 import numpy as np
 import pandas as pd
 import torch
+from numpy.typing import ArrayLike
 from PIL import Image
 from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformationUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF, AbstractTransformationUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -104,17 +105,33 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         return self.to(torch.device("cuda:{}".format(device)))
 
     def __call__(self, *args, **kwargs):
-        frames = None
-        if len(args):
-            frames = args[0]
+        if len(args) == 0:
+            return nn.Module.__call__(self, *args, **kwargs)
+
+        frames = args[0]
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
+
         return nn.Module.__call__(self, frames, **kwargs)
 
 
 class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
+    """
+    Use PyTorch torchvision transforms as EVA transforms.
+    """
+
     def __init__(self, transforms):
         Compose.__init__(self, transforms)
 
-    def transform(self, frames: np.ndarray) -> np.ndarray:
-        return Compose(frames)
+    def transform(self, frames: ArrayLike) -> ArrayLike:
+        return Compose.__call__(self, frames)
+
+    def __call__(self, *args, **kwargs):
+        if len(args) == 0:
+            return nn.Module.__call__(self, *args, **kwargs)
+
+        frames = args[0]
+        if isinstance(frames, pd.DataFrame):
+            frames = frames.transpose().values.tolist()[0]
+
+        return Compose.__call__(self, frames, **kwargs)

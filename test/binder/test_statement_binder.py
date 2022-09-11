@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
+from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.alias import Alias
 from eva.parser.types import FileFormatType
 
@@ -220,6 +222,7 @@ class StatementBinderTests(unittest.TestCase):
         load_statement = MagicMock()
         load_statement.file_options = {"file_format": FileFormatType.VIDEO}
         load_statement.column_list = None
+        load_statement.path = "video_path"
         column = MagicMock()
         table_ref_obj = MagicMock()
         table_ref_obj.columns = [column]
@@ -229,102 +232,65 @@ class StatementBinderTests(unittest.TestCase):
         mock_tve.return_value = tve_return_value = MagicMock()
 
         with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
-            binder._bind_load_data_statement(load_statement)
-            mock_binder.assert_any_call(load_statement.table_ref)
-            mock_create.assert_any_call("table_name")
-            mock_tve.assert_called_with(
-                col_name=column.name,
-                table_alias="table_alias",
-                col_object=column,
-            )
-            mock_binder.assert_any_call(tve_return_value)
-            self.assertEqual(load_statement.column_list, [tve_return_value])
-
-    @patch("eva.binder.statement_binder.create_video_metadata")
-    @patch("eva.binder.statement_binder.TupleValueExpression")
-    def test_bind_upload_video_statement(self, mock_tve, mock_create):
-        upload_statement = MagicMock()
-        upload_statement.file_options = {"file_format": FileFormatType.VIDEO}
-        upload_statement.column_list = None
-        column = MagicMock()
-        table_ref_obj = MagicMock()
-        table_ref_obj.columns = [column]
-        table_ref_obj.name = "table_alias"
-        upload_statement.table_ref.table.table_obj = table_ref_obj
-        upload_statement.table_ref.table.table_name = "table_name"
-        mock_tve.return_value = tve_return_value = MagicMock()
-
-        with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
-            binder._bind_upload_statement(upload_statement)
-            mock_binder.assert_any_call(upload_statement.table_ref)
-            mock_create.assert_any_call("table_name")
-            mock_tve.assert_called_with(
-                col_name=column.name, table_alias="table_alias", col_object=column
-            )
-            mock_binder.assert_any_call(tve_return_value)
-            self.assertEqual(upload_statement.column_list, [tve_return_value])
-
-    @patch("eva.binder.statement_binder.create_video_metadata")
-    @patch("eva.binder.statement_binder.TupleValueExpression")
-    def test_bind_load_data(self, mock_tve, mock_create):
-        load_statement = MagicMock()
-        column = MagicMock()
-        load_statement.column_list = [column]
-
-        table_ref_obj = MagicMock()
-        table_ref_obj.columns = [column]
-
-        with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
-            binder._bind_load_data_statement(load_statement)
-            mock_binder.assert_any_call(load_statement.table_ref)
-            mock_create.assert_not_called()
-            mock_tve.assert_not_called()
-            mock_binder.assert_any_call(column)
-
-    @patch("eva.binder.statement_binder.create_video_metadata")
-    @patch("eva.binder.statement_binder.TupleValueExpression")
-    def test_bind_upload_data(self, mock_tve, mock_create):
-        upload_statement = MagicMock()
-        column = MagicMock()
-        upload_statement.column_list = [column]
-
-        table_ref_obj = MagicMock()
-        table_ref_obj.columns = [column]
-
-        with patch.object(StatementBinder, "bind") as mock_binder:
-            binder = StatementBinder(StatementBinderContext())
-            binder._bind_upload_statement(upload_statement)
-            mock_binder.assert_any_call(upload_statement.table_ref)
-            mock_create.assert_not_called()
-            mock_tve.assert_not_called()
-            mock_binder.assert_any_call(column)
+            with patch.object(Path, "exists") as mock_exists:
+                mock_exists.return_value = True
+                binder = StatementBinder(StatementBinderContext())
+                binder._bind_load_and_upload_data_statement(load_statement)
+                mock_binder.assert_any_call(load_statement.table_ref)
+                mock_create.assert_any_call("table_name")
+                mock_tve.assert_called_with(
+                    col_name=column.name,
+                    table_alias="table_alias",
+                    col_object=column,
+                )
+                mock_binder.assert_any_call(tve_return_value)
+                self.assertEqual(load_statement.column_list, [tve_return_value])
 
     @patch("eva.binder.statement_binder.create_video_metadata")
     @patch("eva.binder.statement_binder.TupleValueExpression")
     def test_bind_load_data_raises(self, mock_tve, mock_create):
         load_statement = MagicMock()
         column = MagicMock()
+        file_path = "file_path"
         load_statement.column_list = [column]
         load_statement.table_ref.table.table_obj = None
         with self.assertRaises(BinderError):
             with patch.object(StatementBinder, "bind"):
                 binder = StatementBinder(StatementBinderContext())
-                binder._bind_load_data_statement(load_statement)
+                binder._bind_load_and_upload_data_statement(load_statement)
 
-    @patch("eva.binder.statement_binder.create_video_metadata")
-    @patch("eva.binder.statement_binder.TupleValueExpression")
-    def test_bind_upload_raises(self, mock_tve, mock_create):
-        upload_statement = MagicMock()
-        column = MagicMock()
-        upload_statement.column_list = [column]
-        upload_statement.table_ref.table.table_obj = None
-        with self.assertRaises(RuntimeError):
-            with patch.object(StatementBinder, "bind"):
-                binder = StatementBinder(StatementBinderContext())
-                binder._bind_upload_statement(upload_statement)
+        # test should raise if the video table already exists
+        table_name = "table_name"
+        load_statement.file_options = {"file_format": FileFormatType.VIDEO}
+        load_statement.table_ref.table.table_name = table_name
+        with patch.object(StatementBinder, "bind"):
+            with patch.object(
+                CatalogManager, "check_table_exists"
+            ) as mock_catalog_check:
+                mock_catalog_check.return_value = True
+                with self.assertRaises(BinderError) as cm:
+                    binder = StatementBinder(StatementBinderContext())
+                    binder._bind_load_and_upload_data_statement(load_statement)
+                self.assertEqual(
+                    str(cm.exception), f"Video table {table_name} already exists."
+                )
+
+        # test should raise if the file path does not exists
+        load_statement.file_options = {"file_format": FileFormatType.VIDEO}
+        load_statement.path = file_path
+        with patch.object(StatementBinder, "bind"):
+            with patch.object(
+                CatalogManager, "check_table_exists"
+            ) as mock_catalog_check:
+                mock_catalog_check.return_value = False
+                with patch.object(Path, "exists") as mock_exists:
+                    mock_exists.return_value = False
+                    with self.assertRaises(BinderError) as cm:
+                        binder = StatementBinder(StatementBinderContext())
+                        binder._bind_load_and_upload_data_statement(load_statement)
+                    self.assertEqual(
+                        str(cm.exception), f"Video file {file_path} does not exist."
+                    )
 
     def test_bind_unknown_object(self):
         class UnknownType:

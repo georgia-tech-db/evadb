@@ -33,7 +33,7 @@ from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.planner.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
@@ -179,11 +179,20 @@ def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
     return b64_string
 
 
-def create_dummy_csv_batches():
-    df = pd.read_csv(
-        os.path.join(upload_dir_from_config, "dummy.csv"),
-        converters={"bbox": convert_bbox},
-    )
+def create_dummy_csv_batches(target_columns=None):
+
+    if target_columns:
+        df = pd.read_csv(
+            os.path.join(upload_dir_from_config, "dummy.csv"),
+            converters={"bbox": convert_bbox},
+            usecols=target_columns,
+        )
+    else:
+        df = pd.read_csv(
+            os.path.join(upload_dir_from_config, "dummy.csv"),
+            converters={"bbox": convert_bbox},
+        )
+
     return Batch(df)
 
 
