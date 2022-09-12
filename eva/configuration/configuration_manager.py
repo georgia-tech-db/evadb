@@ -43,7 +43,9 @@ class ConfigurationManager(object):
         return cls._instance
 
     def get_value(self, category, key):
-        return read_value_config(self._cfg, category, key)
+        return self._cfg.get(category, {}).get(key)
 
     def update_value(self, category, key, value):
-        update_value_config(self._cfg, category, key, value)
+        category_data = self._cfg.get(category, None)
+        if category_data:
+            category_data[key] = value
