@@ -62,7 +62,7 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT data FROM MyVideo"
         expected_batch = execute_query_fetch_all(select_query)
 
-        self.assertEqual(actual_batch.batch_size, expected_batch.batch_size)
+        self.assertEqual(len(actual_batch), len(expected_batch))
 
     def test_should_load_and_sort_in_table(self):
         select_query = "SELECT data, id FROM MyVideo ORDER BY id;"
@@ -228,7 +228,7 @@ class SelectExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(num_frames=10, batch_size=5))
 
-        self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
         self.assertEqual(actual_batch, expected_batch[0])
 
     def test_select_and_sample(self):
@@ -238,7 +238,7 @@ class SelectExecutorTest(unittest.TestCase):
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
 
-        self.assertEqual(actual_batch.batch_size, expected_batch[0].batch_size)
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         # self.assertEqual(actual_batch, expected_batch[0])
@@ -249,7 +249,7 @@ class SelectExecutorTest(unittest.TestCase):
                         FastRCNNObjectDetector(data) AS T(a,b,c) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(list(actual_batch.columns), ["myvideo.id", "T.a"])
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
@@ -257,7 +257,7 @@ class SelectExecutorTest(unittest.TestCase):
                         FastRCNNObjectDetector(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertTrue(all(actual_batch.frames.columns == ["myvideo.id", "T.labels"]))
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
     def test_lateral_join_with_unnest(self):
         query = """SELECT id, label
