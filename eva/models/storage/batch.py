@@ -41,13 +41,15 @@ Batch = TypeVar("Batch")
 
 class Batch:
     """
-    Data model used for storing a batch of frames
+    Data model used for storing a batch of frames.
+    Internally stored as a pandas DataFrame with columns
+    "id" and "data".
+    id: integer index of frame
+    data: frame as np.array
 
     Arguments:
         frames (DataFrame): pandas Dataframe holding frames data
         identifier_column (str): A column used to uniquely a row
-
-
     """
 
     def __init__(self, frames=None, identifier_column=None):
@@ -86,9 +88,6 @@ class Batch:
         return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
 
     def __str__(self) -> str:
-        """
-        For debug propose
-        """
         return (
             "Batch Object:\n"
             "@dataframe: %s\n"
@@ -102,7 +101,7 @@ class Batch:
             other.frames[sorted(other.frames.columns)]
         )
 
-    def __getitem__(self, indices) -> "Batch":
+    def __getitem__(self, indices) -> Batch:
         """
         Returns a batch with the desired frames
 
@@ -131,7 +130,7 @@ class Batch:
         new_batch = Batch(new_frames)
         return new_batch
 
-    def sort(self, by=None):
+    def sort(self, by=None) -> None:
         """
         in_place sort
         """
@@ -145,7 +144,7 @@ class Batch:
                 return
         self._frames.sort_values(by=by, ignore_index=True, inplace=True)
 
-    def sort_orderby(self, by, sort_type=None):
+    def sort_orderby(self, by, sort_type=None) -> None:
         """
         in_place sort for orderby
 
@@ -212,7 +211,7 @@ class Batch:
             logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
-    def __add__(self, other: Batch):
+    def __add__(self, other: Batch) -> Batch:
         """
         Adds two batch frames and return a new batch frame
         Arguments:
