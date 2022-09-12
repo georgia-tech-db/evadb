@@ -77,10 +77,6 @@ class Batch:
         return self._batch_size
 
     @property
-    def identifier_column(self):
-        return self._identifier_column
-
-    @property
     def columns(self):
         return self._frames.columns
 
@@ -91,7 +87,7 @@ class Batch:
         obj = {
             "frames": self.frames,
             "batch_size": self.batch_size,
-            "identifier_column": self.identifier_column,
+            "identifier_column": self._identifier_column,
         }
         return json.dumps(obj, cls=BatchEncoder)
 
@@ -109,7 +105,7 @@ class Batch:
             "@dataframe: %s\n"
             "@batch_size: %d\n"
             "@identifier_column: %s"
-            % (self._frames, self._batch_size, self.identifier_column)
+            % (self._frames, self._batch_size, self._identifier_column)
         )
 
     def __eq__(self, other: "Batch"):
@@ -151,8 +147,8 @@ class Batch:
         in_place sort
         """
         if by is None:
-            if self.identifier_column in self._frames:
-                by = [self.identifier_column]
+            if self._identifier_column in self._frames:
+                by = [self._identifier_column]
             elif not self.empty():
                 by = self.frames.columns[0]
             else:
