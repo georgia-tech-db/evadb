@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from typing import Iterable, NoReturn, Union
+from typing import Iterable, TypeVar, Union, List
 
 import numpy as np
 import pandas as pd
@@ -37,6 +37,9 @@ def as_batch(d):
         return d
 
 
+Batch = TypeVar("Batch")
+
+
 class Batch:
     """
     Data model used for storing a batch of frames
@@ -54,7 +57,7 @@ class Batch:
         self._identifier_column = identifier_column
 
     @property
-    def frames(self):
+    def frames(self) -> pd.DataFrame:
         return self._frames
 
     @frames.setter
@@ -96,7 +99,7 @@ class Batch:
         obj = json.loads(json_str, object_hook=as_batch)
         return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         For debug propose
         """
@@ -108,7 +111,7 @@ class Batch:
             % (self._frames, self._batch_size, self._identifier_column)
         )
 
-    def __eq__(self, other: "Batch"):
+    def __eq__(self, other: Batch):
         return self.frames[sorted(self.frames.columns)].equals(
             other.frames[sorted(other.frames.columns)]
         )
@@ -203,7 +206,7 @@ class Batch:
         return Batch(self._frames[verfied_cols], self._identifier_column)
 
     @classmethod
-    def merge_column_wise(cls, batches: ["Batch"], auto_renaming=False) -> "Batch":
+    def merge_column_wise(cls, batches: List[Batch], auto_renaming=False) -> Batch:
         """
         Merge list of batch frames column_wise and return a new batch frame
         Arguments:
@@ -222,7 +225,7 @@ class Batch:
             logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
 
-    def __add__(self, other: "Batch"):
+    def __add__(self, other: Batch):
         """
         Adds two batch frames and return a new batch frame
         Arguments:
@@ -245,7 +248,7 @@ class Batch:
         return Batch(new_frames)
 
     @classmethod
-    def concat(cls, batch_list: Iterable["Batch"], copy=True) -> "Batch":
+    def concat(cls, batch_list: Iterable[Batch], copy=True) -> Batch:
         """Concat a list of batches. Avoid the extra copying overhead by
         the append operation in __add__.
         Notice: only frames are considered.
@@ -267,7 +270,7 @@ class Batch:
         """
         return self.batch_size == 0
 
-    def reverse(self):
+    def reverse(self) -> None:
         """Reverses dataframe"""
         self._frames = self._frames[::-1]
         self._frames.reset_index(drop=True, inplace=True)
@@ -276,7 +279,7 @@ class Batch:
         """Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
 
-    def modify_column_alias(self, alias: Union[Alias, str]) -> NoReturn:
+    def modify_column_alias(self, alias: Union[Alias, str]) -> None:
         # a, b, c -> table1.a, table1.b, table1.c
         # t1.a -> t2.a
         if isinstance(alias, str):
@@ -305,7 +308,7 @@ class Batch:
 
         self.frames.columns = new_col_names
 
-    def drop_column_alias(self) -> NoReturn:
+    def drop_column_alias(self) -> None:
         # table1.a, table1.b, table1.c -> a, b, c
         new_col_names = []
         for col_name in self.frames.columns:
