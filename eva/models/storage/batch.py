@@ -64,17 +64,6 @@ class Batch:
     def frames(self) -> pd.DataFrame:
         return self._frames
 
-    @frames.setter
-    def frames(self, values):
-        if isinstance(values, DataFrame):
-            self._frames = values
-        else:
-            logger.debug("Batch constructor not properly called!")
-            raise ValueError(
-                "Batch constructor not properly called. \
-                Expected pandas.DataFrame"
-            )
-
     def __len__(self):
         return len(self._frames)
 
