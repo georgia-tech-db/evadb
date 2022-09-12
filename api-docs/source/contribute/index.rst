@@ -26,6 +26,39 @@ package manager. EVA requires JAVA 8 for generating the parser.
    sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
    pip install -e ".[dev]"
 
+For M1 Mac users, we recommend using the following instructions to safely
+setup EVA (dev) on your local machine.
+
+1.  Install Java 11 using homebrew.
+
+   `brew install openjdk@11`
+2.  If you have existing versions of Java or if `java -version` doesn't point to the homebrew
+version of Java you have just installed, run the following command:
+
+   `export JAVA_HOME="/opt/homebrew/opt/openjdk@11"`
+
+   You can also add the above command inside `./zshrc` to permanently set the path to Java.
+3. Run the following command to resolve multithreading issues in macOS:
+
+   `export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`
+
+   WARNING: Do not add this command inside `./zshrc` as not all programs require this. Either run
+   this command every time or setup a shell script to do so for you.
+4. Open `setup.py` and edit the line `opencv-python==4.5.1.48` to `opencv-python>=4.5.1.58`.
+5. Install as per instructions shared above (except for the Java installation part)
+6. Run `bash script/test/test.sh` to verify everything is working correctly.
+
+Common issues with M1 Mac Installation:
+-  If while installing, an error is thrown regarding no version of opencv-python being available
+   (or)
+   If there are build errors (eg. numpy build errors) while installing opencv-pythonm do the following:
+
+   Replace the version in `setup.py` from `opencv-python==<version_no>` to `opencv-python>=<version_no>`.
+-  If you get errors related to `from .cv2 import *`, it is likely that there are conflicting versions
+of `opencv-python` causing this problem. Running the following should most likely resolve the issue:
+
+   `pip install --upgrade opencv-python`
+
 Testing
 ^^^^^^^
 
