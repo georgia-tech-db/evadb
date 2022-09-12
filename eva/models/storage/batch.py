@@ -70,14 +70,9 @@ class Batch:
                 "Batch constructor not properly called. \
                 Expected pandas.DataFrame"
             )
-        self._batch_size = len(values)
-
-    @property
-    def batch_size(self):
-        return self._batch_size
 
     def __len__(self):
-        return self._batch_size
+        return len(self._frames)
 
     @property
     def columns(self):
@@ -89,7 +84,7 @@ class Batch:
     def to_json(self):
         obj = {
             "frames": self.frames,
-            "batch_size": self.batch_size,
+            "batch_size": len(self),
             "identifier_column": self._identifier_column,
         }
         return json.dumps(obj, cls=BatchEncoder)
@@ -108,7 +103,7 @@ class Batch:
             "@dataframe: %s\n"
             "@batch_size: %d\n"
             "@identifier_column: %s"
-            % (self._frames, self._batch_size, self._identifier_column)
+            % (self._frames, len(self), self._identifier_column)
         )
 
     def __eq__(self, other: Batch):
@@ -190,7 +185,7 @@ class Batch:
         else:
             logger.warn("Columns and Sort Type are required for orderby")
 
-    def project(self, cols: None) -> "Batch":
+    def project(self, cols: None) -> Batch:
         """
         Takes as input the column list, returns the projection.
         We do a copy for now.
@@ -269,7 +264,7 @@ class Batch:
         Returns:
             True if the batch_size == 0
         """
-        return self.batch_size == 0
+        return len(self) == 0
 
     def reverse(self) -> None:
         """Reverses dataframe"""
