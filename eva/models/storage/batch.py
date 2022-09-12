@@ -51,9 +51,13 @@ class Batch:
 
     """
 
-    def __init__(self, frames=pd.DataFrame(), identifier_column=None):
-        super().__init__()
-        self.frames = frames
+    def __init__(self, frames=None, identifier_column=None):
+        self._frames = pd.DataFrame() if frames is None else frames
+        if not isinstance(self._frames, pd.DataFrame):
+            raise ValueError(
+                "Batch constructor not properly called.\n"
+                "Expected pandas.DataFrame"
+            )
         self._identifier_column = identifier_column
 
     @property
