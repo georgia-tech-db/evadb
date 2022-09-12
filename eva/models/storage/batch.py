@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from typing import Iterable, TypeVar, Union, List
+from typing import Iterable, List, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -190,11 +190,12 @@ class Batch:
         else:
             logger.warn("Columns and Sort Type are required for orderby")
 
-    def project(self, cols: []) -> "Batch":
+    def project(self, cols: None) -> "Batch":
         """
         Takes as input the column list, returns the projection.
         We do a copy for now.
         """
+        cols = cols or []
         verfied_cols = [c for c in cols if c in self._frames]
         unknown_cols = list(set(cols) - set(verfied_cols))
         if len(unknown_cols):
