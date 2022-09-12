@@ -17,7 +17,6 @@ from typing import Iterable, List, TypeVar, Union
 
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
 
 from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
