@@ -38,6 +38,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
+from eva.executor.dataset_executor import DatasetExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
@@ -118,6 +119,8 @@ class PlanExecutor:
             executor_node = PredicateExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SHOW_INFO:
             executor_node = ShowInfoExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.DATASET:
+            executor_node = DatasetExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))

@@ -12,11 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import enum
+
 from sqlalchemy import Boolean, Column, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import Enum
 
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.base_model import BaseModel
+
+
+class DataFrameType(enum.Enum):
+    VIDEO = 1
+    STRUCTURED = 2
+    DATASET = 3
 
 
 class DataFrameMetadata(BaseModel):
@@ -25,19 +34,19 @@ class DataFrameMetadata(BaseModel):
     _name = Column("name", String(100), unique=True)
     _file_url = Column("file_url", String(100))
     _unique_identifier_column = Column("identifier_column", String(100))
-    _is_video = Column("is_video", Boolean)
+    _dftype = Column("dftype", Enum(DataFrameType), default=DataFrameType.VIDEO)
     _columns = relationship(
         "DataFrameColumn",
         back_populates="_dataset",
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, file_url: str, identifier_id="id", is_video=False):
+    def __init__(self, name: str, file_url: str, identifier_id="id", dftype=DataFrameType.VIDEO):
         self._name = name
         self._file_url = file_url
         self._schema = None
         self._unique_identifier_column = identifier_id
-        self._is_video = is_video
+        self._dftype = dftype
 
     @property
     def schema(self):
@@ -68,8 +77,20 @@ class DataFrameMetadata(BaseModel):
         return self._unique_identifier_column
 
     @property
-    def is_video(self):
-        return self._is_video
+    def dftype(self):
+        return self._dftype
+
+    @property
+    def is_video(self) -> bool:
+        return self.dftype is DataFrameType.VIDEO
+    
+    @property
+    def is_structured(self) -> bool:
+        return self.dftype is DataFrameType.STRUCTURED
+
+    @property
+    def is_dataset(self) -> bool:
+        return self.dftype is DataFrameType.DATASET
 
     def __eq__(self, other):
         return (
@@ -78,7 +99,7 @@ class DataFrameMetadata(BaseModel):
             and self.schema == other.schema
             and self.identifier_column == other.identifier_column
             and self.name == other.name
-            and self.is_video == other.is_video
+            and self.dftype == other.dftype
         )
 
     def __hash__(self) -> int:
@@ -89,6 +110,6 @@ class DataFrameMetadata(BaseModel):
                 self.schema,
                 self.identifier_column,
                 self.name,
-                self.is_video,
+                self.dftype,
             )
         )

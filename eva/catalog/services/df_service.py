@@ -16,7 +16,7 @@ from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.df_metadata import DataFrameMetadata, DataFrameType
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
@@ -26,7 +26,7 @@ class DatasetService(BaseService):
         super().__init__(DataFrameMetadata)
 
     def create_dataset(
-        self, name, file_url, identifier_id="id", is_video=False
+        self, name, file_url, identifier_id="id", dftype=DataFrameType.VIDEO
     ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
@@ -41,7 +41,7 @@ class DatasetService(BaseService):
             name=name,
             file_url=file_url,
             identifier_id=identifier_id,
-            is_video=is_video,
+            dftype=dftype,
         )
         metadata = metadata.save()
         return metadata

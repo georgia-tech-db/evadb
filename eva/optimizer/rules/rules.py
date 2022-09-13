@@ -58,6 +58,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalDataset,
     Operator,
     OperatorType,
 )
@@ -78,6 +79,7 @@ from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
+from eva.planner.dataset_plan import DatasetPlan
 
 # Modified
 
@@ -91,6 +93,7 @@ class RuleType(Flag):
     INVALID_RULE = 0
 
     # REWRITE RULES(LOGICAL -> LOGICAL)
+    EXPAND_GET_TO_DATASET = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
@@ -105,6 +108,7 @@ class RuleType(Flag):
     TRANSFORMATION_DELIMETER = auto()
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
+    LOGICAL_DATASET_TO_PHYSICAL = auto()
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
@@ -139,6 +143,7 @@ class Promise(IntEnum):
     """
 
     # IMPLEMENTATION RULES
+    LOGICAL_DATASET_TO_PHYSICAL = auto()
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
@@ -166,6 +171,7 @@ class Promise(IntEnum):
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
 
     # REWRITE RULES
+    EXPAND_GET_TO_DATASET = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
@@ -235,6 +241,22 @@ class Rule(ABC):
 ##############################################
 # REWRITE RULES START
 
+
+class ExpandGetToDataset(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGET)
+        super().__init__(RuleType.EXPAND_GET_TO_DATASET, pattern)
+
+    def promise(self):
+        return Promise.EXPAND_GET_TO_DATASET
+
+    def check(self, before: LogicalGet, context: OptimizerContext):
+        return before.dataset_metadata.is_dataset
+
+    def apply(self, before: LogicalGet, context: OptimizerContext):
+        dataset_opr = LogicalDataset()
+        dataset_opr.append_child(before)
+        return dataset_opr
 
 class EmbedFilterIntoGet(Rule):
     def __init__(self):
@@ -759,6 +781,25 @@ class LogicalDerivedGetToPhysical(Rule):
         return after
 
 
+class LogicalDatasetToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALDATASET)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_DATASET_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_DATASET_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalDataset, context: OptimizerContext):
+        after = DatasetPlan()
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
 class LogicalUnionToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALUNION)
@@ -995,6 +1036,7 @@ class RulesManager:
         self._logical_rules = [LogicalInnerJoinCommutativity()]
 
         self._rewrite_rules = [
+            ExpandGetToDataset(),
             EmbedFilterIntoGet(),
             # EmbedFilterIntoDerivedGet(),
             PushdownFilterThroughSample(),

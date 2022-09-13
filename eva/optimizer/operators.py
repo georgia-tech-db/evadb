@@ -53,6 +53,7 @@ class OperatorType(IntEnum):
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
+    LOGICALDATASET = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1035,3 +1036,20 @@ class LogicalShow(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type))
+
+
+class LogicalDataset(Operator):
+    """
+    Explode a list of table names into their contents
+    """
+    def __init__(self, children: List = None):
+        super().__init__(OperatorType.LOGICALDATASET, children)
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalDataset):
+            return False
+        return is_subtree_equal
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(),))
