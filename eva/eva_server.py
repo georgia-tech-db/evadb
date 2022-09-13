@@ -28,6 +28,8 @@ sys.path.append(EVA_CODE_DIR)
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import start_server  # noqa: E402
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
+from eva.configuration.bootstrap_environment import bootstrap_environment
+from eva.configuration.constants import EVA_DEFAULT_DIR, EVA_INSTALLATION_DIR
 
 
 def eva():
@@ -59,6 +61,10 @@ def eva():
 
 
 def main():
+    bootstrap_environment(
+        eva_config_dir=EVA_DEFAULT_DIR,
+        eva_installation_dir=EVA_INSTALLATION_DIR,
+    )
     mode = ConfigurationManager().get_value("core", "mode")
     init_builtin_udfs(mode=mode)
     eva()

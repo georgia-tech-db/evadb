@@ -32,11 +32,6 @@ class ConfigurationManager(object):
         if cls._instance is None:
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
 
-            bootstrap_environment(
-                eva_config_dir=EVA_DEFAULT_DIR,
-                eva_installation_dir=EVA_INSTALLATION_DIR,
-            )  # Setup eva in home directory
-
         return cls._instance
 
     @property
