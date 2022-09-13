@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pytest
 
 from eva.configuration.configuration_manager import ConfigurationManager
 
@@ -28,8 +29,8 @@ class ConfigurationManagerTests(unittest.TestCase):
         value = configuration_manager.get_value("core", "datasets_dir")
         self.assertNotEqual(value, None)
 
-        value = configuration_manager.get_value("invalid", "")
-        self.assertEqual(value, None)
+        with pytest.raises(KeyError):
+            value = configuration_manager.get_value("invalid", "")
 
-        value = configuration_manager.get_value("core", "invalid")
-        self.assertEqual(value, None)
+        with pytest.raises(KeyError):
+            value = configuration_manager.get_value("core", "invalid")

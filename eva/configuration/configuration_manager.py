@@ -14,8 +14,9 @@
 # limitations under the License.
 import yaml
 
+from typing import Any
+
 from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.config_utils import read_value_config, update_value_config
 from eva.configuration.constants import (
     EVA_CONFIG_FILE,
     EVA_DEFAULT_DIR,
@@ -25,7 +26,7 @@ from eva.configuration.constants import (
 
 class ConfigurationManager(object):
     _instance = None
-    _cfg = None
+    yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
 
     def __new__(cls):
         if cls._instance is None:
@@ -36,16 +37,18 @@ class ConfigurationManager(object):
                 eva_installation_dir=EVA_INSTALLATION_DIR,
             )  # Setup eva in home directory
 
-            ymlpath = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
-            with ymlpath.open("r") as ymlfile:
-                cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
         return cls._instance
+    
+    @property
+    def _read_config_from_file(self) -> Any:
+        with self.yml_path.open("r") as yml_file:
+            return yaml.safe_load(yml_file) 
 
     def get_value(self, category, key):
-        return self._cfg.get(category, {}).get(key)
+        return self._read_config_from_file[category][key]
 
     def update_value(self, category, key, value):
-        category_data = self._cfg.get(category, None)
-        if category_data:
-            category_data[key] = value
+        cfg = self._read_config_from_file
+        cfg[category][key] = value
+        with self.yml_path.open("w") as yml_file:
+            yaml.dump(cfg, yml_file)
