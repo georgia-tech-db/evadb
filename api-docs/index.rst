@@ -28,20 +28,23 @@ Starting EVA
     .. grid-item-card:: :doc:`Tutorial: Intro to EVA <tutorial/index>`
         :link: tutorial
         :link-type: doc
+        :class-card: content-cards
 
-        A simple example of using BentoML in action. In under 10 minutes, you'll be able to serve your ML model over an HTTP API endpoint, and build a docker image that is ready to be deployed in production.
+        A simple example of using EVA.
 
     .. grid-item-card:: :doc:`SQL Commands <sql/index>`
         :link: sql/index
         :link-type: doc
+        :class-card: content-cards
 
-        A step-by-step tour of BentoML's components and introduce you to its philosophy. After reading, you will see what drives BentoML's design, and know what `bento` and `runner` stands for.
+        All SQL commands supported by EVA.
     
     .. grid-item-card:: :doc:`Registering UDFs <sql/index>`
         :link: sql/index
         :link-type: doc
+        :class-card: content-cards
 
-        A step-by-step tour of BentoML's components and introduce you to its philosophy. After reading, you will see what drives BentoML's design, and know what `bento` and `runner` stands for.
+        A step-by-step tour of creating custom User Defined Functions for EVA.
 
 
 .. spelling::
