@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
-with open("../../eva/version.py", "r") as version_file:
+with open("../eva/version.py", "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 # Set the latest version.
@@ -27,7 +27,8 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
     "recommonmark",  # optional
-    "sphinx_external_toc"
+    "sphinx_external_toc",
+    "sphinx_design",
 ]
 
 # The suffix(es) of source filenames.
@@ -90,6 +91,10 @@ html_sidebars = {
         "sidebar/scroll-end.html",
     ]
 }
+
+# Adding custom added css files
+html_static_path = ['_static']
+html_css_files = ['custom.css']
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):
