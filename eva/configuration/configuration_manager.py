@@ -16,12 +16,7 @@ from typing import Any
 
 import yaml
 
-from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.constants import (
-    EVA_CONFIG_FILE,
-    EVA_DEFAULT_DIR,
-    EVA_INSTALLATION_DIR,
-)
+from eva.configuration.constants import EVA_CONFIG_FILE, EVA_DEFAULT_DIR
 
 
 class ConfigurationManager(object):

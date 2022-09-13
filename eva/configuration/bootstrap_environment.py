@@ -51,7 +51,7 @@ def create_config_file(eva_config_dir: Path, eva_installation_dir: Path) -> Path
     Arguments:
         eva_config_dir: path to user's .eva/ directory
         eva_installation_dir: path to default eva.yml
-    
+
     Returns:
         path to user's .eva/eva.yml config file
     """
