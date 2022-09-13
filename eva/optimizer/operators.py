@@ -1042,6 +1042,7 @@ class LogicalDataset(Operator):
     """
     Explode a list of table names into their contents
     """
+
     def __init__(self, children: List = None):
         super().__init__(OperatorType.LOGICALDATASET, children)
 

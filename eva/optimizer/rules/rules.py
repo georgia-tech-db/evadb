@@ -41,6 +41,7 @@ from eva.optimizer.operators import (
     LogicalCreate,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDataset,
     LogicalDrop,
     LogicalDropUDF,
     LogicalFilter,
@@ -58,12 +59,12 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
-    LogicalDataset,
     Operator,
     OperatorType,
 )
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
+from eva.planner.dataset_plan import DatasetPlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.function_scan_plan import FunctionScanPlan
@@ -79,7 +80,6 @@ from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
-from eva.planner.dataset_plan import DatasetPlan
 
 # Modified
 
@@ -257,6 +257,7 @@ class ExpandGetToDataset(Rule):
         dataset_opr = LogicalDataset()
         dataset_opr.append_child(before)
         return dataset_opr
+
 
 class EmbedFilterIntoGet(Rule):
     def __init__(self):
@@ -794,7 +795,13 @@ class LogicalDatasetToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDataset, context: OptimizerContext):
-        after = DatasetPlan()
+        config_batch_mem_size = ConfigurationManager().get_value(
+            "executor", "batch_mem_size"
+        )
+        batch_mem_size = (
+            config_batch_mem_size if config_batch_mem_size else 30000000
+        )  # 30mb
+        after = DatasetPlan(batch_mem_size)
         for child in before.children:
             after.append_child(child)
         return after

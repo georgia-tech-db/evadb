@@ -21,8 +21,8 @@ class DatasetPlan(AbstractPlan):
     This plan is used for expanding list of table names in to contents
     """
 
-    def __init__(self, all: bool):
-        self._all = all
+    def __init__(self, batch_mem_size):
+        self.batch_mem_size = batch_mem_size
         super().__init__(PlanOprType.DATASET)
 
     def __hash__(self) -> int:

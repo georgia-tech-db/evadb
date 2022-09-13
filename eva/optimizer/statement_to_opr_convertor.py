@@ -33,7 +33,6 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
-    LogicalDataset,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement

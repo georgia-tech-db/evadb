@@ -18,6 +18,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.create_executor import CreateExecutor
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
+from eva.executor.dataset_executor import DatasetExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
@@ -38,7 +39,6 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
-from eva.executor.dataset_executor import DatasetExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType

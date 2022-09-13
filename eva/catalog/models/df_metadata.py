@@ -14,7 +14,7 @@
 # limitations under the License.
 import enum
 
-from sqlalchemy import Boolean, Column, String
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
@@ -41,7 +41,9 @@ class DataFrameMetadata(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, file_url: str, identifier_id="id", dftype=DataFrameType.VIDEO):
+    def __init__(
+        self, name: str, file_url: str, identifier_id="id", dftype=DataFrameType.VIDEO
+    ):
         self._name = name
         self._file_url = file_url
         self._schema = None
@@ -83,7 +85,7 @@ class DataFrameMetadata(BaseModel):
     @property
     def is_video(self) -> bool:
         return self.dftype is DataFrameType.VIDEO
-    
+
     @property
     def is_structured(self) -> bool:
         return self.dftype is DataFrameType.STRUCTURED
