@@ -38,11 +38,11 @@ class ConfigurationManager(object):
             )  # Setup eva in home directory
 
         return cls._instance
-    
+
     @property
     def _read_config_from_file(self) -> Any:
         with self.yml_path.open("r") as yml_file:
-            return yaml.safe_load(yml_file) 
+            return yaml.safe_load(yml_file)
 
     def get_value(self, category, key):
         return self._read_config_from_file[category][key]
