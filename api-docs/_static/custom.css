@@ -1,7 +1,7 @@
 /* https://github.com/ray-project/ray/blob/releases/1.9.0/doc/source/_static/css/custom.css*/
-:root {
-  --sd-color-shadow: rgba(0, 0, 0, 0.15);
-  --sd-color-card-background: #cd2e2e;
+.content-cards {
+  --sd-color-shadow: rgba(0, 0, 0, 0.35);
+  --sd-color-card-background: #f4f4f4;
 }
 
 
