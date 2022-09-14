@@ -48,16 +48,3 @@ Starting EVA
 
 
 .. spelling::
-
-.. .. |pypi_status| image:: https://img.shields.io/pypi/v/bentoml.svg?style=flat-square
-..    :target: https://pypi.org/project/evadb
-.. .. |downloads| image:: https://pepy.tech/badge/bentoml?style=flat-square
-..    :target: https://will add for downloads
-.. .. |actions_status| image:: https://github.com/bentoml/bentoml/workflows/CI/badge.svg
-..    :target: https://github.com/bentoml/bentoml/actions
-.. .. |documentation_status| image:: https://readthedocs.org/projects/bentoml/badge/?version=latest&style=flat-square
-..    :target: https://evadb.readthedocs.io/en/latest/index.html
-.. .. |join_slack| image:: https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack&style=flat-square
-..    :target: https:/will add slack for EVA
-.. .. |github_stars| image:: https://img.shields.io/github/stars/bentoml/BentoML?color=%23c9378a&label=github&logo=github&style=flat-square
-..    :target: https://github.com/georgia-tech-db/eva
