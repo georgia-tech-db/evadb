@@ -29,6 +29,7 @@ extensions = [
     "recommonmark",  # optional
     "sphinx_external_toc",
     "sphinx_design",
+    "myst_nb"
 ]
 
 # The suffix(es) of source filenames.
