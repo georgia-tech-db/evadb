@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.df_metadata import DataFrameMetadata, DataFrameType
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
@@ -62,7 +62,7 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="id", is_video=True
+        name, uri, col_metadata, identifier_column="id", dftype=DataFrameType.VIDEO
     )
     return metadata
 

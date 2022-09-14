@@ -1043,7 +1043,7 @@ class RulesManager:
         self._logical_rules = [LogicalInnerJoinCommutativity()]
 
         self._rewrite_rules = [
-            ExpandGetToDataset(),
+            # ExpandGetToDataset(),
             EmbedFilterIntoGet(),
             # EmbedFilterIntoDerivedGet(),
             PushdownFilterThroughSample(),

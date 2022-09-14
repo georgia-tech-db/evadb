@@ -23,6 +23,7 @@ from eva.binder.binder_utils import (
     handle_if_not_exists,
 )
 from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.models.df_metadata import DataFrameType
 
 
 class BinderUtilsTest(unittest.TestCase):
@@ -73,7 +74,11 @@ class BinderUtilsTest(unittest.TestCase):
         m_cci.assert_called_once_with(unique=True)
         m_cd.assert_has_calls(calls)
         catalog_ins.create_metadata.assert_called_with(
-            name, uri, "col_metadata", identifier_column="id", is_video=True
+            name,
+            uri,
+            "col_metadata",
+            identifier_column="id",
+            dftype=DataFrameType.VIDEO,
         )
         self.assertEqual(actual, expected)
 

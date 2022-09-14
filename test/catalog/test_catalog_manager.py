@@ -20,6 +20,7 @@ from mock import MagicMock
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.df_metadata import DataFrameType
 from eva.catalog.models.udf import UdfMetadata
 
 
@@ -68,7 +69,7 @@ class CatalogManagerTests(unittest.TestCase):
         columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
         actual = catalog.create_metadata(dataset_name, file_url, columns)
         ds_mock.return_value.create_dataset.assert_called_with(
-            dataset_name, file_url, identifier_id="id", is_video=False
+            dataset_name, file_url, identifier_id="id", dftype=DataFrameType.STRUCTURED
         )
         for column in columns:
             column.metadata_id = ds_mock.return_value.create_dataset.return_value.id

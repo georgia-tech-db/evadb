@@ -17,7 +17,7 @@ from typing import List
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.df_metadata import DataFrameMetadata, DataFrameType
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
@@ -79,7 +79,7 @@ class CatalogManager(object):
         file_url: str,
         column_list: List[DataFrameColumn],
         identifier_column="id",
-        is_video=False,
+        dftype=DataFrameType.STRUCTURED,
     ) -> DataFrameMetadata:
         """Creates metadata object
 
@@ -91,13 +91,13 @@ class CatalogManager(object):
             file_url: #todo
             column_list: list of columns
             identifier_column (str):  A unique identifier column for each row
-            is_video (bool): True if the table is a video
+            dftype (enum): Type of the table
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column, is_video=is_video
+            name, file_url, identifier_id=identifier_column, dftype=dftype
         )
         for column in column_list:
             column.metadata_id = metadata.id
