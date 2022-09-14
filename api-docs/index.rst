@@ -1,6 +1,8 @@
 Exploratory Video Analytics
 ===================================================
 
+|pypi_status| |CI Status| |Coverage Status| |License| |documentation_status| |Discuss| |Python Versions|
+
 What is EVA?
 ------------
 
@@ -48,3 +50,18 @@ Starting EVA
 
 
 .. spelling::
+
+.. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
+   :target: https://pypi.org/project/evadb
+.. |CI Status| image:: https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg
+   :target: https://circleci.com/gh/georgia-tech-db/eva
+.. |Coverage Status| image:: https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master
+   :target: https://coveralls.io/github/georgia-tech-db/eva?branch=master
+.. |License| image:: https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache
+    :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
+.. |documentation_status| image:: https://readthedocs.org/projects/exvian/badge/?version=latest
+   :target: https://evadb.readthedocs.io/en/latest/index.html
+.. |Discuss| image:: https://img.shields.io/badge/-Discuss!-blueviolet
+   :target: https://github.com/georgia-tech-db/eva/discussions
+.. |Python Versions| image:: https://img.shields.io/badge/Python--versions-3.7+-brightgreen
+   :target: https://github.com/georgia-tech-db/eva
