@@ -3,9 +3,6 @@ Sentiment analysis tutorial
 
 .. container:: cell markdown
 
-   .. rubric:: Sentiment analysis tutorial
-      :name: sentiment-analysis-tutorial
-
    run this notebook on `google
    colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/movie_analysis.ipynb>`__
 

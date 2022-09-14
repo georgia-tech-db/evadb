@@ -3,9 +3,6 @@ Object Detection tutorial
 
 .. container:: cell markdown
 
-   .. rubric:: Object detection tutorial
-      :name: object-detection-tutorial
-
    run this notebook on `google
    colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/object_detection.ipynb>`__
 

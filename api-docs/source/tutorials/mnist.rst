@@ -3,9 +3,6 @@ Working with mnist data tutorial
 
 .. container:: cell markdown
 
-   .. rubric:: Working with mnist data tutorial
-      :name: working-with-mnist-data-tutorial
-
    run this notebook on `google
    colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/mnist.ipynb>`__
 
@@ -164,7 +161,7 @@ Working with mnist data tutorial
 
    .. container:: output display_data
 
-      .. image:: vertopal_eba088659dd0492fb1196d9f212fa9bc/ff77c302d89f3534fa0ce208db38992276194896.png
+      .. image:: assests/ff77c302d89f3534fa0ce208db38992276194896.png
 
 .. container:: cell code
 
