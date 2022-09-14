@@ -1,7 +1,7 @@
 .. _guide-tutorials:
 
-Tutorials
-=============
+Setup for local system
+======================
 
 Configure GPU (Recommended)
 ----------------------------

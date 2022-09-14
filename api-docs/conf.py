@@ -26,7 +26,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
-    "recommonmark",  # optional
+    
     "sphinx_external_toc",
     "sphinx_design",
     "myst_nb"

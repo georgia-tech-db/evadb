@@ -8,6 +8,12 @@ parts:
   - caption: Tutorial
     chapters:
       - file: source/tutorials/tutorials
+      - file: source/tutorials/mnist
+        title: Working with mnist data tutorial
+      - file: source/tutorials/movie_analysis
+        title: Sentiment analysis tutorial
+      - file: source/tutorials/object_detection
+        title: Object detection tutorial
 
   - caption: Reference
     chapters:
