@@ -74,7 +74,7 @@ Quickstart Tutorial
 
         .. code-block:: python
 
-            cursor.execute('UPLOAD INFILE "../data/ua_detrac/ua_detrac.mp4" PATH "video.mp4";')
+            cursor.execute('UPLOAD INFILE "../data/ua_detrac/ua_detrac.mp4" INTO MyVideo')
             response = cursor.fetch_all()
             print(response)
 
@@ -86,16 +86,6 @@ Quickstart Tutorial
 
             from ipywidgets import Video
             Video.from_file("../data/ua_detrac/ua_detrac.mp4", embed=True)
-
-    * Load the video into EVA:
-
-        .. code-block:: python
-
-            cursor.execute('LOAD DATA INFILE "video.mp4" INTO MyVideo;')
-            response = cursor.fetch_all()
-            print(response)
-
-        The 'LOAD' command is used to load a video into EVA. `INFILE` is the path of the video in the database.
 
     * Registering UDFs (User Defined Functions):
 
@@ -117,7 +107,7 @@ Quickstart Tutorial
 
         .. code-block:: python
 
-            cursor.execute("""SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo""")
+            cursor.execute("""SELECT id, FastRCNNObjectDetector(data) FROM MyVideo""")
             response = cursor.fetch_all()
 
         UDFs are typically used like sql functions along with the 'SELECT' command. The 'Unnest' function is used to unnest the output of the UDF.
