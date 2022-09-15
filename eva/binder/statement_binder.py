@@ -112,15 +112,10 @@ class StatementBinder:
         table_ref = node.table_ref
         name = table_ref.table.table_name
         if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Sanity check to make sure there is no existing video table with same name
-            if self._catalog.check_table_exists(
+            # create dataset catalog object if it does not exist
+            if not self._catalog.check_table_exists(
                 table_ref.table.database_name, table_ref.table.table_name
             ):
-                err_msg = f"Video table {name} already exists."
-                logger.error(err_msg)
-                raise BinderError(err_msg)
-            else:
-
                 # create catalog entry only if the file path exists
                 upload_dir = Path(
                     ConfigurationManager().get_value("storage", "upload_dir")
