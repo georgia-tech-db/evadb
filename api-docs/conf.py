@@ -105,6 +105,7 @@ for i in os.listdir('../tutorials'):
     if i.endswith('.ipynb'):
         shutil.copy(f'../tutorials/{i}', './source/tutorials/')
 
+jupyter_execute_notebooks = "off"
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):
