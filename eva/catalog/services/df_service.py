@@ -26,7 +26,7 @@ class DatasetService(BaseService):
         super().__init__(DataFrameMetadata)
 
     def create_dataset(
-        self, name, file_url, identifier_id="id", dftype=DataFrameType.VIDEO
+        self, name, file_url, identifier_id="id", dftype=DataFrameType.STRUCTURED
     ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.

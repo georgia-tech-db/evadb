@@ -16,6 +16,7 @@ import unittest
 
 from mock import patch
 
+from eva.catalog.models.df_metadata import DataFrameType
 from eva.catalog.services.df_service import DatasetService
 
 DATASET_ID = 123
@@ -35,7 +36,7 @@ class DatasetServiceTest(unittest.TestCase):
             name=DATASET_NAME,
             file_url=DATASET_URL,
             identifier_id=IDENTIFIER,
-            is_video=False,
+            dftype=DataFrameType.STRUCTURED,
         )
         mocked.return_value.save.assert_called_once()
 
