@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import shutil
 import warnings
 from datetime import date
 
@@ -96,6 +97,14 @@ html_sidebars = {
 # Adding custom added css files
 html_static_path = ['_static']
 html_css_files = ['custom.css']
+
+
+# Adding the Tutorial notebooks to ./api-docs/source/tutorials/
+
+for i in os.listdir('../tutorials'):
+    if i.endswith('.ipynb'):
+        shutil.copy(f'../tutorials/{i}', './source/tutorials/')
+
 
 # -- Initialize Sphinx ----------------------------------------------
 def setup(sphinx):

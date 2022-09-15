@@ -28,21 +28,21 @@ Starting EVA
     .. grid-item-card:: :doc:`Tutorial: Intro to EVA <source/tutorials/tutorials>`
         :link: source/tutorials/tutorials
         :link-type: doc
-        :class-card: content-cards
+        
 
         A simple example of using EVA.
 
     .. grid-item-card:: :doc:`SQL Commands <source/reference/index>`
         :link: source/reference/index
         :link-type: doc
-        :class-card: content-cards
+        
 
         All SQL commands supported by EVA.
     
     .. grid-item-card:: :doc:`Registering UDFs <source/reference/udf>`
         :link: source/reference/udf
         :link-type: doc
-        :class-card: content-cards
+        
 
         A step-by-step tour of creating custom User Defined Functions for EVA.
 
