@@ -118,15 +118,10 @@ class StatementBinder:
                 table_ref.table.database_name, table_ref.table.table_name
             ):
                 create_dataset_metadata(name)
-            
+
             # create catalog entry for the video only if the file path exists
-            upload_dir = Path(
-                ConfigurationManager().get_value("storage", "upload_dir")
-            )
-            if (
-                Path(node.path).exists()
-                or Path(Path(upload_dir) / node.path).exists()
-            ):
+            upload_dir = Path(ConfigurationManager().get_value("storage", "upload_dir"))
+            if Path(node.path).exists() or Path(Path(upload_dir) / node.path).exists():
                 create_video_metadata(node.path)
 
             # else raise error

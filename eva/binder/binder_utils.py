@@ -53,7 +53,7 @@ def create_dataset_metadata(name: str) -> DataFrameMetadata:
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="id", dftype=DataFrameType.DATASET
+        name, uri, col_metadata, identifier_column="name", dftype=DataFrameType.DATASET
     )
     return metadata
 

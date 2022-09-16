@@ -93,7 +93,6 @@ class RuleType(Flag):
     INVALID_RULE = 0
 
     # REWRITE RULES(LOGICAL -> LOGICAL)
-    EXPAND_GET_TO_DATASET = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
@@ -171,7 +170,6 @@ class Promise(IntEnum):
     LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
 
     # REWRITE RULES
-    EXPAND_GET_TO_DATASET = auto()
     EMBED_FILTER_INTO_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
@@ -240,24 +238,6 @@ class Rule(ABC):
 
 ##############################################
 # REWRITE RULES START
-
-
-class ExpandGetToDataset(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALGET)
-        super().__init__(RuleType.EXPAND_GET_TO_DATASET, pattern)
-
-    def promise(self):
-        return Promise.EXPAND_GET_TO_DATASET
-
-    def check(self, before: LogicalGet, context: OptimizerContext):
-        return before.dataset_metadata.is_dataset
-
-    def apply(self, before: LogicalGet, context: OptimizerContext):
-        dataset_opr = LogicalDataset()
-        dataset_opr.append_child(before)
-        return dataset_opr
-
 
 class EmbedFilterIntoGet(Rule):
     def __init__(self):
@@ -1043,7 +1023,6 @@ class RulesManager:
         self._logical_rules = [LogicalInnerJoinCommutativity()]
 
         self._rewrite_rules = [
-            # ExpandGetToDataset(),
             EmbedFilterIntoGet(),
             # EmbedFilterIntoDerivedGet(),
             PushdownFilterThroughSample(),

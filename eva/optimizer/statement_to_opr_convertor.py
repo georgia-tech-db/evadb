@@ -12,11 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (
     LogicalCreate,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
+    LogicalDataset,
     LogicalDrop,
     LogicalDropUDF,
     LogicalFilter,
@@ -65,9 +67,14 @@ class StatementToPlanConvertor:
         """
         if table_ref.is_table_atom():
             # Table
-            catalog_vid_metadata = table_ref.table.table_obj
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
+            catalog_metadata: DataFrameMetadata = table_ref.table.table_obj
+            self._plan = LogicalGet(table_ref, catalog_metadata, table_ref.alias)
 
+            if catalog_metadata.is_dataset:
+                plan_node = LogicalDataset()
+                plan_node.append_child(self._plan)
+                self._plan = plan_node
+            
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
             self._plan = LogicalFunctionScan(
