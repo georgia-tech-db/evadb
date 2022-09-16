@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.configuration.dictionary import EVA_INSTALLATION_DIR
+from eva.configuration.constants import EVA_INSTALLATION_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector

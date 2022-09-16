@@ -20,7 +20,7 @@ from pathlib import Path
 import yaml
 
 from eva.configuration.config_utils import read_value_config, update_value_config
-from eva.configuration.dictionary import (
+from eva.configuration.constants import (
     DB_DEFAULT_URI,
     EVA_CONFIG_FILE,
     EVA_DATASET_DIR,
