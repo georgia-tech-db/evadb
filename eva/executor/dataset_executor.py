@@ -43,17 +43,18 @@ class DatasetExecutor(AbstractExecutor):
         catalog = CatalogManager()
         for batch in child.exec():
             assert (
-                len(batch.columns) == 1
-            ), f"DatasetExecutor expects 1-column dataframe from child, but {len(batch.columns)} found."
+                len(batch.columns) == 3
+            ), f"DatasetExecutor expects 3-column dataframe from child, but {len(batch.columns)} found."
             for table_name in batch.frames[0]:
                 metadata = catalog.get_dataset_metadata(None, table_name)
                 if metadata is None:
-                    logger.warn(f"Table {table_name} does not exsit.")
+                    logger.warn(f"Table {table_name} does not exist.")
                 elif metadata.is_dataset:
                     logger.warn(
                         f"Table {table_name} is dataset. Nested dataset is not supported."
                     )
                 elif metadata.is_video:
-                    return VideoStorageEngine.read(metadata, self.node.batch_mem_size)
-                elif metadata.is_structured:
-                    return StorageEngine.read(metadata, self.node.batch_mem_size)
+                    for batch in VideoStorageEngine.read(metadata, self.node.batch_mem_size):
+                        yield batch
+                # elif metadata.is_structured:
+                #     return StorageEngine.read(metadata, self.node.batch_mem_size)

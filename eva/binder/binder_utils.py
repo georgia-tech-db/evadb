@@ -33,10 +33,45 @@ class BinderError(Exception):
     pass
 
 
+def get_video_columns() -> List[ColumnDefinition]:
+    columns = [
+        ColumnDefinition(
+            "id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+        )
+    ]
+    # the ndarray dimensions are set as None. We need to fix this as we
+    # cannot assume. Either ask the user to provide this with load or
+    # we infer this from the provided video.
+    columns.append(
+        ColumnDefinition(
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+        )
+    )
+    return columns
+
+def get_dataset_columns() -> List[ColumnDefinition]:
+    columns = [
+        ColumnDefinition(
+            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+        )
+    ]
+    columns.append(ColumnDefinition("id", ColumnType.INTEGER, None, []))
+    # the ndarray dimensions are set as None. We need to fix this as we
+    # cannot assume. Either ask the user to provide this with load or
+    # we infer this from the provided video.
+    columns.append(
+        ColumnDefinition(
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+        )
+    )
+    return columns
+
 def create_dataset_metadata(name: str) -> DataFrameMetadata:
     """Create dataset metadata
     We have predefined columns for such a object
         name: dataset name
+        id: frame id
+        data: frame data
 
     Args:
         name (str): dataset name
@@ -45,15 +80,16 @@ def create_dataset_metadata(name: str) -> DataFrameMetadata:
         DataFrameMetadata: catalog object for the dataset
     """
     catalog = CatalogManager()
-    columns = [
-        ColumnDefinition(
-            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
-        )
-    ]
+    columns = get_dataset_columns()
+    print(columns)
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="name", dftype=DataFrameType.DATASET
+        name,
+        uri,
+        col_metadata,
+        identifier_column="name",
+        dftype=DataFrameType.DATASET,
     )
     return metadata
 
@@ -71,23 +107,15 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
         DataFrameMetadata:  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    columns = [
-        ColumnDefinition(
-            "id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
-        )
-    ]
-    # the ndarray dimensions are set as None. We need to fix this as we
-    # cannot assume. Either ask the user to provide this with load or
-    # we infer this from the provided video.
-    columns.append(
-        ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-        )
-    )
+    columns = get_video_columns()
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="id", dftype=DataFrameType.VIDEO
+        name,
+        uri,
+        col_metadata,
+        identifier_column="id",
+        dftype=DataFrameType.VIDEO,
     )
     return metadata
 
@@ -140,12 +168,15 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
+    obj = catalog.get_dataset_metadata(
+        table_info.database_name, table_info.table_name
+    )
     if obj:
         table_info.table_obj = obj
     else:
-        error = "{} does not exist. Create the table using" " CREATE TABLE.".format(
-            table_info.table_name
+        error = (
+            "{} does not exist. Create the table using"
+            " CREATE TABLE.".format(table_info.table_name)
         )
         logger.error(error)
         raise BinderError(error)

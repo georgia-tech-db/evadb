@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import numpy
 from pathlib import Path
 
 import pandas as pd
@@ -65,13 +66,20 @@ class LoadVideoExecutor(AbstractExecutor):
         success = VideoStorageEngine.create(video_metainfo, video_file_path)
 
         if success:
-            # we only support single column for dataset table
-            print(self.node.table_metainfo.columns)
-            if len(self.node.table_metainfo.columns) != 1:
+            # dataset table should have 3 columns
+            if len(self.node.table_metainfo.columns) != 3:
                 raise ExecutorError(error)
-            column_name = self.node.table_metainfo.columns[0].name
 
-            batch = Batch(pd.DataFrame([{column_name: video_metainfo.name}]))
+            columns = self.node.table_metainfo.columns
+            # filling dummy values for columns id and data
+            # these are populated by video during select query
+            data = {
+                columns[0].name: video_metainfo.name,
+                columns[1].name: 0,
+                columns[2].name: numpy.array([[[]]], dtype=numpy.uint8),
+            }
+            print(data)
+            batch = Batch(pd.DataFrame([data]))
             StorageEngine.write(self.node.table_metainfo, batch)
             yield Batch(
                 pd.DataFrame(
