@@ -71,6 +71,10 @@ class Batch:
     def columns(self):
         return self._frames.columns
 
+    @columns.setter
+    def columns(self, columns):
+        self._frames.columns = columns
+    
     def column_as_numpy_array(self, column_name="data"):
         return np.array(self._frames[column_name])
 

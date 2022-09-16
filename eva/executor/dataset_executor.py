@@ -40,22 +40,13 @@ class DatasetExecutor(AbstractExecutor):
         ), f"DatasetExecutor expects 1 child, but {len(self.children)} found."
         child = self.children[0]
         catalog = CatalogManager()
-        dataset_column_name = None
         for batch in child.exec():
             # The input should be only the table (video) name
             assert (
                 len(batch.columns) == 3
             ), f"DatasetExecutor expects 3-column dataframe from child, but {len(batch.columns)} found."
-            # Find the dataset's primiary column name, which is usually alias
-            # + eva.constants.DATASET_PRIMARY_COLUMN_NAME
-            if dataset_column_name is None:
-                dataset_column_name = batch.columns[0]
-            elif dataset_column_name != batch.columns[0]:
-                logger.warn(
-                    f"DatasetExecutor found different column names: {dataset_column_name}, {batch.columns[0]}."
-                    " Use {dataset_column_name} for the output."
-                )
-            for table_name in batch.frames[0]:
+            dataset_column_name = batch.columns[0]
+            for table_name in batch.frames[dataset_column_name]:
                 metadata = catalog.get_dataset_metadata(None, table_name)
                 if metadata is None:
                     logger.warn(f"Table {table_name} does not exist.")
@@ -68,11 +59,8 @@ class DatasetExecutor(AbstractExecutor):
                         reader = VideoStorageEngine.read(
                             metadata, self.node.batch_mem_size
                         )
-                    elif metadata.is_structured:
-                        reader = StorageEngine.read(metadata, self.node.batch_mem_size)
-                    else:
-                        raise ValueError(f"Unexpected metadata {metadata}")
-                    for table_batch in reader:
-                        # Add the table name column to the output batch
-                        table_batch.frames[dataset_column_name] = table_name
-                        yield table_batch
+                        for table_batch in reader:
+                            table_batch.columns = batch.columns[1:]
+                            # Add the table name column to the output batch
+                            table_batch.frames[dataset_column_name] = table_name
+                            yield table_batch

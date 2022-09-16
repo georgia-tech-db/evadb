@@ -22,14 +22,14 @@ from eva.parser.upload_statement import UploadStatement
 class Upload(evaql_parserVisitor):
     def visitUploadStatement(self, ctx: evaql_parser.UploadStatementContext):
         srv_path = self.visit(ctx.fileName()).value
-        if ctx.AS():
-            table_name = self.visit(ctx.uid())
-        else:
-            # TODO risk operation
-            table_name = srv_path
+        # if ctx.AS():
+        #     table_name = self.visit(ctx.uid())
+        # else:
+        #     # TODO risk operation
+        #     table_name = srv_path
         video_blob = self.visit(ctx.videoBlob()).value
-        table = TableRef(TableInfo(table_name=table_name))
-        dataset = TableRef(self.visit(ctx.tableName()))
+        # table = TableRef(TableInfo(table_name=table_name))
+        table = TableRef(self.visit(ctx.tableName()))
 
         # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
@@ -45,6 +45,6 @@ class Upload(evaql_parserVisitor):
             column_list = self.visit(ctx.uidList())
 
         stmt = UploadStatement(
-            srv_path, video_blob, table, dataset, column_list, file_options
+            srv_path, video_blob, table, column_list, file_options
         )
         return stmt

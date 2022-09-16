@@ -49,6 +49,7 @@ def get_video_columns() -> List[ColumnDefinition]:
     )
     return columns
 
+
 def get_dataset_columns() -> List[ColumnDefinition]:
     columns = [
         ColumnDefinition(
@@ -65,6 +66,7 @@ def get_dataset_columns() -> List[ColumnDefinition]:
         )
     )
     return columns
+
 
 def create_dataset_metadata(name: str) -> DataFrameMetadata:
     """Create dataset metadata
@@ -168,15 +170,12 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(
-        table_info.database_name, table_info.table_name
-    )
+    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
     if obj:
         table_info.table_obj = obj
     else:
-        error = (
-            "{} does not exist. Create the table using"
-            " CREATE TABLE.".format(table_info.table_name)
+        error = "{} does not exist. Create the table using" " CREATE TABLE.".format(
+            table_info.table_name
         )
         logger.error(error)
         raise BinderError(error)

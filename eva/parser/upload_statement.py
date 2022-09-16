@@ -36,7 +36,6 @@ class UploadStatement(AbstractStatement):
         path: str,
         video_blob: str,
         table_ref: str,
-        dataset_ref: str,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
     ):
@@ -44,16 +43,14 @@ class UploadStatement(AbstractStatement):
         self._path = Path(path)
         self._video_blob = video_blob
         self._table_ref = table_ref
-        self._dataset_ref = dataset_ref
         self._column_list = column_list
         self._file_options = file_options
 
     def __str__(self) -> str:
-        print_str = "UPLOAD PATH {} AS {} BLOB {} INTO {}({}) WITH {}".format(
+        print_str = "UPLOAD PATH {} BLOB {} INTO {}({}) WITH {}".format(
             self._path,
             self._table_ref,
             "string of video blob",
-            self._dataset_ref,
             self._column_list,
             self._file_options,
         )
@@ -70,10 +67,6 @@ class UploadStatement(AbstractStatement):
     @property
     def table_ref(self) -> TableRef:
         return self._table_ref
-
-    @property
-    def dataset_ref(self) -> TableRef:
-        return self._dataset_ref
 
     @property
     def column_list(self) -> List[AbstractExpression]:
@@ -94,7 +87,6 @@ class UploadStatement(AbstractStatement):
             self.path == other.path
             and self.video_blob == other.video_blob
             and self.table_ref == other.table_ref
-            and self.dataset_ref == other.dataset_ref
             and self.column_list == other.column_list
             and self.file_options == other.file_options
         )
@@ -106,7 +98,6 @@ class UploadStatement(AbstractStatement):
                 self.path,
                 self.video_blob,
                 self.table_ref,
-                self.dataset_ref,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
             )

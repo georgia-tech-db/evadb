@@ -33,23 +33,20 @@ class LoadDataStatement(AbstractStatement):
     def __init__(
         self,
         table_ref: TableRef,
-        dataset_ref: TableRef,
         path: str,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
     ):
         super().__init__(StatementType.LOAD_DATA)
         self._table_ref = table_ref
-        self._dataset_ref = dataset_ref
         self._path = Path(path)
         self._column_list = column_list
         self._file_options = file_options
 
     def __str__(self) -> str:
-        print_str = "LOAD FILE {} AS {} INTO {}({}) WITH {}".format(
+        print_str = "LOAD FILE {} INTO {}({}) WITH {}".format(
             self._path.name,
             self._table_ref,
-            self._dataset_ref,
             self._column_list,
             self._file_options,
         )
@@ -58,10 +55,6 @@ class LoadDataStatement(AbstractStatement):
     @property
     def table_ref(self) -> TableRef:
         return self._table_ref
-
-    @property
-    def dataset_ref(self) -> TableRef:
-        return self._dataset_ref
 
     @property
     def path(self) -> Path:
@@ -84,7 +77,6 @@ class LoadDataStatement(AbstractStatement):
             return False
         return (
             self.table_ref == other.table_ref
-            and self.dataset_ref == other.dataset_ref
             and self.path == other.path
             and self.column_list == other.column_list
             and self.file_options == other.file_options
@@ -95,7 +87,6 @@ class LoadDataStatement(AbstractStatement):
             (
                 super().__hash__(),
                 self.table_ref,
-                self.dataset_ref,
                 self.path,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),

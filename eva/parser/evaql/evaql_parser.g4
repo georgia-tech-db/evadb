@@ -178,7 +178,7 @@ updateStatement
 loadStatement
     : LOAD 
       FILE fileName
-      (AS? uid)?
+//      (AS? uid)?
       INTO tableName
         (
             ('(' columns=uidList ')')
@@ -193,7 +193,7 @@ fileOptions
 uploadStatement
     : UPLOAD
       PATH fileName
-      (AS? uid)?
+//      (AS? uid)?
       BLOB videoBlob
       INTO tableName
         (
