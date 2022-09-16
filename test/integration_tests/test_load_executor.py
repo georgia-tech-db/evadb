@@ -49,11 +49,19 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
+        count_frames = len(expected_batch)
 
-        # Try adding video to an existing table
-        with self.assertRaises(BinderError) as cm:
-            execute_query_fetch_all(query)
-        self.assertEqual(str(cm.exception), "Video table MyVideo already exists.")
+        # Try adding another video to the dataset
+        video_name = "dummy2.avi"
+        create_sample_video(name=video_name)
+        query = """LOAD FILE 'dummy2.avi' INTO MyVideo WITH FORMAT VIDEO;"""
+        print(query)
+        execute_query_fetch_all(query)
+
+        select_query = """SELECT id, data FROM MyVideo;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 2 * count_frames)
+        file_remove(video_name)
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):
@@ -125,6 +133,12 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
+        expected_batch = create_dummy_csv_batches(
+            target_columns=select_columns
+        )
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
+
+
+if __name__ == "__main__":
+    unittest.main()

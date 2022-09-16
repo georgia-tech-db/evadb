@@ -19,7 +19,7 @@ from mock import MagicMock, call, patch
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
-    create_video_metadata,
+    create_dataset_metadata,
     handle_if_not_exists,
 )
 from eva.catalog.column_type import ColumnType, NdArrayType
@@ -51,7 +51,7 @@ class BinderUtilsTest(unittest.TestCase):
     @patch("eva.binder.binder_utils.ColConstraintInfo")
     @patch("eva.binder.binder_utils.create_column_metadata")
     @patch("eva.binder.binder_utils.generate_file_path")
-    def test_create_video_metadata(self, m_gfp, m_ccm, m_cci, m_cd, m_cm):
+    def test_create_dataset_metadata(self, m_gfp, m_ccm, m_cci, m_cd, m_cm):
         catalog_ins = MagicMock()
         expected = "video_metadata"
         name = "eva"
@@ -64,11 +64,12 @@ class BinderUtilsTest(unittest.TestCase):
         catalog_ins.create_metadata.return_value = expected
 
         calls = [
-            call("id", ColumnType.INTEGER, None, [], "cci"),
+            call("id", ColumnType.INTEGER, None, []),
             call("data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]),
+            call("name", ColumnType.TEXT, None, []),
         ]
 
-        actual = create_video_metadata(name)
+        actual = create_dataset_metadata(name)
         m_gfp.assert_called_once_with(name)
         m_ccm.assert_called_once_with([1, 1])
         m_cci.assert_called_once_with(unique=True)
@@ -78,7 +79,7 @@ class BinderUtilsTest(unittest.TestCase):
             uri,
             "col_metadata",
             identifier_column="id",
-            dftype=DataFrameType.VIDEO,
+            dftype=DataFrameType.DATASET,
         )
         self.assertEqual(actual, expected)
 

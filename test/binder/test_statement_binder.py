@@ -246,7 +246,7 @@ class StatementBinderTests(unittest.TestCase):
                 mock_binder.assert_any_call(tve_return_value)
                 self.assertEqual(load_statement.column_list, [tve_return_value])
 
-    @patch("eva.binder.statement_binder.create_video_metadata")
+    @patch("eva.binder.statement_binder.create_dataset_metadata")
     @patch("eva.binder.statement_binder.TupleValueExpression")
     def test_bind_load_data_raises(self, mock_tve, mock_create):
         load_statement = MagicMock()

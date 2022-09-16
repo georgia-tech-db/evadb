@@ -41,6 +41,10 @@ class SelectExecutorTest(unittest.TestCase):
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
+        cls.dummy_batches = list(create_dummy_batches())[0]
+        cls.dummy_batches.frames['myvideo.name'] = 'dummy.avi'
+        cls.video_name = 'dummy.avi'
+        
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
         cls.table2 = create_table("table2", 500, 3)
@@ -102,19 +106,22 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(create_dummy_batches())[0]
+        expected_batch = self.dummy_batches
+        expected_batch.modify_column_alias("myvideo")
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT * FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
         expected_batch = list(create_dummy_batches(filters=[5]))[0]
+        expected_batch.frames['name'] = self.video_name
+        expected_batch.modify_column_alias("myvideo")
         self.assertEqual(actual_batch, expected_batch)
 
     def test_should_select_star_in_nested_query(self):
         select_query = """SELECT * FROM (SELECT * FROM MyVideo) AS T;"""
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected_batch = list(create_dummy_batches())[0]
+        expected_batch = self.dummy_batches
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
 
@@ -130,7 +137,6 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
                           FastRCNNObjectDetector(data);"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
@@ -138,7 +144,7 @@ class SelectExecutorTest(unittest.TestCase):
                    INTO MNIST;"""
         execute_query_fetch_all(query)
 
-        select_query = "SELECT * FROM MNIST;"
+        select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         video_reader = OpenCVReader("data/mnist/mnist.mp4", batch_mem_size=30000000)
@@ -198,7 +204,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
 
-    def test_select_and_union_video_in_table(self):
+    def test_aaselect_and_union_video_in_table(self):
         select_query = """SELECT id, data FROM MyVideo WHERE id < 3
             UNION ALL SELECT id, data FROM MyVideo WHERE id > 7;"""
         actual_batch = execute_query_fetch_all(select_query)
@@ -423,3 +429,6 @@ class SelectExecutorTest(unittest.TestCase):
                 expected_batch.sort_orderby(["table1.a0"]),
                 actual_batch.sort_orderby(["table1.a0"]),
             )
+
+if __name__ == '__main__':
+    unittest.main()

@@ -228,14 +228,14 @@ def create_table(table_name, num_rows, num_columns):
     return df
 
 
-def create_sample_video(num_frames=NUM_FRAMES):
+def create_sample_video(num_frames=NUM_FRAMES, name = "dummy.avi"):
     try:
-        os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
+        os.remove(os.path.join(upload_dir_from_config, name))
     except FileNotFoundError:
         pass
 
     out = cv2.VideoWriter(
-        os.path.join(upload_dir_from_config, "dummy.avi"),
+        os.path.join(upload_dir_from_config, name),
         cv2.VideoWriter_fourcc("M", "J", "P", "G"),
         10,
         (2, 2),
