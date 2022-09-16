@@ -15,14 +15,20 @@
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.load_statement import LoadDataStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import FileFormatType
 
 
 class Load(evaql_parserVisitor):
     def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):
         file_path = self.visit(ctx.fileName()).value
-        table = TableRef(self.visit(ctx.tableName()))
+        if ctx.AS():
+            table_name = self.visit(ctx.uid())
+        else:
+            # TODO risky operation!!!
+            table_name = file_path
+        table = TableRef(TableInfo(table_name=table_name))
+        dataset = TableRef(self.visit(ctx.tableName()))
 
         # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
@@ -37,7 +43,7 @@ class Load(evaql_parserVisitor):
         if ctx.uidList():
             column_list = self.visit(ctx.uidList())
 
-        stmt = LoadDataStatement(table, file_path, column_list, file_options)
+        stmt = LoadDataStatement(table, dataset, file_path, column_list, file_options)
         return stmt
 
     def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):

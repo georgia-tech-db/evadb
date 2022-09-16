@@ -239,6 +239,7 @@ class Rule(ABC):
 ##############################################
 # REWRITE RULES START
 
+
 class EmbedFilterIntoGet(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFILTER)

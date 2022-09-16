@@ -13,19 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from pathlib import Path
 from typing import Union
 
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
     create_dataset_metadata,
-    create_video_metadata,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression

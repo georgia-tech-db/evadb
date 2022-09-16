@@ -40,7 +40,5 @@ def apply_project(batch: Batch, project_list: List[AbstractExpression]):
 def apply_predicate(batch: Batch, predicate: AbstractExpression):
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch).frames
-        batch = Batch(
-            batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True)
-        )
+        batch = Batch(batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True))
     return batch

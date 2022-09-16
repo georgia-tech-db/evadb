@@ -16,8 +16,8 @@ import numpy
 from pathlib import Path
 
 import pandas as pd
-from eva.binder.binder_utils import create_video_metadata
 
+from eva.binder.binder_utils import create_video_metadata
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
