@@ -34,11 +34,35 @@ class BinderError(Exception):
 
 
 def create_dataset_metadata(name: str) -> DataFrameMetadata:
-    """Create dataset metadata object.
+    """Create dataset metadata
+    We have predefined columns for such a object
+        name: dataset name
+
+    Args:
+        name (str): dataset name
+
+    Returns:
+        DataFrameMetadata: catalog object for the dataset
+    """
+    catalog = CatalogManager()
+    columns = [
+        ColumnDefinition(
+            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+        )
+    ]
+    col_metadata = create_column_metadata(columns)
+    uri = str(generate_file_path(name))
+    metadata = catalog.create_metadata(
+        name, uri, col_metadata, identifier_column="id", dftype=DataFrameType.DATASET
+    )
+    return metadata
+
+
+def create_video_metadata(name: str) -> DataFrameMetadata:
+    """Create video metadata object.
         We have predefined columns for such a object
         id:  the frame id
         data: the frame data
-        name: the file_name
 
     Arguments:
         name (str): name of the metadata to be added to the catalog
@@ -47,7 +71,11 @@ def create_dataset_metadata(name: str) -> DataFrameMetadata:
         DataFrameMetadata:  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    columns = [ColumnDefinition("id", ColumnType.INTEGER, None, [])]
+    columns = [
+        ColumnDefinition(
+            "id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+        )
+    ]
     # the ndarray dimensions are set as None. We need to fix this as we
     # cannot assume. Either ask the user to provide this with load or
     # we infer this from the provided video.
@@ -56,11 +84,10 @@ def create_dataset_metadata(name: str) -> DataFrameMetadata:
             "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
         )
     )
-    columns.append(ColumnDefinition("name", ColumnType.TEXT, None, []))
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="id", dftype=DataFrameType.DATASET
+        name, uri, col_metadata, identifier_column="id", dftype=DataFrameType.VIDEO
     )
     return metadata
 
@@ -113,15 +140,12 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(
-        table_info.database_name, table_info.table_name
-    )
+    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
     if obj:
         table_info.table_obj = obj
     else:
-        error = (
-            "{} does not exist. Create the table using"
-            " CREATE TABLE.".format(table_info.table_name)
+        error = "{} does not exist. Create the table using" " CREATE TABLE.".format(
+            table_info.table_name
         )
         logger.error(error)
         raise BinderError(error)
