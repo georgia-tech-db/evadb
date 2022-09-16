@@ -1057,6 +1057,7 @@ class RulesManager:
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalDatasetToPhysical()
         ]
         self._all_rules = (
             self._rewrite_rules + self._logical_rules + self._implementation_rules

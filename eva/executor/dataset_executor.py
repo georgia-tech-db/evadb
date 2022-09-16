@@ -44,9 +44,8 @@ class DatasetExecutor(AbstractExecutor):
         for batch in child.exec():
             # The input should be only the table (video) name
             assert (
-                len(batch.columns) == 1
-            ), f"DatasetExecutor expects 1-column dataframe from child, but {len(batch.columns)} found."
-
+                len(batch.columns) == 3
+            ), f"DatasetExecutor expects 3-column dataframe from child, but {len(batch.columns)} found."
             # Find the dataset's primiary column name, which is usually alias
             # + eva.constants.DATASET_PRIMARY_COLUMN_NAME
             if dataset_column_name is None:
@@ -56,11 +55,10 @@ class DatasetExecutor(AbstractExecutor):
                     f"DatasetExecutor found different column names: {dataset_column_name}, {batch.columns[0]}."
                     " Use {dataset_column_name} for the output."
                 )
-
             for table_name in batch.frames[0]:
                 metadata = catalog.get_dataset_metadata(None, table_name)
                 if metadata is None:
-                    logger.warn(f"Table {table_name} does not exsit.")
+                    logger.warn(f"Table {table_name} does not exist.")
                 elif metadata.is_dataset:
                     logger.warn(
                         f"Table {table_name} is dataset. Nested dataset is not supported."

@@ -42,10 +42,22 @@ class LoadDataExecutor(AbstractExecutor):
             executor = LoadCSVExecutor(self.node)
 
         batch = executor.exec().next()
+        """
         assert (
             len(self.node.dataset_metainfo.columns) == 1
         ), f"Dataset expects one column; found {self.node.dataset_metainfo.columns}"
+        """
         column_name = self.node.dataset_metainfo.columns[0].name
+        """
+        columns = self.node.dataset_metainfo.columns
+            # filling dummy values for columns id and data
+            # these are populated by video during select query
+        data = {
+            columns[0].name: video_metainfo.name,
+            columns[1].name: 0,
+            columns[2].name: numpy.array([[[]]], dtype=numpy.uint8),
+        }
+        """
         batch = Batch(pd.DataFrame([{column_name: self.node.table_metainfo.name}]))
         StorageEngine.write(self.node.dataset_metainfo, batch)
         yield batch + Batch(
