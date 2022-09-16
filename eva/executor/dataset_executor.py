@@ -47,8 +47,8 @@ class DatasetExecutor(AbstractExecutor):
                 len(batch.columns) == 1
             ), f"DatasetExecutor expects 1-column dataframe from child, but {len(batch.columns)} found."
 
-            # Find the dataset's primiary column name, which is usually the
-            # value defined in eva.constants.DATASET_PRIMARY_COLUMN_NAME
+            # Find the dataset's primiary column name, which is usually alias
+            # + eva.constants.DATASET_PRIMARY_COLUMN_NAME
             if dataset_column_name is None:
                 dataset_column_name = batch.columns[0]
             elif dataset_column_name != batch.columns[0]:
