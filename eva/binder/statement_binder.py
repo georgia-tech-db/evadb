@@ -119,18 +119,6 @@ class StatementBinder:
             ):
                 create_dataset_metadata(name)
 
-            # create catalog entry for the video only if the file path exists
-            upload_dir = Path(ConfigurationManager().get_value("storage", "upload_dir"))
-            if Path(node.path).exists() or Path(Path(upload_dir) / node.path).exists():
-                create_video_metadata(node.path)
-
-            # else raise error
-            else:
-                err_msg = f"Video file {node.path} does not exist."
-                logger.error(err_msg)
-                raise BinderError(err_msg)
-
-        # todo: add the video metadata to load statement
         self.bind(table_ref)
 
         table_ref_obj = table_ref.table.table_obj
@@ -144,7 +132,6 @@ class StatementBinder:
             column_list = node.column_list
 
         # else we curate the column list from the metadata
-        # todo: special case for dataset
         else:
             column_list = []
             for column in table_ref_obj.columns:

@@ -16,9 +16,17 @@ from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
+from eva.utils.logging_manager import logger
 
 
 class ExecutorError(Exception):
+    def __init__(self, msg=""):
+        self.msg = msg
+        logger.error(msg)
+
+    def __str__(self):
+        return self.msg
+
     pass
 
 
@@ -32,5 +40,7 @@ def apply_project(batch: Batch, project_list: List[AbstractExpression]):
 def apply_predicate(batch: Batch, predicate: AbstractExpression):
     if not batch.empty() and predicate is not None:
         outcomes = predicate.evaluate(batch).frames
-        batch = Batch(batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True))
+        batch = Batch(
+            batch.frames[(outcomes > 0).to_numpy()].reset_index(drop=True)
+        )
     return batch
