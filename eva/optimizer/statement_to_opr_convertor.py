@@ -74,7 +74,7 @@ class StatementToPlanConvertor:
                 plan_node = LogicalDataset()
                 plan_node.append_child(self._plan)
                 self._plan = plan_node
-            
+
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr
             self._plan = LogicalFunctionScan(
