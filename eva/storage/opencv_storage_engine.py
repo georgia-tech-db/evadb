@@ -52,24 +52,6 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             raise FileExistsError(error)
         return True
 
-    """
-    def create(self, table: DataFrameMetadata, video_file: Path):
-        # Create directory to store video and metadata related to the video
-        dir_path = Path(table.file_url)
-        try:
-            dir_path.mkdir(parents=True)
-            shutil.copy2(str(video_file), str(dir_path))
-        except FileExistsError:
-            error = "Failed to load the video as directory \
-                        already exists: {}".format(
-                dir_path
-            )
-            logger.error(error)
-            raise FileExistsError(error)
-        self._create_video_metadata(dir_path, video_file.name)
-        return True
-    """
-
     def drop(self, table: DataFrameMetadata):
         dir_path = Path(table.file_url)
         try:
@@ -86,7 +68,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 shutil.copy2(str(video_file), str(dir_path))
                 self._create_video_metadata(dir_path, video_file.name)
         except Exception:
-            error = "Current video storage engine only supports loading video on disk."
+            error = "Current video storage engine only supports loading videos on disk."
             logger.exception(error)
             raise RuntimeError(error)
         return True
