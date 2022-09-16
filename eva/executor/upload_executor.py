@@ -17,9 +17,7 @@ import os
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.load_csv_executor import LoadCSVExecutor
-from eva.executor.load_video_executor import LoadVideoExecutor
-from eva.parser.types import FileFormatType
+from eva.executor.load_executor import LoadDataExecutor
 from eva.planner.upload_plan import UploadPlan
 
 
@@ -46,11 +44,7 @@ class UploadExecutor(AbstractExecutor):
         with open(os.path.join(self.upload_dir, path), "wb") as f:
             f.write(video_bytes)
 
-        # invoke the appropriate executor
-        if self.node.file_options["file_format"] == FileFormatType.VIDEO:
-            executor = LoadVideoExecutor(self.node)
-        elif self.node.file_options["file_format"] == FileFormatType.CSV:
-            executor = LoadCSVExecutor(self.node)
+        executor = LoadDataExecutor(self.node)
 
         # for each batch, exec the executor
         for batch in executor.exec():

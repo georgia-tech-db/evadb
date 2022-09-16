@@ -681,6 +681,7 @@ class LogicalLoadData(Operator):
     def __init__(
         self,
         table_metainfo: DataFrameMetadata,
+        dataset_metainfo: DataFrameMetadata,
         path: Path,
         column_list: List[AbstractExpression] = None,
         file_options: dict = dict(),
@@ -688,6 +689,7 @@ class LogicalLoadData(Operator):
     ):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
         self._table_metainfo = table_metainfo
+        self._dataset_metainfo = dataset_metainfo
         self._path = path
         self._column_list = column_list or []
         self._file_options = file_options
@@ -695,6 +697,10 @@ class LogicalLoadData(Operator):
     @property
     def table_metainfo(self):
         return self._table_metainfo
+
+    @property
+    def dataset_metainfo(self):
+        return self._dataset_metainfo
 
     @property
     def path(self):
@@ -709,10 +715,14 @@ class LogicalLoadData(Operator):
         return self._file_options
 
     def __str__(self):
-        return "LogicalLoadData(table: {}, path: {}, \
+        return "LogicalLoadData(table: {}, dataset:{}, path: {}, \
                 column_list: {}, \
                 file_options: {})".format(
-            self.table_metainfo, self.path, self.column_list, self.file_options
+            self.table_metainfo,
+            self.dataset_metainfo,
+            self.path,
+            self.column_list,
+            self.file_options,
         )
 
     def __eq__(self, other):
@@ -722,6 +732,7 @@ class LogicalLoadData(Operator):
         return (
             is_subtree_equal
             and self.table_metainfo == other.table_metainfo
+            and self.dataset_metainfo == other.dataset_metainfo
             and self.path == other.path
             and self.column_list == other.column_list
             and self.file_options == other.file_options
@@ -732,6 +743,7 @@ class LogicalLoadData(Operator):
             (
                 super().__hash__(),
                 self.table_metainfo,
+                self.dataset_metainfo,
                 self.path,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
@@ -753,6 +765,7 @@ class LogicalUpload(Operator):
         path: Path,
         video_blob: str,
         table_metainfo: DataFrameMetadata,
+        dataset_metainfo: DataFrameMetadata,
         column_list: List[AbstractExpression] = None,
         file_options: dict = dict(),
         children: List = None,
@@ -761,6 +774,7 @@ class LogicalUpload(Operator):
         self._path = path
         self._video_blob = video_blob
         self._table_metainfo = table_metainfo
+        self._dataset_metainfo = dataset_metainfo
         self._column_list = column_list or []
         self._file_options = file_options
 
@@ -777,6 +791,10 @@ class LogicalUpload(Operator):
         return self._table_metainfo
 
     @property
+    def dataset_metainfo(self):
+        return self._dataset_metainfo
+
+    @property
     def column_list(self):
         return self._column_list
 
@@ -788,11 +806,13 @@ class LogicalUpload(Operator):
         return "LogicalUpload(path: {}, \
                 blob: {}, \
                 table: {}, \
+                dataset: {}, \
                 column_list: {}, \
                 file_options: {})".format(
             self.path,
             "string of video blob",
             self.table_metainfo,
+            self.dataset_metainfo,
             self.column_list,
             self.file_options,
         )
@@ -806,6 +826,7 @@ class LogicalUpload(Operator):
             and self.path == other.path
             and self.video_blob == other.video_blob
             and self.table_metainfo == other.table_metainfo
+            and self.dataset_metainfo == other.dataset_metainfo
             and self.column_list == other.column_list
             and self.file_options == other.file_options
         )
@@ -817,6 +838,7 @@ class LogicalUpload(Operator):
                 self.path,
                 self.video_blob,
                 self.table_metainfo,
+                self.dataset_metainfo,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
             )

@@ -12,11 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
+
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
 from eva.executor.load_video_executor import LoadVideoExecutor
+from eva.models.storage.batch import Batch
 from eva.parser.types import FileFormatType
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.storage_engine import StorageEngine
 
 
 class LoadDataExecutor(AbstractExecutor):
@@ -37,6 +41,17 @@ class LoadDataExecutor(AbstractExecutor):
         elif self.node.file_options["file_format"] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
 
-        # for each batch, exec the executor
-        for batch in executor.exec():
-            yield batch
+        batch = executor.exec().next()
+        assert (
+            len(self.node.dataset_metainfo.columns) == 1
+        ), f"Dataset expects one column; found {self.node.dataset_metainfo.columns}"
+        column_name = self.node.dataset_metainfo.columns[0].name
+        batch = Batch(pd.DataFrame([{column_name: self.node.table_metainfo.name}]))
+        StorageEngine.write(self.node.dataset_metainfo, batch)
+        yield batch + Batch(
+            pd.DataFrame(
+                [
+                    f"Table {self.node.table_metainfo.name} successfully added to Dataset {self.node.dataset_metainfo.name}"
+                ]
+            )
+        )

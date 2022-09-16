@@ -38,6 +38,7 @@ class UploadPlan(AbstractPlan):
         file_path: Path,
         video_blob: str,
         table_metainfo: DataFrameMetadata,
+        dataset_metainfo: DataFrameMetadata,
         batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
@@ -46,6 +47,7 @@ class UploadPlan(AbstractPlan):
         self._file_path = file_path
         self._video_blob = video_blob
         self._table_metainfo = table_metainfo
+        self._dataset_metainfo = dataset_metainfo
         self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
@@ -63,6 +65,10 @@ class UploadPlan(AbstractPlan):
         return self._table_metainfo
 
     @property
+    def dataset_metainfo(self):
+        return self._dataset_metainfo
+
+    @property
     def batch_mem_size(self):
         return self._batch_mem_size
 
@@ -78,12 +84,14 @@ class UploadPlan(AbstractPlan):
         return "UploadPlan(file_path={}, \
             video_blob={}, \
             table_id={}, \
+            dataset={}, \
             batch_mem_size={}, \
             column_list={}, \
             file_options={})".format(
             self.file_path,
             "string of video blob",
             self.table_metainfo,
+            self.dataset_metainfo,
             self.batch_mem_size,
             self.column_list,
             self.file_options,
@@ -96,6 +104,7 @@ class UploadPlan(AbstractPlan):
                 self.file_path,
                 self.video_blob,
                 self.table_metainfo,
+                self.dataset_metainfo,
                 self.batch_mem_size,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),

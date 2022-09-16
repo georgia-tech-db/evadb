@@ -13,16 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+from pathlib import Path
 from typing import Union
 
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
     create_dataset_metadata,
+    create_video_metadata,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -108,27 +111,45 @@ class StatementBinder:
         self, node: Union[LoadDataStatement, UploadStatement]
     ):
         table_ref = node.table_ref
-        name = table_ref.table.table_name
+        table_name = table_ref.table.table_name
+        dataset_ref = node.dataset_ref
+        dataset_name = dataset_ref.table.table_name
+
         if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # create dataset catalog object if it does not exist
-            if not self._catalog.check_table_exists(
+            # TODO for now, we require the table name to be unique. Change later.
+            if self._catalog.check_table_exists(
                 table_ref.table.database_name, table_ref.table.table_name
             ):
-                create_dataset_metadata(name)
+                err_msg = f"Video table {table_name} already exists."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+
+            # create catalog entry only if the file path exists
+            upload_dir = Path(ConfigurationManager().get_value("storage", "upload_dir"))
+            if not (
+                Path(node.path).exists() or Path(Path(upload_dir) / node.path).exists()
+            ):
+                err_msg = f"Video file {node.path} does not exist."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+
+            # All good, we create video table metadata
+            create_video_metadata(table_name)
 
         self.bind(table_ref)
+        # Below is for load csv with column specified
+        if node.file_options["file_format"] == FileFormatType.CSV:
+            table_ref_obj = table_ref.table.table_obj
+            if table_ref_obj is None:
+                error = f"Table {table_name} does not exist."
+                logger.error(error)
+                raise BinderError(error)
 
-        table_ref_obj = table_ref.table.table_obj
-        if table_ref_obj is None:
-            error = f"{name} does not exist."
-            logger.error(error)
-            raise BinderError(error)
+            # if query had columns specified, we just copy them
+            if node.column_list is not None:
+                column_list = node.column_list
 
-        # if query had columns specified, we just copy them
-        if node.column_list is not None:
-            column_list = node.column_list
-
-        # else we curate the column list from the metadata
+            # else we curate the column list from the metadata
         else:
             column_list = []
             for column in table_ref_obj.columns:
@@ -140,11 +161,18 @@ class StatementBinder:
                     )
                 )
 
-        # bind the columns
-        for expr in column_list:
-            self.bind(expr)
+            # bind the columns
+            for expr in column_list:
+                self.bind(expr)
 
-        node.column_list = column_list
+            node.column_list = column_list
+
+        # create dataset catalog entry if not existed
+        if not self._catalog.check_table_exists(
+            dataset_ref.table.database_name, dataset_ref.table.table_name
+        ):
+            create_dataset_metadata(dataset_name)
+        self.bind(dataset_ref)
 
     @bind.register(DropTableStatement)
     def _bind_drop_table_statement(self, node: DropTableStatement):

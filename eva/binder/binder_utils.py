@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.df_metadata import DataFrameMetadata, DataFrameType
+from eva.constants import DATASET_PRIMARY_COLUMN_NAME
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
@@ -47,13 +48,21 @@ def create_dataset_metadata(name: str) -> DataFrameMetadata:
     catalog = CatalogManager()
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            DATASET_PRIMARY_COLUMN_NAME,
+            ColumnType.TEXT,
+            None,
+            [],
+            ColConstraintInfo(unique=True),
         )
     ]
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="name", dftype=DataFrameType.DATASET
+        name,
+        uri,
+        col_metadata,
+        identifier_column=DATASET_PRIMARY_COLUMN_NAME,
+        dftype=DataFrameType.DATASET,
     )
     return metadata
 

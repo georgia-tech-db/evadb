@@ -651,6 +651,7 @@ class LogicalLoadToPhysical(Rule):
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
             before.table_metainfo,
+            before.dataset_metainfo,
             before.path,
             batch_mem_size,
             before.column_list,
@@ -685,6 +686,7 @@ class LogicalUploadToPhysical(Rule):
             before.path,
             before.video_blob,
             before.table_metainfo,
+            before.dataset_metainfo,
             batch_mem_size,
             before.column_list,
             before.file_options,

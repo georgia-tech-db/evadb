@@ -35,6 +35,7 @@ class LoadDataPlan(AbstractPlan):
     def __init__(
         self,
         table_metainfo: DataFrameMetadata,
+        dataset_metainfo: DataFrameMetadata,
         file_path: Path,
         batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
@@ -42,6 +43,7 @@ class LoadDataPlan(AbstractPlan):
     ):
         super().__init__(PlanOprType.LOAD_DATA)
         self._table_metainfo = table_metainfo
+        self._dataset_metainfo = dataset_metainfo
         self._file_path = file_path
         self._batch_mem_size = batch_mem_size
         self._column_list = column_list
@@ -50,6 +52,10 @@ class LoadDataPlan(AbstractPlan):
     @property
     def table_metainfo(self):
         return self._table_metainfo
+
+    @property
+    def dataset_metainfo(self):
+        return self._dataset_metainfo
 
     @property
     def file_path(self):
@@ -68,11 +74,12 @@ class LoadDataPlan(AbstractPlan):
         return self._file_options
 
     def __str__(self):
-        return "LoadDataPlan(table_id={}, file_path={}, \
+        return "LoadDataPlan(table_id={}, dataset={}, file_path={}, \
             batch_mem_size={}, \
             column_list={}, \
             file_options={})".format(
             self.table_metainfo,
+            self.dataset_metainfo,
             self.file_path,
             self.batch_mem_size,
             self.column_list,
@@ -84,6 +91,7 @@ class LoadDataPlan(AbstractPlan):
             (
                 super().__hash__(),
                 self.table_metainfo,
+                self.dataset_metainfo,
                 self.file_path,
                 self.batch_mem_size,
                 tuple(self.column_list),
