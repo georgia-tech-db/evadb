@@ -37,7 +37,6 @@ class Context:
         return cls._instance
 
     def __init__(self):
-        self._config_manager = ConfigurationManager()
         self._gpus = self._populate_gpu_ids()
 
     @property
@@ -53,7 +52,7 @@ class Context:
         return result_address
 
     def _populate_gpu_from_config(self) -> List:
-        gpu_conf = self._config_manager.get_value("executor", "gpus")
+        gpu_conf = ConfigurationManager.get_value("executor", "gpus")
         gpu_conf = gpu_conf if gpu_conf else {}
         this_address = self._possible_addresses()
         intersection_addresses = this_address.intersection(gpu_conf.keys())

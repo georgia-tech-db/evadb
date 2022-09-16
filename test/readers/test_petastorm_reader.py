@@ -75,7 +75,8 @@ class PetastormLoaderTest(unittest.TestCase):
             shard_count=-2,
         )
         list(petastorm_reader._read())
-        petastorm_config = ConfigurationManager().get_value("storage", "petastorm")
+        ConfigurationManager.reload()
+        petastorm_config = ConfigurationManager.get_value("storage", "petastorm")
         mock.assert_called_once_with(
             os.path.join(upload_dir_from_config, "dummy.avi"),
             shard_count=None,

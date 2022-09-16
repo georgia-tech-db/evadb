@@ -73,7 +73,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         Returns:
             pd.DataFrame: outcome after prediction
         """
-        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
+        gpu_batch_size = ConfigurationManager.get_value("executor", "gpu_batch_size")
 
         if gpu_batch_size:
             chunks = torch.split(frames, gpu_batch_size)

@@ -95,7 +95,7 @@ def generate_file_path(name: str = "") -> Path:
         Path: pathlib.Path object
 
     """
-    dataset_location = ConfigurationManager().get_value("core", "datasets_dir")
+    dataset_location = ConfigurationManager.get_value("core", "datasets_dir")
     if dataset_location is None:
         logger.error("Missing dataset location key in eva.yml")
         raise KeyError("Missing datasets_dir key in eva.yml")

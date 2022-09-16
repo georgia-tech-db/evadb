@@ -32,8 +32,7 @@ class Session(object):
         return cls._instance
 
     def __init__(self):
-        self._config = ConfigurationManager()
-        name = self._config.get_value("core", "application")
+        name = ConfigurationManager.get_value("core", "application")
         self.init_spark_session(name)
 
     def init_spark_session(self, application_name, spark_master=None):
@@ -48,7 +47,7 @@ class Session(object):
         """
 
         eva_spark_conf = SparkConf()
-        pyspark_config = self._config.get_value("pyspark", "property")
+        pyspark_config = ConfigurationManager.get_value("pyspark", "property")
         for key, value in pyspark_config.items():
             eva_spark_conf.set(key, value)
 

@@ -29,7 +29,7 @@ from eva.utils.logging_manager import logger
 class OpenCVStorageEngine(AbstractStorageEngine):
     def __init__(self):
         self.metadata = "metadata"
-        self.curr_version = ConfigurationManager().get_value(
+        self.curr_version = ConfigurationManager.get_value(
             "storage", "video_engine_version"
         )
 

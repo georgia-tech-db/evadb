@@ -37,7 +37,7 @@ class PetastormStorageEngine(AbstractStorageEngine):
         self._spark = Session()
         self.spark_session = self._spark.get_session()
         self.spark_context = self._spark.get_context()
-        self.coalesce = ConfigurationManager().get_value("pyspark", "coalesce")
+        self.coalesce = ConfigurationManager.get_value("pyspark", "coalesce")
 
     def _spark_url(self, table: DataFrameMetadata) -> str:
         """

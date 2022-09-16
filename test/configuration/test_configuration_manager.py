@@ -25,13 +25,11 @@ class ConfigurationManagerTests(unittest.TestCase):
 
     def test_configuration_manager_read(self):
 
-        configuration_manager = ConfigurationManager()
-
-        value = configuration_manager.get_value("core", "datasets_dir")
+        value = ConfigurationManager.get_value("core", "datasets_dir")
         self.assertNotEqual(value, None)
 
         with pytest.raises(KeyError):
-            value = configuration_manager.get_value("invalid", "")
+            value = ConfigurationManager.get_value("invalid", "")
 
         with pytest.raises(KeyError):
-            value = configuration_manager.get_value("core", "invalid")
+            value = ConfigurationManager.get_value("core", "invalid")

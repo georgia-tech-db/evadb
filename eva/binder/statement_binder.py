@@ -123,11 +123,11 @@ class StatementBinder:
 
                 # create catalog entry only if the file path exists
                 upload_dir = Path(
-                    ConfigurationManager().get_value("storage", "upload_dir")
+                    ConfigurationManager.get_value("storage", "upload_dir")
                 )
                 if (
                     Path(node.path).exists()
-                    or Path(Path(upload_dir) / node.path).exists()
+                    or Path(upload_dir / node.path).exists()
                 ):
                     create_video_metadata(name)
 

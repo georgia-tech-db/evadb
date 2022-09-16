@@ -62,8 +62,9 @@ class UploadExecutorTest(unittest.TestCase):
 
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     def test_should_search_in_upload_directory(self, create_mock):
+        ConfigurationManager.reload()
         self.upload_dir = Path(
-            ConfigurationManager().get_value("storage", "upload_dir")
+            ConfigurationManager.get_value("storage", "upload_dir")
         )
         file_path = "video"
         video_blob = "b'AAAA'"

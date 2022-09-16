@@ -16,9 +16,7 @@ import asyncio
 import sys
 from os.path import abspath, dirname, join
 
-from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
-from eva.configuration.constants import EVA_DEFAULT_DIR, EVA_INSTALLATION_DIR
 from eva.server.server import start_server  # noqa: E402
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
 from eva.utils.logging_manager import logger
@@ -36,10 +34,9 @@ def eva():
     Start the eva system
     """
     # Get the hostname and port information from the configuration file
-    config = ConfigurationManager()
-    hostname = config.get_value("server", "host")
-    port = config.get_value("server", "port")
-    socket_timeout = config.get_value("server", "socket_timeout")
+    hostname = ConfigurationManager.get_value("server", "host")
+    port = ConfigurationManager.get_value("server", "port")
+    socket_timeout = ConfigurationManager.get_value("server", "socket_timeout")
     loop = asyncio.new_event_loop()
     stop_server_future = loop.create_future()
 
@@ -60,10 +57,6 @@ def eva():
 
 
 def main():
-    bootstrap_environment(
-        eva_config_dir=EVA_DEFAULT_DIR,
-        eva_installation_dir=EVA_INSTALLATION_DIR,
-    )
     mode = ConfigurationManager().get_value("core", "mode")
     init_builtin_udfs(mode=mode)
     eva()

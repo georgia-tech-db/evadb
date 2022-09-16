@@ -27,8 +27,7 @@ from eva.storage.storage_engine import StorageEngine
 class LoadCSVExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.upload_dir = config.get_value("storage", "upload_dir")
+        self.upload_dir = ConfigurationManager.get_value("storage", "upload_dir")
 
     def validate(self):
         pass

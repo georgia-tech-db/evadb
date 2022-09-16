@@ -640,7 +640,7 @@ class LogicalLoadToPhysical(Rule):
         # ToDO: Experiment heuristics.
 
         batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
+        config_batch_mem_size = ConfigurationManager.get_value(
             "executor", "batch_mem_size"
         )
         if config_batch_mem_size:
@@ -672,7 +672,7 @@ class LogicalUploadToPhysical(Rule):
         # ToDO: Experiment heuristics.
 
         batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
+        config_batch_mem_size = ConfigurationManager.get_value(
             "executor", "batch_mem_size"
         )
         if config_batch_mem_size:
@@ -706,7 +706,7 @@ class LogicalGetToSeqScan(Rule):
         # ToDO: Experiment heuristics.
 
         batch_mem_size = 30000000  # 30mb
-        config_batch_mem_size = ConfigurationManager().get_value(
+        config_batch_mem_size = ConfigurationManager.get_value(
             "executor", "batch_mem_size"
         )
         if config_batch_mem_size:

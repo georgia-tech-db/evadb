@@ -47,7 +47,7 @@ class PetastormReader(AbstractReader):
         self.cur_shard = cur_shard
         self.shard_count = shard_count
         self.predicate = predicate
-        petastorm_config = ConfigurationManager().get_value("storage", "petastorm")
+        petastorm_config = ConfigurationManager.get_value("storage", "petastorm")
         # cache not allowed with predicates
         if self.predicate or petastorm_config is None:
             petastorm_config = {}

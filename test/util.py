@@ -38,8 +38,7 @@ from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
 FRAME_SIZE = 2 * 2 * 3
-config = ConfigurationManager()
-upload_dir_from_config = config.get_value("storage", "upload_dir")
+upload_dir_from_config = ConfigurationManager.get_value("storage", "upload_dir")
 
 
 EVA_TEST_DATA_DIR = EVA_INSTALLATION_DIR.parent
@@ -308,7 +307,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
 
 
 def load_inbuilt_udfs():
-    mode = ConfigurationManager().get_value("core", "mode")
+    mode = ConfigurationManager.get_value("core", "mode")
     init_builtin_udfs(mode=mode)
 
 

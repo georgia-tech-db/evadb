@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import imp
 import unittest
 from test.util import (
     create_dummy_batches,
@@ -27,6 +28,7 @@ import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.server.command_handler import execute_query_fetch_all
@@ -37,6 +39,7 @@ NUM_FRAMES = 10
 class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        ConfigurationManager.reload()
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
