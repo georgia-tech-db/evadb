@@ -60,8 +60,8 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             logger.exception(f"Failed to drop the video table {e}")
 
     def write(self, table: DataFrameMetadata, rows: Batch):
-        df = rows.frames
         try:
+            df = rows.frames
             dir_path = Path(table.file_url)
             for video_file_path in df["video_file_path"]:
                 video_file = Path(video_file_path)

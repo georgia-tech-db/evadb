@@ -14,6 +14,7 @@
 # limitations under the License.
 import struct
 import unittest
+from unittest.mock import MagicMock
 
 import mock
 from mock import mock_open
@@ -59,4 +60,12 @@ class VideoStorageEngineTest(unittest.TestCase):
         corrupt_meta = struct.pack("!H", self.curr_version + 1)
         with mock.patch("builtins.open", mock_open(read_data=corrupt_meta)):
             with self.assertRaises(RuntimeError):
-                yield from self.video_engine._get_video_file_path("metadata")
+                list(self.video_engine._get_video_file_path("metadata"))
+
+    def test_write(self):
+        batch = MagicMock()
+        batch.frames = []
+        table = MagicMock()
+        table.file_url = Exception()
+        with self.assertRaises(Exception):
+            self.video_engine.write(MagicMock(), batch)

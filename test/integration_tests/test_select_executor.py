@@ -138,7 +138,7 @@ class SelectExecutorTest(unittest.TestCase):
                    INTO MNIST;"""
         execute_query_fetch_all(query)
 
-        select_query = "SELECT * FROM MNIST;"
+        select_query = "SELECT id, data FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("mnist.id")
         video_reader = OpenCVReader("data/mnist/mnist.mp4", batch_mem_size=30000000)
@@ -147,6 +147,7 @@ class SelectExecutorTest(unittest.TestCase):
             batch.frames["name"] = "mnist.mp4"
             expected_batch += batch
         expected_batch.modify_column_alias("mnist")
+        expected_batch = expected_batch.project(["mnist.id", "mnist.data"])
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
@@ -167,11 +168,14 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
-        select_query = "SELECT name, id, data FROM MyVideo WHERE id >= 2;"
+        select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(filters=range(2, NUM_FRAMES)))[0]
-        self.assertEqual(actual_batch, expected_batch)
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
 
         select_query = "SELECT name, id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
         actual_batch = execute_query_fetch_all(select_query)
@@ -424,3 +428,7 @@ class SelectExecutorTest(unittest.TestCase):
                 expected_batch.sort_orderby(["table1.a0"]),
                 actual_batch.sort_orderby(["table1.a0"]),
             )
+
+
+if __name__ == "__main__":
+    unittest.main()

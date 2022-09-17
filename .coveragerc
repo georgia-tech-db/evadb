@@ -1,2 +1,5 @@
 [run]
 omit = eva/parser/evaql/*
+exclude_lines =
+    # pragma: no cover
+    if TYPE_CHECKING:
