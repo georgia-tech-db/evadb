@@ -39,7 +39,7 @@ VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
     "numpy==1.21.6",
-    "opencv-python==4.6.0.66",
+    "opencv-python==4.5.5.64",
     "pandas==1.3.5",
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
