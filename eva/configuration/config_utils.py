@@ -20,7 +20,7 @@ import yaml
 
 def read_value_config(config_path: Path, category: str, key: str) -> Any:
     with config_path.open("r") as yml_file:
-        config_obj = yaml.load(yml_file)
+        config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
         if config_obj is None:
             raise ValueError(f"Invalid path to config file {config_path}")
         return config_obj[category][key]
@@ -29,7 +29,7 @@ def read_value_config(config_path: Path, category: str, key: str) -> Any:
 def update_value_config(config_path: Path, category: str, key: str, value: str):
     # read config file
     with config_path.open("r") as yml_file:
-        config_obj = yaml.load(yml_file)
+        config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
         if config_obj is None:
             raise ValueError(f"Invalid path to config file {config_path}")
 

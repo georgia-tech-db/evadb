@@ -13,23 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pytest
 
 from eva.configuration.configuration_manager import ConfigurationManager
 
 
 class ConfigurationManagerTests(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def setUp(self) -> None:
+        self.config = ConfigurationManager()
+        return super().setUp()
 
-    def test_configuration_manager_read(self):
-
-        configuration_manager = ConfigurationManager()
-
-        value = configuration_manager.get_value("core", "datasets_dir")
+    def test_configuration_manager_read_nonexistent_key(self):
+        value = self.config.get_value("core", "datasets_dir")
         self.assertNotEqual(value, None)
 
-        value = configuration_manager.get_value("invalid", "")
-        self.assertEqual(value, None)
+    def test_configuration_manager_read_invalid_category(self):
+        with pytest.raises(KeyError):
+            value = self.config.get_value("invalid", "")
+            self.assertEqual(value, None)
 
-        value = configuration_manager.get_value("core", "invalid")
-        self.assertEqual(value, None)
+    def test_configuration_manager_read_invalid_key(self):
+        with pytest.raises(KeyError):
+            value = self.config.get_value("core", "invalid")
+            self.assertEqual(value, None)
