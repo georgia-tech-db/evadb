@@ -21,39 +21,15 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torchvision.transforms as transforms
 from PIL import Image
-from skimage.transform import resize
-from torch.autograd import Variable
+from torch import Tensor
+from torchvision import transforms
 
 from eva.configuration.dictionary import EVA_DEFAULT_DIR
-from eva.udfs.abstract_udf import AbstractClassifierUDF
-from eva.udfs.gpu_compatible import GPUCompatible
+from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 # VGG configuration
 cfg = {
-    "VGG11": [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
-    "VGG13": [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
-    "VGG16": [
-        64,
-        64,
-        "M",
-        128,
-        128,
-        "M",
-        256,
-        256,
-        256,
-        "M",
-        512,
-        512,
-        512,
-        "M",
-        512,
-        512,
-        512,
-        "M",
-    ],
     "VGG19": [
         64,
         64,
@@ -111,7 +87,7 @@ class VGG(nn.Module):
         return nn.Sequential(*layers)
 
 
-class EmotionDetector(AbstractClassifierUDF, GPUCompatible):
+class EmotionDetector(PytorchAbstractClassifierUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -131,83 +107,69 @@ class EmotionDetector(AbstractClassifierUDF, GPUCompatible):
             os.path.join(EVA_DEFAULT_DIR, "data", "models", "emotion_detector.t7")
         )
         self.model.load_state_dict(model_state["net"])
-
-        # move to GPU and set to evaluation mode
-        self.to_device("0")
         self.model.eval()
 
-        # define the transforms
+        # for augmentation
         self.cut_size = 44
-        self.transforms = transforms.Compose(
-            [
-                transforms.TenCrop(self.cut_size),
-                transforms.Lambda(
-                    lambda crops: torch.stack(
-                        [transforms.ToTensor()(crop) for crop in crops]
-                    )
-                ),
-            ]
-        )
 
-    def to_device(self, device: str):
-        print(f"to device {device}")
-        gpu = "cuda:{}".format(device)
-        self.model = self.model.to(torch.device(gpu))
-        return self
+    def transforms(self, frame: Tensor) -> Tensor:
+        """
+        Performs augmentation on input frame
+        Arguments:
+            frame (Tensor): Frame on which augmentation needs
+            to be performed
+        Returns:
+            frame (Tensor): Augmented frame
+        """
+
+        # convert to grayscale, resize and make tensor
+        frame = frame.convert("L")
+        frame = transforms.functional.resize(frame, (48, 48))
+        frame = transforms.functional.to_tensor(frame)
+
+        return frame
+
+    def transform(self, images: np.ndarray):
+        # reverse the channels from opencv
+        return self.transforms(Image.fromarray(images[:, :, ::-1]))
 
     @property
     def labels(self) -> List[str]:
         return ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
 
-    def classify(self, frames: pd.DataFrame) -> pd.DataFrame:
+    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
-            frames (np.ndarray): Frames on which predictions need
+            frames (Tensor): Frames on which predictions need
             to be performed
         Returns:
             outcome (pd.DataFrame): Emotion Predictions for input frames
         """
 
-        # convert frames to ndarray
-        frames_list = frames.transpose().values.tolist()[0]
-        frames = np.asarray(frames_list)
-
         # result dataframe
         outcome = pd.DataFrame()
-        for frame in frames:
 
-            # preprocess
-            frame = np.dot(frame[..., :3], [0.299, 0.587, 0.114])
-            frame = resize(frame, (48, 48), mode="symmetric").astype(np.uint8)
-            frame = frame[:, :, np.newaxis]
-            frame = np.concatenate([frame, frame, frame], axis=2)
-            frame = Image.fromarray(frame)
+        # convert to 3 channels, ten crop and stack
+        frames = frames.repeat(3, 1, 1)
+        frames = transforms.functional.ten_crop(frames, self.cut_size)
+        frames = torch.stack([crop for crop in frames])
 
-            # transform frame
-            inputs = self.transforms(frame)
+        # perform predictions and take mean over crops
+        predictions = self.model(frames)
+        predictions = torch.mean(predictions, dim=0)
 
-            # predict
-            ncrops, c, h, w = np.shape(inputs)
-            inputs = inputs.view(-1, c, h, w)
-            inputs = inputs.cuda()
-            inputs = Variable(inputs)
-            outputs = self.model(inputs)
+        # get the scores
+        score = F.softmax(predictions, dim=0)
+        _, predicted = torch.max(predictions.data, 0)
 
-            # avg over crops
-            outputs_avg = outputs.view(ncrops, -1).mean(0)
-
-            # get max index
-            score = F.softmax(outputs_avg, dim=0)
-            _, predicted = torch.max(outputs_avg.data, 0)
-
-            # save results
-            outcome = outcome.append(
-                {
-                    "labels": self.labels[predicted.item()],
-                    "scores": score.cpu().detach().numpy()[predicted.item()],
-                },
-                ignore_index=True,
-            )
+        # save results
+        outcome = outcome.append(
+            {
+                "labels": self.labels[predicted.item()],
+                "scores": score.cpu().detach().numpy()[predicted.item()],
+            },
+            ignore_index=True,
+        )
 
         return outcome
