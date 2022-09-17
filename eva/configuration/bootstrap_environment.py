@@ -90,9 +90,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
 
     # fill default values for eva installation dir,
     # dataset, database and upload loc if not present
-    eva_installation_dir_from_file = read_value_config(
-        cfg, "core", "eva_installation_dir"
-    )
+    install_dir = read_value_config(cfg, "core", "eva_installation_dir")
     dataset_location = read_value_config(cfg, "core", "datasets_dir")
     database_uri = read_value_config(cfg, "core", "catalog_database_uri")
     upload_location = None
@@ -101,9 +99,9 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         not dataset_location
         or not database_uri
         or not upload_location
-        or not eva_installation_dir_from_file
+        or not install_dir
     ):
-        if not eva_installation_dir_from_file:
+        if not install_dir:
             update_value_config(
                 cfg, "core", "eva_installation_dir", str(default_install_dir.resolve())
             )
