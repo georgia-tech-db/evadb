@@ -29,7 +29,9 @@ from eva.parser.types import FileFormatType
 class UploadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
-    def test_should_call_opencv_reader_and_storage_engine(self, write_mock, create_mock):
+    def test_should_call_opencv_reader_and_storage_engine(
+        self, write_mock, create_mock
+    ):
         file_path = "video"
         video_blob = "b'AAAA'"
         table_metainfo = "info"
@@ -54,8 +56,7 @@ class UploadExecutorTest(unittest.TestCase):
             batch = next(upload_executor.exec())
             create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
             write_mock.assert_called_once_with(
-                table_metainfo,
-                Batch(pd.DataFrame([{"video_file_path": file_path}]))
+                table_metainfo, Batch(pd.DataFrame([{"video_file_path": file_path}]))
             )
             location = file_path
             expected = Batch(
@@ -97,7 +98,7 @@ class UploadExecutorTest(unittest.TestCase):
             create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
             write_mock.assert_called_once_with(
                 table_metainfo,
-                Batch(pd.DataFrame([{"video_file_path": str(location)}]))
+                Batch(pd.DataFrame([{"video_file_path": str(location)}])),
             )
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {location}"}])

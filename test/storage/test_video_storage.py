@@ -53,10 +53,10 @@ class VideoStorageEngineTest(unittest.TestCase):
     def test_should_raise_file_exist_error(self, m):
         m.side_effect = FileExistsError
         with self.assertRaises(FileExistsError):
-            self.video_engine.create(self.table, "sample")
+            self.video_engine.create(self.table, if_not_exists=False)
 
     def test_invalid_metadata(self):
         corrupt_meta = struct.pack("!H", self.curr_version + 1)
         with mock.patch("builtins.open", mock_open(read_data=corrupt_meta)):
             with self.assertRaises(RuntimeError):
-                self.video_engine._get_video_file_path("metadata")
+                yield from self.video_engine._get_video_file_path("metadata")

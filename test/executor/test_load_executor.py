@@ -29,7 +29,9 @@ from eva.parser.types import FileFormatType
 class LoadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
     @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
-    def test_should_call_opencv_reader_and_storage_engine(self, write_mock, create_mock):
+    def test_should_call_opencv_reader_and_storage_engine(
+        self, write_mock, create_mock
+    ):
         file_path = "video"
         table_metainfo = "info"
         batch_mem_size = 3000
@@ -52,8 +54,7 @@ class LoadExecutorTest(unittest.TestCase):
             batch = next(load_executor.exec())
             create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
             write_mock.assert_called_once_with(
-                table_metainfo,
-                Batch(pd.DataFrame([{"video_file_path": file_path}]))
+                table_metainfo, Batch(pd.DataFrame([{"video_file_path": file_path}]))
             )
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {file_path}"}])
@@ -90,7 +91,7 @@ class LoadExecutorTest(unittest.TestCase):
             create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
             write_mock.assert_called_once_with(
                 table_metainfo,
-                Batch(pd.DataFrame([{"video_file_path": str(location)}]))
+                Batch(pd.DataFrame([{"video_file_path": str(location)}])),
             )
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {location}"}])
