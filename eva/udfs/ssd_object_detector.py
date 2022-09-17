@@ -34,7 +34,7 @@ except ImportError as e:
     )
 
 try:
-    from torchvision.transforms import Compose, transforms
+    from torchvision.transforms import transforms
 except ImportError as e:
     raise ImportError(
         f"Failed to import with error {e}, \
@@ -50,6 +50,10 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
     def __init__(self, threshold=0.5):
         super().__init__()
         self.threshold = threshold
+        self.transforms = [
+            transforms.Resize([300, 300]),
+            transforms.ToTensor(),
+        ]
 
         # load ssd from pytorch hub api and default to cpu
         self.model = torch.hub.load(
@@ -158,15 +162,6 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
     @property
     def input_format(self) -> FrameInfo:
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
-
-    @property
-    def transforms(self) -> Compose:
-        return Compose(
-            [
-                transforms.Resize([300, 300]),
-                transforms.ToTensor(),
-            ]
-        )
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         assert frames.size()[-1] == frames.size()[-2] == 300
