@@ -30,10 +30,8 @@ class ConfigurationManagerTests(unittest.TestCase):
 
     def test_configuration_manager_read_invalid_category(self):
         with pytest.raises(KeyError):
-            value = self.config.get_value("invalid", "")
-            self.assertEqual(value, None)
+            _ = self.config.get_value("invalid", "")
 
     def test_configuration_manager_read_invalid_key(self):
         with pytest.raises(KeyError):
-            value = self.config.get_value("core", "invalid")
-            self.assertEqual(value, None)
+            _ = self.config.get_value("core", "invalid")
