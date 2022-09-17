@@ -14,7 +14,7 @@ Setting up the development environment
 To hack on EVA, you need to checkout the repository and build EVA from
 the source. Follow the following instructions to build EVA and test your
 changes locally. We recommend using a virtual environment and the pip
-package manager. EVA requires JAVA 8 for generating the parser.
+package manager. EVA requires JAVA 11 for generating the parser.
 
 ::
 
@@ -25,44 +25,17 @@ package manager. EVA requires JAVA 8 for generating the parser.
    sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
    sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
    pip install -e ".[dev]"
+   bash script/test/test.sh                             # to run the test suite
 
-For M1 Mac users, we recommend using the following instructions to safely
-setup EVA (dev) on your local machine:
+For developers using an M1 Mac, here are some pointers for installing JAVA:
 
-1. Install Java 11 using homebrew:
-   ::
-      
-     brew install openjdk@11
-
-2. If you have existing versions of Java or if ``java -version`` doesn't point to the homebrew
-   version of Java you have just installed, run the following command:
-   ::
-      
-     export JAVA_HOME="/opt/homebrew/opt/openjdk@11"
-   You can also add the above command inside ``./zshrc`` to permanently set the path to Java.
-
-3. Run the following command to resolve multithreading issues in macOS:
-   ::
-      
-      export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
-   WARNING: Do not add this command inside ``./zshrc`` as not all programs require this. Either run
-   this command every time or setup a shell script to do so for you.
-
-4. Open ``setup.py`` and edit the line ``opencv-python==4.5.1.48`` to ``opencv-python>=4.5.1.58``.
-
-5. Install as per instructions shared above (except for the Java installation part)
-
-6. Run ``bash script/test/test.sh`` to verify everything is working correctly.
-
-Common issues with M1 Mac Installation:
-
--  If you get errors related to ``from .cv2 import *``, it is likely that there are conflicting versions
-   of ``opencv-python`` causing this problem. Running the following should most likely resolve the issue:
+::      
+   brew install openjdk@11    #to install openjdk 11
+   export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc or ~/.bashrc
+   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
+   pip install --upgrade opencv-python     # change setup.py to use opencv-python>=4.5.1.58
    
-   ::
-
-      pip install --upgrade opencv-python
-
+      
 Testing
 ^^^^^^^
 
