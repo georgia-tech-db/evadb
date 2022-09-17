@@ -74,6 +74,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
 
     if cfg is None:
         raise OSError(f"Eva configuration file not found at {ymlfile}")
+
     # set logging level
     mode = read_value_config(cfg, "core", "mode")
     assert mode == "debug" or mode == "release"
@@ -86,7 +87,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     logger.setLevel(level)
     logger.debug("Setting logging level to: " + str(level))
 
-    # fill default values for dataset, database and upload loc if not present
+    # fill default values for eva installation dir, 
+    # dataset, database and upload loc if not present
     eva_installation_dir_from_file = read_value_config(
         cfg, "core", "eva_installation_dir"
     )
