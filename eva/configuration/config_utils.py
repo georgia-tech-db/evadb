@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import yaml
-from typing import Any
 from pathlib import Path
+from typing import Any
+
+import yaml
+
 
 def read_value_config(config_path: Path, category: str, key: str) -> Any:
     with config_path.open("r") as yml_file:
@@ -35,4 +37,3 @@ def update_value_config(config_path: Path, category: str, key: str, value: str):
     config_obj[category][key] = value
     with config_path.open("w") as yml_file:
         yml_file.write(yaml.dump(config_obj))
-

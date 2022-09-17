@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import yaml
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.config_utils import read_value_config, update_value_config
@@ -25,8 +24,7 @@ from eva.configuration.constants import (
 
 class ConfigurationManager(object):
     _instance = None
-    _cfg = None
-    _yml_path = None
+    _yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
 
     def __new__(cls):
         if cls._instance is None:
@@ -36,10 +34,6 @@ class ConfigurationManager(object):
                 eva_config_dir=EVA_DEFAULT_DIR,
                 eva_installation_dir=EVA_INSTALLATION_DIR,
             )  # Setup eva in home directory
-
-            cls._yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
-            with cls._yml_path.open("r") as ymlfile:
-                cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         return cls._instance
 
