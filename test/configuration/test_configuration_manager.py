@@ -24,7 +24,7 @@ class ConfigurationManagerTests(unittest.TestCase):
         self.config = ConfigurationManager()
         return super().setUp()
 
-    def test_configuration_manager_read_nonexistent_key(self):
+    def test_configuration_manager_read_valid_key(self):
         value = self.config.get_value("core", "datasets_dir")
         self.assertNotEqual(value, None)
 
