@@ -19,7 +19,6 @@ import pandas as pd
 import torch
 from torch import Tensor
 from torchvision import models
-from torchvision.transforms import Compose, transforms
 
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
@@ -38,10 +37,6 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
     @property
     def labels(self) -> List[str]:
         return []
-
-    @property
-    def transforms(self) -> Compose:
-        return Compose([transforms.ToTensor()])
 
     def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
         """
