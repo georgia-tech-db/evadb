@@ -88,7 +88,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             )
             for batch in reader.read():
                 column_name = table.columns[0].name
-                batch.frames[column_name] = video_file_name
+                batch.frames[column_name] = str(video_file_name)
                 yield batch
 
     def _get_video_file_path(self, metadata_file):

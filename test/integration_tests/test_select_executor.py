@@ -140,10 +140,11 @@ class SelectExecutorTest(unittest.TestCase):
 
         select_query = "SELECT * FROM MNIST;"
         actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
+        actual_batch.sort("mnist.id")
         video_reader = OpenCVReader("data/mnist/mnist.mp4", batch_mem_size=30000000)
         expected_batch = Batch(frames=pd.DataFrame())
         for batch in video_reader.read():
+            batch.frames["name"] = "mnist.mp4"
             expected_batch += batch
         expected_batch.modify_column_alias("mnist")
         self.assertEqual(actual_batch, expected_batch)
