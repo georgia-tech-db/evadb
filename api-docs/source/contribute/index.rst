@@ -27,13 +27,12 @@ package manager. EVA requires JAVA 11 for generating the parser.
    pip install -e ".[dev]"
    bash script/test/test.sh                             # to run the test suite
 
-For developers using an M1 Mac, here are some pointers for installing JAVA:
+For developers using an M1 Mac, here are some pointers for installing JAVA and to resolve multi-threading issues:
 
 ::      
    brew install openjdk@11    #to install openjdk 11
    export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc or ~/.bashrc
    export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
-   pip install --upgrade opencv-python     # change setup.py to use opencv-python>=4.5.1.58
    
       
 Testing
