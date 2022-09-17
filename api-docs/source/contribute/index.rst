@@ -19,13 +19,13 @@ package manager. EVA requires JAVA 11 for generating the parser.
 ::
 
    git clone https://github.com/georgia-tech-db/eva.git && cd eva
-   python3 -m venv env38                                # to create a virtual environment
+   python3 -m venv env38                                  # to create a virtual environment
    . env38/bin/activate
    pip install --upgrade pip
    sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
-   sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
+   sh script/antlr4/generate_parser.sh                    # to generate the EVA parser
    pip install -e ".[dev]"
-   bash script/test/test.sh                             # to run the test suite
+   bash script/test/test.sh                               # to run the test suite
 
 For developers using an M1 Mac, here are some pointers for installing JAVA and to resolve multi-threading issues:
 
