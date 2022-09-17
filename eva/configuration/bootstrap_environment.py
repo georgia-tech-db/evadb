@@ -87,7 +87,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     logger.setLevel(level)
     logger.debug("Setting logging level to: " + str(level))
 
-    # fill default values for eva installation dir, 
+    # fill default values for eva installation dir,
     # dataset, database and upload loc if not present
     eva_installation_dir_from_file = read_value_config(
         cfg, "core", "eva_installation_dir"
