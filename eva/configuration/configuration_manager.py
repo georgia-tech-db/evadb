@@ -26,6 +26,7 @@ from eva.configuration.constants import (
 class ConfigurationManager(object):
     _instance = None
     _cfg = None
+    _yml_path = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -36,14 +37,14 @@ class ConfigurationManager(object):
                 eva_installation_dir=EVA_INSTALLATION_DIR,
             )  # Setup eva in home directory
 
-            ymlpath = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
-            with ymlpath.open("r") as ymlfile:
+            cls._yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
+            with cls._yml_path.open("r") as ymlfile:
                 cls._cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
         return cls._instance
 
     def get_value(self, category, key):
-        return read_value_config(self._cfg, category, key)
+        return read_value_config(self._yml_path, category, key)
 
     def update_value(self, category, key, value):
         update_value_config(self._cfg, category, key, value)

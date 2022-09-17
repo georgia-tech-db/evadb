@@ -77,22 +77,18 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         raise OSError(f"Eva configuration file not found at {ymlfile}")
 
     # set logging level
-    mode = read_value_config(cfg, "core", "mode")
+    mode = read_value_config(config_file_path, "core", "mode")
     assert mode == "debug" or mode == "release"
-    level = None
-    if mode == "debug":
-        level = DEBUG
-    else:
-        level = WARN
+    level = WARN if mode == "release" else DEBUG
 
     logger.setLevel(level)
     logger.debug("Setting logging level to: " + str(level))
 
     # fill default values for eva installation dir,
     # dataset, database and upload loc if not present
-    install_dir = read_value_config(cfg, "core", "eva_installation_dir")
-    dataset_location = read_value_config(cfg, "core", "datasets_dir")
-    database_uri = read_value_config(cfg, "core", "catalog_database_uri")
+    install_dir = read_value_config(config_file_path, "core", "eva_installation_dir")
+    dataset_location = read_value_config(config_file_path, "core", "datasets_dir")
+    database_uri = read_value_config(config_file_path, "core", "catalog_database_uri")
     upload_location = None
 
     if (
