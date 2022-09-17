@@ -99,22 +99,18 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     ):
         if not install_dir:
             update_value_config(
-                cfg, "core", "eva_installation_dir", str(default_install_dir.resolve())
+                config_file_path, "core", "eva_installation_dir", str(default_install_dir.resolve())
             )
         if not dataset_location:
             dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
             update_value_config(
-                cfg, "core", "datasets_dir", str(dataset_location.resolve())
+                config_file_path, "core", "datasets_dir", str(dataset_location.resolve())
             )
         if not database_uri:
             database_uri = DB_DEFAULT_URI
-            update_value_config(cfg, "core", "catalog_database_uri", database_uri)
+            update_value_config(config_file_path, "core", "catalog_database_uri", database_uri)
 
         upload_dir = eva_config_dir / EVA_UPLOAD_DIR
-        update_value_config(cfg, "storage", "upload_dir", str(upload_dir.resolve()))
+        update_value_config(config_file_path, "storage", "upload_dir", str(upload_dir.resolve()))
         # Create upload directory in eva home directory if it does not exist
         upload_dir.mkdir(parents=True, exist_ok=True)
-
-        # update config on disk
-        with config_file_path.open("w") as ymlfile:
-            ymlfile.write(yaml.dump(cfg))

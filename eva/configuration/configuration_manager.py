@@ -47,4 +47,4 @@ class ConfigurationManager(object):
         return read_value_config(self._yml_path, category, key)
 
     def update_value(self, category, key, value):
-        update_value_config(self._cfg, category, key, value)
+        update_value_config(self._yml_file, category, key, value)

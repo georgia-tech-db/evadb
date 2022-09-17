@@ -24,7 +24,15 @@ def read_value_config(config_path: Path, category: str, key: str) -> Any:
         return config_obj[category][key]
 
 
-def update_value_config(cfg: Any, category: str, key: str, value: str):
-    category_data = cfg.get(category, None)
-    if category_data:
-        category_data[key] = value
+def update_value_config(config_path: Path, category: str, key: str, value: str):
+    # read config file
+    with config_path.open("r") as yml_file:
+        config_obj = yaml.load(yml_file)
+        if config_obj is None:
+            raise ValueError(f"Invalid path to config file {config_path}")
+
+    # update value and write back to config file
+    config_obj[category][key] = value
+    with config_path.open("w") as yml_file:
+        yml_file.write(yaml.dump(config_obj))
+
