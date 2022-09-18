@@ -1,7 +1,13 @@
 [run]
+<<<<<<< HEAD
 omit = eva/parser/evaql/*
 
 [report]
 exclude_lines =
     # pragma: no cover
     if TYPE_CHECKING:
+=======
+omit = 
+    eva/parser/evaql/*
+    eva/udfs/emotion_detector.py
+>>>>>>> temporarily ignoring udf from coveralls
