@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import importlib.resources as importlib_resources
+import logging
 import shutil
-from logging import DEBUG, WARN
 from pathlib import Path
 
 from eva.configuration.config_utils import read_value_config, update_value_config
@@ -25,7 +25,7 @@ from eva.configuration.constants import (
     EVA_DEFAULT_DIR,
     EVA_UPLOAD_DIR,
 )
-from eva.utils.logging_manager import logger
+from eva.utils.logging_manager import logger as eva_logger
 
 
 def get_base_config(eva_installation_dir: Path) -> Path:
@@ -71,10 +71,10 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     # set logging level
     mode = read_value_config(config_file_path, "core", "mode")
     assert mode == "debug" or mode == "release"
-    level = WARN if mode == "release" else DEBUG
+    level = logging.WARN if mode == "release" else logging.DEBUG
 
-    logger.setLevel(level)
-    logger.debug("Setting logging level to: " + str(level))
+    eva_logger.setLevel(level)
+    eva_logger.debug(f"Setting logging level to: {str(level)}")
 
     # fill default values for eva installation dir,
     # dataset, database and upload loc if not present
