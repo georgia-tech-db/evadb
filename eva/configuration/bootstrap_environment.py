@@ -17,8 +17,6 @@ import shutil
 from logging import DEBUG, WARN
 from pathlib import Path
 
-import yaml
-
 from eva.configuration.config_utils import read_value_config, update_value_config
 from eva.configuration.constants import (
     DB_DEFAULT_URI,
@@ -70,29 +68,19 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         default_udfs_path = default_install_dir / "udfs"
         shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
 
-    with config_file_path.open("r") as ymlfile:
-        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-    if cfg is None:
-        raise OSError(f"Eva configuration file not found at {ymlfile}")
-
     # set logging level
-    mode = read_value_config(cfg, "core", "mode")
+    mode = read_value_config(config_file_path, "core", "mode")
     assert mode == "debug" or mode == "release"
-    level = None
-    if mode == "debug":
-        level = DEBUG
-    else:
-        level = WARN
+    level = WARN if mode == "release" else DEBUG
 
     logger.setLevel(level)
     logger.debug("Setting logging level to: " + str(level))
 
     # fill default values for eva installation dir,
     # dataset, database and upload loc if not present
-    install_dir = read_value_config(cfg, "core", "eva_installation_dir")
-    dataset_location = read_value_config(cfg, "core", "datasets_dir")
-    database_uri = read_value_config(cfg, "core", "catalog_database_uri")
+    install_dir = read_value_config(config_file_path, "core", "eva_installation_dir")
+    dataset_location = read_value_config(config_file_path, "core", "datasets_dir")
+    database_uri = read_value_config(config_file_path, "core", "catalog_database_uri")
     upload_location = None
 
     if (
@@ -103,22 +91,28 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     ):
         if not install_dir:
             update_value_config(
-                cfg, "core", "eva_installation_dir", str(default_install_dir.resolve())
+                config_file_path,
+                "core",
+                "eva_installation_dir",
+                str(default_install_dir.resolve()),
             )
         if not dataset_location:
             dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
             update_value_config(
-                cfg, "core", "datasets_dir", str(dataset_location.resolve())
+                config_file_path,
+                "core",
+                "datasets_dir",
+                str(dataset_location.resolve()),
             )
         if not database_uri:
             database_uri = DB_DEFAULT_URI
-            update_value_config(cfg, "core", "catalog_database_uri", database_uri)
+            update_value_config(
+                config_file_path, "core", "catalog_database_uri", database_uri
+            )
 
         upload_dir = eva_config_dir / EVA_UPLOAD_DIR
-        update_value_config(cfg, "storage", "upload_dir", str(upload_dir.resolve()))
+        update_value_config(
+            config_file_path, "storage", "upload_dir", str(upload_dir.resolve())
+        )
         # Create upload directory in eva home directory if it does not exist
         upload_dir.mkdir(parents=True, exist_ok=True)
-
-        # update config on disk
-        with config_file_path.open("w") as ymlfile:
-            ymlfile.write(yaml.dump(cfg))
