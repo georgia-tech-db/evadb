@@ -17,7 +17,6 @@ from typing import Any
 import yaml
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.config_utils import read_value_config, update_value_config
 from eva.configuration.constants import (
     EVA_CONFIG_FILE,
     EVA_DEFAULT_DIR,
