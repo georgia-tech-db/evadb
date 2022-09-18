@@ -12,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Any
+
+import yaml
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.config_utils import read_value_config, update_value_config
@@ -37,8 +40,17 @@ class ConfigurationManager(object):
 
         return cls._instance
 
-    def get_value(self, category, key):
-        return read_value_config(self._yml_path, category, key)
+    @classmethod
+    def _get(cls, category: str, key: str) -> Any:
+        with cls._yml_path.open("r") as yml_file:
+            config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
+            if config_obj is None:
+                raise ValueError(f"Invalid yml file at {cls._yml_path}")
+            return config_obj[category][key]
+
+
+    def get_value(self, category: str, key: str) -> Any:
+        return self._get(category, key)
 
     def update_value(self, category, key, value):
         update_value_config(self._yml_file, category, key, value)
