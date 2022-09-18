@@ -29,11 +29,12 @@ class PetastormStorageEngineTest(unittest.TestCase):
 
     def create_sample_table(self):
         table_info = DataFrameMetadata("dataset", "dataset")
+        column_0 = DataFrameColumn("name", ColumnType.TEXT, False)
         column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn(
             "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
         )
-        table_info.schema = [column_1, column_2]
+        table_info.schema = [column_0, column_1, column_2]
         return table_info
 
     def setUp(self):

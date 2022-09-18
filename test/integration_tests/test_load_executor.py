@@ -43,7 +43,7 @@ class LoadExecutorTest(unittest.TestCase):
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
 
-        select_query = """SELECT id, data FROM MyVideo;"""
+        select_query = """SELECT name, id, data FROM MyVideo;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
