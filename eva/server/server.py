@@ -128,13 +128,13 @@ def start_server(
 
     except KeyboardInterrupt:
 
-        logger.critical("Interrupting server")
+        logger.debug("Interrupting server")
 
     finally:
         # Stop monitor
         monitor.cancel()
 
-        logger.critical("Shutting down server")
+        logger.debug("Shutting down server")
 
         # Close server
         server.close()
@@ -143,4 +143,4 @@ def start_server(
         loop.run_until_complete(server.wait_closed())
         loop.close()
 
-        logger.critical("Successfully shutdown server")
+        logger.debug("Successfully shutdown server")
