@@ -48,9 +48,21 @@ class ConfigurationManager(object):
                 raise ValueError(f"Invalid yml file at {cls._yml_path}")
             return config_obj[category][key]
 
+    @classmethod
+    def _update(cls, category: str, key: str, value: str):
+        # read config file
+        with cls._yml_path.open("r") as yml_file:
+            config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
+            if config_obj is None:
+                raise ValueError(f"Invalid yml file at {cls._yml_path}")
+
+        # update value and write back to config file
+        config_obj[category][key] = value
+        with cls._yml_path.open("w") as yml_file:
+            yml_file.write(yaml.dump(config_obj))
 
     def get_value(self, category: str, key: str) -> Any:
         return self._get(category, key)
 
-    def update_value(self, category, key, value):
-        update_value_config(self._yml_file, category, key, value)
+    def update_value(self, category, key, value) -> None:
+        self._update(category, key, value)
