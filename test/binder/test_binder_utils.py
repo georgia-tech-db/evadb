@@ -63,13 +63,14 @@ class BinderUtilsTest(unittest.TestCase):
         catalog_ins.create_metadata.return_value = expected
 
         calls = [
-            call("id", ColumnType.INTEGER, None, [], "cci"),
+            call("name", ColumnType.TEXT, None, [], "cci"),
+            call("id", ColumnType.INTEGER, None, []),
             call("data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]),
         ]
 
         actual = create_video_metadata(name)
         m_gfp.assert_called_once_with(name)
-        m_ccm.assert_called_once_with([1, 1])
+        m_ccm.assert_called_once_with([1, 1, 1])
         m_cci.assert_called_once_with(unique=True)
         m_cd.assert_has_calls(calls)
         catalog_ins.create_metadata.assert_called_with(
