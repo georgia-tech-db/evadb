@@ -14,18 +14,27 @@ Setting up the development environment
 To hack on EVA, you need to checkout the repository and build EVA from
 the source. Follow the following instructions to build EVA and test your
 changes locally. We recommend using a virtual environment and the pip
-package manager. EVA requires JAVA 8 for generating the parser.
+package manager. EVA requires JAVA 11 for generating the parser.
 
 ::
 
    git clone https://github.com/georgia-tech-db/eva.git && cd eva
-   python3 -m venv env38                                # to create a virtual environment
+   python3 -m venv env38                                  # to create a virtual environment
    . env38/bin/activate
    pip install --upgrade pip
    sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
-   sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
+   sh script/antlr4/generate_parser.sh                    # to generate the EVA parser
    pip install -e ".[dev]"
+   bash script/test/test.sh                               # to run the test suite
 
+For developers using an M1 Mac, here are some pointers for installing JAVA and to resolve multi-threading issues:
+
+::      
+   brew install openjdk@11    #to install openjdk 11
+   export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc or ~/.bashrc
+   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
+   
+      
 Testing
 ^^^^^^^
 

@@ -12,14 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from typing import Any
 
-
-def read_value_config(cfg: Any, category: str, key: str) -> Any:
-    return cfg.get(category, {}).get(key)
+import yaml
 
 
-def update_value_config(cfg: Any, category: str, key: str, value: str):
-    category_data = cfg.get(category, None)
-    if category_data:
-        category_data[key] = value
+def read_value_config(config_path: Path, category: str, key: str) -> Any:
+    with config_path.open("r") as yml_file:
+        config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
+        if config_obj is None:
+            raise ValueError(f"Invalid yml file at {config_path}")
+        return config_obj[category][key]
+
+
+def update_value_config(config_path: Path, category: str, key: str, value: str):
+    # read config file
+    with config_path.open("r") as yml_file:
+        config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
+        if config_obj is None:
+            raise ValueError(f"Invalid yml file at {config_path}")
+
+    # update value and write back to config file
+    config_obj[category][key] = value
+    with config_path.open("w") as yml_file:
+        yml_file.write(yaml.dump(config_obj))

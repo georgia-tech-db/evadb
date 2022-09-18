@@ -28,7 +28,10 @@ from eva.parser.types import FileFormatType
 
 class UploadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
-    def test_should_call_opencv_reader_and_storage_engine(self, create_mock):
+    @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
+    def test_should_call_opencv_reader_and_storage_engine(
+        self, write_mock, create_mock
+    ):
         file_path = "video"
         video_blob = "b'AAAA'"
         table_metainfo = "info"
@@ -51,8 +54,10 @@ class UploadExecutorTest(unittest.TestCase):
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.return_value = True
             batch = next(upload_executor.exec())
-            create_mock.assert_called_once_with(table_metainfo, file_path)
-
+            create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
+            write_mock.assert_called_once_with(
+                table_metainfo, Batch(pd.DataFrame([{"video_file_path": file_path}]))
+            )
             location = file_path
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {location}"}])
@@ -61,7 +66,8 @@ class UploadExecutorTest(unittest.TestCase):
             self.assertEqual(batch, expected)
 
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
-    def test_should_search_in_upload_directory(self, create_mock):
+    @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
+    def test_should_search_in_upload_directory(self, write_mock, create_mock):
         self.upload_dir = Path(
             ConfigurationManager().get_value("storage", "upload_dir")
         )
@@ -89,15 +95,19 @@ class UploadExecutorTest(unittest.TestCase):
             batch = next(upload_executor.exec())
             location = self.upload_dir / file_path
 
-            create_mock.assert_called_once_with(table_metainfo, location)
-
+            create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
+            write_mock.assert_called_once_with(
+                table_metainfo,
+                Batch(pd.DataFrame([{"video_file_path": str(location)}])),
+            )
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {location}"}])
             )
             self.assertEqual(batch, expected)
 
     @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
-    def test_should_fail_to_find_file(self, create_mock):
+    @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
+    def test_should_fail_to_find_file(self, write_mock, create_mock):
         file_path = "video"
         video_blob = "b'AAAA'"
         table_metainfo = "info"

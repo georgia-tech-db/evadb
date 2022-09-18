@@ -39,7 +39,7 @@ class DropExecutorTest(unittest.TestCase):
         video_dir = metadata_obj.file_url
         self.assertFalse(metadata_obj is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
-        self.assertEqual(len(column_objects), 2)
+        self.assertEqual(len(column_objects), 3)
         self.assertTrue(Path(video_dir).exists())
         drop_query = """DROP TABLE MyVideo;"""
         execute_query_fetch_all(drop_query)

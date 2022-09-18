@@ -15,6 +15,7 @@
 import base64
 import os
 import shutil
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -23,7 +24,6 @@ import pandas as pd
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.dictionary import EVA_INSTALLATION_DIR
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.models.storage.batch import Batch
@@ -42,7 +42,7 @@ config = ConfigurationManager()
 upload_dir_from_config = config.get_value("storage", "upload_dir")
 
 
-EVA_TEST_DATA_DIR = EVA_INSTALLATION_DIR.parent
+EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
 
 
 def get_logical_query_plan(query: str) -> Operator:
@@ -293,6 +293,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
     for i in filters:
         data.append(
             {
+                "myvideo.name": "dummy.avi",
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
