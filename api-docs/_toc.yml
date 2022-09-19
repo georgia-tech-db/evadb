@@ -8,11 +8,11 @@ parts:
   - caption: Tutorial
     chapters:
       - file: source/tutorials/tutorials
-      - file: source/tutorials/mnist
+      - file: source/tutorials/01-mnist
         title: Working with MNIST data tutorial
-      - file: source/tutorials/movie_analysis
+      - file: source/tutorials/03-movie_analysis
         title: Movie analysis tutorial
-      - file: source/tutorials/object_detection
+      - file: source/tutorials/02-object-detection
         title: Object detection tutorial
 
   - caption: Reference
