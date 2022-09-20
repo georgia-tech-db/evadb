@@ -11,7 +11,7 @@
 <div align="center" style="display:flex;flex-direction:column;">
     <h3>🌟 Try It Out! 🌟</h3>
     <div>
-        <a href="https://colab.research.google.com/drive/1H0HNOoCqvO5RFr0ousWku6YJK3qeApCN#scrollTo=B4gcnpDu5q4n">
+        <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
         </a>
         <a href="https://github.com/georgia-tech-db/eva/discussions">
