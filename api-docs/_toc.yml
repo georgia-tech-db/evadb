@@ -9,18 +9,16 @@ parts:
     chapters:
       - file: source/tutorials/tutorials
       - file: source/tutorials/01-mnist
-        title: Working with MNIST data tutorial
-      - file: source/tutorials/03-movie_analysis
-        title: Movie analysis tutorial
+        title: MNIST
+      - file: source/tutorials/00-start-server
+        title: EVA Server
       - file: source/tutorials/02-object-detection
-        title: Object detection tutorial
+        title: Object Detection
+      - file: source/tutorials/03-movie_analysis
+        title: Movie Analysis
 
   - caption: Reference
     chapters:
-      - file: source/reference/connecting
-        title: Connect
-      - file: source/reference/data_import
-        title: Data Import
       - file: source/reference/index
         title: SQL Reference
         sections:
@@ -36,6 +34,12 @@ parts:
 
       - file: source/reference/udf
         title: Register UDFs
+
+      - file: source/reference/connecting
+        title: Connect
+
+      - file: source/reference/data_import
+        title: Data Import
 
   - caption: Developer Guides
     chapters:
