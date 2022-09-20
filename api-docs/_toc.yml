@@ -3,23 +3,43 @@ root: index
 parts:
   - caption: Overview
     chapters:
-      - file: source/overview/index
       - file: source/overview/installation
 
-  # - caption: Tutorial
-  #   chapters:
-  #     - file: source/tutorials/tutorials
+  - caption: Tutorial
+    chapters:
+      - file: source/tutorials/tutorials
+      - file: source/tutorials/01-mnist
+        title: MNIST
+      - file: source/tutorials/00-start-server
+        title: EVA Server
+      - file: source/tutorials/02-object-detection
+        title: Object Detection
+      - file: source/tutorials/03-movie_analysis
+        title: Movie Analysis
 
   - caption: Reference
     chapters:
       - file: source/reference/index
         title: SQL Reference
         sections:
-          - file: source/reference/load
-          - file: source/reference/select
+          - file: source/reference/sql/upload
+          - file: source/reference/sql/load
+          - file: source/reference/sql/select
+          - file: source/reference/sql/insert
+          - file: source/reference/sql/drop
+          - file: source/reference/sql/create
+          - file: source/reference/sql/rename
+          - file: source/reference/sql/show
+            title: SHOW INFO keyword
 
       - file: source/reference/udf
         title: Register UDFs
+
+      - file: source/reference/connecting
+        title: Connect
+
+      - file: source/reference/data_import
+        title: Data Import
 
   - caption: Developer Guides
     chapters:

@@ -15,6 +15,7 @@
 import base64
 import os
 import shutil
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -23,7 +24,6 @@ import pandas as pd
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.dictionary import EVA_INSTALLATION_DIR
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.models.storage.batch import Batch
@@ -33,7 +33,7 @@ from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
 from eva.planner.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.abstract_udfs import AbstractClassifierUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
 
 NUM_FRAMES = 10
@@ -42,7 +42,7 @@ config = ConfigurationManager()
 upload_dir_from_config = config.get_value("storage", "upload_dir")
 
 
-EVA_TEST_DATA_DIR = EVA_INSTALLATION_DIR.parent
+EVA_TEST_DATA_DIR = Path(config.get_value("core", "eva_installation_dir")).parent
 
 
 def get_logical_query_plan(query: str) -> Operator:
@@ -179,11 +179,20 @@ def create_sample_csv_as_blob(num_frames=NUM_FRAMES):
     return b64_string
 
 
-def create_dummy_csv_batches():
-    df = pd.read_csv(
-        os.path.join(upload_dir_from_config, "dummy.csv"),
-        converters={"bbox": convert_bbox},
-    )
+def create_dummy_csv_batches(target_columns=None):
+
+    if target_columns:
+        df = pd.read_csv(
+            os.path.join(upload_dir_from_config, "dummy.csv"),
+            converters={"bbox": convert_bbox},
+            usecols=target_columns,
+        )
+    else:
+        df = pd.read_csv(
+            os.path.join(upload_dir_from_config, "dummy.csv"),
+            converters={"bbox": convert_bbox},
+        )
+
     return Batch(df)
 
 
@@ -284,6 +293,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
     for i in filters:
         data.append(
             {
+                "myvideo.name": "dummy.avi",
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8

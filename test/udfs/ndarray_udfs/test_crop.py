@@ -49,5 +49,18 @@ class CropTests(unittest.TestCase):
         )
         self.assertTrue(expected_image.equals(cropped_image))
 
+    def test_should_crop_bad_bbox(self):
+        imarray = np.random.randint(0, 255, size=(100, 100, 3))
+        bbox1 = np.array([0, 0, 0, 0])
+        bbox2 = np.array([-10, -10, 20, 20])
+        df = pd.DataFrame([[imarray, bbox1], [imarray, bbox2]])
+        cropped_image = self.crop_instance.exec(df)
+
+        expected_image = pd.DataFrame(
+            [[imarray[0:1, 0:1]], [imarray[0:20, 0:20]]],
+            columns=["cropped_frame_array"],
+        )
+        self.assertTrue(expected_image.equals(cropped_image))
+
     def test_udf_name_crop(self):
         self.assertEqual(self.crop_instance.name(), "Crop")

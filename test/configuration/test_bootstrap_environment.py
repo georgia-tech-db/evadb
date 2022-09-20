@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.dictionary import EVA_CONFIG_FILE, EVA_INSTALLATION_DIR
+from eva.configuration.constants import EVA_CONFIG_FILE, EVA_INSTALLATION_DIR
 
 
 class BootstrapEnvironmentTests(unittest.TestCase):

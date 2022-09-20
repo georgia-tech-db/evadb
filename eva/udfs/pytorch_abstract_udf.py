@@ -24,7 +24,7 @@ from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract_udfs import AbstractClassifierUDF, AbstractTransformationUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF, AbstractTransformationUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -37,17 +37,15 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
     def __init__(self):
         AbstractClassifierUDF.__init__(self)
         nn.Module.__init__(self)
+        self.transforms = [transforms.ToTensor()]
 
     def get_device(self):
         return next(self.parameters()).device
 
-    @property
-    def transforms(self) -> Compose:
-        return Compose([transforms.ToTensor()])
-
     def transform(self, images: np.ndarray):
+        composed = Compose(self.transforms)
         # reverse the channels from opencv
-        return self.transforms(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
+        return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
     def forward(self, frames: List[np.ndarray]):
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(

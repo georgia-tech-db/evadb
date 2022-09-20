@@ -48,17 +48,13 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     catalog = CatalogManager()
     columns = [
         ColumnDefinition(
-            "id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
-        )
-    ]
-    # the ndarray dimensions are set as None. We need to fix this as we
-    # cannot assume. Either ask the user to provide this with load or
-    # we infer this from the provided video.
-    columns.append(
+            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+        ),
+        ColumnDefinition("id", ColumnType.INTEGER, None, []),
         ColumnDefinition(
             "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-        )
-    )
+        ),
+    ]
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
@@ -97,7 +93,7 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
             result_list.append(col)
         result_list.append(
             CatalogManager().create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension
+                col.name, col.type, col.array_type, col.dimension, col.cci
             )
         )
 
