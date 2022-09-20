@@ -25,30 +25,35 @@ class Crop(AbstractNdarrayUDF):
 
     def exec(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Crop the frame given the bbox.
-        Crop(frame, bbox)
+        Crop the frame given the bbox - Crop(frame, bbox)
         If one of the side of the crop box is 0, it automatically sets it to 1 pixel
 
+        Returns:
+            ret (pd.DataFrame): The cropped frame.
         """
 
         def crop(row: pd.Series) -> np.ndarray:
+
             frame = row[0]
             bboxes = row[1]
-            try:
-                x0, y0, x1, y1 = np.asarray(bboxes, dtype="int")
-                x0 = max(0, x0)
-                y0 = max(0, y0)
-                if x1 == x0 :
-                    x1 = x0 + 1
-                if y1 == y0 :
-                    y1 = y0 + 1
-                output = frame[y0:y1, x0:x1]
-                ss = output.shape
-                assert ss[0] > 0
-                assert ss[1] > 0
-            except Exception as e:
-                logger.warn(f"Invalid input to crop {e}")
-            return frame
+
+            x0, y0, x1, y1 = np.asarray(bboxes, dtype="int")
+
+            # make sure the bbox is valid
+            x0 = max(0, x0)
+            y0 = max(0, y0)
+
+            if x1 == x0:
+                x1 = x0 + 1
+
+            if y1 == y0:
+                y1 = y0 + 1
+
+            # assertion removed
+            #ss = output.shape
+            #    assert ss[0] > 0
+            #    assert ss[1] > 0
+            return frame[y0:y1, x0:x1]
 
         ret = pd.DataFrame()
         ret["cropped_frame_array"] = df.apply(crop, axis=1)

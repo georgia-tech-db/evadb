@@ -45,7 +45,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ssd(self):
@@ -60,7 +60,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
@@ -80,7 +80,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FaceDetector(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ocr(self):
@@ -97,7 +97,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT OCRExtractor(data) FROM MNIST
                         WHERE id >= 150 AND id < 155;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
         # non-trivial test case for MNIST
         res = actual_batch.frames
@@ -117,7 +117,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT FeatureExtractor(data) FROM MyVideo
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
         # non-trivial test case for Resnet50
         res = actual_batch.frames

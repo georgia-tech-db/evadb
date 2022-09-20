@@ -112,7 +112,7 @@ class MaterializedViewTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_view_query)
         actual_batch.sort()
 
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
@@ -134,7 +134,7 @@ class MaterializedViewTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_view_query)
         actual_batch.sort()
 
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:

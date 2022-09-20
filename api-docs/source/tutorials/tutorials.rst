@@ -1,7 +1,7 @@
 .. _guide-tutorials:
 
-Tutorials
-=============
+Setup for local system
+======================
 
 Configure GPU (Recommended)
 ----------------------------
@@ -70,11 +70,11 @@ Quickstart Tutorial
 
         We use `nest_asyncio` to allow nested asyncio calls. This is required for the client to work with the server. `cursor` is a cursor object that allows us to execute queries on the database.
 
-    * Upload a video to be analyzed:
+    * Load the video to be analyzed:
 
         .. code-block:: python
 
-            cursor.execute('UPLOAD INFILE "../data/ua_detrac/ua_detrac.mp4" PATH "video.mp4";')
+            cursor.execute('LOAD FILE "../data/ua_detrac/ua_detrac.mp4" INTO MyVideo')
             response = cursor.fetch_all()
             print(response)
 
@@ -87,17 +87,7 @@ Quickstart Tutorial
             from ipywidgets import Video
             Video.from_file("../data/ua_detrac/ua_detrac.mp4", embed=True)
 
-    * Load the video into EVA:
-
-        .. code-block:: python
-
-            cursor.execute('LOAD DATA INFILE "video.mp4" INTO MyVideo;')
-            response = cursor.fetch_all()
-            print(response)
-
-        The 'LOAD' command is used to load a video into EVA. `INFILE` is the path of the video in the database.
-
-    * Registering UDFs (User Defined Functions):
+    * Registering an user-defined function (UDFs):
 
         .. code-block:: python
 
@@ -111,15 +101,15 @@ Quickstart Tutorial
             response = cursor.fetch_all()
             print(response)
 
-        To learn more about UDFs, refer to `this <udf.html>`_.
+        To learn more about UDFs, check out `this page <udf.html>`_.
 
-    * Run the UDF:
+    * Running the UDF in a query:
 
         .. code-block:: python
 
-            cursor.execute("""SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo""")
+            cursor.execute("""SELECT id, FastRCNNObjectDetector(data) FROM MyVideo""")
             response = cursor.fetch_all()
 
-        UDFs are typically used like sql functions along with the 'SELECT' command. The 'Unnest' function is used to unnest the output of the UDF.
+        UDFs are typically used like SQL functions in 'SELECT' queries. The 'UNNEST' function is used to unnest the output of the UDF.
 
-    Shown above is a quickstart tutorial of how you can use EVA for your video analysis tasks.
+    That's all folks! You can now use EVA for analysing your own videos with your own UDFs.

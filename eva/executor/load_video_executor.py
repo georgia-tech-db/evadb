@@ -56,7 +56,11 @@ class LoadVideoExecutor(AbstractExecutor):
             logger.error(error)
             raise RuntimeError(error)
 
-        success = VideoStorageEngine.create(self.node.table_metainfo, video_file_path)
+        VideoStorageEngine.create(self.node.table_metainfo, if_not_exists=True)
+        success = VideoStorageEngine.write(
+            self.node.table_metainfo,
+            Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
+        )
 
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek
