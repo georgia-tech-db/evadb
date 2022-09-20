@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+import subprocess
 from typing import List
 
 import numpy as np
@@ -25,7 +26,7 @@ from PIL import Image
 from torch import Tensor
 from torchvision import transforms
 
-from eva.configuration.dictionary import EVA_DEFAULT_DIR
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 # VGG configuration
@@ -103,16 +104,22 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         # load model
         self.model = VGG("VGG19")
-        model_state = torch.load(
-            os.path.join(EVA_DEFAULT_DIR, "data", "models", "emotion_detector.t7")
-        )
+        output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
+        model_path = os.path.join(output_directory, "emotion_detector.t7")
+
+        # pull model from dropbox if not present
+        if not os.path.exists(model_path):
+            model_url = "https://www.dropbox.com/s/bqblykok62d28mn/emotion_detector.t7"
+            subprocess.call(["wget", model_url, "-O", model_path])
+
+        model_state = torch.load(model_path)
         self.model.load_state_dict(model_state["net"])
         self.model.eval()
 
         # for augmentation
         self.cut_size = 44
 
-    def transforms(self, frame: Tensor) -> Tensor:
+    def transforms_ed(self, frame: Image) -> Tensor:
         """
         Performs augmentation on input frame
         Arguments:
@@ -131,7 +138,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
     def transform(self, images: np.ndarray):
         # reverse the channels from opencv
-        return self.transforms(Image.fromarray(images[:, :, ::-1]))
+        return self.transforms_ed(Image.fromarray(images[:, :, ::-1]))
 
     @property
     def labels(self) -> List[str]:
