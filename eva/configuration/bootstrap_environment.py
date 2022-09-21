@@ -57,8 +57,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
     upload_dir = eva_config_dir / EVA_UPLOAD_DIR
 
-    # create eva config directory if not exists
     eva_config_dir.mkdir(parents=True, exist_ok=True)
+    upload_dir.mkdir(parents=True, exist_ok=True)
 
     # copy eva.yml into config path
     if not config_file_path.exists():
@@ -103,6 +103,3 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     update_value_config(
         config_file_path, "storage", "upload_dir", str(upload_dir.resolve())
     )
-
-    # Create upload directory in eva home directory if it does not exist
-    upload_dir.mkdir(parents=True, exist_ok=True)
