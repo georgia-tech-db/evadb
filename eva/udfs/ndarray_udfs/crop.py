@@ -16,7 +16,6 @@ import numpy as np
 import pandas as pd
 
 from eva.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
-from eva.utils.logging_manager import logger
 
 
 class Crop(AbstractNdarrayUDF):
