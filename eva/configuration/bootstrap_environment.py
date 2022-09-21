@@ -24,6 +24,7 @@ from eva.configuration.constants import (
     EVA_DATASET_DIR,
     EVA_DEFAULT_DIR,
     EVA_UPLOAD_DIR,
+    UDF_DIR,
 )
 from eva.utils.logging_manager import logger as eva_logger
 
@@ -63,7 +64,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         shutil.copy(str(default_config_path.resolve()), str(eva_config_dir.resolve()))
 
     # copy udfs to eva directory
-    udfs_path = eva_config_dir / "udfs"
+    udfs_path = eva_config_dir / UDF_DIR
     if not udfs_path.exists():
         default_udfs_path = default_install_dir / "udfs"
         shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
