@@ -43,6 +43,7 @@ def get_base_config(eva_installation_dir: Path) -> Path:
         return eva_installation_dir / EVA_CONFIG_FILE
 
 
+
 def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     """
     Populates necessary configuration for EVA to be able to run.
@@ -66,8 +67,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     # copy udfs to eva directory
     udfs_path = eva_config_dir / UDF_DIR
     if not udfs_path.exists():
-        default_udfs_path = default_install_dir / "udfs"
-        shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()))
+        default_udfs_path = default_install_dir / UDF_DIR
+        shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()), dirs_exist_ok=True)
 
     # set logging level
     mode = read_value_config(config_file_path, "core", "mode")
@@ -77,36 +78,29 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     eva_logger.setLevel(level)
     eva_logger.debug(f"Setting logging level to: {str(level)}")
 
-    # fill default values for eva installation dir,
-    # dataset, database and upload loc if not present
-    install_dir = read_value_config(config_file_path, "core", "eva_installation_dir")
-    dataset_location = read_value_config(config_file_path, "core", "datasets_dir")
-    database_uri = read_value_config(config_file_path, "core", "catalog_database_uri")
+    update_value_config(
+        config_file_path,
+        "core",
+        "eva_installation_dir",
+        str(default_install_dir.resolve()),
+    )
 
-    if not install_dir:
-        update_value_config(
-            config_file_path,
-            "core",
-            "eva_installation_dir",
-            str(default_install_dir.resolve()),
-        )
-    if not dataset_location:
-        dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
-        update_value_config(
-            config_file_path,
-            "core",
-            "datasets_dir",
-            str(dataset_location.resolve()),
-        )
-    if not database_uri:
-        database_uri = DB_DEFAULT_URI
-        update_value_config(
-            config_file_path, "core", "catalog_database_uri", database_uri
-        )
+    dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
+    update_value_config(
+        config_file_path,
+        "core",
+        "datasets_dir",
+        str(dataset_location.resolve()),
+    )
+
+    update_value_config(
+        config_file_path, "core", "catalog_database_uri", DB_DEFAULT_URI
+    )
 
     upload_dir = eva_config_dir / EVA_UPLOAD_DIR
     update_value_config(
         config_file_path, "storage", "upload_dir", str(upload_dir.resolve())
     )
+
     # Create upload directory in eva home directory if it does not exist
     upload_dir.mkdir(parents=True, exist_ok=True)
