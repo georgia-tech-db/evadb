@@ -80,6 +80,8 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 *.ipynb
+
+!tutorials/*.ipynb
 # pyenv
 .python-version
 
