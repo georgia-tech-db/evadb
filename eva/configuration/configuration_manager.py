@@ -53,15 +53,13 @@ class ConfigurationManager(object):
 
     @classmethod
     def _update(cls, category: str, key: str, value: str):
-        # read config file
-        with cls._yml_path.open("r") as yml_file:
+        with cls._yml_path.open("r+") as yml_file:
             config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
+
             if config_obj is None:
                 raise ValueError(f"Invalid yml file at {cls._yml_path}")
 
-        # update value and write back to config file
-        config_obj[category][key] = value
-        with cls._yml_path.open("w") as yml_file:
+            config_obj[category][key] = value
             yml_file.write(yaml.dump(config_obj))
 
     @classmethod

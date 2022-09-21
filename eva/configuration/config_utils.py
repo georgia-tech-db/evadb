@@ -27,13 +27,11 @@ def read_value_config(config_path: Path, category: str, key: str) -> Any:
 
 
 def update_value_config(config_path: Path, category: str, key: str, value: str):
-    # read config file
-    with config_path.open("r") as yml_file:
+    with config_path.open("r+") as yml_file:
         config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
+
         if config_obj is None:
             raise ValueError(f"Invalid yml file at {config_path}")
 
-    # update value and write back to config file
-    config_obj[category][key] = value
-    with config_path.open("w") as yml_file:
+        config_obj[category][key] = value
         yml_file.write(yaml.dump(config_obj))

@@ -43,7 +43,6 @@ def get_base_config(eva_installation_dir: Path) -> Path:
         return eva_installation_dir / EVA_CONFIG_FILE
 
 
-
 def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     """
     Populates necessary configuration for EVA to be able to run.
@@ -68,7 +67,11 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     udfs_path = eva_config_dir / UDF_DIR
     if not udfs_path.exists():
         default_udfs_path = default_install_dir / UDF_DIR
-        shutil.copytree(str(default_udfs_path.resolve()), str(udfs_path.resolve()), dirs_exist_ok=True)
+        shutil.copytree(
+            str(default_udfs_path.resolve()),
+            str(udfs_path.resolve()),
+            dirs_exist_ok=True,
+        )
 
     # set logging level
     mode = read_value_config(config_file_path, "core", "mode")
