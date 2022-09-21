@@ -31,13 +31,17 @@ class ConfigurationManager(object):
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
+            cls._create_if_not_exists()
 
+        return cls._instance
+
+    @classmethod
+    def _create_if_not_exists(cls):
+        if not cls._yml_path.exists():
             bootstrap_environment(
                 eva_config_dir=EVA_DEFAULT_DIR,
                 eva_installation_dir=EVA_INSTALLATION_DIR,
-            )  # Setup eva in home directory
-
-        return cls._instance
+            )
 
     @classmethod
     def _get(cls, category: str, key: str) -> Any:
@@ -60,8 +64,10 @@ class ConfigurationManager(object):
         with cls._yml_path.open("w") as yml_file:
             yml_file.write(yaml.dump(config_obj))
 
-    def get_value(self, category: str, key: str) -> Any:
-        return self._get(category, key)
+    @classmethod
+    def get_value(cls, category: str, key: str) -> Any:
+        return cls._get(category, key)
 
-    def update_value(self, category, key, value) -> None:
-        self._update(category, key, value)
+    @classmethod
+    def update_value(cls, category, key, value) -> None:
+        cls._update(category, key, value)
