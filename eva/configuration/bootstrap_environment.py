@@ -54,6 +54,8 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     """
     config_file_path = eva_config_dir / EVA_CONFIG_FILE
     default_install_dir = eva_installation_dir
+    dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
+    upload_dir = eva_config_dir / EVA_UPLOAD_DIR
 
     # create eva config directory if not exists
     eva_config_dir.mkdir(parents=True, exist_ok=True)
@@ -70,7 +72,6 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         shutil.copytree(
             str(default_udfs_path.resolve()),
             str(udfs_path.resolve()),
-            dirs_exist_ok=True,
         )
 
     # set logging level
@@ -88,7 +89,6 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         str(default_install_dir.resolve()),
     )
 
-    dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
     update_value_config(
         config_file_path,
         "core",
@@ -100,7 +100,6 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         config_file_path, "core", "catalog_database_uri", DB_DEFAULT_URI
     )
 
-    upload_dir = eva_config_dir / EVA_UPLOAD_DIR
     update_value_config(
         config_file_path, "storage", "upload_dir", str(upload_dir.resolve())
     )
