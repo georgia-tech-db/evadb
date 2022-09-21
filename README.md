@@ -11,7 +11,7 @@
 <div align="center" style="display:flex;flex-direction:column;">
     <h3>🌟 Try It Out! 🌟</h3>
     <div>
-        <a href="https://colab.research.google.com/drive/1H0HNOoCqvO5RFr0ousWku6YJK3qeApCN#scrollTo=B4gcnpDu5q4n">
+        <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
         </a>
         <a href="https://github.com/georgia-tech-db/eva/discussions">
@@ -58,14 +58,14 @@ pip install evadb
 
 1. Start the EVA server and the client programs
 ```shell
-eva_server&   # launch server
-eva_client    # launch client
+python eva/eva_server&   # launch server
+python eva/eva_client    # launch client
 ```
 
 2. UPLOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
-UPLOAD INFILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
+LOAD FILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
 ```
 
 3. That's it. You can now start issuing queries over the loaded video:

@@ -14,7 +14,7 @@ Starting EVA Server
 ---------------------
 EVA uses a client server architecture. To start the server, run the followign command:::
 
-    eva_server &
+    python eva/eva_server &
 
 Querying EVA
 --------------
@@ -44,7 +44,6 @@ Once the connection is established, you can run queries using the cursor::
 
 EVA offers a command line interface (CLI) to query the server for quick testing and debugging::
 
-    eva_client
-    >>> UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
-    >>> LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
-    >>> SELECT id, data FROM MyVideo WHERE id < 5
+    python eva/eva_client
+    >>> LOAD FILE "eva/data/mnist/mnist.mp4" INTO MNISTVid;
+    >>> SELECT id, data FROM MNISTVid WHERE id < 5
