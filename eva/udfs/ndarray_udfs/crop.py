@@ -19,6 +19,8 @@ from eva.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
 
 
 class Crop(AbstractNdarrayUDF):
+    """Crop UDF"""
+
     def name(self):
         return "Crop"
 
