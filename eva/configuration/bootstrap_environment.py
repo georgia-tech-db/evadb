@@ -82,17 +82,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         if config_obj is None:
             raise ValueError(f"Invalid yml file at {config_file_path}")
 
-        try:
-            mode = config_obj["core"]["mode"]
-
-            if mode != "debug" and mode != "release":
-                raise ValueError("core/mode must be set to 'debug' or 'release'")
-
-            level = logging.WARN if mode == "release" else logging.DEBUG
-        except KeyError:
-            raise KeyError(
-                "core/mode not found in eva.yml\nNeeded to specify debug or release"
-            )
+        mode = config_obj["core"]["mode"]
 
         config_obj["core"]["eva_installation_dir"] = str(default_install_dir.resolve())
         config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
@@ -102,5 +92,6 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         yml_file.write(yaml.dump(config_obj))
 
     # set logger to appropriate level (debug or release)
+    level = logging.WARN if mode == "release" else logging.DEBUG
     eva_logger.setLevel(level)
     eva_logger.debug(f"Setting logging level to: {str(level)}")
