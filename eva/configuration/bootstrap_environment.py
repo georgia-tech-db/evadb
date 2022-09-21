@@ -17,7 +17,8 @@ import logging
 import shutil
 from pathlib import Path
 
-from eva.configuration.config_utils import read_value_config, update_value_config
+import yaml
+
 from eva.configuration.constants import (
     DB_DEFAULT_URI,
     EVA_CONFIG_FILE,
@@ -74,32 +75,32 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
             str(udfs_path.resolve()),
         )
 
-    # set logging level
-    mode = read_value_config(config_file_path, "core", "mode")
-    assert mode == "debug" or mode == "release"
-    level = logging.WARN if mode == "release" else logging.DEBUG
+    # Update eva.yml with user specific paths
+    with config_file_path.open("r+") as yml_file:
+        config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
 
+        if config_obj is None:
+            raise ValueError(f"Invalid yml file at {config_file_path}")
+
+        try:
+            mode = config_obj["core"]["mode"]
+
+            if mode != "debug" and mode != "release":
+                raise ValueError("core/mode must be set to 'debug' or 'release'")
+
+            level = logging.WARN if mode == "release" else logging.DEBUG
+        except KeyError:
+            raise KeyError(
+                "core/mode not found in eva.yml\nNeeded to specify debug or release"
+            )
+
+        config_obj["core"]["eva_installation_dir"] = str(default_install_dir.resolve())
+        config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
+        config_obj["core"]["catalog_database_uri"] = DB_DEFAULT_URI
+        config_obj["storage"]["upload_dir"] = str(upload_dir.resolve())
+
+        yml_file.write(yaml.dump(config_obj))
+
+    # set logger to appropriate level (debug or release)
     eva_logger.setLevel(level)
     eva_logger.debug(f"Setting logging level to: {str(level)}")
-
-    update_value_config(
-        config_file_path,
-        "core",
-        "eva_installation_dir",
-        str(default_install_dir.resolve()),
-    )
-
-    update_value_config(
-        config_file_path,
-        "core",
-        "datasets_dir",
-        str(dataset_location.resolve()),
-    )
-
-    update_value_config(
-        config_file_path, "core", "catalog_database_uri", DB_DEFAULT_URI
-    )
-
-    update_value_config(
-        config_file_path, "storage", "upload_dir", str(upload_dir.resolve())
-    )
