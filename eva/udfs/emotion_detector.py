@@ -104,13 +104,13 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         # load model
         self.model = VGG("VGG19")
-        output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
+        output_directory = os.path.join(os.getcwd(), "udfs", "models")
         model_path = os.path.join(output_directory, "emotion_detector.t7")
 
         # pull model from dropbox if not present
         if not os.path.exists(model_path):
             model_url = "https://www.dropbox.com/s/bqblykok62d28mn/emotion_detector.t7"
-            subprocess.call(["wget", model_url, "-O", model_path])
+            subprocess.call(["wget", model_url, "--directory-prefix", output_directory])
 
         model_state = torch.load(model_path)
         self.model.load_state_dict(model_state["net"])
