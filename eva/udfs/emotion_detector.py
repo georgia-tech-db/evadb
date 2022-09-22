@@ -26,6 +26,7 @@ from PIL import Image
 from torch import Tensor
 from torchvision import transforms
 
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 # VGG configuration
@@ -103,7 +104,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         # load model
         self.model = VGG("VGG19")
-        output_directory = os.path.join(os.getcwd(), "models")
+        output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
         model_path = os.path.join(output_directory, "emotion_detector.t7")
 
         # pull model from dropbox if not present
