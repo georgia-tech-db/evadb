@@ -48,7 +48,8 @@ minimal_requirement = [
     "petastorm==0.11.5",
     "antlr4-python3-runtime==4.10",
     "pyyaml==5.1",
-    "ray==1.13.0" # TODO: not minimal requirement
+    "ray==1.13.0", # TODO: not minimal requirement
+    "grpcio"
 ]
 
 formatter_libs = [
