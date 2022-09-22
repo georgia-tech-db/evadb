@@ -13,8 +13,10 @@ executor:
   # batch size used for gpu_operations
   gpu_batch_size: 20
 
-  gpus: {'130.207.125.60': [0]}
+  gpus: {'127.0.0.1': [0]} # {'130.207.125.60': [0]}
+
 storage:
+  upload_dir: ""
   engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
   video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
   video_engine_version: 0
