@@ -135,7 +135,7 @@ To file a bug or request a feature, please use GitHub issues. Pull requests are 
 For more information on installing from source, troublshooting,and contributing to EVA, see our
 [contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
-## Contributors
+## Contributors 
 
 See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
 
