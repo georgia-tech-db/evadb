@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
     Dummy,
     LogicalCreate,
@@ -81,7 +82,6 @@ from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
 
-from eva.expression.function_expression import FunctionExpression
 
 class RuleType(Flag):
     """
@@ -727,7 +727,9 @@ class LogicalGetToSeqScan(Rule):
             )
             scan.append_child(lower)
             # Check whether the projection contains a UDF
-            if before.target_list is None or not any([isinstance(expr, FunctionExpression) for expr in before.target_list]):
+            if before.target_list is None or not any(
+                [isinstance(expr, FunctionExpression) for expr in before.target_list]
+            ):
                 return scan
             upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
             upper.append_child(scan)
