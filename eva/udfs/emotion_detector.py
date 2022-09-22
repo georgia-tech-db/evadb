@@ -26,7 +26,6 @@ from PIL import Image
 from torch import Tensor
 from torchvision import transforms
 
-from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 # VGG configuration
