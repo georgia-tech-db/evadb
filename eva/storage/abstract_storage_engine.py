@@ -36,15 +36,6 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def _open(self, table):
-        """Internal function responsible for opening table to serve data
-        update, delete, insert or scan.
-
-        Attributes:
-            table: storage unit to be opened
-        """
-
-    @abstractmethod
     def write(self, table, rows):
         """Interface responsible for inserting the rows into the required
         table. Internally calls the _open function and does the required
@@ -53,23 +44,6 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         Attributes:
             table: storage unit to be created
             rows : rows data to be written
-        """
-
-    @abstractmethod
-    def _close(self, table):
-        """Internal function responsible for closing table to free resouces.
-
-        Attributes:
-            table: storage unit to be closed
-        """
-
-    @abstractmethod
-    def _read_init(self, table):
-        """Internal function responsible for doing tasks required before
-        we begin scanning/reading a table
-
-        Attributes:
-            table: storage unit to be read
         """
 
     @abstractmethod
