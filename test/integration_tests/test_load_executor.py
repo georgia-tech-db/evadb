@@ -51,9 +51,9 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # Try adding video to an existing table
-        with self.assertRaises(BinderError) as cm:
-            execute_query_fetch_all(query)
-        self.assertEqual(str(cm.exception), "Video table MyVideo already exists.")
+        execute_query_fetch_all(query)
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 2 * len(expected_batch))
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):
@@ -125,6 +125,8 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
+        expected_batch = create_dummy_csv_batches(
+            target_columns=select_columns
+        )
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)

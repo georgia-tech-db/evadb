@@ -116,9 +116,8 @@ class StatementBinder:
             if self._catalog.check_table_exists(
                 table_ref.table.database_name, table_ref.table.table_name
             ):
-                err_msg = f"Video table {name} already exists."
-                logger.error(err_msg)
-                raise BinderError(err_msg)
+                msg = f"Adding to an existing video table {name}."
+                logger.info(msg)
             else:
 
                 # create catalog entry only if the file path exists
