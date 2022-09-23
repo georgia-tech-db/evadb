@@ -21,27 +21,13 @@ python setup.py install '''
           }
         }
 
-        stage('Generate Parser') {
+        stage('Generate Parser, Test and Coverage') {
           steps {
             sh '''. eva_dev_env/bin/activate
-sh script/antlr4/generate_parser.sh'''
+sh script/antlr4/generate_parser.sh
+sh script/test/test.sh
+coveralls'''
           }
-        }
-      }
-    }
-    
-    parallel {
-      stage('Test') {
-        steps {
-          sh '''. eva_dev_env/bin/activate
-  sh script/test/test.sh'''
-        }
-      }
-
-      stage('Coveralls') {
-        steps {
-          sh '''. eva_dev_env/bin/activate
-  coveralls'''
         }
       }
     }
