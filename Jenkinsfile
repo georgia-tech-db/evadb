@@ -21,23 +21,15 @@ python setup.py install '''
           }
         }
 
-        stage('Generate Parser') {
+        stage('Generate Parser, Test and Coverage') {
           steps {
             sh '''. env37/bin/activate
-sh script/antlr4/generate_parser.sh'''
-          }
-        }
-
-      }
-    }
-
-    stage('Test') {
-      steps {
-        sh '''. env37/bin/activate
+sh script/antlr4/generate_parser.sh
 sh script/test/test.sh
 coveralls'''
+          }
+        }
       }
     }
-
   }
 }
