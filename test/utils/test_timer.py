@@ -50,7 +50,7 @@ class TimerTests(unittest.TestCase):
         self.assertTrue("error" not in response.to_json())
 
         # If response is an error, we do not report time
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD INFILE 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
         response = asyncio.run(handle_request(transport, load_query))
