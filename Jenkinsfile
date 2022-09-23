@@ -25,20 +25,22 @@ python setup.py install '''
             sh 'sh script/antlr4/generate_parser.sh'
           }
         }
-
       }
     }
-    stage('Test') {
-      steps {
-        sh '''. env37/bin/activate
-sh script/test/test.sh'''
+    
+    parallel {
+      stage('Test') {
+        steps {
+          sh '''. env37/bin/activate
+  sh script/test/test.sh'''
+        }
       }
-    }
 
-    stage('Coveralls') {
-      steps {
-        sh '''. env37/bin/activate
-coveralls'''
+      stage('Coveralls') {
+        steps {
+          sh '''. env37/bin/activate
+  coveralls'''
+        }
       }
     }
   }
