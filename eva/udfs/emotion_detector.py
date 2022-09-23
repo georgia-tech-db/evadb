@@ -110,7 +110,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         # pull model from dropbox if not present
         if not os.path.exists(model_path):
             model_url = "https://www.dropbox.com/s/bqblykok62d28mn/emotion_detector.t7"
-            subprocess.call(["wget", model_url, "-O", model_path])
+            subprocess.run(["wget", model_url, "--directory-prefix", output_directory])
 
         model_state = torch.load(model_path)
         self.model.load_state_dict(model_state["net"])
