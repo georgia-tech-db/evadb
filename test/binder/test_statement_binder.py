@@ -259,22 +259,6 @@ class StatementBinderTests(unittest.TestCase):
                 binder = StatementBinder(StatementBinderContext())
                 binder._bind_load_and_upload_data_statement(load_statement)
 
-        # test should raise if the video table already exists
-        table_name = "table_name"
-        load_statement.file_options = {"file_format": FileFormatType.VIDEO}
-        load_statement.table_ref.table.table_name = table_name
-        with patch.object(StatementBinder, "bind"):
-            with patch.object(
-                CatalogManager, "check_table_exists"
-            ) as mock_catalog_check:
-                mock_catalog_check.return_value = True
-                with self.assertRaises(BinderError) as cm:
-                    binder = StatementBinder(StatementBinderContext())
-                    binder._bind_load_and_upload_data_statement(load_statement)
-                self.assertEqual(
-                    str(cm.exception), f"Video table {table_name} already exists."
-                )
-
         # test should raise if the file path does not exists
         load_statement.file_options = {"file_format": FileFormatType.VIDEO}
         load_statement.path = file_path
