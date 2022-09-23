@@ -60,7 +60,9 @@ class ConfigurationManager(object):
                 raise ValueError(f"Invalid yml file at {cls._yml_path}")
 
             config_obj[category][key] = value
+            yml_file.seek(0)
             yml_file.write(yaml.dump(config_obj))
+            yml_file.truncate()
 
     @classmethod
     def get_value(cls, category: str, key: str) -> Any:
