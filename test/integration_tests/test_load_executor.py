@@ -21,7 +21,6 @@ from test.util import (
     file_remove,
 )
 
-from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -125,8 +124,6 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(
-            target_columns=select_columns
-        )
+        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
