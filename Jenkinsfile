@@ -10,8 +10,8 @@ pipeline {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
-            sh '''python3 -m venv eva_dev_env
-. eva_dev_env/bin/activate
+            sh '''python3 -m venv env37
+. env37/bin/activate
 pip install --upgrade pip
 pip install scikit-build
 pip install cython
