@@ -3,8 +3,20 @@ omit =
     eva/parser/evaql/*
     eva/udfs/emotion_detector.py
 
+    # Ray Execution
+    eva/executor/exchange_executor.py
+    eva/executor/ray_stage.py
+    eva/planner/exchange_plan.py
+    ray_playground.py
+    script/install/conda_eva_environment.yml
+    setup.cfg
+
 [report]
 exclude_lines =
     # pragma: no cover
     if TYPE_CHECKING:
+
+    # Ray Execution
+    if ray_enabled:
+    class LogicalExchangeToPhysical(Rule):
 
