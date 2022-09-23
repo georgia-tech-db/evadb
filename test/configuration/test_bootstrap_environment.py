@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
-from eva.configuration.constants import EVA_CONFIG_FILE, EVA_INSTALLATION_DIR
+from eva.configuration.constants import EVA_CONFIG_FILE, EVA_INSTALLATION_DIR, UDF_DIR
 
 
 class BootstrapEnvironmentTests(unittest.TestCase):
@@ -31,7 +31,7 @@ class BootstrapEnvironmentTests(unittest.TestCase):
             config_path = temp_dir_path / EVA_CONFIG_FILE
             assert config_path.exists()
 
-            udfs_dir = temp_dir_path / "udfs"
+            udfs_dir = temp_dir_path / UDF_DIR
             assert udfs_dir.exists()
 
     def test_invalid_eva_path_setup(self):
