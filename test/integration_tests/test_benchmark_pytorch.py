@@ -20,6 +20,7 @@ def test_should_run_pytorch_and_fastrcnn(benchmark):
 
 
 @pytest.mark.torchtest
+@pytest.mark.benchmark
 def test_should_run_pytorch_and_ssd(benchmark):
     create_udf_query = """CREATE UDF IF NOT EXISTS SSDObjectDetector
                 INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
@@ -40,6 +41,7 @@ def test_should_run_pytorch_and_ssd(benchmark):
 
 
 @pytest.mark.torchtest
+@pytest.mark.benchmark
 def test_should_run_pytorch_and_facenet(benchmark):
     create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -59,6 +61,7 @@ def test_should_run_pytorch_and_facenet(benchmark):
 
 
 @pytest.mark.torchtest
+@pytest.mark.benchmark
 def test_should_run_pytorch_and_ocr(benchmark):
     create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -81,6 +84,7 @@ def test_should_run_pytorch_and_ocr(benchmark):
     assert(res["ocrextractor.scores"][2][0] > 0.9)
 
 @pytest.mark.torchtest
+@pytest.mark.benchmark
 def test_should_run_pytorch_and_resnet50(benchmark):
     create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
