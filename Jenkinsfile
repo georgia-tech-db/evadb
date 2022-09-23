@@ -10,8 +10,8 @@ pipeline {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
-            sh '''python3 -m venv env37
-. env37/bin/activate
+            sh '''python3 -m venv eva_dev_env
+. eva_dev_env/bin/activate
 pip install --upgrade pip
 pip install ".[dev]"
 pip install scikit-build
@@ -32,14 +32,14 @@ python setup.py install '''
     parallel {
       stage('Test') {
         steps {
-          sh '''. env37/bin/activate
+          sh '''. eva_dev_env/bin/activate
   sh script/test/test.sh'''
         }
       }
 
       stage('Coveralls') {
         steps {
-          sh '''. env37/bin/activate
+          sh '''. eva_dev_env/bin/activate
   coveralls'''
         }
       }
