@@ -6,7 +6,7 @@ pipeline {
 
   }
   stages {
-    stage('Setup and Build EVA') {
+    stage('Setup and Build') {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
