@@ -37,7 +37,7 @@ class ConfigurationManagerTests(unittest.TestCase):
             _ = self.config.get_value("core", "invalid")
 
     def test_configuration_manager_update_valid_key(self):
-        value = self.config.get_value("core", "datasets_dir")
+        value = self.config.get_value("core", "mode")
 
         updated = "debug2"
         self.config.update_value("core", "mode", updated)
