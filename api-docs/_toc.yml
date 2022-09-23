@@ -14,7 +14,7 @@ parts:
         title: EVA Server
       - file: source/tutorials/02-object-detection
         title: Object Detection
-      - file: source/tutorials/03-movie_analysis
+      - file: source/tutorials/03-movie-analysis
         title: Movie Analysis
 
   - caption: Reference
