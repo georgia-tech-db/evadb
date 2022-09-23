@@ -23,7 +23,7 @@ python setup.py install '''
 
         stage('Generate Parser') {
           steps {
-            sh '. env37/bin/activate
+            sh '. eva_dev_env/bin/activate
   sh script/antlr4/generate_parser.sh'
           }
         }
