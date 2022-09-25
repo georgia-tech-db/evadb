@@ -15,6 +15,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Iterator
 
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 
 
@@ -27,7 +29,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def create(self, table):
+    def create(self, table: DataFrameMetadata):
         """Interface that implements all the necessary task required for
             creating the basic unit of storage(table or dataframe)
 
@@ -36,7 +38,7 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def write(self, table, rows):
+    def write(self, table: DataFrameMetadata, rows: Batch):
         """Interface responsible for inserting the rows into the required
         table. Internally calls the _open function and does the required
         task.
@@ -47,7 +49,12 @@ class AbstractStorageEngine(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def read(self, table, pos) -> Iterator[Batch]:
+    def read(
+        self,
+        table: DataFrameMetadata,
+        batch_mem_size: int,
+        predicate: AbstractExpression = None,
+    ) -> Iterator[Batch]:
         """Interface responsible for yielding row/rows to the client.
         This should be implemeneted as an interator over of table. Helpful
         while doing full table scan. `pos` parameter is used if user wants
