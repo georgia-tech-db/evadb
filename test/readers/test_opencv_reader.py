@@ -14,11 +14,6 @@
 # limitations under the License.
 import os
 import unittest
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.abstract_expression import ExpressionType
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.logical_expression import LogicalExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
 from test.util import (
     FRAME_SIZE,
     NUM_FRAMES,
@@ -28,6 +23,11 @@ from test.util import (
     upload_dir_from_config,
 )
 
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.logical_expression import LogicalExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.readers.opencv_reader import OpenCVReader
 
 
@@ -63,9 +63,7 @@ class VideoLoaderTest(unittest.TestCase):
             offset=2,
         )
         batches = list(video_loader.read())
-        expected = list(
-            create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)])
-        )
+        expected = list(create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)]))
 
         self.assertTrue(batches, expected)
 
@@ -77,9 +75,7 @@ class VideoLoaderTest(unittest.TestCase):
         )
         batches = list(video_loader.read())
         expected = list(
-            create_dummy_batches(
-                filters=[i for i in range(0, NUM_FRAMES)], start_id=2
-            )
+            create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES)], start_id=2)
         )
         self.assertTrue(batches, expected)
 
@@ -92,9 +88,7 @@ class VideoLoaderTest(unittest.TestCase):
             offset=2,
         )
         batches = list(video_loader.read())
-        expected = list(
-            create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)])
-        )
+        expected = list(create_dummy_batches(filters=[i for i in range(2, NUM_FRAMES)]))
         self.assertTrue(batches, expected)
 
     def test_should_sample_every_k_frame(self):
@@ -106,9 +100,7 @@ class VideoLoaderTest(unittest.TestCase):
             )
             batches = list(video_loader.read())
             expected = list(
-                create_dummy_batches(
-                    filters=[i for i in range(0, NUM_FRAMES, k)]
-                )
+                create_dummy_batches(filters=[i for i in range(0, NUM_FRAMES, k)])
             )
             self.assertTrue(batches, expected)
 
@@ -131,9 +123,7 @@ class VideoLoaderTest(unittest.TestCase):
             value = NUM_FRAMES // 2
             start = value + k - (value % k) if value % k else value
             expected = list(
-                create_dummy_batches(
-                    filters=[i for i in range(start, NUM_FRAMES, k)]
-                )
+                create_dummy_batches(filters=[i for i in range(start, NUM_FRAMES, k)])
             )
         self.assertTrue(batches, expected)
 
