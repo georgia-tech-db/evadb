@@ -284,6 +284,47 @@ class EmbedFilterIntoGet(Rule):
         else:
             return before
 
+class EmbedSampleIntoGet(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALSAMPLE)
+        pattern.append_child(Pattern(OperatorType.LOGICALGET))
+        super().__init__(RuleType.EMBED_FILTER_INTO_GET, pattern)
+
+    def promise(self):
+        return Promise.EMBED_SAMPLE_INTO_GET
+
+    def check(self, before: LogicalSample, context: OptimizerContext):
+        # System supports sample pushdown only while reading video data
+        lget: LogicalGet = before.children[0]
+        if lget.dataset_metadata.is_video:
+            return True
+        return False
+
+    def apply(self, before: LogicalSample, context: OptimizerContext):
+        sample_freq = before.sample_freq
+        lget: LogicalGet = before.children[0]
+        # System only supports pushing basic range predicates on id
+        video_alias = lget.video.alias
+        col_alias = f"{video_alias}.id"
+        pushdown_pred, unsupported_pred = extract_pushdown_predicate(
+            predicate, col_alias
+        )
+        if pushdown_pred:
+            new_get_opr = LogicalGet(
+                lget.video,
+                lget.dataset_metadata,
+                alias=lget.alias,
+                predicate=pushdown_pred,
+                target_list=lget.target_list,
+                children=lget.children,
+            )
+            if unsupported_pred:
+                unsupported_opr = LogicalFilter(unsupported_pred)
+                unsupported_opr.append_child(new_get_opr)
+                return unsupported_opr
+            return new_get_opr
+        else:
+            return before
 
 class EmbedProjectIntoGet(Rule):
     def __init__(self):

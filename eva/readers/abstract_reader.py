@@ -57,6 +57,7 @@ class AbstractReader(metaclass=ABCMeta):
                 row_size = get_size(data)
             data_batch.append(data)
             if len(data_batch) * row_size >= self.batch_mem_size:
+                print("yielding: ", len(data_batch), self.batch_mem_size, row_size)
                 yield Batch(pd.DataFrame(data_batch))
                 data_batch = []
         if data_batch:
