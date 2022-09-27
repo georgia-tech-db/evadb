@@ -63,9 +63,12 @@ class OpenCVReader(AbstractReader):
                     _, frame = video.read()
                     frame_id += 1
         else:
-            for idx, (begin, end) in enumerate(range_list):
+            for begin, end in range_list:
                 # align begin with sampling rate
-                begin += self._sampling_rate - prev_skipped_frames
+                if begin % self._sampling_rate:
+                    begin += self._sampling_rate - (
+                        begin % self._sampling_rate
+                    )
 
                 for frame_id in range(begin, end + 1, self._sampling_rate):
                     video.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
