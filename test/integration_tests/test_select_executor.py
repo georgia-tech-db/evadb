@@ -297,6 +297,36 @@ class SelectExecutorTest(unittest.TestCase):
 
         self.assertEqual(unnest_batch, expected)
 
+    def test_lateral_join_with_unnest_and_sample(self):
+        query = """SELECT id, label
+                  FROM MyVideo SAMPLE 2 JOIN LATERAL
+                    UNNEST(DummyMultiObjectDetector(data).labels) AS T(label)
+                  WHERE id < 10 ORDER BY id;"""
+        unnest_batch = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame(
+                {
+                    "myvideo.id": np.array([0, 0, 2, 2, 4, 4, 6, 6, 8, 8]),
+                    "T.label": np.array(
+                        [
+                            "person",
+                            "person",
+                            "car",
+                            "car",
+                            "bicycle",
+                            "bicycle",
+                            "person",
+                            "person",
+                            "car",
+                            "car",
+                        ]
+                    ),
+                }
+            )
+        )
+        self.assertEqual(len(unnest_batch), 10)
+        self.assertEqual(unnest_batch, expected)
+
     def test_lateral_join_with_unnest_on_subset_of_outputs(self):
         query = """SELECT id, label
                   FROM MyVideo JOIN LATERAL
