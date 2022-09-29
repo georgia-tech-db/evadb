@@ -78,13 +78,17 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         table: DataFrameMetadata,
         batch_mem_size: int,
         predicate: AbstractExpression = None,
+        sampling_rate: int = None,
     ) -> Iterator[Batch]:
 
         metadata_file = Path(table.file_url) / self.metadata
         for video_file_name in self._get_video_file_path(metadata_file):
             video_file = Path(table.file_url) / video_file_name
             reader = OpenCVReader(
-                str(video_file), batch_mem_size=batch_mem_size, predicate=predicate
+                str(video_file),
+                batch_mem_size=batch_mem_size,
+                predicate=predicate,
+                sampling_rate=sampling_rate,
             )
             for batch in reader.read():
                 column_name = table.columns[0].name

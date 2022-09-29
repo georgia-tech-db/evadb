@@ -142,6 +142,7 @@ class LogicalGet(Operator):
         alias: str,
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
+        sampling_rate: int = None,
         children=None,
     ):
         self._video = video
@@ -149,6 +150,7 @@ class LogicalGet(Operator):
         self._alias = alias
         self._predicate = predicate
         self._target_list = target_list
+        self._sampling_rate = sampling_rate
         super().__init__(OperatorType.LOGICALGET, children)
 
     @property
@@ -179,6 +181,10 @@ class LogicalGet(Operator):
     def target_list(self, target_list):
         self._target_list = target_list
 
+    @property
+    def sampling_rate(self):
+        return self._sampling_rate
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, LogicalGet):
@@ -190,6 +196,7 @@ class LogicalGet(Operator):
             and self.alias == other.alias
             and self.predicate == other.predicate
             and self.target_list == other.target_list
+            and self.sampling_rate == other.sampling_rate
         )
 
     def __hash__(self) -> int:
@@ -201,6 +208,7 @@ class LogicalGet(Operator):
                 self.dataset_metadata,
                 self.predicate,
                 tuple(self.target_list or []),
+                self.sampling_rate,
             )
         )
 

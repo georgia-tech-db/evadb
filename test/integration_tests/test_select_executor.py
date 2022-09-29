@@ -246,7 +246,29 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
-        # self.assertEqual(actual_batch, expected_batch[0])
+        self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_aaselect_and_sample_with_predicate(self):
+        select_query = (
+            "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        expected_batch = list(create_dummy_batches(filters=range(6, NUM_FRAMES, 2)))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+        select_query = (
+            "SELECT name, id,data FROM MyVideo SAMPLE 4 WHERE id > 2 ORDER BY id;"
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        print(actual_batch)
+        expected_batch = list(create_dummy_batches(filters=range(4, NUM_FRAMES, 4)))
+        self.assertEqual(actual_batch, expected_batch[0])
+
+        select_query = "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 2 AND id < 8 ORDER BY id;"
+        actual_batch = execute_query_fetch_all(select_query)
+        print(actual_batch)
+        expected_batch = list(create_dummy_batches(filters=range(4, 8, 2)))
+        self.assertEqual(actual_batch, expected_batch[0])
 
     @pytest.mark.torchtest
     def test_lateral_join(self):
