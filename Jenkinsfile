@@ -1,7 +1,7 @@
 pipeline {
   agent {
     dockerfile {
-      filename 'docker/eva_jenkins2.Dockerfile'
+      filename 'docker/eva_jenkins.Dockerfile'
     }
 
   }
