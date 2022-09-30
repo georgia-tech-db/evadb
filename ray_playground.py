@@ -212,62 +212,10 @@ class FastRCNN:
 
 def post_process(outcome):
     return list([(c, b) for c, b, s in outcome])
-"""
-s = time.perf_counter()
-
-BATCH_SIZE = 20
-LIMIT = 1999
-count = 0
-it = read(BATCH_SIZE, LIMIT)
-f = FastRCNN()
-gpu_time = 0
-f.prepare()
-for frame in it:
-    s = time.perf_counter()
-    res = f(frame)
-    gpu_time += (time.perf_counter() -s)
-    count += 1
-    if count % 100 == 0:
-        print('Completed rows: %s' % count)
-print("Total row: %s" % count)
-e = time.perf_counter()
-
-print(gpu_time)
-print('Total cost: %.2f' % (e-s))
-
-window = []
-for frame in it:
-    window.append(frame)
-    if len(window) >= 4:
-        pipe = ray.data.from_items(window).window(blocks_per_window=1)
-        pipe = pipe.map(FastRCNN, compute="actors", num_gpus=1)
-        for res in pipe.iter_rows():
-            count += 1
-        window = []
-if len(window) >= 4:
-    pipe = ray.data.from_items(window).window(blocks_per_window=1)
-    pipe = pipe.map(FastRCNN, compute="actors", num_gpus=1)
-    for res in pipe.iter_rows():
-        count += 1
-print("Total row: %s" % count)
-e = time.perf_counter()
-print('Total cost: %.2f' % (e-s))
-"""
 
 s = time.perf_counter()
 queue = Queue(maxsize=100)
 output_queue = Queue(maxsize=100)
-
-"""
-consumers = []
-for _ in range(2):
-    fast = FastRCNN()
-    consumers.append(RayStage.options(num_gpus=1).remote([fast]))
-
-tasks = []
-for c in consumers:
-    tasks.append(c.run.remote([queue], [output_queue]))
-"""
 
 tasks = []
 for _ in range(2):
@@ -281,10 +229,6 @@ read_video_gen = lambda: read(BATCH_SIZE, LIMIT)
 producer_task = ray_stage.remote([read_video_gen], [], [queue])
 ray_stage_wait_and_alert.remote([producer_task], [queue])
 
-#it = read_video_gen()
-#for batch in it:
-#    queue.put(batch)
-#queue.put(QueueStopSignal)
 count = 0
 while True:
     res = output_queue.get(block=True)

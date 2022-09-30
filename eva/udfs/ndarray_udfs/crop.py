@@ -50,10 +50,6 @@ class Crop(AbstractNdarrayUDF):
             if y1 == y0:
                 y1 = y0 + 1
 
-            # assertion removed
-            # ss = output.shape
-            #    assert ss[0] > 0
-            #    assert ss[1] > 0
             return frame[y0:y1, x0:x1]
 
         ret = pd.DataFrame()

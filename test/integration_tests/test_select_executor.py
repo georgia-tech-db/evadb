@@ -130,7 +130,6 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
                           FastRCNNObjectDetector(data);"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
@@ -166,7 +165,6 @@ class SelectExecutorTest(unittest.TestCase):
             }
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
-        print(actual_batch)
         self.assertEqual(actual_batch, expected_batch)
 
         select_query = "SELECT id, data FROM MyVideo WHERE id >= 2;"
