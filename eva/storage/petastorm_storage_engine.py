@@ -131,12 +131,3 @@ class PetastormStorageEngine(AbstractStorageEngine):
         )
         for batch in reader.read():
             yield batch
-
-    def _open(self, table):
-        pass
-
-    def _close(self, table):
-        pass
-
-    def _read_init(self, table):
-        pass
