@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 from typing import Optional
 
 from eva.models.storage.batch import Batch
@@ -44,6 +44,7 @@ class Response:
     """
     Data model for EVA server response
     """
+
     status: ResponseStatus
     batch: Batch
     error: Optional[str] = None
