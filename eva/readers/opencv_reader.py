@@ -23,15 +23,24 @@ from eva.utils.logging_manager import logger
 
 
 class OpenCVReader(AbstractReader):
-    def __init__(self, *args, predicate: AbstractExpression = None, **kwargs):
+    def __init__(
+        self,
+        *args,
+        predicate: AbstractExpression = None,
+        sampling_rate: int = None,
+        **kwargs
+    ):
         """Read frames from the disk
 
         Args:
             predicate (AbstractExpression, optional): If only subset of frames
             need to be read. The predicate should be only on single column and
             can be converted to ranges. Defaults to None.
+            sampling_rate (int, optional): Set if the caller wants one frame
+            every `sampling_rate` number of frames. For example, if `sampling_rate = 10`, it returns every 10th frame. If both `predicate` and `sampling_rate` are specified, `sampling_rate` is given precedence.
         """
         self._predicate = predicate
+        self._sampling_rate = sampling_rate or 1
         super().__init__(*args, **kwargs)
 
     def _read(self) -> Iterator[Dict]:
@@ -44,12 +53,25 @@ class OpenCVReader(AbstractReader):
         else:
             range_list = [(0, num_frames - 1)]
         logger.debug("Reading frames")
-
-        for (begin, end) in range_list:
-            video.set(cv2.CAP_PROP_POS_FRAMES, begin)
-            _, frame = video.read()
-            frame_id = begin
-            while frame is not None and frame_id <= end:
-                yield {"id": frame_id, "data": frame}
+        if self._sampling_rate == 1:
+            for (begin, end) in range_list:
+                video.set(cv2.CAP_PROP_POS_FRAMES, begin)
                 _, frame = video.read()
-                frame_id += 1
+                frame_id = begin
+                while frame is not None and frame_id <= end:
+                    yield {"id": frame_id, "data": frame}
+                    _, frame = video.read()
+                    frame_id += 1
+        else:
+            for begin, end in range_list:
+
+                # align begin with sampling rate
+                if begin % self._sampling_rate:
+                    begin += self._sampling_rate - (begin % self._sampling_rate)
+                for frame_id in range(begin, end + 1, self._sampling_rate):
+                    video.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
+                    _, frame = video.read()
+                    if frame is not None:
+                        yield {"id": frame_id, "data": frame}
+                    else:
+                        break

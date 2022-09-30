@@ -112,7 +112,9 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
             model_url = "https://www.dropbox.com/s/bqblykok62d28mn/emotion_detector.t7"
             subprocess.run(["wget", model_url, "--directory-prefix", output_directory])
 
-        model_state = torch.load(model_path)
+        # self.get_device() infers device from the loaded model, so not using it
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        model_state = torch.load(model_path, map_location=device)
         self.model.load_state_dict(model_state["net"])
         self.model.eval()
 

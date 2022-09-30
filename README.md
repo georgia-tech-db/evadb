@@ -58,8 +58,8 @@ pip install evadb
 
 1. Start the EVA server and the client programs
 ```shell
-python eva/eva_server&   # launch server
-python eva/eva_client    # launch client
+python eva/eva_server &   # launch server
+python eva/eva_client     # launch client
 ```
 
 2. UPLOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
