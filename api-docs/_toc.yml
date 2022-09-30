@@ -17,6 +17,9 @@ parts:
       - file: source/tutorials/03-emotion-analysis
         title: Emotion Analysis
       - file: source/tutorials/04-movie-analysis-interstellar.ipynb
+        title: Movie Analysis Interstellar
+      - file: source/tutorials/05-emotion-palette.ipynb
+        title: Emotion Palette
 
   - caption: Reference
     chapters:
