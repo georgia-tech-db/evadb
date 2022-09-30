@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+
 from eva.models.catalog.properties import ColorSpace
 
 
@@ -34,6 +35,7 @@ class FrameInfo:
         color_space (ColorSpace)(default: ColorSpace.RGB): color space of
         the frame (RGB, HSV, BGR, GRAY)
     """
+
     width: int
     height: int
     channels: int
