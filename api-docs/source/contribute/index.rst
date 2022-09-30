@@ -19,7 +19,7 @@ package manager. EVA requires JAVA 11 for generating the parser.
 ::
 
    git clone https://github.com/georgia-tech-db/eva.git && cd eva
-   python3 -m venv env38                                  # to create a virtual environment
+   python3 -m venv test_eva_db                            # to create a virtual environment
    . env38/bin/activate
    pip install --upgrade pip
    sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
