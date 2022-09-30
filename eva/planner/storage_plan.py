@@ -31,6 +31,7 @@ class StoragePlan(AbstractPlan):
         limit (int): limit on data records to be retrieved
         total_shards (int): number of shards of data (if sharded)
         curr_shard (int): current curr_shard if data is sharded
+        sampling_rate (int): uniform sampling rate
     """
 
     def __init__(
@@ -43,6 +44,7 @@ class StoragePlan(AbstractPlan):
         total_shards: int = 0,
         curr_shard: int = 0,
         predicate: AbstractExpression = None,
+        sampling_rate: int = None,
     ):
         super().__init__(PlanOprType.STORAGE_PLAN)
         self._video = video
@@ -53,6 +55,7 @@ class StoragePlan(AbstractPlan):
         self._total_shards = total_shards
         self._curr_shard = curr_shard
         self._predicate = predicate
+        self._sampling_rate = sampling_rate
 
     @property
     def video(self):
@@ -86,6 +89,10 @@ class StoragePlan(AbstractPlan):
     def predicate(self):
         return self._predicate
 
+    @property
+    def sampling_rate(self):
+        return self._sampling_rate
+
     def __hash__(self) -> int:
         return hash(
             (
@@ -98,5 +105,6 @@ class StoragePlan(AbstractPlan):
                 self.total_shards,
                 self.curr_shard,
                 self.predicate,
+                self.sampling_rate,
             )
         )
