@@ -21,7 +21,6 @@ from test.util import (
     file_remove,
 )
 
-from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -43,7 +42,7 @@ class LoadExecutorTest(unittest.TestCase):
                    WITH FORMAT VIDEO;"""
         execute_query_fetch_all(query)
 
-        select_query = """SELECT id, data FROM MyVideo;"""
+        select_query = """SELECT name, id, data FROM MyVideo;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
@@ -51,9 +50,9 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # Try adding video to an existing table
-        with self.assertRaises(BinderError) as cm:
-            execute_query_fetch_all(query)
-        self.assertEqual(str(cm.exception), "Video table MyVideo already exists.")
+        execute_query_fetch_all(query)
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 2 * len(expected_batch))
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):

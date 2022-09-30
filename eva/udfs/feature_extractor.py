@@ -52,6 +52,7 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
         for f in frames:
             with torch.no_grad():
                 outcome = outcome.append(
-                    {"features": self.model(torch.unsqueeze(f, 0))}, ignore_index=True
+                    {"features": self.as_numpy(self.model(torch.unsqueeze(f, 0)))},
+                    ignore_index=True,
                 )
         return outcome
