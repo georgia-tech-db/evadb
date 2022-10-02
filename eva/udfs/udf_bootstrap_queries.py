@@ -17,6 +17,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
 
 EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+NDARRAY_DIR = "ndarray"
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
@@ -42,9 +43,9 @@ ArrayCount_udf_query = """CREATE UDF
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
             TYPE NdarrayUDF
-            IMPL "{}/udfs/ndarray/array_count.py";
+            IMPL "{}/udfs/{}/array_count.py";
         """.format(
-    EVA_INSTALLATION_DIR
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
@@ -52,18 +53,18 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
                         bboxes NDARRAY FLOAT32(ANYDIM, 4))
                 OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 TYPE  NdarrayUDF
-                IMPL  "{}/udfs/ndarray/crop.py";
+                IMPL  "{}/udfs/{}/crop.py";
         """.format(
-    EVA_INSTALLATION_DIR
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
                 TYPE  NdarrayUDF
-                IMPL  "{}/udfs/ndarray/unnest.py";
+                IMPL  "{}/udfs/{}/unnest.py";
         """.format(
-    EVA_INSTALLATION_DIR
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
