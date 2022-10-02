@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from eva.models.catalog.properties import ColorSpace
 
 
-@dataclass
+@dataclass(frozen=True)
 class FrameInfo:
     """
     Data model contains information about the frame
