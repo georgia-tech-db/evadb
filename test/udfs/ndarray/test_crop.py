@@ -23,7 +23,7 @@ from eva.udfs.ndarray.crop import Crop
 class CropTests(unittest.TestCase):
     def setUp(self):
         self.crop_instance = Crop()
-    
+
     def test_crop_name_exists(self):
         assert len(self.crop_instance.name) > 0
 
