@@ -34,21 +34,25 @@ class AbstractUDF(metaclass=ABCMeta):
 
     def __init__(self):
         self.setup()
+    
+    def __call__(self, *args, **kwargs):
+        return self.forward(args[0])
+
+    def __str__(self):
+        return self.name
 
     @abstractmethod
     def setup(self) -> None:
         pass
-
-    def __call__(self, *args, **kwargs):
-        return self.forward(args[0])
 
     @abstractmethod
     def forward(self, frames: InputType) -> InputType:
         pass
 
     @property
+    @abstractmethod
     def name(self) -> str:
-        return str(self)
+        pass
 
     @property
     def input_format(self) -> FrameInfo:
