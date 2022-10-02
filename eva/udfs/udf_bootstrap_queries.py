@@ -42,7 +42,7 @@ ArrayCount_udf_query = """CREATE UDF
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
             TYPE NdarrayUDF
-            IMPL "{}/udfs/ndarray_udfs/array_count.py";
+            IMPL "{}/udfs/ndarray/array_count.py";
         """.format(
     EVA_INSTALLATION_DIR
 )
@@ -52,7 +52,7 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
                         bboxes NDARRAY FLOAT32(ANYDIM, 4))
                 OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 TYPE  NdarrayUDF
-                IMPL  "{}/udfs/ndarray_udfs/crop.py";
+                IMPL  "{}/udfs/ndarray/crop.py";
         """.format(
     EVA_INSTALLATION_DIR
 )
@@ -61,7 +61,7 @@ Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
                 TYPE  NdarrayUDF
-                IMPL  "{}/udfs/ndarray_udfs/unnest.py";
+                IMPL  "{}/udfs/ndarray/unnest.py";
         """.format(
     EVA_INSTALLATION_DIR
 )
