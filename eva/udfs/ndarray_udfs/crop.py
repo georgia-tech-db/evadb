@@ -22,6 +22,7 @@ class Crop(AbstractUDF):
     def setup(self):
         pass
 
+    @property
     def name(self):
         return "Crop"
 

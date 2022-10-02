@@ -23,6 +23,9 @@ from eva.udfs.ndarray_udfs.crop import Crop
 class CropTests(unittest.TestCase):
     def setUp(self):
         self.crop_instance = Crop()
+    
+    def test_crop_name_exists(self):
+        assert len(self.crop_instance.name) > 0
 
     def test_should_crop_one_frame(self):
         imarray = np.random.randint(0, 255, size=(100, 100, 3))
@@ -61,6 +64,3 @@ class CropTests(unittest.TestCase):
             columns=["cropped_frame_array"],
         )
         self.assertTrue(expected_image.equals(cropped_image))
-
-    def test_udf_name_crop(self):
-        self.assertEqual(self.crop_instance.name(), "Crop")
