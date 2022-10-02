@@ -13,13 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, Union
 
 import pandas as pd
 from numpy.typing import ArrayLike
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
+
+InputType = Union[pd.DataFrame, ArrayLike]
 
 
 class AbstractUDF(metaclass=ABCMeta):
@@ -31,6 +33,17 @@ class AbstractUDF(metaclass=ABCMeta):
     """
 
     def __init__(self):
+        self.setup()
+
+    @abstractmethod
+    def setup(self) -> None:
+        pass
+
+    def __call__(self, *args, **kwargs):
+        return self.forward(args[0])
+
+    @abstractmethod
+    def forward(self, frames: InputType) -> InputType:
         pass
 
     @property
@@ -43,6 +56,9 @@ class AbstractUDF(metaclass=ABCMeta):
 
 
 class AbstractClassifierUDF(AbstractUDF):
+    def setup(self):
+        pass
+
     @property
     @abstractmethod
     def labels(self) -> List[str]:
@@ -50,7 +66,7 @@ class AbstractClassifierUDF(AbstractUDF):
         Returns:
             List[str]: list of labels the classifier predicts
         """
-        return []
+        pass
 
     @abstractmethod
     def classify(self, frames: ArrayLike) -> pd.DataFrame:
@@ -66,8 +82,8 @@ class AbstractClassifierUDF(AbstractUDF):
             DataFrame: The predictions made by the classifier
         """
 
-    def __call__(self, *args, **kwargs):
-        return self.classify(*args, **kwargs)
+    def forward(self, frames: InputType) -> InputType:
+        return self.classify(frames)
 
 
 class AbstractTransformationUDF(AbstractUDF):
