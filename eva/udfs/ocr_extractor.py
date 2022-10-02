@@ -41,7 +41,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         super().__init__()
         self.threshold = threshold
         self.model = easyocr.Reader(["en"])
-    
+
     @property
     def name(self) -> str:
         return "OCRExtractor"

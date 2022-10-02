@@ -34,7 +34,7 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         super().__init__()
         self.threshold = threshold
         self.model = MTCNN()
-    
+
     @property
     def name(self) -> str:
         return "FaceDetector"

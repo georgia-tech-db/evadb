@@ -34,7 +34,7 @@ class AbstractUDF(metaclass=ABCMeta):
 
     def __init__(self):
         self.setup()
-    
+
     def __call__(self, *args, **kwargs):
         return self.forward(args[0])
 
