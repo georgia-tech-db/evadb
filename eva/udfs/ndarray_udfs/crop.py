@@ -15,14 +15,17 @@
 import numpy as np
 import pandas as pd
 
-from eva.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
+from eva.udfs.abstract_udf import AbstractUDF
 
 
-class Crop(AbstractNdarrayUDF):
+class Crop(AbstractUDF):
+    def setup(self):
+        pass
+
     def name(self):
         return "Crop"
 
-    def exec(self, df: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Crop the frame given the bbox - Crop(frame, bbox)
         If one of the side of the crop box is 0, it automatically sets it to 1 pixel
