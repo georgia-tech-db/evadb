@@ -43,6 +43,10 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         self.model = easyocr.Reader(["en"])
 
     @property
+    def name(self) -> str:
+        return "OCRExtractor"
+
+    @property
     def labels(self) -> List[str]:
         """
         Empty as there are no labels required for

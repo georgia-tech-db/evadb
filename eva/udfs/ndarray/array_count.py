@@ -15,15 +15,18 @@
 import numpy as np
 import pandas as pd
 
-from eva.udfs.ndarray_udfs.abstract_ndarray_udfs import AbstractNdarrayUDF
+from eva.udfs.abstract_udf import AbstractUDF
 
 
-class Array_Count(AbstractNdarrayUDF):
+class Array_Count(AbstractUDF):
     @property
     def name(self) -> str:
         return "Array_Count"
 
-    def exec(self, inp: pd.DataFrame):
+    def setup(self):
+        pass
+
+    def forward(self, inp: pd.DataFrame) -> pd.DataFrame:
         """
         It will return a count of search element for each tuple.
         The idea is to flatten the input array along the first dimension and
