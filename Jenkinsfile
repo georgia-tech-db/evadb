@@ -22,8 +22,7 @@ python setup.py install '''
 
         stage('Generate Parser') {
           steps {
-            sh '''sh script/antlr4/generate_parser.sh
- apt-get install openjdk-11-jdk openjdk-11-jre'''
+            sh '''sh script/antlr4/generate_parser.sh'''
           }
         }
 
