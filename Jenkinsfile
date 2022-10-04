@@ -22,7 +22,7 @@ python setup.py install '''
 
         stage('Generate Parser') {
           steps {
-            sh '''sh script/antlr4/generate_parser.sh'''
+            sh 'sh script/antlr4/generate_parser.sh'
           }
         }
 
