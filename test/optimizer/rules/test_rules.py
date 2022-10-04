@@ -29,13 +29,13 @@ from eva.optimizer.operators import (
     LogicalGet,
     LogicalProject,
     LogicalQueryDerivedGet,
-    LogicalSample,
 )
 from eva.optimizer.rules.rules import (
     EmbedFilterIntoDerivedGet,
     EmbedFilterIntoGet,
     EmbedProjectIntoDerivedGet,
     EmbedProjectIntoGet,
+    EmbedSampleIntoGet,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -60,8 +60,6 @@ from eva.optimizer.rules.rules import (
     LogicalUploadToPhysical,
     Promise,
     PushDownFilterThroughJoin,
-    PushdownFilterThroughSample,
-    PushdownProjectThroughSample,
     RulesManager,
 )
 from eva.server.command_handler import execute_query_fetch_all
@@ -86,10 +84,7 @@ class TestRules(unittest.TestCase):
             Promise.EMBED_PROJECT_INTO_DERIVED_GET > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE > Promise.IMPLEMENTATION_DELIMETER
-        )
-        self.assertTrue(
-            Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE > Promise.IMPLEMENTATION_DELIMETER
+            Promise.EMBED_SAMPLE_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.EMBED_FILTER_INTO_GET > Promise.IMPLEMENTATION_DELIMETER
@@ -144,10 +139,9 @@ class TestRules(unittest.TestCase):
         supported_rewrite_rules = [
             EmbedFilterIntoGet(),
             #    EmbedFilterIntoDerivedGet(),
-            PushdownFilterThroughSample(),
             EmbedProjectIntoGet(),
+            EmbedSampleIntoGet(),
             #    EmbedProjectIntoDerivedGet(),
-            PushdownProjectThroughSample(),
             PushDownFilterThroughJoin(),
         ]
         self.assertEqual(
@@ -254,35 +248,6 @@ class TestRules(unittest.TestCase):
         rewrite_opr = rule.apply(logi_project, MagicMock())
         self.assertFalse(rewrite_opr is logi_derived_get)
         self.assertEqual(rewrite_opr.target_list, target_list)
-
-    # PushdownFilterThroughSample
-    def test_pushdown_filter_thru_sample(self):
-        rule = PushdownFilterThroughSample()
-        predicate = MagicMock()
-        constexpr = MagicMock()
-        logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        sample = LogicalSample(constexpr, [logi_get])
-        logi_filter = LogicalFilter(predicate, [sample])
-        rewrite_opr = rule.apply(logi_filter, MagicMock())
-        self.assertIsInstance(rewrite_opr, LogicalSample)
-        print(rewrite_opr.children[0])
-        self.assertIsInstance(rewrite_opr.children[0], LogicalFilter)
-        self.assertIsInstance(rewrite_opr.children[0].children[0], LogicalGet)
-
-    # PushdownProjectThroughSample
-    def test_pushdown_project_thru_sample(self):
-        rule = PushdownProjectThroughSample()
-        target_list = MagicMock()
-        constexpr = MagicMock()
-        logi_get = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        sample = LogicalSample(constexpr, [logi_get])
-        logi_project = LogicalProject(target_list, [sample])
-
-        rewrite_opr = rule.apply(logi_project, MagicMock())
-        self.assertTrue(rewrite_opr is sample)
-        self.assertFalse(rewrite_opr.children[0] is logi_project)
-        self.assertTrue(logi_get is rewrite_opr.children[0].children[0])
-        self.assertEqual(rewrite_opr.children[0].target_list, target_list)
 
     def test_should_pushdown_filter_through_join(self):
         query = """SELECT id, label

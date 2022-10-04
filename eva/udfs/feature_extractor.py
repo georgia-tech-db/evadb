@@ -35,6 +35,10 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
         self.model.eval()
 
     @property
+    def name(self) -> str:
+        return "FeatureExtractor"
+
+    @property
     def labels(self) -> List[str]:
         return []
 
