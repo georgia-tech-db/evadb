@@ -31,8 +31,7 @@ python setup.py install '''
 
     stage('Test') {
       steps {
-        sh '''. env37/bin/activate
-sh script/test/test.sh'''
+        sh '''. env37/bin/activate'''
       }
     }
 
