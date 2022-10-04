@@ -27,6 +27,8 @@ RUN apt-get -qq update \
         libpq-dev \
         python3-dev \
         sudo \
+        openjdk-11-jdk \
+        openjdk-11-jre \
     && pip install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
