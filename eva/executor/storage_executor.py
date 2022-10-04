@@ -33,6 +33,7 @@ class StorageExecutor(AbstractExecutor):
                 self.node.video,
                 self.node.batch_mem_size,
                 predicate=self.node.predicate,
+                sampling_rate=self.node.sampling_rate,
             )
         else:
             return StorageEngine.read(self.node.video, self.node.batch_mem_size)

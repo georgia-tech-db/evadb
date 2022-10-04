@@ -94,8 +94,7 @@ class RuleType(Flag):
     # REWRITE RULES(LOGICAL -> LOGICAL)
     EMBED_FILTER_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
-    PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
-    PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
+    EMBED_SAMPLE_INTO_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
@@ -173,8 +172,7 @@ class Promise(IntEnum):
     EMBED_PROJECT_INTO_GET = auto()
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    PUSHDOWN_FILTER_THROUGH_SAMPLE = auto()
-    PUSHDOWN_PROJECT_THROUGH_SAMPLE = auto()
+    EMBED_SAMPLE_INTO_GET = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
 
 
@@ -277,6 +275,7 @@ class EmbedFilterIntoGet(Rule):
                 alias=lget.alias,
                 predicate=pushdown_pred,
                 target_list=lget.target_list,
+                sampling_rate=lget.sampling_rate,
                 children=lget.children,
             )
             if unsupported_pred:
@@ -286,6 +285,37 @@ class EmbedFilterIntoGet(Rule):
             return new_get_opr
         else:
             return before
+
+
+class EmbedSampleIntoGet(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALSAMPLE)
+        pattern.append_child(Pattern(OperatorType.LOGICALGET))
+        super().__init__(RuleType.EMBED_SAMPLE_INTO_GET, pattern)
+
+    def promise(self):
+        return Promise.EMBED_SAMPLE_INTO_GET
+
+    def check(self, before: LogicalSample, context: OptimizerContext):
+        # System supports sample pushdown only while reading video data
+        lget: LogicalGet = before.children[0]
+        if lget.dataset_metadata.is_video:
+            return True
+        return False
+
+    def apply(self, before: LogicalSample, context: OptimizerContext):
+        sample_freq = before.sample_freq.value
+        lget: LogicalGet = before.children[0]
+        new_get_opr = LogicalGet(
+            lget.video,
+            lget.dataset_metadata,
+            alias=lget.alias,
+            predicate=lget.predicate,
+            target_list=lget.target_list,
+            sampling_rate=sample_freq,
+            children=lget.children,
+        )
+        return new_get_opr
 
 
 class EmbedProjectIntoGet(Rule):
@@ -310,6 +340,7 @@ class EmbedProjectIntoGet(Rule):
             alias=lget.alias,
             predicate=lget.predicate,
             target_list=target_list,
+            sampling_rate=lget.sampling_rate,
             children=lget.children,
         )
 
@@ -371,56 +402,6 @@ class EmbedProjectIntoDerivedGet(Rule):
             children=ld_get.children,
         )
         return new_opr
-
-
-class PushdownFilterThroughSample(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern_sample = Pattern(OperatorType.LOGICALSAMPLE)
-        pattern_sample.append_child(Pattern(OperatorType.LOGICALGET))
-        pattern.append_child(pattern_sample)
-        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_SAMPLE, pattern)
-
-    def promise(self):
-        return Promise.PUSHDOWN_FILTER_THROUGH_SAMPLE
-
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalFilter, context: OptimizerContext):
-        sample = before.children[0]
-        logical_get = sample.children[0]
-        new_filter = LogicalFilter(before.predicate)
-        new_filter.append_child(logical_get)
-        sample.clear_children()
-        sample.append_child(new_filter)
-        return sample
-
-
-class PushdownProjectThroughSample(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALPROJECT)
-        pattern_sample = Pattern(OperatorType.LOGICALSAMPLE)
-        pattern_sample.append_child(Pattern(OperatorType.LOGICALGET))
-        pattern.append_child(pattern_sample)
-        super().__init__(RuleType.PUSHDOWN_PROJECT_THROUGH_SAMPLE, pattern)
-
-    def promise(self):
-        return Promise.PUSHDOWN_PROJECT_THROUGH_SAMPLE
-
-    def check(self, before: Operator, context: OptimizerContext):
-        # nothing else to check if logical match found return true
-        return True
-
-    def apply(self, before: LogicalProject, context: OptimizerContext):
-        sample = before.children[0]
-        logical_get = sample.children[0]
-        new_project = LogicalProject(before.target_list)
-        new_project.append_child(logical_get)
-        sample.clear_children()
-        sample.append_child(new_project)
-        return sample
 
 
 # Join Queries
@@ -723,6 +704,7 @@ class LogicalGetToSeqScan(Rule):
                     before.dataset_metadata,
                     batch_mem_size=batch_mem_size,
                     predicate=before.predicate,
+                    sampling_rate=before.sampling_rate,
                 )
             )
             scan.append_child(lower)
@@ -741,6 +723,7 @@ class LogicalGetToSeqScan(Rule):
                     before.dataset_metadata,
                     batch_mem_size=batch_mem_size,
                     predicate=before.predicate,
+                    sampling_rate=before.sampling_rate,
                 )
             )
             return after
@@ -1046,10 +1029,9 @@ class RulesManager:
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
             # EmbedFilterIntoDerivedGet(),
-            PushdownFilterThroughSample(),
             EmbedProjectIntoGet(),
             # EmbedProjectIntoDerivedGet(),
-            PushdownProjectThroughSample(),
+            EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
         ]
 

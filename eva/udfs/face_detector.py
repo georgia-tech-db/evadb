@@ -36,6 +36,10 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         self.threshold = threshold
         self.model = MTCNN()
 
+    @property
+    def name(self) -> str:
+        return "FaceDetector"
+
     def to_device(self, device: str):
         gpu = "cuda:{}".format(device)
         self.model = MTCNN(device=torch.device(gpu))
