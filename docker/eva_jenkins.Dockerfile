@@ -54,11 +54,11 @@ RUN apt-get -qq update \
     && rm -rf /opt/build/* \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# Install Java8 (Direct Download) because java-8 is no longer supported
+# Install Java11 (Direct Download) because java-8 is no longer supported
 RUN wget https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz && \
-    mkdir /opt/jdk-16 && \
+    mkdir /opt/jdk-11 && \
     tar -zxf openjdk-11_linux-x64_bin.tar.gz -C /opt/jdk-11 && \
-    update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
+    update-alternatives --install /usr/bin/java java /opt/jdk-11/java-se-8u41-ri/bin/java 100
 
 # Add Jenkins user, For Spark Authentication (cannot be done without user)
 RUN groupadd --gid 1000 jenkins && \
