@@ -15,7 +15,8 @@ pipeline {
 pip install --upgrade pip
 pip install scikit-build
 pip install cython
-pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1 torch torchvision
+pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1
+pip install torch torchvision facenet_pytorch
 python setup.py install '''
           }
         }
