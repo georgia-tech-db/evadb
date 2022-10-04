@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Callable, List
-from ray.util.queue import Queuea
+from ray.util.queue import Queue
 import ray
 
 class StageCompleteSignal:
