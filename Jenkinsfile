@@ -6,7 +6,7 @@ pipeline {
 
   }
   stages {
-    stage('Setup and Build') {
+    stage('Setup and Install Packages') {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
@@ -21,7 +21,7 @@ python setup.py install '''
           }
         }
 
-        stage('Generate Parser') {
+        stage('Generate Parser Files') {
           steps {
             sh 'sh script/antlr4/generate_parser.sh'
           }
@@ -30,7 +30,7 @@ python setup.py install '''
       }
     }
 
-    stage('Test') {
+    stage('Run Tests') {
       steps {
         sh '''. env37/bin/activate
 sh script/test/test.sh'''
