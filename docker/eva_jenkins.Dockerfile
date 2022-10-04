@@ -55,10 +55,10 @@ RUN apt-get -qq update \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
 # Install Java8 (Direct Download) because java-8 is no longer supported
-#RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
-#    mkdir /opt/jdk-16 && \
-#    tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
-#    update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
+RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
+    mkdir /opt/jdk-16 && \
+    tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
+    update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
 
 # Add Jenkins user, For Spark Authentication (cannot be done without user)
 RUN groupadd --gid 1000 jenkins && \
