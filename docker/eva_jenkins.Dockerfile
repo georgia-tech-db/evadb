@@ -1,7 +1,7 @@
 # https://www.jenkins.io/doc/book/installing/docker/ - Follow these steps for starting jenkins.
 FROM python:3.8
 
-ENV OPENCV_VERSION="4.5.1"
+ENV OPENCV_VERSION="4.5.5.64"
 
 # OpenCV Specific Installation
 RUN apt-get -qq update \
@@ -55,9 +55,9 @@ RUN apt-get -qq update \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
 # Install Java8 (Direct Download) because java-8 is no longer supported
-RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
+RUN wget https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz && \
     mkdir /opt/jdk-16 && \
-    tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
+    tar -zxf openjdk-11_linux-x64_bin.tar.gz -C /opt/jdk-11 && \
     update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
 
 # Add Jenkins user, For Spark Authentication (cannot be done without user)
