@@ -12,9 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass
+
 from eva.models.catalog.properties import ColorSpace
 
 
+@dataclass(frozen=True)
 class FrameInfo:
     """
     Data model contains information about the frame
@@ -31,35 +34,9 @@ class FrameInfo:
 
         color_space (ColorSpace)(default: ColorSpace.RGB): color space of
         the frame (RGB, HSV, BGR, GRAY)
-
     """
 
-    def __init__(self, height=-1, width=-1, channels=3, color_space=ColorSpace.RGB):
-        self._color_space = color_space
-        self._width = width
-        self._height = height
-        self._channels = channels
-
-    @property
-    def width(self):
-        return self._width
-
-    @property
-    def height(self):
-        return self._height
-
-    @property
-    def color_space(self):
-        return self._color_space
-
-    @property
-    def num_channels(self):
-        return self._channels
-
-    def __eq__(self, other):
-        return (
-            self.color_space == other.color_space
-            and self.width == other.width
-            and self.height == other.height
-            and self.num_channels == other.num_channels
-        )
+    width: int
+    height: int
+    channels: int
+    color_space: ColorSpace.RGB
