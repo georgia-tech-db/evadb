@@ -6,7 +6,7 @@ pipeline {
 
   }
   stages {
-    stage('Setup and Build') {
+    stage('Setup and Install Packages') {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
@@ -16,11 +16,12 @@ pip install --upgrade pip
 pip install scikit-build
 pip install cython
 pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1
+pip install torch torchvision facenet_pytorch easyocr
 python setup.py install '''
           }
         }
 
-        stage('Generate Parser') {
+        stage('Generate Parser Files') {
           steps {
             sh 'sh script/antlr4/generate_parser.sh'
           }
@@ -29,11 +30,11 @@ python setup.py install '''
       }
     }
 
-    stage('Test') {
+    stage('Run Tests') {
       steps {
-        sh '''. env37/bin/activate'''
+        sh '''. env37/bin/activate
+sh script/test/test.sh'''
       }
     }
-
   }
 }
