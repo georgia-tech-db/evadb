@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Callable, List
-from ray.util.queue import Queue
+
 import ray
+from ray.util.queue import Queue
+
 
 class StageCompleteSignal:
     pass
+
 
 @ray.remote(num_cpus=0)
 def ray_stage_wait_and_alert(tasks: ray.ObjectRef, output_queue: Queue):
