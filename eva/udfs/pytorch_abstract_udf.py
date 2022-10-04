@@ -53,17 +53,6 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         )
         return self.classify(tens_batch)
 
-    @abstractmethod
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
-        """
-        Abstract method to work with tensors.
-        Specified transformations are already applied
-        Arguments:
-            frames (Tensor): tensor on which transformation is performed
-        Returns:
-            pd.DataFrame: outcome after prediction
-        """
-
     def classify(self, frames: Tensor) -> pd.DataFrame:
         """
         Given the gpu_batch_size, we split the input tensor inpto chunks.
