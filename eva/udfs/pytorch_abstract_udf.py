@@ -23,7 +23,7 @@ from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract_udf import AbstractClassifierUDF, AbstractTransformationUDF
+from eva.udfs.abstract_udf import AbstractClassifierUDF, AbstractTransformationUDF, InputType
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -32,6 +32,11 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
     A pytorch based classifier. Used to make sure we make maximum
     utilization of features provided by pytorch without reinventing the wheel.
     """
+    def setup(self, *args, **kwargs):
+        pass
+
+    def forward(self, frames: InputType) -> InputType:
+        pass
 
     def __init__(self):
         AbstractClassifierUDF.__init__(self)

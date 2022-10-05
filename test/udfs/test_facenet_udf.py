@@ -50,13 +50,13 @@ class FaceNet(unittest.TestCase):
         }
         frame_batch = Batch(pd.DataFrame([frame_single_face, frame_single_face]))
         detector = FaceDetector()
-        result = detector.classify(frame_batch.project(["data"]).frames)
+        result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(1, len(result.iloc[0]["bboxes"]))
         self.assertEqual(1, len(result.iloc[1]["bboxes"]))
 
         frame_batch = Batch(pd.DataFrame([frame_multifaces]))
         detector = FaceDetector()
-        result = detector.classify(frame_batch.project(["data"]).frames)
+        result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(6, len(result.iloc[0]["bboxes"]))
 
     @unittest.skip("Needs GPU")
@@ -72,7 +72,7 @@ class FaceNet(unittest.TestCase):
 
         # test on GPU
         detector = FaceDetector().to_device(0)
-        result = detector.classify(frame_batch.project(["data"]).frames)
+        result = detector(frame_batch.project(["data"]).frames)
         self.assertEqual(6, len(result.iloc[0]["bboxes"]))
 
     def test_mock_to_device(self):

@@ -314,12 +314,12 @@ def load_inbuilt_udfs():
 
 
 class DummyObjectDetector(AbstractClassifierUDF):
+    def setup(self, *args, **kwargs):
+        pass
+
     @property
     def name(self) -> str:
         return "DummyObjectDetector"
-
-    def __init__(self):
-        super().__init__()
 
     @property
     def input_format(self):
@@ -329,7 +329,7 @@ class DummyObjectDetector(AbstractClassifierUDF):
     def labels(self):
         return ["__background__", "person", "bicycle"]
 
-    def classify(self, df: pd.DataFrame):
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         ret = pd.DataFrame()
         ret["label"] = df.apply(self.classify_one, axis=1)
         return ret
@@ -345,13 +345,12 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
     """
     Returns multiple objects for each frame
     """
+    def setup(self, *args, **kwargs):
+        pass
 
     @property
     def name(self) -> str:
         return "DummyMultiObjectDetector"
-
-    def __init__(self):
-        super().__init__()
 
     @property
     def input_format(self):
@@ -361,7 +360,7 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
     def labels(self):
         return ["__background__", "person", "bicycle", "car"]
 
-    def classify(self, df: pd.DataFrame):
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         ret = pd.DataFrame()
         ret["labels"] = df.apply(self.classify_one, axis=1)
         return ret
