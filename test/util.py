@@ -345,6 +345,7 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
     """
     Returns multiple objects for each frame
     """
+
     def setup(self, *args, **kwargs):
         pass
 
