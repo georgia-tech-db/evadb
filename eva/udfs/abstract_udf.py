@@ -41,6 +41,8 @@ class AbstractUDF(metaclass=ABCMeta):
     def __str__(self):
         return self.name
 
+    """Abstract Methods all UDFs must implement. """
+
     @abstractmethod
     def setup(self, *args, **kwargs) -> None:
         """
