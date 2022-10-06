@@ -27,6 +27,8 @@ RUN apt-get -qq update \
         libpq-dev \
         python3-dev \
         sudo \
+        openjdk-11-jdk \
+        openjdk-11-jre \
     && pip install numpy \
     && wget -q https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip -O opencv.zip \
     && unzip -qq opencv.zip -d /opt \
@@ -54,11 +56,10 @@ RUN apt-get -qq update \
     && rm -rf /opt/build/* \
     && rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# Install Java8 (Direct Download) because java-8 is no longer supported
-RUN wget https://download.java.net/openjdk/jdk8u41/ri/openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz && \
-    mkdir /opt/jdk-16 && \
-    tar -zxf openjdk-8u41-b04-linux-x64-14_jan_2020.tar.gz -C /opt/jdk-16 && \
-    update-alternatives --install /usr/bin/java java /opt/jdk-16/java-se-8u41-ri/bin/java 100
+# Install Java11 (Direct Download) because java-8 is no longer supported
+RUN wget https://download.java.net/java/ga/jdk11/openjdk-11_linux-x64_bin.tar.gz && \
+    mkdir /opt/jdk-11 && \
+    tar -zxf openjdk-11_linux-x64_bin.tar.gz -C /opt/jdk-11
 
 # Add Jenkins user, For Spark Authentication (cannot be done without user)
 RUN groupadd --gid 1000 jenkins && \

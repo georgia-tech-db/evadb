@@ -49,7 +49,8 @@ minimal_requirement = [
     "antlr4-python3-runtime==4.10",
     "pyyaml==5.1",
     "ray==1.13.0", # TODO: not minimal requirement
-    "grpcio"
+    "grpcio",
+    "importlib-metadata<5.0"
 ]
 
 formatter_libs = [
