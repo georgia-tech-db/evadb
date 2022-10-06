@@ -43,10 +43,17 @@ class AbstractUDF(metaclass=ABCMeta):
 
     @abstractmethod
     def setup(self, *args, **kwargs) -> None:
+        """
+        Do necessary setup in here. Gets called automatically on intialization.
+        """
         pass
 
     @abstractmethod
     def forward(self, frames: InputType) -> InputType:
+        """
+        Implement UDF function call by overriding this function.
+        Gets called automatically by __call__.
+        """
         pass
 
     @property
