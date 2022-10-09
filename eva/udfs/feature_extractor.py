@@ -26,8 +26,7 @@ from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 class FeatureExtractor(PytorchAbstractClassifierUDF):
     """ """
 
-    def __init__(self):
-        super().__init__()
+    def setup(self):
         self.model = models.resnet50(pretrained=True, progress=False)
         for param in self.model.parameters():
             param.requires_grad = False
@@ -42,7 +41,7 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
     def labels(self) -> List[str]:
         return []
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs feature extraction on input frames
         Arguments:

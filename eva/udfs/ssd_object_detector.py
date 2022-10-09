@@ -47,8 +47,7 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "ssd"
 
-    def __init__(self, threshold=0.5):
-        super().__init__()
+    def setup(self, threshold=0.5):
         self.threshold = threshold
         self.transforms = [
             transforms.Resize([300, 300]),
@@ -163,7 +162,7 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
     def input_format(self) -> FrameInfo:
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: Tensor) -> pd.DataFrame:
         assert frames.size()[-1] == frames.size()[-2] == 300
 
         prediction = self.model(frames)

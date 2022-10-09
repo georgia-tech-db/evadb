@@ -33,9 +33,10 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
     utilization of features provided by pytorch without reinventing the wheel.
     """
 
-    def setup(self, *args, **kwargs):
-        nn.Module.__init__(self)
+    def __init__(self, *args, **kwargs):
         self.transforms = [transforms.ToTensor()]
+        nn.Module.__init__(self, *args, **kwargs)
+        self.setup(*args, **kwargs)
 
     def get_device(self):
         return next(self.parameters()).device
@@ -45,7 +46,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         # reverse the channels from opencv
         return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
-    def forward(self, frames: List[np.ndarray]) -> pd.DataFrame:
+    def __call__(self, *args, **kwargs) -> pd.DataFrame:
         """
         This method transforms the list of frames by
         running pytorch transforms then splits them into batches.
@@ -56,6 +57,11 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         Returns:
             DataFrame with features key and associated frame
         """
+
+        frames = args[0]
+        if isinstance(frames, pd.DataFrame):
+            frames = frames.transpose().values.tolist()[0]
+
         gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(
             self.get_device()
@@ -65,12 +71,10 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
             chunks = torch.split(tens_batch, gpu_batch_size)
             outcome = pd.DataFrame()
             for tensor in chunks:
-                outcome = outcome.append(
-                    self._get_predictions(tensor), ignore_index=True
-                )
+                outcome = outcome.append(self.forward(tensor), ignore_index=True)
             return outcome
         else:
-            return self._get_predictions(frames)
+            return self.forward(frames)
 
     def as_numpy(self, val: Tensor) -> np.ndarray:
         """
@@ -87,13 +91,6 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         Required to make class a member of GPUCompatible Protocol.
         """
         return self.to(torch.device("cuda:{}".format(device)))
-
-    def __call__(self, *args, **kwargs):
-        frames = args[0]
-        if isinstance(frames, pd.DataFrame):
-            frames = frames.transpose().values.tolist()[0]
-
-        return self.forward(frames)
 
 
 class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
