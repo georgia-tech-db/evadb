@@ -15,7 +15,7 @@
 import numpy as np
 import pandas as pd
 
-from eva.udfs.abstract_udf import AbstractUDF
+from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class Crop(AbstractUDF):

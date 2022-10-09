@@ -20,7 +20,7 @@ import pandas as pd
 import torch
 from facenet_pytorch import MTCNN
 
-from eva.udfs.abstract_udf import AbstractClassifierUDF
+from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
