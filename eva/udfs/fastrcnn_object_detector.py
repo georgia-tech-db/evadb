@@ -19,7 +19,7 @@ import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
     from torch import Tensor
