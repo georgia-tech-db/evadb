@@ -1,7 +1,7 @@
 [run]
 omit = 
     eva/parser/evaql/*
-    eva/udfs/abstract_udf.py
+    eva/udfs/abstract/abstract_udf.py
     eva/udfs/emotion_detector.py
 
 [report]
