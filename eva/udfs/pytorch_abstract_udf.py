@@ -89,15 +89,11 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         return self.to(torch.device("cuda:{}".format(device)))
 
     def __call__(self, *args, **kwargs):
-        if len(args) == 0:
-            return nn.Module.__call__(self, *args, **kwargs)
-
         frames = args[0]
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
 
-        print("__call__")
-        return nn.Module.__call__(self, frames, **kwargs)
+        return self.forward(frames)
 
 
 class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
