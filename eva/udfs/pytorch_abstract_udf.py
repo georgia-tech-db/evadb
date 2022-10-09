@@ -45,25 +45,24 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         # reverse the channels from opencv
         return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
-    def forward(self, frames: List[np.ndarray]):
+    def forward(self, frames: List[np.ndarray]) -> pd.DataFrame:
+        """
+        This method transforms the list of frames by
+        running pytorch transforms then splits them into batches.
+
+        Arguments:
+            frames: List of input frames
+
+        Returns:
+            DataFrame with features key and associated frame
+        """
+        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(
             self.get_device()
         )
-        return self.classify(tens_batch)
-
-    def classify(self, frames: Tensor) -> pd.DataFrame:
-        """
-        Given the gpu_batch_size, we split the input tensor inpto chunks.
-        And call the _get_predictions and merge the results.
-        Arguments:
-            frames (Tensor): tensor on which transformation is performed
-        Returns:
-            pd.DataFrame: outcome after prediction
-        """
-        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
 
         if gpu_batch_size:
-            chunks = torch.split(frames, gpu_batch_size)
+            chunks = torch.split(tens_batch, gpu_batch_size)
             outcome = pd.DataFrame()
             for tensor in chunks:
                 outcome = outcome.append(
@@ -97,6 +96,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         if isinstance(frames, pd.DataFrame):
             frames = frames.transpose().values.tolist()[0]
 
+        print("__call__")
         return nn.Module.__call__(self, frames, **kwargs)
 
 
