@@ -22,7 +22,10 @@ from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF, AbstractTransformationUDF
+from eva.udfs.abstract.abstract_udf import (
+    AbstractClassifierUDF,
+    AbstractTransformationUDF,
+)
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
