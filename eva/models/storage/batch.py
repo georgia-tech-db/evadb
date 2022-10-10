@@ -76,7 +76,7 @@ class Batch:
 
     def to_json(self):
         obj = {
-            "frames": self.frames,
+            "frames": self._frames,
             "batch_size": len(self),
             "identifier_column": self._identifier_column,
         }
@@ -97,8 +97,8 @@ class Batch:
         )
 
     def __eq__(self, other: Batch):
-        return self.frames[sorted(self.frames.columns)].equals(
-            other.frames[sorted(other.frames.columns)]
+        return self._frames[sorted(self.columns)].equals(
+            other.frames[sorted(other.columns)]
         )
 
     def __getitem__(self, indices) -> Batch:
@@ -117,7 +117,7 @@ class Batch:
             start = indices.start if indices.start else 0
             end = indices.stop if indices.stop else len(self.frames)
             if end < 0:
-                end = len(self.frames) + end
+                end = len(self._frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
         elif isinstance(indices, int):
@@ -126,7 +126,7 @@ class Batch:
             raise TypeError("Invalid argument type: {}".format(type(indices)))
 
     def _get_frames_from_indices(self, required_frame_ids):
-        new_frames = self.frames.iloc[required_frame_ids, :]
+        new_frames = self._frames.iloc[required_frame_ids, :]
         new_batch = Batch(new_frames)
         return new_batch
 
@@ -272,10 +272,10 @@ class Batch:
             alias = Alias(alias)
         new_col_names = []
         if len(alias.col_names):
-            if len(self.frames.columns) != len(alias.col_names):
+            if len(self.columns) != len(alias.col_names):
                 err_msg = (
                     f"Expected {len(alias.col_names)} columns {alias.col_names},"
-                    f"got {len(self.frames.columns)} columns {self.frames.columns}."
+                    f"got {len(self.columns)} columns {self.columns}."
                 )
                 logger.error(err_msg)
                 raise RuntimeError(err_msg)
@@ -284,7 +284,7 @@ class Batch:
                 for col_name in alias.col_names
             ]
         else:
-            for col_name in self.frames.columns:
+            for col_name in self.columns:
                 if "." in col_name:
                     new_col_names.append(
                         "{}.{}".format(alias.alias_name, col_name.split(".")[1])
@@ -292,15 +292,15 @@ class Batch:
                 else:
                     new_col_names.append("{}.{}".format(alias.alias_name, col_name))
 
-        self.frames.columns = new_col_names
+        self._frames.columns = new_col_names
 
     def drop_column_alias(self) -> None:
         # table1.a, table1.b, table1.c -> a, b, c
         new_col_names = []
-        for col_name in self.frames.columns:
+        for col_name in self.columns:
             if "." in col_name:
                 new_col_names.append(col_name.split(".")[1])
             else:
                 new_col_names.append(col_name)
 
-        self.frames.columns = new_col_names
+        self._frames.columns = new_col_names
