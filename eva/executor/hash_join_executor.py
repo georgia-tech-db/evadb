@@ -41,11 +41,8 @@ class HashJoinExecutor(AbstractExecutor):
                 probe_batch.frames.index = probe_batch.frames[hash_keys].apply(
                     lambda x: hash(tuple(x)), axis=1
                 )
-                join_batch = probe_batch.frames.merge(
-                    build_batch.frames, left_index=True, right_index=True, how="inner"
-                )
-                join_batch.reset_index(drop=True, inplace=True)
-                join_batch = Batch(join_batch)
+                join_batch = Batch.inner_join(probe_batch, build_batch)
+                join_batch.reset_index()
                 join_batch = apply_predicate(join_batch, self.predicate)
                 join_batch = apply_project(join_batch, self.join_project)
                 yield join_batch

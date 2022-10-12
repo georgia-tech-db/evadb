@@ -248,6 +248,10 @@ class Batch:
         frame = pd.concat(frame_list, ignore_index=True, copy=copy)
 
         return Batch(frame)
+    
+    @classmethod
+    def inner_join(cls, first: Batch, second: Batch) -> Batch:
+        return cls(first._frames.merge(second._frames, left_index=True, right_index=True, how="inner"))
 
     def empty(self):
         """Checks if the batch is empty
