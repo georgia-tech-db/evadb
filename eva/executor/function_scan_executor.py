@@ -44,8 +44,6 @@ class FunctionScanExecutor(AbstractExecutor):
             res = self.func_expr.evaluate(lateral_input)
             if not res.empty():
                 if self.do_unnest:
-                    res = res.frames.explode(list(res.columns))
-                    res.dropna(inplace=True)
-                    res = Batch(res)
+                    res.unnest()
 
                 yield res

@@ -138,7 +138,7 @@ class Batch:
             if self._identifier_column in self._frames:
                 by = [self._identifier_column]
             elif not self.empty():
-                by = self.frames.columns[0]
+                by = self.columns[0]
             else:
                 logger.warn("Sorting an empty batch")
                 return
@@ -255,6 +255,13 @@ class Batch:
             True if the batch_size == 0
         """
         return len(self) == 0
+    
+    def unnest(self) -> None:
+        """
+        Unnest columns and drop columns with no data
+        """
+        self._frames = self._frames.explode(list(self._frames.columns))
+        self._frames.dropna(inplace=True)
 
     def reverse(self) -> None:
         """Reverses dataframe"""
