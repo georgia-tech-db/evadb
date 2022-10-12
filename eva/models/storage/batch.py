@@ -268,6 +268,10 @@ class Batch:
         self._frames = self._frames[::-1]
         self._frames.reset_index(drop=True, inplace=True)
 
+    def drop_zero(self, outcomes: Batch) -> None:
+        """Drop all columns with corresponding outcomes containing zero."""
+        self._frames = self._frames[(outcomes._frames > 0).to_numpy()]
+
     def reset_index(self):
         """Resets the index of the data frame in the batch"""
         self._frames.reset_index(drop=True, inplace=True)
