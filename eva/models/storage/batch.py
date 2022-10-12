@@ -229,7 +229,7 @@ class Batch:
         if other.empty():
             return self
 
-        new_frames = self.frames.append(other.frames, ignore_index=True)
+        new_frames = self._frames.append(other.frames, ignore_index=True)
 
         return Batch(new_frames)
 
