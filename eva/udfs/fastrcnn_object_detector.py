@@ -19,7 +19,7 @@ import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
     from torch import Tensor
@@ -49,8 +49,7 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "fastrcnn"
 
-    def __init__(self, threshold=0.85):
-        super().__init__()
+    def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
             pretrained=True, progress=False
@@ -157,7 +156,7 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
             "toothbrush",
         ]
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:

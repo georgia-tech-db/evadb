@@ -20,7 +20,7 @@ import pandas as pd
 import torch
 from facenet_pytorch import MTCNN
 
-from eva.udfs.abstract_udf import AbstractClassifierUDF
+from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -30,8 +30,7 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         threshold (float): Threshold for classifier confidence score
     """
 
-    def __init__(self, threshold=0.85):
-        super().__init__()
+    def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = MTCNN()
 
@@ -48,7 +47,7 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
     def labels(self) -> List[str]:
         return []
 
-    def classify(self, frames: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, frames: pd.DataFrame) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
