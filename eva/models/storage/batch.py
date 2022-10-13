@@ -257,6 +257,11 @@ class Batch:
             )
         )
 
+    def hash_items(self, indexes) -> None:
+        self._frames.index = self._frames[indexes].apply(
+            lambda x: hash(tuple(x)), axis=1
+        )
+
     def empty(self):
         """Checks if the batch is empty
         Returns:

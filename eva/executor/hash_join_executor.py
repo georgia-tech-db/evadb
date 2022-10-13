@@ -38,9 +38,7 @@ class HashJoinExecutor(AbstractExecutor):
         hash_keys = [key.col_alias for key in self.probe_keys]
         for build_batch in build_table.exec():
             for probe_batch in probe_table.exec():
-                probe_batch.frames.index = probe_batch.frames[hash_keys].apply(
-                    lambda x: hash(tuple(x)), axis=1
-                )
+                probe_batch.hash_items(hash_keys)
                 join_batch = Batch.inner_join(probe_batch, build_batch)
                 join_batch.reset_index()
                 join_batch = apply_predicate(join_batch, self.predicate)
