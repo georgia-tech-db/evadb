@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
     Dummy,
@@ -67,7 +68,6 @@ from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.exchange_plan import ExchangePlan
 from eva.planner.function_scan_plan import FunctionScanPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan

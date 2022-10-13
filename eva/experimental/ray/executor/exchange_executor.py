@@ -22,8 +22,8 @@ from eva.executor.ray_stage import (
     ray_stage,
     ray_stage_wait_and_alert,
 )
+from eva.experimental.ray.planner.exchange_plan import ExchangePlan
 from eva.models.storage.batch import Batch
-from eva.planner.exchange_plan import ExchangePlan
 
 
 class QueueReaderExecutor(AbstractExecutor):
