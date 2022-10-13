@@ -262,6 +262,16 @@ class Batch:
             lambda x: hash(tuple(x)), axis=1
         )
 
+    def aggregate(self, method: str) -> None:
+        """
+        Aggregate batch based on method.
+        Methods can be sum, count, min, max, mean
+
+        Arguments:
+            method: string with one of the five above options
+        """
+        self._frames = self._frames.agg([method])
+
     def empty(self):
         """Checks if the batch is empty
         Returns:
