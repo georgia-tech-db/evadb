@@ -17,7 +17,6 @@ from eva.expression.abstract_expression import (
     ExpressionReturnType,
     ExpressionType,
 )
-from eva.models.storage.batch import Batch
 
 
 class AggregationExpression(AbstractExpression):

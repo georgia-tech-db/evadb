@@ -18,13 +18,9 @@ from typing import Iterable, List, TypeVar, Union
 import numpy as np
 import pandas as pd
 
+from eva.expression.abstract_expression import ExpressionType
 from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
-from eva.expression.abstract_expression import (
-    AbstractExpression,
-    ExpressionReturnType,
-    ExpressionType,
-)
 
 
 class BatchEncoder(json.JSONEncoder):
