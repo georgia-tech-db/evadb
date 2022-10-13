@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from abc import abstractmethod
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -24,7 +22,10 @@ from torch import Tensor, nn
 from torchvision.transforms import Compose, transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.udfs.abstract_udf import AbstractClassifierUDF, AbstractTransformationUDF
+from eva.udfs.abstract.abstract_udf import (
+    AbstractClassifierUDF,
+    AbstractTransformationUDF,
+)
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -34,10 +35,10 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
     utilization of features provided by pytorch without reinventing the wheel.
     """
 
-    def __init__(self):
-        AbstractClassifierUDF.__init__(self)
-        nn.Module.__init__(self)
+    def __init__(self, *args, **kwargs):
         self.transforms = [transforms.ToTensor()]
+        nn.Module.__init__(self, *args, **kwargs)
+        self.setup(*args, **kwargs)
 
     def get_device(self):
         return next(self.parameters()).device
@@ -47,44 +48,35 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         # reverse the channels from opencv
         return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
-    def forward(self, frames: List[np.ndarray]):
+    def __call__(self, *args, **kwargs) -> pd.DataFrame:
+        """
+        This method transforms the list of frames by
+        running pytorch transforms then splits them into batches.
+
+        Arguments:
+            frames: List of input frames
+
+        Returns:
+            DataFrame with features key and associated frame
+        """
+
+        frames = args[0]
+        if isinstance(frames, pd.DataFrame):
+            frames = frames.transpose().values.tolist()[0]
+
+        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
         tens_batch = torch.cat([self.transform(x) for x in frames]).to(
             self.get_device()
         )
-        return self.classify(tens_batch)
-
-    @abstractmethod
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
-        """
-        Abstract method to work with tensors.
-        Specified transformations are already applied
-        Arguments:
-            frames (Tensor): tensor on which transformation is performed
-        Returns:
-            pd.DataFrame: outcome after prediction
-        """
-
-    def classify(self, frames: Tensor) -> pd.DataFrame:
-        """
-        Given the gpu_batch_size, we split the input tensor inpto chunks.
-        And call the _get_predictions and merge the results.
-        Arguments:
-            frames (Tensor): tensor on which transformation is performed
-        Returns:
-            pd.DataFrame: outcome after prediction
-        """
-        gpu_batch_size = ConfigurationManager().get_value("executor", "gpu_batch_size")
 
         if gpu_batch_size:
-            chunks = torch.split(frames, gpu_batch_size)
+            chunks = torch.split(tens_batch, gpu_batch_size)
             outcome = pd.DataFrame()
             for tensor in chunks:
-                outcome = outcome.append(
-                    self._get_predictions(tensor), ignore_index=True
-                )
+                outcome = outcome.append(self.forward(tensor), ignore_index=True)
             return outcome
         else:
-            return self._get_predictions(frames)
+            return self.forward(frames)
 
     def as_numpy(self, val: Tensor) -> np.ndarray:
         """
@@ -101,16 +93,6 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
         Required to make class a member of GPUCompatible Protocol.
         """
         return self.to(torch.device("cuda:{}".format(device)))
-
-    def __call__(self, *args, **kwargs):
-        if len(args) == 0:
-            return nn.Module.__call__(self, *args, **kwargs)
-
-        frames = args[0]
-        if isinstance(frames, pd.DataFrame):
-            frames = frames.transpose().values.tolist()[0]
-
-        return nn.Module.__call__(self, frames, **kwargs)
 
 
 class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
