@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from typing import Iterable, List, TypeVar, Union
+from typing import Callable, Iterable, List, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -130,6 +130,12 @@ class Batch:
         new_frames = self._frames.iloc[required_frame_ids, :]
         new_batch = Batch(new_frames)
         return new_batch
+
+    def apply_function_expression(self, expr: Callable) -> None:
+        """
+        Execute function expression on frames.
+        """
+        self._frames = expr(self._frames)
 
     def sort(self, by=None) -> None:
         """
