@@ -20,6 +20,11 @@ import pandas as pd
 
 from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
+from eva.expression.abstract_expression import (
+    AbstractExpression,
+    ExpressionReturnType,
+    ExpressionType,
+)
 
 
 class BatchEncoder(json.JSONEncoder):
@@ -256,6 +261,22 @@ class Batch:
                 second._frames, left_index=True, right_index=True, how="inner"
             )
         )
+
+    @classmethod
+    def combine_batches(
+        cls, first: Batch, second: Batch, expression: ExpressionType
+    ) -> Batch:
+        """
+        Creates Batch by combining two batches using some arithmetic expression.
+        """
+        if expression == ExpressionType.ARITHMETIC_ADD:
+            return Batch(pd.DataFrame(first._frames + second._frames))
+        elif expression == ExpressionType.ARITHMETIC_SUBTRACT:
+            return Batch(pd.DataFrame(first._frames - second._frames))
+        elif expression == ExpressionType.ARITHMETIC_MULTIPLY:
+            return Batch(pd.DataFrame(first._frames * second._frames))
+        elif expression == ExpressionType.ARITHMETIC_DIVIDE:
+            return Batch(pd.DataFrame(first._frames / second._frames))
 
     def hash_items(self, indexes) -> None:
         self._frames.index = self._frames[indexes].apply(

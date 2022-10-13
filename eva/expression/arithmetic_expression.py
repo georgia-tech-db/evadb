@@ -37,17 +37,10 @@ class ArithmeticExpression(AbstractExpression):
         super().__init__(exp_type, rtype=ExpressionReturnType.FLOAT, children=children)
 
     def evaluate(self, *args, **kwargs):
-        vl = self.get_child(0).evaluate(*args, **kwargs).frames
-        vr = self.get_child(1).evaluate(*args, **kwargs).frames
+        vl = self.get_child(0).evaluate(*args, **kwargs)
+        vr = self.get_child(1).evaluate(*args, **kwargs)
 
-        if self.etype == ExpressionType.ARITHMETIC_ADD:
-            return Batch(pd.DataFrame(vl + vr))
-        elif self.etype == ExpressionType.ARITHMETIC_SUBTRACT:
-            return Batch(pd.DataFrame(vl - vr))
-        elif self.etype == ExpressionType.ARITHMETIC_MULTIPLY:
-            return Batch(pd.DataFrame(vl * vr))
-        elif self.etype == ExpressionType.ARITHMETIC_DIVIDE:
-            return Batch(pd.DataFrame(vl / vr))
+        return Batch.combine_batches(vl, vr, self.etype)
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
