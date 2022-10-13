@@ -19,7 +19,7 @@ import easyocr
 import numpy as np
 import pandas as pd
 
-from eva.udfs.abstract_udf import AbstractClassifierUDF
+from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
 
 
@@ -37,8 +37,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         self.model = easyocr.Reader(["en"], gpu="cuda:{}".format(device))
         return self
 
-    def __init__(self, threshold=0.85):
-        super().__init__()
+    def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = easyocr.Reader(["en"])
 
@@ -54,7 +53,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         """
         return
 
-    def classify(self, frames: np.ndarray) -> pd.DataFrame:
+    def forward(self, frames: np.ndarray) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:

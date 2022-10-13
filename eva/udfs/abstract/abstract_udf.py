@@ -32,8 +32,8 @@ class AbstractUDF(metaclass=ABCMeta):
 
     """
 
-    def __init__(self):
-        self.setup()
+    def __init__(self, *args, **kwargs):
+        self.setup(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
         return self.forward(args[0])
@@ -41,12 +41,21 @@ class AbstractUDF(metaclass=ABCMeta):
     def __str__(self):
         return self.name
 
+    """Abstract Methods all UDFs must implement. """
+
     @abstractmethod
-    def setup(self) -> None:
+    def setup(self, *args, **kwargs) -> None:
+        """
+        Do necessary setup in here. Gets called automatically on intialization.
+        """
         pass
 
     @abstractmethod
     def forward(self, frames: InputType) -> InputType:
+        """
+        Implement UDF function call by overriding this function.
+        Gets called automatically by __call__.
+        """
         pass
 
     @property
@@ -60,9 +69,6 @@ class AbstractUDF(metaclass=ABCMeta):
 
 
 class AbstractClassifierUDF(AbstractUDF):
-    def setup(self):
-        pass
-
     @property
     @abstractmethod
     def labels(self) -> List[str]:
@@ -71,23 +77,6 @@ class AbstractClassifierUDF(AbstractUDF):
             List[str]: list of labels the classifier predicts
         """
         pass
-
-    @abstractmethod
-    def classify(self, frames: ArrayLike) -> pd.DataFrame:
-        """
-        Takes as input a batch of frames and returns the predictions by
-        applying the classification model.
-
-        Arguments:
-            frames (np.ndarray): Input batch of frames on which prediction
-            needs to be made
-
-        Returns:
-            DataFrame: The predictions made by the classifier
-        """
-
-    def forward(self, frames: InputType) -> InputType:
-        return self.classify(frames)
 
 
 class AbstractTransformationUDF(AbstractUDF):
