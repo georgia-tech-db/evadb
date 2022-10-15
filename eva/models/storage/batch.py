@@ -182,6 +182,26 @@ class Batch:
         else:
             logger.warn("Columns and Sort Type are required for orderby")
 
+    def invert(self) -> None:
+        self._frames = ~self._frames
+
+    def all_true(self) -> bool:
+        return self._frames.all().bool()
+
+    def all_false(self) -> bool:
+        inverted = ~self._frames
+        return inverted.all().bool()
+
+    def create_mask(self) -> List:
+        return self._frames[self._frames[0]].index.tolist()
+
+    def create_inverted_mask(self) -> List:
+        return self._frames[~self._frames[0]].index.tolist()
+
+    def update_indices(self, indices: List, other: Batch):
+        self._frames.iloc[indices] = other._frames
+        self._frames = pd.DataFrame(self._frames)
+
     def project(self, cols: None) -> Batch:
         """
         Takes as input the column list, returns the projection.
