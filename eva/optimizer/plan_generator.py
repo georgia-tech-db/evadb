@@ -19,7 +19,8 @@ from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules import RulesManager
-
+from eva.optimizer.operators import *
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 class PlanGenerator:
     """
@@ -37,10 +38,46 @@ class PlanGenerator:
             task = task_stack.pop()
             task.execute()
 
+    def map_alias(self, optimizer_context: OptimizerContext):
+        alias_map = {}
+        grp_exprs = optimizer_context.memo.group_exprs
+        alias_counter = 0
+
+        for key,val in grp_exprs.items():
+            if isinstance(val.opr, LogicalGet):
+                if val.opr.predicate:
+                    predicates = val.opr.predicate.children
+                    for child in predicates:
+                        if isinstance(child, TupleValueExpression):
+                            if (child.col_alias not in alias_map):
+                                alias_map[child.col_alias] = alias_counter
+                                alias_map[child.col_name] = alias_counter
+                                alias_counter+=1
+                        
+                            child.col_alias = alias_map[child.col_alias]
+                            child.col_name = alias_map[child.col_alias]
+                        
+                
+            elif isinstance(val.opr, LogicalProject):
+                select_columns = val.opr.target_list
+                for col in select_columns:
+                    if col.col_alias not in alias_map:
+                        alias_map[col.col_alias] = alias_counter
+                        alias_map[col.col_name] = alias_counter
+                        alias_counter+=1
+
+                    col.col_alias = alias_map[col.col_alias]
+                    
+                    col.col_name = alias_map[col.col_name]
+                    
+    
+        return optimizer_context
+
     def build_optimal_physical_plan(
         self, root_grp_id: int, optimizer_context: OptimizerContext
     ):
         physical_plan = None
+        optimizer_context = self.map_alias(optimizer_context)
         root_grp = optimizer_context.memo.groups[root_grp_id]
         best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
         physical_plan = best_grp_expr.opr
