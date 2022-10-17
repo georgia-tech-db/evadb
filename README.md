@@ -1,18 +1,12 @@
-<div align="center" style="display:flex;flex-direction:column;">
+<div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="600px" margin-left="-5px">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
   </a>
-  <h3>Where SQL meets Deep Learning</h3>
-  <p>
-  </p>
-  <p>
-</div>
-
-<div align="center" style="display:flex;flex-direction:column;">
-    <h3>🌟 Try It Out! 🌟</h3>
-    <div>
+  <h3>Where SQL meets Deep Learning!</h3>
+  <div>
+        <h3>🌟 Try It Out! 🌟</h3>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
-            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
+            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EVA on Colab"/>
         </a>
         <a href="https://github.com/georgia-tech-db/eva/discussions">
             <img alt="Discuss on Github!" src="https://img.shields.io/badge/-Discuss%20on%20Github!-blueviolet">
