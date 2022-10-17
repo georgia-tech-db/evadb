@@ -2,7 +2,7 @@
   <a href="https://georgia-tech-db.github.io/eva/index.html">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="600px" margin-left="-5px">
   </a>
-  <h3>Quickly capture information embedded in videos!</h3>
+  <h3>Where SQL meets Deep Learning</h3>
   <p>
   </p>
   <p>
