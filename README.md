@@ -2,7 +2,7 @@
   <a href="https://georgia-tech-db.github.io/eva/index.html">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
   </a>
-  <h3>Where SQL meets Deep Learning!</h3>
+  <h3>EVA Video Database System: Where SQL meets Deep Learning!</h3>
   <div>
         <h3>🌟 Try It Out! 🌟</h3>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
@@ -14,7 +14,7 @@
     </div>
 </div>
 
-# EVA Video Analytics System
+# EVA Video Database System
 
 [![PyPI Status](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
 [![CI Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
