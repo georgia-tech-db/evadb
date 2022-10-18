@@ -14,6 +14,13 @@
     </div>
 </div>
 
+## Links
+* [Documentation](https://evadb.readthedocs.io/en/latest/)
+* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
+* [Website](https://georgia-tech-db.github.io/eva/index.html)
+* [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
+
 # EVA Video Database System
 
 [![PyPI Status](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
@@ -35,12 +42,6 @@ EVA is a new database system tailored for video analytics -- think MySQL for vid
 🚅 Speed up queries and save money spent on model inference using in-built sampling, caching, and filtering optimizations.
 
 ✨ Hit your target accuracy using state-of-the-art model selection and query optimization algorithms.
-
-## Links
-* [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
-* [Documentation](https://evadb.readthedocs.io/en/latest/)
-* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [Website](https://georgia-tech-db.github.io/eva/index.html)
 
 ## QuickStart
 
