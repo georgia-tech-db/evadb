@@ -101,32 +101,8 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 ## Contributing to EVA
 
-### Development Environment Setup
-
-To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
-
-```shell
-git clone https://github.com/georgia-tech-db/eva.git && cd eva
-python3 -m venv test_eva_db                             # to create a virtual environment
-source test_eva_db/bin/activate                         # activate virtual environment
-pip install --upgrade pip
-sudo -E apt install -y openjdk-11-jdk openjdk-11-jre    # to install JAVA
-sh script/antlr4/generate_parser.sh                     # to generate the EVA parser
-pip install -e ".[dev]"
-```
-
-Note: If you face Pytorch CUDA compatibility issues after installation, refer this [link](https://pytorch.org/get-started/previous-versions/) and re-install the correct `torch` and `torchvision` packages with `pip` 
-
-To verify that installation is successful, run the test suite.
-
-```shell
-sh script/test/test.sh
-```
-
-### Contributing Guidelines
-
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-For more information on installing from source, troublshooting,and contributing to EVA, see our
+For more information on installing from source and contributing to EVA, see our
 [contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
 ## Contributors
