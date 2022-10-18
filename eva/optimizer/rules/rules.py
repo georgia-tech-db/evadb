@@ -96,6 +96,7 @@ class RuleType(Flag):
     EMBED_SAMPLE_INTO_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
+    UDF_REUSE_FUNCTION_SCAN = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
     REWRITE_DELIMETER = auto()
 
@@ -170,6 +171,7 @@ class Promise(IntEnum):
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
+    UDF_REUSE_FUNCTION_SCAN = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
 
 
@@ -400,6 +402,79 @@ class EmbedProjectIntoDerivedGet(Rule):
         )
         return new_opr
 
+class UdfReuseForFuntionScan(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        # We do not care the right child of the lateral join
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        # As the first version, we do not support filter between function scan
+        # and lateral join.
+        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
+        super().__init__(RuleType.UDF_REUSE_FUNCTION_SCAN, pattern)
+
+    def promise(self):
+        return Promise.UDF_REUSE_FUNCTION_SCAN
+
+    def check(self, before: Operator, context: OptimizerContext):
+        """
+        We can do cost analysis here. For example, skipping cheap UDFs.
+        For now, we apply the rule for all function scan.
+        """
+        # The join type needs to be lateral 
+        return (before.join_type == JoinType.LATERAL_JOIN)
+
+    def apply(self, before: Operator, context: OptimizerContext):
+        lateral_join = before
+        function_scan = lateral_join.children[1]
+        # We check the historical invocation of the same UDF and find the
+        # table that stores the results.
+        # We should also check the input relation of the function scan 
+        # (right child of lateral join), which is tricky.
+        view = self._check_udf_history(function_scan) 
+        if view is not None:
+            # Create a left join between the right child of the lateral_join
+            # and the materialized view
+            left_join = self._generate_left_join(lateral_join, view)
+            left_join.append_child(lateral_join.children[0])
+            get = self._generate_get(view)
+            left_join.append_child(get)
+
+            # Set the guard predicate for the lateral_join
+            lateral_join = self._set_guard_predicate(lateral_join)
+        else:
+            # Create a table name for materialization
+            view = self._generate_view_name(function_scan)
+        # Create  the operator
+        mat = self._generate_mat_operator(view, function_scan) 
+        mat.append_child(function_scan)
+        # We need to change the mat executor, so it yields results to
+        # the parent.
+        lateral_join.children[1] = mat
+        return lateral_join
+
+    def _check_udf_history(self, fs: LogicalFunctionScan) \
+            -> Optional[DataFrameMetadata]:
+        raise NotImplementedError
+
+    def _generate_view_name(self, fs: LogicalFunctionScan) \
+            -> DataFrameMetadata:
+        raise NotImplementedError
+
+    def _generate_mat_operator(self,
+        view: DataFrameMetadata, 
+        fs: LogicalFunctionScan
+    ) -> LogicalCreateMaterializedView:
+        raise NotImplementedError
+
+    def _generate_left_join(self, lj: LogicalJoin, view: DataFrameMetadata) \
+            -> LogicalJoin:
+        raise NotImplementedError
+
+    def _generate_get(self, view: DataFrameMetadata) -> LogicalGet:
+        raise NotImplementedError
+
+    def _set_guard_predicate(self, ls: LogicalJoin) -> LogicalJoin:
+        raise NotImplementedError
 
 # Join Queries
 class PushDownFilterThroughJoin(Rule):
