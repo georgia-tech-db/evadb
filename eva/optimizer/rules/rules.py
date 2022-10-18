@@ -425,6 +425,7 @@ class UdfReuseForFuntionScan(Rule):
 
     def apply(self, before: Operator, context: OptimizerContext):
         lateral_join = before
+        input_relation = lateral_join.children[0]
         function_scan = lateral_join.children[1]
         # We check the historical invocation of the same UDF and find the
         # table that stores the results.
@@ -435,18 +436,22 @@ class UdfReuseForFuntionScan(Rule):
             # Create a left join between the right child of the lateral_join
             # and the materialized view
             left_join = self._generate_left_join(lateral_join, view)
-            left_join.append_child(lateral_join.children[0])
+            left_join.append_child(input_relation)
             get = self._generate_get(view)
             left_join.append_child(get)
 
             # Set the guard predicate for the lateral_join
             lateral_join = self._set_guard_predicate(lateral_join)
+            lateral_join.children[0] = left_join
         else:
             # Create a table name for materialization
             view = self._generate_view_name(function_scan)
-        # Create  the operator
-        mat = self._generate_mat_operator(view, function_scan) 
-        mat.append_child(function_scan)
+        # We need to modify the function scan so it yields the input arguments.
+        # Optimization: frame -> frame id.
+        modified_function_scan = self._function_scan_for_mat(function_scan)
+        # Create the mat operator
+        mat = self._generate_mat_operator(view, modified_function_scan) 
+        mat.append_child(modified_function_scan)
         # We need to change the mat executor, so it yields results to
         # the parent.
         lateral_join.children[1] = mat
@@ -458,6 +463,10 @@ class UdfReuseForFuntionScan(Rule):
 
     def _generate_view_name(self, fs: LogicalFunctionScan) \
             -> DataFrameMetadata:
+        raise NotImplementedError
+
+    def _function_scan_for_mat(self, fs: LogicalFunctionScan) \
+            -> LogicalFunctionScan:
         raise NotImplementedError
 
     def _generate_mat_operator(self,
