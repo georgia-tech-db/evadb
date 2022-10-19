@@ -87,6 +87,30 @@ class Batch:
     def from_json(cls, json_str: str):
         obj = json.loads(json_str, object_hook=as_batch)
         return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
+    
+    @classmethod
+    def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1._frames.to_numpy() == batch2._frames.to_numpy()))
+    
+    @classmethod
+    def from_greater(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1._frames.to_numpy() > batch2._frames.to_numpy()))
+
+    @classmethod
+    def from_lesser(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1._frames.to_numpy() < batch2._frames.to_numpy()))
+
+    @classmethod
+    def from_greater_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1._frames.to_numpy() >= batch2._frames.to_numpy()))
+
+    @classmethod
+    def from_lesser_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1._frames.to_numpy() <= batch2._frames.to_numpy()))
+
+    @classmethod
+    def from_not_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(pd.DataFrame(batch1._frames.to_numpy() != batch2._frames.to_numpy()))
 
     def __str__(self) -> str:
         return (
@@ -217,6 +241,9 @@ class Batch:
                 % (unknown_cols, self._frames)
             )
         return Batch(self._frames[verfied_cols], self._identifier_column)
+    
+    def repeat(self, times: int) -> None:
+        self._frames = pd.DataFrame(np.repeat(self._frames.to_numpy(), times, axis=0))
 
     @classmethod
     def merge_column_wise(cls, batches: List[Batch], auto_renaming=False) -> Batch:

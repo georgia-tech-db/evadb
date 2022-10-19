@@ -41,29 +41,33 @@ class ComparisonExpression(AbstractExpression):
 
     def evaluate(self, *args, **kwargs):
         # cast in to numpy array
-        lvalues = self.get_child(0).evaluate(*args, **kwargs).frames.values
-        rvalues = self.get_child(1).evaluate(*args, **kwargs).frames.values
+        lbatch = self.get_child(0).evaluate(*args, **kwargs)
+        lvalues = lbatch.frames.values
+        rbatch = self.get_child(1).evaluate(*args, **kwargs)
+        rvalues = rbatch.frames.values
 
-        if len(lvalues) != len(rvalues):
-            if len(lvalues) == 1:
-                lvalues = np.repeat(lvalues, len(rvalues), axis=0)
-            elif len(rvalues) == 1:
-                rvalues = np.repeat(rvalues, len(lvalues), axis=0)
+        if len(lbatch) != len(rbatch):
+            if len(lbatch) == 1:
+                lbatch.repeat(len(rbatch))
+                lvalues = lbatch.frames.values
+            elif len(rbatch) == 1:
+                rbatch.repeat(len(lbatch))
+                rvalues = rbatch.frames.values
             else:
                 raise Exception("Left and Right batch does not have equal elements")
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
-            return Batch(pd.DataFrame(lvalues == rvalues))
+            return Batch.from_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_GREATER:
-            return Batch(pd.DataFrame(lvalues > rvalues))
+            return Batch.from_greater(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_LESSER:
-            return Batch(pd.DataFrame(lvalues < rvalues))
+            return Batch.from_lesser(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_GEQ:
-            return Batch(pd.DataFrame(lvalues >= rvalues))
+            return Batch.from_greater_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_LEQ:
-            return Batch(pd.DataFrame(lvalues <= rvalues))
+            return Batch.from_lesser_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_NEQ:
-            return Batch(pd.DataFrame(lvalues != rvalues))
+            return Batch.from_not_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_CONTAINS:
             res = [
                 [all(x in p for x in q) for p, q in zip(left, right)]
