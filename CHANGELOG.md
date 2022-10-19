@@ -11,6 +11,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+## [0.0.12] - 2022-10-18
+### [Added]
+
+* PR #424: Jenkins CI
+* PR #432: Emotion palette notebook
+* PR #419: Updated Dockerfile
+* PR #407: Movie analysis notebook
+* PR #404: feat: Lateral join + sampling
+* PR #393: feat: EVA config updates
+
+### [Contributors]
+
+Thanks to @gaurav274, @xzdandy, @LordDarkula, @jarulraj, @Anirudh58, @Aryan-Rajoria for contributions!
+
 ## [0.0.10] - 2022-09-22
 ### [Added]
 
