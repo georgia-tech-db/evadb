@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
-import pandas as pd
 
 from eva.expression.abstract_expression import (
     AbstractExpression,
@@ -42,17 +40,13 @@ class ComparisonExpression(AbstractExpression):
     def evaluate(self, *args, **kwargs):
         # cast in to numpy array
         lbatch = self.get_child(0).evaluate(*args, **kwargs)
-        lvalues = lbatch.frames.values
         rbatch = self.get_child(1).evaluate(*args, **kwargs)
-        rvalues = rbatch.frames.values
 
         if len(lbatch) != len(rbatch):
             if len(lbatch) == 1:
                 lbatch.repeat(len(rbatch))
-                lvalues = lbatch.frames.values
             elif len(rbatch) == 1:
                 rbatch.repeat(len(lbatch))
-                rvalues = rbatch.frames.values
             else:
                 raise Exception("Left and Right batch does not have equal elements")
 
