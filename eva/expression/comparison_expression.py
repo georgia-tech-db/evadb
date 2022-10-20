@@ -69,17 +69,9 @@ class ComparisonExpression(AbstractExpression):
         elif self.etype == ExpressionType.COMPARE_NEQ:
             return Batch.from_not_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_CONTAINS:
-            res = [
-                [all(x in p for x in q) for p, q in zip(left, right)]
-                for left, right in zip(lvalues, rvalues)
-            ]
-            return Batch(pd.DataFrame(res))
+            return Batch.compare_contains(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
-            res = [
-                [all(x in q for x in p) for p, q in zip(left, right)]
-                for left, right in zip(lvalues, rvalues)
-            ]
-            return Batch(pd.DataFrame(res))
+            return Batch.compare_is_contained(lbatch, rbatch)
         else:
             raise NotImplementedError
 

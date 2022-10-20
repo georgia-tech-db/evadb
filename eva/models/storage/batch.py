@@ -87,30 +87,42 @@ class Batch:
     def from_json(cls, json_str: str):
         obj = json.loads(json_str, object_hook=as_batch)
         return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
-    
+
     @classmethod
     def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(pd.DataFrame(batch1._frames.to_numpy() == batch2._frames.to_numpy()))
-    
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() == batch2._frames.to_numpy())
+        )
+
     @classmethod
     def from_greater(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(pd.DataFrame(batch1._frames.to_numpy() > batch2._frames.to_numpy()))
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() > batch2._frames.to_numpy())
+        )
 
     @classmethod
     def from_lesser(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(pd.DataFrame(batch1._frames.to_numpy() < batch2._frames.to_numpy()))
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() < batch2._frames.to_numpy())
+        )
 
     @classmethod
     def from_greater_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(pd.DataFrame(batch1._frames.to_numpy() >= batch2._frames.to_numpy()))
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() >= batch2._frames.to_numpy())
+        )
 
     @classmethod
     def from_lesser_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(pd.DataFrame(batch1._frames.to_numpy() <= batch2._frames.to_numpy()))
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() <= batch2._frames.to_numpy())
+        )
 
     @classmethod
     def from_not_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
-        return Batch(pd.DataFrame(batch1._frames.to_numpy() != batch2._frames.to_numpy()))
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() != batch2._frames.to_numpy())
+        )
 
     def __str__(self) -> str:
         return (
@@ -241,7 +253,7 @@ class Batch:
                 % (unknown_cols, self._frames)
             )
         return Batch(self._frames[verfied_cols], self._identifier_column)
-    
+
     def repeat(self, times: int) -> None:
         self._frames = pd.DataFrame(np.repeat(self._frames.to_numpy(), times, axis=0))
 
@@ -348,6 +360,28 @@ class Batch:
             True if the batch_size == 0
         """
         return len(self) == 0
+
+    @classmethod
+    def compare_contains(cls, batch1: Batch, batch2: Batch) -> None:
+        return cls(
+            pd.DataFrame(
+                [all(x in p for x in q) for p, q in zip(left, right)]
+                for left, right in zip(
+                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
+                )
+            )
+        )
+
+    @classmethod
+    def compare_is_contained(cls, batch1: Batch, batch2: Batch) -> None:
+        return cls(
+            pd.DataFrame(
+                [all(x in q for x in p) for p, q in zip(left, right)]
+                for left, right in zip(
+                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
+                )
+            )
+        )
 
     def unnest(self) -> None:
         """
