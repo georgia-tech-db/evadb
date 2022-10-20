@@ -239,6 +239,18 @@ class CatalogManager(object):
             UdfMetadata object
         """
         return self._udf_service.udf_by_name(name)
+    
+    def get_udf_by_type(self, type: str) -> UdfMetadata:
+        """
+        Get the UDF information based on name.
+
+        Arguments:
+             name (str): name of the UDF
+
+        Returns:
+            UdfMetadata object
+        """
+        return self._udf_service.udf_by_type(type)
 
     def get_udf_inputs(self, udf_obj: UdfMetadata) -> List[UdfIO]:
         if not isinstance(udf_obj, UdfMetadata):

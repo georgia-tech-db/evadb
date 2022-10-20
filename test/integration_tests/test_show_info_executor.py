@@ -49,7 +49,7 @@ class ShowExecutorTest(unittest.TestCase):
                 ],
                 ["key_count INTEGER"],
             ],
-            "type": ["Classification", "NdarrayUDF"],
+            "type": ["ObjectDetection", "NdarrayUDF"],
         }
         expected_df = pd.DataFrame(expected)
         self.assertTrue(all(expected_df.inputs == result.frames.inputs))

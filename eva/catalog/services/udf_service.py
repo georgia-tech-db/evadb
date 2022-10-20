@@ -51,6 +51,19 @@ class UdfService(BaseService):
         except NoResultFound:
             return None
 
+    def udf_by_type(self, name: str):
+        """return the first udf entry that matches the type provided.
+           None if no such entry found.
+
+        Arguments:
+            name (str): name to be searched
+        """
+
+        try:
+            return self.model.query.filter(self.model._type == name).one()
+        except NoResultFound:
+            return None
+
     def udf_by_id(self, id: int):
         """return the udf entry that matches the id provided.
            None if no such entry found.

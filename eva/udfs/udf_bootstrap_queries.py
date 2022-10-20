@@ -71,7 +71,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
       OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
                 scores NDARRAY FLOAT32(ANYDIM))
-      TYPE  Classification
+      TYPE  ObjectDetection
       IMPL  '{}/udfs/fastrcnn_object_detector.py';
       """.format(
     EVA_INSTALLATION_DIR

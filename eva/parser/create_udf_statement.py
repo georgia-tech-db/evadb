@@ -91,7 +91,7 @@ class CreateUDFStatement(AbstractStatement):
     @property
     def udf_type(self):
         return self._udf_type
-
+    
     def __eq__(self, other):
         if not isinstance(other, CreateUDFStatement):
             return False
