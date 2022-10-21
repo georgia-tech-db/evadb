@@ -61,9 +61,8 @@ class OpenCVStorageEngine(AbstractStorageEngine):
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
-            df = rows.frames
             dir_path = Path(table.file_url)
-            for video_file_path in df["video_file_path"]:
+            for video_file_path in rows.video_file_paths():
                 video_file = Path(video_file_path)
                 shutil.copy2(str(video_file), str(dir_path))
                 self._create_video_metadata(dir_path, video_file.name)

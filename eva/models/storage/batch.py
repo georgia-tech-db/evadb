@@ -238,6 +238,9 @@ class Batch:
         self._frames.iloc[indices] = other._frames
         self._frames = pd.DataFrame(self._frames)
 
+    def video_file_paths(self) -> Iterable:
+        yield from self._frames["video_file_path"]
+
     def project(self, cols: None) -> Batch:
         """
         Takes as input the column list, returns the projection.
