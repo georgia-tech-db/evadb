@@ -46,6 +46,21 @@ class CreateUDFExecutor(AbstractExecutor):
                 msg = f"UDF {self.node.name} already exists."
                 logger.error(msg)
                 raise RuntimeError(msg)
+        # check catalog if a UDF type with this name exists
+        if catalog_manager.get_udf_by_type(self.node.name):
+            msg = f"UDF Type {self.node.name} already exists."
+            logger.error(msg)
+            raise RuntimeError(msg)
+        # also check catalog if a UDF name with given type already exists
+        elif catalog_manager.get_udf_by_name(self.node.type):
+            msg = f"UDF already exists with name: {self.node.type}. Change the type"
+            logger.error(msg)
+            raise RuntimeError(msg)
+        # ensure the type name and the udf name don't match
+        elif self.node.type == self.node.name:
+            msg = f"UDF name and the type cannot be the same"
+            logger.error(msg)
+            raise RuntimeError(msg)
         io_list = []
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)

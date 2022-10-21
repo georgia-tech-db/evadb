@@ -37,7 +37,6 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
-from eva.udfs.udf_types import ModelType
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
@@ -228,13 +227,11 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        udf_obj = None
-        # First, check if it refers to a type of model instead of a specific model
-        if node.name in ModelType.__members__:
-            udf_obj = self._catalog.get_udf_by_type(node.name)
-        # If not, try to fetch a model referring to the exact name from the catalog
+        # First, check if it refers to any specific model in the catalog
+        udf_obj = self._catalog.get_udf_by_name(node.name)
         if udf_obj is None:
-            udf_obj = self._catalog.get_udf_by_name(node.name)
+            # If not, check if it refers to a type of model instead of a specific model
+            udf_obj = self._catalog.get_udf_by_type(node.name)            
         if udf_obj is None:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "
