@@ -34,7 +34,7 @@ class LateralJoinExecutor(AbstractExecutor):
         inner = self.children[1]
         for outer_batch in outer.exec():
             for result_batch in inner.exec(lateral_input=outer_batch):
-                result_batch = Batch.inner_join(outer_batch, result_batch)
+                result_batch = Batch.join(outer_batch, result_batch)
                 result_batch.reset_index()
                 result_batch = apply_predicate(result_batch, self.predicate)
                 result_batch = apply_project(result_batch, self.join_project)

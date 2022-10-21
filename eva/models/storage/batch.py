@@ -341,10 +341,10 @@ class Batch:
         return Batch(frame)
 
     @classmethod
-    def inner_join(cls, first: Batch, second: Batch) -> Batch:
+    def join(cls, first: Batch, second: Batch, how="inner") -> Batch:
         return cls(
             first._frames.merge(
-                second._frames, left_index=True, right_index=True, how="inner"
+                second._frames, left_index=True, right_index=True, how=how
             )
         )
 

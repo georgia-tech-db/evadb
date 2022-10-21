@@ -39,7 +39,7 @@ class HashJoinExecutor(AbstractExecutor):
         for build_batch in build_table.exec():
             for probe_batch in probe_table.exec():
                 probe_batch.hash_items(hash_keys)
-                join_batch = Batch.inner_join(probe_batch, build_batch)
+                join_batch = Batch.join(probe_batch, build_batch)
                 join_batch.reset_index()
                 join_batch = apply_predicate(join_batch, self.predicate)
                 join_batch = apply_project(join_batch, self.join_project)
