@@ -7,8 +7,8 @@ core:
 
 executor:
   # batch_mem_size configures the number of rows processed by the execution engine in one iteration
-  # #rows = max(1, row_mem_size / batch_mem_size)
-  batch_mem_size: 30000000 # 30mb
+  # rows = max(1, row_mem_size / batch_mem_size) = 30MB
+  batch_mem_size: 30000000
 
   # batch size used for gpu_operations
   gpu_batch_size: 1
