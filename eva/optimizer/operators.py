@@ -565,7 +565,7 @@ class LogicalCreateUDF(Operator):
             This file should be placed in the UDF directory and
             the path provided should be relative to the UDF dir.
         udf_type: str
-            udf type. it ca be object detection, classification etc.
+            udf type. it can be object detection, classification etc.
     """
 
     def __init__(
