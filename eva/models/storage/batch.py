@@ -124,6 +124,28 @@ class Batch:
             pd.DataFrame(batch1._frames.to_numpy() != batch2._frames.to_numpy())
         )
 
+    @classmethod
+    def compare_contains(cls, batch1: Batch, batch2: Batch) -> None:
+        return cls(
+            pd.DataFrame(
+                [all(x in p for x in q) for p, q in zip(left, right)]
+                for left, right in zip(
+                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
+                )
+            )
+        )
+
+    @classmethod
+    def compare_is_contained(cls, batch1: Batch, batch2: Batch) -> None:
+        return cls(
+            pd.DataFrame(
+                [all(x in q for x in p) for p, q in zip(left, right)]
+                for left, right in zip(
+                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
+                )
+            )
+        )
+
     def __str__(self) -> str:
         return (
             "Batch Object:\n"
@@ -363,28 +385,6 @@ class Batch:
             True if the batch_size == 0
         """
         return len(self) == 0
-
-    @classmethod
-    def compare_contains(cls, batch1: Batch, batch2: Batch) -> None:
-        return cls(
-            pd.DataFrame(
-                [all(x in p for x in q) for p, q in zip(left, right)]
-                for left, right in zip(
-                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
-                )
-            )
-        )
-
-    @classmethod
-    def compare_is_contained(cls, batch1: Batch, batch2: Batch) -> None:
-        return cls(
-            pd.DataFrame(
-                [all(x in q for x in p) for p, q in zip(left, right)]
-                for left, right in zip(
-                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
-                )
-            )
-        )
 
     def unnest(self) -> None:
         """
