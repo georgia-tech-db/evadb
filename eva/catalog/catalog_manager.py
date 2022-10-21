@@ -239,7 +239,7 @@ class CatalogManager(object):
             UdfMetadata object
         """
         return self._udf_service.udf_by_name(name)
-    
+
     def get_udf_by_type(self, type: str) -> UdfMetadata:
         """
         Get the UDF information based on name.
