@@ -15,6 +15,7 @@
 from typing import Dict, Iterator
 
 import cv2
+import datetime
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_range_list_from_predicate
@@ -59,7 +60,7 @@ class OpenCVReader(AbstractReader):
                 _, frame = video.read()
                 frame_id = begin
                 while frame is not None and frame_id <= end:
-                    yield {"id": frame_id, "data": frame}
+                    yield {"id": frame_id, "data": frame, "timestamp": str(datetime.timedelta(seconds=(frame_id // video.get(cv2.CAP_PROP_FPS))))}
                     _, frame = video.read()
                     frame_id += 1
         else:

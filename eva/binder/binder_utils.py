@@ -54,6 +54,7 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
         ColumnDefinition(
             "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
         ),
+        ColumnDefinition("timestamp", ColumnType.TEXT, None, []),
     ]
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
