@@ -13,17 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pytest
-
 from test.util import (
     DummyObjectDetector,
-    copy_sample_video_to_prefix,
+    copy_sample_videos_to_upload_dir,
     create_sample_video,
     file_remove,
     load_inbuilt_udfs,
 )
 
 import pandas as pd
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
@@ -38,7 +37,7 @@ class MaterializedViewTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        copy_sample_video_to_prefix()
+        copy_sample_videos_to_upload_dir()
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         query = """LOAD FILE 'ua_detrac.mp4'
@@ -63,7 +62,7 @@ class MaterializedViewTest(unittest.TestCase):
 
         labels = DummyObjectDetector().labels
         expected = [
-            {"dummy_view.id": i, "dummy_view.label": labels[1 + i % 2]}
+            {"dummy_view.id": i, "dummy_view.label": [labels[1 + i % 2]]}
             for i in range(NUM_FRAMES)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -90,7 +89,7 @@ class MaterializedViewTest(unittest.TestCase):
 
         labels = DummyObjectDetector().labels
         expected = [
-            {"dummy_view2.id": i, "dummy_view2.label": labels[1 + i % 2]}
+            {"dummy_view2.id": i, "dummy_view2.label": [labels[1 + i % 2]]}
             for i in range(5)
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
@@ -98,21 +97,45 @@ class MaterializedViewTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_mat_view_with_fastrcnn(self):
-        select_query = """SELECT id, FastRCNNObjectDetector(data).labels
-                            FROM UATRAC WHERE id < 5;"""
-        query = """CREATE MATERIALIZED VIEW 
-                   IF NOT EXISTS uadtrac_fastRCNN (id, labels) \
-        AS {}""".format(
-            select_query
+        select_query = (
+            "SELECT id, FastRCNNObjectDetector(data).labels, "
+            "FastRCNNObjectDetector(data).bboxes "
+            "FROM UATRAC WHERE id < 5;"
+        )
+        query = (
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS "
+            f"uadtrac_fastRCNN (id, labels, bboxes) AS {select_query}"
         )
         execute_query_fetch_all(query)
 
-        select_view_query = "SELECT id, labels FROM uadtrac_fastRCNN"
+        select_view_query = "SELECT id, labels, bboxes FROM uadtrac_fastRCNN"
         actual_batch = execute_query_fetch_all(select_view_query)
         actual_batch.sort()
 
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["uadtrac_fastrcnn.labels"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_mat_view_with_fastrcnn_lateral_join(self):
+        select_query = (
+            "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
+            "FastRCNNObjectDetector(data) AS T(label, bbox, score) WHERE id < 5;"
+        )
+        query = (
+            "CREATE MATERIALIZED VIEW IF NOT EXISTS "
+            f"uadtrac_fastRCNN_new (id, label, bbox) AS {select_query};"
+        )
+        execute_query_fetch_all(query)
+
+        select_view_query = "SELECT id, label, bbox FROM uadtrac_fastRCNN_new"
+        actual_batch = execute_query_fetch_all(select_view_query)
+        actual_batch.sort()
+
+        self.assertEqual(len(actual_batch), 5)
+        # non-trivial test case
+        res = actual_batch.frames
+        for idx in res.index:
+            self.assertTrue("car" in res["uadtrac_fastrcnn_new.label"][idx])

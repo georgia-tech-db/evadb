@@ -13,13 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import socket
 import unittest
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock
 
 import mock
 
 from eva.models.server.response import Response
-from eva.server.db_api import EVACursor
+from eva.server.async_protocol import EvaClient
+from eva.server.db_api import EVACursor, connect
+
+
+def get_free_port():
+    s = socket.socket(socket.AF_INET, type=socket.SOCK_STREAM)
+    s.bind(("localhost", 0))
+    address, port = s.getsockname()
+    s.close()
+    return port
 
 
 class AsyncMock(MagicMock):
@@ -53,3 +64,30 @@ class DBAPITests(unittest.TestCase):
         self.assertEqual(eva_cursor._pending_query, False)
         protocol.queue.get.assert_called_once()
         self.assertEqual(expected, response)
+
+    def test_eva_connection(self):
+        hostname = "localhost"
+
+        mock_server_port = get_free_port()
+        mock_server = HTTPServer((hostname, mock_server_port), BaseHTTPRequestHandler)
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        connection = connect(hostname, mock_server.server_port)
+        cursor = connection.cursor()
+
+        self.assertEquals(type(connection._protocol), EvaClient)
+        self.assertEquals(type(cursor), EVACursor)
+
+        # test upload transformation with non-existing file
+        with self.assertRaises(FileNotFoundError):
+            cursor._upload_transformation('UPLOAD PATH "foo" BLOB')
+
+        # test attr
+        with self.assertRaises(AttributeError):
+            cursor.__getattr__("foo")
+
+        # test connection error with incorrect port
+        with self.assertRaises(OSError):
+            connect(hostname, port=1)

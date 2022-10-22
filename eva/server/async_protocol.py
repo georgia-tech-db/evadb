@@ -46,7 +46,7 @@ class EvaProtocolBuffer:
 
     def read_message(self) -> str:
         message = self.buf[: self.expected_length]
-        rest_data = self.buf[self.expected_length:]
+        rest_data = self.buf[self.expected_length :]
         self.empty()
         if rest_data:
             self.feed_data(rest_data)

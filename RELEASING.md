@@ -24,7 +24,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
 1. Make sure you're in the top-level `eva` directory.
 1. Make certain your branch is in sync with head:
    
-       $ git pull origin main
+       $ git pull origin master
 
 1. Add a new changelog entry for the release.
 
@@ -34,6 +34,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
        ### [Changed]
        ### [Deprecated]
        ### [Removed]
+
   Make sure `CHANGELOG.md` is up to date for the release: compare against PRs
   merged since the last release.
 
@@ -46,7 +47,7 @@ Then run `chmod 600 ./.pypirc` so only you can read/write.
        git commit -m "[RELEASE]: v0.0.6"
        git push --set-upstream origin release-v0.0.6
 
-1. Once the PR is approved, merge it and pull main locally.
+1. Once the PR is approved, merge it and pull master locally.
 
 1. Tag the release:
 

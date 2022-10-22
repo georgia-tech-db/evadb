@@ -47,7 +47,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         total_size = 0
         for batch in reduced_batches:
-            total_size += batch.batch_size
+            total_size += len(batch)
 
         self.assertEqual(total_size, limit_value)
 
@@ -65,7 +65,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         previous_total_size = 0
         for batch in batches:
-            previous_total_size += batch.batch_size
+            previous_total_size += len(batch)
 
         limit_value = 500
 
@@ -77,7 +77,7 @@ class LimitExecutorTest(unittest.TestCase):
 
         after_total_size = 0
         for batch in reduced_batches:
-            after_total_size += batch.batch_size
+            after_total_size += len(batch)
 
         self.assertEqual(previous_total_size, after_total_size)
 

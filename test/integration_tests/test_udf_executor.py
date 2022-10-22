@@ -110,10 +110,10 @@ class UDFExecutorTest(unittest.TestCase):
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         expected_batch.sort()
-        self.assertEqual(actual_batch, expected_batch)
 
-        nested_select_query = """SELECT id, data FROM
-            (SELECT id, data, DummyObjectDetector(data) FROM MyVideo
+        self.assertEqual(actual_batch, expected_batch)
+        nested_select_query = """SELECT name, id, data FROM
+            (SELECT name, id, data, DummyObjectDetector(data) FROM MyVideo
                 WHERE id >= 2
             ) AS T
             WHERE ['person'] <@ label;

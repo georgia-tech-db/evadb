@@ -33,20 +33,23 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             "storage", "video_engine_version"
         )
 
-    def create(self, table: DataFrameMetadata, video_file: Path):
-        # Create directory to store video and metadata related to the video
+    def create(self, table: DataFrameMetadata, if_not_exists=True):
+        """
+        Create the directory to store the video and metadata related to
+        the table (dataset) name
+        """
         dir_path = Path(table.file_url)
         try:
             dir_path.mkdir(parents=True)
-            shutil.copy2(str(video_file), str(dir_path))
         except FileExistsError:
+            if if_not_exists:
+                return True
             error = "Failed to load the video as directory \
                         already exists: {}".format(
                 dir_path
             )
             logger.error(error)
             raise FileExistsError(error)
-        self._create_video_metadata(dir_path, video_file.name)
         return True
 
     def drop(self, table: DataFrameMetadata):
@@ -57,39 +60,60 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             logger.exception(f"Failed to drop the video table {e}")
 
     def write(self, table: DataFrameMetadata, rows: Batch):
-        pass
+        try:
+            df = rows.frames
+            dir_path = Path(table.file_url)
+            for video_file_path in df["video_file_path"]:
+                video_file = Path(video_file_path)
+                shutil.copy2(str(video_file), str(dir_path))
+                self._create_video_metadata(dir_path, video_file.name)
+        except Exception:
+            error = "Current video storage engine only supports loading videos on disk."
+            logger.exception(error)
+            raise RuntimeError(error)
+        return True
 
     def read(
         self,
         table: DataFrameMetadata,
         batch_mem_size: int,
         predicate: AbstractExpression = None,
+        sampling_rate: int = None,
     ) -> Iterator[Batch]:
 
         metadata_file = Path(table.file_url) / self.metadata
-        video_file_name = self._get_video_file_path(metadata_file)
-        video_file = Path(table.file_url) / video_file_name
-        reader = OpenCVReader(
-            str(video_file), batch_mem_size=batch_mem_size, predicate=predicate
-        )
-        for batch in reader.read():
-            yield batch
+        for video_file_name in self._get_video_file_path(metadata_file):
+            video_file = Path(table.file_url) / video_file_name
+            reader = OpenCVReader(
+                str(video_file),
+                batch_mem_size=batch_mem_size,
+                predicate=predicate,
+                sampling_rate=sampling_rate,
+            )
+            for batch in reader.read():
+                column_name = table.columns[0].name
+                batch.frames[column_name] = str(video_file_name)
+                yield batch
 
     def _get_video_file_path(self, metadata_file):
         with open(metadata_file, "rb") as f:
-            (version,) = struct.unpack("!H", f.read(struct.calcsize("!H")))
-            if version > self.curr_version:
-                error = "Invalid metadata version {}".format(version)
-                logger.error(error)
-                raise RuntimeError(error)
-            (length,) = struct.unpack("!H", f.read(struct.calcsize("!H")))
-            path = f.read(length)
-            return Path(path.decode())
+            while True:
+                buf = f.read(struct.calcsize("!H"))
+                if not buf:
+                    break
+                (version,) = struct.unpack("!H", buf)
+                if version > self.curr_version:
+                    error = "Invalid metadata version {}".format(version)
+                    logger.error(error)
+                    raise RuntimeError(error)
+                (length,) = struct.unpack("!H", f.read(struct.calcsize("!H")))
+                path = f.read(length)
+                yield Path(path.decode())
 
     def _create_video_metadata(self, dir_path, video_file):
         # File structure
         # <version> <length> <file_name>
-        with open(dir_path / self.metadata, "wb") as f:
+        with open(dir_path / self.metadata, "ab") as f:
             # write version number
             file_path_bytes = str(video_file).encode()
             length = len(file_path_bytes)

@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
+from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 from eva.models.storage.batch import Batch
 
@@ -37,18 +39,24 @@ def as_response(d):
         return d
 
 
+@dataclass(frozen=True)
 class Response:
     """
     Data model for EVA server response
     """
 
-    def __init__(self, status: ResponseStatus, batch: Batch, error: str = ""):
-        self._status = status
-        self._batch = batch
-        self._error = error
+    status: ResponseStatus
+    batch: Batch
+    error: Optional[str] = None
+    query_time: Optional[float] = None
 
     def to_json(self):
-        obj = {"status": self.status, "batch": self.batch, "error": self.error}
+        obj = {"status": self.status, "batch": self.batch}
+        if self.error is not None:
+            obj["error"] = self.error
+        if self.query_time is not None:
+            obj["query_time"] = self.query_time
+
         return json.dumps(obj, cls=ResponseEncoder)
 
     @classmethod
@@ -56,29 +64,16 @@ class Response:
         obj = json.loads(json_str, object_hook=as_response)
         return cls(**obj)
 
-    def __eq__(self, other: "Response"):
-        return (
-            self.status == other.status
-            and self.batch == other.batch
-            and self.error == other.error
-        )
-
     def __str__(self):
-        return (
-            "Response Object:\n"
-            "@status: %s\n"
-            "@batch: %s\n"
-            "@error: %s" % (self.status, self.batch, self.error)
-        )
-
-    @property
-    def status(self):
-        return self._status
-
-    @property
-    def batch(self):
-        return self._batch
-
-    @property
-    def error(self):
-        return self._error
+        if self.query_time is not None:
+            return (
+                "@status: %s\n"
+                "@batch: %s\n"
+                "@query_time: %s" % (self.status, self.batch, self.query_time)
+            )
+        else:
+            return (
+                "@status: %s\n"
+                "@batch: %s\n"
+                "@error: %s" % (self.status, self.batch, self.error)
+            )

@@ -40,7 +40,7 @@ class SchemaUtils(object):
         if column_type == ColumnType.INTEGER:
             petastorm_column = UnischemaField(
                 column_name,
-                np.int32,
+                np.int64,
                 (),
                 ScalarCodec(IntegerType()),
                 column_is_nullable,
@@ -48,7 +48,7 @@ class SchemaUtils(object):
         elif column_type == ColumnType.FLOAT:
             petastorm_column = UnischemaField(
                 column_name,
-                np.float64,
+                np.float32,
                 (),
                 ScalarCodec(FloatType()),
                 column_is_nullable,

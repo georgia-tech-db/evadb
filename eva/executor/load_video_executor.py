@@ -27,9 +27,8 @@ from eva.utils.logging_manager import logger
 class LoadVideoExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        self.upload_path = Path(
-            ConfigurationManager().get_value("storage", "path_prefix")
-        )
+        config = ConfigurationManager()
+        self.upload_dir = Path(config.get_value("storage", "upload_dir"))
 
     def validate(self):
         pass
@@ -46,7 +45,7 @@ class LoadVideoExecutor(AbstractExecutor):
             video_file_path = self.node.file_path
         # check in the upload directory
         else:
-            video_path = Path(self.upload_path / self.node.file_path)
+            video_path = Path(Path(self.upload_dir) / self.node.file_path)
             if video_path.exists():
                 video_file_path = video_path
 
@@ -57,7 +56,11 @@ class LoadVideoExecutor(AbstractExecutor):
             logger.error(error)
             raise RuntimeError(error)
 
-        success = VideoStorageEngine.create(self.node.table_metainfo, video_file_path)
+        VideoStorageEngine.create(self.node.table_metainfo, if_not_exists=True)
+        success = VideoStorageEngine.write(
+            self.node.table_metainfo,
+            Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
+        )
 
         # ToDo: Add logic for indexing the video file
         # Create an index of I frames to speed up random video seek

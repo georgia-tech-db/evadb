@@ -193,6 +193,11 @@ uploadStatement
     : UPLOAD
       PATH fileName
       BLOB videoBlob
+      INTO tableName
+        (
+            ('(' columns=uidList ')')
+        )?
+      (WITH fileOptions)?
     ;
 
 fileName
@@ -261,7 +266,11 @@ tableSourceItemWithSample
 tableSourceItem
     : tableName                                         #atomTableItem
     | subqueryTableSourceItem                           #subqueryTableItem
-    | LATERAL functionCall                              #lateralFunctionCallItem
+    ;
+
+tableValuedFunction
+    : functionCall                                
+    | UNNEST LR_BRACKET functionCall RR_BRACKET   
     ;
 
 subqueryTableSourceItem
@@ -281,8 +290,16 @@ joinPart
       (
         ON expression
         | USING LR_BRACKET uidList RR_BRACKET
-      )?                                                            #innerJoin
+      )?                                                #innerJoin
+    |
+      JOIN LATERAL tableValuedFunction aliasClause?     #lateralJoin
     ;
+
+aliasClause
+    : AS? uid '(' uidList ')'
+    | AS? uid
+    ;
+
 
 //    Select Statement's Details
 

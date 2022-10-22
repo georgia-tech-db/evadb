@@ -19,7 +19,7 @@ import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
     from torch import Tensor
@@ -38,7 +38,7 @@ except ImportError as e:
     )
 
 
-class FastRCNNObjectDetector(PytorchAbstractUDF):
+class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -49,11 +49,10 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
     def name(self) -> str:
         return "fastrcnn"
 
-    def __init__(self, threshold=0.85):
-        super().__init__()
+    def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
-            pretrained=True
+            pretrained=True, progress=False
         )
         self.model.eval()
 
@@ -157,7 +156,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
             "toothbrush",
         ]
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
@@ -177,7 +176,7 @@ class FastRCNNObjectDetector(PytorchAbstractUDF):
                 str(self.labels[i]) for i in list(self.as_numpy(prediction["labels"]))
             ]
             pred_boxes = [
-                [[i[0], i[1]], [i[2], i[3]]]
+                [i[0], i[1], i[2], i[3]]
                 for i in list(self.as_numpy(prediction["boxes"]))
             ]
             pred_score = list(self.as_numpy(prediction["scores"]))
