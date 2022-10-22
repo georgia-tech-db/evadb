@@ -65,7 +65,7 @@ Quickstart Tutorial
 
             import nest_asyncio
             nest_asyncio.apply()
-            connection = connect(host = '0.0.0.0', port = 5432)
+            connection = connect(host = '0.0.0.0', port = 5435)
             cursor = connection.cursor()
 
         We use `nest_asyncio` to allow nested asyncio calls. This is required for the client to work with the server. `cursor` is a cursor object that allows us to execute queries on the database.

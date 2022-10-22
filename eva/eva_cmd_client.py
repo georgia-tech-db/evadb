@@ -28,7 +28,7 @@ sys.path.append(EVA_CODE_DIR)
 from eva.server.interpreter import start_cmd_client  # noqa: E402
 
 
-def eva_client(host="0.0.0.0", port=5432):
+def eva_client(host="0.0.0.0", port=5435):
     """
     Start the eva system
     """
@@ -51,7 +51,7 @@ def parse_args(args):
         default="0.0.0.0",
     )
     parser.add_argument(
-        "-P", "--port", dest="port", type=int, help="Port for EVA server", default=5432
+        "-P", "--port", dest="port", type=int, help="Port for EVA server", default=5435
     )
     return parser.parse_args(args)
 

@@ -110,6 +110,7 @@ def start_server(
     # loop = asyncio.get_event_loop()
 
     # Start the eva server
+    port = 5435
     coro = loop.create_server(lambda: EvaServer(socket_timeout), host, port)
     server = loop.run_until_complete(coro)
 

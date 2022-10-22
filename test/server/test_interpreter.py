@@ -79,7 +79,7 @@ class InterpreterTests(unittest.TestCase):
         mock_connect.return_value = MOCKCONNECTION()
 
         host = "0.0.0.0"
-        port = 5432
+        port = 5435
         start_cmd_client(host, port)
 
         mock_connect.assert_called_once_with(host, port)

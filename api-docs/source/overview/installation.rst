@@ -28,7 +28,7 @@ EVA provides an API for connecting to the server in Python code::
     from src.server.db_api import connect
     import nest_asyncio
     nest_asyncio.apply()
-    connection = connect(host = '0.0.0.0', port = 5432) # hostname, port of the server where EVADB is running
+    connection = connect(host = '0.0.0.0', port = 5435) # hostname, port of the server where EVADB is running
     cursor = connection.cursor()
 
 Once the connection is established, you can run queries using the cursor::
