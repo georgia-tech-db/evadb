@@ -60,7 +60,7 @@ class OpenCVReader(AbstractReader):
                 _, frame = video.read()
                 frame_id = begin
                 while frame is not None and frame_id <= end:
-                    yield {"id": frame_id, "data": frame, "timestamp": str(datetime.timedelta(seconds=(frame_id // video.get(cv2.CAP_PROP_FPS))))}
+                    yield {"id": frame_id, "data": frame, "timestamp": frame_id_to_time_string(frame_id, video.get(cv2.CAP_PROP_FPS))}
                     _, frame = video.read()
                     frame_id += 1
         else:
@@ -76,3 +76,7 @@ class OpenCVReader(AbstractReader):
                         yield {"id": frame_id, "data": frame}
                     else:
                         break
+
+def frame_id_to_time_string(frame_id, fps):
+    return str(datetime.timedelta(seconds=(frame_id // fps)))
+
