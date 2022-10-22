@@ -12,13 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict, List
 import numpy as np
 import pandas as pd
 from petastorm.codecs import NdarrayCodec, ScalarCodec
 from petastorm.unischema import Unischema, UnischemaField
 from pyspark.sql.types import FloatType, IntegerType, StringType
+from sqlalchemy import (
+    FLOAT,
+    INTEGER,
+    TEXT,
+    Column,
+    Float,
+    Integer,
+    LargeBinary,
+)
 
 from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.models.df_column import DataFrameColumn
 from eva.utils.logging_manager import logger
 
 
@@ -55,7 +66,11 @@ class SchemaUtils(object):
             )
         elif column_type == ColumnType.TEXT:
             petastorm_column = UnischemaField(
-                column_name, np.str_, (), ScalarCodec(StringType()), column_is_nullable
+                column_name,
+                np.str_,
+                (),
+                ScalarCodec(StringType()),
+                column_is_nullable,
             )
         elif column_type == ColumnType.NDARRAY:
             np_type = NdArrayType.to_numpy_type(column_array_type)
@@ -82,7 +97,9 @@ class SchemaUtils(object):
         return petastorm_schema
 
     @staticmethod
-    def petastorm_type_cast(schema: Unischema, df: pd.DataFrame) -> pd.DataFrame:
+    def petastorm_type_cast(
+        schema: Unischema, df: pd.DataFrame
+    ) -> pd.DataFrame:
         """
         Try to cast the type if schema defined in UnischemeField for
         Petastorm is not consistent with panda DataFrame provided.
@@ -96,5 +113,42 @@ class SchemaUtils(object):
             try:
                 df[col] = df[col].apply(lambda x: x.astype(dtype, copy=False))
             except Exception:
-                logger.exception("Failed to cast %s to %s for Petastorm" % (col, dtype))
+                logger.exception(
+                    "Failed to cast %s to %s for Petastorm" % (col, dtype)
+                )
         return df
+
+    @staticmethod
+    def get_sqlalchemy_column(df_column: DataFrameColumn) -> Column:
+        column_type = df_column.type
+
+        sqlalchemy_column = None
+        if column_type == ColumnType.INTEGER:
+            sqlalchemy_column = Column(Integer)
+        elif column_type == ColumnType.FLOAT:
+            sqlalchemy_column = Column(Float)
+        elif column_type == ColumnType.TEXT:
+            sqlalchemy_column = Column(TEXT)
+        elif column_type == ColumnType.NDARRAY:
+            sqlalchemy_column = Column(LargeBinary)
+        else:
+            logger.error("Invalid column type: " + str(column_type))
+
+        return sqlalchemy_column
+
+    @staticmethod
+    def get_sqlalchemy_schema(
+        column_list: List[DataFrameColumn],
+    ) -> Dict[str, Column]:
+        """Converts the list of DataFrameColumns to SQLAlchemyColumns
+
+        Args:
+            column_list (List[DataFrameColumn]): columns to be converted
+
+        Returns:
+            Dict[str, Column]: mapping from column_name to sqlalchemy column object
+        """
+        return {
+            column.name: SchemaUtils.get_sqlalchemy_column(column)
+            for column in column_list
+        }
