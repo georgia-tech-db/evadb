@@ -366,7 +366,7 @@ class Batch:
 
     def reassign_indices_to_hash(self, indices) -> None:
         """
-        Hash indices and replace the indices with those hash values. 
+        Hash indices and replace the indices with those hash values.
         """
         self._frames.index = self._frames[indices].apply(
             lambda x: hash(tuple(x)), axis=1
