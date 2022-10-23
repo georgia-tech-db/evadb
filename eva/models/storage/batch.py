@@ -364,8 +364,11 @@ class Batch:
         elif expression == ExpressionType.ARITHMETIC_DIVIDE:
             return Batch(pd.DataFrame(first._frames / second._frames))
 
-    def hash_items(self, indexes) -> None:
-        self._frames.index = self._frames[indexes].apply(
+    def reassign_indices_to_hash(self, indices) -> None:
+        """
+        Hash indices and replace the indices with those hash values. 
+        """
+        self._frames.index = self._frames[indices].apply(
             lambda x: hash(tuple(x)), axis=1
         )
 

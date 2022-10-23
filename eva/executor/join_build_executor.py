@@ -37,5 +37,5 @@ class BuildJoinExecutor(AbstractExecutor):
         cumm_batches = [batch for batch in child_executor.exec() if not batch.empty()]
         cumm_batches = Batch.concat(cumm_batches)
         hash_keys = [key.col_alias for key in self.build_keys]
-        cumm_batches.hash_items(hash_keys)
+        cumm_batches.reassign_indices_to_hash(hash_keys)
         yield cumm_batches
