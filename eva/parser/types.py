@@ -66,6 +66,7 @@ class FileFormatType(Enum):
 
     VIDEO = auto()
     CSV = auto()
+    RICH_VIDEO = auto()
 
 
 @unique

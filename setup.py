@@ -49,6 +49,7 @@ minimal_requirement = [
     "antlr4-python3-runtime==4.10",
     "pyyaml==5.1",
     "importlib-metadata<5.0",
+    "vosk>=0.3.42"
 ]
 
 formatter_libs = [
