@@ -96,6 +96,7 @@ WITH:                 'WITH';
 FORMAT:               'FORMAT';
 CSV:                  'CSV';
 VIDEO:                'VIDEO';
+RICH_VIDEO:           'RICH_VIDEO';
 
 // EVAQL keywords
 

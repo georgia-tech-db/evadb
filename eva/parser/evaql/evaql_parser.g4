@@ -186,7 +186,7 @@ loadStatement
     ;
 
 fileOptions
-    : FORMAT fileFormat=(CSV|VIDEO)
+    : FORMAT fileFormat=(CSV|VIDEO|RICH_VIDEO)
     ;
 
 uploadStatement
