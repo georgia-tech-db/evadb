@@ -15,14 +15,11 @@
 from pathlib import Path
 
 import pandas as pd
+import eva.utils.audio_utils as audio_utils
 
-from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.storage.storage_engine import VideoStorageEngine
-from eva.utils.logging_manager import logger
 
 
 class LoadRichVideoExecutor(LoadVideoExecutor):
@@ -32,7 +29,8 @@ class LoadRichVideoExecutor(LoadVideoExecutor):
     def exec(self):
         if super().exec() is not None:
 
-            # TODO: Add transcript metadata here
+            audio_utils.transcribe_file_with_word_time_offsets(self.node.file_path)
+            # TODO: Add transcript metadata to table here
 
             yield Batch(
                 pd.DataFrame(
