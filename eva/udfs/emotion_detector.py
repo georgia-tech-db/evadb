@@ -27,7 +27,7 @@ from torch import Tensor
 from torchvision import transforms
 
 from eva.configuration.constants import EVA_DEFAULT_DIR
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 # VGG configuration
 cfg = {
@@ -98,8 +98,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
     def name(self) -> str:
         return "EmotionDetector"
 
-    def __init__(self, threshold=0.85):
-        super().__init__()
+    def setup(self, threshold=0.85):
         self.threshold = threshold
 
         # load model
@@ -146,7 +145,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
     def labels(self) -> List[str]:
         return ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"]
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: Tensor) -> pd.DataFrame:
         """
         Performs predictions on input frames
         Arguments:
