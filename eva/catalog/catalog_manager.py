@@ -20,9 +20,10 @@ from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.transcript_metadata import TranscriptMetadata
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
-from eva.catalog.services.df_transcript_metadata_service import TranscriptMetadataService
+from eva.catalog.services.transcript_metadata_service import TranscriptMetadataService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo
@@ -306,3 +307,14 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    def create_transcript_metadata(
+            self,
+            video_name: str,
+            word: str,
+            start_time: str,
+            end_time: str,
+            confidence: str
+    ) -> TranscriptMetadata:
+        metadata = self._transcript_metadata_service.create_transcript_metadata(video_name, word, start_time, end_time, confidence)
+        return metadata

@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship
 from eva.catalog.models.base_model import BaseModel
 
 
-class DataFrameTranscriptMetadata(BaseModel):
+class TranscriptMetadata(BaseModel):
     __tablename__ = "df_transcript_metadata"
 
     _id = Column("id", Integer, primary_key=True, autoincrement=True)
