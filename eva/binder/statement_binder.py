@@ -39,23 +39,7 @@ from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
-
-if sys.version_info >= (3, 8):
-    from functools import singledispatchmethod
-else:
-    # https://stackoverflow.com/questions/24601722/how-can-i-use-functools-singledispatch-with-instance-methods
-    from functools import singledispatch, update_wrapper
-
-    def singledispatchmethod(func):
-        dispatcher = singledispatch(func)
-
-        def wrapper(*args, **kw):
-            return dispatcher.dispatch(args[1].__class__)(*args, **kw)
-
-        wrapper.register = dispatcher.register
-        update_wrapper(wrapper, func)
-        return wrapper
-
+from eva.utils import singledispatchmethod
 
 class StatementBinder:
     def __init__(self, binder_context: StatementBinderContext):
