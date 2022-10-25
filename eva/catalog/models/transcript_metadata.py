@@ -21,9 +21,9 @@ from eva.catalog.models.base_model import BaseModel
 
 
 class TranscriptMetadata(BaseModel):
-    __tablename__ = "df_transcript_metadata"
+    __tablename__ = "transcript_metadata"
 
-    _id = Column("id", Integer, primary_key=True, autoincrement=True)
+    # _id = Column("id", Integer, primary_key=True, autoincrement=True)
     _video_name = Column("video_name", String(100))
     _word = Column("word", String(100))
     _start_time = Column("start_time", String(100))
@@ -32,14 +32,14 @@ class TranscriptMetadata(BaseModel):
 
     def __init__(
             self,
-            id: str,
+            # id: str,
             video_name: str,
             word: str,
             start_time: str,
             end_time: str,
             confidence: str
     ):
-        self._id = id
+        # self._id = id
         self._video_name = video_name
         self._word = word
         self._start_time = start_time
@@ -71,8 +71,7 @@ class TranscriptMetadata(BaseModel):
         return self._confidence
 
     def __str__(self):
-        column_str = "Column: (%s, %s, %s, %s, %s, %s)" % (
-            self._id,
+        column_str = "Column: (%s, %s, %s, %s, %s)" % (
             self._video_name,
             self._word,
             self._start_time,
@@ -95,11 +94,11 @@ class TranscriptMetadata(BaseModel):
     def __hash__(self):
         return hash(
             (
-                self._id,
-                self._video_name,
-                self._word,
-                self._start_time,
-                self._end_time,
-                self._confidence
+                self.id,
+                self.video_name,
+                self.word,
+                self.start_time,
+                self.end_time,
+                self.confidence
             )
         )
