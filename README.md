@@ -1,18 +1,12 @@
-<div align="center" style="display:flex;flex-direction:column;">
+<div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="600px" margin-left="-5px">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
   </a>
-  <h3>Quickly capture information embedded in videos!</h3>
-  <p>
-  </p>
-  <p>
-</div>
-
-<div align="center" style="display:flex;flex-direction:column;">
-    <h3>🌟 Try It Out! 🌟</h3>
-    <div>
+  <h3>EVA Video Database System: Where SQL meets Deep Learning!</h3>
+  <div>
+        <h3>🌟 Try It Out! 🌟</h3>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
-            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/>
+            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EVA on Colab"/>
         </a>
         <a href="https://github.com/georgia-tech-db/eva/discussions">
             <img alt="Discuss on Github!" src="https://img.shields.io/badge/-Discuss%20on%20Github!-blueviolet">
@@ -20,7 +14,14 @@
     </div>
 </div>
 
-# EVA Video Analytics System
+## Links
+* [Documentation](https://evadb.readthedocs.io/en/latest/)
+* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
+* [Website](https://georgia-tech-db.github.io/eva/index.html)
+* [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
+
+# EVA Video Database System
 
 [![PyPI Status](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
 [![CI Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
@@ -42,12 +43,6 @@ EVA is a new database system tailored for video analytics -- think MySQL for vid
 
 ✨ Hit your target accuracy using state-of-the-art model selection and query optimization algorithms.
 
-## Links
-* [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
-* [Documentation](https://evadb.readthedocs.io/en/latest/)
-* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [Website](https://georgia-tech-db.github.io/eva/index.html)
-
 ## QuickStart
 
 1. EVA requires Python 3.7+. To install EVA, we recommend using an virtual environment and the pip package manager:
@@ -58,8 +53,8 @@ pip install evadb
 
 1. Start the EVA server and the client programs
 ```shell
-python eva/eva_server &   # launch server
-python eva/eva_client     # launch client
+eva_server &   # launch server
+eva_client     # launch client
 ```
 
 2. UPLOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
@@ -107,32 +102,8 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 ## Contributing to EVA
 
-### Development Environment Setup
-
-To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
-
-```shell
-git clone https://github.com/georgia-tech-db/eva.git && cd eva
-python3 -m venv test_eva_db                             # to create a virtual environment
-source test_eva_db/bin/activate                         # activate virtual environment
-pip install --upgrade pip
-sudo -E apt install -y openjdk-11-jdk openjdk-11-jre    # to install JAVA
-sh script/antlr4/generate_parser.sh                     # to generate the EVA parser
-pip install -e ".[dev]"
-```
-
-Note: If you face Pytorch CUDA compatibility issues after installation, refer this [link](https://pytorch.org/get-started/previous-versions/) and re-install the correct `torch` and `torchvision` packages with `pip` 
-
-To verify that installation is successful, run the test suite.
-
-```shell
-sh script/test/test.sh
-```
-
-### Contributing Guidelines
-
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-For more information on installing from source, troublshooting,and contributing to EVA, see our
+For more information on installing from source and contributing to EVA, see our
 [contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
 ## Contributors
