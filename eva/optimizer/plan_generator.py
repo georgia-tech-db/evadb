@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.optimizer.column_deriver import ColumnDeriver
 from eva.optimizer.cost_model import CostModel
 from eva.optimizer.operators import Operator
 from eva.optimizer.optimizer_context import OptimizerContext
@@ -38,46 +39,10 @@ class PlanGenerator:
             task = task_stack.pop()
             task.execute()
 
-    def map_alias(self, optimizer_context: OptimizerContext):
-        alias_map = {}
-        grp_exprs = optimizer_context.memo.group_exprs
-        alias_counter = 0
-
-        for key,val in grp_exprs.items():
-            if isinstance(val.opr, LogicalGet):
-                if val.opr.predicate:
-                    predicates = val.opr.predicate.children
-                    for child in predicates:
-                        if isinstance(child, TupleValueExpression):
-                            if (child.col_alias not in alias_map):
-                                alias_map[child.col_alias] = alias_counter
-                                alias_map[child.col_name] = alias_counter
-                                alias_counter+=1
-                        
-                            child.col_alias = alias_map[child.col_alias]
-                            child.col_name = alias_map[child.col_alias]
-                        
-                
-            elif isinstance(val.opr, LogicalProject):
-                select_columns = val.opr.target_list
-                for col in select_columns:
-                    if col.col_alias not in alias_map:
-                        alias_map[col.col_alias] = alias_counter
-                        alias_map[col.col_name] = alias_counter
-                        alias_counter+=1
-
-                    col.col_alias = alias_map[col.col_alias]
-                    
-                    col.col_name = alias_map[col.col_name]
-                    
-    
-        return optimizer_context
-
     def build_optimal_physical_plan(
         self, root_grp_id: int, optimizer_context: OptimizerContext
     ):
         physical_plan = None
-        optimizer_context = self.map_alias(optimizer_context)
         root_grp = optimizer_context.memo.groups[root_grp_id]
         best_grp_expr = root_grp.get_best_expr(PropertyType.DEFAULT)
         physical_plan = best_grp_expr.opr
@@ -121,10 +86,13 @@ class PlanGenerator:
 
         # Build Optimal Tree
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
+        
+        #map the columns to ids
+        optimal_plan = ColumnDeriver(optimal_plan)
+
         return optimal_plan
 
     def build(self, logical_plan: Operator):
         # apply optimizations
-
         plan = self.optimize(logical_plan)
         return plan
