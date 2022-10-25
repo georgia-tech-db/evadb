@@ -14,7 +14,7 @@ ADD requirements.txt /eva
 WORKDIR eva
 
 RUN pip install -r requirements.txt
-ADD . /eva
+ADD .. /eva
 RUN pip install -e ".[dev]"
 
 RUN script/antlr4/generate_parser.sh

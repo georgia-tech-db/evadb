@@ -24,3 +24,4 @@ wheel==0.37.1
 scriv==0.16.0
 facenet-pytorch==2.5.2
 easyocr==1.5.0
+vosk==0.3.44
