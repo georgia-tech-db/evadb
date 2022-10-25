@@ -22,6 +22,7 @@ from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
+from eva.catalog.services.df_transcript_metadata_service import TranscriptMetadataService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo
@@ -45,6 +46,7 @@ class CatalogManager(object):
         self._column_service = DatasetColumnService()
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
+        self._transcript_metadata_service = TranscriptMetadataService()
 
     def reset(self):
         """
