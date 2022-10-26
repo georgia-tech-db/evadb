@@ -17,4 +17,6 @@ RUN chmod -R 777 /src \
     && sh script/antlr4/generate_parser.sh \
     && pip install -e ".[dev]"
 
+RUN mkdir -p /root/.eva && chmod -R 777 /root/.eva
+
 WORKDIR /eva

@@ -111,7 +111,9 @@ class StatementBinder:
     ):
         table_ref = node.table_ref
         name = table_ref.table.table_name
-        if node.file_options["file_format"] == FileFormatType.VIDEO:
+        if node.file_options["file_format"] == FileFormatType.VIDEO \
+            or node.file_options["file_format"] == FileFormatType.RICH_VIDEO:
+
             # Sanity check to make sure there is no existing video table with same name
             if self._catalog.check_table_exists(
                 table_ref.table.database_name, table_ref.table.table_name
