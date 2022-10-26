@@ -17,6 +17,7 @@ from pathlib import Path
 import pandas as pd
 import eva.utils.audio_utils as audio_utils
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.models.storage.batch import Batch
 from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.planner.load_data_plan import LoadDataPlan
@@ -27,10 +28,14 @@ class LoadRichVideoExecutor(LoadVideoExecutor):
         super().__init__(node)
 
     def exec(self):
+        # TODO: super exec not creating table if it doesn't exist
         if super().exec() is not None:
 
-            audio_utils.transcribe_file_with_word_time_offsets(self.node.file_path)
-            # TODO: Add transcript metadata to table here
+            # TODO: make results typed
+            catalog = CatalogManager()
+            results = audio_utils.transcribe_file_with_word_time_offsets(self.node.file_path)
+            for result in results:
+                catalog.create_transcript_metadata(str(self.node.file_path), result['word'], result['start'], result['end'], result['conf'])
 
             yield Batch(
                 pd.DataFrame(
