@@ -33,11 +33,11 @@
 
 ## What is EVA?
 
-EVA is a new database system tailored for video analytics -- think MySQL for videos. It supports a simple SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or find touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
+EVA is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
 
 ## Why EVA? ##
 
-👀 Easily query videos in user-facing applications with a simple SQL-like interface for commonly used computer vision models.
+👀 Easily query videos in user-facing applications with a SQL-like interface for commonly used computer vision models.
 
 🚅 Speed up queries and save money spent on model inference using in-built sampling, caching, and filtering optimizations.
 
@@ -45,7 +45,7 @@ EVA is a new database system tailored for video analytics -- think MySQL for vid
 
 ## QuickStart
 
-1. EVA requires Python 3.7+. To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA requires Python 3.8+. To install EVA, we recommend using an virtual environment and the pip package manager:
 
 ```shell
 pip install evadb
@@ -57,7 +57,7 @@ eva_server &   # launch server
 eva_client     # launch client
 ```
 
-2. UPLOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
+2. LOAD a video using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
 LOAD FILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
