@@ -251,6 +251,9 @@ class Batch:
         return inverted.all().bool()
 
     def create_mask(self) -> List:
+        """
+        Return list of indices of first row.
+        """
         return self._frames[self._frames[0]].index.tolist()
 
     def create_inverted_mask(self) -> List:
@@ -280,6 +283,12 @@ class Batch:
         return Batch(self._frames[verfied_cols], self._identifier_column)
 
     def repeat(self, times: int) -> None:
+        """
+        Repeat the rows of a dataframe.
+
+        Arguments:
+            times: number of times to repeat
+        """
         self._frames = pd.DataFrame(np.repeat(self._frames.to_numpy(), times, axis=0))
 
     @classmethod
