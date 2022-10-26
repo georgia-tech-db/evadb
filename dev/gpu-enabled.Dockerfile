@@ -6,7 +6,8 @@ RUN apt-get -qq update \
     && apt-get install -y software-properties-common \
     && add-apt-repository ppa:deadsnakes/ppa \
     && apt install -y python3.8 python3.8-venv python3-pip \
-    && python3 -m pip install --upgrade pip
+    && python3 -m pip install --upgrade pip \
+    && apt-get install -y ffmpeg
 
 RUN apt install -y openjdk-11-jdk openjdk-11-jre wget
 RUN mkdir /eva && chmod -R 777 /eva && mkdir /src

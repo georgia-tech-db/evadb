@@ -39,7 +39,7 @@ def transcribe_file_with_word_time_offsets(rich_video_file, sample_rate=16000):
 def get_audio(file_name):
     outfile = tempfile.NamedTemporaryFile(prefix="temp_extract_audio", suffix=".wav", mode="w+b")
     # TODO: don't use a binary
-    subprocess.call(['ffmpeg', '-y', '-i', file_name, outfile.name], stdout="/dev/null")
+    subprocess.call(['ffmpeg', '-y', '-i', file_name, outfile.name], stdout=None)
     try:
         yield wave.open(outfile.name, "rb")
     finally:
