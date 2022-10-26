@@ -37,6 +37,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
@@ -74,6 +75,10 @@ class StatementBinder:
     def _bind_abstract_expr(self, node: AbstractExpression):
         for child in node.children:
             self.bind(child)
+
+    @bind.register(ExplainStatement)
+    def _bind_explain_statement(self, node: ExplainStatement):
+        self.bind(node.explainable_stmt)
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):

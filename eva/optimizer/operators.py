@@ -55,6 +55,7 @@ class OperatorType(IntEnum):
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
     LOGICALDELIMITER = auto()
+    LOGICALEXPLAIN = auto()
 
 
 class Operator:
@@ -1057,3 +1058,22 @@ class LogicalExchange(Operator):
 
     def __hash__(self) -> int:
         return super().__hash__()
+
+
+class LogicalExplain(Operator):
+    def __init__(self, explainable_opr: Operator=None):
+        super().__init__(OperatorType.LOGICALEXPLAIN, explainable_opr)
+        self._explainable_opr = explainable_opr
+
+    @property
+    def explainable_opr(self):
+        return self._explainable_opr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExplain):
+            return False
+        return is_subtree_equal and self._explainable_opr == other.explainable_opr
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._explainable_opr))

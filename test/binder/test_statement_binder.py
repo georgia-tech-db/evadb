@@ -117,6 +117,13 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_create_mat_statement(mat_statement)
             mock_binder.assert_called_with(mat_statement.query)
 
+    def test_bind_explain_statement(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            stmt = MagicMock()
+            binder._bind_explain_statement(stmt)
+            mock_binder.assert_called_with(stmt.explainable_stmt)
+
     @patch("eva.binder.statement_binder.CatalogManager")
     @patch("eva.binder.statement_binder.path_to_class")
     def test_bind_func_expr(self, mock_path_to_class, mock_catalog):

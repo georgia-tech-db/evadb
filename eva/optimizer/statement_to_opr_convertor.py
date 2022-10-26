@@ -19,6 +19,7 @@ from eva.optimizer.operators import (
     LogicalCreateUDF,
     LogicalDrop,
     LogicalDropUDF,
+    LogicalExplain,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -48,6 +49,7 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.utils.logging_manager import logger
 
 
@@ -292,6 +294,10 @@ class StatementToPlanConvertor:
         show_opr = LogicalShow(statement.show_type)
         self._plan = show_opr
 
+    def visit_explain(self, statement: ExplainStatement):
+        explain_opr = LogicalExplain(self.visit(statement.explainable_stmt))
+        self._plan = explain_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -322,6 +328,8 @@ class StatementToPlanConvertor:
             self.visit_materialized_view(statement)
         elif isinstance(statement, ShowStatement):
             self.visit_show(statement)
+        elif isinstance(statement, ExplainStatement):
+            self.visit_explain(statement)
         return self._plan
 
     @property
