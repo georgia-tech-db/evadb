@@ -17,7 +17,6 @@
 ## Links
 * [Documentation](https://evadb.readthedocs.io/en/latest/)
 * [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [Website](https://georgia-tech-db.github.io/eva/index.html)
 * [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
 
