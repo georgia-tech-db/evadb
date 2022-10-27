@@ -91,7 +91,7 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = create_dummy_csv_batches()
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
-        
+
         # clean up
         drop_query = "DROP TABLE MyVideoCSV;"
         execute_query_fetch_all(drop_query)
@@ -131,9 +131,3 @@ class LoadExecutorTest(unittest.TestCase):
         # clean up
         drop_query = "DROP TABLE MyVideoCSV;"
         execute_query_fetch_all(drop_query)
-
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(LoadExecutorTest("test_should_load_csv_in_table"))
-    runner = unittest.TextTestRunner()
-    runner.run(suite)

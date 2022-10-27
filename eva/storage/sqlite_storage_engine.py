@@ -83,7 +83,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             self._sql_session.commit()
             # In memory metadata does not automatically sync with the database
             # therefore manually removing the table from the in-memory metadata
-            # https://github.com/sqlalchemy/sqlalchemy/issues/5112 
+            # https://github.com/sqlalchemy/sqlalchemy/issues/5112
             BaseModel.metadata.remove(table_to_remove)
         except Exception as e:
             logger.exception(
