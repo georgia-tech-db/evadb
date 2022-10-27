@@ -14,10 +14,9 @@
 # limitations under the License.
 import hashlib
 import importlib
+import pickle
 import sys
 import uuid
-import pickle
-
 from pathlib import Path
 
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -135,7 +134,6 @@ def get_size(obj, seen=None):
 
 
 class PickleSerializer(object):
-
     def serialize(self, data):
         return pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
 

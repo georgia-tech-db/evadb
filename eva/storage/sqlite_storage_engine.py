@@ -12,22 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import shutil
 from typing import Iterator, List
+
 import pandas as pd
+from sqlalchemy.ext.declarative import declarative_base
 
 from eva.catalog.column_type import ColumnType
+from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.df_column import DataFrameColumn
-
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import SQLConfig
 from eva.models.storage.batch import Batch
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
-from eva.catalog.models.base_model import BaseModel
-from eva.catalog.schema_utils import SchemaUtils
-from sqlalchemy.ext.declarative import declarative_base
 
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
@@ -49,7 +48,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         for col in columns:
             if col.type == ColumnType.NDARRAY:
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
-        return dict_row            
+        return dict_row
 
     def _sql_row_to_dict(self, sql_row: tuple, columns: List[DataFrameColumn]):
         # Deserialize numpy data
@@ -59,8 +58,8 @@ class SQLStorageEngine(AbstractStorageEngine):
                 dict_row[col.name] = self._serializer.deserialize(sql_row[idx])
             else:
                 dict_row[col.name] = sql_row[idx]
-        return dict_row 
-    
+        return dict_row
+
     def create(self, table: DataFrameMetadata, **kwargs):
         """
         Create an empty table in sql.
@@ -78,11 +77,13 @@ class SQLStorageEngine(AbstractStorageEngine):
         return new_table
 
     def drop(self, table: DataFrameMetadata):
-        dir_path = self._spark_url(table)
         try:
-            shutil.rmtree(str(dir_path))
+            BaseModel.metadata.tables[table.name].drop()
+            self._sql_session.commit()
         except Exception as e:
-            logger.exception(f"Failed to drop the video table {e}")
+            logger.exception(
+                f"Failed to drop the table {table.name} with Exception {str(e)}"
+            )
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         """
@@ -112,21 +113,19 @@ class SQLStorageEngine(AbstractStorageEngine):
         tuples.
 
         Argument:
-            table: table metadata object of teh table to read 
+            table: table metadata object of teh table to read
             batch_mem_size (int): memory size of the batch read from storage
         Return:
             Iterator of Batch read.
         """
-        
+
         new_table = BaseModel.metadata.tables[table.name]
-        result = self._sql_engine.execute(
-            new_table.select()
-        )
+        result = self._sql_engine.execute(new_table.select())
         data_batch = []
         row_size = None
         for row in result:
             # Todo: Verfiy the order of columns in row matches the table.columns
-            # ignore the first dummy (_row_id) primary column 
+            # ignore the first dummy (_row_id) primary column
             data_batch.append(self._sql_row_to_dict(row[1:], table.columns))
             if row_size is None:
                 row_size = 0
@@ -136,4 +135,3 @@ class SQLStorageEngine(AbstractStorageEngine):
                 data_batch = []
         if data_batch:
             yield Batch(pd.DataFrame(data_batch))
-        

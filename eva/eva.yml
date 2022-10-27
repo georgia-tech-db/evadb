@@ -17,22 +17,9 @@ executor:
 
 storage:
   upload_dir: ""
-  engine: "eva.storage.petastorm_storage_engine.PetastormStorageEngine"
+  engine: "eva.storage.sqlite_storage_engine.SQLStorageEngine"
   video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
   video_engine_version: 0
-
-  # https://petastorm.readthedocs.io/en/latest/api.html#module-petastorm.reader
-  petastorm: {'cache_type' : 'local-disk',
-              'cache_location' : '.cache',
-              'cache_size_limit' : 4000000000, #4gb
-              'cache_row_size_estimate' : 512}
-
-pyspark:
-  property: {'spark.logConf': 'true',
-             'spark.driver.memory': '10g',
-             'spark.sql.execution.arrow.pyspark.enabled': 'true'}
-  coalesce: 2
-
 
 server:
   host: "0.0.0.0"
