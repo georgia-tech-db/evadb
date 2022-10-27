@@ -50,6 +50,7 @@ minimal_requirement = [
     "pyyaml==5.1",
     "importlib-metadata<5.0",
     "vosk==0.3.44"
+    "pydub==0.25.1"
 ]
 
 formatter_libs = [

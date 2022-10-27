@@ -4,16 +4,16 @@ import wave
 import json
 from vosk import Model, KaldiRecognizer, SetLogLevel
 from contextlib import contextmanager
+from pydub import AudioSegment
 
 
-def transcribe_file_with_word_time_offsets(rich_video_file, sample_rate=16000):
+def transcribe_file_with_word_time_offsets(rich_video_file):
     SetLogLevel(-1)
     print("Running Vosk")
     model = Model(lang="en-us")
-    rec = KaldiRecognizer(model, sample_rate)
 
     with get_audio(rich_video_file) as wf:
-
+        rec = KaldiRecognizer(model, wf.getframerate())
         rec.SetWords(True)
         rec.SetPartialWords(True)
 
@@ -37,9 +37,13 @@ def transcribe_file_with_word_time_offsets(rich_video_file, sample_rate=16000):
 
 @contextmanager
 def get_audio(file_name):
+    outfile_stereo = tempfile.NamedTemporaryFile(prefix="temp_extract_audio_stereo", suffix=".wav", mode="w+b")
     outfile = tempfile.NamedTemporaryFile(prefix="temp_extract_audio", suffix=".wav", mode="w+b")
     # TODO: don't use a binary
-    subprocess.call(['ffmpeg', '-y', '-i', file_name, outfile.name], stdout=None)
+    subprocess.call(['ffmpeg', '-y', '-i', file_name, outfile_stereo.name], stdout=None)
+    mono_audio = AudioSegment.from_wav(outfile_stereo.name)
+    mono_audio = mono_audio.set_channels(1)
+    mono_audio.export(outfile, format="wav")
     try:
         yield wave.open(outfile.name, "rb")
     finally:
