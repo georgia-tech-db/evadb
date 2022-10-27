@@ -14,15 +14,15 @@
 # limitations under the License.
 import shutil
 import unittest
-from test.util import NUM_FRAMES, create_dummy_batches
+from test.util import create_dummy_batches
 
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.storage.petastorm_storage_engine import PetastormStorageEngine
+from eva.storage.sqlite_storage_engine import SQLStorageEngine
 
 
-class PetastormStorageEngineTest(unittest.TestCase):
+class SQLStorageEngineTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.table = None
@@ -47,41 +47,19 @@ class PetastormStorageEngineTest(unittest.TestCase):
             pass
 
     def test_should_create_empty_table(self):
-        petastorm = PetastormStorageEngine()
-        petastorm.create(self.table)
-        records = list(petastorm.read(self.table, batch_mem_size=3000))
+        sqlengine = SQLStorageEngine()
+        sqlengine.create(self.table)
+        records = list(sqlengine.read(self.table, batch_mem_size=3000))
         self.assertEqual(records, [])
 
     def test_should_write_rows_to_table(self):
         dummy_batches = list(create_dummy_batches())
 
-        petastorm = PetastormStorageEngine()
-        petastorm.create(self.table)
+        sqlengine = SQLStorageEngine()
+        sqlengine.create(self.table)
         for batch in dummy_batches:
             batch.drop_column_alias()
-            petastorm.write(self.table, batch)
+            sqlengine.write(self.table, batch)
 
-        read_batch = list(petastorm.read(self.table, batch_mem_size=3000))
+        read_batch = list(sqlengine.read(self.table, batch_mem_size=3000))
         self.assertTrue(read_batch, dummy_batches)
-
-    def test_should_return_even_frames(self):
-        dummy_batches = list(create_dummy_batches())
-
-        petastorm = PetastormStorageEngine()
-        petastorm.create(self.table)
-        for batch in dummy_batches:
-            batch.drop_column_alias()
-            petastorm.write(self.table, batch)
-
-        read_batch = list(
-            petastorm.read(
-                self.table,
-                batch_mem_size=3000,
-                columns=["id"],
-                predicate_func=lambda id: id % 2 == 0,
-            )
-        )
-        expected_batch = list(
-            create_dummy_batches(filters=[i for i in range(NUM_FRAMES) if i % 2 == 0])
-        )
-        self.assertTrue(read_batch, expected_batch)
