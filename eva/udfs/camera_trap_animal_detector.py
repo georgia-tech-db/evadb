@@ -1,0 +1,213 @@
+from ctypes.wintypes import HCOLORSPACE
+from inspect import FrameInfo
+import pickle
+import torch
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+from eva.utils.logging_manager import logger
+import numpy as np
+from torchvision.transforms import Normalize
+from torchvision import transforms
+import pandas as pd
+import cv2
+import torch
+import pickle
+from eva.utils.logging_manager import logger
+from torch import nn
+
+def _stack_tups(tuples, stack_dim=1):
+    """Stack tuple of tensors along `stack_dim`
+
+    NOTE: vendored (with minor adaptations) from fastai:
+    https://github.com/fastai/fastai/blob/4b0785254fdece1a44859956b6e54eedb167a97e/fastai/layers.py#L505-L507
+
+    Updates:
+        -  use `range` rather than fastai `range_of`
+    """
+    return tuple(torch.stack([t[i] for t in tuples], dim=stack_dim) for i in range(len(tuples[0])))
+
+
+class TimeDistributed(torch.nn.Module):
+    # base model borrowed from zamba
+    """Applies `module` over `tdim` identically for each step, use `low_mem` to compute one at a time.
+
+    NOTE: vendored (with minor adaptations) from fastai:
+    https://github.com/fastai/fastai/blob/4b0785254fdece1a44859956b6e54eedb167a97e/fastai/layers.py#L510-L544
+
+    Updates:
+     - super.__init__() in init
+     - assign attributes in init
+     - inherit from torch.nn.Module rather than fastai.Module
+    """
+
+    def __init__(self, low_mem=False, tdim=1):
+        super().__init__()
+        self.low_mem = low_mem
+        self.tdim = tdim
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        base_module_ckt_path = '/Users/dawndawn/Downloads/zamba/base_module_blank.pt'
+        base_module_arc_path = '/Users/dawndawn/Downloads/zamba/base_module_arc_blank'
+        with open(base_module_arc_path,"rb") as f:
+            self.module = pickle.load(f)
+        self.module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
+
+    def forward(self, *tensors, **kwargs):
+        "input x with shape:(bs,seq_len,channels,width,height)"
+        if self.low_mem or self.tdim != 1:
+            return self.low_mem_forward(*tensors, **kwargs)
+        else:
+            # only support tdim=1
+            inp_shape = tensors[0].shape
+            bs, seq_len = inp_shape[0], inp_shape[1]
+            out = self.module(*[x.view(bs * seq_len, *x.shape[2:]) for x in tensors], **kwargs)
+        return self.format_output(out, bs, seq_len)
+
+    def low_mem_forward(self, *tensors, **kwargs):
+        "input x with shape:(bs,seq_len,channels,width,height)"
+        seq_len = tensors[0].shape[self.tdim]
+        args_split = [torch.unbind(x, dim=self.tdim) for x in tensors]
+        out = []
+        for i in range(seq_len):
+            out.append(self.module(*[args[i] for args in args_split]), **kwargs)
+        if isinstance(out[0], tuple):
+            return _stack_tups(out, stack_dim=self.tdim)
+        return torch.stack(out, dim=self.tdim)
+
+    def format_output(self, out, bs, seq_len):
+        "unstack from batchsize outputs"
+        if isinstance(out, tuple):
+            return tuple(out_i.view(bs, seq_len, *out_i.shape[1:]) for out_i in out)
+        return out.view(bs, seq_len, *out.shape[1:])
+
+    def __repr__(self):
+        return f"TimeDistributed({self.module})"
+
+
+class AnimalDetector(PytorchAbstractClassifierUDF):
+    @property
+    def name(self) -> str:
+        return "AnimalDetector"
+    
+    @property
+    def input_format(self) -> FrameInfo:
+        return FrameInfo(-1, -1, 3, HCOLORSPACE.RGB)
+
+    @property
+    def labels(self) -> 'List[str]':
+        return ['blank', 'non_blank']
+
+
+    def setup(self):
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        
+        base_ckt_path = '/Users/dawndawn/Downloads/zamba/base_blank.pt'
+        self.base = TimeDistributed()
+        self.base.load_state_dict(torch.load(base_ckt_path, map_location=device))
+
+        classifier_ckt_path = '/Users/dawndawn/Downloads/zamba/classifier_blank.pt'
+        self.classifier = torch.nn.Sequential(
+            nn.Linear(2152, 256),
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.Linear(256, 64),
+            nn.Flatten(),
+            nn.Linear(1024, 1),
+
+        )
+        self.classifier.load_state_dict(torch.load(classifier_ckt_path, map_location=device))
+
+    def ensure_frame_number(arr, total_frames: int):
+        # preprocess borrowed from zamba
+        if (total_frames is None) or (arr.shape[0] == total_frames):
+            return arr
+        elif arr.shape[0] == 0:
+            logger.warning(
+                "No frames selected. Returning an array in the desired shape with all zeros."
+            )
+            return np.zeros((total_frames, arr.shape[1], arr.shape[2], arr.shape[3]), dtype="int")
+        elif arr.shape[0] > total_frames:
+            logger.info(
+                f"Clipping {arr.shape[0] - total_frames} frames "
+                f"(original: {arr.shape[0]}, requested: {total_frames})."
+            )
+            return arr[:total_frames]
+        elif arr.shape[0] < total_frames:
+            logger.info(
+                f"Duplicating last frame {total_frames - arr.shape[0]} times "
+                f"(original: {arr.shape[0]}, requested: {total_frames})."
+            )
+            return np.concatenate(
+                [arr, np.tile(arr[-1], (total_frames - arr.shape[0], 1, 1, 1))], axis=0
+            )
+
+    def image_model_transforms():  
+        # preprocess borrowed from zamba
+        class ConvertTHWCtoTCHW(torch.nn.Module):
+            """Convert tensor from (T, H, W, C) to (T, C, H, W)"""
+
+            def forward(self, vid: torch.Tensor) -> torch.Tensor:
+                return vid.permute(0, 3, 1, 2)
+        class Uint8ToFloat(torch.nn.Module):
+            def forward(self, tensor: torch.Tensor) -> torch.Tensor:
+                return tensor / 255.0
+        
+        imagenet_normalization_values = dict(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        img_transforms = [
+            ConvertTHWCtoTCHW(),
+            Uint8ToFloat(),
+            Normalize(**imagenet_normalization_values),
+        ]
+
+        return transforms.Compose(img_transforms)
+    
+    def transform_video(frames)->'Tensor':
+        if len(frames.shape) < 4:
+            frames = frames.unsqueeze(0)
+        # split the tensor to multiple images and do the following transforms one by one
+        arr_list = []
+        for i in range(frames.shape[0]):
+            frame = frames[i]
+            to_img = transforms.ToPILImage()
+            img = to_img(frame)
+            np_img = np.asarray(img)
+            arr_list.append(np_img)
+        arr = np.array(arr_list)
+        # preprocess borrowed from zamba
+        model_input_height, model_input_width = 240, 426
+        if (model_input_height is not None) and (model_input_width is not None):
+            resized_frames = np.zeros(
+                (arr.shape[0], model_input_height, model_input_width, 3), np.uint8
+            )
+            for ix, f in enumerate(arr):
+                if (f.shape[0] != model_input_height) or (
+                    f.shape[1] != model_input_width
+                ):
+                    f = cv2.resize(
+                        f,
+                        (model_input_width, model_input_height),
+                        # https://stackoverflow.com/a/51042104/1692709
+                        interpolation=(
+                            cv2.INTER_LINEAR
+                            if f.shape[1] < model_input_width
+                            else cv2.INTER_AREA
+                        ),
+                    )
+                resized_frames[ix, ...] = f
+            arr = np.array(resized_frames)
+        arr = AnimalDetector.ensure_frame_number(arr, 16)
+        return torch.Tensor(arr)
+
+    def forward(self, frames):
+        torch.set_grad_enabled(False)
+        frames = AnimalDetector.transform_video(frames)
+        transform = AnimalDetector.image_model_transforms()
+        frames = transform(frames)
+        frames = frames.unsqueeze(0)
+        to_base = frames
+        to_classifier = self.base(to_base)
+        y_hat = self.classifier(to_classifier)
+        pred = torch.sigmoid(y_hat).cpu().numpy()
+        outcome = pd.DataFrame()
+        outcome = outcome.append({'labels': ['blank', 'non_blank'], 'scores': [pred, 1 - pred]}, ignore_index=True,)
+        return outcome
+
+        
