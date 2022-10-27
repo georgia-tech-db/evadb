@@ -15,7 +15,7 @@
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.generic_utils import str_to_class
 
-StorageEngine = str_to_class("eva.storage.structured_storage_engine.SQLStorageEngine")()
+StorageEngine = str_to_class("eva.storage.sqlite_storage_engine.SQLStorageEngine")()
 VideoStorageEngine = str_to_class(
     ConfigurationManager().get_value("storage", "video_engine")
 )()

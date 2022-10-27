@@ -31,7 +31,7 @@ class DataFrameColumn(BaseModel):
     _is_nullable = Column("is_nullable", Boolean, default=False)
     _array_type = Column("array_type", Enum(NdArrayType), nullable=True)
     _array_dimensions = Column("array_dimensions", String(100))
-    _metadata_id = Column("metadata_id", Integer, ForeignKey("df_metadata.id"))
+    _metadata_id = Column("metadata_id", Integer, ForeignKey("df_metadata._row_id"))
 
     _dataset = relationship("DataFrameMetadata", back_populates="_columns")
 
