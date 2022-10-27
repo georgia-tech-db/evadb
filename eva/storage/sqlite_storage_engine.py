@@ -50,8 +50,9 @@ class SQLStorageEngine(AbstractStorageEngine):
             if col.type == ColumnType.NDARRAY:
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
             elif isinstance(dict_row[col.name], (np.generic,)):
-                # SqlAlchemy does not understand numpy geenric data types
+                # SqlAlchemy does not consume numpy generic data types
                 # convert numpy datatype to python generic datatype
+                # eg. np.int64 -> int
                 dict_row[col.name] = dict_row[col.name].tolist()
         return dict_row
 
@@ -86,7 +87,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             table_to_remove = BaseModel.metadata.tables[table.name]
             table_to_remove.drop()
             self._sql_session.commit()
-            # In memory metadata does not automatically sync with the database
+            # In-memory metadata does not automatically sync with the database
             # therefore manually removing the table from the in-memory metadata
             # https://github.com/sqlalchemy/sqlalchemy/issues/5112
             BaseModel.metadata.remove(table_to_remove)
