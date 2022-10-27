@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Iterator, List
 
+import numpy as np
 import pandas as pd
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -48,6 +49,10 @@ class SQLStorageEngine(AbstractStorageEngine):
         for col in columns:
             if col.type == ColumnType.NDARRAY:
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
+            elif isinstance(dict_row[col.name], (np.generic,)):
+                # SqlAlchemy does not understand numpy geenric data types
+                # convert numpy datatype to python generic datatype
+                dict_row[col.name] = dict_row[col.name].tolist()
         return dict_row
 
     def _sql_row_to_dict(self, sql_row: tuple, columns: List[DataFrameColumn]):
