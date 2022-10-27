@@ -248,7 +248,7 @@ class SelectExecutorTest(unittest.TestCase):
         # Disabling it for time being
         self.assertEqual(actual_batch, expected_batch[0])
 
-    def test_aaselect_and_sample_with_predicate(self):
+    def test_select_and_sample_with_predicate(self):
         select_query = (
             "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
         )

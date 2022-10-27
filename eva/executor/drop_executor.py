@@ -16,6 +16,7 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.planner.drop_plan import DropPlan
 from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
@@ -57,6 +58,7 @@ class DropExecutor(AbstractExecutor):
         if not success:
             err_msg = "Failed to drop {}".format(table_ref)
             logger.exception(err_msg)
+            raise ExecutorError(err_msg)
 
         yield Batch(
             pd.DataFrame(

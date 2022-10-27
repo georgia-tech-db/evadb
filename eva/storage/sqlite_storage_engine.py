@@ -78,8 +78,13 @@ class SQLStorageEngine(AbstractStorageEngine):
 
     def drop(self, table: DataFrameMetadata):
         try:
-            BaseModel.metadata.tables[table.name].drop()
+            table_to_remove = BaseModel.metadata.tables[table.name]
+            table_to_remove.drop()
             self._sql_session.commit()
+            # In memory metadata does not automatically sync with the database
+            # therefore manually removing the table from the in-memory metadata
+            # https://github.com/sqlalchemy/sqlalchemy/issues/5112 
+            BaseModel.metadata.remove(table_to_remove)
         except Exception as e:
             logger.exception(
                 f"Failed to drop the table {table.name} with Exception {str(e)}"
