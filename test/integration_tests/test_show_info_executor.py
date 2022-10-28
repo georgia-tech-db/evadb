@@ -33,7 +33,7 @@ class ShowExecutorTest(unittest.TestCase):
     # integration test
     def test_show_udfs(self):
         result = execute_query_fetch_all("SHOW UDFS;")
-        self.assertEqual(len(result.frames.columns), 5)
+        self.assertEqual(len(result.columns), 5)
 
         expected = {
             "name": ["FastRCNNObjectDetector", "Array_Count"],

@@ -134,7 +134,7 @@ class LogicalExpressionsTest(unittest.TestCase):
             ExpressionType.COMPARE_EQUAL, tup_val_exp_l, tup_val_exp_r
         )
         comp_exp_r = Mock(spec=ComparisonExpression)
-        comp_exp_r.evaluate = Mock(return_value=Mock(frames=[[True], [False]]))
+        comp_exp_r.evaluate = Mock(return_value=Mock(_frames=[[True], [False]]))
 
         logical_exp = LogicalExpression(
             ExpressionType.LOGICAL_AND, comp_exp_l, comp_exp_r
@@ -157,7 +157,7 @@ class LogicalExpressionsTest(unittest.TestCase):
             ExpressionType.COMPARE_EQUAL, tup_val_exp_l, tup_val_exp_r
         )
         comp_exp_r = Mock(spec=ComparisonExpression)
-        comp_exp_r.evaluate = Mock(return_value=Mock(frames=[[True], [False]]))
+        comp_exp_r.evaluate = Mock(return_value=Mock(_frames=[[True], [False]]))
 
         logical_exp = LogicalExpression(
             ExpressionType.LOGICAL_OR, comp_exp_l, comp_exp_r
