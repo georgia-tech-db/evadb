@@ -48,7 +48,6 @@ minimal_requirement = [
     "petastorm==0.12.0",
     "antlr4-python3-runtime==4.10",
     "pyyaml==5.1",
-    "ray==1.13.0", # TODO: not minimal requirement
     "importlib-metadata<5.0"
 ]
 
@@ -94,6 +93,12 @@ udf_libs = [
     "easyocr==1.6.0"
 ]
 
+### NEEDED FOR EXPERIMENTAL FEATURES
+experimental_libs = [
+    "ray==1.13.0" #TODO: not minimal requirement
+]
+
+
 MINIMAL_REQUIRES = minimal_requirement
 INSTALL_REQUIRES = minimal_requirement + formatter_libs
 DATABASE_REQUIRES = INSTALL_REQUIRES + database_libs
@@ -109,12 +114,14 @@ DEV_REQUIRES = (
     + dist_libs
     + udf_libs
 )
+EXPERIMENTAL_REQUIRES = DEV_REQUIRES + experimental_libs
 
 EXTRA_REQUIRES = {
     "dev": DEV_REQUIRES,
     "database": DATABASE_REQUIRES,
     "minimal": MINIMAL_REQUIRES,
-    "udf": UDF_REQUIRES
+    "udf": UDF_REQUIRES,
+    "experimental": EXPERIMENTAL_REQUIRES
 }
 
 setup(
