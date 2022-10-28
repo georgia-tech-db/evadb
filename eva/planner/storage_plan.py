@@ -93,6 +93,27 @@ class StoragePlan(AbstractPlan):
     def sampling_rate(self):
         return self._sampling_rate
 
+    def __str__(self):
+        return "StoragePlan(video={}, \
+            batch_mem_size={}, \
+            skip_frames={}, \
+            offset={}, \
+            limit={}, \
+            total_shards={}, \
+            curr_shard={}, \
+            predicate={}, \
+            sampling_rate={})".format(
+            self._video,
+            self._batch_mem_size,
+            self._skip_frames,
+            self._offset,
+            self._limit,
+            self._total_shards,
+            self._curr_shard,
+            self._predicate,
+            self._sampling_rate
+            )
+
     def __hash__(self) -> int:
         return hash(
             (

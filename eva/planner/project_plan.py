@@ -29,5 +29,8 @@ class ProjectPlan(AbstractPlan):
         self.target_list = target_list
         super().__init__(PlanOprType.PROJECT)
 
+    def __str__(self):
+        return "ProjectPlan(target_list={})".format(self.target_list)
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.target_list)))

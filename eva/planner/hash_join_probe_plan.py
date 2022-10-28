@@ -44,6 +44,17 @@ class HashJoinProbePlan(AbstractJoin):
         self.join_project = join_project
         super().__init__(PlanOprType.HASH_JOIN, join_type, join_predicate)
 
+    def __str__(self):
+        return "HashJoinProbePlan(join_type={}, \
+            probe_keys={}, \
+            join_predicate={}, \
+            join_project={})".format(
+            self.join_type,
+            self.probe_keys,
+            self.join_predicate,
+            self.join_project
+        )
+
     def __hash__(self) -> int:
         return hash(
             (

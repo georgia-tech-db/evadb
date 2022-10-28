@@ -39,7 +39,9 @@ from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
+from eva.executor.explain_executor import ExplainExecutor
 from eva.models.storage.batch import Batch
+from eva.optimizer.plan_generator import PlanGenerator
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -121,9 +123,14 @@ class PlanExecutor:
             executor_node = PredicateExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SHOW_INFO:
             executor_node = ShowInfoExecutor(node=plan)
-        # Build Executor Tree for children
-        for children in plan.children:
-            executor_node.append_child(self._build_execution_tree(children))
+        elif plan_opr_type == PlanOprType.EXPLAIN:
+            executor_node = ExplainExecutor(node=plan)
+
+        # EXPLAIN does not need to build execution tree for its children
+        if plan_opr_type != PlanOprType.EXPLAIN:
+            # Build Executor Tree for children
+            for children in plan.children:
+                executor_node.append_child(self._build_execution_tree(children))
 
         return executor_node
 

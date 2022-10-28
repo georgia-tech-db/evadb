@@ -35,5 +35,12 @@ class HashJoinBuildPlan(AbstractPlan):
         self.build_keys = build_keys
         super().__init__(PlanOprType.HASH_BUILD)
 
+    def __str__(self):
+        return "HashJoinBuildPlan(join_type={}, \
+            build_keys={})".format(
+            self.join_type,
+            self.build_keys
+        )
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.join_type, tuple(self.build_keys or [])))

@@ -12,24 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
 
-class PredicatePlan(AbstractPlan):
-    """
-    Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-    """
+class ExplainPlan(AbstractPlan):
+    def __init__(self, explainable_plan: AbstractPlan):
+        super().__init__(PlanOprType.EXPLAIN)
+        self._explainable_plan = explainable_plan
 
-    def __init__(self, predicate: AbstractExpression):
-        self.predicate = predicate
-        super().__init__(PlanOprType.PREDICATE_FILTER)
-
-    def __str__(self):
-        return "PredicatePlan(predicate={})".format(self.predicate)
+    @property
+    def explainable_plan(self):
+        return self._explainable_plan
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.predicate))
+        return hash((super().__hash__(), self._explainable_plan))

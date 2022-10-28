@@ -53,6 +53,15 @@ class CreateMaterializedViewPlan(AbstractPlan):
     def columns(self):
         return self._columns
 
+    def __str__(self):
+        return "CreateMaterializedViewPlan(view={}, \
+            columns={}, \
+            if_not_exists={})".format(
+            self._view,
+            self._columns,
+            self._if_not_exists
+        )
+
     def __hash__(self) -> int:
         return hash(
             (super().__hash__(), self.view, self.if_not_exists, tuple(self.columns))

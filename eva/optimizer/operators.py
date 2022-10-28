@@ -1061,9 +1061,10 @@ class LogicalExchange(Operator):
 
 
 class LogicalExplain(Operator):
-    def __init__(self, explainable_opr: Operator=None):
-        super().__init__(OperatorType.LOGICALEXPLAIN, explainable_opr)
-        self._explainable_opr = explainable_opr
+    def __init__(self, children: List = None):
+        super().__init__(OperatorType.LOGICALEXPLAIN, children)
+        assert(len(children) == 1, "EXPLAIN command only takes one child")
+        self._explainable_opr = children[0]
 
     @property
     def explainable_opr(self):
