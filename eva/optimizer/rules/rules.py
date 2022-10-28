@@ -25,6 +25,7 @@ from eva.optimizer.optimizer_utils import (
     extract_pushdown_predicate_for_alias,
 )
 from eva.optimizer.rules.pattern import Pattern
+from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -35,6 +36,7 @@ from eva.planner.show_info_plan import ShowInfoPlan
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_history import UdfHistory
+from eva.binder.binder_utils import create_table_metadata
 
 
 if TYPE_CHECKING:
@@ -429,6 +431,13 @@ class UdfReuseForFunctionScan(Rule):
         return (before.join_type == JoinType.LATERAL_JOIN)
 
     def apply(self, before: Operator, context: OptimizerContext):
+        """
+              LateralJoin                                LateralJoin
+              /          \        -------------->        /          \
+            SeqScan     FuncScan                   LeftOuterJoin   FuncScan
+                                                       /     \
+                                                   SeqScan  MatView
+        """
         
         # Do this only for lateral join
         if before.join_type == JoinType.LATERAL_JOIN:
@@ -473,10 +482,8 @@ class UdfReuseForFunctionScan(Rule):
             # Optimization: frame -> frame id.
             modified_function_scan = self._function_scan_for_mat(function_scan)
 
-
             # Create the mat operator
             mat = self._generate_mat_operator(view, modified_function_scan) 
-
 
             mat.append_child(modified_function_scan)
 
@@ -496,16 +503,18 @@ class UdfReuseForFunctionScan(Rule):
         history_service = catalog._udf_history_service
         history_col_service = catalog._udf_history_col_service
 
-        # get udf histories
-        udf_histories = history_service.udf_history_by_id(udf_id)
+        # get udf histories for this udf id
+        udf_histories = history_service.udf_history_by_udfid(udf_id)
 
         if udf_histories:
-            # iterate over the histories and check col history matches
+
+            # iterate over the histories and check if col history matches
             for udf_history in udf_histories:
                 col_histories = list(
                     [entry[0] for entry  in history_col_service.get_cols_by_udf_history_id(udf_history.id)]
                 )
-
+                
+                # TODO: What about the predicate matching?
                 # if there is a match, return the udf_history
                 if col_histories == cols:
                     return udf_history
@@ -517,16 +526,35 @@ class UdfReuseForFunctionScan(Rule):
         
     def _check_udf_history(self, fs: LogicalFunctionScan) \
             -> Optional[DataFrameMetadata]:
-        
-        catalog = CatalogManager()
-        udf_meta = catalog.get_udf_by_name(fs.func_expr.name)
-        udf_col_ids = [col.col_object.id for col in fs.func_expr.children]
-        udf_history = self._read_udf_history_catalog(udf_meta.id, udf_col_ids)
 
-        # if there is a match, return the view
+        udf_id = -1
+        col_defs = []
+        col_ids = []
+        for col_obj in fs.func_expr.output_objs:
+            udf_id = col_obj.udf_id
+            col_defs.append(
+                ColumnDefinition(
+                    col_name=col_obj.name,
+                    col_type=col_obj.type,
+                    col_array_type=col_obj.array_type,
+                    col_dim=col_obj.array_dimensions
+                )
+            )
+            col_ids.append(col_obj.id)
+
+        udf_history = self._read_udf_history_catalog(udf_id, col_ids)
+
+        # if there is a match, return the mat view
         if udf_history:
-            view = udf_history.materialized_view
-            return view
+            view_ref = TableRef(
+                TableInfo(table_name=udf_history.materialize_view),
+            )
+            mat_view = LogicalCreateMaterializedView(
+                view=view_ref,
+                col_list=col_defs,
+                if_not_exists=True
+            )
+            return mat_view
 
         # if no match, return None
         else:
@@ -535,34 +563,54 @@ class UdfReuseForFunctionScan(Rule):
     def _generate_view_name(self, fs: LogicalFunctionScan) \
             -> DataFrameMetadata:
 
-        catalog = CatalogManager()
-        udf_meta = catalog.get_udf_by_name(fs.func_expr.name)
-        udf_col_ids = [col.col_object.id for col in fs.func_expr.children]
-
-        # add a new udf history
+        # TODO: This part can maybe moved to utils. 
+        # iterate over output objs of fs to get udf_id and col info
+        udf_id = -1
+        col_defs = []
+        col_ids = []
+        for col_obj in fs.func_expr.output_objs:
+            udf_id = col_obj.udf_id
+            col_defs.append(
+                ColumnDefinition(
+                    col_name=col_obj.name,
+                    col_type=col_obj.type,
+                    col_array_type=col_obj.array_type,
+                    col_dim=col_obj.array_dimensions
+                )
+            )
+            col_ids.append(col_obj.id)
+             
         # TODO: What should be the name of the view?
+        # TODO: How to handle predicate info?
         import time
-        udf_history = UdfHistory(
-            udf_id=udf_meta.id,
-            materialized_view=f"test_view_{str(int(time.time()))}",
-            cols=udf_col_ids,
-        )
+        catalog = CatalogManager()
 
-        view_ref = TableRef(
-            TableInfo(table_name=udf_history.materialized_view),
-        )
-
-        # create a new view
-        # TODO: col_list should actually be column definitions
-        mat_view = LogicalCreateMaterializedView(view=view_ref, col_list=udf_col_ids, if_not_exists=True)
-
-        # add the udf history to the catalog
-        # TODO: What about predicate?
-        catalog._udf_history_service.create_udf_history(
-            udf_id=udf_meta.id, 
+        # create a udf history instance
+        udf_history = catalog._udf_history_service.create_udf_history(
+            udf_id=udf_id, 
             predicate=None, 
-            materialized_view=udf_history.materialized_view
+            materialize_view=f"test_view_{str(int(time.time()))}",
         )
+
+        # create a udf history col instance
+        catalog._udf_history_col_service.create_udf_history_cols(
+            udf_history_id=udf_history.id,
+            cols=col_ids
+        )
+
+        # get a ref to the mat view
+        view_ref = TableRef(
+            TableInfo(table_name=udf_history.materialize_view),
+        )
+
+        # create a table metadata instance
+        metadata = create_table_metadata(
+            table_ref=view_ref,
+            columns=col_defs,
+        )
+        
+        # create a new view
+        mat_view = LogicalCreateMaterializedView(view=view_ref, col_list=col_defs, if_not_exists=True)
 
         return mat_view
         
@@ -1184,6 +1232,7 @@ class RulesManager:
             # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
+            # TODO: Add a flag to enable/disable this rule
             UdfReuseForFunctionScan(),
         ]
 
