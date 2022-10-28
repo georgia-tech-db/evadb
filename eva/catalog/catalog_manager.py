@@ -24,6 +24,8 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
+from eva.catalog.services.udf_history_service import UdfHistoryService
+from eva.catalog.services.udf_history_col_service import UdfHistoryColumnService
 from eva.parser.create_statement import ColConstraintInfo
 from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
@@ -45,6 +47,8 @@ class CatalogManager(object):
         self._column_service = DatasetColumnService()
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
+        self._udf_history_service = UdfHistoryService()
+        self._udf_history_col_service = UdfHistoryColumnService()
 
     def reset(self):
         """
