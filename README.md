@@ -1,3 +1,24 @@
+> code cannot run in colab because the pip version of evadb is incompatible with the current github version in terms of udf
+
+How to run locally 
+
+```
+git clone https://github.com/sashiko-345/eva.git && cd eva # our folked eva
+python3 -m venv test_eva_db                            # to create a virtual environment
+. test_eva_db/bin/activate
+pip install --upgrade pip
+sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA # may need other way to install jre 11 in mac os
+sh script/antlr4/generate_parser.sh                    # to generate the EVA parser
+pip install -e ".[dev]"
+bash script/test/test.sh 
+```
+
+For developers using an M1 Mac, here are some pointers for installing JAVA and to resolve multi-threading issues:
+```
+brew install openjdk@11                         # to install openjdk 11
+export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc or ~/.bashrc
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
+```
 <div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
