@@ -100,7 +100,8 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         return ['blank', 'non_blank']
 
 
-    def setup(self):
+    def setup(self, threshold=0.85):
+        self.threshold = threshold
         # pull the necessary checkpoints and model architectures
         output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
         base_module_arc_path = os.path.join(output_directory, "base_module_arc_blank")
@@ -239,7 +240,12 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         y_hat = self.classifier(to_classifier)
         pred = torch.sigmoid(y_hat).cpu().numpy()
         outcome = pd.DataFrame()
-        outcome = outcome.append({'labels': ['blank', 'non_blank'], 'scores': [pred, 1 - pred]}, ignore_index=True,)
+        for frame_output in pred:
+            blank_score = frame_output[0]
+            if blank_score > self.threshold:
+                outcome = outcome.append({'labels': ['blank'], 'scores': [blank_score]}, ignore_index=True,)
+            else:
+                outcome = outcome.append({'labels': ['non_blank'], 'scores': [1 - blank_score]}, ignore_index=True,)
         return outcome
 
         
