@@ -1,7 +1,10 @@
 from ctypes.wintypes import HCOLORSPACE
 from inspect import FrameInfo
+import os
 import pickle
+import subprocess
 import torch
+from eva.configuration.constants import EVA_DEFAULT_DIR
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.utils.logging_manager import logger
 import numpy as np
@@ -39,16 +42,17 @@ class TimeDistributed(torch.nn.Module):
      - inherit from torch.nn.Module rather than fastai.Module
     """
 
-    def __init__(self, low_mem=False, tdim=1):
+    def __init__(self, module, low_mem=False, tdim=1):
         super().__init__()
         self.low_mem = low_mem
         self.tdim = tdim
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        base_module_ckt_path = '/Users/dawndawn/Downloads/zamba/base_module_blank.pt'
-        base_module_arc_path = '/Users/dawndawn/Downloads/zamba/base_module_arc_blank'
-        with open(base_module_arc_path,"rb") as f:
-            self.module = pickle.load(f)
-        self.module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
+        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # base_module_ckt_path = '/Users/dawndawn/Downloads/zamba/base_module_blank.pt'
+        # base_module_arc_path = '/Users/dawndawn/Downloads/zamba/base_module_arc_blank'
+        # with open(base_module_arc_path,"rb") as f:
+        #     self.module = pickle.load(f)
+        # self.module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
+        self.module = module
 
     def forward(self, *tensors, **kwargs):
         "input x with shape:(bs,seq_len,channels,width,height)"
@@ -97,13 +101,41 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
 
 
     def setup(self):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        
-        base_ckt_path = '/Users/dawndawn/Downloads/zamba/base_blank.pt'
-        self.base = TimeDistributed()
-        self.base.load_state_dict(torch.load(base_ckt_path, map_location=device))
+        # pull the necessary checkpoints and model architectures
+        output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
+        base_module_arc_path = os.path.join(output_directory, "base_module_arc_blank")
+        base_module_ckt_path = os.path.join(output_directory, "base_module_blank.pt")
+        classifier_ckt_path = os.path.join(output_directory, "classifier_blank.pt")
+        file_names = ["base_module_arc_blank", "base_module_blank.pt", "classifier_blank.pt"]
+        file_urls = [
+            "https://www.dropbox.com/s/rsu3ig9d168mj05/base_module_arc_blank?dl=0",
+            "https://www.dropbox.com/s/eejcvyzh1ama24r/base_module_blank.pt?dl=0",
+            "https://www.dropbox.com/s/ltsnv527fwk481r/classifier_blank.pt?dl=0",
+        ]
+        file_paths = [
+            base_module_arc_path,
+            base_module_ckt_path,
+            classifier_ckt_path,
+        ]
+        # pull model from dropbox if not present
+        for i in range(len(file_urls)):
+            if not os.path.exists(file_paths[i]):
+                subprocess.run(["wget", file_urls[i], "--output-document", file_paths[i]])
 
-        classifier_ckt_path = '/Users/dawndawn/Downloads/zamba/classifier_blank.pt'
+        
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        # init self.base
+        module = None
+        with open(base_module_arc_path,"rb") as f:
+            module = pickle.load(f)
+        module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
+        # base_ckt_path = '/Users/dawndawn/Downloads/zamba/base_blank.pt'
+        self.base = TimeDistributed(module)
+        # self.base.load_state_dict(torch.load(base_ckt_path, map_location=device))
+
+        # init self.classifier
+        # classifier_ckt_path = '/Users/dawndawn/Downloads/zamba/classifier_blank.pt'
         self.classifier = torch.nn.Sequential(
             nn.Linear(2152, 256),
             nn.Dropout(0.2),
