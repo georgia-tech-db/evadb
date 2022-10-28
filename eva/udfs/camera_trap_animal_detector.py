@@ -1,10 +1,10 @@
-from ctypes.wintypes import HCOLORSPACE
 from inspect import FrameInfo
 import os
 import pickle
 import subprocess
 import torch
 from eva.configuration.constants import EVA_DEFAULT_DIR
+from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.utils.logging_manager import logger
 import numpy as np
@@ -93,7 +93,7 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
     
     @property
     def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, HCOLORSPACE.RGB)
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
     def labels(self) -> 'List[str]':
