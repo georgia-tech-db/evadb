@@ -67,7 +67,7 @@ test_libs = [
 
 notebook_libs = [
     "ipywidgets==8.0.2",
-    "matplotlib==3.6.1",
+    "matplotlib==3.5.1",
     "nbmake==1.3.4"    
 ]
 
