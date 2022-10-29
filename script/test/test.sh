@@ -33,10 +33,9 @@ if [ $notebook_test_code -ne 0 ];
 then
     cat tutorials/*.ipynb
     cat tutorials/eva.log
-    ls eva/parser/evaql
+    ls -larth eva/parser/evaql
+    wc -l eva/parser/evaql/evaql_lexer
     exit $notebook_test_code
-else
-    exit $linter_code
 fi
 
 # Run unit tests
@@ -45,6 +44,8 @@ test_code=$?
 if [ $test_code -ne 0 ];
 then
     exit $test_code
+else
+    exit $linter_code
 fi
 
 # restore __init__.py if it exists
