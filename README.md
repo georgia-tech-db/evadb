@@ -18,6 +18,9 @@ brew install openjdk@11                         # to install openjdk 11
 export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc or ~/.bashrc
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
 ```
+
+For AninalDetector Demo, look at the 
+
 <div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
