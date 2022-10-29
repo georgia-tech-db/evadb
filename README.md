@@ -78,7 +78,7 @@ SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).label
 ![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
 |Original Video | Result Frames|
 |---------------|--------------|
-|![Origin Video](D:\Projects\Internship\gt\eva\data\assets\gifs\traffic.gif)|![Result Video](D:\Projects\Internship\gt\eva\data\assets\gifs\outtraffic.gif)|
+|![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.gif)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.gif)|
 
 2. Search for frames in the video that contain a pedestrian and a car
 
