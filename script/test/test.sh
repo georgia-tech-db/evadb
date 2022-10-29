@@ -26,14 +26,23 @@ then
     exit $linter_code
 fi
 
+# Run notebooks
+PYTHONPATH=./ pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
+notebook_test_code=$?
+if [ $notebook_test_code -ne 0 ];
+then
+    cat tutorials/eva.log
+    exit $notebook_test_code
+fi
+
 # Run unit tests
 PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-}
 test_code=$?
-if [ $linter_code -ne 0 ];
+if [ $test_code -ne 0 ];
 then
-    exit $linter_code
-else
     exit $test_code
+else
+    exit $linter_code
 fi
 
 # restore __init__.py if it exists
