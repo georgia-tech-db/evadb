@@ -29,21 +29,19 @@ fi
 # Run unit tests
 PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-}
 test_code=$?
-if [ $linter_code -ne 0 ];
+if [ $test_code -ne 0 ];
 then
-    exit $linter_code
-else
     exit $test_code
 fi
 
 # Run notebooks
 PYTHONPATH=./ pytest --nbmake "./tutorials" -s -v --log-level=WARNING
 notebook_test_code=$?
-if [ $linter_code -ne 0 ];
+if [ $notebook_test_code -ne 0 ];
 then
-    exit $linter_code
-else
     exit $notebook_test_code
+else
+    exit $linter_code
 fi
 
 # restore __init__.py if it exists
