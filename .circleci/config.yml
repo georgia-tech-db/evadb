@@ -24,12 +24,8 @@ jobs:
             python -m venv eva_dev_env
             . eva_dev_env/bin/activate
             pip install --upgrade pip
-            pip install ".[dev]"
-
-      - run:
-          name: Generate Parser Files
-          command: |
             sh script/antlr4/generate_parser.sh
+            pip install ".[dev]"
 
       - run:
           name: Test and upload coverage report to coveralls
