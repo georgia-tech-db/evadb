@@ -1,5 +1,6 @@
 # tmp checkpoint
 *.pt
+downloaded*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -104,6 +104,7 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         self.threshold = threshold
         # pull the necessary checkpoints and model architectures
         output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
+        subprocess.run(["mkdir", "-p", output_directory])
         base_module_arc_path = os.path.join(output_directory, "base_module_arc_blank")
         base_module_ckt_path = os.path.join(output_directory, "base_module_blank.pt")
         classifier_ckt_path = os.path.join(output_directory, "classifier_blank.pt")
