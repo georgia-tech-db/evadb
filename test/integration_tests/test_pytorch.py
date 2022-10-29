@@ -17,6 +17,7 @@ import unittest
 from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
 import mock
+import PIL
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -39,6 +40,7 @@ class PytorchTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         file_remove("ua_detrac.mp4")
+        file_remove("mnist.mp4")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -46,6 +48,26 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_gaussian_blur(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS GaussianBlur
+                INPUT  (Frame_Array_In NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                OUTPUT (Frame_Array_Out NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE  Transformation
+                IMPL  'eva/udfs/gaussian_blur.py';"""
+
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT GaussianBlur(data) FROM MyVideo
+                        WHERE id < 5;"""
+
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(actual_batch.batch_size, 5)
+
+        res = actual_batch.frames
+        for idx in res.index:
+            self.assertIsInstance(res["gaussianblur.Frame_Array_Out"][idx], PIL.Image)
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ssd(self):
