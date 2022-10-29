@@ -65,10 +65,16 @@ test_libs = [
     "flake8==3.9.1"    
 ]
 
+notebook_libs = [
+    "ipywidgets==8.0.2",
+    "matplotlib==3.6.1",
+    "nbmake==1.3.4"    
+]
+
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
     "torch==1.10.2",
-    "torchvision==0.11.3",
+    "torchvision==0.11.3"
 ]
 
 benchmark_libs = [
@@ -101,6 +107,7 @@ DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
     + test_libs
+    + notebook_libs
     + integration_test_libs
     + benchmark_libs
     + doc_libs

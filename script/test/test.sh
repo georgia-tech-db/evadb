@@ -36,6 +36,16 @@ else
     exit $test_code
 fi
 
+# Run notebooks
+PYTHONPATH=./ pytest --nbmake "./tutorials" -s -v --log-level=WARNING
+notebook_test_code=$?
+if [ $linter_code -ne 0 ];
+then
+    exit $linter_code
+else
+    exit $notebook_test_code
+fi
+
 # restore __init__.py if it exists
 if [ -f ./__init__.py.bak ]; then
     mv ./__init__.py.bak ./__init__.py
