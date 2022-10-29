@@ -27,10 +27,11 @@ then
 fi
 
 # Run notebooks
-PYTHONPATH=./ pytest --nbmake "./tutorials" -s -v --log-level=WARNING
+PYTHONPATH=./ pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
 notebook_test_code=$?
 if [ $notebook_test_code -ne 0 ];
 then
+    cat tutorials/*.ipynb
     exit $notebook_test_code
 else
     exit $linter_code
