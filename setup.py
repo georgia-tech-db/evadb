@@ -68,7 +68,8 @@ test_libs = [
 notebook_libs = [
     "ipywidgets==8.0.2",
     "matplotlib==3.5.1",
-    "nbmake==1.3.4"    
+    "nbmake==1.3.4",
+    "nest-asyncio==1.5.6"
 ]
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
