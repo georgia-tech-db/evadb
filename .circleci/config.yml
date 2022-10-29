@@ -12,11 +12,11 @@ jobs:
 
       - restore_cache:
           keys:
-            - v8-model_cache-{{ checksum "setup.py" }}
+            - v9-model_cache-{{ checksum "setup.py" }}
 
       - restore_cache:
           keys:
-            - v8-pip-cache-{{ checksum "setup.py" }}
+            - v9-pip-cache-{{ checksum "setup.py" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -39,13 +39,13 @@ jobs:
             coveralls
 
       - save_cache:
-          key: v8-model_cache-{{ checksum "setup.py" }}
+          key: v9-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
       - save_cache:
-          key: v8-pip-cache-{{ checksum "setup.py" }}
+          key: v9-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./eva_dev_env/
 
