@@ -19,7 +19,7 @@ export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc o
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
 ```
 
-For AninalDetector Demo, look at the 
+For AninalDetector Demo, look at the client_test.ipynb
 
 <div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
