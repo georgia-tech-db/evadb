@@ -34,6 +34,7 @@ jobs:
       - run:
           name: Test and upload coverage report to coveralls
           command: |
+            sudo apt-get install lsof 
             . eva_dev_env/bin/activate
             sh script/test/test.sh
             coveralls

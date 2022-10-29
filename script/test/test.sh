@@ -3,9 +3,6 @@
 # This script should return a non-zero value if either
 # linter fails or the pytest fails. This is important for the CI system.
 
-which lsof
-lsof -v 
-
 # temporarily remove __init__.py from root if it exists
 if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
