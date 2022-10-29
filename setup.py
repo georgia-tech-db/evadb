@@ -103,6 +103,7 @@ MINIMAL_REQUIRES = minimal_requirement
 INSTALL_REQUIRES = minimal_requirement + formatter_libs
 DATABASE_REQUIRES = INSTALL_REQUIRES + database_libs
 UDF_REQUIRES = INSTALL_REQUIRES + integration_test_libs + udf_libs
+EXPERIMENTAL_REQUIRES = experimental_libs
 DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
@@ -113,8 +114,7 @@ DEV_REQUIRES = (
     + database_libs
     + dist_libs
     + udf_libs
-)
-EXPERIMENTAL_REQUIRES = DEV_REQUIRES + experimental_libs
+) + EXPERIMENTAL_REQUIRES
 
 EXTRA_REQUIRES = {
     "dev": DEV_REQUIRES,
