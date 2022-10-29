@@ -31,10 +31,7 @@ PYTHONPATH=./ pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNIN
 notebook_test_code=$?
 if [ $notebook_test_code -ne 0 ];
 then
-    cat tutorials/*.ipynb
     cat tutorials/eva.log
-    ls -larth eva/parser/evaql
-    wc -l eva/parser/evaql/evaql_lexer
     exit $notebook_test_code
 fi
 
