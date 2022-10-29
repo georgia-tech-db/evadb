@@ -10,7 +10,6 @@ pip install --upgrade pip
 sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA # may need other way to install jre 11 in mac os
 sh script/antlr4/generate_parser.sh                    # to generate the EVA parser
 pip install -e ".[dev]"
-bash script/test/test.sh 
 ```
 
 For developers using an M1 Mac, here are some pointers for installing JAVA and to resolve multi-threading issues:
