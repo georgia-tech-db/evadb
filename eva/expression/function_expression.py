@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Callable, List
+import numpy as np
 
 from eva.catalog.models.udf_io import UdfIO
 from eva.constants import NO_GPU
@@ -79,6 +80,24 @@ class FunctionExpression(AbstractExpression):
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+        
+        batch_sizes = [len(child_batch) for child_batch in child_batches]
+        are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
+        maximum_batch_size = max(batch_sizes)
+        new_batches = []
+        if not are_all_equal_length:
+            for child_batch in child_batches:
+                if len(child_batch) != maximum_batch_size:
+                    if len(child_batch) == 1:
+                        new_batches.append(Batch(pd.DataFrame(np.repeat(child_batch.frames.values, maximum_batch_size, axis=0))))
+                    else:
+                        raise Exception("Not all columns in the batch have equal elements")
+                else:
+                    new_batches.append(child_batch)
+        else:
+            new_batches = child_batches
+        child_batches = new_batches
+        
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
 
