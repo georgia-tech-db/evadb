@@ -42,7 +42,6 @@ from eva.optimizer.rules.rules import (
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
-    LogicalExchangeToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
@@ -61,8 +60,9 @@ from eva.optimizer.rules.rules import (
     LogicalUploadToPhysical,
     Promise,
     PushDownFilterThroughJoin,
-    RulesManager,
 )
+from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
+from eva.optimizer.rules.rules_manager import RulesManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
