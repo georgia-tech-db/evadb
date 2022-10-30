@@ -26,7 +26,7 @@ class FunctionScanExecutorTest(unittest.TestCase):
     def test_simple_function_scan(self):
         values = Batch(pd.DataFrame([1, 2, 3], columns=["a"]))
         expression = FunctionExpression(
-            lambda x: x + 1,
+            lambda: lambda x: x + 1,
             name="test",
             alias=Alias(
                 "test",
@@ -41,6 +41,5 @@ class FunctionScanExecutorTest(unittest.TestCase):
         )
         function_scan_executor = FunctionScanExecutor(plan)
         actual = list(function_scan_executor.exec(lateral_input=values))[0]
-        print(actual.frames)
         expected = Batch(pd.DataFrame([2, 3, 4], columns=["test.a"]))
         self.assertEqual(expected, actual)
