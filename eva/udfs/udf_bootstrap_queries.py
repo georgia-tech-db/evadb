@@ -16,7 +16,9 @@
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
 
-EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+EVA_INSTALLATION_DIR = ConfigurationManager().get_value(
+    "core", "eva_installation_dir"
+)
 NDARRAY_DIR = "ndarray"
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
@@ -77,6 +79,25 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
+ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor 
+      INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM)) 
+      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(ANYDIM, 4), scores NDARRAY FLOAT32(ANYDIM))  
+      TYPE  OCRExtraction
+      IMPL  '{}/udfs/ocr_extractor.py';
+      """.format(
+    EVA_INSTALLATION_DIR
+)
+
+face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  '{}/udfs/face_detector.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(mode="debug"):
     """
@@ -86,8 +107,16 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
-    queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
+    queries = [
+        Fastrcnn_udf_query,
+        ArrayCount_udf_query,
+        Crop_udf_query,
+        face_detection_udf_query,
+        ocr_udf_query,
+    ]
+    queries.extend(
+        [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]
+    )
 
     for query in queries:
         execute_query_fetch_all(query)
