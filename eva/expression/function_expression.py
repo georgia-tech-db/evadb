@@ -80,27 +80,25 @@ class FunctionExpression(AbstractExpression):
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
 
-        batch_sizes = [len(child_batch) for child_batch in child_batches]
-        are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
-        maximum_batch_size = max(batch_sizes)
-        new_batches = []
-        if not are_all_equal_length:
-            for child_batch in child_batches:
-                if len(child_batch) != maximum_batch_size:
-                    if len(child_batch) == 1:
-                        new_batches.append(child_batch.repeat(maximum_batch_size))
-                    else:
-                        raise Exception(
-                            "Not all columns in the batch have equal elements"
-                        )
-                else:
-                    new_batches.append(child_batch)
-        else:
-            new_batches = child_batches
-        child_batches = new_batches
-
         if len(child_batches):
-            new_batch = Batch.merge_column_wise(child_batches)
+            batch_sizes = [len(child_batch) for child_batch in child_batches]
+            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
+            maximum_batch_size = max(batch_sizes)
+            new_batches = []
+            if not are_all_equal_length:
+                for child_batch in child_batches:
+                    if len(child_batch) != maximum_batch_size:
+                        if len(child_batch) == 1:
+                            new_batches.append(child_batch.repeat(maximum_batch_size))
+                        else:
+                            raise Exception(
+                                "Not all columns in the batch have equal elements"
+                            )
+                    else:
+                        new_batches.append(child_batch)
+            else:
+                new_batches = child_batches
+            new_batch = Batch.merge_column_wise(new_batches)
 
         func = self._gpu_enabled_function()
         outcomes = new_batch
