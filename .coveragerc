@@ -3,7 +3,7 @@ omit =
     eva/parser/evaql/*
     eva/udfs/abstract/*
     eva/udfs/emotion_detector.py
-    eva/experimental/
+    eva/experimental/*
 
 [report]
 exclude_lines =
