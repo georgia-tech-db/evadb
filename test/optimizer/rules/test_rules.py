@@ -22,8 +22,8 @@ from test.util import (
 
 from mock import MagicMock
 
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.optimizer.operators import (
