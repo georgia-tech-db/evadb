@@ -41,7 +41,6 @@ class Crop(AbstractUDF):
             bboxes = row[1]
 
             x0, y0, x1, y1 = np.asarray(bboxes, dtype="int")
-            print(x0, y0, x1, y1)
             # make sure the bbox is valid
             x0 = max(0, x0)
             y0 = max(0, y0)
