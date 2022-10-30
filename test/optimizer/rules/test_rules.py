@@ -23,6 +23,7 @@ from test.util import (
 from mock import MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.optimizer.operators import (
     LogicalFilter,
@@ -61,7 +62,6 @@ from eva.optimizer.rules.rules import (
     Promise,
     PushDownFilterThroughJoin,
 )
-from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.optimizer.rules.rules_manager import RulesManager
 from eva.server.command_handler import execute_query_fetch_all
 
