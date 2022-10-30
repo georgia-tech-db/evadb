@@ -34,14 +34,8 @@ class LateralJoinExecutor(AbstractExecutor):
         inner = self.children[1]
         for outer_batch in outer.exec(**kwargs):
             for result_batch in inner.exec(lateral_input=outer_batch):
-                result_batch = outer_batch.frames.merge(
-                    result_batch.frames,
-                    left_index=True,
-                    right_index=True,
-                    how="inner",
-                )
-                result_batch.reset_index(drop=True, inplace=True)
-                result_batch = Batch(result_batch)
+                result_batch = Batch.join(outer_batch, result_batch)
+                result_batch.reset_index()
                 result_batch = apply_predicate(result_batch, self.predicate)
                 result_batch = apply_project(result_batch, self.join_project)
                 if not result_batch.empty():

@@ -38,15 +38,15 @@ LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
-    "numpy==1.23.1",
+    "numpy==1.21.6",
     "opencv-python==4.5.4.60", # bug in easyocr
-    "pandas==1.4.2",
+    "pandas==1.3.5",
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
-    "pyspark==3.1.3",
-    "petastorm==0.12.0",
-    "antlr4-python3-runtime==4.10",
+    "pyspark==3.0.2",
+    "petastorm==0.11.5",
+    "antlr4-python3-runtime==4.8",
     "pyyaml==5.1",
     "importlib-metadata<5.0"
 ]
@@ -65,10 +65,17 @@ test_libs = [
     "flake8==3.9.1"    
 ]
 
+notebook_libs = [
+    "ipywidgets==8.0.2",
+    "matplotlib==3.5.1",
+    "nbmake==1.3.4",
+    "nest-asyncio==1.5.6"
+]
+
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
-    "torch==1.11.0",
-    "torchvision==0.12.0",
+    "torch==1.10.2",
+    "torchvision==0.11.3"
 ]
 
 benchmark_libs = [
@@ -90,7 +97,7 @@ database_libs = [
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 udf_libs = [
     "facenet-pytorch==2.5.2",
-    "easyocr==1.6.0"
+    "easyocr==1.5.0"
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
@@ -108,6 +115,7 @@ DEV_REQUIRES = (
     minimal_requirement
     + formatter_libs
     + test_libs
+    + notebook_libs
     + integration_test_libs
     + benchmark_libs
     + doc_libs

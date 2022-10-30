@@ -14,8 +14,6 @@
 # limitations under the License.
 from typing import Callable, List
 
-import pandas as pd
-
 from eva.catalog.models.udf_io import UdfIO
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
@@ -85,8 +83,8 @@ class FunctionExpression(AbstractExpression):
             new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
-        outcomes = func(new_batch.frames)
-        outcomes = Batch(pd.DataFrame(outcomes))
+        outcomes = new_batch
+        outcomes.apply_function_expression(func)
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
         return outcomes

@@ -17,7 +17,6 @@ from eva.expression.abstract_expression import (
     ExpressionReturnType,
     ExpressionType,
 )
-from eva.models.storage.batch import Batch
 
 
 class AggregationExpression(AbstractExpression):
@@ -39,15 +38,17 @@ class AggregationExpression(AbstractExpression):
     def evaluate(self, *args, **kwargs):
         batch = self.get_child(0).evaluate(*args, **kwargs)
         if self.etype == ExpressionType.AGGREGATION_SUM:
-            return Batch(frames=batch.frames.agg(["sum"]))
+            batch.aggregate("sum")
         elif self.etype == ExpressionType.AGGREGATION_COUNT:
-            return Batch(frames=batch.frames.agg(["count"]))
+            batch.aggregate("count")
         elif self.etype == ExpressionType.AGGREGATION_AVG:
-            return Batch(frames=batch.frames.agg(["mean"]))
+            batch.aggregate("mean")
         elif self.etype == ExpressionType.AGGREGATION_MIN:
-            return Batch(frames=batch.frames.agg(["min"]))
+            batch.aggregate("min")
         elif self.etype == ExpressionType.AGGREGATION_MAX:
-            return Batch(frames=batch.frames.agg(["max"]))
+            batch.aggregate("max")
+
+        return batch
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
