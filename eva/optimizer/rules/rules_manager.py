@@ -96,7 +96,7 @@ class RulesManager:
             LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
-            else SequentialLogicalGetToSeqScan(), 
+            else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
