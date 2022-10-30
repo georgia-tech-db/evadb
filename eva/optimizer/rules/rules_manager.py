@@ -96,7 +96,7 @@ class RulesManager:
             LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
-            else SequentialLogicalGetToSeqScan(),
+            else SequentialLogicalGetToSeqScan(), 
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
             LogicalOrderByToPhysical(),
@@ -105,7 +105,6 @@ class RulesManager:
             LogicalJoinToPhysicalHashJoin(),
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
-            LogicalExchangeToPhysical() if ray_enabled else None,
             LogicalFilterToPhysical(),
             DistributedLogicalProjectToPhysical()
             if ray_enabled
@@ -113,6 +112,8 @@ class RulesManager:
             LogicalShowToPhysical(),
         ]
 
+        if ray_enabled:
+            self._implementation_rules.append(LogicalExchangeToPhysical())
         self._all_rules = (
             self._rewrite_rules + self._logical_rules + self._implementation_rules
         )
