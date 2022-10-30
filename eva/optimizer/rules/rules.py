@@ -14,8 +14,6 @@
 # limitations under the License.
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
 
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
@@ -25,6 +23,7 @@ from eva.optimizer.optimizer_utils import (
     extract_pushdown_predicate_for_alias,
 )
 from eva.optimizer.rules.pattern import Pattern
+from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
@@ -36,8 +35,6 @@ if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.experimental.ray.planner.exchange_plan import ExchangePlan
-from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.operators import (
     Dummy,
     LogicalCreate,
@@ -45,7 +42,6 @@ from eva.optimizer.operators import (
     LogicalCreateUDF,
     LogicalDrop,
     LogicalDropUDF,
-    LogicalExchange,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -81,157 +77,6 @@ from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
-
-
-class RuleType(Flag):
-    """
-    Manages enums for all the supported rules
-    """
-
-    # Don't move this enum, else will break rule exploration logic
-    INVALID_RULE = 0
-
-    # REWRITE RULES(LOGICAL -> LOGICAL)
-    EMBED_FILTER_INTO_GET = auto()
-    EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_SAMPLE_INTO_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
-    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
-    REWRITE_DELIMETER = auto()
-
-    # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
-    LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
-    TRANSFORMATION_DELIMETER = auto()
-
-    # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
-    LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
-    LOGICAL_UNION_TO_PHYSICAL = auto()
-    LOGICAL_ORDERBY_TO_PHYSICAL = auto()
-    LOGICAL_LIMIT_TO_PHYSICAL = auto()
-    LOGICAL_INSERT_TO_PHYSICAL = auto()
-    LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_TO_PHYSICAL = auto()
-    LOGICAL_RENAME_TO_PHYSICAL = auto()
-    LOGICAL_DROP_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
-    LOGICAL_GET_TO_SEQSCAN = auto()
-    LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
-    LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
-    LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
-    LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
-    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
-    LOGICAL_FILTER_TO_PHYSICAL = auto()
-    LOGICAL_PROJECT_TO_PHYSICAL = auto()
-    LOGICAL_SHOW_TO_PHYSICAL = auto()
-    LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
-    IMPLEMENTATION_DELIMETER = auto()
-
-    NUM_RULES = auto()
-
-
-class Promise(IntEnum):
-    """
-    Manages order in which rules should be applied.
-    Rule with a higher enum will be preferred in case of
-    conflict
-    """
-
-    # IMPLEMENTATION RULES
-    LOGICAL_EXCHANGE_TO_PHYSICAL = auto()
-    LOGICAL_UNION_TO_PHYSICAL = auto()
-    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
-    LOGICAL_ORDERBY_TO_PHYSICAL = auto()
-    LOGICAL_LIMIT_TO_PHYSICAL = auto()
-    LOGICAL_INSERT_TO_PHYSICAL = auto()
-    LOGICAL_RENAME_TO_PHYSICAL = auto()
-    LOGICAL_DROP_TO_PHYSICAL = auto()
-    LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
-    LOGICAL_GET_TO_SEQSCAN = auto()
-    LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
-    LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
-    LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
-    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
-    LOGICAL_FILTER_TO_PHYSICAL = auto()
-    LOGICAL_PROJECT_TO_PHYSICAL = auto()
-    LOGICAL_SHOW_TO_PHYSICAL = auto()
-    LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
-    IMPLEMENTATION_DELIMETER = auto()
-
-    # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
-    LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
-
-    # REWRITE RULES
-    EMBED_FILTER_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
-    EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    EMBED_SAMPLE_INTO_GET = auto()
-    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
-
-
-class Rule(ABC):
-    """Base class to define any optimization rule
-
-    Arguments:
-        rule_type(RuleType): type of the rule, can be rewrite,
-            logical->physical
-        pattern: the match pattern for the rule
-    """
-
-    def __init__(self, rule_type: RuleType, pattern=None):
-        self._pattern = pattern
-        self._rule_type = rule_type
-
-    @property
-    def rule_type(self):
-        return self._rule_type
-
-    @property
-    def pattern(self):
-        return self._pattern
-
-    @pattern.setter
-    def pattern(self, pattern):
-        self._pattern = pattern
-
-    def top_match(self, opr: Operator) -> bool:
-        return opr.opr_type == self.pattern.opr_type
-
-    @abstractmethod
-    def promise(self) -> int:
-        raise NotImplementedError
-
-    @abstractmethod
-    def check(self, before: Operator, context: OptimizerContext) -> bool:
-        """Check whether the rule is applicable for the input_expr
-
-        Args:
-            before (Operator): the before operator expression
-
-        Returns:
-            bool: If the rule is applicable, return true, else false
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def apply(self, before: Operator) -> Operator:
-        """Transform the before expression to the after expression
-
-        Args:
-            before (Operator): the before expression
-
-        Returns:
-            Operator: the transformed expression
-        """
-        raise NotImplementedError
-
 
 ##############################################
 # REWRITE RULES START
@@ -695,38 +540,16 @@ class LogicalGetToSeqScan(Rule):
         )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
-        if ray_enabled:
-            scan = SeqScanPlan(None, before.target_list, before.alias)
-            lower = ExchangePlan(parallelism=1)
-            lower.append_child(
-                StoragePlan(
-                    before.dataset_metadata,
-                    batch_mem_size=batch_mem_size,
-                    predicate=before.predicate,
-                    sampling_rate=before.sampling_rate,
-                )
+        after = SeqScanPlan(None, before.target_list, before.alias)
+        after.append_child(
+            StoragePlan(
+                before.dataset_metadata,
+                batch_mem_size=batch_mem_size,
+                predicate=before.predicate,
+                sampling_rate=before.sampling_rate,
             )
-            scan.append_child(lower)
-            # Check whether the projection contains a UDF
-            if before.target_list is None or not any(
-                [isinstance(expr, FunctionExpression) for expr in before.target_list]
-            ):
-                return scan
-            upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
-            upper.append_child(scan)
-            return upper
-        else:
-            after = SeqScanPlan(None, before.target_list, before.alias)
-            after.append_child(
-                StoragePlan(
-                    before.dataset_metadata,
-                    batch_mem_size=batch_mem_size,
-                    predicate=before.predicate,
-                    sampling_rate=before.sampling_rate,
-                )
-            )
-            return after
+        )
+        return after
 
 
 class LogicalSampleToUniformSample(Rule):
@@ -965,31 +788,6 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
-        upper.append_child(after)
-        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
-        if ray_enabled:
-            return upper
-        else:
-            return after
-
-
-class LogicalExchangeToPhysical(Rule):
-    def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALEXCHANGE)
-        pattern.append_child(Pattern(OperatorType.DUMMY))
-        super().__init__(RuleType.LOGICAL_EXCHANGE_TO_PHYSICAL, pattern)
-
-    def promise(self):
-        return Promise.LOGICAL_EXCHANGE_TO_PHYSICAL
-
-    def check(self, grp_id: int, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalExchange, context: OptimizerContext):
-        after = ExchangePlan(before.view)
-        for child in before.children:
-            after.append_child(child)
         return after
 
 
@@ -1011,70 +809,3 @@ class LogicalShowToPhysical(Rule):
 
 # IMPLEMENTATION RULES END
 ##############################################
-
-
-class RulesManager:
-    """Singelton class to manage all the rules in our system"""
-
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(RulesManager, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self):
-        self._logical_rules = [LogicalInnerJoinCommutativity()]
-
-        self._rewrite_rules = [
-            EmbedFilterIntoGet(),
-            # EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoGet(),
-            # EmbedProjectIntoDerivedGet(),
-            EmbedSampleIntoGet(),
-            PushDownFilterThroughJoin(),
-        ]
-
-        self._implementation_rules = [
-            LogicalCreateToPhysical(),
-            LogicalRenameToPhysical(),
-            LogicalDropToPhysical(),
-            LogicalCreateUDFToPhysical(),
-            LogicalDropUDFToPhysical(),
-            LogicalInsertToPhysical(),
-            LogicalLoadToPhysical(),
-            LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
-            LogicalGetToSeqScan(),
-            LogicalDerivedGetToPhysical(),
-            LogicalUnionToPhysical(),
-            LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical(),
-            LogicalLateralJoinToPhysical(),
-            LogicalJoinToPhysicalHashJoin(),
-            LogicalFunctionScanToPhysical(),
-            LogicalCreateMaterializedViewToPhysical(),
-            LogicalExchangeToPhysical(),
-            LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
-            LogicalShowToPhysical(),
-        ]
-        self._all_rules = (
-            self._rewrite_rules + self._logical_rules + self._implementation_rules
-        )
-
-    @property
-    def rewrite_rules(self):
-        return self._rewrite_rules
-
-    @property
-    def implementation_rules(self):
-        return self._implementation_rules
-
-    @property
-    def logical_rules(self):
-        return self._logical_rules
-
-    @property
-    def all_rules(self):
-        return self._all_rules
