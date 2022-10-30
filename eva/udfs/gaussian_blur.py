@@ -15,7 +15,7 @@
 
 from torchvision import transforms as tv_transforms
 
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractTransformationUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractTransformationUDF
 
 
 class GaussianBlur(PytorchAbstractTransformationUDF, tv_transforms.GaussianBlur):
@@ -31,11 +31,16 @@ class GaussianBlur(PytorchAbstractTransformationUDF, tv_transforms.GaussianBlur)
     https://pytorch.org/vision/0.8/_modules/torchvision/transforms/transforms.html#GaussianBlur
     """
 
-    def __init__(self, kernel_size: int = 3, sigma: float = 1.0):
+    @property
+    def name(self) -> str:
+        return "GaussianBlur"
+
+    def setup(self, kernel_size: int = 3, sigma: float = 1.0):
         """
         Arguments:
             kernel_size: side length of square kernel used to perform gaussian
             sigma: standard deviation of the filter
         """
         blur = tv_transforms.GaussianBlur(kernel_size=kernel_size, sigma=sigma)
-        PytorchAbstractTransformationUDF.__init__(self, [blur])
+        self.transforms = [tv_transforms.ToPILImage(), blur]
+        PytorchAbstractTransformationUDF.__init__(self, self.transforms)

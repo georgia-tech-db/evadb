@@ -98,7 +98,7 @@ def init_builtin_udfs(mode="debug"):
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
-        Gaussianblur_udf_query,
+        # Gaussianblur_udf_query,
     ]
 
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])

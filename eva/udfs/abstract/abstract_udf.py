@@ -87,8 +87,8 @@ class AbstractTransformationUDF(AbstractUDF):
         by applying the frame transformation model.
 
         Arguments:
-            frames: Input batch of frames on which prediction
-            needs to be made
+            frames: Input batch of frames on which the
+            transformation needs to be made
 
         Returns:
             Transformed frames

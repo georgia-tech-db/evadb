@@ -16,15 +16,16 @@
 import numpy as np
 import pandas as pd
 import torch
-from numpy.typing import ArrayLike
 from PIL import Image
 from torch import Tensor, nn
-from torchvision.transforms import Compose, transforms
+from torchvision.transforms import Compose
+from torchvision.transforms import transforms as tv_transforms
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.udfs.abstract.abstract_udf import (
     AbstractClassifierUDF,
     AbstractTransformationUDF,
+    InputType,
 )
 from eva.udfs.gpu_compatible import GPUCompatible
 
@@ -36,7 +37,7 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
     """
 
     def __init__(self, *args, **kwargs):
-        self.transforms = [transforms.ToTensor()]
+        self.transforms = [tv_transforms.ToTensor()]
         nn.Module.__init__(self, *args, **kwargs)
         self.setup(*args, **kwargs)
 
@@ -100,18 +101,32 @@ class PytorchAbstractTransformationUDF(AbstractTransformationUDF, Compose):
     Use PyTorch torchvision transforms as EVA transforms.
     """
 
-    def __init__(self, transforms):
-        Compose.__init__(self, transforms)
+    def __init__(self):
+        blur = tv_transforms.GaussianBlur(kernel_size=3, sigma=1)
+        Compose.__init__(self, [tv_transforms.ToPILImage(), blur])
 
-    def transform(self, frames: ArrayLike) -> ArrayLike:
-        return Compose.__call__(self, frames)
+    def transform(self, images: np.ndarray):
+        blur = tv_transforms.GaussianBlur(kernel_size=3, sigma=1)
+        self.transforms = [tv_transforms.ToPILImage(), blur]
+        composed = Compose(self.transforms)
+        output = composed(images)
+        ndarray = np.array(output)
+        return ndarray
+
+    def forward(self, frames: InputType) -> InputType:
+        pass
 
     def __call__(self, *args, **kwargs):
         if len(args) == 0:
             return nn.Module.__call__(self, *args, **kwargs)
 
         frames = args[0]
+        outcome = None
         if isinstance(frames, pd.DataFrame):
+            # column_list = frames.columns.tolist()
             frames = frames.transpose().values.tolist()[0]
+            array_batch = [self.transform(x) for x in frames]
+            outcome = pd.DataFrame([array_batch]).T
+            outcome.columns = ["frame_array_out"]
 
-        return Compose.__call__(self, frames, **kwargs)
+        return outcome

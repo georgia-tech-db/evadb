@@ -17,7 +17,7 @@ import unittest
 from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
 import mock
-import PIL
+import numpy
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -63,11 +63,13 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
 
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(actual_batch.batch_size, 5)
+        self.assertEqual(len(actual_batch), 5)
 
         res = actual_batch.frames
         for idx in res.index:
-            self.assertIsInstance(res["gaussianblur.Frame_Array_Out"][idx], PIL.Image)
+            self.assertIsInstance(
+                res["gaussianblur.frame_array_out"][idx], numpy.ndarray
+            )
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ssd(self):
