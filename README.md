@@ -75,9 +75,9 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-|Original Video | Result Frames|
+| Source Video  | Query Result |
 |---------------|--------------|
-|![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.webp)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.webp)|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.webp" width="400"> |
 
 2. Search for frames in the video that contain a pedestrian and a car
 
@@ -100,17 +100,18 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
-## Examples
-### MNIST Character Recognition
-|Original Video | Result Frames|
+## EVA Applications
+
+### MNIST Digit Recognition
+| Source Video  | Query Result |
 |---------------|--------------|
-|![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistvideo.webp)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistoutput.webp)|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistvideo.webp" width="100"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistoutput.webp" width="100"> |
 
 ### Emotion Detection
 
-|Original Video | Result Frames|
+| Source Video  | Query Result |
 |---------------|--------------|
-|![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp)|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp" width="400"> |
 
 ## Contributing to EVA
 
