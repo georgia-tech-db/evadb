@@ -119,6 +119,7 @@ async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=Non
 
     while True:
         try:
+            loop.set_debug(enabled = True)
             transport, protocol = await loop.create_connection(
                 lambda: EvaClient(loop), host, port
             )

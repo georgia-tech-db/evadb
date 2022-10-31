@@ -29,6 +29,15 @@ class EvaCommandInterpreter(Cmd):
     def __init__(self):
         super().__init__()
 
+    def cmdloop_with_keyboard_interrupt(self, intro=None):
+        quit_loop = False
+        while quit_loop != True:
+            try:
+                self.cmdloop()
+                quit_loop = True
+            except KeyboardInterrupt:
+                print('\ncommand interrupted...\n')
+
     def preloop(self):
         # To retain command history across multiple client sessions
         if os.path.exists(histfile):
@@ -89,7 +98,9 @@ def handle_user_input(connection):
 
     VERSION = VERSION_DICT["VERSION"]
 
-    prompt.cmdloop("eva (v " + VERSION + ')\nType "help" for help')
+    prompt.cmdloop_with_keyboard_interrupt(
+        intro = "eva (v " + VERSION + ')\nType "help" for help'
+    )
 
 
 def start_cmd_client(host: str, port: int):
