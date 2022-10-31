@@ -54,6 +54,7 @@ class FunctionExpression(AbstractExpression):
         self._context = Context()
         self._name = name
         self._function = func
+        self._function_instance = None
         self._output = output
         self.alias = alias
         self.output_objs: List[UdfIO] = []
@@ -89,11 +90,13 @@ class FunctionExpression(AbstractExpression):
         return outcomes
 
     def _gpu_enabled_function(self):
-        if isinstance(self._function, GPUCompatible):
-            device = self._context.gpu_device()
-            if device != NO_GPU:
-                return self._function.to_device(device)
-        return self._function
+        if self._function_instance is None:
+            self._function_instance = self.function()
+            if isinstance(self._function_instance, GPUCompatible):
+                device = self._context.gpu_device()
+                if device != NO_GPU:
+                    self._function_instance = self._function_instance.to_device(device)
+        return self._function_instance
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

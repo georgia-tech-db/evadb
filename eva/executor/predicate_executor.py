@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Generator, Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate
@@ -36,3 +36,6 @@ class PredicateExecutor(AbstractExecutor):
             batch = apply_predicate(batch, self.predicate)
             if not batch.empty():
                 yield batch
+
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec(**kwargs)

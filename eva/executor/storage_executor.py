@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Generator, Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
@@ -37,3 +37,6 @@ class StorageExecutor(AbstractExecutor):
             )
         else:
             return StorageEngine.read(self.node.video, self.node.batch_mem_size)
+
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec()
