@@ -85,14 +85,31 @@ class EVACursor(object):
         if not asyncio.iscoroutinefunction(func):
             raise AttributeError
 
+        async def shutdown_task(signal, task):
+            logger.critical(f"Received exit signal {signal.name}...")
+            tasks = [task]
+            task.cancel()
+            logger.critical("x")
+            await self._protocol.send_message("interrupt")
+            logger.critical("y")
+            self._pending_query = False
+            logger.critical("z")
+            await asyncio.gather(*tasks, return_exceptions=True) 
+            logger.critical("Cancelled task")
+
         def func_sync(*args, **kwargs):
             loop = self._protocol.loop
             #res = loop.run_until_complete(func(*args, **kwargs))       
             task = asyncio.ensure_future(func(*args, **kwargs))
             for s in [SIGINT, SIGTERM]:
-                loop.add_signal_handler(s, task.cancel)
-            res = loop.run_until_complete(task)
-            return res
+                loop.add_signal_handler(s, 
+                lambda s=s: asyncio.create_task(shutdown_task(s, task)))
+
+            try:
+                res = loop.run_until_complete(task)
+                return res
+            except asyncio.CancelledError:
+                logger.critical("Cancelled Error")
 
         return func_sync
 

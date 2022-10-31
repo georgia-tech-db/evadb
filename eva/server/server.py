@@ -84,6 +84,7 @@ class EvaServer(asyncio.Protocol):
             elif request_message in ["interrupt"]:
                 logger.critical("Interrupt the pending query")
                 if self.pending_task is not None:
+                    logger.critical("Terminating process")
                     self.pending_task.terminate()
                     self.pending_task = None
             else:
