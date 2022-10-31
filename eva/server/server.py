@@ -42,6 +42,7 @@ class EvaServer(asyncio.Protocol):
         self.transport = None
         self._socket_timeout = socket_timeout
         self.buffer = EvaProtocolBuffer()
+        self.pending_task = None
 
     def connection_made(self, transport):
         self.transport = transport
@@ -79,9 +80,16 @@ class EvaServer(asyncio.Protocol):
             if request_message in ["quit", "exit"]:
                 logger.debug("Close client socket")
                 return self.transport.close()
+            elif request_message in ["interrupt"]:
+                logger.debug("Interrupt the pending query")
+                if self.pending_task is not None:
+                    self.pending_task.cancel()
+                    self.pending_task = None
             else:
                 logger.debug("Handle request")
-                asyncio.create_task(handle_request(self.transport, request_message))
+                self.pending_task = asyncio.create_task(
+                    handle_request(self.transport, request_message)
+                )
 
 
 def start_server(
