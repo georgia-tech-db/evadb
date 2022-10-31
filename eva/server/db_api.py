@@ -17,7 +17,6 @@ import base64
 import os
 import random
 from signal import SIGINT, SIGTERM
-from contextlib import suppress
 
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
@@ -34,7 +33,7 @@ class EVAConnection:
         # One unique cursor for one connection
         if self._cursor is None:
             self._cursor = EVACursor(self)
-        return self._cursor        
+        return self._cursor
 
     @property
     def protocol(self):
@@ -45,7 +44,7 @@ class EVACursor(object):
     def __init__(self, connection):
         self._connection = connection
         self._pending_query = False
-        self._pending_tasks = set() # Only for sync APIs
+        self._pending_tasks = set()  # Only for sync APIs
 
     @property
     def connection(self):
@@ -84,21 +83,20 @@ class EVACursor(object):
         """
         return await self.fetch_one_async()
 
-
     def __getattr__(self, name):
         """
         Auto generate sync function calls from async
         Sync function calls should not be used in an async environment.
         """
         func = object.__getattribute__(self, "%s_async" % name)
-        logger.debug("autogen: "  + str(name))
+        logger.debug("autogen: " + str(name))
 
         if not asyncio.iscoroutinefunction(func):
             raise AttributeError
 
         async def shutdown_task(signal, task):
             logger.info(f"Received exit signal {signal.name}...")
-            self._pending_tasks.remove(task)                
+            self._pending_tasks.remove(task)
             tasks = [task]
             task.cancel()
             await self.connection.protocol.send_message("interrupt")
@@ -107,16 +105,17 @@ class EVACursor(object):
 
         def func_sync(*args, **kwargs):
             loop = self.connection.protocol.loop
-            #res = loop.run_until_complete(func(*args, **kwargs))       
+            # res = loop.run_until_complete(func(*args, **kwargs))
             task = asyncio.ensure_future(func(*args, **kwargs))
             for s in [SIGINT, SIGTERM]:
-                loop.add_signal_handler(s, 
-                lambda s=s: asyncio.create_task(shutdown_task(s, task)))
+                loop.add_signal_handler(
+                    s, lambda s=s: asyncio.create_task(shutdown_task(s, task))
+                )
             self._pending_tasks.add(task)
 
             try:
                 res = loop.run_until_complete(task)
-                self._pending_tasks.remove(task)                
+                self._pending_tasks.remove(task)
                 return res
             except asyncio.CancelledError:
                 logger.warn("Cancelled Error")
@@ -146,6 +145,7 @@ class EVACursor(object):
                 raise e
 
         return query
+
 
 async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=None):
     if loop is None:

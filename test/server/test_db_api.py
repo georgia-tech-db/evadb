@@ -43,12 +43,12 @@ class DBAPITests(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     def test_EVA_Cursor_execute_async(self):
-        protocol = AsyncMock()
-        eva_cursor = EVACursor(protocol)
+        connection = AsyncMock()
+        eva_cursor = EVACursor(connection)
         query = "test_query"
         asyncio.run(eva_cursor.execute_async(query))
         self.assertEqual(eva_cursor._pending_query, True)
-        protocol.send_message.assert_called_with(query)
+        connection.protocol.send_message.assert_called_with(query)
 
         # concurrent queries not allowed
         with self.assertRaises(SystemError):
@@ -56,13 +56,28 @@ class DBAPITests(unittest.TestCase):
 
     @mock.patch.object(Response, "from_json")
     def test_eva_cursor_fetch_one_async(self, mock_response):
-        protocol = AsyncMock()
-        eva_cursor = EVACursor(protocol)
+        connection = AsyncMock()
+        eva_cursor = EVACursor(connection)
         response = "test_response"
         mock_response.side_effect = [response]
         expected = asyncio.run(eva_cursor.fetch_one_async())
         self.assertEqual(eva_cursor._pending_query, False)
-        protocol.queue.get.assert_called_once()
+        connection.protocol.queue.get.assert_called_once()
+        self.assertEqual(expected, response)
+
+    @mock.patch.object(Response, "from_json")
+    def test_eva_cursor_fetch_one_sync(self, mock_response):
+        connection = AsyncMock()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        connection.protocol.loop = loop
+
+        eva_cursor = EVACursor(connection)
+        response = "test_response"
+        mock_response.side_effect = [response]
+        expected = eva_cursor.fetch_one()
+        self.assertEqual(eva_cursor._pending_query, False)
+        connection.protocol.queue.get.assert_called_once()
         self.assertEqual(expected, response)
 
     def test_eva_connection(self):

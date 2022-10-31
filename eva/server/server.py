@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import multiprocessing
 import os
 import string
 from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
-import multiprocessing
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
@@ -92,10 +92,10 @@ class EvaServer(asyncio.Protocol):
                     target=handle_request,
                     args=(self.transport, request_message),
                 )
-                self.pending_task.start()                
-                #self.pending_task = asyncio.create_task(
+                self.pending_task.start()
+                # self.pending_task = asyncio.create_task(
                 #    handle_request(self.transport, request_message)
-                #)
+                # )
 
 
 def start_server(

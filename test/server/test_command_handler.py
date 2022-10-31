@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 import unittest
 from unittest.mock import MagicMock
 
@@ -22,11 +21,6 @@ from eva.server.command_handler import handle_request
 
 
 class CommandHandlerTests(unittest.TestCase):
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        self.stop_server_future = self.loop.create_future()
-        asyncio.set_event_loop(None)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -35,4 +29,4 @@ class CommandHandlerTests(unittest.TestCase):
         transport.write = MagicMock(return_value="response_message")
         request_message = "query"
 
-        asyncio.run(handle_request(transport, request_message))
+        handle_request(transport, request_message)

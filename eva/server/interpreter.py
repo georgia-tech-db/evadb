@@ -19,7 +19,6 @@ from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
 
 from eva.server.db_api import connect
-from eva.utils.logging_manager import logger
 
 # History file to persist EVA  command history across multiple client sessions
 histfile = "eva.history"
@@ -32,12 +31,12 @@ class EvaCommandInterpreter(Cmd):
 
     def cmdloop_with_keyboard_interrupt(self, intro=None):
         quit_loop = False
-        while quit_loop != True:
+        while quit_loop is not True:
             try:
                 self.cmdloop()
                 quit_loop = True
             except KeyboardInterrupt:
-                print('\ncommand interrupted...\n')
+                print("\ncommand interrupted...\n")
 
     def preloop(self):
         # To retain command history across multiple client sessions
@@ -99,7 +98,7 @@ def handle_user_input(connection):
     VERSION = VERSION_DICT["VERSION"]
 
     prompt.cmdloop_with_keyboard_interrupt(
-        intro = "eva (v " + VERSION + ')\nType "help" for help'
+        intro="eva (v " + VERSION + ')\nType "help" for help'
     )
 
 
