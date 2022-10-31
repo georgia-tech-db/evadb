@@ -16,7 +16,7 @@ import asyncio
 import base64
 import os
 import random
-from signal import SIGINT, SIGTERM
+from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1
 
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
@@ -107,7 +107,7 @@ class EVACursor(object):
             loop = self.connection.protocol.loop
             # res = loop.run_until_complete(func(*args, **kwargs))
             task = asyncio.ensure_future(func(*args, **kwargs))
-            for s in [SIGINT, SIGTERM]:
+            for s in [SIGHUP, SIGINT, SIGTERM, SIGUSR1]:
                 loop.add_signal_handler(
                     s, lambda s=s: asyncio.create_task(shutdown_task(s, task))
                 )
