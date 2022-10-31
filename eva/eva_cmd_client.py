@@ -26,12 +26,15 @@ EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
 
 from eva.server.interpreter import start_cmd_client  # noqa: E402
+from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 
 
 def eva_client(host="0.0.0.0", port=5432):
     """
     Start the eva system
     """
+
+    config = ConfigurationManager()
 
     # Launch server
     try:

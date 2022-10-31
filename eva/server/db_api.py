@@ -16,9 +16,12 @@ import asyncio
 import base64
 import os
 import random
+from signal import SIGINT, SIGTERM
+from contextlib import suppress
 
 from eva.models.server.response import Response
 from eva.server.async_protocol import EvaClient
+from eva.utils.logging_manager import logger
 
 
 class EVAConnection:
@@ -38,11 +41,13 @@ class EVACursor(object):
     def __init__(self, protocol):
         self._protocol = protocol
         self._pending_query = False
+        self._pending_tasks = set() # Only for sync APIs
 
     async def execute_async(self, query: str):
         """
         Send query to the EVA server.
         """
+        logger.critical("execute aysnc : " + str(query))
         if self._pending_query:
             raise SystemError(
                 "EVA does not support concurrent queries. \
@@ -56,7 +61,9 @@ class EVACursor(object):
         """
         fetch_one returns one batch instead of one row for now.
         """
+        logger.critical("fetch_one_async" )
         try:
+            logger.critical("queue get")
             message = await self._protocol.queue.get()
             response = await asyncio.coroutine(Response.from_json)(message)
         except Exception as e:
@@ -69,6 +76,49 @@ class EVACursor(object):
         fetch_all is the same as fetch_one for now.
         """
         return await self.fetch_one_async()
+
+
+    def __getattr__(self, name):
+        """
+        Auto generate sync function calls from async
+        Sync function calls should not be used in an async environment.
+        """
+        func = object.__getattribute__(self, "%s_async" % name)
+        logger.critical("autogen: "  + str(name))
+
+        if not asyncio.iscoroutinefunction(func):
+            raise AttributeError
+
+        async def shutdown_task(signal, loop, task):
+            logger.critical(f"Received exit signal {signal.name}...")
+
+            task.cancel()
+            with suppress(asyncio.CancelledError):
+                loop.run_until_complete(task)
+            #try:
+            #    await task    
+            #except asyncio.CancelledError:
+            #    logger.critical("Cancelled task")
+
+            logger.critical("Cancelled task")
+
+        def func_sync(*args, **kwargs):
+            loop = self._protocol.loop
+            #res = loop.run_until_complete(func(*args, **kwargs))       
+            task = asyncio.ensure_future(func(*args, **kwargs))
+            for s in [SIGINT, SIGTERM]:
+                loop.add_signal_handler(s, 
+                lambda s=s: asyncio.create_task(shutdown_task(s, loop, task)
+                ))
+
+            try:
+                res = loop.run_until_complete(task) 
+                return res
+            except Exception as e:
+                raise e
+
+
+        return func_sync
 
     def _upload_transformation(self, query: str) -> str:
         """
@@ -93,23 +143,6 @@ class EVACursor(object):
                 raise e
 
         return query
-
-    def __getattr__(self, name):
-        """
-        Auto generate sync function calls from async
-        Sync function calls should not be used in an async environment.
-        """
-        func = object.__getattribute__(self, "%s_async" % name)
-        if not asyncio.iscoroutinefunction(func):
-            raise AttributeError
-
-        def func_sync(*args, **kwargs):
-            loop = self._protocol.loop
-            res = loop.run_until_complete(func(*args, **kwargs))
-            return res
-
-        return func_sync
-
 
 async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=None):
     if loop is None:

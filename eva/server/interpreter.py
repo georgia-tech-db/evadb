@@ -19,6 +19,7 @@ from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
 
 from eva.server.db_api import connect
+from eva.utils.logging_manager import logger
 
 # History file to persist EVA  command history across multiple client sessions
 histfile = "eva.history"
@@ -70,9 +71,14 @@ class EvaCommandInterpreter(Cmd):
 
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
-
+        logger.critical("do query: " + str(query))
+        logger.critical("execute query")
         self.cursor.execute(query)
+
+        logger.critical("fetch all")
         print(self.cursor.fetch_all())
+
+        logger.critical("done fetching")
         return False
 
 
