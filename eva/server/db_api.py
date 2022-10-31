@@ -47,7 +47,7 @@ class EVACursor(object):
         """
         Send query to the EVA server.
         """
-        logger.critical("execute aysnc : " + str(query))
+        logger.critical("execute async : " + str(query))
         if self._pending_query:
             raise SystemError(
                 "EVA does not support concurrent queries. \
@@ -62,12 +62,8 @@ class EVACursor(object):
         fetch_one returns one batch instead of one row for now.
         """
         logger.critical("fetch_one_async" )
-        try:
-            logger.critical("queue get")
-            message = await self._protocol.queue.get()
-            response = await asyncio.coroutine(Response.from_json)(message)
-        except Exception as e:
-            raise e
+        message = await self._protocol.queue.get()
+        response = await asyncio.coroutine(Response.from_json)(message)
         self._pending_query = False
         return response
 
@@ -89,34 +85,14 @@ class EVACursor(object):
         if not asyncio.iscoroutinefunction(func):
             raise AttributeError
 
-        async def shutdown_task(signal, loop, task):
-            logger.critical(f"Received exit signal {signal.name}...")
-
-            task.cancel()
-            with suppress(asyncio.CancelledError):
-                loop.run_until_complete(task)
-            #try:
-            #    await task    
-            #except asyncio.CancelledError:
-            #    logger.critical("Cancelled task")
-
-            logger.critical("Cancelled task")
-
         def func_sync(*args, **kwargs):
             loop = self._protocol.loop
             #res = loop.run_until_complete(func(*args, **kwargs))       
             task = asyncio.ensure_future(func(*args, **kwargs))
             for s in [SIGINT, SIGTERM]:
-                loop.add_signal_handler(s, 
-                lambda s=s: asyncio.create_task(shutdown_task(s, loop, task)
-                ))
-
-            try:
-                res = loop.run_until_complete(task) 
-                return res
-            except Exception as e:
-                raise e
-
+                loop.add_signal_handler(s, task.cancel)
+            res = loop.run_until_complete(task)
+            return res
 
         return func_sync
 

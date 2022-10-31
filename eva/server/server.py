@@ -16,6 +16,7 @@ import asyncio
 import os
 import string
 from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
+import multiprocessing
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
@@ -71,25 +72,30 @@ class EvaServer(asyncio.Protocol):
     def data_received(self, data):
 
         message = data.decode()
-        logger.debug("Request from client: --|" + str(message) + "|--")
+        logger.critical("Request from client: --|" + str(message) + "|--")
 
         self.buffer.feed_data(message)
         while self.buffer.has_complete_message():
             request_message = self.buffer.read_message()
 
             if request_message in ["quit", "exit"]:
-                logger.debug("Close client socket")
+                logger.critical("Close client socket")
                 return self.transport.close()
             elif request_message in ["interrupt"]:
-                logger.debug("Interrupt the pending query")
+                logger.critical("Interrupt the pending query")
                 if self.pending_task is not None:
-                    self.pending_task.cancel()
+                    self.pending_task.terminate()
                     self.pending_task = None
             else:
-                logger.debug("Handle request")
-                self.pending_task = asyncio.create_task(
-                    handle_request(self.transport, request_message)
+                logger.critical("Handle request")
+                self.pending_task = multiprocessing.Process(
+                    target=handle_request,
+                    args=(self.transport, request_message),
                 )
+                self.pending_task.start()                
+                #self.pending_task = asyncio.create_task(
+                #    handle_request(self.transport, request_message)
+                #)
 
 
 def start_server(

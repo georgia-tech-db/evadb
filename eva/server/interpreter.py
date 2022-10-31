@@ -16,6 +16,7 @@ import os
 from cmd import Cmd
 from contextlib import ExitStack
 from readline import read_history_file, set_history_length, write_history_file
+from time import sleep
 from typing import Dict
 
 from eva.server.db_api import connect
@@ -74,6 +75,8 @@ class EvaCommandInterpreter(Cmd):
         logger.critical("do query: " + str(query))
         logger.critical("execute query")
         self.cursor.execute(query)
+
+        sleep(5)
 
         logger.critical("fetch all")
         print(self.cursor.fetch_all())
