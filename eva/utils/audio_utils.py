@@ -32,7 +32,9 @@ def transcribe_file_with_word_time_offsets(rich_video_file):
             results += (part_result['result'])
         results.append(part_result)
 
-        return results
+        # sometimes there are bugs in recognition, and
+        # the library returns an empty dictionary {'text': ''}
+        return [result for result in results if len(result) == 4]
 
 
 @contextmanager
