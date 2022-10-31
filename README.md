@@ -75,7 +75,9 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.webp" width="400"> |
 
 2. Search for frames in the video that contain a pedestrian and a car
 
@@ -98,6 +100,18 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
+## EVA Applications
+
+### MNIST Digit Recognition
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistvideo.webp" width="100"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistoutput.webp" width="100"> |
+
+### Emotion Detection
+
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp" width="400"> |
 
 ## Contributing to EVA
 
