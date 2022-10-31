@@ -130,7 +130,6 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
                           FastRCNNObjectDetector(data);"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):

@@ -22,6 +22,7 @@ from facenet_pytorch import MTCNN
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.gpu_compatible import GPUCompatible
+from eva.utils.logging_manager import logger
 
 
 class FaceDetector(AbstractClassifierUDF, GPUCompatible):
@@ -66,8 +67,11 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
             pred_boxes = []
             pred_scores = []
             if frame_boxes is not None and frame_scores is not None:
-                pred_boxes = frame_boxes
-                pred_scores = frame_scores
+                if not np.isnan(pred_boxes):
+                    pred_boxes = np.asarray(frame_boxes, dtype="int")
+                    pred_scores = frame_scores
+                else:
+                    logger.warn(f"Nan entry in box {frame_boxes}")
             outcome = outcome.append(
                 {"bboxes": pred_boxes, "scores": pred_scores},
                 ignore_index=True,

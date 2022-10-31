@@ -6,17 +6,17 @@ jobs:
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       # This comes with python and openjdk11
-      - image: cimg/python:3.8-browsers
+      - image: cimg/python:3.7-browsers
     steps:
       - checkout
 
       - restore_cache:
           keys:
-            - v8-model_cache-{{ checksum "setup.py" }}
+            - v9-model_cache-{{ checksum "setup.py" }}
 
       - restore_cache:
           keys:
-            - v8-pip-cache-{{ checksum "setup.py" }}
+            - v9-pip-cache-{{ checksum "setup.py" }}
 
       - run:
           name: Install EVA package with test dependencies
@@ -24,28 +24,26 @@ jobs:
             python -m venv eva_dev_env
             . eva_dev_env/bin/activate
             pip install --upgrade pip
-            pip install ".[dev]"
-
-      - run:
-          name: Generate Parser Files
-          command: |
             sh script/antlr4/generate_parser.sh
+            pip install ".[dev]"
 
       - run:
           name: Test and upload coverage report to coveralls
           command: |
+            sudo apt-get update          
+            sudo apt-get install lsof 
             . eva_dev_env/bin/activate
             sh script/test/test.sh
             coveralls
 
       - save_cache:
-          key: v8-model_cache-{{ checksum "setup.py" }}
+          key: v9-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
       - save_cache:
-          key: v8-pip-cache-{{ checksum "setup.py" }}
+          key: v9-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./eva_dev_env/
 
