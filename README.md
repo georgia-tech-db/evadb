@@ -75,7 +75,6 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
 |Original Video | Result Frames|
 |---------------|--------------|
 |![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.webp)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.webp)|
@@ -101,6 +100,17 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
+## Examples
+### MNIST Character Recognition
+|Original Video | Result Frames|
+|---------------|--------------|
+|![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistvideo.webp)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistoutput.webp)|
+
+### Emotion Detection
+
+|Original Video | Result Frames|
+|---------------|--------------|
+|![Origin Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp)|![Result Video](https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp)|
 
 ## Contributing to EVA
 
