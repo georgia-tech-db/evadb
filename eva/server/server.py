@@ -72,23 +72,22 @@ class EvaServer(asyncio.Protocol):
     def data_received(self, data):
 
         message = data.decode()
-        logger.critical("Request from client: --|" + str(message) + "|--")
+        logger.debug("Request from client: --|" + str(message) + "|--")
 
         self.buffer.feed_data(message)
         while self.buffer.has_complete_message():
             request_message = self.buffer.read_message()
 
             if request_message in ["quit", "exit"]:
-                logger.critical("Close client socket")
+                logger.debug("Close client socket")
                 return self.transport.close()
             elif request_message in ["interrupt"]:
-                logger.critical("Interrupt the pending query")
                 if self.pending_task is not None:
-                    logger.critical("Terminating process")
+                    logger.debug("Interrupt the pending query")
                     self.pending_task.terminate()
                     self.pending_task = None
             else:
-                logger.critical("Handle request")
+                logger.debug("Handle request")
                 self.pending_task = multiprocessing.Process(
                     target=handle_request,
                     args=(self.transport, request_message),

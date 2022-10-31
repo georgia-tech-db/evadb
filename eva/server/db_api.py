@@ -28,9 +28,13 @@ class EVAConnection:
     def __init__(self, transport, protocol):
         self._transport = transport
         self._protocol = protocol
+        self._cursor = None
 
     def cursor(self):
-        return EVACursor(self._protocol)
+        # One unique cursor for one connection
+        if self._cursor is None:
+            self._cursor = EVACursor(self)
+        return self._cursor        
 
     @property
     def protocol(self):
@@ -38,34 +42,41 @@ class EVAConnection:
 
 
 class EVACursor(object):
-    def __init__(self, protocol):
-        self._protocol = protocol
+    def __init__(self, connection):
+        self._connection = connection
         self._pending_query = False
         self._pending_tasks = set() # Only for sync APIs
+
+    @property
+    def connection(self):
+        return self._connection
 
     async def execute_async(self, query: str):
         """
         Send query to the EVA server.
         """
-        logger.critical("execute async : " + str(query))
         if self._pending_query:
             raise SystemError(
                 "EVA does not support concurrent queries. \
                     Call fetch_all() to complete the pending query"
             )
         query = self._upload_transformation(query)
-        await self._protocol.send_message(query)
+        await self.connection.protocol.send_message(query)
         self._pending_query = True
 
     async def fetch_one_async(self) -> Response:
         """
         fetch_one returns one batch instead of one row for now.
         """
-        logger.critical("fetch_one_async" )
-        message = await self._protocol.queue.get()
+        message = await self.connection.protocol.queue.get()
         response = await asyncio.coroutine(Response.from_json)(message)
         self._pending_query = False
         return response
+
+    def reset(self):
+        self._pending_query = False
+        for task in self._pending_tasks:
+            task.cancel()
 
     async def fetch_all_async(self) -> Response:
         """
@@ -80,36 +91,35 @@ class EVACursor(object):
         Sync function calls should not be used in an async environment.
         """
         func = object.__getattribute__(self, "%s_async" % name)
-        logger.critical("autogen: "  + str(name))
+        logger.debug("autogen: "  + str(name))
 
         if not asyncio.iscoroutinefunction(func):
             raise AttributeError
 
         async def shutdown_task(signal, task):
-            logger.critical(f"Received exit signal {signal.name}...")
+            logger.info(f"Received exit signal {signal.name}...")
+            self._pending_tasks.remove(task)                
             tasks = [task]
             task.cancel()
-            logger.critical("x")
-            await self._protocol.send_message("interrupt")
-            logger.critical("y")
+            await self.connection.protocol.send_message("interrupt")
             self._pending_query = False
-            logger.critical("z")
-            await asyncio.gather(*tasks, return_exceptions=True) 
-            logger.critical("Cancelled task")
+            await asyncio.gather(*tasks, return_exceptions=True)
 
         def func_sync(*args, **kwargs):
-            loop = self._protocol.loop
+            loop = self.connection.protocol.loop
             #res = loop.run_until_complete(func(*args, **kwargs))       
             task = asyncio.ensure_future(func(*args, **kwargs))
             for s in [SIGINT, SIGTERM]:
                 loop.add_signal_handler(s, 
                 lambda s=s: asyncio.create_task(shutdown_task(s, task)))
+            self._pending_tasks.add(task)
 
             try:
                 res = loop.run_until_complete(task)
+                self._pending_tasks.remove(task)                
                 return res
             except asyncio.CancelledError:
-                logger.critical("Cancelled Error")
+                logger.warn("Cancelled Error")
 
         return func_sync
 
@@ -145,7 +155,6 @@ async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=Non
 
     while True:
         try:
-            loop.set_debug(enabled = True)
             transport, protocol = await loop.create_connection(
                 lambda: EvaClient(loop), host, port
             )
