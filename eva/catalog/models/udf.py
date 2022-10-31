@@ -29,6 +29,10 @@ class UdfMetadata(BaseModel):
         "UdfIO", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
 
+    _history = relationship(
+        "UdfHistory", back_populates="_udf", cascade="all, delete, delete-orphan"
+    )
+
     def __init__(self, name: str, impl_file_path: str, type: str):
         self._name = name
         self._impl_file_path = impl_file_path

@@ -35,6 +35,10 @@ class DataFrameColumn(BaseModel):
 
     _dataset = relationship("DataFrameMetadata", back_populates="_columns")
 
+    _udf_history_arg = relationship(
+        "UdfHistoryColumn", back_populates="_col", cascade="all, delete, delete-orphan"
+    )
+
     __table_args__ = (UniqueConstraint("name", "metadata_id"), {})
 
     def __init__(
