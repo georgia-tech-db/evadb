@@ -84,18 +84,18 @@ class EvaServer(asyncio.Protocol):
             elif request_message in ["interrupt"]:
                 if self.pending_task is not None:
                     logger.debug("Interrupt the pending query")
-                    self.pending_task.terminate()
+                    self.pending_task.cancel()
                     self.pending_task = None
             else:
                 logger.debug("Handle request")
-                self.pending_task = multiprocessing.Process(
-                    target=handle_request,
-                    args=(self.transport, request_message),
+                #self.pending_task = multiprocessing.Process(
+                #    target=handle_request,
+                #    args=(self.transport, request_message),
+                #)
+                #self.pending_task.start()
+                self.pending_task = asyncio.create_task(
+                    handle_request(self.transport, request_message)
                 )
-                self.pending_task.start()
-                # self.pending_task = asyncio.create_task(
-                #    handle_request(self.transport, request_message)
-                # )
 
 
 def start_server(
