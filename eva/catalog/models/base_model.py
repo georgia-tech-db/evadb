@@ -33,7 +33,7 @@ class CustomModel:
     """
 
     query = db_session.query_property()
-    _id = Column("id", Integer, primary_key=True)
+    _id = Column("_row_id", Integer, primary_key=True)
 
     def __init__(self, **kwargs):
         cls_ = type(self)

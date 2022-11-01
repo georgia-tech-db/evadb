@@ -44,8 +44,6 @@ minimal_requirement = [
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
-    "pyspark==3.0.2",
-    "petastorm==0.11.5",
     "antlr4-python3-runtime==4.8",
     "pyyaml==5.1",
     "importlib-metadata<5.0"
