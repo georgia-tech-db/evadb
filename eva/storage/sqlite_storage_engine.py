@@ -16,7 +16,6 @@ from typing import Iterator, List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy.ext.declarative import declarative_base
 
 from eva.catalog.column_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -31,8 +30,6 @@ from eva.utils.logging_manager import logger
 
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
-
-Base = declarative_base()
 
 
 class SQLStorageEngine(AbstractStorageEngine):
@@ -51,8 +48,9 @@ class SQLStorageEngine(AbstractStorageEngine):
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
             elif isinstance(dict_row[col.name], (np.generic,)):
                 # SqlAlchemy does not consume numpy generic data types
-                # convert numpy datatype to python generic datatype
+                # convert numpy datatype to python generic datatype using tolist()
                 # eg. np.int64 -> int
+                # https://stackoverflow.com/a/53067954
                 dict_row[col.name] = dict_row[col.name].tolist()
         return dict_row
 
