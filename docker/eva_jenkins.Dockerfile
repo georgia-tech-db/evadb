@@ -1,5 +1,5 @@
 # https://www.jenkins.io/doc/book/installing/docker/ - Follow these steps for starting jenkins.
-FROM python:3.8
+FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
 
 ENV OPENCV_VERSION="4.5.1"
 
@@ -36,7 +36,7 @@ RUN apt-get -qq update \
     && cmake \
         -D BUILD_TIFF=ON \
         -D BUILD_opencv_java=OFF \
-        -D WITH_CUDA=OFF \
+        -D WITH_CUDA=ON \
         -D WITH_OPENGL=ON \
         -D WITH_OPENCL=ON \
         -D WITH_IPP=ON \
