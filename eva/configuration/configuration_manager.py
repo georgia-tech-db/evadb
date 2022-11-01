@@ -48,7 +48,20 @@ class ConfigurationManager(object):
         with cls._yml_path.open("r") as yml_file:
             config_obj = yaml.load(yml_file, Loader=yaml.FullLoader)
             if config_obj is None:
-                raise ValueError(f"Invalid yml file at {cls._yml_path}")
+                raise ValueError(f"Invalid yaml file at {cls._yml_path}")
+            key_error = (
+                f"Add the entry '{category}: {key}' to the yaml file. Or, if "
+                f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
+                f"and the system will auto-generate one."
+            )
+            if category not in config_obj:
+                raise KeyError(
+                    f"Missing category '{category}' in the yaml file at {cls._yml_path}. {key_error}"
+                )
+            if key not in config_obj[category]:
+                raise KeyError(
+                    f"Missing key {key} for the category {category} in the yaml file at {cls._yml_path}. {key_error}"
+                )
             return config_obj[category][key]
 
     @classmethod
@@ -59,6 +72,16 @@ class ConfigurationManager(object):
             if config_obj is None:
                 raise ValueError(f"Invalid yml file at {cls._yml_path}")
 
+            key_error = (
+                f"Cannot update the key {key} for the missing category {category}."
+                f"Add the entry '{category}' to the yaml file. Or, if "
+                f"you did not modify the yaml file, remove it (rm {cls._yml_path}),"
+                f"and the system will auto-generate one."
+            )
+            if category not in config_obj:
+                raise KeyError(
+                    f"Missing category '{category}' in the yaml file at {cls._yml_path}. {key_error}"
+                )
             config_obj[category][key] = value
             yml_file.seek(0)
             yml_file.write(yaml.dump(config_obj))
