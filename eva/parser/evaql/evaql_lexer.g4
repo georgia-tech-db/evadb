@@ -73,6 +73,7 @@ SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
 SHOW:                                'SHOW';
 SOME:                                'SOME';
+STACK:                               'STACK';
 TABLE:                               'TABLE';
 TABLES:                              'TABLES';
 TO:                                  'TO';

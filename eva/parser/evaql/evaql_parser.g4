@@ -256,11 +256,11 @@ tableSources
 //    ;
 
 tableSource
-    : tableSourceItemWithSample joinPart*                #tableSourceBase
+    : tableSourceItemWithSampleAndStack joinPart*                #tableSourceBase
     ;
 
-tableSourceItemWithSample
-    : tableSourceItem (AS? uid)? sampleClause?
+tableSourceItemWithSampleAndStack
+    : tableSourceItem (AS? uid)? sampleClause? stackClause?
     ;
 
 tableSourceItem
@@ -284,9 +284,12 @@ sampleClause
     : SAMPLE decimalLiteral
     ;
 
+stackClause
+    : STACK decimalLiteral
+    ;
 
 joinPart
-    : JOIN tableSourceItemWithSample
+    : JOIN tableSourceItemWithSampleAndStack
       (
         ON expression
         | USING LR_BRACKET uidList RR_BRACKET
