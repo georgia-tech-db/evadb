@@ -140,7 +140,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_ocr_on_cropped_data(self):
-        create_udf_query = """CREATE UDF OCRExtractor
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -150,7 +150,7 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT OCRExtractor(Crop(data, [10, 10, 200, 200]) FROM MNIST
+        select_query = """SELECT OCRExtractor(Crop(data, [2, 2, 24, 24])) FROM MNIST
                         WHERE id >= 150 AND id < 155;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
