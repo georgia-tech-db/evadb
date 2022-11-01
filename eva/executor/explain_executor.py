@@ -33,5 +33,5 @@ class ExplainExecutor(AbstractExecutor):
     def _exec(self, node: AbstractPlan, depth: int):
         cur_str = " " * depth * 4 + "|__ " + str(node) + "\n"
         for child in node.children:
-            cur_str += self.exec(child, depth + 1)
+            cur_str += self._exec(child, depth + 1)
         return cur_str
