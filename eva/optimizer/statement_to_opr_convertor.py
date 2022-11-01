@@ -295,7 +295,7 @@ class StatementToPlanConvertor:
         self._plan = show_opr
 
     def visit_explain(self, statement: ExplainStatement):
-        explain_opr = LogicalExplain(self.visit(statement.explainable_stmt))
+        explain_opr = LogicalExplain([self.visit(statement.explainable_stmt)])
         self._plan = explain_opr
 
     def visit(self, statement: AbstractStatement):

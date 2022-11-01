@@ -56,6 +56,7 @@ from eva.optimizer.rules.rules import (
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
+    LogicalExplainToPhysical,
     PushDownFilterThroughJoin,
 )
 
@@ -93,6 +94,7 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
+            LogicalExplainToPhysical(),
             LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
