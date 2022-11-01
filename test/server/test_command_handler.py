@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 import unittest
 from unittest.mock import MagicMock
 
@@ -30,4 +29,4 @@ class CommandHandlerTests(unittest.TestCase):
         transport.write = MagicMock(return_value="response_message")
         request_message = "query"
 
-        asyncio.run(handle_request(transport, request_message))
+        handle_request(transport, request_message)
