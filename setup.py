@@ -100,7 +100,7 @@ udf_libs = [
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = [
-    "ray==1.13.0" #TODO: not minimal requirement
+    "ray==1.13.0"
 ]
 
 
