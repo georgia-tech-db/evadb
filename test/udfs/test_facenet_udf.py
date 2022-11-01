@@ -38,8 +38,8 @@ class FaceNet(unittest.TestCase):
     def test_should_return_batches_equivalent_to_number_of_frames(self):
         from eva.udfs.face_detector import FaceDetector
 
-        single_face_img = self.base_path / "one.jpg"
-        multi_face_img = self.base_path / "multiface.jpg"
+        single_face_img = Path("data/facenet/one.jpg")
+        multi_face_img = Path("data/facenet/multiface.jpg")
         frame_single_face = {
             "id": 1,
             "data": self._load_image(single_face_img),
@@ -63,7 +63,7 @@ class FaceNet(unittest.TestCase):
     def test_should_run_on_gpu(self):
         from eva.udfs.face_detector import FaceDetector
 
-        single_face_img = self.base_path / "one.jpg"
+        single_face_img = Path("data/facenet/one.jpg")
         frame_single_face = {
             "id": 1,
             "data": self._load_image(single_face_img),

@@ -38,6 +38,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
+from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
@@ -112,6 +113,8 @@ class PlanExecutor:
             executor_node = FunctionScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.EXCHANGE:
+            executor_node = ExchangeExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PROJECT:
             executor_node = ProjectExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:

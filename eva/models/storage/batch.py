@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-from typing import Iterable, List, TypeVar, Union
+from typing import Callable, Iterable, List, TypeVar, Union
 
 import numpy as np
 import pandas as pd
 
+from eva.expression.abstract_expression import ExpressionType
 from eva.parser.alias import Alias
 from eva.utils.logging_manager import logger
 
@@ -76,7 +77,7 @@ class Batch:
 
     def to_json(self):
         obj = {
-            "frames": self.frames,
+            "frames": self._frames,
             "batch_size": len(self),
             "identifier_column": self._identifier_column,
         }
@@ -86,6 +87,64 @@ class Batch:
     def from_json(cls, json_str: str):
         obj = json.loads(json_str, object_hook=as_batch)
         return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
+
+    @classmethod
+    def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() == batch2._frames.to_numpy())
+        )
+
+    @classmethod
+    def from_greater(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() > batch2._frames.to_numpy())
+        )
+
+    @classmethod
+    def from_lesser(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() < batch2._frames.to_numpy())
+        )
+
+    @classmethod
+    def from_greater_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() >= batch2._frames.to_numpy())
+        )
+
+    @classmethod
+    def from_lesser_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() <= batch2._frames.to_numpy())
+        )
+
+    @classmethod
+    def from_not_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        return Batch(
+            pd.DataFrame(batch1._frames.to_numpy() != batch2._frames.to_numpy())
+        )
+
+    @classmethod
+    def compare_contains(cls, batch1: Batch, batch2: Batch) -> None:
+        return cls(
+            pd.DataFrame(
+                [all(x in p for x in q) for p, q in zip(left, right)]
+                for left, right in zip(
+                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
+                )
+            )
+        )
+
+    @classmethod
+    def compare_is_contained(cls, batch1: Batch, batch2: Batch) -> None:
+        return cls(
+            pd.DataFrame(
+                [all(x in q for x in p) for p, q in zip(left, right)]
+                for left, right in zip(
+                    batch1._frames.to_numpy(), batch2._frames.to_numpy()
+                )
+            )
+        )
 
     def __str__(self) -> str:
         return (
@@ -97,8 +156,8 @@ class Batch:
         )
 
     def __eq__(self, other: Batch):
-        return self.frames[sorted(self.frames.columns)].equals(
-            other.frames[sorted(other.frames.columns)]
+        return self._frames[sorted(self.columns)].equals(
+            other.frames[sorted(other.columns)]
         )
 
     def __getitem__(self, indices) -> Batch:
@@ -117,7 +176,7 @@ class Batch:
             start = indices.start if indices.start else 0
             end = indices.stop if indices.stop else len(self.frames)
             if end < 0:
-                end = len(self.frames) + end
+                end = len(self._frames) + end
             step = indices.step if indices.step else 1
             return self._get_frames_from_indices(range(start, end, step))
         elif isinstance(indices, int):
@@ -126,9 +185,15 @@ class Batch:
             raise TypeError("Invalid argument type: {}".format(type(indices)))
 
     def _get_frames_from_indices(self, required_frame_ids):
-        new_frames = self.frames.iloc[required_frame_ids, :]
+        new_frames = self._frames.iloc[required_frame_ids, :]
         new_batch = Batch(new_frames)
         return new_batch
+
+    def apply_function_expression(self, expr: Callable) -> None:
+        """
+        Execute function expression on frames.
+        """
+        self._frames = expr(self._frames)
 
     def sort(self, by=None) -> None:
         """
@@ -138,7 +203,7 @@ class Batch:
             if self._identifier_column in self._frames:
                 by = [self._identifier_column]
             elif not self.empty():
-                by = self.frames.columns[0]
+                by = self.columns[0]
             else:
                 logger.warn("Sorting an empty batch")
                 return
@@ -175,6 +240,32 @@ class Batch:
         else:
             logger.warn("Columns and Sort Type are required for orderby")
 
+    def invert(self) -> None:
+        self._frames = ~self._frames
+
+    def all_true(self) -> bool:
+        return self._frames.all().bool()
+
+    def all_false(self) -> bool:
+        inverted = ~self._frames
+        return inverted.all().bool()
+
+    def create_mask(self) -> List:
+        """
+        Return list of indices of first row.
+        """
+        return self._frames[self._frames[0]].index.tolist()
+
+    def create_inverted_mask(self) -> List:
+        return self._frames[~self._frames[0]].index.tolist()
+
+    def update_indices(self, indices: List, other: Batch):
+        self._frames.iloc[indices] = other._frames
+        self._frames = pd.DataFrame(self._frames)
+
+    def video_file_paths(self) -> Iterable:
+        yield from self._frames["video_file_path"]
+
     def project(self, cols: None) -> Batch:
         """
         Takes as input the column list, returns the projection.
@@ -190,6 +281,15 @@ class Batch:
                 % (unknown_cols, self._frames)
             )
         return Batch(self._frames[verfied_cols], self._identifier_column)
+
+    def repeat(self, times: int) -> None:
+        """
+        Repeat the rows of a dataframe.
+
+        Arguments:
+            times: number of times to repeat
+        """
+        self._frames = pd.DataFrame(np.repeat(self._frames.to_numpy(), times, axis=0))
 
     @classmethod
     def merge_column_wise(cls, batches: List[Batch], auto_renaming=False) -> Batch:
@@ -229,7 +329,7 @@ class Batch:
         if other.empty():
             return self
 
-        new_frames = self.frames.append(other.frames, ignore_index=True)
+        new_frames = self._frames.append(other.frames, ignore_index=True)
 
         return Batch(new_frames)
 
@@ -249,6 +349,48 @@ class Batch:
 
         return Batch(frame)
 
+    @classmethod
+    def join(cls, first: Batch, second: Batch, how="inner") -> Batch:
+        return cls(
+            first._frames.merge(
+                second._frames, left_index=True, right_index=True, how=how
+            )
+        )
+
+    @classmethod
+    def combine_batches(
+        cls, first: Batch, second: Batch, expression: ExpressionType
+    ) -> Batch:
+        """
+        Creates Batch by combining two batches using some arithmetic expression.
+        """
+        if expression == ExpressionType.ARITHMETIC_ADD:
+            return Batch(pd.DataFrame(first._frames + second._frames))
+        elif expression == ExpressionType.ARITHMETIC_SUBTRACT:
+            return Batch(pd.DataFrame(first._frames - second._frames))
+        elif expression == ExpressionType.ARITHMETIC_MULTIPLY:
+            return Batch(pd.DataFrame(first._frames * second._frames))
+        elif expression == ExpressionType.ARITHMETIC_DIVIDE:
+            return Batch(pd.DataFrame(first._frames / second._frames))
+
+    def reassign_indices_to_hash(self, indices) -> None:
+        """
+        Hash indices and replace the indices with those hash values.
+        """
+        self._frames.index = self._frames[indices].apply(
+            lambda x: hash(tuple(x)), axis=1
+        )
+
+    def aggregate(self, method: str) -> None:
+        """
+        Aggregate batch based on method.
+        Methods can be sum, count, min, max, mean
+
+        Arguments:
+            method: string with one of the five above options
+        """
+        self._frames = self._frames.agg([method])
+
     def empty(self):
         """Checks if the batch is empty
         Returns:
@@ -256,10 +398,21 @@ class Batch:
         """
         return len(self) == 0
 
+    def unnest(self) -> None:
+        """
+        Unnest columns and drop columns with no data
+        """
+        self._frames = self._frames.explode(list(self._frames.columns))
+        self._frames.dropna(inplace=True)
+
     def reverse(self) -> None:
         """Reverses dataframe"""
         self._frames = self._frames[::-1]
         self._frames.reset_index(drop=True, inplace=True)
+
+    def drop_zero(self, outcomes: Batch) -> None:
+        """Drop all columns with corresponding outcomes containing zero."""
+        self._frames = self._frames[(outcomes._frames > 0).to_numpy()]
 
     def reset_index(self):
         """Resets the index of the data frame in the batch"""
@@ -272,10 +425,10 @@ class Batch:
             alias = Alias(alias)
         new_col_names = []
         if len(alias.col_names):
-            if len(self.frames.columns) != len(alias.col_names):
+            if len(self.columns) != len(alias.col_names):
                 err_msg = (
                     f"Expected {len(alias.col_names)} columns {alias.col_names},"
-                    f"got {len(self.frames.columns)} columns {self.frames.columns}."
+                    f"got {len(self.columns)} columns {self.columns}."
                 )
                 logger.error(err_msg)
                 raise RuntimeError(err_msg)
@@ -284,7 +437,7 @@ class Batch:
                 for col_name in alias.col_names
             ]
         else:
-            for col_name in self.frames.columns:
+            for col_name in self.columns:
                 if "." in col_name:
                     new_col_names.append(
                         "{}.{}".format(alias.alias_name, col_name.split(".")[1])
@@ -292,15 +445,15 @@ class Batch:
                 else:
                     new_col_names.append("{}.{}".format(alias.alias_name, col_name))
 
-        self.frames.columns = new_col_names
+        self._frames.columns = new_col_names
 
     def drop_column_alias(self) -> None:
         # table1.a, table1.b, table1.c -> a, b, c
         new_col_names = []
-        for col_name in self.frames.columns:
+        for col_name in self.columns:
             if "." in col_name:
                 new_col_names.append(col_name.split(".")[1])
             else:
                 new_col_names.append(col_name)
 
-        self.frames.columns = new_col_names
+        self._frames.columns = new_col_names
