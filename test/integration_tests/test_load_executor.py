@@ -92,6 +92,10 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 
+        # clean up
+        drop_query = "DROP TABLE MyVideoCSV;"
+        execute_query_fetch_all(drop_query)
+
     def test_should_load_csv_with_columns_in_table(self):
 
         # loading a csv requires a table to be created first
@@ -101,12 +105,8 @@ class LoadExecutorTest(unittest.TestCase):
                 id INTEGER UNIQUE,
                 frame_id INTEGER NOT NULL,
                 video_id INTEGER NOT NULL,
-                dataset_name TEXT(30) NOT NULL,
-                label TEXT(30),
-                bbox NDARRAY FLOAT32(4),
-                object_id INTEGER
+                dataset_name TEXT(30) NOT NULL
             );
-
             """
         execute_query_fetch_all(create_table_query)
 
@@ -127,3 +127,7 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = create_dummy_csv_batches(target_columns=select_columns)
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
+
+        # clean up
+        drop_query = "DROP TABLE MyVideoCSV;"
+        execute_query_fetch_all(drop_query)

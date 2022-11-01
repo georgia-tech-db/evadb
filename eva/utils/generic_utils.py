@@ -14,6 +14,7 @@
 # limitations under the License.
 import hashlib
 import importlib
+import pickle
 import sys
 import uuid
 from pathlib import Path
@@ -130,3 +131,11 @@ def get_size(obj, seen=None):
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
         size += sum([get_size(i, seen) for i in obj])
     return size
+
+
+class PickleSerializer(object):
+    def serialize(self, data):
+        return pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+
+    def deserialize(self, data):
+        return pickle.loads(data)
