@@ -36,7 +36,7 @@ RUN apt-get -qq update \
     && cmake \
         -D BUILD_TIFF=ON \
         -D BUILD_opencv_java=OFF \
-        -D WITH_CUDA=OFF \
+        -D WITH_CUDA=ON \
         -D WITH_OPENGL=ON \
         -D WITH_OPENCL=ON \
         -D WITH_IPP=ON \
