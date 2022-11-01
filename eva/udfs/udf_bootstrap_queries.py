@@ -16,7 +16,9 @@
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
 
-EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+EVA_INSTALLATION_DIR = ConfigurationManager().get_value(
+    "core", "eva_installation_dir"
+)
 NDARRAY_DIR = "ndarray"
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
@@ -110,10 +112,13 @@ def init_builtin_udfs(mode="debug"):
         Fastrcnn_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
-        face_detection_udf_query,
-        ocr_udf_query,
+        # Disabled because required packages (eg., easy_ocr might not be preinstalled)
+        # face_detection_udf_query,
+        # ocr_udf_query,
     ]
-    queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
+    queries.extend(
+        [DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query]
+    )
 
     for query in queries:
         execute_query_fetch_all(query)
