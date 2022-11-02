@@ -3,6 +3,7 @@ FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
 
 ENV OPENCV_VERSION="4.5.1"
 
+# Docker image specific installation
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
       python3-numpy \
@@ -42,8 +43,7 @@ RUN apt-get -qq update && \
         python3-dev \
         sudo \
         openjdk-11-jdk \
-        openjdk-11-jre \
-    && pip install numpy
+        openjdk-11-jre
 
 # Give Permission To Home Directory To Create EVA
 RUN mkdir /.eva && chmod -R 777 /.eva
