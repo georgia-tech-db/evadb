@@ -17,7 +17,7 @@ import unittest
 from eva.udfs.ndarray.array_count import ArrayCount
 
 
-class CropTests(unittest.TestCase):
+class ArrayCountTests(unittest.TestCase):
     def setUp(self):
         self.array_count = ArrayCount()
 
