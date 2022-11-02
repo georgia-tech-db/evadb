@@ -6,7 +6,7 @@ pipeline {
 
   }
   stages {
-    stage('Setup and Install Packages') {
+    stage('Setup and Install EVA Packages') {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
@@ -33,9 +33,11 @@ pip install -e ."[dev]"'''
         sh '''. env37/bin/activate
 sh script/test/test.sh'''
       }
+    }
 
-      stage('Coverage Check') {
-        '''coveralls'''
+    stage('Coverage Check') {
+      steps {
+        sh '''coveralls'''
       }
     }
   }
