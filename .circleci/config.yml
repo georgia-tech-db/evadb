@@ -34,6 +34,7 @@ jobs:
             sudo apt-get install lsof 
             . eva_dev_env/bin/activate
             sh script/test/test.sh
+            coveralls
 
       - save_cache:
           key: v9-model_cache-{{ checksum "setup.py" }}
