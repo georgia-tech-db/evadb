@@ -56,6 +56,10 @@ class AbstractPlan(ABC):
     def children(self) -> List["AbstractPlan"]:
         return self._children
 
+    @children.setter
+    def children(self, children_list):
+        self._children = children_list
+        
     @property
     def opr_type(self) -> PlanOprType:
         """

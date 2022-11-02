@@ -37,7 +37,6 @@ class ColumnMapper:
             curr_node = node.target_list[i]
             node.target_list[i] = self.map_node_attributes_to_id(curr_node)
 
-
         return node
     
     @map_node_attributes_to_id.register(StoragePlan)
@@ -78,11 +77,4 @@ class ColumnMapper:
             child._col_idx = self.column_to_id_map[col_name]
         
         return node
-
-    def map_target_list(self, node):
-        for i in range(len(node.target_list)):
-            child = node.target_list[i]
-            node.target_list[i] = self.map_node_attributes_to_id(child)
         
-        return node
-            
