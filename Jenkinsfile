@@ -6,7 +6,7 @@ pipeline {
 
   }
   stages {
-    stage('Setup and Install Packages') {
+    stage('Setup and Install EVA Packages') {
       parallel {
         stage('Setup Virtual Environment') {
           steps {
