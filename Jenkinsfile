@@ -31,8 +31,7 @@ pip install -e ."[dev]"'''
     stage('Run Tests') {
       steps {
         sh '''. env37/bin/activate
-sh script/test/test.sh
-coveralls'''
+sh script/test/test.sh'''
       }
     }
 
