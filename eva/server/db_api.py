@@ -151,7 +151,7 @@ async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=Non
     if loop is None:
         loop = asyncio.get_event_loop()
 
-    retries = [1, 1, 1]
+    retries = max_retry_count * [1]
 
     while True:
         try:
@@ -169,8 +169,6 @@ async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=Non
     return EVAConnection(transport, protocol)
 
 
-def connect(host: str, port: int, max_retry_count: int = 3, loop=None):
-    if loop is None:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+def connect(host: str, port: int, max_retry_count: int = 3):
+    loop = asyncio.get_event_loop()
     return loop.run_until_complete(connect_async(host, port, max_retry_count))

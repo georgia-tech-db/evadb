@@ -48,7 +48,7 @@ class ServerTests(unittest.TestCase):
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(CancelledError):
+        with self.assertRaises((CancelledError, SystemExit)):
             start_server(
                 host=host,
                 port=port,
