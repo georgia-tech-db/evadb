@@ -44,8 +44,8 @@ class SequentialScanExecutor(AbstractExecutor):
         for batch in child_executor.exec(**kwargs):
             # apply alias to the batch
             # id, data -> myvideo.id, myvideo.data
-            if self.alias:
-                batch.modify_column_alias(self.alias)
+            # if self.alias:
+            #     batch.modify_column_alias(self.alias)
 
             # We do the predicate first
             batch = apply_predicate(batch, self.predicate)

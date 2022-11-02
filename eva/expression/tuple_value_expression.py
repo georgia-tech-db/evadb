@@ -78,7 +78,7 @@ class TupleValueExpression(AbstractExpression):
     def evaluate(self, batch: Batch, *args, **kwargs):
         if "mask" in kwargs:
             batch = batch[kwargs["mask"]]
-        return batch.project([self.col_alias])
+        return batch.project([self._col_idx])
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

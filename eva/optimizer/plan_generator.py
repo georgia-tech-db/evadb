@@ -19,7 +19,7 @@ from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
 from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
-
+from eva.optimizer.column_deriver import ColumnDeriver
 
 class PlanGenerator:
     """
@@ -84,6 +84,11 @@ class PlanGenerator:
 
         # Build Optimal Tree
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
+
+        #map columns to ids
+        column_deriver = ColumnDeriver()
+        optimal_plan = column_deriver(optimal_plan)
+
         return optimal_plan
 
     def build(self, logical_plan: Operator):
