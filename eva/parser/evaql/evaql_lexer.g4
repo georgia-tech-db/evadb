@@ -73,7 +73,6 @@ SET:                                 'SET';
 SHUTDOWN:                            'SHUTDOWN';
 SHOW:                                'SHOW';
 SOME:                                'SOME';
-STACK:                               'STACK';
 TABLE:                               'TABLE';
 TABLES:                              'TABLES';
 TO:                                  'TO';
@@ -142,6 +141,9 @@ MIN:                                 'MIN';
 STD:                                 'STD';
 SUM:                                 'SUM';
 FCOUNT: 						     'FCOUNT';
+FIRST:                               'FIRST';
+LAST:                                'LAST';
+SEGMENT:                             'SEGMENT';
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID

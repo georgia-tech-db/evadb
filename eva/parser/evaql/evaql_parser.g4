@@ -256,11 +256,11 @@ tableSources
 //    ;
 
 tableSource
-    : tableSourceItemWithSampleAndStack joinPart*                #tableSourceBase
+    : tableSourceItemWithSample joinPart*                #tableSourceBase
     ;
 
-tableSourceItemWithSampleAndStack
-    : tableSourceItem (AS? uid)? sampleClause? stackClause?
+tableSourceItemWithSample
+    : tableSourceItem (AS? uid)? sampleClause?
     ;
 
 tableSourceItem
@@ -269,8 +269,8 @@ tableSourceItem
     ;
 
 tableValuedFunction
-    : functionCall                                
-    | UNNEST LR_BRACKET functionCall RR_BRACKET   
+    : functionCall
+    | UNNEST LR_BRACKET functionCall RR_BRACKET
     ;
 
 subqueryTableSourceItem
@@ -284,12 +284,8 @@ sampleClause
     : SAMPLE decimalLiteral
     ;
 
-stackClause
-    : STACK decimalLiteral
-    ;
-
 joinPart
-    : JOIN tableSourceItemWithSampleAndStack
+    : JOIN tableSourceItemWithSample
       (
         ON expression
         | USING LR_BRACKET uidList RR_BRACKET
@@ -333,10 +329,11 @@ selectElement
 fromClause
     : FROM tableSources
       (WHERE whereExpr=expression)?
-      (
-        GROUP BY
-        groupByItem (',' groupByItem)*
-      )?
+      groupbyClause?
+    ;
+
+groupbyClause
+    : GROUP BY groupByItem (',' groupByItem)*
       (HAVING havingExpr=expression)?
     ;
 
@@ -548,9 +545,13 @@ udfFunction
 
 
 aggregateWindowedFunction
-    : (AVG | MAX | MIN | SUM)
+    :aggregateFunctionName
       '(' aggregator=(ALL | DISTINCT)? functionArg ')'
     | COUNT '(' (starArg='*' | aggregator=ALL? functionArg) ')'
+    ;
+
+aggregateFunctionName
+    : (AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT)
     ;
 
 functionArgs

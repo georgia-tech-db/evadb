@@ -124,6 +124,7 @@ class TableSources(evaql_parserVisitor):
         target_list = None
         from_clause = None
         where_clause = None
+        groupby_clause = None
         orderby_clause = None
         limit_count = None
 
@@ -139,6 +140,7 @@ class TableSources(evaql_parserVisitor):
                     clause = self.visit(child)
                     from_clause = clause.get("from", None)
                     where_clause = clause.get("where", None)
+                    groupby_clause = clause.get("groupby", None)
 
                 elif rule_idx == evaql_parser.RULE_orderByClause:
                     orderby_clause = self.visit(ctx.orderByClause())
@@ -158,6 +160,7 @@ class TableSources(evaql_parserVisitor):
             target_list,
             from_clause,
             where_clause,
+            groupby_clause=groupby_clause,
             orderby_clause_list=orderby_clause,
             limit_count=limit_count,
         )
@@ -176,16 +179,31 @@ class TableSources(evaql_parserVisitor):
 
         return select_list
 
+    # TODO ACTION
     def visitFromClause(self, ctx: evaql_parser.FromClauseContext):
         from_table = None
         where_clause = None
-
+        groupby_clause = None
+        # TODO ACTION Group By
         if ctx.tableSources():
             from_table = self.visit(ctx.tableSources())
         if ctx.whereExpr is not None:
             where_clause = self.visit(ctx.whereExpr)
+        if ctx.groupbyClause():
+            groupby_clause = self.visit(ctx.groupbyClause())
+        return {"from": from_table, "where": where_clause, "groupby": groupby_clause}
 
-        return {"from": from_table, "where": where_clause}
+    def visitGroupbyClause(self, ctx: evaql_parser.GroupbyClauseContext):
+        groupby_clause = None
+        if ctx.groupByItem():
+            # TODO ACTION: Check what happens if 0 size is possible
+            if len(ctx.groupByItem()) > 1:
+                err_msg = f"Parsing error: We do not \
+                        support multiple attributes in GROUP BY"
+                logger.error(err_msg)
+                raise SyntaxError(err_msg)
+            groupby_clause = self.visit(ctx.groupByItem()[0])
+        return groupby_clause
 
     def visitAliasClause(self, ctx: evaql_parser.AliasClauseContext):
         alias_name = self.visit(ctx.uid())

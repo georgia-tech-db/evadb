@@ -248,6 +248,20 @@ class SelectExecutorTest(unittest.TestCase):
         # Disabling it for time being
         self.assertEqual(actual_batch, expected_batch[0])
 
+    def test_select_and_groupby(self):
+        # select_query = "SELECT name, id,data FROM MyVideo ORDER BY id;"
+        select_query = "SELECT FIRST(id) FROM MyVideo GROUP BY '8f';"
+        # select_query = "SELECT FastRCNNObjectDetector(data) FROM MyVideo GROUP BY '8f';"
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+
+        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+
+        self.assertEqual(len(actual_batch), len(expected_batch[0]))
+        # Since frames are fetched in random order, this test might be flaky
+        # Disabling it for time being
+        self.assertEqual(actual_batch, expected_batch[0])
+
     def test_aaselect_and_sample_with_predicate(self):
         select_query = (
             "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
@@ -482,5 +496,8 @@ class SelectExecutorTest(unittest.TestCase):
             )
 
 
-if __name__ == "__main__":
-    unittest.main()
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(SelectExecutorTest(
+        'test_select_and_groupby'))
+    unittest.TextTestRunner().run(suite)

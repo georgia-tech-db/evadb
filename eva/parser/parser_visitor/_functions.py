@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from antlr4 import TerminalNode
-
+from eva.expression.aggregation_expression import AggregationExpression
+from eva.expression.abstract_expression import ExpressionType
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
@@ -120,3 +121,30 @@ class Functions(evaql_parserVisitor):
         udf_info = self.getUDFInfo(ctx)
         stmt = CreateUDFStatement(*udf_info)
         return stmt
+
+    def visitAggregateWindowedFunction(self, ctx: evaql_parser.AggregateWindowedFunctionContext):
+        agg_function_name = None
+        if ctx.aggregateFunctionName():
+            agg_func_name = self.visit(ctx.aggregateFunctionName())
+        else:
+            logger.error("Aggregate function name missing.")
+        agg_func_type = self.getAggregateFunctionType(agg_func_name)
+        agg_func_arg = self.visit(ctx.functionArg())
+        agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
+
+        return agg_expr
+
+    def visitAggregateFunctionName(self, ctx: evaql_parser.AggregateFunctionNameContext):
+        return ctx.getText()
+
+    def getAggregateFunctionType(self, agg_func_name):
+        agg_func_type = None
+        if agg_func_name == 'FIRST':
+            agg_func_type = ExpressionType.AGGREGATION_FIRST
+        elif agg_func_name == 'LAST':
+            agg_func_type = ExpressionType.AGGREGATION_LAST
+        elif agg_func_name == 'SEGMENT':
+            agg_func_type = ExpressionType.AGGREGATION_SEGMENT
+        else:
+            logger.error("Aggregate Function {} not supported.".format(agg_func_name))
+        return agg_func_type
