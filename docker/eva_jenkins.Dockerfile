@@ -4,8 +4,8 @@ FROM nvidia/cuda
 ENV OPENCV_VERSION="4.5.1"
 
 # OpenCV Specific Installation
-RUN apt-get -qq update \
-    && apt-get -qq install -y --no-install-recommends \
+RUN apt-get -qq update && \
+    DEBIAN_FRONTEND=noninteractive apt-get -qq install -y --no-install-recommends \
         build-essential \
         cmake \
         git \
