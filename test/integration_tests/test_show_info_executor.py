@@ -36,7 +36,7 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertEqual(len(result.columns), 5)
 
         expected = {
-            "name": ["FastRCNNObjectDetector", "Array_Count"],
+            "name": ["FastRCNNObjectDetector", "ArrayCount"],
             "inputs": [
                 ["Frame_Array NDARRAY UINT8 [3, None, None]"],
                 ["Input_Array NDARRAY ANYTYPE []", "Search_Key ANY"],

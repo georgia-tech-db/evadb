@@ -18,10 +18,10 @@ import pandas as pd
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
-class Array_Count(AbstractUDF):
+class ArrayCount(AbstractUDF):
     @property
     def name(self) -> str:
-        return "Array_Count"
+        return "ArrayCount"
 
     def setup(self):
         pass

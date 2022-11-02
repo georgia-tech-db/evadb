@@ -39,7 +39,7 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
 )
 
 ArrayCount_udf_query = """CREATE UDF
-            IF NOT EXISTS  Array_Count
+            IF NOT EXISTS  ArrayCount
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
             OUTPUT (key_count INTEGER)
             TYPE NdarrayUDF
