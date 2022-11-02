@@ -48,3 +48,4 @@ RUN apt-get -qq update && \
 # Give Permission To Home Directory To Create EVA
 RUN mkdir /.eva && chmod -R 777 /.eva
 RUN mkdir /.cache && chmod -R 777 /.cache
+RUN mkdir /.EasyOCR && chmod -R 777 /.EasyOCR
