@@ -34,5 +34,12 @@ pip install -e ."[dev]"'''
 sh script/test/test.sh'''
       }
     }
+
+    stage('Coverage Check') {
+      steps {
+        sh '''. env37/bin/activate
+coveralls'''
+      }
+    }
   }
 }
