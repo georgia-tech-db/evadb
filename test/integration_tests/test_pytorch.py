@@ -84,7 +84,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ocr(self):
-        create_udf_query = """CREATE UDF OCRExtractor
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -137,3 +137,25 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
 
                 pass
+
+    @pytest.mark.torchtest
+    def test_should_run_ocr_on_cropped_data(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  OCRExtraction
+                  IMPL  'eva/udfs/ocr_extractor.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT OCRExtractor(Crop(data, [2, 2, 24, 24])) FROM MNIST
+                        WHERE id >= 150 AND id < 155;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
+
+        # non-trivial test case for MNIST
+        res = actual_batch.frames
+        self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
+        self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)

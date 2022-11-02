@@ -15,7 +15,7 @@ pipeline {
 pip install --upgrade pip
 pip install scikit-build
 pip install cython
-python setup.py install'''
+pip install -e ."[dev]"'''
           }
         }
 
