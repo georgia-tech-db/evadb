@@ -14,10 +14,7 @@
 # limitations under the License.
 import asyncio
 import os
-import signal
 import socket
-import threading
-import time
 import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock
@@ -124,7 +121,7 @@ class DBAPITests(unittest.TestCase):
         with self.assertRaises(OSError):
             connect(hostname, port=1)
 
-    def test_eva_signal(self):
+    def test_eva_cursor_reset(self):
         hostname = "localhost"
 
         loop = asyncio.new_event_loop()
@@ -136,13 +133,4 @@ class DBAPITests(unittest.TestCase):
         connection = connect(hostname, mock_server.server_port)
         cursor = connection.cursor()
 
-        def trigger_signal():
-            time.sleep(1)
-            os.kill(os.getpid(), signal.SIGTERM)
-
-        thread = threading.Thread(target=trigger_signal)
-        thread.daemon = True
-        thread.start()
-
-        query = "test_query"
-        cursor.execute(query)
+        cursor.reset()
