@@ -1,5 +1,5 @@
 # https://www.jenkins.io/doc/book/installing/docker/ - Follow these steps for starting jenkins.
-FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
+FROM nvidia/cuda
 
 ENV OPENCV_VERSION="4.5.1"
 
