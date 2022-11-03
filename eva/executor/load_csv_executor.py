@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
+from pathlib import Path
 
 import pandas as pd
 
@@ -22,6 +22,7 @@ from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.readers.csv_reader import CSVReader
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class LoadCSVExecutor(AbstractExecutor):
@@ -39,11 +40,28 @@ class LoadCSVExecutor(AbstractExecutor):
         using storage engine
         """
 
+        csv_file_path = None
+        # Validate file_path
+        if Path(self.node.file_path).exists():
+            csv_file_path = self.node.file_path
+        # check in the upload directory
+        else:
+            csv_path = Path(Path(self.upload_dir) / self.node.file_path)
+            if csv_path.exists():
+                csv_file_path = csv_path
+
+        if csv_file_path is None:
+            error = "Failed to find a video file at location: {}".format(
+                self.node.file_path
+            )
+            logger.error(error)
+            raise RuntimeError(error)
+
         # Read the CSV file
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
         csv_reader = CSVReader(
-            os.path.join(self.upload_dir, self.node.file_path),
+            csv_file_path,
             column_list=self.node.column_list,
             batch_mem_size=self.node.batch_mem_size,
         )
@@ -58,7 +76,7 @@ class LoadCSVExecutor(AbstractExecutor):
         df_yield_result = Batch(
             pd.DataFrame(
                 {
-                    "CSV": str(self.node.file_path),
+                    "CSV": csv_file_path,
                     "Number of loaded frames": num_loaded_frames,
                 },
                 index=[0],
