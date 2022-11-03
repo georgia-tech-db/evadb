@@ -250,7 +250,8 @@ class SelectExecutorTest(unittest.TestCase):
 
     def test_select_and_groupby(self):
         # select_query = "SELECT name, id,data FROM MyVideo ORDER BY id;"
-        select_query = "SELECT FIRST(id) FROM MyVideo GROUP BY '8f';"
+        # select_query = "SELECT name, id,data FROM MyVideo SAMPLE 8;"
+        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '3f';"
         # select_query = "SELECT FastRCNNObjectDetector(data) FROM MyVideo GROUP BY '8f';"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()

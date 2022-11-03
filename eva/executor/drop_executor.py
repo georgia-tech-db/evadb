@@ -39,7 +39,7 @@ class DropExecutor(AbstractExecutor):
         if not catalog_manager.check_table_exists(
             table_ref.table.database_name, table_ref.table.table_name
         ):
-            err_msg = "Table: {} does not exsits".format(table_ref)
+            err_msg = "Table: {} does not exist".format(table_ref)
             if self.node.if_exists:
                 logger.warn(err_msg)
             else:

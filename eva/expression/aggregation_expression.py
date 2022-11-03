@@ -17,6 +17,7 @@ from eva.expression.abstract_expression import (
     ExpressionReturnType,
     ExpressionType,
 )
+from eva.models.storage.batch import Batch
 
 
 class AggregationExpression(AbstractExpression):
@@ -37,17 +38,13 @@ class AggregationExpression(AbstractExpression):
 
     def evaluate(self, *args, **kwargs):
         batch = self.get_child(0).evaluate(*args, **kwargs)
-        if self.etype == ExpressionType.AGGREGATION_SUM:
-            batch.aggregate("sum")
-        elif self.etype == ExpressionType.AGGREGATION_COUNT:
-            batch.aggregate("count")
-        elif self.etype == ExpressionType.AGGREGATION_AVG:
-            batch.aggregate("mean")
-        elif self.etype == ExpressionType.AGGREGATION_MIN:
-            batch.aggregate("min")
-        elif self.etype == ExpressionType.AGGREGATION_MAX:
-            batch.aggregate("max")
-
+        if self.etype == ExpressionType.AGGREGATION_FIRST:
+            batch = batch[0]
+        if self.etype == ExpressionType.AGGREGATION_LAST:
+            batch = batch[-1]
+        if self.etype == ExpressionType.AGGREGATION_SEGMENT:
+            batch = Batch.stack(batch)
+        batch.reset_index()
         # TODO ACTION:
         # Add raise exception if data type doesn't match
 
