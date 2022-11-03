@@ -50,7 +50,7 @@ class InsertPlan(AbstractPlan):
             self.table_metainfo,
             self.columns_list,
             self.value_list
-            )
+        )
 
     def __hash__(self) -> int:
         return hash(

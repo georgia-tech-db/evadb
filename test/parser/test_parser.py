@@ -36,7 +36,6 @@ from eva.parser.statement import AbstractStatement, StatementType
 from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 from eva.parser.upload_statement import UploadStatement
-from eva.parser.explain_statement import ExplainStatement
 
 
 class ParserTests(unittest.TestCase):
@@ -55,7 +54,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
 
         # check inner stmt
-        inner_stmt = eva_statement_list[0].explainable_stmt 
+        inner_stmt = eva_statement_list[0].explainable_stmt
         self.assertEqual(inner_stmt.stmt_type, StatementType.SELECT)
 
         # check inner stmt from
@@ -80,7 +79,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
 
         # check inner stmt
-        inner_stmt = eva_statement_list[0].explainable_stmt 
+        inner_stmt = eva_statement_list[0].explainable_stmt
         self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE_MATERIALIZED_VIEW)
 
         # check inner stmt from

@@ -45,7 +45,7 @@ class RenamePlan(AbstractPlan):
             new_name={})".format(
             self._old_table,
             self._new_name
-            )
+        )
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.old_table, self.new_name))

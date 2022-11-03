@@ -33,7 +33,6 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalExplain,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.explain_statement import ExplainStatement

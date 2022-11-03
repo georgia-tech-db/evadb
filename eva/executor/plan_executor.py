@@ -41,7 +41,6 @@ from eva.executor.upload_executor import UploadExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.executor.explain_executor import ExplainExecutor
 from eva.models.storage.batch import Batch
-from eva.optimizer.plan_generator import PlanGenerator
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 

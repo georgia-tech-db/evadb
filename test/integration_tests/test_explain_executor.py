@@ -20,10 +20,6 @@ from test.util import (
     load_inbuilt_udfs,
 )
 
-import numpy as np
-import pandas as pd
-import pytest
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -50,4 +46,4 @@ class ExplainExecutorTest(unittest.TestCase):
         # Do not create any assertion here. Just run integration test
         # to make sure no error is thrown.
         select_query = "EXPLAIN SELECT data FROM MyVideo"
-        expected_batch = execute_query_fetch_all(select_query)
+        _ = execute_query_fetch_all(select_query)
