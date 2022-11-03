@@ -79,3 +79,8 @@ def test_zeros_udf_name(all_zeros_udf):
 def test_zeros_udf_call(all_zeros_udf, test_input, expected):
     udf = all_zeros_udf()
     assert udf(test_input) == expected
+
+
+def test_incomplete_udf():
+    with pytest.raises(ValueError):
+        UDFService("inc").create_udf()

@@ -66,6 +66,10 @@ class UDFService:
         return self._forward(args[0])
 
     def create_udf(self) -> Type[AbstractUDF]:
+        if self._setup is None or self._forward is None:
+            raise ValueError(
+                "Both setup and forward functions must be decorated before creating UDF."
+            )
         return type(
             "DecoratorUDF",
             (AbstractUDF,),
