@@ -14,13 +14,8 @@
 # limitations under the License.
 from typing import Iterator, List
 
-<<<<<<< HEAD
-import pandas as pd
-from sqlalchemy.ext.declarative import declarative_base
-=======
 import numpy as np
 import pandas as pd
->>>>>>> b88efa4803486bc1ce99b80364d3e18b39689c04
 
 from eva.catalog.column_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -36,11 +31,6 @@ from eva.utils.logging_manager import logger
 # Leveraging Dynamic schema in SQLAlchemy
 # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
 
-<<<<<<< HEAD
-Base = declarative_base()
-
-=======
->>>>>>> b88efa4803486bc1ce99b80364d3e18b39689c04
 
 class SQLStorageEngine(AbstractStorageEngine):
     def __init__(self):
@@ -56,15 +46,12 @@ class SQLStorageEngine(AbstractStorageEngine):
         for col in columns:
             if col.type == ColumnType.NDARRAY:
                 dict_row[col.name] = self._serializer.serialize(dict_row[col.name])
-<<<<<<< HEAD
-=======
             elif isinstance(dict_row[col.name], (np.generic,)):
                 # SqlAlchemy does not consume numpy generic data types
                 # convert numpy datatype to python generic datatype using tolist()
                 # eg. np.int64 -> int
                 # https://stackoverflow.com/a/53067954
                 dict_row[col.name] = dict_row[col.name].tolist()
->>>>>>> b88efa4803486bc1ce99b80364d3e18b39689c04
         return dict_row
 
     def _sql_row_to_dict(self, sql_row: tuple, columns: List[DataFrameColumn]):
@@ -98,11 +85,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             table_to_remove = BaseModel.metadata.tables[table.name]
             table_to_remove.drop()
             self._sql_session.commit()
-<<<<<<< HEAD
-            # In memory metadata does not automatically sync with the database
-=======
             # In-memory metadata does not automatically sync with the database
->>>>>>> b88efa4803486bc1ce99b80364d3e18b39689c04
             # therefore manually removing the table from the in-memory metadata
             # https://github.com/sqlalchemy/sqlalchemy/issues/5112
             BaseModel.metadata.remove(table_to_remove)
