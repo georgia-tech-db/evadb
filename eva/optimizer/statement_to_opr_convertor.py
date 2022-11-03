@@ -118,12 +118,6 @@ class StatementToPlanConvertor:
         if predicate is not None:
             self._visit_select_predicate(predicate)
 
-        # Projection operator
-        select_columns = statement.target_list
-
-        if select_columns is not None:
-            self._visit_projection(select_columns)
-
         # union
         if statement.union_link is not None:
             self._visit_union(statement.union_link, statement.union_all)
@@ -137,6 +131,12 @@ class StatementToPlanConvertor:
 
         if statement.limit_count is not None:
             self._visit_limit(statement.limit_count)
+
+        # Projection operator
+        select_columns = statement.target_list
+
+        if select_columns is not None:
+            self._visit_projection(select_columns)
 
     def _visit_sample(self, sample_freq):
         sample_opr = LogicalSample(sample_freq)
