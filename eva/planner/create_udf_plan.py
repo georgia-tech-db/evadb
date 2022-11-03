@@ -95,7 +95,7 @@ class CreateUDFPlan(AbstractPlan):
             self._inputs,
             self._outputs,
             self._impl_path,
-            self._udf_type
+            self._udf_type,
         )
 
     def __hash__(self) -> int:

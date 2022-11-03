@@ -111,7 +111,7 @@ class StoragePlan(AbstractPlan):
             self._total_shards,
             self._curr_shard,
             self._predicate,
-            self._sampling_rate
+            self._sampling_rate,
         )
 
     def __hash__(self) -> int:

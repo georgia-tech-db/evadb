@@ -18,6 +18,7 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor._common_clauses_ids import CommonClauses
 from eva.parser.parser_visitor._create_statements import CreateTable
 from eva.parser.parser_visitor._drop_statement import DropTable
+from eva.parser.parser_visitor._explain_statement import Explain
 from eva.parser.parser_visitor._expressions import Expressions
 from eva.parser.parser_visitor._functions import Functions
 from eva.parser.parser_visitor._insert_statements import Insert
@@ -27,7 +28,6 @@ from eva.parser.parser_visitor._select_statement import Select
 from eva.parser.parser_visitor._show_statements import Show
 from eva.parser.parser_visitor._table_sources import TableSources
 from eva.parser.parser_visitor._upload_statement import Upload
-from eva.parser.parser_visitor._explain_statement import Explain
 
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which

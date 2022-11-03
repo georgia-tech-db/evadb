@@ -38,8 +38,7 @@ class HashJoinBuildPlan(AbstractPlan):
     def __str__(self):
         return "HashJoinBuildPlan(join_type={}, \
             build_keys={})".format(
-            self.join_type,
-            self.build_keys
+            self.join_type, self.build_keys
         )
 
     def __hash__(self) -> int:

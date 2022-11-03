@@ -49,10 +49,7 @@ class HashJoinProbePlan(AbstractJoin):
             probe_keys={}, \
             join_predicate={}, \
             join_project={})".format(
-            self.join_type,
-            self.probe_keys,
-            self.join_predicate,
-            self.join_project
+            self.join_type, self.probe_keys, self.join_predicate, self.join_project
         )
 
     def __hash__(self) -> int:

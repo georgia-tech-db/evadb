@@ -49,9 +49,7 @@ class SeqScanPlan(AbstractScan):
         return "SeqScanPlan(predicate={}, \
             columns={}, \
             alias={})".format(
-            self._predicate,
-            self._columns,
-            self.alias
+            self._predicate, self._columns, self.alias
         )
 
     def __hash__(self) -> int:

@@ -13,12 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import (
-    create_sample_video,
-    create_table,
-    file_remove,
-    load_inbuilt_udfs,
-)
+from test.util import create_sample_video, create_table, file_remove, load_inbuilt_udfs
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all

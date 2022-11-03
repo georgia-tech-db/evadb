@@ -47,9 +47,7 @@ class InsertPlan(AbstractPlan):
         return "InsertPlan(table_metainfo={}, \
             column_list={}, \
             value_list={})".format(
-            self.table_metainfo,
-            self.columns_list,
-            self.value_list
+            self.table_metainfo, self.columns_list, self.value_list
         )
 
     def __hash__(self) -> int:

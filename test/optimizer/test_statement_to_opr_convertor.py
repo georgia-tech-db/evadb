@@ -35,11 +35,11 @@ from eva.optimizer.operators import (
     LogicalUnion,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from eva.parser.explain_statement import ExplainStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement

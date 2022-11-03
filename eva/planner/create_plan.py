@@ -57,9 +57,7 @@ class CreatePlan(AbstractPlan):
         return "CreatePlan(table_ref={}, \
             column_list={}, \
             if_not_exists={})".format(
-            self._table_ref,
-            self._column_list,
-            self._if_not_exists
+            self._table_ref, self._column_list, self._if_not_exists
         )
 
     def __hash__(self) -> int:

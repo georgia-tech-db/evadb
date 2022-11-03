@@ -31,13 +31,13 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
-from eva.parser.explain_statement import ExplainStatement
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 

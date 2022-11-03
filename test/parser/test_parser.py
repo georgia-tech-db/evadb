@@ -83,7 +83,9 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE_MATERIALIZED_VIEW)
 
         # check inner stmt from
-        self.assertIsNotNone(inner_stmt.view_ref, TableRef(TableInfo("uadetrac_fastRCNN")))
+        self.assertIsNotNone(
+            inner_stmt.view_ref, TableRef(TableInfo("uadetrac_fastRCNN"))
+        )
 
     def test_create_statement(self):
         parser = Parser()
