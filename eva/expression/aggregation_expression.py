@@ -48,6 +48,9 @@ class AggregationExpression(AbstractExpression):
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
 
+        # TODO ACTION:
+        # Add raise exception if data type doesn't match
+
         return batch
 
     def __eq__(self, other):
@@ -55,3 +58,11 @@ class AggregationExpression(AbstractExpression):
         if not isinstance(other, AggregationExpression):
             return False
         return is_subtree_equal and self.etype == other.etype
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.etype,
+            )
+        )

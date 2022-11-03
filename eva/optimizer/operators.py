@@ -45,6 +45,7 @@ class OperatorType(IntEnum):
     LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
+    LOGICALGROUPBY = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
@@ -289,6 +290,23 @@ class LogicalProject(Operator):
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.target_list)))
 
+class LogicalGroupBy(Operator):
+    def __init__(self, groupby_clause: ConstantValueExpression, children: List = None):
+        super().__init__(OperatorType.LOGICALGROUPBY, children)
+        self._groupby_clause = groupby_clause
+
+    @property
+    def groupby_clause(self):
+        return self._groupby_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalGroupBy):
+            return False
+        return is_subtree_equal and self.groupby_clause == other.groupby_clause
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.groupby_clause))
 
 class LogicalOrderBy(Operator):
     def __init__(self, orderby_list: List, children: List = None):

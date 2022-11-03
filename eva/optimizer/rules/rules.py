@@ -50,6 +50,7 @@ from eva.optimizer.operators import (
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
+    LogicalGroupBy,
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
@@ -71,6 +72,7 @@ from eva.planner.insert_plan import InsertPlan
 from eva.planner.lateral_join_plan import LateralJoinPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.planner.groupby_plan import GroupByPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.rename_plan import RenamePlan
 from eva.planner.sample_plan import SamplePlan
@@ -105,6 +107,7 @@ class RuleType(Flag):
 
     # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
     LOGICAL_UNION_TO_PHYSICAL = auto()
+    LOGICAL_GROUPBY_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
@@ -140,6 +143,7 @@ class Promise(IntEnum):
     # IMPLEMENTATION RULES
     LOGICAL_UNION_TO_PHYSICAL = auto()
     LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
+    LOGICAL_GROUPBY_TO_PHYSICAL = auto()
     LOGICAL_ORDERBY_TO_PHYSICAL = auto()
     LOGICAL_LIMIT_TO_PHYSICAL = auto()
     LOGICAL_INSERT_TO_PHYSICAL = auto()
@@ -761,6 +765,23 @@ class LogicalUnionToPhysical(Rule):
             after.append_child(child)
         return after
 
+class LogicalGroupByToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGROUPBY)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_GROUPBY_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_GROUPBY_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalGroupBy, context: OptimizerContext):
+        after = GroupByPlan(before.groupby_clause)
+        for child in before.children:
+            after.append_child(child)
+        return after
 
 class LogicalOrderByToPhysical(Rule):
     def __init__(self):
@@ -998,6 +1019,7 @@ class RulesManager:
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),
