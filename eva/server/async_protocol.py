@@ -22,7 +22,7 @@ from eva.utils.logging_manager import logger
 class EvaProtocolBuffer:
     """
     Buffer to handle arbitrary length of message.
-    Data chunk sent back by EVA Server starts with the length of the data,
+    Data chunk sent back by EVA server starts with the length of the data,
     a delimiter `|`, and the actual data.
     """
 

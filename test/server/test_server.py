@@ -16,7 +16,6 @@ import asyncio
 import threading
 import time
 import unittest
-from asyncio import CancelledError
 from unittest.mock import MagicMock
 
 import mock
@@ -48,7 +47,7 @@ class ServerTests(unittest.TestCase):
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(CancelledError):
+        with self.assertRaises((SystemExit)):
             start_server(
                 host=host,
                 port=port,
