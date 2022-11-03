@@ -24,6 +24,7 @@ class ResponseStatus(str, Enum):
     FAIL = -1
     SUCCESS = 0
 
+
 @dataclass(frozen=True)
 class Response:
     """
@@ -42,12 +43,12 @@ class Response:
         if self.query_time is not None:
             obj["query_time"] = self.query_time
 
-        return PickleSerializer().serialize(obj)
+        return PickleSerializer.serialize(obj)
 
     @classmethod
     def deserialize(cls, data):
-        obj = PickleSerializer().deserialize(data)
-        return cls(**obj)
+        obj = PickleSerializer.deserialize(data)
+        return obj
 
     def __str__(self):
         if self.query_time is not None:

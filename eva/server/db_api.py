@@ -58,7 +58,6 @@ class EVACursor(object):
         """
         try:
             message = await self._protocol.queue.get()
-            print(message)
             response = await asyncio.coroutine(Response.deserialize)(message)
         except Exception as e:
             raise e

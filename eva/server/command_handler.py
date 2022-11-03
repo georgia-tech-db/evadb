@@ -23,6 +23,7 @@ from eva.models.storage.batch import Batch
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
+from eva.server.networking_utils import serialize_message
 from eva.utils.logging_manager import logger
 from eva.utils.timer import Timer
 
@@ -90,18 +91,7 @@ def handle_request(transport, request_message):
 
     query_runtime.log_elapsed_time("Query Response Time")
 
-    responseData = response.serialize()
-    print(responseData)
-    # # Send data length, because response can be very large
-    # data = (str(len(responseData)) + "|" + responseData).encode("ascii")
-
-    logger.debug(
-        "Response to client: --|"
-        + str(response)
-        + "|--\n"
-        + "Length: "
-        + str(len(responseData))
-    )
+    responseData = serialize_message(response)
 
     transport.write(responseData)
 

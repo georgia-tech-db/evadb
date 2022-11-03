@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import json
 from typing import Callable, Iterable, List, TypeVar, Union
 
 import numpy as np
@@ -22,7 +21,6 @@ from eva.expression.abstract_expression import ExpressionType
 from eva.parser.alias import Alias
 from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
-
 
 Batch = TypeVar("Batch")
 
@@ -61,15 +59,12 @@ class Batch:
         return np.array(self._frames[column_name])
 
     def serialize(self):
-        obj = {
-            "frames": self._frames,
-            "batch_size": len(self)
-        }
-        return PickleSerializer().serialize(obj)
+        obj = {"frames": self._frames, "batch_size": len(self)}
+        return PickleSerializer.serialize(obj)
 
     @classmethod
     def deserialize(cls, data):
-        obj = PickleSerializer().deserialize(data)
+        obj = PickleSerializer.deserialize(data)
         return cls(frames=obj["frames"])
 
     @classmethod
@@ -134,8 +129,7 @@ class Batch:
         return (
             "Batch Object:\n"
             "@dataframe: %s\n"
-            "@batch_size: %d\n"
-            % (self._frames, len(self))
+            "@batch_size: %d\n" % (self._frames, len(self))
         )
 
     def __eq__(self, other: Batch):
@@ -199,7 +193,7 @@ class Batch:
             sort_type: list of True/False if ASC for each column name in 'by'
                 i.e [True, False] means [ASC, DESC]
         """
-        
+
         if sort_type is None:
             sort_type = [True]
 

@@ -15,14 +15,8 @@
 import asyncio
 import struct
 
-from eva.server.networking_utils import set_socket_io_timeouts
+from eva.server.networking_utils import serialize_message, set_socket_io_timeouts
 from eva.utils.logging_manager import logger
-
-
-def pack_message(message):
-    header = struct.pack("!Q", len(message))
-    data = header + message
-    return data
 
 
 class EvaProtocolBuffer:
@@ -113,35 +107,15 @@ class EvaClient(asyncio.Protocol):
             else:
                 self.done.set_result(None)
 
-    def data_received(self, data):
-
-        response_chunk = data.decode()
-        logger.debug(
-            "[ "
-            + str(self.id)
-            + " ]"
-            + " Response from server: --|"
-            + str(response_chunk)
-            + "|--"
-        )
-
-        self.buffer.feed_data(response_chunk)
+    def data_received(self, data: bytes):
+        # Response from server
+        self.buffer.feed_data(data)
         while self.buffer.has_complete_message():
             message = self.buffer.read_message()
             self.queue.put_nowait(message)
 
     @asyncio.coroutine
-    def send_message(self, message):
-
-        logger.debug(
-            "[ "
-            + str(self.id)
-            + " ]"
-            + " Request to server: --|"
-            + str(message)
-            + "|--"
-        )
-
-        request_chunk = pack_message(message)
-        # Send request
+    def send_message(self, message: str):
+        # Send request to server
+        request_chunk = serialize_message(message)
         self.transport.write(request_chunk)
