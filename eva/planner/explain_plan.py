@@ -25,5 +25,8 @@ class ExplainPlan(AbstractPlan):
     def explainable_plan(self):
         return self._explainable_plan
 
+    def __str__(self) -> str:
+        return "ExplainPlan()"
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._explainable_plan))

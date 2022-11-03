@@ -812,6 +812,7 @@ class LogicalShowToPhysical(Rule):
 class LogicalExplainToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALEXPLAIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
         super().__init__(RuleType.LOGICAL_EXPLAIN_TO_PHYSICAL, pattern)
 
     def promise(self):

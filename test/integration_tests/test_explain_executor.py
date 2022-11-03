@@ -47,6 +47,7 @@ class ExplainExecutorTest(unittest.TestCase):
         file_remove("dummy.avi")
 
     def test_explain_simple_select(self):
+        # Do not create any assertion here. Just run integration test
+        # to make sure no error is thrown.
         select_query = "EXPLAIN SELECT data FROM MyVideo"
         expected_batch = execute_query_fetch_all(select_query)
-        print(expected_batch)

@@ -54,8 +54,8 @@ class OperatorType(IntEnum):
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
-    LOGICALDELIMITER = auto()
     LOGICALEXPLAIN = auto()
+    LOGICALDELIMITER = auto()
 
 
 class Operator:

@@ -28,7 +28,11 @@ class ExplainExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        yield Batch(pd.DataFrame([self._exec(self._node.explainable_plan)]))
+        # Traverse optimized physical plan, which is commonly supported.
+        # Logical plan can be also printted by passing explainable_opr attribute
+        # of the node, but is not done for now.
+        plan_str = self._exec(self._node.children[0], 0)
+        yield Batch(pd.DataFrame([plan_str]))
 
     def _exec(self, node: AbstractPlan, depth: int):
         cur_str = " " * depth * 4 + "|__ " + str(node) + "\n"

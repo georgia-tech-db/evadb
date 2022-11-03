@@ -94,7 +94,6 @@ class RulesManager:
             LogicalInsertToPhysical(),
             LogicalLoadToPhysical(),
             LogicalUploadToPhysical(),
-            LogicalExplainToPhysical(),
             LogicalSampleToUniformSample(),
             DistributedLogicalGetToSeqScan()
             if ray_enabled
@@ -112,6 +111,7 @@ class RulesManager:
             if ray_enabled
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalExplainToPhysical(),
         ]
 
         if ray_enabled:
