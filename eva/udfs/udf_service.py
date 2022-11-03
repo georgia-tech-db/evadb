@@ -13,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 from enum import Enum, auto
+from typing import Callable
+
+from numpy.typing import ArrayLike
 
 
 class FrameType(Enum):
@@ -22,15 +26,32 @@ class FrameType(Enum):
 
 
 class UDFService:
-    def setup(self, func):
-        return func
+    def __init__(self, name: str) -> None:
+        self._name = name
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    def setup(self, func: Callable):
+        @functools.wraps(func)
+        def wrapper_setup(*args, **kwargs):
+            return func(*args, **kwargs)
+
+        return wrapper_setup
 
     def forward(
         self,
-        func,
         input_type: FrameType,
         output_type: FrameType,
         channels_first: bool = True,
         batch: bool = False,
     ):
-        return func
+        def decorator_forward(func: Callable):
+            @functools.wraps(func)
+            def wrapper_forward(frame: ArrayLike):
+                return func(frame)
+
+            return wrapper_forward
+
+        return decorator_forward

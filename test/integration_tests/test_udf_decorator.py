@@ -34,9 +34,7 @@ def all_zeros_callable():
 
 @pytest.fixture
 def all_zeros_udf(all_zeros_callable):
-    all_zero_udf = UDFService()
-
-    all_zero_udf.name = "all_zeros"
+    all_zero_udf = UDFService("all_zeros")
 
     @all_zero_udf.setup
     def setup():
@@ -50,6 +48,8 @@ def all_zeros_udf(all_zeros_callable):
     )
     def forward(frame):
         return all_zeros_callable(frame)
+
+    return all_zero_udf
 
 
 def test_zeros_callable_true(all_zeros_callable):
@@ -68,6 +68,5 @@ def test_zeros_callable_none(all_zeros_callable):
     assert not all_zeros_callable(frame)
 
 
-@pytest.mark.xfail
 def test_zeros_udf_name(all_zeros_udf):
     assert all_zeros_udf.name == "all_zeros"
