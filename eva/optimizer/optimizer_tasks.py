@@ -21,7 +21,8 @@ from eva.optimizer.binder import Binder
 from eva.optimizer.group import Group
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.property import PropertyType
-from eva.optimizer.rules.rules import Rule, RulesManager
+from eva.optimizer.rules.rules_base import Rule
+from eva.optimizer.rules.rules_manager import RulesManager
 from eva.utils.logging_manager import logger
 
 if TYPE_CHECKING:

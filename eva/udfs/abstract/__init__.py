@@ -12,4 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+<<<<<<< HEAD
+<<<<<<< HEAD:eva/udfs/abstract/__init__.py
 """abstract user defined functions"""
+=======
+"""ray subdirectory"""
+>>>>>>> b88efa4803486bc1ce99b80364d3e18b39689c04:eva/experimental/ray/__init__.py
+=======
+"""abstract user defined functions"""
+>>>>>>> b88efa4803486bc1ce99b80364d3e18b39689c04

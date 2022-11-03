@@ -16,7 +16,7 @@ from typing import List
 
 from eva.constants import UNDEFINED_GROUP_ID
 from eva.optimizer.operators import Operator
-from eva.optimizer.rules.rules import RuleType
+from eva.optimizer.rules.rules_base import RuleType
 
 
 class GroupExpression:

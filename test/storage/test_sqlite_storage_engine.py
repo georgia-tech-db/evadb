@@ -51,6 +51,8 @@ class SQLStorageEngineTest(unittest.TestCase):
         sqlengine.create(self.table)
         records = list(sqlengine.read(self.table, batch_mem_size=3000))
         self.assertEqual(records, [])
+        # clean up
+        sqlengine.drop(self.table)
 
     def test_should_write_rows_to_table(self):
         dummy_batches = list(create_dummy_batches())
@@ -63,3 +65,5 @@ class SQLStorageEngineTest(unittest.TestCase):
 
         read_batch = list(sqlengine.read(self.table, batch_mem_size=3000))
         self.assertTrue(read_batch, dummy_batches)
+        # clean up
+        sqlengine.drop(self.table)

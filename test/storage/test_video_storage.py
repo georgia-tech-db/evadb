@@ -68,4 +68,4 @@ class VideoStorageEngineTest(unittest.TestCase):
         table = MagicMock()
         table.file_url = Exception()
         with self.assertRaises(Exception):
-            self.video_engine.write(MagicMock(), batch)
+            self.video_engine.write(table, batch)

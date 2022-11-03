@@ -152,7 +152,7 @@ class StatementBinderTests(unittest.TestCase):
             func_expr.alias,
             Alias("func_expr", ["out1"]),
         )
-        self.assertEqual(func_expr.function, "path_to_class")
+        self.assertEqual(func_expr.function(), "path_to_class")
 
         # Case 2 output not set
         func_expr.output = None
@@ -171,7 +171,7 @@ class StatementBinderTests(unittest.TestCase):
                 ["out1", "out2"],
             ),
         )
-        self.assertEqual(func_expr.function, "path_to_class")
+        self.assertEqual(func_expr.function(), "path_to_class")
 
         # Raise error if the class object cannot be created
         mock_path_to_class.reset_mock()
