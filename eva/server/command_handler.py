@@ -90,9 +90,10 @@ def handle_request(transport, request_message):
 
     query_runtime.log_elapsed_time("Query Response Time")
 
-    responseData = response.to_json()
-    # Send data length, because response can be very large
-    data = (str(len(responseData)) + "|" + responseData).encode("ascii")
+    responseData = response.serialize()
+    print(responseData)
+    # # Send data length, because response can be very large
+    # data = (str(len(responseData)) + "|" + responseData).encode("ascii")
 
     logger.debug(
         "Response to client: --|"
@@ -102,6 +103,6 @@ def handle_request(transport, request_message):
         + str(len(responseData))
     )
 
-    transport.write(data)
+    transport.write(responseData)
 
     return response

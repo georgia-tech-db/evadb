@@ -20,21 +20,8 @@ import pandas as pd
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.parser.alias import Alias
+from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
-
-
-class BatchEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, pd.DataFrame):
-            return {"__dataframe__": obj.to_json()}
-        return json.JSONEncoder.default(self, obj)
-
-
-def as_batch(d):
-    if "__dataframe__" in d:
-        return pd.read_json(d["__dataframe__"])
-    else:
-        return d
 
 
 Batch = TypeVar("Batch")
@@ -50,16 +37,14 @@ class Batch:
 
     Arguments:
         frames (DataFrame): pandas Dataframe holding frames data
-        identifier_column (str): A column used to uniquely a row
     """
 
-    def __init__(self, frames=None, identifier_column=None):
+    def __init__(self, frames=None):
         self._frames = pd.DataFrame() if frames is None else frames
         if not isinstance(self._frames, pd.DataFrame):
             raise ValueError(
                 "Batch constructor not properly called.\n" "Expected pandas.DataFrame"
             )
-        self._identifier_column = identifier_column
 
     @property
     def frames(self) -> pd.DataFrame:
@@ -75,18 +60,17 @@ class Batch:
     def column_as_numpy_array(self, column_name="data"):
         return np.array(self._frames[column_name])
 
-    def to_json(self):
+    def serialize(self):
         obj = {
             "frames": self._frames,
-            "batch_size": len(self),
-            "identifier_column": self._identifier_column,
+            "batch_size": len(self)
         }
-        return json.dumps(obj, cls=BatchEncoder)
+        return PickleSerializer().serialize(obj)
 
     @classmethod
-    def from_json(cls, json_str: str):
-        obj = json.loads(json_str, object_hook=as_batch)
-        return cls(frames=obj["frames"], identifier_column=obj["identifier_column"])
+    def deserialize(cls, data):
+        obj = PickleSerializer().deserialize(data)
+        return cls(frames=obj["frames"])
 
     @classmethod
     def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
@@ -151,8 +135,7 @@ class Batch:
             "Batch Object:\n"
             "@dataframe: %s\n"
             "@batch_size: %d\n"
-            "@identifier_column: %s"
-            % (self._frames, len(self), self._identifier_column)
+            % (self._frames, len(self))
         )
 
     def __eq__(self, other: Batch):
@@ -200,9 +183,7 @@ class Batch:
         in_place sort
         """
         if by is None:
-            if self._identifier_column in self._frames:
-                by = [self._identifier_column]
-            elif not self.empty():
+            if not self.empty():
                 by = self.columns[0]
             else:
                 logger.warn("Sorting an empty batch")
@@ -218,9 +199,7 @@ class Batch:
             sort_type: list of True/False if ASC for each column name in 'by'
                 i.e [True, False] means [ASC, DESC]
         """
-        # if by is None and self.identifier_column in self._frames:
-        #     by = [self.identifier_column]
-
+        
         if sort_type is None:
             sort_type = [True]
 
@@ -280,7 +259,7 @@ class Batch:
                                  Frames: %s"
                 % (unknown_cols, self._frames)
             )
-        return Batch(self._frames[verfied_cols], self._identifier_column)
+        return Batch(self._frames[verfied_cols])
 
     def repeat(self, times: int) -> None:
         """

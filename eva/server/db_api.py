@@ -58,7 +58,8 @@ class EVACursor(object):
         """
         try:
             message = await self._protocol.queue.get()
-            response = await asyncio.coroutine(Response.from_json)(message)
+            print(message)
+            response = await asyncio.coroutine(Response.deserialize)(message)
         except Exception as e:
             raise e
         self._pending_query = False

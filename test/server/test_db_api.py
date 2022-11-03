@@ -54,7 +54,7 @@ class DBAPITests(unittest.TestCase):
         with self.assertRaises(SystemError):
             asyncio.run(eva_cursor.execute_async(query))
 
-    @mock.patch.object(Response, "from_json")
+    @mock.patch.object(Response, "serialize")
     def test_eva_cursor_fetch_one_async(self, mock_response):
         protocol = AsyncMock()
         eva_cursor = EVACursor(protocol)

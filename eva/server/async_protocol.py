@@ -13,9 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import struct
 
 from eva.server.networking_utils import set_socket_io_timeouts
 from eva.utils.logging_manager import logger
+
+
+def pack_message(message):
+    header = struct.pack("!Q", len(message))
+    data = header + message
+    return data
 
 
 class EvaProtocolBuffer:
@@ -29,15 +36,16 @@ class EvaProtocolBuffer:
         self.empty()
 
     def empty(self):
-        self.buf = ""
+        self.buf = bytearray()
         self.expected_length = -1
 
-    def feed_data(self, data: str):
-        if not self.buf:
-            # First chunk should contain the length of the message
-            segs = data.split("|", 1)
-            self.expected_length = int(segs[0])
-            self.buf += segs[1]
+    def feed_data(self, data):
+        if self.expected_length == -1:
+            # First chunk should contain the 8 bytes header with chunk size
+            header = data[:8]
+            size = struct.unpack("!Q", header)[0]
+            self.expected_length = size
+            self.buf += data[8:]
         else:
             self.buf += data
 
@@ -134,6 +142,6 @@ class EvaClient(asyncio.Protocol):
             + "|--"
         )
 
-        request_chunk = (str(len(message)) + "|" + message).encode("ascii")
+        request_chunk = pack_message(message)
         # Send request
         self.transport.write(request_chunk)
