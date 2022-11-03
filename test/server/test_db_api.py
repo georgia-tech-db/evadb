@@ -13,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import os
+import signal
 import socket
+import threading
+import time
 import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from unittest.mock import MagicMock
@@ -42,13 +46,23 @@ class DBAPITests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def test_EVA_Cursor_execute_async(self):
-        protocol = AsyncMock()
-        eva_cursor = EVACursor(protocol)
+    def setUp(self) -> None:
+        f = open("upload.txt", "w")
+        f.write("dummy data")
+        f.close()
+        return super().setUp()
+
+    def tearDown(self) -> None:
+        os.remove("upload.txt")
+        return super().tearDown()
+
+    def test_eva_cursor_execute_async(self):
+        connection = AsyncMock()
+        eva_cursor = EVACursor(connection)
         query = "test_query"
         asyncio.run(eva_cursor.execute_async(query))
         self.assertEqual(eva_cursor._pending_query, True)
-        protocol.send_message.assert_called_with(query)
+        connection.protocol.send_message.assert_called_with(query)
 
         # concurrent queries not allowed
         with self.assertRaises(SystemError):
@@ -56,13 +70,28 @@ class DBAPITests(unittest.TestCase):
 
     @mock.patch.object(Response, "from_json")
     def test_eva_cursor_fetch_one_async(self, mock_response):
-        protocol = AsyncMock()
-        eva_cursor = EVACursor(protocol)
+        connection = AsyncMock()
+        eva_cursor = EVACursor(connection)
         response = "test_response"
         mock_response.side_effect = [response]
         expected = asyncio.run(eva_cursor.fetch_one_async())
         self.assertEqual(eva_cursor._pending_query, False)
-        protocol.queue.get.assert_called_once()
+        connection.protocol.queue.get.assert_called_once()
+        self.assertEqual(expected, response)
+
+    @mock.patch.object(Response, "from_json")
+    def test_eva_cursor_fetch_one_sync(self, mock_response):
+        connection = AsyncMock()
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        connection.protocol.loop = loop
+
+        eva_cursor = EVACursor(connection)
+        response = "test_response"
+        mock_response.side_effect = [response]
+        expected = eva_cursor.fetch_one()
+        self.assertEqual(eva_cursor._pending_query, False)
+        connection.protocol.queue.get.assert_called_once()
         self.assertEqual(expected, response)
 
     def test_eva_connection(self):
@@ -80,9 +109,12 @@ class DBAPITests(unittest.TestCase):
         self.assertEquals(type(connection._protocol), EvaClient)
         self.assertEquals(type(cursor), EVACursor)
 
+        # test upload transformation with existing file
+        cursor._upload_transformation('UPLOAD PATH "upload.txt" BLOB')
+
         # test upload transformation with non-existing file
         with self.assertRaises(FileNotFoundError):
-            cursor._upload_transformation('UPLOAD PATH "foo" BLOB')
+            cursor._upload_transformation('UPLOAD PATH "blah.txt" BLOB')
 
         # test attr
         with self.assertRaises(AttributeError):
@@ -91,3 +123,26 @@ class DBAPITests(unittest.TestCase):
         # test connection error with incorrect port
         with self.assertRaises(OSError):
             connect(hostname, port=1)
+
+    def test_eva_signal(self):
+        hostname = "localhost"
+
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        mock_server_port = get_free_port()
+        mock_server = HTTPServer((hostname, mock_server_port), BaseHTTPRequestHandler)
+
+        connection = connect(hostname, mock_server.server_port)
+        cursor = connection.cursor()
+
+        def trigger_signal():
+            time.sleep(1)
+            os.kill(os.getpid(), signal.SIGTERM)
+
+        thread = threading.Thread(target=trigger_signal)
+        thread.daemon = True
+        thread.start()
+
+        query = "test_query"
+        cursor.execute(query)

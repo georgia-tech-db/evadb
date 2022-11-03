@@ -29,6 +29,15 @@ class EvaCommandInterpreter(Cmd):
     def __init__(self):
         super().__init__()
 
+    def cmdloop_with_keyboard_interrupt(self, intro=None):
+        quit_loop = False
+        while quit_loop is not True:
+            try:
+                self.cmdloop()
+                quit_loop = True
+            except KeyboardInterrupt:
+                print("\ncommand interrupted...\n")
+
     def preloop(self):
         # To retain command history across multiple client sessions
         if os.path.exists(histfile):
@@ -61,7 +70,6 @@ class EvaCommandInterpreter(Cmd):
 
     def do_query(self, query):
         """Takes in SQL query and generates the output"""
-
         self.cursor.execute(query)
         print(self.cursor.fetch_all())
         return False
@@ -89,7 +97,9 @@ def handle_user_input(connection):
 
     VERSION = VERSION_DICT["VERSION"]
 
-    prompt.cmdloop("eva (v " + VERSION + ')\nType "help" for help')
+    prompt.cmdloop_with_keyboard_interrupt(
+        intro="eva (v " + VERSION + ')\nType "help" for help'
+    )
 
 
 def start_cmd_client(host: str, port: int):
