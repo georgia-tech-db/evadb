@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncio
 from typing import Iterator, Optional
 
 from eva.binder.statement_binder import StatementBinder
@@ -53,8 +54,7 @@ def execute_query_fetch_all(query) -> Optional[Batch]:
         return Batch.concat(batch_list, copy=False)
 
 
-# based on asyncio
-# @asyncio.coroutine
+@asyncio.coroutine
 def handle_request(transport, request_message):
     """
     Reads a request from a client and processes it

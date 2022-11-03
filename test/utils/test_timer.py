@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import asyncio
 import time
 import unittest
 from test.util import create_sample_video, file_remove
@@ -43,7 +45,7 @@ class TimerTests(unittest.TestCase):
         load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
-        response = handle_request(transport, load_query)
+        response = asyncio.run(handle_request(transport, load_query))
         self.assertTrue("query_time" in response.to_json())
         self.assertTrue("error" not in response.to_json())
 
@@ -51,7 +53,7 @@ class TimerTests(unittest.TestCase):
         load_query = """LOAD INFILE 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
-        response = handle_request(transport, load_query)
+        response = asyncio.run(handle_request(transport, load_query))
         self.assertTrue("error" in response.to_json())
         self.assertTrue("query_time" not in response.to_json())
 
