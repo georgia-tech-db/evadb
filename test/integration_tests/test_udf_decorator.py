@@ -52,21 +52,30 @@ def all_zeros_udf(all_zeros_callable):
     return all_zero_udf
 
 
-def test_zeros_callable_true(all_zeros_callable):
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np.zeros((3, 4, 4)), True),
+        (np.array([0, 1, 2, 0]), False),
+        (np.ones((3, 4, 4)), False),
+    ],
+)
+def test_zeros_callable(all_zeros_callable, test_input, expected):
     # 4 x 4 frame with 3 channels
-    frame = np.zeros((3, 4, 4))
-    assert all_zeros_callable(frame)
-
-
-def test_zeros_callable_mixed(all_zeros_callable):
-    frame = np.array([0, 1, 2, 0])
-    assert not all_zeros_callable(frame)
-
-
-def test_zeros_callable_none(all_zeros_callable):
-    frame = np.ones((3, 4, 4))
-    assert not all_zeros_callable(frame)
+    assert all_zeros_callable(test_input) == expected
 
 
 def test_zeros_udf_name(all_zeros_udf):
     assert all_zeros_udf.name == "all_zeros"
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (np.zeros((3, 4, 4)), True),
+        (np.array([0, 1, 2, 0]), False),
+        (np.ones((3, 4, 4)), False),
+    ],
+)
+def test_zeros_udf_call(all_zeros_udf, test_input, expected):
+    assert all_zeros_udf(test_input) == expected

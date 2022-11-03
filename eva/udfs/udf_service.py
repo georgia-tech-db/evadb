@@ -15,7 +15,7 @@
 
 import functools
 from enum import Enum, auto
-from typing import Callable
+from typing import Any, Callable, Optional
 
 from numpy.typing import ArrayLike
 
@@ -27,7 +27,8 @@ class FrameType(Enum):
 
 class UDFService:
     def __init__(self, name: str) -> None:
-        self._name = name
+        self._name: str = name
+        self._forward: Optional[Callable] = None
 
     @property
     def name(self) -> str:
@@ -52,6 +53,11 @@ class UDFService:
             def wrapper_forward(frame: ArrayLike):
                 return func(frame)
 
+            self._forward = wrapper_forward
+
             return wrapper_forward
 
         return decorator_forward
+
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        return self._forward(args[0])
