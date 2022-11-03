@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 
 import numpy as np
 import pytest
@@ -44,12 +43,12 @@ def all_zeros_udf(all_zeros_callable):
         input_type=FrameType.NdArray,
         channels_first=True,
         batch=False,
-        output_type=List[bool],
+        output_type=bool,
     )
     def forward(frame):
         return all_zeros_callable(frame)
 
-    return all_zero_udf
+    return all_zero_udf.create_udf()
 
 
 @pytest.mark.parametrize(
@@ -66,7 +65,7 @@ def test_zeros_callable(all_zeros_callable, test_input, expected):
 
 
 def test_zeros_udf_name(all_zeros_udf):
-    assert all_zeros_udf.name == "all_zeros"
+    assert all_zeros_udf().name == "all_zeros"
 
 
 @pytest.mark.parametrize(
@@ -78,4 +77,5 @@ def test_zeros_udf_name(all_zeros_udf):
     ],
 )
 def test_zeros_udf_call(all_zeros_udf, test_input, expected):
-    assert all_zeros_udf(test_input) == expected
+    udf = all_zeros_udf()
+    assert udf(test_input) == expected

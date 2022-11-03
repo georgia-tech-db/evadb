@@ -15,9 +15,11 @@
 
 import functools
 from enum import Enum, auto
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Type
 
 from numpy.typing import ArrayLike
+
+from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class FrameType(Enum):
@@ -28,6 +30,7 @@ class FrameType(Enum):
 class UDFService:
     def __init__(self, name: str) -> None:
         self._name: str = name
+        self._setup: Optional[Callable] = None
         self._forward: Optional[Callable] = None
 
     @property
@@ -36,9 +39,10 @@ class UDFService:
 
     def setup(self, func: Callable):
         @functools.wraps(func)
-        def wrapper_setup(*args, **kwargs):
+        def wrapper_setup(self, *args, **kwargs):
             return func(*args, **kwargs)
 
+        self._setup = wrapper_setup
         return wrapper_setup
 
     def forward(
@@ -50,14 +54,24 @@ class UDFService:
     ):
         def decorator_forward(func: Callable):
             @functools.wraps(func)
-            def wrapper_forward(frame: ArrayLike):
-                return func(frame)
+            def wrapper_forward(self, frames: ArrayLike):
+                return func(frames)
 
             self._forward = wrapper_forward
-
             return wrapper_forward
 
         return decorator_forward
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self._forward(args[0])
+
+    def create_udf(self) -> Type[AbstractUDF]:
+        return type(
+            "DecoratorUDF",
+            (AbstractUDF,),
+            {
+                "setup": self._setup,
+                "forward": self._forward,
+                "name": self._name,
+            },
+        )
