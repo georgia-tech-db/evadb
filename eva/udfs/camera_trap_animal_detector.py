@@ -17,20 +17,10 @@ import pickle
 from eva.utils.logging_manager import logger
 from torch import nn
 
-def _stack_tups(tuples, stack_dim=1):
-    """Stack tuple of tensors along `stack_dim`
-
-    NOTE: vendored (with minor adaptations) from fastai:
-    https://github.com/fastai/fastai/blob/4b0785254fdece1a44859956b6e54eedb167a97e/fastai/layers.py#L505-L507
-
-    Updates:
-        -  use `range` rather than fastai `range_of`
-    """
-    return tuple(torch.stack([t[i] for t in tuples], dim=stack_dim) for i in range(len(tuples[0])))
-
 
 class TimeDistributed(torch.nn.Module):
-    # base model borrowed from zamba
+    # base model borrowed from Zamba pretrained model:
+    # https://github.com/drivendataorg/zamba/blob/master/zamba/pytorch/layers.py
     """Applies `module` over `tdim` identically for each step, use `low_mem` to compute one at a time.
 
     NOTE: vendored (with minor adaptations) from fastai:
@@ -41,17 +31,21 @@ class TimeDistributed(torch.nn.Module):
      - assign attributes in init
      - inherit from torch.nn.Module rather than fastai.Module
     """
+    def _stack_tups(tuples, stack_dim=1):
+        """Stack tuple of tensors along `stack_dim`
+
+        NOTE: vendored (with minor adaptations) from fastai:
+        https://github.com/fastai/fastai/blob/4b0785254fdece1a44859956b6e54eedb167a97e/fastai/layers.py#L505-L507
+
+        Updates:
+            -  use `range` rather than fastai `range_of`
+        """
+        return tuple(torch.stack([t[i] for t in tuples], dim=stack_dim) for i in range(len(tuples[0])))
 
     def __init__(self, module, low_mem=False, tdim=1):
         super().__init__()
         self.low_mem = low_mem
         self.tdim = tdim
-        # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        # base_module_ckt_path = '/Users/dawndawn/Downloads/zamba/base_module_blank.pt'
-        # base_module_arc_path = '/Users/dawndawn/Downloads/zamba/base_module_arc_blank'
-        # with open(base_module_arc_path,"rb") as f:
-        #     self.module = pickle.load(f)
-        # self.module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
         self.module = module
 
     def forward(self, *tensors, **kwargs):
@@ -73,7 +67,7 @@ class TimeDistributed(torch.nn.Module):
         for i in range(seq_len):
             out.append(self.module(*[args[i] for args in args_split]), **kwargs)
         if isinstance(out[0], tuple):
-            return _stack_tups(out, stack_dim=self.tdim)
+            return TimeDistributed._stack_tups(out, stack_dim=self.tdim)
         return torch.stack(out, dim=self.tdim)
 
     def format_output(self, out, bs, seq_len):
@@ -108,7 +102,6 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         base_module_arc_path = os.path.join(output_directory, "base_module_arc_blank")
         base_module_ckt_path = os.path.join(output_directory, "base_module_blank.pt")
         classifier_ckt_path = os.path.join(output_directory, "classifier_blank.pt")
-        file_names = ["base_module_arc_blank", "base_module_blank.pt", "classifier_blank.pt"]
         file_urls = [
             "https://www.dropbox.com/s/rsu3ig9d168mj05/base_module_arc_blank?dl=0",
             "https://www.dropbox.com/s/eejcvyzh1ama24r/base_module_blank.pt?dl=0",
@@ -132,12 +125,9 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         with open(base_module_arc_path,"rb") as f:
             module = pickle.load(f)
         module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
-        # base_ckt_path = '/Users/dawndawn/Downloads/zamba/base_blank.pt'
         self.base = TimeDistributed(module)
-        # self.base.load_state_dict(torch.load(base_ckt_path, map_location=device))
 
         # init self.classifier
-        # classifier_ckt_path = '/Users/dawndawn/Downloads/zamba/classifier_blank.pt'
         self.classifier = torch.nn.Sequential(
             nn.Linear(2152, 256),
             nn.Dropout(0.2),
@@ -150,7 +140,8 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         self.classifier.load_state_dict(torch.load(classifier_ckt_path, map_location=device))
 
     def ensure_frame_number(arr, total_frames: int):
-        # preprocess borrowed from zamba
+        # preprocess borrowed from Zamba pretrained model
+        # https://github.com/drivendataorg/zamba/blob/master/zamba/data/video.py
         if (total_frames is None) or (arr.shape[0] == total_frames):
             return arr
         elif arr.shape[0] == 0:
@@ -174,7 +165,8 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
             )
 
     def image_model_transforms():  
-        # preprocess borrowed from zamba
+        # preprocess borrowed from zamba pretained model
+        # https://github.com/drivendataorg/zamba/blob/master/zamba/pytorch/transforms.py
         class ConvertTHWCtoTCHW(torch.nn.Module):
             """Convert tensor from (T, H, W, C) to (T, C, H, W)"""
 
@@ -206,6 +198,7 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
             arr_list.append(np_img)
         arr = np.array(arr_list)
         # preprocess borrowed from zamba
+        # https://github.com/drivendataorg/zamba/blob/master/zamba/data/video.py
         model_input_height, model_input_width = 240, 426
         if (model_input_height is not None) and (model_input_width is not None):
             resized_frames = np.zeros(
