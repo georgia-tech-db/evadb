@@ -36,6 +36,12 @@ class ExplainExecutorTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         file_remove("dummy.avi")
+        drop_query = """DROP TABLE table1;"""
+        execute_query_fetch_all(drop_query)
+        drop_query = """DROP TABLE table2;"""
+        execute_query_fetch_all(drop_query)
+        drop_query = """DROP TABLE table3;"""
+        execute_query_fetch_all(drop_query)
 
     def test_explain_simple_select(self):
         # Do not create any assertion here. Just run integration test
