@@ -73,7 +73,7 @@ notebook_libs = [
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
     "torch==1.13.0+cu116",
-    "torchvision=0.14.0+cu116"
+    "torchvision==0.14.0+cu116",
 ]
 
 benchmark_libs = [
