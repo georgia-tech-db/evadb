@@ -141,6 +141,9 @@ class UploadExecutorTest(unittest.TestCase):
         # creates a dummy.csv
         csv_blob = create_sample_csv_as_blob()
 
+        self.upload_path = Path(
+            ConfigurationManager().get_value("storage", "upload_dir")
+        )
         file_path = "dummy.csv"
         table_metainfo = "info"
         batch_mem_size = 3000
@@ -173,7 +176,13 @@ class UploadExecutorTest(unittest.TestCase):
         # Note: We call exec() from the child classes.
         self.assertEqual(
             batch,
-            Batch(pd.DataFrame([{"CSV": file_path, "Number of loaded frames": 20}])),
+            Batch(
+                pd.DataFrame(
+                    [
+                        f"CSV successfully loaded at location: {self.upload_path / file_path}"
+                    ]
+                )
+            ),
         )
 
         # remove the dummy.csv

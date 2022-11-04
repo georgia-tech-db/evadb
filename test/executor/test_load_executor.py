@@ -125,6 +125,32 @@ class LoadExecutorTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 next(load_executor.exec())
 
+    @patch("eva.executor.load_video_executor.StorageEngine.write")
+    def test_should_fail_to_find_csv_file(self, write_mock, create_mock):
+        file_path = "csv"
+        table_metainfo = "info"
+        batch_mem_size = 3000
+        file_options = {}
+        file_options["file_format"] = FileFormatType.CSV
+        column_list = None
+        plan = type(
+            "LoadDataPlan",
+            (),
+            {
+                "table_metainfo": table_metainfo,
+                "file_path": file_path,
+                "batch_mem_size": batch_mem_size,
+                "column_list": column_list,
+                "file_options": file_options,
+            },
+        )
+
+        load_executor = LoadDataExecutor(plan)
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.side_effect = [False, False]
+            with self.assertRaises(RuntimeError):
+                next(load_executor.exec())
+
     @patch("eva.storage.storage_engine.StorageEngine.write")
     def test_should_call_csv_reader_and_storage_engine(self, write_mock):
         batch_frames = [list(range(5))] * 2
@@ -132,6 +158,9 @@ class LoadExecutorTest(unittest.TestCase):
         # creates a dummy.csv
         create_sample_csv()
 
+        self.upload_path = Path(
+            ConfigurationManager().get_value("storage", "upload_dir")
+        )
         file_path = "dummy.csv"
         table_metainfo = "info"
         batch_mem_size = 3000
@@ -164,8 +193,39 @@ class LoadExecutorTest(unittest.TestCase):
         # Note: We call exec() from the child classes.
         self.assertEqual(
             batch,
-            Batch(pd.DataFrame([{"CSV": file_path, "Number of loaded frames": 20}])),
+            Batch(
+                pd.DataFrame(
+                    [
+                        f"CSV successfully loaded at location: {self.upload_path / file_path}"
+                    ]
+                )
+            ),
         )
 
         # remove the dummy.csv
         file_remove("dummy.csv")
+
+    def test_should_fail_to_find_csv_file(self):
+        file_path = "dummy"
+        table_metainfo = "info"
+        batch_mem_size = 3000
+        file_options = {}
+        file_options["file_format"] = FileFormatType.CSV
+        column_list = None
+        plan = type(
+            "LoadDataPlan",
+            (),
+            {
+                "table_metainfo": table_metainfo,
+                "file_path": file_path,
+                "batch_mem_size": batch_mem_size,
+                "column_list": column_list,
+                "file_options": file_options,
+            },
+        )
+
+        load_executor = LoadDataExecutor(plan)
+        with patch.object(Path, "exists") as mock_exists:
+            mock_exists.side_effect = [False, False]
+            with self.assertRaises(RuntimeError):
+                next(load_executor.exec())

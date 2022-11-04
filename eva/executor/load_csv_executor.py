@@ -73,14 +73,6 @@ class LoadCSVExecutor(AbstractExecutor):
             num_loaded_frames += len(batch)
 
         # yield result
-        df_yield_result = Batch(
-            pd.DataFrame(
-                {
-                    "CSV": csv_file_path,
-                    "Number of loaded frames": num_loaded_frames,
-                },
-                index=[0],
-            )
+        yield Batch(
+            pd.DataFrame([f"CSV successfully loaded at location: {csv_file_path}"])
         )
-
-        yield df_yield_result
