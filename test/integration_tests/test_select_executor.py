@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 from test.util import (
+    create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
     create_table,
@@ -249,19 +250,25 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch[0])
 
     def test_select_and_groupby(self):
-        # select_query = "SELECT name, id,data FROM MyVideo ORDER BY id;"
-        # select_query = "SELECT name, id,data FROM MyVideo SAMPLE 8;"
-        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '3f';"
-        # select_query = "SELECT FastRCNNObjectDetector(data) FROM MyVideo GROUP BY '8f';"
+        # TODO ACTION: groupby and orderby together not tested because groupby
+        # only applies to video data which is already sorted
+        segment_size = 3
+        select_query = (
+            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+                segment_size
+            )
+        )
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-
-        expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
-
-        self.assertEqual(len(actual_batch), len(expected_batch[0]))
-        # Since frames are fetched in random order, this test might be flaky
-        # Disabling it for time being
-        self.assertEqual(actual_batch, expected_batch[0])
+        ids = np.arange(NUM_FRAMES)
+        segments = [ids[i : i + segment_size] for i in range(0, len(ids), segment_size)]
+        segments = [i for i in segments if len(i) == segment_size]
+        expected_batch = list(create_dummy_4d_batches(filters=segments))[0]
+        self.assertEqual(len(actual_batch), len(expected_batch))
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
 
     def test_aaselect_and_sample_with_predicate(self):
         select_query = (
@@ -495,10 +502,3 @@ class SelectExecutorTest(unittest.TestCase):
                 expected_batch.sort_orderby(["table1.a0"]),
                 actual_batch.sort_orderby(["table1.a0"]),
             )
-
-
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(SelectExecutorTest(
-        'test_select_and_groupby'))
-    unittest.TextTestRunner().run(suite)

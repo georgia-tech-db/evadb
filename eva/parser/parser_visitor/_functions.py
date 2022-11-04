@@ -126,7 +126,6 @@ class Functions(evaql_parserVisitor):
     def visitAggregateWindowedFunction(
         self, ctx: evaql_parser.AggregateWindowedFunctionContext
     ):
-        agg_function_name = None
         if ctx.aggregateFunctionName():
             agg_func_name = self.visit(ctx.aggregateFunctionName())
         else:

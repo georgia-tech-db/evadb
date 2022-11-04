@@ -312,6 +312,32 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
         yield Batch(pd.DataFrame(data))
 
 
+def create_dummy_4d_batches(
+    num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0
+):
+    if not filters:
+        filters = range(num_frames)
+    data = []
+    for segment in filters:
+        segment_data = []
+        for i in segment:
+            segment_data.append(np.ones((2, 2, 3)) * float(i + 1) * 25)
+        segment_data = np.stack(np.array(segment_data, dtype=np.uint8))
+        data.append(
+            {
+                "myvideo.name": "dummy.avi",
+                "myvideo.id": segment[0] + start_id,
+                "myvideo.data": segment_data,
+            }
+        )
+
+        if len(data) % batch_size == 0:
+            yield Batch(pd.DataFrame(data))
+            data = []
+    if data:
+        yield Batch(pd.DataFrame(data))
+
+
 def load_inbuilt_udfs():
     mode = ConfigurationManager().get_value("core", "mode")
     init_builtin_udfs(mode=mode)

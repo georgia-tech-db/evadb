@@ -198,7 +198,7 @@ class TableSources(evaql_parserVisitor):
         if ctx.groupByItem():
             # TODO ACTION: Check what happens if 0 size is possible
             if len(ctx.groupByItem()) > 1:
-                err_msg = f"Parsing error: We do not \
+                err_msg = "Parsing error: We do not \
                         support multiple attributes in GROUP BY"
                 logger.error(err_msg)
                 raise SyntaxError(err_msg)

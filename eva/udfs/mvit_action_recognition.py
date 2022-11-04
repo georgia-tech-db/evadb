@@ -13,22 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
-from torchvision.models.video import mvit_v2_s, MViT_V2_S_Weights
+from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
 
-
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
 class MVITActionRecognition(PytorchAbstractClassifierUDF):
-
     @property
     def name(self) -> str:
-        return 'MVITActionRecognition'
+        return "MVITActionRecognition"
 
     def setup(self):
         self.weights = MViT_V2_S_Weights.DEFAULT
@@ -62,8 +60,7 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         print(f"{actions}: {100 * scores}%")
         # If batch size is 1
         if np.isscalar(actions) == 1:
-            outcome = pd.DataFrame(
-                {"labels": np.array([actions])})
+            outcome = pd.DataFrame({"labels": np.array([actions])})
         else:
             # TODO ACTION: In the current pipeline, actions will always get batches on
             # length 1, so this case would never be invoked.
