@@ -269,6 +269,27 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch.project(["myvideo.id", "myvideo.data"]),
         )
 
+    def test_select_and_groupby_with_sample(self):
+        # TODO ACTION: groupby and orderby together not tested because groupby
+        # only applies to video data which is already sorted
+        segment_size = 2
+        sampling_rate = 2
+        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo SAMPLE {} GROUP BY '{}f';".format(
+            sampling_rate, segment_size
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        ids = np.arange(0, NUM_FRAMES, sampling_rate)
+
+        segments = [ids[i : i + segment_size] for i in range(0, len(ids), segment_size)]
+        segments = [i for i in segments if len(i) == segment_size]
+        expected_batch = list(create_dummy_4d_batches(filters=segments))[0]
+        self.assertEqual(len(actual_batch), len(expected_batch))
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
+
     def test_select_and_sample_with_predicate(self):
         select_query = (
             "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"

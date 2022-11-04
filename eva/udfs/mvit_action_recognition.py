@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -40,8 +41,8 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
-    def labels(self):
-        return list([str(num) for num in range(400)])
+    def labels(self) -> List[str]:
+        return self.category_names
 
     def forward(self, segments):
         return self.classify(segments)
@@ -56,11 +57,8 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
             preds = self.model(segments).softmax(1)
         labels = preds.argmax(axis=1)
         actions = self.category_names[labels]
-        # If batch size is 1
+        # TODO ACTION: In the current pipeline, actions will always get batches on
+        # length 1, so this case would never be invoked.
         if np.isscalar(actions) == 1:
             outcome = pd.DataFrame({"labels": np.array([actions])})
-        else:
-            # TODO ACTION: In the current pipeline, actions will always get batches on
-            # length 1, so this case would never be invoked.
-            outcome = pd.DataFrame({"labels": actions})
         return outcome

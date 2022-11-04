@@ -93,6 +93,34 @@ class PytorchTest(unittest.TestCase):
             self.assertTrue("yoga" in res["mvitactionrecognition.labels"][idx])
 
     @pytest.mark.torchtest
+    def test_should_run_pytorch_and_fastrcnn_and_mvit(self):
+        create_udf_query = """CREATE UDF MVITActionRecognition
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+                  OUTPUT (labels NDARRAY STR(ANYDIM))
+                  TYPE  Classification
+                  IMPL  'eva/udfs/mvit_action_recognition.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT FIRST(id),
+                                 FastRCNNObjectDetector(FIRST(data)),
+                                 MVITActionRecognition(SEGMENT(data))
+                       FROM Actions
+                       GROUP BY '16f';"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 9)
+
+        res = actual_batch.frames
+        # TODO ACTION: Test case for group by and sample
+        # TODO ACTION: Test case for aliases
+
+        for idx in res.index:
+            self.assertTrue(
+                "person" in res["fastrcnnobjectdetector.labels"][idx]
+                and "yoga" in res["mvitactionrecognition.labels"][idx]
+            )
+
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
         create_udf_query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
