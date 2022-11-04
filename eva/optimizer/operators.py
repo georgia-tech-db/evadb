@@ -290,6 +290,7 @@ class LogicalProject(Operator):
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.target_list)))
 
+
 class LogicalGroupBy(Operator):
     def __init__(self, groupby_clause: ConstantValueExpression, children: List = None):
         super().__init__(OperatorType.LOGICALGROUPBY, children)
@@ -307,6 +308,7 @@ class LogicalGroupBy(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.groupby_clause))
+
 
 class LogicalOrderBy(Operator):
     def __init__(self, orderby_list: List, children: List = None):

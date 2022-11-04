@@ -12,14 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
 import re
+from typing import Iterator
+
 import pandas as pd
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.groupby_plan import GroupByPlan
 from eva.utils.logging_manager import logger
+
 
 class GroupByExecutor(AbstractExecutor):
     """
@@ -33,11 +35,11 @@ class GroupByExecutor(AbstractExecutor):
     def __init__(self, node: GroupByPlan):
         super().__init__(node)
         # match the pattern of group by clause (e.g., 16f or 8s)
-        pattern = re.search(r'^\d+[fs]$', node.groupby_clause.value)
+        pattern = re.search(r"^\d+[fs]$", node.groupby_clause.value)
         # if valid pattern
         if pattern:
             match_string = pattern.group(0)
-            if match_string[-1] == 'f':
+            if match_string[-1] == "f":
                 self._segment_length = int(match_string[:-1])
                 # TODO ACTION condition on segment length?
             else:
@@ -57,6 +59,6 @@ class GroupByExecutor(AbstractExecutor):
         for batch in child_executor.exec():
             new_batch = buffer + batch
             while len(new_batch) >= self._segment_length:
-                yield new_batch[:self._segment_length]
-                new_batch = new_batch[self._segment_length:]
+                yield new_batch[: self._segment_length]
+                new_batch = new_batch[self._segment_length :]
             buffer = new_batch

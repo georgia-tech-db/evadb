@@ -1,10 +1,22 @@
-from turtle import forward
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import pandas as pd
 import numpy as np
 import torch
-from torchvision.io.video import read_video
 from torchvision.models.video import mvit_v2_s, MViT_V2_S_Weights
-from torchvision.models.video import r3d_18, R3D_18_Weights
 
 
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
@@ -17,7 +29,6 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
     @property
     def name(self) -> str:
         return 'MVITActionRecognition'
-
 
     def setup(self):
         self.weights = MViT_V2_S_Weights.DEFAULT
@@ -34,16 +45,13 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
     def labels(self):
         return list([str(num) for num in range(400)])
 
-
     def forward(self, segments):
         return self.classify(segments)
 
-
-    def transform(self, segments) ->list:
+    def transform(self, segments) -> torch.Tensor:
         segments = torch.Tensor(segments)
         segments = segments.permute(0, 3, 1, 2)
         return self.preprocess(segments).unsqueeze(0)
-
 
     def classify(self, segments: torch.Tensor) -> pd.DataFrame:
         with torch.no_grad():
@@ -56,9 +64,8 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         if np.isscalar(actions) == 1:
             outcome = pd.DataFrame(
                 {"labels": np.array([actions])})
-                # , "scores": np.array([scores.item()])})
         else:
             # TODO ACTION: In the current pipeline, actions will always get batches on
             # length 1, so this case would never be invoked.
-            outcome = pd.DataFrame({"labels": actions, "scores": scores})
+            outcome = pd.DataFrame({"labels": actions})
         return outcome

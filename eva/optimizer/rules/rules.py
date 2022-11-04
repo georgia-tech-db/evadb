@@ -46,11 +46,11 @@ from eva.optimizer.operators import (
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
+    LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
-    LogicalGroupBy,
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
@@ -67,12 +67,12 @@ from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.function_scan_plan import FunctionScanPlan
+from eva.planner.groupby_plan import GroupByPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.lateral_join_plan import LateralJoinPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.groupby_plan import GroupByPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.rename_plan import RenamePlan
 from eva.planner.sample_plan import SamplePlan
@@ -765,6 +765,7 @@ class LogicalUnionToPhysical(Rule):
             after.append_child(child)
         return after
 
+
 class LogicalGroupByToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGROUPBY)
@@ -782,6 +783,7 @@ class LogicalGroupByToPhysical(Rule):
         for child in before.children:
             after.append_child(child)
         return after
+
 
 class LogicalOrderByToPhysical(Rule):
     def __init__(self):
