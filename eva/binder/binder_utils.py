@@ -126,7 +126,7 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
     if CatalogManager().check_table_exists(
         table_ref.table.database_name, table_ref.table.table_name
     ):
-        err_msg = "Table: {} already exsits".format(table_ref)
+        err_msg = "Table: {} already exists".format(table_ref)
         if if_not_exist:
             logger.warn(err_msg)
             return True
