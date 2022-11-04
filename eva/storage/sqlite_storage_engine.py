@@ -39,7 +39,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         """
         self._sql_session = SQLConfig().session
         self._sql_engine = SQLConfig().engine
-        self._serializer = PickleSerializer()
+        self._serializer = PickleSerializer
 
     def _dict_to_sql_row(self, dict_row: dict, columns: List[DataFrameColumn]):
         # Serialize numpy data

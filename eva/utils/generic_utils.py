@@ -134,8 +134,10 @@ def get_size(obj, seen=None):
 
 
 class PickleSerializer(object):
-    def serialize(self, data):
+    @classmethod
+    def serialize(cls, data):
         return pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
 
-    def deserialize(self, data):
+    @classmethod
+    def deserialize(cls, data):
         return pickle.loads(data)

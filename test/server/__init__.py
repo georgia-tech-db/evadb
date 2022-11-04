@@ -12,17 +12,3 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
-from test.util import create_dataframe
-
-from eva.models.server.response import Response, ResponseStatus
-from eva.models.storage.batch import Batch
-
-
-class ResponseTest(unittest.TestCase):
-    def test_server_reponse_serialize_deserialize(self):
-        batch = Batch(frames=create_dataframe())
-        response = Response(status=ResponseStatus.SUCCESS, batch=batch)
-        response2 = Response.deserialize(response.serialize())
-        print(response2)
-        self.assertEqual(response, response2)
