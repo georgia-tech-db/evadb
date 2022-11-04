@@ -55,9 +55,7 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         with torch.no_grad():
             preds = self.model(segments).softmax(1)
         labels = preds.argmax(axis=1)
-        scores = preds.gather(1, labels.unsqueeze(0)).squeeze().cpu().numpy()
         actions = self.category_names[labels]
-        print(f"{actions}: {100 * scores}%")
         # If batch size is 1
         if np.isscalar(actions) == 1:
             outcome = pd.DataFrame({"labels": np.array([actions])})

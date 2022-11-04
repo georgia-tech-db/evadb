@@ -48,7 +48,7 @@ class PytorchTest(unittest.TestCase):
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
-                        SAMPLE 5 WHERE id < 100;"""
+                        WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
 
@@ -62,7 +62,8 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT SSDObjectDetector(data) FROM MyVideo SAMPLE 5;"""
+        select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
+                        WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
@@ -80,8 +81,8 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = "SELECT FIRST(id), MVITActionRecognition(SEGMENT(data)) FROM Actions GROUP BY '16f';"
-        # select_query = "SELECT FastRCNNObjectDetector(data) FROM MyVideo GROUP BY '8f';"
+        select_query = """SELECT FIRST(id), MVITActionRecognition(SEGMENT(data)) FROM Actions
+                       GROUP BY '16f';"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 9)
         res = actual_batch.frames
