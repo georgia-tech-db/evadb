@@ -126,11 +126,12 @@ class Batch:
         )
 
     def __str__(self) -> str:
-        return (
-            "Batch Object:\n"
-            "@dataframe: %s\n"
-            "@batch_size: %d\n" % (self._frames, len(self))
-        )
+        with pd.option_context("display.pprint_nest_depth", 1):
+            return (
+                "Batch Object:\n"
+                "@dataframe: %s\n"
+                "@batch_size: %d\n" % (self._frames, len(self))
+            )
 
     def __eq__(self, other: Batch):
         return self._frames[sorted(self.columns)].equals(

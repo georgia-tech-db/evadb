@@ -37,13 +37,7 @@ class Response:
     query_time: Optional[float] = None
 
     def serialize(self):
-        obj = {"status": self.status, "batch": self.batch}
-        if self.error is not None:
-            obj["error"] = self.error
-        if self.query_time is not None:
-            obj["query_time"] = self.query_time
-
-        return PickleSerializer.serialize(obj)
+        return PickleSerializer.serialize(self)
 
     @classmethod
     def deserialize(cls, data):

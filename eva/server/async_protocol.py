@@ -33,7 +33,7 @@ class EvaProtocolBuffer:
         self.buf = bytearray()
         self.expected_length = -1
 
-    def feed_data(self, data):
+    def feed_data(self, data: bytes):
         if self.expected_length == -1:
             # First chunk should contain the 8 bytes header with chunk size
             header = data[:8]
@@ -46,7 +46,7 @@ class EvaProtocolBuffer:
     def has_complete_message(self) -> bool:
         return self.expected_length > 0 and len(self.buf) >= self.expected_length
 
-    def read_message(self) -> str:
+    def read_message(self) -> bytes:
         message = self.buf[: self.expected_length]
         rest_data = self.buf[self.expected_length :]
         self.empty()

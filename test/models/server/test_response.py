@@ -24,4 +24,5 @@ class ResponseTest(unittest.TestCase):
         batch = Batch(frames=create_dataframe())
         response = Response(status=ResponseStatus.SUCCESS, batch=batch)
         response2 = Response.deserialize(response.serialize())
+        print(response2)
         self.assertEqual(response, response2)
