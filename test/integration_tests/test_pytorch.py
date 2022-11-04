@@ -162,10 +162,3 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
 
                 pass
-
-
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(PytorchTest(
-        'test_should_run_pytorch_and_mvit'))
-    unittest.TextTestRunner().run(suite)
