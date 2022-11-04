@@ -19,7 +19,7 @@ import pytest
 from eva.udfs.udf_service import FrameType, UDFService
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def all_zeros_callable():
     """
     Operates on single frame and returns bool
@@ -31,7 +31,7 @@ def all_zeros_callable():
     return forward
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def all_zeros_udf(all_zeros_callable):
     all_zero_udf = UDFService("all_zeros")
 
