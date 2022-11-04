@@ -126,6 +126,7 @@ class Batch:
         )
 
     def __str__(self) -> str:
+        # reduce the nesting depth to accelerate printing ndarray objects
         with pd.option_context("display.pprint_nest_depth", 1):
             return (
                 "Batch Object:\n"
