@@ -25,9 +25,13 @@ class EVAConnection:
     def __init__(self, transport, protocol):
         self._transport = transport
         self._protocol = protocol
+        self._cursor = None
 
     def cursor(self):
-        return EVACursor(self._protocol)
+        # One unique cursor for one connection
+        if self._cursor is None:
+            self._cursor = EVACursor(self)
+        return self._cursor
 
     @property
     def protocol(self):
@@ -35,9 +39,13 @@ class EVAConnection:
 
 
 class EVACursor(object):
-    def __init__(self, protocol):
-        self._protocol = protocol
+    def __init__(self, connection):
+        self._connection = connection
         self._pending_query = False
+
+    @property
+    def connection(self):
+        return self._connection
 
     async def execute_async(self, query: str):
         """
@@ -49,7 +57,7 @@ class EVACursor(object):
                     Call fetch_all() to complete the pending query"
             )
         query = self._upload_transformation(query)
-        await self._protocol.send_message(query)
+        await self.connection.protocol.send_message(query)
         self._pending_query = True
 
     async def fetch_one_async(self) -> Response:
@@ -57,7 +65,7 @@ class EVACursor(object):
         fetch_one returns one batch instead of one row for now.
         """
         try:
-            message = await self._protocol.queue.get()
+            message = await self.connection.protocol.queue.get()
             response = await asyncio.coroutine(Response.from_json)(message)
         except Exception as e:
             raise e
@@ -104,7 +112,7 @@ class EVACursor(object):
             raise AttributeError
 
         def func_sync(*args, **kwargs):
-            loop = self._protocol.loop
+            loop = self.connection.protocol.loop
             res = loop.run_until_complete(func(*args, **kwargs))
             return res
 

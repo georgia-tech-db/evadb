@@ -131,7 +131,6 @@ class SelectExecutorTest(unittest.TestCase):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
                           FastRCNNObjectDetector(data);"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
@@ -270,7 +269,7 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch.project(["myvideo.id", "myvideo.data"]),
         )
 
-    def test_aaselect_and_sample_with_predicate(self):
+    def test_select_and_sample_with_predicate(self):
         select_query = (
             "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
         )

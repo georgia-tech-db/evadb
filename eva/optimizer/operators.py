@@ -33,6 +33,7 @@ class OperatorType(IntEnum):
     """
 
     DUMMY = auto()
+    LOGICALEXCHANGE = auto()
     LOGICALGET = auto()
     LOGICALFILTER = auto()
     LOGICALPROJECT = auto()
@@ -1063,3 +1064,16 @@ class LogicalShow(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.show_type))
+
+
+class LogicalExchange(Operator):
+    def __init__(self, children=None):
+        super().__init__(OperatorType.LOGICALEXCHANGE, children)
+
+    def __eq__(self, other):
+        if not isinstance(other, LogicalExchange):
+            return False
+        return True
+
+    def __hash__(self) -> int:
+        return super().__hash__()

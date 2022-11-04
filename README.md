@@ -2,7 +2,7 @@
   <a href="https://georgia-tech-db.github.io/eva/index.html">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
   </a>
-  <h3>EVA Video Database System: Where SQL meets Deep Learning!</h3>
+  <h3>EVA Video Database System: Where SQL meets Deep Learning</h3>
   <div>
         <h3>🌟 Try It Out! 🌟</h3>
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
@@ -44,7 +44,7 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 
 ## QuickStart
 
-1. EVA requires Python 3.8+. To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA requires Python 3.7+. To install EVA, we recommend using an virtual environment and the pip package manager:
 
 ```shell
 pip install evadb
@@ -75,7 +75,9 @@ SELECT id, data FROM MyVideo WHERE id < 5;
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.webp" width="400"> |
 
 2. Search for frames in the video that contain a pedestrian and a car
 
@@ -98,6 +100,18 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
+## EVA Applications
+
+### MNIST Digit Recognition
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistvideo.webp" width="100"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistoutput.webp" width="100"> |
+
+### Emotion Detection
+
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp" width="400"> |
 
 ## Contributing to EVA
 

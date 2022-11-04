@@ -38,6 +38,7 @@ class PlanOprType(Enum):
     LATERAL_JOIN = auto()
     HASH_BUILD = auto()
     CREATE_MATERIALIZED_VIEW = auto()
+    EXCHANGE = auto()
     PREDICATE_FILTER = auto()
     PROJECT = auto()
     SHOW_INFO = auto()

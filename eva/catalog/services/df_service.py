@@ -104,6 +104,7 @@ class DatasetService(BaseService):
         try:
             dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
+            return True
         except Exception as e:
             err_msg = "Delete dataset failed for name {} with error {}".format(
                 dataset_name, str(e)
