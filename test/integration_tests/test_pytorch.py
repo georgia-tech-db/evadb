@@ -34,16 +34,21 @@ class PytorchTest(unittest.TestCase):
         query = """LOAD FILE 'mnist.mp4'
                    INTO MNIST;"""
         execute_query_fetch_all(query)
+        query = """LOAD FILE 'actions.mp4'
+                   INTO Actions;"""
+        execute_query_fetch_all(query)
         load_inbuilt_udfs()
 
     @classmethod
     def tearDownClass(cls):
         file_remove("ua_detrac.mp4")
+        file_remove("mnist.mp4")
+        file_remove("actions.mp4")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
         select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
+                        SAMPLE 5 WHERE id < 100;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
 
@@ -57,14 +62,34 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_udf_query)
 
-        select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
+        select_query = """SELECT SSDObjectDetector(data) FROM MyVideo SAMPLE 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
         # non-trivial test case
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue("car" in res["ssdobjectdetector.label"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_mvit(self):
+        create_udf_query = """CREATE UDF MVITActionRecognition
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+                  OUTPUT (labels NDARRAY STR(ANYDIM))
+                  TYPE  Classification
+                  IMPL  'eva/udfs/mvit_action_recognition.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = "SELECT FIRST(id), MVITActionRecognition(SEGMENT(data)) FROM Actions GROUP BY '16f';"
+        # select_query = "SELECT FastRCNNObjectDetector(data) FROM MyVideo GROUP BY '8f';"
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 9)
+        res = actual_batch.frames
+        # TODO ACTION: Test case for group by and sample
+        # TODO ACTION: Test case for aliases
+
+        for idx in res.index:
+            self.assertTrue("yoga" in res["mvitactionrecognition.labels"][idx])
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
@@ -137,3 +162,10 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
 
                 pass
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(PytorchTest(
+        'test_should_run_pytorch_and_mvit'))
+    unittest.TextTestRunner().run(suite)
