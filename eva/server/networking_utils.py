@@ -15,6 +15,7 @@
 import asyncio
 import socket
 import struct
+from typing import Any
 
 from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
@@ -83,7 +84,7 @@ def set_socket_io_timeouts(transport, seconds, useconds=0):
         return False
 
 
-def serialize_message(message: str):
+def serialize_message(message: Any):
     pickled_message = PickleSerializer.serialize(message)
     header = struct.pack("!Q", len(pickled_message))
     data = header + pickled_message
