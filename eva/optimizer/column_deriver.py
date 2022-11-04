@@ -11,16 +11,23 @@ from eva.optimizer.column_mapper import ColumnMapper
 import copy
 
 class ColumnDeriver:
+    """
+    Derives the id for the column names in the optimal plans
+    """
 
     def __init__(self):
         pass
 
-    def merge(self, left_list, left_map, right_list, right_map):
-        merged_list = left_list[:]
-        merged_map = left_map
-        attribute_id_counter = len(left_list)
+    def merge(self, left_map:dict, right_map:dict) -> dict:
+        """
+        To merge the left_map with the right_map. 
+        Keys in the left_map come first and then the keys in the right_map.
+        """
         
-        #merging the two lists
+        merged_map = left_map
+        attribute_id_counter = len(left_map)
+        
+        #merging the two maps
         new_map = {}
         for col_name, col_id in right_map.items():
             if col_name in left_map:
@@ -29,112 +36,120 @@ class ColumnDeriver:
                 new_map[col_id] = attribute_id_counter
                 merged_map[col_name] = attribute_id_counter
                 attribute_id_counter+=1
-        
-        for index, id_val in enumerate(right_list):
-            right_list[index] = new_map[id_val]
-        
-        merged_list.extend(right_list)
 
-        return merged_map, merged_list
+        return merged_map
     
     @singledispatchmethod
-    def scan_node_for_attributes(self, node):
+    def scan_node_for_attributes(self, node:AbstractPlan, alias_prefix:str=None) -> dict:
         raise NotImplementedError(f"Cannot bind {type(node)}")
 
+    def scan_children(self, children:list, alias_prefix:str=None) -> dict:
+        """
+        Function to scan all the children of a node and create the mapping of column names 
+        to id. 
+        """
+        prev_map = {}
+        column_id_map = {}
+        for child in children:
+            curr_map = self.scan_node_for_attributes(child, alias_prefix)
+            column_id_map = self.merge(prev_map, curr_map)
+        
+        return column_id_map
+
     @scan_node_for_attributes.register(AbstractPlan)
-    def _scan_node_for_attributes_for_abstract_plan(self, node):
-        return {}, []
+    def _for_abstract_plan(self, node:AbstractPlan, alias_prefix:str=None) -> dict:
+        return {}
 
     @scan_node_for_attributes.register(ProjectPlan)
-    def _scan_node_for_attributes_for_project_plan(self, node):
+    def _for_project_plan(self, node:ProjectPlan, alias_prefix:str=None) -> dict:
         child_nodes = node.children
-        if len(child_nodes)>0:
-            column_to_id_mapping_map, column_to_id_list = \
-                self.scan_node_for_attributes(child_nodes[0])
-
-        prev_map = column_to_id_mapping_map
-        prev_list = copy.deepcopy(column_to_id_list)
-
-        target_list = node.target_list
-        for curr_node in target_list:
-            temp_map, temp_list = self.scan_node_for_attributes(curr_node)
-            column_to_id_mapping_map, column_to_id_list = self.merge(prev_list, prev_map, temp_list, temp_map)
-            prev_map = column_to_id_mapping_map
-            prev_list = copy.deepcopy(column_to_id_list)
-
-
-        return column_to_id_mapping_map, column_to_id_list
+        return self.scan_children(child_nodes)
     
     @scan_node_for_attributes.register(StoragePlan)
-    def _scan_node_for_attributes_for_storage_plan(self, node):
+    def _for_storage_plan(self, node:StoragePlan, alias_prefix:str=None):
+        """
+        Scans the children of the Storage Plan node. Also gets the columns from
+        video object.
+        Assumption: columns of video are placed after the columns of the childrens
+        """
         node_children = node.predicate.children
         column_name_to_id_mapping = {}
-        column_to_id_mapping_list = []
-        prev_list = []
         prev_map = {}
 
-        for child in node_children:
-            temp_map, temp_list = self.scan_node_for_attributes(child)
-            column_name_to_id_mapping, column_to_id_mapping_list =\
-                 self.merge(prev_list, prev_map, temp_list, temp_map)
+        prev_map = self.scan_children(node_children)
             
-            prev_map = column_name_to_id_mapping
-            prev_list =copy.deepcopy(column_to_id_mapping_list)
-            
-        return column_name_to_id_mapping, column_to_id_mapping_list
+        video_columns_map = {}
+        attribute_id = 0
+        video_columns = node.video.columns
+        for column in video_columns:
+            col_name = alias_prefix+"."+column.name
+            video_columns_map[col_name] = attribute_id
+            attribute_id+=1
+        
+        column_name_to_id_mapping = self.merge(prev_map, video_columns_map)
+
+        return column_name_to_id_mapping
 
     @scan_node_for_attributes.register(SeqScanPlan)
-    def _scan_node_for_attributes_for_seq_scan_plan(self, node):
-        id_map, id_list = self.scan_node_for_attributes(node.children[0])
-        return id_map, id_list
+    def _for_seq_scan_plan(self, node:SeqScanPlan, alias_prefix:str=None) -> dict:
+        alias_prefix = node.alias.alias_name
+        return self.scan_children(node.children, alias_prefix)
 
     @scan_node_for_attributes.register(LateralJoinPlan)
-    def _scan_node_for_attributes_for_lateral_join_plan(self,node):
-        left_child_map, left_child_list = self.scan_node_for_attributes(node.children[0])
-        right_child_map, right_child_list = self.scan_node_for_attributes(node.children[1])
-        merged_id_map, merged_attribute_id_list = \
-            self.merge(left_child_list, left_child_map, right_child_list, right_child_map)
-        
-        return merged_id_map, merged_attribute_id_list
+    def _for_lateral_join_plan(self,node:LateralJoinPlan, alias_prefix:str=None) -> dict:
+        """
+        Scans the left child first and then the right child. Makes the assumption
+        that the left child is the first element of children and right child is the 
+        second element of children
+        """
+        left_child_map = self.scan_node_for_attributes(node.children[0], alias_prefix)
+        right_child_map = self.scan_node_for_attributes(node.children[1], alias_prefix)
+        merged_id_map = self.merge(left_child_map, right_child_map)
+        return merged_id_map
 
     @scan_node_for_attributes.register(FunctionScanPlan)
-    def _scan_node_for_attributes_for_seq_scan_plan(self, node):
+    def _for_func_scan_plan(self, node:FunctionScanPlan, alias_prefix:str=None) -> dict:
+        """
+        To map the columns in the FunctionScanPlan node to ids
+        Gets the columns of the children node first, then gets the columns from 
+        func_expr.
+        Assumption: columns of func_expr.alias are placed after children's columns.
+        """
         column_name_to_id_mapping = {}
-        column_to_id_mapping_list = []
-        prev_list = []
         prev_map = {}
         node_children = node.func_expr.children
+        children_column_map = self.scan_children(node_children)
+    
+        #get the columns from alias.
+        alias_prefix = node.func_expr.alias.alias_name
+        col_names = node.func_expr.alias.col_names
+        col_map = {}
+        id_counter = 0
+        prev_map = children_column_map
 
-        for child in node_children:
-            temp_map, temp_list = self.scan_node_for_attributes(child)
-            column_name_to_id_mapping, column_to_id_mapping_list =\
-                 self.merge(prev_list, prev_map, temp_list, temp_map)
-            
-            prev_map = column_name_to_id_mapping
-            prev_list =copy.deepcopy(column_to_id_mapping_list)
-            
+        for col_name in col_names:
+            col_map[alias_prefix+"."+col_name] = id_counter
+            id_counter+=1
         
-        return column_name_to_id_mapping, column_to_id_mapping_list
+        column_name_to_id_mapping = self.merge(prev_map, col_map)       
+        return column_name_to_id_mapping
 
     @scan_node_for_attributes.register(TupleValueExpression)
-    def _scan_node_for_attributes_tuple_value_expr(self, node):
+    def _for_tuple_value_expr(self, node:TupleValueExpression, alias_prefix:str=None) -> dict:
         column_name_to_id_mapping = {}
-        column_to_id_mapping_list = []
         attribute_id_counter = 0
         column_name = node.col_alias
         if column_name not in column_name_to_id_mapping:
             column_name_to_id_mapping[column_name] = attribute_id_counter
-            column_to_id_mapping_list.append(attribute_id_counter)
             
-        
-        return  column_name_to_id_mapping, column_to_id_mapping_list
+        return  column_name_to_id_mapping
 
     @scan_node_for_attributes.register(ConstantValueExpression)
-    def _scan_node_for_attributes_const_val_expr(self, node):
-        return {}, []
+    def _for_const_val_expr(self, node: ConstantValueExpression, alias_prefix:str=None) -> dict:
+        return {}
 
     def __call__(self, node):
-        column_to_id_map, column_to_id_list = self.scan_node_for_attributes(node)
-        column_mapper = ColumnMapper(column_to_id_map, column_to_id_list)
+        column_to_id_map = self.scan_node_for_attributes(node)
+        column_mapper = ColumnMapper(column_to_id_map)
         updated_node = column_mapper.map_node_attributes_to_id(node)
         return updated_node
