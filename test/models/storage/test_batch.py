@@ -122,3 +122,8 @@ class BatchTest(unittest.TestCase):
     def test_should_return_empty_dataframe(self):
         batch = Batch()
         self.assertEqual(batch, Batch(create_dataframe(0)))
+
+    def test_stack_batch_more_than_one_column_should_raise_exception(self):
+        batch = Batch(create_dataframe_same(2))
+        self.assertRaises(ValueError, Batch.stack, batch)
+        # TODO ACTION: Add test cases for stack correctness

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -33,7 +32,6 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         self.weights = MViT_V2_S_Weights.DEFAULT
         self.model = mvit_v2_s(weights=self.weights)
         self.preprocess = self.weights.transforms()
-        self.category_names = np.array(self.weights.meta["categories"])
         self.model.eval()
 
     @property
@@ -41,8 +39,8 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     @property
-    def labels(self) -> List[str]:
-        return self.category_names
+    def labels(self) -> np.array([str]):
+        return np.array(self.weights.meta["categories"])
 
     def forward(self, segments):
         return self.classify(segments)
@@ -55,8 +53,8 @@ class MVITActionRecognition(PytorchAbstractClassifierUDF):
     def classify(self, segments: torch.Tensor) -> pd.DataFrame:
         with torch.no_grad():
             preds = self.model(segments).softmax(1)
-        labels = preds.argmax(axis=1)
-        actions = self.category_names[labels]
+        label_indices = preds.argmax(axis=1)
+        actions = self.labels[label_indices]
         # TODO ACTION: In the current pipeline, actions will always get batches on
         # length 1, so this case would never be invoked.
         if np.isscalar(actions) == 1:

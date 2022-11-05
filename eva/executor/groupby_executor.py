@@ -20,7 +20,6 @@ import pandas as pd
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.groupby_plan import GroupByPlan
-from eva.utils.logging_manager import logger
 
 
 class GroupByExecutor(AbstractExecutor):
@@ -44,10 +43,10 @@ class GroupByExecutor(AbstractExecutor):
                 # TODO ACTION condition on segment length?
             else:
                 err_msg = "Only grouping by frames (f) is supported"
-                logger.exception(err_msg)
+                raise ValueError(err_msg)
         else:
             err_msg = "Incorrect GROUP BY pattern: {}".format(node.groupby_clause.value)
-            logger.exception(err_msg)
+            raise ValueError(err_msg)
 
     def validate(self):
         pass

@@ -97,7 +97,7 @@ face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
     EVA_INSTALLATION_DIR
 )
 
-Mvit_udf_query = """CREATE UDF MVITActionRecognition
+Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
         INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
         OUTPUT (labels NDARRAY STR(ANYDIM))
         TYPE  Classification

@@ -358,7 +358,7 @@ class Batch:
             Batch (always of length 1)
         """
         if len(batch.columns) > 1:
-            logger.exception("Stack can only be called on single-column batches")
+            raise ValueError("Stack can only be called on single-column batches")
         frame_data_col = batch.columns[0]
 
         stacked_array = np.array(batch.frames[frame_data_col].values.tolist())
