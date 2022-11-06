@@ -83,6 +83,21 @@ class CreateUDFPlan(AbstractPlan):
     def udf_type(self):
         return self._udf_type
 
+    def __str__(self):
+        return "CreateUDFPlan(name={}, \
+            if_not_exists={}, \
+            inputs={}, \
+            outputs={}, \
+            impl_file_path={}, \
+            udf_type={})".format(
+            self._name,
+            self._if_not_exists,
+            self._inputs,
+            self._outputs,
+            self._impl_path,
+            self._udf_type,
+        )
+
     def __hash__(self) -> int:
         return hash(
             (

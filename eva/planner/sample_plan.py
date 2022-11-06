@@ -36,5 +36,8 @@ class SamplePlan(AbstractPlan):
     def sample_freq(self):
         return self._sample_freq
 
+    def __str__(self):
+        return "SamplePlan(sample_freq={})".format(self._sample_freq)
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.sample_freq))

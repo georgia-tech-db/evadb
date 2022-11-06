@@ -42,6 +42,51 @@ class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def test_explain_dml_statement(self):
+        parser = Parser()
+
+        explain_query = "EXPLAIN SELECT CLASS FROM TAIPAI;"
+        eva_statement_list = parser.parse(explain_query)
+
+        # check explain stmt itself
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
+
+        # check inner stmt
+        inner_stmt = eva_statement_list[0].explainable_stmt
+        self.assertEqual(inner_stmt.stmt_type, StatementType.SELECT)
+
+        # check inner stmt from
+        self.assertIsNotNone(inner_stmt.from_table)
+        self.assertIsInstance(inner_stmt.from_table, TableRef)
+        self.assertEqual(inner_stmt.from_table.table.table_name, "TAIPAI")
+
+    def test_explain_ddl_statement(self):
+        parser = Parser()
+
+        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+                        WHERE id<5; """
+        explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
+            select_query
+        )
+
+        eva_statement_list = parser.parse(explain_query)
+
+        # check explain stmt itself
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
+
+        # check inner stmt
+        inner_stmt = eva_statement_list[0].explainable_stmt
+        self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE_MATERIALIZED_VIEW)
+
+        # check inner stmt from
+        self.assertIsNotNone(
+            inner_stmt.view_ref, TableRef(TableInfo("uadetrac_fastRCNN"))
+        )
+
     def test_create_statement(self):
         parser = Parser()
 

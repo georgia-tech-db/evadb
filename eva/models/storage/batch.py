@@ -126,13 +126,10 @@ class Batch:
         )
 
     def __str__(self) -> str:
-        # reduce the nesting depth to accelerate printing ndarray objects
-        with pd.option_context("display.pprint_nest_depth", 1):
-            return (
-                "Batch Object:\n"
-                "@dataframe: %s\n"
-                "@batch_size: %d\n" % (self._frames, len(self))
-            )
+        with pd.option_context(
+            "display.pprint_nest_depth", 1, "display.max_colwidth", 100
+        ):
+            return f"{self._frames}"
 
     def __eq__(self, other: Batch):
         return self._frames[sorted(self.columns)].equals(

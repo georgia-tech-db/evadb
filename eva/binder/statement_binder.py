@@ -31,6 +31,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
@@ -74,6 +75,10 @@ class StatementBinder:
     def _bind_abstract_expr(self, node: AbstractExpression):
         for child in node.children:
             self.bind(child)
+
+    @bind.register(ExplainStatement)
+    def _bind_explain_statement(self, node: ExplainStatement):
+        self.bind(node.explainable_stmt)
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):

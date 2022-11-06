@@ -39,6 +39,7 @@ class StatementType(Enum):
     CREATE_MATERIALIZED_VIEW = (auto(),)
     SHOW = (auto(),)
     DROP_UDF = auto()
+    EXPLAIN = (auto(),)
     # add other types
 
 
