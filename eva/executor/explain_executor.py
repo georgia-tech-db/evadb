@@ -35,7 +35,7 @@ class ExplainExecutor(AbstractExecutor):
         yield Batch(pd.DataFrame([plan_str]))
 
     def _exec(self, node: AbstractPlan, depth: int):
-        cur_str = " " * depth * 4 + "|__ " + str(node) + "\n"
+        cur_str = " " * depth * 4 + "|__ " + str(node.__class__.__name__) + "\n"
         for child in node.children:
             cur_str += self._exec(child, depth + 1)
         return cur_str

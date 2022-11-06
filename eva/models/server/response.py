@@ -48,12 +48,12 @@ class Response:
         if self.query_time is not None:
             return (
                 "@status: %s\n"
-                "@batch: %s\n"
+                "@batch: \n %s\n"
                 "@query_time: %s" % (self.status, self.batch, self.query_time)
             )
         else:
             return (
                 "@status: %s\n"
-                "@batch: %s\n"
+                "@batch: \n %s\n"
                 "@error: %s" % (self.status, self.batch, self.error)
             )

@@ -44,7 +44,12 @@ class ExplainExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
 
     def test_explain_simple_select(self):
-        # Do not create any assertion here. Just run integration test
-        # to make sure no error is thrown.
-        select_query = "EXPLAIN SELECT data FROM MyVideo"
-        _ = execute_query_fetch_all(select_query)
+        select_query = "EXPLAIN SELECT id, data FROM MyVideo"
+        batch = execute_query_fetch_all(select_query)
+        expected_output = """|__ SeqScanPlan\n    |__ StoragePlan\n"""
+        self.assertEqual(batch.frames[0][0], expected_output)
+
+        select_query = "EXPLAIN SELECT id, data FROM MyVideo JOIN LATERAL DummyObjectDetector(data) AS T ;"
+        batch = execute_query_fetch_all(select_query)
+        expected_output = """|__ ProjectPlan\n    |__ LateralJoinPlan\n        |__ SeqScanPlan\n            |__ StoragePlan\n        |__ FunctionScanPlan\n"""
+        self.assertEqual(batch.frames[0][0], expected_output)
