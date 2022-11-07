@@ -18,62 +18,67 @@ from unittest.mock import MagicMock
 from mock import patch
 
 from eva.server.async_protocol import EvaClient, EvaProtocolBuffer
+from eva.server.networking_utils import serialize_message
+from eva.utils.generic_utils import PickleSerializer
 
 
 class AsyncProtocolTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.serializer = PickleSerializer
+        self.raw_data = "1234"
+        self.serialized_raw_data = self.serializer.serialize(self.raw_data)
+        self.serialized_data_with_header = serialize_message(self.raw_data)
 
     def test_empty_buffer(self):
         buf = EvaProtocolBuffer()
         buf.empty()
-        self.assertEqual("", buf.buf)
+        self.assertEqual(bytearray(), buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
     def test_feed_data(self):
         buf = EvaProtocolBuffer()
-        data1 = "4|12"
-        data2 = "34"
-
-        buf.feed_data(data1)
-        self.assertEqual("12", buf.buf)
-        self.assertEqual(4, buf.expected_length)
-
-        buf.feed_data(data2)
-        self.assertEqual("1234", buf.buf)
-        self.assertEqual(4, buf.expected_length)
+        size = len(self.serialized_data_with_header)
+        # send first half of the data
+        buf.feed_data(self.serialized_data_with_header[: size // 2])
+        self.assertEqual(len(self.serialized_raw_data), buf.expected_length)
+        # send remaining data
+        buf.feed_data(self.serialized_data_with_header[size // 2 :])
+        self.assertEqual(self.serialized_raw_data, buf.buf)
+        self.assertEqual(len(self.serialized_raw_data), buf.expected_length)
 
     def test_has_complete_message(self):
         buf = EvaProtocolBuffer()
-        data1 = "4|12"
-        data2 = "34"
-
-        buf.feed_data(data1)
+        size = len(self.serialized_data_with_header)
+        # send first half of the data
+        buf.feed_data(self.serialized_data_with_header[: size // 2])
         self.assertFalse(buf.has_complete_message())
-        buf.feed_data(data2)
+        # send remaining data
+        buf.feed_data(self.serialized_data_with_header[size // 2 :])
         self.assertTrue(buf.has_complete_message())
 
     def test_read_message_one(self):
         buf = EvaProtocolBuffer()
-        data1 = "4|12"
-        data2 = "34"
-        buf.feed_data(data1)
-        buf.feed_data(data2)
-
-        self.assertEqual("1234", buf.read_message())
-        self.assertEqual("", buf.buf)
+        buf.feed_data(self.serialized_data_with_header)
+        self.assertEqual(self.serialized_raw_data, buf.read_message())
+        self.assertEqual(bytearray(), buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
     def test_read_message_two(self):
         buf = EvaProtocolBuffer()
-        data1 = "4|123"
-        data2 = "42|56"
+        size = len(self.serialized_raw_data)
+        # read 2 messages that are interleaved
+        data1 = self.serialized_data_with_header[: size // 2]
+        data2 = (
+            self.serialized_data_with_header[size // 2 :]
+            + self.serialized_data_with_header
+        )
         buf.feed_data(data1)
         buf.feed_data(data2)
 
-        self.assertEqual("1234", buf.read_message())
-        self.assertEqual("56", buf.read_message())
-        self.assertEqual("", buf.buf)
+        self.assertEqual(self.serialized_raw_data, buf.read_message())
+        self.assertEqual(self.serialized_raw_data, buf.read_message())
+        self.assertEqual(bytearray(), buf.buf)
         self.assertEqual(-1, buf.expected_length)
 
     @patch("eva.server.async_protocol.set_socket_io_timeouts")
@@ -118,7 +123,5 @@ class AsyncProtocolTests(unittest.TestCase):
     def test_data_received(self):
         client = EvaClient()
         client.queue = MagicMock()
-
-        testdata = "4|1234".encode("ascii")
-        client.data_received(testdata)
-        client.queue.put_nowait.assert_called_once_with("1234")
+        client.data_received(self.serialized_data_with_header)
+        client.queue.put_nowait.assert_called_once_with(self.serialized_raw_data)

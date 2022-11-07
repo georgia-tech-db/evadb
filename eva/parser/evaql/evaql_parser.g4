@@ -35,7 +35,12 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement | showStatement
+    : simpleDescribeStatement | helpStatement | showStatement | explainStatement
+    ;
+
+explainableStatement
+    : selectStatement | insertStatement | updateStatement | deleteStatement
+    | createMaterializedView
     ;
 
 // Data Definition Language
@@ -376,6 +381,10 @@ helpStatement
 
 showStatement
     : SHOW (UDFS | TABLES)
+    ;
+
+explainStatement
+    : EXPLAIN explainableStatement
     ;
 
 // Common Clauses

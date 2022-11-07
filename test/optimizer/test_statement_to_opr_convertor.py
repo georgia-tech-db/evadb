@@ -39,6 +39,7 @@ from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
@@ -197,6 +198,16 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)
+
+    def test_visit_should_call_explain(self):
+        stmt = MagicMock(spec=ExplainStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_explain = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_once_with(stmt)
 
     def test_visit_should_call_drop(self):
         stmt = MagicMock(spec=DropTableStatement)

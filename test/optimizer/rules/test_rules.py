@@ -44,6 +44,7 @@ from eva.optimizer.rules.rules import (
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
@@ -135,6 +136,9 @@ class TestRules(unittest.TestCase):
         self.assertTrue(
             Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
+        self.assertTrue(
+            Promise.LOGICAL_EXPLAIN_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
 
     def test_supported_rules(self):
         # adding/removing rules should update this test
@@ -187,6 +191,7 @@ class TestRules(unittest.TestCase):
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalExplainToPhysical(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

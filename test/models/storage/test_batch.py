@@ -22,9 +22,9 @@ from eva.models.storage.batch import Batch
 
 
 class BatchTest(unittest.TestCase):
-    def test_batch_from_json(self):
-        batch = Batch(frames=create_dataframe(), identifier_column="id")
-        batch2 = Batch.from_json(batch.to_json())
+    def test_batch_serialize_deserialize(self):
+        batch = Batch(frames=create_dataframe())
+        batch2 = Batch.deserialize(batch.serialize())
         self.assertEqual(batch, batch2)
 
     def test_frames_as_numpy_array_should_frames_as_numpy_array(self):

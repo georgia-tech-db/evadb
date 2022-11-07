@@ -29,5 +29,11 @@ class LateralJoinPlan(AbstractJoin):
             PlanOprType.LATERAL_JOIN, JoinType.LATERAL_JOIN, join_predicate
         )
 
+    def __str__(self):
+        return "LateralJoinPlan(join_project={}, \
+            join_predicate={})".format(
+            self.join_project, self.join_predicate
+        )
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.join_project)))
