@@ -59,6 +59,18 @@ def dummy_object_detector():
     return udf_service.create_udf()
 
 
+@pytest.fixture(scope="session")
+def register_dummy_udf(load_dummy_video, dummy_object_detector):
+    # TODO: update query to register decorator UDF
+    create_udf_query = """CREATE UDF DummyObjectDetector
+                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
+                  OUTPUT (label NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'test/util.py';
+        """
+    return execute_query_fetch_all(create_udf_query)
+
+
 def test_is_udf_classifier_instance(dummy_object_detector):
     assert issubclass(dummy_object_detector, AbstractClassifierUDF)
 
