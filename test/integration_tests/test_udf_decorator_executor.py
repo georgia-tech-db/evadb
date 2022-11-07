@@ -12,18 +12,32 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from test.util import create_sample_video, file_remove
+
 import numpy as np
 import pandas as pd
 import pytest
 
+from eva.catalog.catalog_manager import CatalogManager
+from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.udf_service import UDFService
 
-# from test.util import file_remove
+NUM_FRAMES = 10
 
 
 @pytest.fixture(scope="session")
-def dummy_object_detector_service():
+def load_dummy_video():
+    CatalogManager().reset()
+    create_sample_video(NUM_FRAMES)
+    load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+    execute_query_fetch_all(load_query)
+    yield
+    file_remove("dummy.avi")
+
+
+@pytest.fixture(scope="session")
+def dummy_object_detector():
     udf_service = UDFService(
         "DummyObjectDetector", labels=["__background__", "person", "bicycle"]
     )
@@ -42,18 +56,15 @@ def dummy_object_detector_service():
         ret["label"] = df.apply(classify_one, axis=1)
         return ret
 
-    yield udf_service.create_udf()
-
-    # TODO: handle cleanup after writing tests which call UDF
-    # file_remove("dummy.avi")
+    return udf_service.create_udf()
 
 
-def test_is_udf_classifier_instance(dummy_object_detector_service):
-    assert issubclass(dummy_object_detector_service, AbstractClassifierUDF)
+def test_is_udf_classifier_instance(dummy_object_detector):
+    assert issubclass(dummy_object_detector, AbstractClassifierUDF)
 
 
-def test_udf_labels(dummy_object_detector_service):
-    assert dummy_object_detector_service().labels == [
+def test_udf_labels(dummy_object_detector):
+    assert dummy_object_detector().labels == [
         "__background__",
         "person",
         "bicycle",
