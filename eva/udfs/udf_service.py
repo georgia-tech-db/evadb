@@ -45,22 +45,13 @@ class UDFService:
         self._setup = wrapper_setup
         return wrapper_setup
 
-    def forward(
-        self,
-        input_type: FrameType,
-        output_type: FrameType,
-        channels_first: bool = True,
-        batch: bool = False,
-    ):
-        def decorator_forward(func: Callable):
-            @functools.wraps(func)
-            def wrapper_forward(self, frames: ArrayLike):
-                return func(frames)
+    def forward(self, func: Callable):
+        @functools.wraps(func)
+        def wrapper_forward(self, frames: ArrayLike):
+            return func(frames)
 
-            self._forward = wrapper_forward
-            return wrapper_forward
-
-        return decorator_forward
+        self._forward = wrapper_forward
+        return wrapper_forward
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self._forward(args[0])

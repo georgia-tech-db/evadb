@@ -16,7 +16,7 @@
 import numpy as np
 import pytest
 
-from eva.udfs.udf_service import FrameType, UDFService
+from eva.udfs.udf_service import UDFService
 
 
 @pytest.fixture(scope="session")
@@ -39,12 +39,7 @@ def all_zeros_udf(all_zeros_callable):
     def setup():
         pass
 
-    @all_zero_udf.forward(
-        input_type=FrameType.NdArray,
-        channels_first=True,
-        batch=False,
-        output_type=bool,
-    )
+    @all_zero_udf.forward
     def forward(frame):
         return all_zeros_callable(frame)
 
