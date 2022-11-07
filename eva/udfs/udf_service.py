@@ -15,11 +15,11 @@
 
 import functools
 from enum import Enum, auto
-from typing import Any, Callable, Optional, Type
+from typing import Any, Callable, List, Optional, Type
 
 from numpy.typing import ArrayLike
 
-from eva.udfs.abstract.abstract_udf import AbstractUDF
+from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF, AbstractUDF
 
 
 class FrameType(Enum):
@@ -28,8 +28,9 @@ class FrameType(Enum):
 
 
 class UDFService:
-    def __init__(self, name: str) -> None:
+    def __init__(self, name: str, labels: Optional[List[str]] = None) -> None:
         self._name: str = name
+        self._labels = labels
         self._setup: Optional[Callable] = None
         self._forward: Optional[Callable] = None
 
@@ -57,16 +58,24 @@ class UDFService:
         return self._forward(args[0])
 
     def create_udf(self) -> Type[AbstractUDF]:
-        if self._setup is None or self._forward is None:
-            raise ValueError(
-                "Both setup and forward functions must be decorated before creating UDF."
-            )
+        if self._setup is None:
+
+            def dummy_setup(*args: Any, **kwargs: Any) -> None:
+                pass
+
+            self._setup = dummy_setup
+
+        if self._forward is None:
+            raise ValueError("forward function must be decorated before creating UDF.")
+
+        parent_type = AbstractUDF if self._labels is None else AbstractClassifierUDF
         return type(
             "DecoratorUDF",
-            (AbstractUDF,),
+            (parent_type,),
             {
                 "setup": self._setup,
                 "forward": self._forward,
                 "name": self._name,
+                "labels": self._labels,
             },
         )
