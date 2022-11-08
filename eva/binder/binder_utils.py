@@ -152,7 +152,7 @@ def extend_star(
     return target_list
 
 
-def check_groupby_pattern(groupby_string: str):
+def check_groupby_pattern(groupby_string: str) -> None:
     # match the pattern of group by clause (e.g., 16f or 8s)
     pattern = re.search(r"^\d+[fs]$", groupby_string)
     # if valid pattern

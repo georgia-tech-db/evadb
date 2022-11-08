@@ -33,7 +33,7 @@ class GroupByExecutor(AbstractExecutor):
 
     def __init__(self, node: GroupByPlan):
         super().__init__(node)
-        self._segment_length = int(node.grouby_clause.value[:-1])
+        self._segment_length = int(node.groupby_clause.value[:-1])
 
     def validate(self):
         pass
