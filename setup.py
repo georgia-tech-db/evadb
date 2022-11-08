@@ -77,7 +77,6 @@ integration_test_libs = [
 ]
 
 benchmark_libs = [
-    "pytest-benchmark"
 ]
 
 doc_libs = [
