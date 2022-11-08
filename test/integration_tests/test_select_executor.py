@@ -269,6 +269,29 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch.project(["myvideo.id", "myvideo.data"]),
         )
 
+    def test_select_and_groupby_with_last(self):
+        # TODO ACTION: groupby and orderby together not tested because groupby
+        # only applies to video data which is already sorted
+        segment_size = 3
+        select_query = (
+            "SELECT LAST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+                segment_size
+            )
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        ids = np.arange(NUM_FRAMES)
+        segments = [ids[i : i + segment_size] for i in range(0, len(ids), segment_size)]
+        segments = [i for i in segments if len(i) == segment_size]
+        expected_batch = list(
+            create_dummy_4d_batches(filters=segments, start_id=segment_size - 1)
+        )[0]
+        self.assertEqual(len(actual_batch), len(expected_batch))
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
+
     def test_select_and_groupby_with_incorrect_pattern(self):
         segment_size = "4a"
         select_query = (
@@ -276,7 +299,7 @@ class SelectExecutorTest(unittest.TestCase):
                 segment_size
             )
         )
-        self.assertRaises(ValueError, execute_query_fetch_all, select_query)
+        self.assertRaises(BinderError, execute_query_fetch_all, select_query)
 
     def test_select_and_groupby_should_fail_with_seconds(self):
         segment_size = 4
@@ -285,7 +308,7 @@ class SelectExecutorTest(unittest.TestCase):
                 segment_size
             )
         )
-        self.assertRaises(ValueError, execute_query_fetch_all, select_query)
+        self.assertRaises(BinderError, execute_query_fetch_all, select_query)
 
     def test_select_and_groupby_with_sample(self):
         # TODO ACTION: groupby and orderby together not tested because groupby

@@ -14,6 +14,7 @@
 # limitations under the License.
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
@@ -149,3 +150,18 @@ def extend_star(
         ]
     )
     return target_list
+
+
+def check_groupby_pattern(groupby_string: str):
+    # match the pattern of group by clause (e.g., 16f or 8s)
+    pattern = re.search(r"^\d+[fs]$", groupby_string)
+    # if valid pattern
+    if not pattern:
+        err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
+        raise BinderError(err_msg)
+    else:
+        match_string = pattern.group(0)
+        if not match_string[-1] == "f":
+            err_msg = "Only grouping by frames (f) is supported"
+            raise BinderError(err_msg)
+            # TODO ACTION condition on segment length?

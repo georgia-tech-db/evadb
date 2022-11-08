@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import re
 from typing import Iterator
 
 import pandas as pd
@@ -24,29 +23,17 @@ from eva.planner.groupby_plan import GroupByPlan
 
 class GroupByExecutor(AbstractExecutor):
     """
-    Samples uniformly from the rows.
+    Group inputs into 4d segments of length provided in the query
+    E.g., "GROUP BY '8f'" groups every 8 frames into one segment
 
     Arguments:
-        node (AbstractPlan): The Sample Plan
+        node (AbstractPlan): The GroupBy Plan
 
     """
 
     def __init__(self, node: GroupByPlan):
         super().__init__(node)
-        # match the pattern of group by clause (e.g., 16f or 8s)
-        pattern = re.search(r"^\d+[fs]$", node.groupby_clause.value)
-        # if valid pattern
-        if pattern:
-            match_string = pattern.group(0)
-            if match_string[-1] == "f":
-                self._segment_length = int(match_string[:-1])
-                # TODO ACTION condition on segment length?
-            else:
-                err_msg = "Only grouping by frames (f) is supported"
-                raise ValueError(err_msg)
-        else:
-            err_msg = "Incorrect GROUP BY pattern: {}".format(node.groupby_clause.value)
-            raise ValueError(err_msg)
+        self._segment_length = int(node.grouby_clause.value[:-1])
 
     def validate(self):
         pass
