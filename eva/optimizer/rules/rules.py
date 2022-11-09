@@ -564,21 +564,23 @@ class UdfReuseForFunctionScan(Rule):
             -> DataFrameMetadata:
 
         # TODO: This part can maybe moved to utils. 
-        # iterate over output objs of fs to get udf_id and col info
-        udf_id = -1
+        # get col info for input cols
+        # we are now assuming no nested udf
         col_defs = []
         col_ids = []
-        for col_obj in fs.func_expr.output_objs:
-            udf_id = col_obj.udf_id
+        metadata_id = -1
+        udf_id = fs.func_expr.output_objs[0].udf_id
+        for child in fs.func_expr.children:
             col_defs.append(
                 ColumnDefinition(
-                    col_name=col_obj.name,
-                    col_type=col_obj.type,
-                    col_array_type=col_obj.array_type,
-                    col_dim=col_obj.array_dimensions
+                    col_name=child.col_object.name,
+                    col_type=child.col_object.type,
+                    col_array_type=child.col_object.array_type,
+                    col_dim=child.col_object.array_dimensions
                 )
             )
-            col_ids.append(col_obj.id)
+            col_ids.append(child.col_object.id)
+            metadata_id = child.col_object.metadata_id
              
         # TODO: What should be the name of the view?
         # TODO: How to handle predicate info?
