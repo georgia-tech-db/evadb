@@ -20,6 +20,7 @@ from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
     check_groupby_pattern,
+    check_table_object_is_video,
     create_video_metadata,
     extend_star,
 )
@@ -94,6 +95,7 @@ class StatementBinder:
         if node.groupby_clause:
             self.bind(node.groupby_clause)
             check_groupby_pattern(node.groupby_clause.value)
+            check_table_object_is_video(node.from_table)
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])

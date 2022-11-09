@@ -159,9 +159,14 @@ def check_groupby_pattern(groupby_string: str) -> None:
     if not pattern:
         err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
         raise BinderError(err_msg)
-    else:
-        match_string = pattern.group(0)
-        if not match_string[-1] == "f":
-            err_msg = "Only grouping by frames (f) is supported"
-            raise BinderError(err_msg)
-            # TODO ACTION condition on segment length?
+    match_string = pattern.group(0)
+    if not match_string[-1] == "f":
+        err_msg = "Only grouping by frames (f) is supported"
+        raise BinderError(err_msg)
+    # TODO ACTION condition on segment length?
+
+
+def check_table_object_is_video(table_ref: TableRef) -> None:
+    if not table_ref.table.table_obj.is_video:
+        err_msg = "GROUP BY only supported for video tables"
+        raise BinderError(err_msg)

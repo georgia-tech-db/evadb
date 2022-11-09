@@ -249,7 +249,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch[0])
 
     def test_select_and_groupby(self):
-        # TODO ACTION: groupby and orderby together not tested because groupby
+        # groupby and orderby together not tested because groupby
         # only applies to video data which is already sorted
         segment_size = 3
         select_query = (
@@ -270,7 +270,7 @@ class SelectExecutorTest(unittest.TestCase):
         )
 
     def test_select_and_groupby_with_last(self):
-        # TODO ACTION: groupby and orderby together not tested because groupby
+        # groupby and orderby together not tested because groupby
         # only applies to video data which is already sorted
         segment_size = 3
         select_query = (
@@ -292,7 +292,7 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch.project(["myvideo.id", "myvideo.data"]),
         )
 
-    def test_select_and_groupby_with_incorrect_pattern(self):
+    def test_select_and_groupby_should_fail_with_incorrect_pattern(self):
         segment_size = "4a"
         select_query = (
             "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
@@ -307,6 +307,13 @@ class SelectExecutorTest(unittest.TestCase):
             "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}s';".format(
                 segment_size
             )
+        )
+        self.assertRaises(BinderError, execute_query_fetch_all, select_query)
+
+    def test_select_and_groupby_should_fail_with_non_video_table(self):
+        segment_size = 4
+        select_query = "SELECT FIRST(a1) FROM table1 GROUP BY '{}f';".format(
+            segment_size
         )
         self.assertRaises(BinderError, execute_query_fetch_all, select_query)
 
