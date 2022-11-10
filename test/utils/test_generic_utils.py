@@ -17,6 +17,9 @@ import unittest
 from pathlib import Path
 
 from mock import MagicMock, patch
+import tempfile
+import pickle
+import pytest
 
 from eva.readers.opencv_reader import OpenCVReader
 from eva.utils.generic_utils import (
@@ -43,6 +46,16 @@ class ModulePathTest(unittest.TestCase):
     def test_should_raise_if_class_does_not_exists(self):
         with self.assertRaises(RuntimeError):
             path_to_class("eva/readers/opencv_reader.py", "OpenCV")
+
+    @pytest.mark.xfail
+    def test_should_load_class_from_pickle(self):
+        class Dummy:
+            value: int
+    
+        with tempfile.NamedTemporaryFile(suffix=".pkl") as pickle_file:
+            pickle.dumps(Dummy, pickle_file)
+            dummy_type = path_to_class(pickle_file.name, "Dummy")
+            self.assertEqual(Dummy, dummy_type)
 
     def test_should_use_torch_to_check_if_gpu_is_available(self):
         # Emulate a missing import
