@@ -272,15 +272,16 @@ class Batch:
         We do a copy for now.
         """
         cols = cols or []
-        verfied_cols = [c for c in cols if c in self._frames]
-        unknown_cols = list(set(cols) - set(verfied_cols))
-        if len(unknown_cols):
-            logger.warn(
-                "Unexpected columns %s\n\
-                                 Frames: %s"
-                % (unknown_cols, self._frames)
-            )
-        return Batch(self._frames[verfied_cols], self._identifier_column)
+        
+        # verfied_cols = [c for c in cols if c in self._frames]
+        # unknown_cols = list(set(cols) - set(verfied_cols))
+        # if len(unknown_cols):
+        #     logger.warn(
+        #         "Unexpected columns %s\n\
+        #                          Frames: %s"
+        #         % (unknown_cols, self._frames)
+        #     )
+        return Batch(self._frames.iloc[:, cols], self._identifier_column)
 
     def repeat(self, times: int) -> None:
         """
@@ -457,3 +458,6 @@ class Batch:
                 new_col_names.append(col_name)
 
         self._frames.columns = new_col_names
+
+    def reorder_columns(self):
+        pass

@@ -16,8 +16,9 @@ class ColumnMapper:
     Maps the ids for columns
     """
     
-    def __init__(self, column_to_id_map: dict):
+    def __init__(self, column_to_id_map: dict, updated_col_map: dict):
         self.column_to_id_map = column_to_id_map
+        self.updated_col_map = updated_col_map
 
     @singledispatchmethod
     def map_node_attributes_to_id(self, node: AbstractPlan):
@@ -40,7 +41,9 @@ class ColumnMapper:
         #update the ids for columns in the target_list
         for i in range(len(node.target_list)):
             curr_node = node.target_list[i]
-            node.target_list[i] = self.map_node_attributes_to_id(curr_node)
+            column_name = curr_node.col_alias
+            curr_node._col_idx = self.updated_col_map[column_name]
+            node.target_list[i] = curr_node
 
         return node
     
@@ -80,5 +83,15 @@ class ColumnMapper:
             col_name = child.col_alias
             child._col_idx = self.column_to_id_map[col_name]
         
+        #update the projection columns
+        alias_prefix = node.func_expr.alias.alias_name
+        col_names = node.func_expr.alias.col_names
+        col_name_lst = []
+        for col_name in col_names:
+            col_name_lst.append(alias_prefix+'.'+col_name)
+            
+        for i,column in enumerate(node.func_expr.projection_columns):
+            node.func_expr.projection_columns[i] = self.column_to_id_map[col_name_lst[i]]
+
         return node
         
