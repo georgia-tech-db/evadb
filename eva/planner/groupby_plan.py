@@ -36,5 +36,8 @@ class GroupByPlan(AbstractPlan):
     def groupby_clause(self):
         return self._groupby_clause
 
+    def __str__(self):
+        return "GroupByPlan(groupby_clause={})".format(self._groupby_clause)
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.groupby_clause))
