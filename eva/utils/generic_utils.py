@@ -18,6 +18,7 @@ import pickle
 import sys
 import uuid
 from pathlib import Path
+from typing import PathLike
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
@@ -47,7 +48,7 @@ def str_to_class(class_path: str):
     return getattr(module, class_name)
 
 
-def path_to_class(filepath: str, classname: str):
+def path_to_class(filepath: PathLike, classname: str):
     """
     Convert the class in the path file into an object
 
@@ -58,6 +59,11 @@ def path_to_class(filepath: str, classname: str):
     Returns:
         type: A class for given path
     """
+    resolved = Path(filepath).resolve()
+    if resolved.suffix == ".pkl":
+        with resolved.open() as f:
+            return pickle.load(f)
+
     try:
         abs_path = Path(filepath).resolve()
         spec = importlib.util.spec_from_file_location(abs_path.stem, abs_path)

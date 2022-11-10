@@ -18,7 +18,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import pytest
 from mock import MagicMock, patch
 
 from eva.readers.opencv_reader import OpenCVReader
@@ -28,6 +27,10 @@ from eva.utils.generic_utils import (
     path_to_class,
     str_to_class,
 )
+
+
+class Dummy:
+    value: int
 
 
 class ModulePathTest(unittest.TestCase):
@@ -47,13 +50,9 @@ class ModulePathTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             path_to_class("eva/readers/opencv_reader.py", "OpenCV")
 
-    @pytest.mark.xfail
     def test_should_load_class_from_pickle(self):
-        class Dummy:
-            value: int
-
         with tempfile.NamedTemporaryFile(suffix=".pkl") as pickle_file:
-            pickle.dumps(Dummy, pickle_file)
+            pickle.dump(Dummy, pickle_file)
             dummy_type = path_to_class(pickle_file.name, "Dummy")
             self.assertEqual(Dummy, dummy_type)
 
