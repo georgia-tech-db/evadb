@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import annotations
+from __future__ import annotations #noqa: F407
 
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, List
