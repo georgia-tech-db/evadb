@@ -4,14 +4,17 @@ workflows:
   main:
     jobs:
         - test:
-            name: "Python v2.7"
-            v: "2.7"
-        - test:
-            name: "Python v3.5"
-            v: "3.5"
+            name: "Python v3.6"
+            v: "3.6"
         - test:
             name: "Python v3.7"
             v: "3.7"
+        - test:
+            name: "Python v3.8"
+            v: "3.8"
+        - test:
+            name: "Python v3.9"
+            v: "3.9"
         - test:
             name: "Python v3.10"
             v: "3.10"
@@ -41,8 +44,8 @@ jobs:
       - run:
           name: Install EVA package with test dependencies
           command: |
-            python -m venv eva_dev_env
-            . eva_dev_env/bin/activate
+            "python<< parameters.v >>" -m venv test_evadb
+            source test_evadb/bin/activate
             pip install --upgrade pip
             sh script/antlr4/generate_parser.sh
             pip install ".[dev]"
@@ -52,7 +55,7 @@ jobs:
           command: |
             sudo apt-get update          
             sudo apt-get install lsof 
-            . eva_dev_env/bin/activate
+            source test_evadb/bin/activate
             sh script/test/test.sh
             coveralls
 
@@ -65,4 +68,4 @@ jobs:
       - save_cache:
           key: v11-pip-cache-{{ checksum "setup.py" }}
           paths:
-            - ./eva_dev_env/
+            - ./test_evadb/
