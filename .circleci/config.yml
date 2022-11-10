@@ -4,11 +4,17 @@ workflows:
   main:
     jobs:
         - test:
+            name: "Python v2.7"
+            v: "2.7"
+        - test:
+            name: "Python v3.5"
+            v: "3.5"
+        - test:
             name: "Python v3.7"
             v: "3.7"
         - test:
-            name: "Python v3.8"
-            v: "3.8"
+            name: "Python v3.10"
+            v: "3.10"
 
 jobs:
   test: 
