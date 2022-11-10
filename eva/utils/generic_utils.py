@@ -17,8 +17,8 @@ import importlib
 import pickle
 import sys
 import uuid
+from os import PathLike
 from pathlib import Path
-from typing import PathLike
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
