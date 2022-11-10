@@ -290,13 +290,15 @@ if __name__ == "__main__":
     else:
         # LOG.info("Default fix modified files")
         MERGEBASE = subprocess.check_output(
-            "git merge-base origin/master HEAD", shell=True, text=True
+            "git merge-base origin/master HEAD", 
+            shell=True, 
+            universal_newlines=True
         ).rstrip()
         files = (
             subprocess.check_output(
                 f"git diff --name-only --diff-filter=ACRM {MERGEBASE} -- '*.py'",
                 shell=True,
-                text=True,
+                universal_newlines=True
             )
             .rstrip()
             .split("\n")
