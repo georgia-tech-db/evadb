@@ -20,11 +20,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
-
-
-@pytest.fixture(
-    autouse=False
-)
+@pytest.fixture(autouse=False)
 def setup_pytorch_tests():
     file_remove("ua_detrac.mp4")
     CatalogManager().reset()

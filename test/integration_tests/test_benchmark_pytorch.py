@@ -1,4 +1,17 @@
-import pytest
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import sys
 
 import mock
@@ -15,9 +28,9 @@ from eva.server.command_handler import execute_query_fetch_all
 )
 def test_should_run_pytorch_and_fastrcnn(benchmark, setup_pytorch_tests):
     select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
-                    WHERE id < 5;"""            
+                    WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert(len(actual_batch)==5)
+    assert len(actual_batch) == 5
 
 
 @pytest.mark.torchtest
@@ -38,11 +51,11 @@ def test_should_run_pytorch_and_ssd(benchmark, setup_pytorch_tests):
     select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert(len(actual_batch)==5)
+    assert len(actual_batch) == 5
     # non-trivial test case
     res = actual_batch.frames
     for idx in res.index:
-        assert("car" in res["ssdobjectdetector.label"][idx])
+        assert "car" in res["ssdobjectdetector.label"][idx]
 
 
 @pytest.mark.torchtest
@@ -64,9 +77,7 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     select_query = """SELECT FaceDetector(data) FROM MyVideo
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert(len(actual_batch)==5)
-
-
+    assert len(actual_batch) == 5
 
 
 @pytest.mark.torchtest
@@ -89,12 +100,13 @@ def test_should_run_pytorch_and_ocr(benchmark, setup_pytorch_tests):
     select_query = """SELECT OCRExtractor(data) FROM MNIST
                     WHERE id >= 150 AND id < 155;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert(len(actual_batch)==5)
+    assert len(actual_batch) == 5
 
     # non-trivial test case for MNIST
     res = actual_batch.frames
-    assert(res["ocrextractor.labels"][0][0] == "4")
-    assert(res["ocrextractor.scores"][2][0] > 0.9)
+    assert res["ocrextractor.labels"][0][0] == "4"
+    assert res["ocrextractor.scores"][2][0] > 0.9
+
 
 @pytest.mark.torchtest
 @pytest.mark.benchmark(
@@ -114,12 +126,13 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     select_query = """SELECT FeatureExtractor(data) FROM MyVideo
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert(len(actual_batch)==5)
+    assert len(actual_batch) == 5
 
     # non-trivial test case for Resnet50
     res = actual_batch.frames
-    assert(res["featureextractor.features"][0].shape==(1, 2048))
-    assert(res["featureextractor.features"][0][0][0] > 0.3)
+    assert res["featureextractor.features"][0].shape == (1, 2048)
+    assert res["featureextractor.features"][0][0][0] > 0.3
+
 
 @pytest.mark.torchtest
 @pytest.mark.benchmark(
@@ -134,13 +147,16 @@ def test_should_raise_import_error_with_missing_torch(benchmark, setup_pytorch_t
 
             pass
 
+
 @pytest.mark.torchtest
 @pytest.mark.benchmark(
     warmup=False,
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_should_raise_import_error_with_missing_torchvision(benchmark, setup_pytorch_tests):
+def test_should_raise_import_error_with_missing_torchvision(
+    benchmark, setup_pytorch_tests
+):
     with pytest.raises(ImportError):
         with mock.patch.dict(sys.modules, {"torchvision.transforms": None}):
             from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
