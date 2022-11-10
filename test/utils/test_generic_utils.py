@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pickle
+import tempfile
 import unittest
 from pathlib import Path
 
-from mock import MagicMock, patch
-import tempfile
-import pickle
 import pytest
+from mock import MagicMock, patch
 
 from eva.readers.opencv_reader import OpenCVReader
 from eva.utils.generic_utils import (
@@ -51,7 +51,7 @@ class ModulePathTest(unittest.TestCase):
     def test_should_load_class_from_pickle(self):
         class Dummy:
             value: int
-    
+
         with tempfile.NamedTemporaryFile(suffix=".pkl") as pickle_file:
             pickle.dumps(Dummy, pickle_file)
             dummy_type = path_to_class(pickle_file.name, "Dummy")
