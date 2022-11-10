@@ -53,16 +53,6 @@ class Insert(evaql_parserVisitor):
         insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
         return insert_stmt
 
-    def visitUidList(self, ctx: evaql_parser.UidListContext):
-        uid_list = []
-        uid_list_length = len(ctx.uid())
-        for uid_index in range(uid_list_length):
-            uid = self.visit(ctx.uid(uid_index))
-            uid_expr = TupleValueExpression(uid)
-            uid_list.append(uid_expr)
-
-        return uid_list
-
     def visitInsertStatementValue(self, ctx: evaql_parser.InsertStatementValueContext):
         insert_stmt_value = []
         for child in ctx.children:
