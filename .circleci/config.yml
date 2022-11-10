@@ -1,13 +1,14 @@
 version: 2.1
 
 workflows:
-  jobs:
-      - test:
-          name: "Python v3.7"
-          v: "3.7"
-      - test:
-          name: "Python v3.8"
-          v: "3.8"
+  main:
+    jobs:
+        - test:
+            name: "Python v3.7"
+            v: "3.7"
+        - test:
+            name: "Python v3.8"
+            v: "3.8"
 
 jobs:
   test: 
