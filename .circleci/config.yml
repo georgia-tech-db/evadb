@@ -10,7 +10,11 @@ workflows:
           v: "3.8"
 
 jobs:
-  test-3.6: &test-template
+  test: 
+    parameters:
+      v:
+        type: string
+        default: ""  # latest version
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
