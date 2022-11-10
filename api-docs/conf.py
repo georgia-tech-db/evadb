@@ -114,4 +114,3 @@ def setup(sphinx):
         category=UserWarning,
         message=r".*Container node skipped.*",
     )
-

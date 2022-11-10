@@ -22,9 +22,9 @@ from eva.models.storage.batch import Batch
 
 
 class BatchTest(unittest.TestCase):
-    def test_batch_from_json(self):
-        batch = Batch(frames=create_dataframe(), identifier_column="id")
-        batch2 = Batch.from_json(batch.to_json())
+    def test_batch_serialize_deserialize(self):
+        batch = Batch(frames=create_dataframe())
+        batch2 = Batch.deserialize(batch.serialize())
         self.assertEqual(batch, batch2)
 
     def test_frames_as_numpy_array_should_frames_as_numpy_array(self):
@@ -122,3 +122,8 @@ class BatchTest(unittest.TestCase):
     def test_should_return_empty_dataframe(self):
         batch = Batch()
         self.assertEqual(batch, Batch(create_dataframe(0)))
+
+    def test_stack_batch_more_than_one_column_should_raise_exception(self):
+        batch = Batch(create_dataframe_same(2))
+        self.assertRaises(ValueError, Batch.stack, batch)
+        # TODO ACTION: Add test cases for stack correctness

@@ -42,6 +42,51 @@ class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def test_explain_dml_statement(self):
+        parser = Parser()
+
+        explain_query = "EXPLAIN SELECT CLASS FROM TAIPAI;"
+        eva_statement_list = parser.parse(explain_query)
+
+        # check explain stmt itself
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
+
+        # check inner stmt
+        inner_stmt = eva_statement_list[0].explainable_stmt
+        self.assertEqual(inner_stmt.stmt_type, StatementType.SELECT)
+
+        # check inner stmt from
+        self.assertIsNotNone(inner_stmt.from_table)
+        self.assertIsInstance(inner_stmt.from_table, TableRef)
+        self.assertEqual(inner_stmt.from_table.table.table_name, "TAIPAI")
+
+    def test_explain_ddl_statement(self):
+        parser = Parser()
+
+        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+                        WHERE id<5; """
+        explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
+            select_query
+        )
+
+        eva_statement_list = parser.parse(explain_query)
+
+        # check explain stmt itself
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.EXPLAIN)
+
+        # check inner stmt
+        inner_stmt = eva_statement_list[0].explainable_stmt
+        self.assertEqual(inner_stmt.stmt_type, StatementType.CREATE_MATERIALIZED_VIEW)
+
+        # check inner stmt from
+        self.assertIsNotNone(
+            inner_stmt.view_ref, TableRef(TableInfo("uadetrac_fastRCNN"))
+        )
+
     def test_create_statement(self):
         parser = Parser()
 
@@ -208,6 +253,44 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt_new.target_list, select_stmt.target_list)
         self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
+
+    def test_select_statement_groupby_class(self):
+        """Testing sample frequency"""
+
+        parser = Parser()
+
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.AGGREGATION_FIRST
+        )
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "TAIPAI")
+
+        # sample_freq
+        self.assertEqual(
+            select_stmt.groupby_clause,
+            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+        )
+
+    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
+        # GROUP BY with multiple attributes should raise Syntax Error
+        parser = Parser()
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
+        self.assertRaises(SyntaxError, parser.parse, select_query)
 
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement

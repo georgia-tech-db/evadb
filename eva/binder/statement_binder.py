@@ -19,6 +19,8 @@ from typing import Union
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
+    check_groupby_pattern,
+    check_table_object_is_video,
     create_video_metadata,
     extend_star,
 )
@@ -31,6 +33,7 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
@@ -75,6 +78,10 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
+    @bind.register(ExplainStatement)
+    def _bind_explain_statement(self, node: ExplainStatement):
+        self.bind(node.explainable_stmt)
+
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         self.bind(node.from_table)
@@ -90,6 +97,10 @@ class StatementBinder:
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
                 self.bind(expr)
+        if node.groupby_clause:
+            self.bind(node.groupby_clause)
+            check_groupby_pattern(node.groupby_clause.value)
+            check_table_object_is_video(node.from_table)
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])

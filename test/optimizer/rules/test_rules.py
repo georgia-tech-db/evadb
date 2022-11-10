@@ -44,9 +44,11 @@ from eva.optimizer.rules.rules import (
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
+    LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
@@ -115,6 +117,9 @@ class TestRules(unittest.TestCase):
             Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
+            Promise.LOGICAL_GROUPBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
             Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
@@ -134,6 +139,9 @@ class TestRules(unittest.TestCase):
         )
         self.assertTrue(
             Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
+            Promise.LOGICAL_EXPLAIN_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
 
     def test_supported_rules(self):
@@ -178,6 +186,7 @@ class TestRules(unittest.TestCase):
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),
@@ -187,6 +196,7 @@ class TestRules(unittest.TestCase):
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalExplainToPhysical(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

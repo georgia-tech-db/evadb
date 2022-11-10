@@ -44,8 +44,6 @@ minimal_requirement = [
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
-    "pyspark==3.0.2",
-    "petastorm==0.11.5",
     "antlr4-python3-runtime==4.8",
     "pyyaml==5.1",
     "importlib-metadata<5.0"
@@ -74,8 +72,8 @@ notebook_libs = [
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
-    "torch==1.10.2",
-    "torchvision==0.11.3"
+    "torch==1.13.0",
+    "torchvision==0.14.0",
 ]
 
 benchmark_libs = [
@@ -102,7 +100,7 @@ udf_libs = [
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = [
-    "ray==1.13.0" #TODO: not minimal requirement
+    "ray==1.13.0"
 ]
 
 

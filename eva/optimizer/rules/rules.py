@@ -26,6 +26,7 @@ from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.planner.explain_plan import ExplainPlan
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
@@ -42,9 +43,11 @@ from eva.optimizer.operators import (
     LogicalCreateUDF,
     LogicalDrop,
     LogicalDropUDF,
+    LogicalExplain,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
+    LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
     LogicalLimit,
@@ -65,6 +68,7 @@ from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.function_scan_plan import FunctionScanPlan
+from eva.planner.groupby_plan import GroupByPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.lateral_join_plan import LateralJoinPlan
@@ -610,6 +614,25 @@ class LogicalUnionToPhysical(Rule):
         return after
 
 
+class LogicalGroupByToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGROUPBY)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_GROUPBY_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_GROUPBY_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalGroupBy, context: OptimizerContext):
+        after = GroupByPlan(before.groupby_clause)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
 class LogicalOrderByToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALORDERBY)
@@ -804,6 +827,25 @@ class LogicalShowToPhysical(Rule):
 
     def apply(self, before: LogicalShow, context: OptimizerContext):
         after = ShowInfoPlan(before.show_type)
+        return after
+
+
+class LogicalExplainToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALEXPLAIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_EXPLAIN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_EXPLAIN_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalExplain, context: OptimizerContext):
+        after = ExplainPlan(before.explainable_opr)
+        for child in before.children:
+            after.append_child(child)
         return after
 
 

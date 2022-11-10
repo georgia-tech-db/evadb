@@ -117,6 +117,13 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_create_mat_statement(mat_statement)
             mock_binder.assert_called_with(mat_statement.query)
 
+    def test_bind_explain_statement(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            stmt = MagicMock()
+            binder._bind_explain_statement(stmt)
+            mock_binder.assert_called_with(stmt.explainable_stmt)
+
     @patch("eva.binder.statement_binder.CatalogManager")
     @patch("eva.binder.statement_binder.path_to_class")
     def test_bind_func_expr(self, mock_path_to_class, mock_catalog):
@@ -192,12 +199,15 @@ class StatementBinderTests(unittest.TestCase):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
-            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
             select_statement.target_list = mocks[:2]
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
+            select_statement.groupby_clause = mocks[4]
+            select_statement.groupby_clause.value = "8f"
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)
+            mock_binder.assert_any_call(select_statement.groupby_clause)
             mock_binder.assert_any_call(select_statement.union_link)
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
@@ -208,11 +218,13 @@ class StatementBinderTests(unittest.TestCase):
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
             select_statement.union_link = None
+            select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 0)
 
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
+            select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 1)
 
