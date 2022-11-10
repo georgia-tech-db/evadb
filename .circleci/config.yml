@@ -1,13 +1,13 @@
 version: 2.1
+
 workflows:
-  version: 2
-  test:
-    jobs:
-      - test-3.6
-      - test-3.7
-      - test-3.8
-      - test-3.9
-      - test-3.10
+  jobs:
+      - test:
+          name: "Python v3.7"
+          v: "3.7"
+      - test:
+          name: "Python v3.8"
+          v: "3.8"
 
 jobs:
   test-3.6: &test-template
@@ -15,7 +15,7 @@ jobs:
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       # This comes with python and openjdk11
-      - image: cimg/python:3.6-browsers
+      - image: "cimg/python:<< parameters.v >>-browsers"
     steps:
       - checkout
 
@@ -55,23 +55,3 @@ jobs:
           key: v9-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./eva_dev_env/
-
-  test-3.7:
-    <<: *test-template
-    docker:
-      - image: circleci/python:3.7
-
-  test-3.8:
-    <<: *test-template
-    docker:
-      - image: circleci/python:3.8
-
-  test-3.9:
-    <<: *test-template
-    docker:
-      - image: circleci/python:3.9
-
-  test-3.10:
-    <<: *test-template
-    docker:
-      - image: circleci/python:3.10
