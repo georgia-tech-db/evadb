@@ -14,6 +14,7 @@
 # limitations under the License.
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
@@ -126,7 +127,7 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
     if CatalogManager().check_table_exists(
         table_ref.table.database_name, table_ref.table.table_name
     ):
-        err_msg = "Table: {} already exsits".format(table_ref)
+        err_msg = "Table: {} already exists".format(table_ref)
         if if_not_exist:
             logger.warn(err_msg)
             return True
@@ -149,3 +150,23 @@ def extend_star(
         ]
     )
     return target_list
+
+
+def check_groupby_pattern(groupby_string: str) -> None:
+    # match the pattern of group by clause (e.g., 16f or 8s)
+    pattern = re.search(r"^\d+[fs]$", groupby_string)
+    # if valid pattern
+    if not pattern:
+        err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
+        raise BinderError(err_msg)
+    match_string = pattern.group(0)
+    if not match_string[-1] == "f":
+        err_msg = "Only grouping by frames (f) is supported"
+        raise BinderError(err_msg)
+    # TODO ACTION condition on segment length?
+
+
+def check_table_object_is_video(table_ref: TableRef) -> None:
+    if not table_ref.table.table_obj.is_video:
+        err_msg = "GROUP BY only supported for video tables"
+        raise BinderError(err_msg)
