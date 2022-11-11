@@ -4,9 +4,6 @@ workflows:
   main:
     jobs:
         - test:
-            name: "Python v3.6"
-            v: "3.6"
-        - test:
             name: "Python v3.7"
             v: "3.7"
         - test:
@@ -18,16 +15,16 @@ workflows:
         - test:
             name: "Python v3.10"
             v: "3.10"
-        - test:
-            name: "Python v3.11"
-            v: "3.11"
+        #- test:
+        #    name: "Python v3.11"  # missing Torchvision
+        #    v: "3.11"
 
 jobs:
   test: 
     parameters:
       v:
         type: string
-        default: ""  # latest version
+        default: "3.7" 
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
