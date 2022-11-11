@@ -17,13 +17,17 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
+from eva.catalog.catalog_manager import CatalogManager
+from eva.expression.abstract_expression import AbstractExpression
 
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
 )
+from eva.utils.generic_utils import path_to_class
 from eva.optimizer.rules.pattern import Pattern
 from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -812,6 +816,14 @@ class LogicalFunctionScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
+        # TODO: Should we convert AbstractExpression into FunctionExpression?
+        # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
+        before.func_expr.__class__ = FunctionExpression
+        if before.func_expr._function == None:
+            catalog = CatalogManager()
+            udf_obj = catalog.get_udf_by_type(before.func_expr._name)
+            before.func_expr._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+
         after = FunctionScanPlan(before.func_expr, before.do_unnest)
         return after
 
