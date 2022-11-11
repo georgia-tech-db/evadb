@@ -128,7 +128,10 @@ def is_tool(name):
         )
         sys.exit(1)
     else:
-        installed_version = pkg_resources.get_distribution(name).version
+        try:
+            installed_version = pkg_resources.get_distribution(name).version
+        except pkg_resources.DistributionNotFound:
+            installed_version = "not-found"
         if installed_version != req_version:
             LOG.warning(
                 f"EVA uses {name} {req_version}. The installed version is"
