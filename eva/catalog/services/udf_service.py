@@ -99,3 +99,13 @@ class UdfService(BaseService):
             return self.model.query.all()
         except NoResultFound:
             return []
+    
+    def check_udf_type_exists(self, type: str):
+        try:
+            metadata = self.model.query.filter(self.model._type == type).one()
+            if metadata is None:
+                return False
+            else:
+                return True
+        except NoResultFound:
+            return False

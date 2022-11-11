@@ -313,6 +313,9 @@ class CatalogManager(object):
             return False
         else:
             return True
+    
+    def check_udf_type_exists(self, type: str):
+        return self._udf_service.check_udf_type_exists(type)
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()

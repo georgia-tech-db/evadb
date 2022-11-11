@@ -230,57 +230,60 @@ class StatementBinder:
         # First, check if it refers to any specific model in the catalog
         udf_obj = self._catalog.get_udf_by_name(node.name)
         if udf_obj is None:
-            # If not, check if it refers to a type of model instead of a specific model
-            udf_obj = self._catalog.get_udf_by_type(node.name)
-        if udf_obj is None:
-            err_msg = (
-                f"UDF with name {node.name} does not exist in the catalog. "
-                "Please create the UDF using CREATE UDF command."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
-
-        try:
-            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
-        except Exception as e:
-            err_msg = (
-                f"{str(e)}. Please verify that the UDF class name in the"
-                "implementation file matches the UDF name."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
-
-        output_objs = self._catalog.get_udf_outputs(udf_obj)
-        if node.output:
-            for obj in output_objs:
-                if obj.name.lower() == node.output:
-                    node.output_objs = [obj]
-            if not node.output_objs:
-                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
+            if not self._catalog.check_udf_type_exists(node.name):
+            # If not, we would want to check if it refers to a type of a model instead
+                err_msg = (
+                    f"UDF with name {node.name} does not exist in the catalog. "
+                    "Please create the UDF using CREATE UDF command."
+                )
                 logger.error(err_msg)
                 raise BinderError(err_msg)
-            node.projection_columns = [node.output]
-        else:
-            node.output_objs = output_objs
-            node.projection_columns = [obj.name.lower() for obj in output_objs]
-
-        default_alias_name = node.name.lower()
-        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
-        if not node.alias:
-            node.alias = Alias(default_alias_name, default_output_col_aliases)
-        else:
-            if not len(node.alias.col_names):
-                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
             else:
-                output_aliases = [
-                    str(col_name.lower()) for col_name in node.alias.col_names
-                ]
-                node.alias = Alias(node.alias.alias_name, output_aliases)
+                # nothing much to do here since it does not exist
+                node.function = None
+                pass
+        else:
+            try:
+                node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+            except Exception as e:
+                err_msg = (
+                    f"{str(e)}. Please verify that the UDF class name in the"
+                    "implementation file matches the UDF name."
+                )
+                logger.error(err_msg)
+                raise BinderError(err_msg)
 
-        if len(node.alias.col_names) != len(node.output_objs):
-            err_msg = (
-                f"Expected {len(node.output_objs)} output columns for "
-                f"{node.alias.alias_name}, got {len(node.alias.col_names)}."
-            )
-            logger.error(err_msg)
-            raise BinderError(err_msg)
+            output_objs = self._catalog.get_udf_outputs(udf_obj)
+            if node.output:
+                for obj in output_objs:
+                    if obj.name.lower() == node.output:
+                        node.output_objs = [obj]
+                if not node.output_objs:
+                    err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
+                    logger.error(err_msg)
+                    raise BinderError(err_msg)
+                node.projection_columns = [node.output]
+            else:
+                node.output_objs = output_objs
+                node.projection_columns = [obj.name.lower() for obj in output_objs]
+
+            default_alias_name = node.name.lower()
+            default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
+            if not node.alias:
+                node.alias = Alias(default_alias_name, default_output_col_aliases)
+            else:
+                if not len(node.alias.col_names):
+                    node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
+                else:
+                    output_aliases = [
+                        str(col_name.lower()) for col_name in node.alias.col_names
+                    ]
+                    node.alias = Alias(node.alias.alias_name, output_aliases)
+
+            if len(node.alias.col_names) != len(node.output_objs):
+                err_msg = (
+                    f"Expected {len(node.output_objs)} output columns for "
+                    f"{node.alias.alias_name}, got {len(node.alias.col_names)}."
+                )
+                logger.error(err_msg)
+                raise BinderError(err_msg)
