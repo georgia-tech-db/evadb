@@ -42,9 +42,9 @@ minimal_requirement = [
     "opencv-python>=4.5.4.60,!=4.6.0.66", # bug in easyocr
     "pandas>=1.1.5",
     "Pillow>=8.4.0",
-    "sqlalchemy>=1.3.20,<1.4.2",
+    "sqlalchemy==1.3.20",
     "sqlalchemy-utils>=0.36.6",
-    "antlr4-python3-runtime>=4.8",
+    "antlr4-python3-runtime==4.8",
     "pyyaml>=5.1,<5.2",
     "importlib-metadata<5.0"
 ]
