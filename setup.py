@@ -38,14 +38,14 @@ LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
-    "numpy>=1.21.6",
-    "opencv-python>=4.5.4.60", # bug in easyocr
+    "numpy>=1.19.5",
+    "opencv-python>=4.5.4.60,!=4.6.0.66", # bug in easyocr
     "pandas>=1.1.5",
-    "Pillow>=9.0.1",
-    "sqlalchemy>=1.3.20",
+    "Pillow>=8.4.0",
+    "sqlalchemy>=1.3.20,<1.4.2",
     "sqlalchemy-utils>=0.36.6",
     "antlr4-python3-runtime>=4.8",
-    "pyyaml>=5.1",
+    "pyyaml>=5.1,<5.2",
     "importlib-metadata<5.0"
 ]
 
@@ -64,16 +64,16 @@ test_libs = [
 ]
 
 notebook_libs = [
-    "ipywidgets>=8.0.2",
-    "matplotlib>=3.5.1",
-    "nbmake>=1.3.4",
+    "ipywidgets>=7.7.2",
+    "matplotlib>=3.3.4",
+    "nbmake>=1.2.1",
     "nest-asyncio>=1.5.6"
 ]
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
-    "torch>=1.13.0",
-    "torchvision>=0.14.0",
+    "torch>=1.10.0",
+    "torchvision>=0.11.1",
 ]
 
 benchmark_libs = [
