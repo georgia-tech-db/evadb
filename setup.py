@@ -153,7 +153,7 @@ setup(
         "eva_server=eva.eva_server:main",
         "eva_client=eva.eva_cmd_client:main"
     ]},
-    python_requires=">=3.7",
+    python_requires=">=3.6.15",
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
