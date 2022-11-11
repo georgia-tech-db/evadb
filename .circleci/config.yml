@@ -18,6 +18,9 @@ workflows:
         - test:
             name: "Python v3.10"
             v: "3.10"
+        - test:
+            name: "Python v3.11"
+            v: "3.11"
 
 jobs:
   test: 
