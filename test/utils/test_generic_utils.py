@@ -51,8 +51,10 @@ class ModulePathTest(unittest.TestCase):
             path_to_class("eva/readers/opencv_reader.py", "OpenCV")
 
     def test_should_load_class_from_pickle(self):
-        with tempfile.NamedTemporaryFile(suffix=".pkl") as pickle_file:
-            pickle.dump(Dummy, pickle_file)
+        with tempfile.NamedTemporaryFile(suffix=".pickle") as pickle_file:
+            with open(pickle_file.name, "wb") as f:
+                pickle.dump(Dummy, f, pickle.HIGHEST_PROTOCOL)
+
             dummy_type = path_to_class(pickle_file.name, "Dummy")
             self.assertEqual(Dummy, dummy_type)
 
