@@ -89,9 +89,14 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 predicate=predicate,
                 sampling_rate=sampling_rate,
             )
+            column_order = []
+            for i in range(len(table.columns)):
+                column_order.append(table.columns[i].name)
+
             for batch in reader.read():
                 column_name = table.columns[0].name
                 batch.frames[column_name] = str(video_file_name)
+                batch.reorder_columns(column_order)
                 yield batch
 
     def _get_video_file_path(self, metadata_file):

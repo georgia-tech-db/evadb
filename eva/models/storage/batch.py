@@ -459,5 +459,6 @@ class Batch:
 
         self._frames.columns = new_col_names
 
-    def reorder_columns(self):
-        pass
+    def reorder_columns(self, col_order):
+        self._frames = self._frames[col_order]
+        

@@ -75,7 +75,7 @@ class ColumnDeriver:
             attribute_id+=1
         
         # #TODO: remove this logic after updating the catalog orderin
-        video_columns_map = {"myvideo.id": 0, "myvideo.data":1, "myvideo.name": 2}
+        #video_columns_map = {"myvideo.id": 0, "myvideo.data":1, "myvideo.name": 2}
         
         
         column_name_to_id_mapping = self.merge(prev_map, video_columns_map)
