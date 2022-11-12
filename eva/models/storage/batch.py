@@ -322,6 +322,23 @@ class Batch:
         return Batch(frame)
 
     @classmethod
+    def stack(cls, batch: Batch, copy=True) -> Batch:
+        """Stack a given batch along the 0th dimension.
+        Notice: input assumed to contain only one column with video frames
+
+        Returns:
+            Batch (always of length 1)
+        """
+        if len(batch.columns) > 1:
+            raise ValueError("Stack can only be called on single-column batches")
+        frame_data_col = batch.columns[0]
+
+        stacked_array = np.array(batch.frames[frame_data_col].values.tolist())
+        stacked_frame = pd.DataFrame([{frame_data_col: stacked_array}])
+
+        return Batch(stacked_frame)
+
+    @classmethod
     def join(cls, first: Batch, second: Batch, how="inner") -> Batch:
         return cls(
             first._frames.merge(

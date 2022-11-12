@@ -48,6 +48,7 @@ from eva.optimizer.rules.rules import (
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
+    LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
@@ -116,6 +117,9 @@ class TestRules(unittest.TestCase):
             Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
+            Promise.LOGICAL_GROUPBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
             Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
@@ -182,6 +186,7 @@ class TestRules(unittest.TestCase):
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),

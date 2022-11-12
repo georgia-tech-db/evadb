@@ -28,7 +28,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache)](https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt)
 [![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 [![Discuss](https://img.shields.io/badge/-Discuss!-blueviolet)](https://github.com/georgia-tech-db/eva/discussions)
-![Python Versions](https://img.shields.io/badge/Python--versions-3.7+-brightgreen)
+![Python Versions](https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen)
 
 ## What is EVA?
 
@@ -44,7 +44,7 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 
 ## QuickStart
 
-1. EVA requires Python 3.7+. To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA supports ![Python Versions](https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen). To install EVA, we recommend using an virtual environment and the pip package manager:
 
 ```shell
 pip install evadb
