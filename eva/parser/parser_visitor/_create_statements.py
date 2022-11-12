@@ -275,7 +275,7 @@ class CreateTable(evaql_parserVisitor):
         table_name = self.visit(ctx.tableName())
         table_ref = TableRef(table_name)
 
-        # index type setup 
+        # index type setup
         index_type_ctx = ctx.indexType()
         index_type = None
         if index_type_ctx.HNSW() is not None:

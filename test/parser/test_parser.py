@@ -60,9 +60,9 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
 
         expected_stmt = CreateIndexStatement("testindex", TableRef(TableInfo("MyVideo")), [
-                ColumnDefinition("id", None, None, None),
-                ColumnDefinition("feature", None, None, None),
-            ], IndexType.HNSW)
+            ColumnDefinition("id", None, None, None),
+            ColumnDefinition("feature", None, None, None),
+        ], IndexType.HNSW)
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 

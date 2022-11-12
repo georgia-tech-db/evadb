@@ -14,7 +14,6 @@
 # limitations under the License.
 from antlr4 import TerminalNode
 
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.insert_statement import InsertTableStatement
