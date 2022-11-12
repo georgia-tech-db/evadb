@@ -44,7 +44,7 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 
 ## QuickStart
 
-1. EVA requires Python ![](https://img.shields.io/badge/3.7+-brightgreen). To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA supports ![Python Versions](https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen). To install EVA, we recommend using an virtual environment and the pip package manager:
 
 ```shell
 pip install evadb
