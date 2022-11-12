@@ -16,12 +16,14 @@ import unittest
 from pathlib import Path
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.index_type import IndexType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
@@ -40,8 +42,6 @@ from eva.parser.statement import AbstractStatement, StatementType
 from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 from eva.parser.upload_statement import UploadStatement
-from eva.parser.create_index_statement import CreateIndexStatement
-from eva.catalog.index_type import IndexType
 
 
 class ParserTests(unittest.TestCase):
@@ -51,7 +51,9 @@ class ParserTests(unittest.TestCase):
     def test_create_index_statement(self):
         parser = Parser()
 
-        create_index_query = "CREATE INDEX testindex USING HNSW ON MyVideo (id, feature);"
+        create_index_query = (
+            "CREATE INDEX testindex USING HNSW ON MyVideo (id, feature);"
+        )
         eva_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
@@ -59,10 +61,15 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(len(eva_stmt_list), 1)
         self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
 
-        expected_stmt = CreateIndexStatement("testindex", TableRef(TableInfo("MyVideo")), [
-            ColumnDefinition("id", None, None, None),
-            ColumnDefinition("feature", None, None, None),
-        ], IndexType.HNSW)
+        expected_stmt = CreateIndexStatement(
+            "testindex",
+            TableRef(TableInfo("MyVideo")),
+            [
+                ColumnDefinition("id", None, None, None),
+                ColumnDefinition("feature", None, None, None),
+            ],
+            IndexType.HNSW,
+        )
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 

@@ -14,13 +14,13 @@
 # limitations under the License.
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.index_type import IndexType
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.types import ColumnConstraintEnum
@@ -281,6 +281,9 @@ class CreateTable(evaql_parserVisitor):
         if index_type_ctx.HNSW() is not None:
             index_type = IndexType.HNSW
 
-        col_list = [ColumnDefinition(uid.col_name, None, None, None) for uid in self.visit(ctx.uidList())]
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None)
+            for uid in self.visit(ctx.uidList())
+        ]
 
         return CreateIndexStatement(index_name, table_ref, col_list, index_type)

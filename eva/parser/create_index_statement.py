@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import List
 
+from eva.catalog.index_type import IndexType
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
-from eva.catalog.index_type import IndexType
 
 
 class CreateIndexStatement(AbstractStatement):
