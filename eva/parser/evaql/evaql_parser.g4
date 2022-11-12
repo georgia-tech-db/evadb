@@ -55,7 +55,7 @@ createDatabase
 createIndex
     : CREATE
       INDEX uid indexType?
-      ON tableName indexColumnNames
+      ON tableName ('(' columns=uidList ')')
     ;
 
 createTable
@@ -105,7 +105,7 @@ udfImpl
     ;
 
 indexType
-    : USING (BTREE | HASH)
+    : USING HNSW
     ;
 
 createDefinitions

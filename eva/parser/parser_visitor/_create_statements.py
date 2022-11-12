@@ -13,16 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
+from eva.catalog.index_type import IndexType
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
+from eva.parser.table_ref import TableRef
 
 
 ##################################################################
@@ -265,3 +268,19 @@ class CreateTable(evaql_parserVisitor):
         return CreateMaterializedViewStatement(
             view_info, col_list, if_not_exists, query
         )
+
+    # INDEX CREATION
+    def visitCreateIndex(self, ctx: evaql_parser.CreateIndexContext):
+        index_name = self.visit(ctx.uid())
+        table_name = self.visit(ctx.tableName())
+        table_ref = TableRef(table_name)
+
+        # index type setup 
+        index_type_ctx = ctx.indexType()
+        index_type = None
+        if index_type_ctx.HNSW() is not None:
+            index_type = IndexType.HNSW
+
+        col_list = [ColumnDefinition(uid.col_name, None, None, None) for uid in self.visit(ctx.uidList())]
+
+        return CreateIndexStatement(index_name, table_ref, col_list, index_type)

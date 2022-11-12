@@ -40,11 +40,31 @@ from eva.parser.statement import AbstractStatement, StatementType
 from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.catalog.index_type import IndexType
 
 
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def test_create_index_statement(self):
+        parser = Parser()
+
+        create_index_query = "CREATE INDEX testindex USING HNSW ON MyVideo (id, feature);"
+        eva_stmt_list = parser.parse(create_index_query)
+
+        # check stmt itself
+        self.assertIsInstance(eva_stmt_list, list)
+        self.assertEqual(len(eva_stmt_list), 1)
+        self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+
+        expected_stmt = CreateIndexStatement("testindex", TableRef(TableInfo("MyVideo")), [
+                ColumnDefinition("id", None, None, None),
+                ColumnDefinition("feature", None, None, None),
+            ], IndexType.HNSW)
+        actual_stmt = eva_stmt_list[0]
+        self.assertEqual(actual_stmt, expected_stmt)
 
     def test_explain_dml_statement(self):
         parser = Parser()
