@@ -29,6 +29,7 @@ class PlanOprType(Enum):
     LOAD_DATA = auto()
     UPLOAD = auto()
     UNION = auto()
+    GROUP_BY = auto()
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
@@ -42,4 +43,5 @@ class PlanOprType(Enum):
     PROJECT = auto()
     SHOW_INFO = auto()
     DROP_UDF = auto()
+    EXPLAIN = auto()
     # add other types

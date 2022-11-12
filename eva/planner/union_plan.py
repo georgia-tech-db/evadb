@@ -33,5 +33,8 @@ class UnionPlan(AbstractPlan):
     def all(self):
         return self._all
 
+    def __str__(self):
+        return "UnionAllPlan" if self._all else "UnionPlan"
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._all))

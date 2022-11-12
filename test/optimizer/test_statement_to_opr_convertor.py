@@ -24,6 +24,7 @@ from eva.optimizer.operators import (
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
+    LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
     LogicalLoadData,
@@ -39,6 +40,7 @@ from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
@@ -198,6 +200,16 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
+    def test_visit_should_call_explain(self):
+        stmt = MagicMock(spec=ExplainStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_explain = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_once_with(stmt)
+
     def test_visit_should_call_drop(self):
         stmt = MagicMock(spec=DropTableStatement)
         convertor = StatementToPlanConvertor()
@@ -224,6 +236,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())
+        groupby_plan = LogicalGroupBy(MagicMock())
         order_by_plan = LogicalOrderBy(MagicMock())
         union_plan = LogicalUnion(MagicMock())
         function_scan_plan = LogicalFunctionScan(MagicMock(), MagicMock())
@@ -242,6 +255,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(get_plan)
         plans.append(sample_plan)
         plans.append(filter_plan)
+        plans.append(groupby_plan)
         plans.append(order_by_plan)
         plans.append(union_plan)
         plans.append(function_scan_plan)

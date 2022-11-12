@@ -32,6 +32,7 @@ from eva.optimizer.rules.rules import (
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
 )
@@ -39,6 +40,7 @@ from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
 from eva.optimizer.rules.rules import (
+    LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
@@ -99,6 +101,7 @@ class RulesManager:
             else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),
@@ -110,6 +113,7 @@ class RulesManager:
             if ray_enabled
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalExplainToPhysical(),
         ]
 
         if ray_enabled:

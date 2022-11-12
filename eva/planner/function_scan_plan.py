@@ -40,5 +40,9 @@ class FunctionScanPlan(AbstractPlan):
     def do_unnest(self):
         return self._do_unnest
 
+    def __str__(self):
+        plan = "UnnestFunctionScanPlan" if self._do_unnest else "FunctionScanPlan"
+        return "{}(func_expr={})".format(plan, self._func_expr)
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.func_expr, self.do_unnest))

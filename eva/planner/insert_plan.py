@@ -43,6 +43,13 @@ class InsertPlan(AbstractPlan):
         self.columns_list = column_list
         self.value_list = value_list
 
+    def __str__(self):
+        return "InsertPlan(table_metainfo={}, \
+            column_list={}, \
+            value_list={})".format(
+            self.table_metainfo, self.columns_list, self.value_list
+        )
+
     def __hash__(self) -> int:
         return hash(
             (

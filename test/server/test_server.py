@@ -16,11 +16,11 @@ import asyncio
 import threading
 import time
 import unittest
-from asyncio import CancelledError
 from unittest.mock import MagicMock
 
 import mock
 
+from eva.server.networking_utils import serialize_message
 from eva.server.server import EvaServer, start_server
 
 
@@ -48,7 +48,7 @@ class ServerTests(unittest.TestCase):
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(CancelledError):
+        with self.assertRaises((SystemExit)):
             start_server(
                 host=host,
                 port=port,
@@ -93,16 +93,14 @@ class ServerTests(unittest.TestCase):
         eva_server.transport.close = MagicMock(return_value="closed")
         eva_server.transport.abort = MagicMock(return_value="aborted")
 
-        # data received
-        data = mock.Mock()
-        data.decode = MagicMock(return_value="4|quit")
+        quit_message = serialize_message("quit")
         self.assertEqual(
-            eva_server.data_received(data), "closed", "transport not closed"
+            eva_server.data_received(quit_message), "closed", "transport not closed"
         )
 
         asyncio.set_event_loop(None)
 
+        query_message = serialize_message("query")
         with self.assertRaises(RuntimeError):
-            data.decode = MagicMock(return_value="5|query")
             # error due to lack of asyncio loop
-            eva_server.data_received(data)
+            eva_server.data_received(query_message)

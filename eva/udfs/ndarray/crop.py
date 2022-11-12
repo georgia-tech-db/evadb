@@ -36,12 +36,11 @@ class Crop(AbstractUDF):
         """
 
         def crop(row: pd.Series) -> np.ndarray:
-
+            row = row.to_list()
             frame = row[0]
             bboxes = row[1]
 
             x0, y0, x1, y1 = np.asarray(bboxes, dtype="int")
-
             # make sure the bbox is valid
             x0 = max(0, x0)
             y0 = max(0, y0)
@@ -56,5 +55,4 @@ class Crop(AbstractUDF):
 
         ret = pd.DataFrame()
         ret["cropped_frame_array"] = df.apply(crop, axis=1)
-
         return ret

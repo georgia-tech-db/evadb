@@ -47,6 +47,9 @@ class ExpressionType(IntEnum):
     AGGREGATION_MIN = auto()
     AGGREGATION_MAX = auto()
     AGGREGATION_AVG = auto()
+    AGGREGATION_FIRST = auto()
+    AGGREGATION_LAST = auto()
+    AGGREGATION_SEGMENT = auto()
 
     CASE = auto()
     # add other types

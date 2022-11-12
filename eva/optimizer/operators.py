@@ -46,6 +46,7 @@ class OperatorType(IntEnum):
     LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
+    LOGICALGROUPBY = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
@@ -54,6 +55,7 @@ class OperatorType(IntEnum):
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
+    LOGICALEXPLAIN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -289,6 +291,25 @@ class LogicalProject(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), tuple(self.target_list)))
+
+
+class LogicalGroupBy(Operator):
+    def __init__(self, groupby_clause: ConstantValueExpression, children: List = None):
+        super().__init__(OperatorType.LOGICALGROUPBY, children)
+        self._groupby_clause = groupby_clause
+
+    @property
+    def groupby_clause(self):
+        return self._groupby_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalGroupBy):
+            return False
+        return is_subtree_equal and self.groupby_clause == other.groupby_clause
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.groupby_clause))
 
 
 class LogicalOrderBy(Operator):
@@ -1057,3 +1078,23 @@ class LogicalExchange(Operator):
 
     def __hash__(self) -> int:
         return super().__hash__()
+
+
+class LogicalExplain(Operator):
+    def __init__(self, children: List = None):
+        super().__init__(OperatorType.LOGICALEXPLAIN, children)
+        assert len(children) == 1, "EXPLAIN command only takes one child"
+        self._explainable_opr = children[0]
+
+    @property
+    def explainable_opr(self):
+        return self._explainable_opr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalExplain):
+            return False
+        return is_subtree_equal and self._explainable_opr == other.explainable_opr
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._explainable_opr))

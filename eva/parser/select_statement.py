@@ -56,6 +56,7 @@ class SelectStatement(AbstractStatement):
         self._target_list = target_list
         self._union_link = None
         self._union_all = False
+        self._groupby_clause = kwargs.get("groupby_clause", None)
         self._orderby_list = kwargs.get("orderby_clause_list", None)
         self._limit_count = kwargs.get("limit_count", None)
 
@@ -100,6 +101,14 @@ class SelectStatement(AbstractStatement):
         self._from_table = table
 
     @property
+    def groupby_clause(self):
+        return self._groupby_clause
+
+    @groupby_clause.setter
+    def groupby_clause(self, groupby_expr: AbstractExpression):
+        self._groupby_clause = groupby_expr
+
+    @property
     def orderby_list(self):
         return self._orderby_list
 
@@ -125,6 +134,9 @@ class SelectStatement(AbstractStatement):
             else:
                 print_str += "\nUNION ALL\n" + str(self._union_link)
 
+        if self._groupby_clause is not None:
+            print_str += " GROUP BY " + str(self._groupby_clause)
+
         if self._orderby_list is not None:
             print_str += " ORDER BY " + str(self._orderby_list)
 
@@ -142,6 +154,7 @@ class SelectStatement(AbstractStatement):
             and self.where_clause == other.where_clause
             and self.union_link == other.union_link
             and self.union_all == other.union_all
+            and self._groupby_clause == other.groupby_clause
             and self.orderby_list == other.orderby_list
             and self.limit_count == other.limit_count
         )
@@ -155,6 +168,7 @@ class SelectStatement(AbstractStatement):
                 self.where_clause,
                 self.union_link,
                 self.union_all,
+                self.groupby_clause,
                 tuple(self.orderby_list or []),
                 self.limit_count,
             )

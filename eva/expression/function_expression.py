@@ -79,7 +79,21 @@ class FunctionExpression(AbstractExpression):
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+
         if len(child_batches):
+            batch_sizes = [len(child_batch) for child_batch in child_batches]
+            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
+            maximum_batch_size = max(batch_sizes)
+            if not are_all_equal_length:
+                for child_batch in child_batches:
+                    if len(child_batch) != maximum_batch_size:
+                        if len(child_batch) == 1:
+                            # duplicate row inplace
+                            child_batch.repeat(maximum_batch_size)
+                        else:
+                            raise Exception(
+                                "Not all columns in the batch have equal elements"
+                            )
             new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()

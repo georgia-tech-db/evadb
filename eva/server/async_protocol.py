@@ -13,15 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import struct
 
-from eva.server.networking_utils import set_socket_io_timeouts
+from eva.server.networking_utils import serialize_message, set_socket_io_timeouts
 from eva.utils.logging_manager import logger
 
 
 class EvaProtocolBuffer:
     """
     Buffer to handle arbitrary length of message.
-    Data chunk sent back by EVA Server starts with the length of the data,
+    Data chunk sent back by EVA server starts with the length of the data,
     a delimiter `|`, and the actual data.
     """
 
@@ -29,22 +30,23 @@ class EvaProtocolBuffer:
         self.empty()
 
     def empty(self):
-        self.buf = ""
+        self.buf = bytearray()
         self.expected_length = -1
 
-    def feed_data(self, data: str):
-        if not self.buf:
-            # First chunk should contain the length of the message
-            segs = data.split("|", 1)
-            self.expected_length = int(segs[0])
-            self.buf += segs[1]
+    def feed_data(self, data: bytes):
+        if self.expected_length == -1:
+            # First chunk should contain the 8 bytes header with chunk size
+            header = data[:8]
+            size = struct.unpack("!Q", header)[0]
+            self.expected_length = size
+            self.buf += data[8:]
         else:
             self.buf += data
 
     def has_complete_message(self) -> bool:
         return self.expected_length > 0 and len(self.buf) >= self.expected_length
 
-    def read_message(self) -> str:
+    def read_message(self) -> bytes:
         message = self.buf[: self.expected_length]
         rest_data = self.buf[self.expected_length :]
         self.empty()
@@ -63,14 +65,11 @@ class EvaClient(asyncio.Protocol):
     __connections__ = 0
     __errors__ = 0
 
-    def __init__(self, loop=None):
+    def __init__(self):
         self.done = asyncio.Future()
         self.transport = None
         self.buffer = EvaProtocolBuffer()
-        if loop is None:
-            loop = asyncio.get_event_loop()
-        self.queue = asyncio.Queue(loop=loop)
-        self.loop = loop
+        self.queue = asyncio.Queue()
         self.id = EvaClient.__connections__
 
         EvaClient.__connections__ += 1
@@ -105,35 +104,15 @@ class EvaClient(asyncio.Protocol):
             else:
                 self.done.set_result(None)
 
-    def data_received(self, data):
-
-        response_chunk = data.decode()
-        logger.debug(
-            "[ "
-            + str(self.id)
-            + " ]"
-            + " Response from server: --|"
-            + str(response_chunk)
-            + "|--"
-        )
-
-        self.buffer.feed_data(response_chunk)
+    def data_received(self, data: bytes):
+        # Response from server
+        self.buffer.feed_data(data)
         while self.buffer.has_complete_message():
             message = self.buffer.read_message()
             self.queue.put_nowait(message)
 
     @asyncio.coroutine
-    def send_message(self, message):
-
-        logger.debug(
-            "[ "
-            + str(self.id)
-            + " ]"
-            + " Request to server: --|"
-            + str(message)
-            + "|--"
-        )
-
-        request_chunk = (str(len(message)) + "|" + message).encode("ascii")
-        # Send request
+    def send_message(self, message: str):
+        # Send request to server
+        request_chunk = serialize_message(message)
         self.transport.write(request_chunk)
