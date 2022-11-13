@@ -24,6 +24,7 @@ To allow running eva_server from any location
 THIS_DIR = dirname(__file__)
 EVA_CODE_DIR = abspath(join(THIS_DIR, ".."))
 sys.path.append(EVA_CODE_DIR)
+cache = {}
 
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import start_server  # noqa: E402
@@ -62,7 +63,6 @@ def main():
     mode = ConfigurationManager().get_value("core", "mode")
     init_builtin_udfs(mode=mode)
     eva()
-
 
 if __name__ == "__main__":
     # execute only if run as the entry point into the program
