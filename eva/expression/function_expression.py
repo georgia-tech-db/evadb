@@ -23,7 +23,7 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
-
+import eva.globals as globals
 
 class FunctionExpression(AbstractExpression):
     """
@@ -82,9 +82,14 @@ class FunctionExpression(AbstractExpression):
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
-
         func = self._gpu_enabled_function()
-        outcomes = func(new_batch.frames)
+        # key: uniquely identify (frame, udf) project
+        # cannot simply use frame id to uniquely identify the frame, because it may include joined tuple
+        key = (batch.__str__(), func.__str__())
+        if key not in globals.cache.keys():
+            globals.cache[key] = func(new_batch.frames)
+        outcomes = globals.cache[key]
+
         outcomes = Batch(pd.DataFrame(outcomes))
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)

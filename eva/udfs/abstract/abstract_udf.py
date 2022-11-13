@@ -50,13 +50,7 @@ class AbstractUDF(metaclass=ABCMeta):
         self.setup(*args, **kwargs)
 
     def __call__(self, *args, **kwargs):
-        freeze_args, freeze_kwargs = get_freeze_args(*args, **kwargs)
-        key = (freeze_args, self.__str__())
-        if key in server.cache.keys():
-            return server.cache[key]
-        value = self.forward(args[0])
-        server.cache[key] = value
-        return value
+        return self.forward(args[0])
 
     def __str__(self):
         return self.name
