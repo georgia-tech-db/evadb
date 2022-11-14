@@ -20,6 +20,8 @@ from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.index import IndexMetadata
+from eva.catalog.models.index_io import IndexIO
 
 
 class CatalogModelsTest(unittest.TestCase):
@@ -156,3 +158,11 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(udf_io, udf_io2)
         udf_io2 = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 2)
         self.assertNotEqual(udf_io, udf_io2)
+
+    def test_index(self):
+        index = IndexMetadata("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index.id, None)
+        self.assertEqual(index.name, "index")
+        self.assertEqual(index.save_file_path, "FaissSavePath")
+        self.assertEqual(index.type, "HNSW")
+        self.assertEqual(str(index), "index: (index, FaissSavePath, HNSW)\n")
