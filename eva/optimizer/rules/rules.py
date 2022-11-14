@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
-from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.expression.function_expression import FunctionExpression
@@ -696,6 +696,18 @@ class LogicalGetToSeqScan(Rule):
         )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
+
+        # TODO: Should we convert AbstractExpression into FunctionExpression?
+        # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
+        # TODO: Should we place this into some other class / method, to resolve into a logical UDF
+        catalog = CatalogManager()
+        for idx, column in enumerate(before.target_list):
+            if column.etype == ExpressionType.FUNCTION_EXPRESSION:
+                column.__class = FunctionExpression
+                udf_obj = catalog.get_udf_by_type(column._name)
+                column._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+                before.target_list[idx] = column
+        
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
