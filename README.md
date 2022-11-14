@@ -7,6 +7,9 @@
         <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EVA on Colab"/>
         </a>
+        <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+            <img alt="Slack" src="https://img.shields.io/badge/slack-eva-ff69b4.svg?logo=slack">
+        </a>    
         <a href="https://github.com/georgia-tech-db/eva/discussions">
             <img alt="Discuss on Github!" src="https://img.shields.io/badge/-Discuss%20on%20Github!-blueviolet">
         </a>
@@ -40,7 +43,7 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 ## Links
 * [Documentation](https://evadb.readthedocs.io/en/latest/)
 * [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
+* [Join Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
 
 ## Quick Start
@@ -111,6 +114,14 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 | Source Video  | Query Result |
 |---------------|--------------|
 |<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp" width="400"> |
+
+## Community
+
+Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
+
+<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/eva-slack.jpg" alt="EVA Slack Channel"  height="150" width="500">
+</a>
 
 ## Contributing to EVA
 
