@@ -4,7 +4,7 @@
   </a>
   <div>
         <h3>Try It Out!</h3>
-        <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/02-object-detection.ipynb">
+        <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb">
             <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EVA on Colab"/>
         </a>
         <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
@@ -42,9 +42,9 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 
 ## Links
 * [Documentation](https://evadb.readthedocs.io/en/latest/)
-* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
+* [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
 * [Join Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
-* [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
+* [Demo](https://ada-00.cc.gatech.edu/eva/playground)
 
 ## Quick Start
 
@@ -54,7 +54,7 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 pip install evadb
 ```
 
-1. EVA works on Jupyter notebooks -- illustrative notebooks are available in the [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials) folder. EVA adopts a client-server architecture and comes with a terminal-based client. To start the EVA server and a terminal-based client, use the following commands:
+1. EVA works on Jupyter notebooks -- illustrative notebooks are available in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb) folder. EVA adopts a client-server architecture and comes with a terminal-based client. To start the EVA server and a terminal-based client, use the following commands:
 ```shell
 eva_server &   # launch server
 eva_client     # launch client
