@@ -1,6 +1,6 @@
 <div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/Logo.png" alt="EVA" width="300px" margin-left="-5px">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/eva-banner.png" alt="EVA" width="400px" margin-left="-5px">
   </a>
   <h3>EVA Video Database System: Where SQL meets Deep Learning</h3>
   <div>
