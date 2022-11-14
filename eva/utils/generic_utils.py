@@ -60,7 +60,7 @@ def path_to_class(filepath: PathLike, classname: str):
         type: A class for given path
     """
     resolved = Path(filepath).resolve()
-    if resolved.suffix == ".pickle":
+    if resolved.suffix in [".pickle", ".pkl"]:
         with resolved.open("rb") as f:
             return pickle.load(f)
 
