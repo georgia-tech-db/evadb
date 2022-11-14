@@ -126,7 +126,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg" alt="EVA Slack Channel"  height="150" width="500">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg" alt="EVA Slack Channel" width="500">
 </a>
 
 ## Contributing to EVA
