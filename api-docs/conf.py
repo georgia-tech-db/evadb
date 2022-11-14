@@ -27,7 +27,7 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
     "sphinx_sitemap",
-    
+
     "sphinx_external_toc",
     "sphinx_design",
     "myst_nb"
@@ -82,7 +82,7 @@ html_theme_options = {
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
 external_toc_exclude_missing = False  # optional, default: False
 
-html_logo = "_static/mascots/Logo.png"
+html_logo = "_static/mascots/eva-logo.png"
 
 html_sidebars = {
     "**": [
