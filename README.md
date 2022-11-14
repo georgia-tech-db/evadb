@@ -18,17 +18,24 @@
 
 # EVA Multimedia Database System
 
-## What is EVA?
-
 EVA is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
 
 ## Why EVA? ##
 
-👀 Easily query videos in user-facing applications with a SQL-like interface for commonly used computer vision models.
+<details>
+  <summary><b>Easily combine SQL and Deep Learning to build next-generation database applications</b></summary>
+  Easily query videos in user-facing applications with a SQL-like interface for commonly used computer vision models.
+</details>
 
-🚅 Speed up queries and save money spent on model inference using in-built sampling, caching, and filtering optimizations.
+<details>
+  <summary><b>Speed up queries and save money spent on model inference</b></summary>
+  EVA comes with a collection of built-in sampling, caching, and filtering optimizations inspired by time-tested relational database systems.
+</details>
 
-✨ Hit your target accuracy using state-of-the-art model selection and query optimization algorithms.
+<details>
+  <summary><b>Extensible by design to support custom deep learning models </b></summary>
+  EVA has first-class support for user-defined functions that wrap around your deep learning models in PyTorch.
+</details>
 
 ## Links
 * [Documentation](https://evadb.readthedocs.io/en/latest/)
@@ -36,7 +43,7 @@ EVA is a new database system tailored for video analytics -- think PostgreSQL fo
 * [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Quick Demo](https://ada-00.cc.gatech.edu/eva/playground)
 
-## QuickStart
+## Quick Start
 
 1. EVA supports Python versions 3.7 through 3.10. To install EVA, we recommend using the pip package manager.
 
@@ -92,7 +99,7 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
-## Illustrative EVA Applications
+## Demos 
 
 ### MNIST Digit Recognition
 | Source Video  | Query Result |
