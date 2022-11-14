@@ -1,6 +1,6 @@
 <div >
   <a href="https://georgia-tech-db.github.io/eva/index.html">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
   </a>
   <div>
         <h3>Try It Out!</h3>
@@ -79,7 +79,7 @@ SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).label
 ```
 | Source Video  | Query Result |
 |---------------|--------------|
-|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/traffic.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/outtraffic.webp" width="400"> |
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
 5. Search for frames in the video that contain a pedestrian and a car
 
@@ -102,25 +102,31 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
-## Demos 
 
-### MNIST Digit Recognition
+## Illustrative EVA Applications 
+
+### :desert_island: Traffic Analysis Application using Object Detection Model
 | Source Video  | Query Result |
 |---------------|--------------|
-|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistvideo.webp" width="100"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/mnistoutput.webp" width="100"> |
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |
 
-### Emotion Detection
+### :desert_island: MNIST Digit Recognition using Image Classification Model
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp" width="150"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp" width="150"> |
+
+### :desert_island: Movie Analysis Application using Face Detection + Emotion Classfication Models
 
 | Source Video  | Query Result |
 |---------------|--------------|
-|<img alt="Source Video" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubai.webp" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/Aryan-Rajoria/eva/readme-gif/data/assets/gangubaioutput.webp" width="400"> |
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp" width="400"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp" width="400"> |
 
 ## Community
 
 Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
 <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/eva-slack.jpg" alt="EVA Slack Channel"  height="150" width="500">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg" alt="EVA Slack Channel"  height="150" width="500">
 </a>
 
 ## Contributing to EVA
