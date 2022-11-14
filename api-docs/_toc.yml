@@ -45,14 +45,15 @@ parts:
       - file: source/reference/data_import
         title: Data Import
 
-  - caption: Developer Guides
+  - caption: Developer Guide
     chapters:
       - file: source/contribute/index
         title: Contributing
-        sections:
-          # - file: source/contribute/new_operator
-          - file: source/contribute/new_command
-          - file: source/contribute/debugging
-          - file: source/contribute/release
+      - file: source/contribute/debugging
+        title: Debugging EVA
+      - file: source/contribute/new_command
+        title: Extending EVA
+      - file: source/contribute/release
+        title: Releasing EVA
       - file: source/contribute/packaging
-        title: Packaging
+        title: Packaging Models
