@@ -58,6 +58,9 @@ class UDFService:
         return self._forward(args[0])
 
     def generate_udf_class(self) -> Type[AbstractUDF]:
+        """
+        Dynamically generate and return subclass of AbstractUDF.
+        """
         if self._setup is None:
 
             def dummy_setup(*args: Any, **kwargs: Any) -> None:
