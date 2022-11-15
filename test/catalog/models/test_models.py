@@ -166,3 +166,48 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(index.save_file_path, "FaissSavePath")
         self.assertEqual(index.type, "HNSW")
         self.assertEqual(str(index), "index: (index, FaissSavePath, HNSW)\n")
+
+    def test_index_hash(self):
+        index1 = IndexMetadata("index", "FaissSavePath", "HNSW")
+        index2 = IndexMetadata("index", "FaissSavePath", "HNSW")
+
+        self.assertEqual(hash(index1), hash(index2))
+
+    def test_index_equality(self):
+        index = IndexMetadata("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index, index)
+        index2 = IndexMetadata("index2", "FaissSavePath", "HNSW")
+        self.assertNotEqual(index, index2)
+        index3 = IndexMetadata("index", "FaissSavePath3", "HNSW")
+        self.assertNotEqual(index, index3)
+        index4 = IndexMetadata("index", "FaissSavePath", "HNSW4")
+        self.assertNotEqual(index, index4)
+
+    def test_index_io(self):
+        index_io = IndexIO(
+            "name", ColumnType.NDARRAY, True, NdArrayType.UINT8, [2, 3], True, 1
+        )
+        self.assertEqual(index_io.id, None)
+        self.assertEqual(index_io.index_id, 1)
+        self.assertEqual(index_io.is_input, True)
+        self.assertEqual(index_io.is_nullable, True)
+        self.assertEqual(index_io.array_type, NdArrayType.UINT8)
+        self.assertEqual(index_io.array_dimensions, [2, 3])
+        self.assertEqual(index_io.name, "name")
+        self.assertEqual(index_io.type, ColumnType.NDARRAY)
+
+    def test_index_io_equality(self):
+        index_io = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 1)
+        self.assertEqual(index_io, index_io)
+        index_io2 = IndexIO("name2", ColumnType.FLOAT, True, None, [2, 3], True, 1)
+        self.assertNotEqual(index_io, index_io2)
+        index_io2 = IndexIO("name", ColumnType.INTEGER, True, None, [2, 3], True, 1)
+        self.assertNotEqual(index_io, index_io2)
+        index_io2 = IndexIO("name", ColumnType.FLOAT, False, None, [2, 3], True, 1)
+        self.assertNotEqual(index_io, index_io2)
+        index_io2 = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3, 4], True, 1)
+        self.assertNotEqual(index_io, index_io2)
+        index_io2 = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3], False, 1)
+        self.assertNotEqual(index_io, index_io2)
+        index_io2 = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 2)
+        self.assertNotEqual(index_io, index_io2)
