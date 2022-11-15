@@ -704,9 +704,10 @@ class LogicalGetToSeqScan(Rule):
         for idx, column in enumerate(before.target_list):
             if column.etype == ExpressionType.FUNCTION_EXPRESSION:
                 column.__class = FunctionExpression
-                udf_obj = catalog.get_udf_by_type(column._name)
-                column._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
-                before.target_list[idx] = column
+                if column._function is None:
+                    udf_obj = catalog.get_udf_by_type(column._name)
+                    column._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+                    before.target_list[idx] = column
         
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
