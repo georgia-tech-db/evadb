@@ -18,10 +18,10 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.catalog.models.udf import UdfMetadata
-from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.models.index import IndexMetadata
 from eva.catalog.models.index_io import IndexIO
+from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.udf_io import UdfIO
 
 
 class CatalogModelsTest(unittest.TestCase):

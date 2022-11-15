@@ -18,12 +18,14 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.index import IndexMetadata
+from eva.catalog.models.index_io import IndexIO
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
-from eva.catalog.models.index_io import IndexIO
-from eva.catalog.models.index import IndexMetadata
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
+from eva.catalog.services.index_io_service import IndexIOService
+from eva.catalog.services.index_service import IndexService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
@@ -391,6 +393,7 @@ class CatalogManager(object):
         return self._udf_service.get_all_udfs()
 
     """ Index related services. """
+
     def index_io(
         self,
         io_name: str,

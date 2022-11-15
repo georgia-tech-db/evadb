@@ -58,14 +58,18 @@ class IndexServiceTest(TestCase):
         service = IndexService()
 
         # file does not exist
-        with patch("eva.catalog.services.index_service.IndexService.index_by_name") as mock_func:
+        with patch(
+            "eva.catalog.services.index_service.IndexService.index_by_name"
+        ) as mock_func:
             mock_os_path.return_value = False
             service.drop_index_by_name("index_name")
             mock_func.assert_called_once_with("index_name")
             mock_func.return_value.delete.assert_called_once()
 
         # file exists
-        with patch("eva.catalog.services.index_service.IndexService.index_by_name") as mock_func:
+        with patch(
+            "eva.catalog.services.index_service.IndexService.index_by_name"
+        ) as mock_func:
             mock_os_path.return_value = True
             save_file_path = mock_func.return_value.save_file_path
             service.drop_index_by_name("index_name")
@@ -73,7 +77,9 @@ class IndexServiceTest(TestCase):
             mock_func.return_value.delete.assert_called_once()
             mock_os_remove.assert_called_once_with(save_file_path)
 
-        with patch("eva.catalog.services.index_service.IndexService.index_by_name") as mock_func:
+        with patch(
+            "eva.catalog.services.index_service.IndexService.index_by_name"
+        ) as mock_func:
             mock_func.return_value.delete.side_effect = Exception()
             with self.assertRaises(Exception) as cm:
                 service.drop_index_by_name("index_name")
