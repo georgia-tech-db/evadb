@@ -57,7 +57,7 @@ class UDFService:
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self._forward(args[0])
 
-    def create_udf(self) -> Type[AbstractUDF]:
+    def generate_udf_class(self) -> Type[AbstractUDF]:
         if self._setup is None:
 
             def dummy_setup(*args: Any, **kwargs: Any) -> None:

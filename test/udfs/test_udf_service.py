@@ -43,7 +43,7 @@ def all_zeros_udf(all_zeros_callable):
     def forward(frame):
         return all_zeros_callable(frame)
 
-    return all_zero_udf.create_udf()
+    return all_zero_udf.generate_udf_class()
 
 
 @pytest.mark.parametrize(
@@ -78,4 +78,4 @@ def test_zeros_udf_call(all_zeros_udf, test_input, expected):
 
 def test_incomplete_udf():
     with pytest.raises(ValueError):
-        UDFService("inc").create_udf()
+        UDFService("inc").generate_udf_class()

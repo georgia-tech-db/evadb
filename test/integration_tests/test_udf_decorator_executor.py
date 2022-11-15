@@ -56,7 +56,7 @@ def dummy_object_detector():
         ret["label"] = df.apply(classify_one, axis=1)
         return ret
 
-    return udf_service.create_udf()
+    return udf_service.generate_udf_class()
 
 
 @pytest.fixture(scope="session")
