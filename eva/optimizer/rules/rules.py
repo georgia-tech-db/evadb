@@ -62,6 +62,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalCreateIndex,
     Operator,
     OperatorType,
 )
@@ -83,6 +84,7 @@ from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
+from eva.planner.create_index_plan import CreateIndexPlan
 
 ##############################################
 # REWRITE RULES START
@@ -422,6 +424,27 @@ class LogicalCreateUDFToPhysical(Rule):
             before.outputs,
             before.impl_path,
             before.udf_type,
+        )
+        return after
+
+
+class LogicalCreateIndexToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_INDEX_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
+        after = CreateIndexPlan(
+            before.name,
+            before.table_ref,
+            before.col_list,
+            before.index_type,
         )
         return after
 

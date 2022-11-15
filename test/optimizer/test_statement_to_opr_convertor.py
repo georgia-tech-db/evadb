@@ -44,6 +44,7 @@ from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.table_ref import TableInfo, TableRef
 
 
@@ -215,6 +216,15 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         convertor = StatementToPlanConvertor()
         mock = MagicMock()
         convertor.visit_drop = mock
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_create_index(self):
+        stmt = MagicMock(spec=CreateIndexStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_create_index = mock
         convertor.visit(stmt)
         mock.assert_called_once()
         mock.assert_called_with(stmt)

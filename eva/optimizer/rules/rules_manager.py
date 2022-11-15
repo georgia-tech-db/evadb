@@ -35,6 +35,7 @@ from eva.optimizer.rules.rules import (
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
+    LogicalCreateIndexToPhysical
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
@@ -114,6 +115,7 @@ class RulesManager:
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
+            LogicalCreateIndexToPhysical(),
         ]
 
         if ray_enabled:

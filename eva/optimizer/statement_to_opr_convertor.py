@@ -35,6 +35,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalCreateIndex,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
@@ -51,6 +52,7 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.utils.logging_manager import logger
 
 
@@ -306,6 +308,15 @@ class StatementToPlanConvertor:
         explain_opr = LogicalExplain([self.visit(statement.explainable_stmt)])
         self._plan = explain_opr
 
+    def visit_create_index(self, statement: CreateIndexStatement):
+        create_index_opr = LogicalCreateIndex(
+            statement.name,
+            statement.table_ref,
+            statement.col_list,
+            statement.index_type,
+        )
+        self._plan = create_index_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -338,6 +349,8 @@ class StatementToPlanConvertor:
             self.visit_show(statement)
         elif isinstance(statement, ExplainStatement):
             self.visit_explain(statement)
+        elif isinstance(statement, CreateIndexStatement):
+            self.visit_create_index(statement)
         return self._plan
 
     @property
