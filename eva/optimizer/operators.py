@@ -16,10 +16,10 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import List
 
+from eva.catalog.index_type import IndexType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
-from eva.catalog.index_type import IndexType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.alias import Alias
@@ -1109,7 +1109,7 @@ class LogicalCreateIndex(Operator):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         index_type: IndexType,
-        children: List = None
+        children: List = None,
     ):
         super().__init__(OperatorType.LOGICALCREATEINDEX, children)
         self._name = name
@@ -1152,6 +1152,6 @@ class LogicalCreateIndex(Operator):
                 self.name,
                 self.table_ref,
                 tuple(self.col_list),
-                self.index_type
+                self.index_type,
             )
         )

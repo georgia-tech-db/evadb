@@ -36,6 +36,7 @@ from eva.optimizer.operators import (
     LogicalUnion,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
@@ -44,7 +45,6 @@ from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
-from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.table_ref import TableInfo, TableRef
 
 

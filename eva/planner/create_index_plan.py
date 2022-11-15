@@ -15,10 +15,10 @@
 from typing import List
 
 from eva.catalog.index_type import IndexType
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableRef
+from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
 class CreateIndexPlan(AbstractPlan):
@@ -69,6 +69,6 @@ class CreateIndexPlan(AbstractPlan):
                 self.name,
                 self.table_ref,
                 tuple(self.col_list),
-                self.index_type
+                self.index_type,
             )
         )

@@ -15,6 +15,7 @@
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
@@ -35,9 +36,9 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
-    LogicalCreateIndex,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
@@ -52,7 +53,6 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.upload_statement import UploadStatement
-from eva.parser.create_index_statement import CreateIndexStatement
 from eva.utils.logging_manager import logger
 
 
