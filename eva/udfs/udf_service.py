@@ -14,17 +14,11 @@
 # limitations under the License.
 
 import functools
-from enum import Enum, auto
 from typing import Any, Callable, List, Optional, Type
 
 from numpy.typing import ArrayLike
 
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF, AbstractUDF
-
-
-class FrameType(Enum):
-    NdArray = auto()
-    PdDataFrame = auto()
 
 
 class UDFService:
