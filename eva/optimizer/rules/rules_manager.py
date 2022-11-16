@@ -40,6 +40,7 @@ from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
 )
 from eva.optimizer.rules.rules import (
+    LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
@@ -100,6 +101,7 @@ class RulesManager:
             else SequentialLogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),

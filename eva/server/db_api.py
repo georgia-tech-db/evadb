@@ -112,23 +112,22 @@ class EVACursor(object):
             raise AttributeError
 
         def func_sync(*args, **kwargs):
-            loop = self.connection.protocol.loop
+            loop = asyncio.get_event_loop()
             res = loop.run_until_complete(func(*args, **kwargs))
             return res
 
         return func_sync
 
 
-async def connect_async(host: str, port: int, max_retry_count: int = 3, loop=None):
-    if loop is None:
-        loop = asyncio.get_event_loop()
+async def connect_async(host: str, port: int, max_retry_count: int = 3):
+    loop = asyncio.get_event_loop()
 
     retries = max_retry_count * [1]
 
     while True:
         try:
             transport, protocol = await loop.create_connection(
-                lambda: EvaClient(loop), host, port
+                lambda: EvaClient(), host, port
             )
 
         except Exception as e:

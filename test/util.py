@@ -280,6 +280,10 @@ def copy_sample_videos_to_upload_dir():
         "data/mnist/mnist.mp4",
         os.path.join(upload_dir_from_config, "mnist.mp4"),
     )
+    shutil.copyfile(
+        "data/actions/actions.mp4",
+        os.path.join(upload_dir_from_config, "actions.mp4"),
+    )
 
 
 def file_remove(path):
@@ -298,6 +302,32 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
                 ),
+            }
+        )
+
+        if len(data) % batch_size == 0:
+            yield Batch(pd.DataFrame(data))
+            data = []
+    if data:
+        yield Batch(pd.DataFrame(data))
+
+
+def create_dummy_4d_batches(
+    num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0
+):
+    if not filters:
+        filters = range(num_frames)
+    data = []
+    for segment in filters:
+        segment_data = []
+        for i in segment:
+            segment_data.append(np.ones((2, 2, 3)) * float(i + 1) * 25)
+        segment_data = np.stack(np.array(segment_data, dtype=np.uint8))
+        data.append(
+            {
+                "myvideo.name": "dummy.avi",
+                "myvideo.id": segment[0] + start_id,
+                "myvideo.data": segment_data,
             }
         )
 

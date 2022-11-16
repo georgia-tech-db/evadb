@@ -254,6 +254,44 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
 
+    def test_select_statement_groupby_class(self):
+        """Testing sample frequency"""
+
+        parser = Parser()
+
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.AGGREGATION_FIRST
+        )
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "TAIPAI")
+
+        # sample_freq
+        self.assertEqual(
+            select_stmt.groupby_clause,
+            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+        )
+
+    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
+        # GROUP BY with multiple attributes should raise Syntax Error
+        parser = Parser()
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
+        self.assertRaises(SyntaxError, parser.parse, select_query)
+
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement
         Class: SelectStatement"""

@@ -140,6 +140,9 @@ MIN:                                 'MIN';
 STD:                                 'STD';
 SUM:                                 'SUM';
 FCOUNT: 						     'FCOUNT';
+FIRST:                               'FIRST';
+LAST:                                'LAST';
+SEGMENT:                             'SEGMENT';
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID
