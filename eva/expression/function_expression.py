@@ -86,7 +86,7 @@ class FunctionExpression(AbstractExpression):
     @function.setter
     def function(self, func: Callable):
         self._function = func
-    
+
     @function_type.setter
     def function_type(self, func_type: str):
         self._function_type = func_type

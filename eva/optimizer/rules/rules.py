@@ -17,17 +17,18 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
-from eva.catalog.catalog_manager import CatalogManager
-from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 
-from eva.expression.expression_utils import conjuction_list_to_expression_tree, is_function_expression
+from eva.catalog.catalog_manager import CatalogManager
+from eva.expression.expression_utils import (
+    conjuction_list_to_expression_tree,
+    is_function_expression,
+)
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
 )
-from eva.utils.generic_utils import path_to_class
 from eva.optimizer.rules.pattern import Pattern
 from eva.parser.types import JoinType
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -35,6 +36,7 @@ from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
 from eva.planner.show_info_plan import ShowInfoPlan
+from eva.utils.generic_utils import path_to_class
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -702,13 +704,15 @@ class LogicalGetToSeqScan(Rule):
         for idx, target in enumerate(before.target_list):
             if is_function_expression(target):
                 func_expr: FunctionExpression = target
-                if func_expr.function == None and func_expr.function_type != None:
+                if func_expr.function is None and func_expr.function_type is not None:
                     #   find a UDF of that type and load the UDF
                     udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
-                    func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+                    func_expr.function = path_to_class(
+                        udf_obj.impl_file_path, udf_obj.name
+                    )()
                     func_expr.name = udf_obj.name
                     before.target_list[idx] = func_expr
-        
+
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
@@ -832,7 +836,7 @@ class LogicalFunctionScanToPhysical(Rule):
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
         # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
         func_expr: FunctionExpression = before.func_expr
-        if func_expr.function == None and func_expr.function_type != None:
+        if func_expr.function is None and func_expr.function_type is not None:
             udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
             func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
             func_expr.name = udf_obj.name
