@@ -251,10 +251,10 @@ class StatementBinder:
                     "implementation file matches the UDF name."
                 )
                 logger.error(err_msg)
-                raise BinderError(err_msg)       
+                raise BinderError(err_msg)
 
         # we need to populate output_objs even with logical UDF type
-        # we'll use the type name to get any udf_output that matches this type     
+        # we'll use the type name to get any udf_output that matches this type
         output_objs = None
         if udf_obj is None:
             # TODO: Change this method later
