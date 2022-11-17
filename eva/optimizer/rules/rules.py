@@ -701,17 +701,21 @@ class LogicalGetToSeqScan(Rule):
             batch_mem_size = config_batch_mem_size
 
         # TODO: Should we place this into some other class / method, to resolve into a logical UDF
-        for idx, target in enumerate(before.target_list):
-            if is_function_expression(target):
-                func_expr: FunctionExpression = target
-                if func_expr.function is None and func_expr.function_type is not None:
-                    #   find a UDF of that type and load the UDF
-                    udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
-                    func_expr.function = path_to_class(
-                        udf_obj.impl_file_path, udf_obj.name
-                    )()
-                    func_expr.name = udf_obj.name
-                    before.target_list[idx] = func_expr
+        if before.target_list is not None:
+            for idx, target in enumerate(before.target_list):
+                if is_function_expression(target):
+                    func_expr: FunctionExpression = target
+                    if (
+                        func_expr.function is None
+                        and func_expr.function_type is not None
+                    ):
+                        #   find a UDF of that type and load the UDF
+                        udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
+                        func_expr.function = path_to_class(
+                            udf_obj.impl_file_path, udf_obj.name
+                        )()
+                        func_expr.name = udf_obj.name
+                        before.target_list[idx] = func_expr
 
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
