@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 
-from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.expression_utils import conjuction_list_to_expression_tree, abstract_to_function_expression, is_function_expression
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
@@ -677,6 +677,7 @@ class LogicalUploadToPhysical(Rule):
 class LogicalGetToSeqScan(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALGET)
+        self.catalog = CatalogManager()
         super().__init__(RuleType.LOGICAL_GET_TO_SEQSCAN, pattern)
 
     def promise(self):
@@ -700,14 +701,14 @@ class LogicalGetToSeqScan(Rule):
         # TODO: Should we convert AbstractExpression into FunctionExpression?
         # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
         # TODO: Should we place this into some other class / method, to resolve into a logical UDF
-        catalog = CatalogManager()
-        for idx, column in enumerate(before.target_list):
-            if column.etype == ExpressionType.FUNCTION_EXPRESSION:
-                column.__class = FunctionExpression
-                if column._function is None:
-                    udf_obj = catalog.get_udf_by_type(column._name)
-                    column._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
-                    before.target_list[idx] = column
+        for idx, target in enumerate(before.target_list):
+            if is_function_expression(target):
+                func_expr: FunctionExpression = target
+                if func_expr._function is None:
+                    #   find a UDF of that type and load the UDF
+                    udf_obj = self.catalog.get_udf_by_type(func_expr._name)
+                    func_expr._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+                    before.target_list[idx] = func_expr
         
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
@@ -820,6 +821,7 @@ class LogicalLimitToPhysical(Rule):
 class LogicalFunctionScanToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALFUNCTIONSCAN)
+        self.catalog = CatalogManager()
         super().__init__(RuleType.LOGICAL_FUNCTION_SCAN_TO_PHYSICAL, pattern)
 
     def promise(self):
@@ -831,11 +833,11 @@ class LogicalFunctionScanToPhysical(Rule):
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
         # TODO: Should we convert AbstractExpression into FunctionExpression?
         # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
-        before.func_expr.__class__ = FunctionExpression
-        if before.func_expr._function == None:
-            catalog = CatalogManager()
-            udf_obj = catalog.get_udf_by_type(before.func_expr._name)
-            before.func_expr._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        func_expr: FunctionExpression = before.func_expr
+        if func_expr._function == None:
+            udf_obj = self.catalog.get_udf_by_type(func_expr._name)
+            func_expr._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+            before.func_expr = func_expr
 
         after = FunctionScanPlan(before.func_expr, before.do_unnest)
         return after
