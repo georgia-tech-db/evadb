@@ -49,12 +49,14 @@ class FunctionExpression(AbstractExpression):
         name: str,
         output: str = None,
         alias: Alias = None,
+        func_type: str = None,
         **kwargs
     ):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
         self._context = Context()
         self._name = name
+        self._function_type = func_type
         self._function = func
         self._output = output
         self.alias = alias
@@ -73,9 +75,21 @@ class FunctionExpression(AbstractExpression):
     def function(self):
         return self._function
 
+    @property
+    def function_type(self):
+        return self._function_type
+
+    @name.setter
+    def name(self, func_name: str):
+        self._name = func_name
+
     @function.setter
     def function(self, func: Callable):
         self._function = func
+    
+    @function_type.setter
+    def function_type(self, func_type: str):
+        self._function_type = func_type
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch

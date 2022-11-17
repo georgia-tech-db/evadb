@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 
-from eva.expression.expression_utils import conjuction_list_to_expression_tree, abstract_to_function_expression, is_function_expression
+from eva.expression.expression_utils import conjuction_list_to_expression_tree, is_function_expression
 from eva.expression.function_expression import FunctionExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
@@ -698,16 +698,15 @@ class LogicalGetToSeqScan(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
 
-        # TODO: Should we convert AbstractExpression into FunctionExpression?
-        # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
         # TODO: Should we place this into some other class / method, to resolve into a logical UDF
         for idx, target in enumerate(before.target_list):
             if is_function_expression(target):
                 func_expr: FunctionExpression = target
-                if func_expr._function is None:
+                if func_expr.function is None:
                     #   find a UDF of that type and load the UDF
-                    udf_obj = self.catalog.get_udf_by_type(func_expr._name)
-                    func_expr._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+                    udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
+                    func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+                    func_expr.name = udf_obj.name
                     before.target_list[idx] = func_expr
         
         after = SeqScanPlan(None, before.target_list, before.alias)
@@ -831,12 +830,12 @@ class LogicalFunctionScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
-        # TODO: Should we convert AbstractExpression into FunctionExpression?
         # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
         func_expr: FunctionExpression = before.func_expr
-        if func_expr._function == None:
-            udf_obj = self.catalog.get_udf_by_type(func_expr._name)
-            func_expr._function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+        if func_expr.function == None:
+            udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
+            func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
+            func_expr.name = udf_obj.name
             before.func_expr = func_expr
 
         after = FunctionScanPlan(before.func_expr, before.do_unnest)

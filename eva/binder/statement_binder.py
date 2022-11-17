@@ -241,6 +241,7 @@ class StatementBinder:
             else:
                 # nothing much to do here since it does not exist
                 node.function = None
+                node.function_type = node.name  #   type of the UDF
         else:
             try:
                 node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
