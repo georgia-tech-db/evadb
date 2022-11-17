@@ -108,7 +108,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ### :desert_island: Traffic Analysis Application using Object Detection Model
 | Source Video  | Query Result |
 |---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
 ### :desert_island: MNIST Digit Recognition using Image Classification Model
 | Source Video  | Query Result |
