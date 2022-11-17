@@ -18,7 +18,6 @@ from typing import List, Set
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.expression.function_expression import FunctionExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 
@@ -276,6 +275,7 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     ]
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
+
 
 def is_function_expression(expr: AbstractExpression) -> bool:
     """Checks if the expr is of type ExpressionType.FUNCTION_EXPRESSION

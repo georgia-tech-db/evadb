@@ -271,7 +271,7 @@ class CatalogManager(object):
                 )
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
-    
+
     def get_udf_outputs_by_type(self, type_name: str) -> List[UdfIO]:
         return self._udf_io_service.get_outputs_by_udf_type(type_name)
 
@@ -316,7 +316,7 @@ class CatalogManager(object):
             return False
         else:
             return True
-    
+
     def check_udf_type_exists(self, type: str):
         return self._udf_service.check_udf_type_exists(type)
 

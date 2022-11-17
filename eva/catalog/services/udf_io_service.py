@@ -46,12 +46,10 @@ class UdfIOService(BaseService):
             error = f"Getting outputs for UDF id {udf_id} raised {e}"
             logger.error(error)
             raise RuntimeError(error)
-    
+
     def get_outputs_by_udf_type(self, type_name: str):
         try:
-            result = self.model.query.filter(
-                self.model._type == type_name
-            ).any()
+            result = self.model.query.filter(self.model._type == type_name).any()
             return result
         except Exception as e:
             error = f"Getting outputs for UDF with type {type_name} raised {e}"
