@@ -28,7 +28,7 @@ class ExchangePlan(AbstractPlan):
             UNION (deduplication) vs UNION ALL (non-deduplication)
     """
 
-    def __init__(self, parallelism: int = 1, ray_conf: Dict[str, Any] = None):
+    def __init__(self, parallelism: int = 1, ray_conf: Dict[str, Any] = {"num_gpus": 1}):
         self.parallelism = parallelism
         self.ray_conf = ray_conf
         super().__init__(PlanOprType.EXCHANGE)
