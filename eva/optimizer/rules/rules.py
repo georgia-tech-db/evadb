@@ -702,7 +702,7 @@ class LogicalGetToSeqScan(Rule):
         for idx, target in enumerate(before.target_list):
             if is_function_expression(target):
                 func_expr: FunctionExpression = target
-                if func_expr.function is None:
+                if func_expr.function == None and func_expr.function_type != None:
                     #   find a UDF of that type and load the UDF
                     udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
                     func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
@@ -832,7 +832,7 @@ class LogicalFunctionScanToPhysical(Rule):
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
         # TODO: Should we add a method somewhere (other than CatalogManager) to resolve this logical UDF?
         func_expr: FunctionExpression = before.func_expr
-        if func_expr.function == None:
+        if func_expr.function == None and func_expr.function_type != None:
             udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
             func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
             func_expr.name = udf_obj.name
