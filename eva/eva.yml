@@ -27,4 +27,4 @@ server:
   socket_timeout: 60
 
 experimental:
-  ray: True
+  ray: False
