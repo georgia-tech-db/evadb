@@ -33,7 +33,7 @@ class ExchangePlan(AbstractPlan):
         self.ray_conf = ray_conf
         super().__init__(PlanOprType.EXCHANGE)
 
-    def _Base__str__(self) -> str:
+    def __str__(self) -> str:
         return "ExchangePlan"
 
     def __hash__(self) -> int:
