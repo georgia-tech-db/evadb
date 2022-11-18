@@ -1,23 +1,16 @@
 // Top Level Description
 
-?start: sql_statements? MINUSMINUS? 
-        
-sql_statements: (sql_statement MINUSMINUS? SEMI | empty_statement)* (sql_statement (MINUSMINUS? SEMI)? | empty_statement)  
+?start: (sql_statement? SEMI)+ 
 
 sql_statement: ddl_statement | dml_statement | utility_statement
-    
-empty_statement: SEMI
-    
+        
 ddl_statement: create_database | create_table | create_index | create_udf | create_materialized_view
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
-
 dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement | upload_statement
     
-
-utility_statement: simple_describe_statement | help_statement | show_statement
-    
+utility_statement: describe_statement | show_statement
 
 // Data Definition Language
 
@@ -31,10 +24,10 @@ create_table: CREATE TABLE if_not_exists? table_name create_definitions ->column
     
 // Rename statements
 
-rename_table: RENAME TABLE oldtable_name TO newtable_name
+rename_table: RENAME TABLE table_name TO table_name
     
 // Create UDFs
-create_udf: CREATE UDF if_not_exists? udf_name INPUT  create_definitions OUTPUT create_definitions TYPE   udf_type IMPL   udf_impl
+create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl
 
 // Create Materialized View
 create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" COLUMNS "=" uid_list ")") AS select_statement 
@@ -77,19 +70,17 @@ drop_udf: DROP UDF if_exists? udf_name
 
 //    Primary DML Statements
 
-delete_statement: single_delete_statement
+delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (LIMIT decimal_literal)?
     
-
 insert_statement: INSERT INTO? table_name (("(" COLUMNS "=" uid_list ")")? insert_statement_value)
     
 select_statement: query_specification                                            ->simple_select
-    | select_statement UNION ALL? select_statement   ->union_select
+               | select_statement UNION ALL? select_statement   ->union_select
     
-update_statement: single_update_statement
+update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
     
-load_statement: LOAD FILE file_name INTO table_name (("(" COLUMNS "=" uid_list ")"))? (WITH file_options)?
+load_statement: LOAD FILE file_name INTO table_name ("(" uid_list ")")? (WITH file_options)?
     
-
 file_options: FORMAT (CSV|VIDEO)
     
 upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" COLUMNS "=" uid_list ")"))? (WITH file_options)?
@@ -105,15 +96,7 @@ insert_statement_value: select_statement
     
 
 updated_element: full_column_name "=" (expression | DEFAULT)
-    
-//    Detailed DML Statements
-
-single_delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (LIMIT decimal_literal)?
-    
-single_update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
-
-// details
-
+ 
 order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
 
 order_by_expression: expression (ASC | DESC)?
@@ -132,7 +115,6 @@ table_source_item: table_name      ->atom_table_item
 table_valued_function: function_call                                
     | UNNEST LR_BRACKET function_call RR_BRACKET   
     
-
 subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_BRACKET)
     
 sample_clause: SAMPLE decimal_literal
@@ -142,20 +124,16 @@ join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET 
     
 alias_clause: AS? uid "(" uid_list ")" | AS? uid
     
-// Select Statement"s Details
+// Select Statement Details
 
 query_expression: "(" query_specification ")" | "(" query_expression ")"
     
 query_specification: SELECT select_elements from_clause order_by_clause? limit_clause? error_bounds_expression? confidence_level_expression?
     
-// details
-
 select_elements: ("*" | select_element ) ("," select_element)*
     
 select_element: full_id "." "*"                                                ->select_star_element
-    | full_column_name (AS? uid)?                                     ->select_column_element
-    | function_call (AS? uid)?                                       ->select_function_element
-    | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                  ->select_expression_element
+    | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                    ->select_expression_element
     
 from_clause: FROM table_sources (WHERE expression)? (GROUP BY  group_by_item ("," group_by_item)* )? (HAVING expression)?
     
@@ -167,30 +145,22 @@ error_bounds_expression: ERROR_BOUNDS REAL_LITERAL
 	
 confidence_level_expression: CONFIDENCE_LEVEL REAL_LITERAL
 	
-//    Other administrative statements
-
-shutdown_statement: SHUTDOWN
-    
 // Utility Statements
 
-simple_describe_statement: DESCRIBE table_name
+describe_statement: DESCRIBE table_name
     
 help_statement: HELP STRING_LITERAL
     
 show_statement: SHOW (UDFS | TABLES)
-    
+
 // Common Clauses
 
 //    DB Objects
 
-full_id: uid (DOT_ID | "." uid)?
+full_id: uid dotted_id?
     
 table_name: full_id
-    
-oldtable_name: full_id
-    
-newtable_name: full_id
-    
+        
 full_column_name: uid (dotted_id dotted_id? )?
     
 index_column_name: uid ("(" decimal_literal ")")? (ASC | DESC)?
@@ -213,17 +183,16 @@ string_literal: STRING_LITERAL
 
 boolean_literal: TRUE | FALSE
 
-null_notnull: NOT? (NULL_LITERAL | NULL_SPEC_LITERAL)
+null_notnull: NOT? NULL_LITERAL
 
 array_literal: LR_SQ_BRACKET  constant ("," constant)* RR_SQ_BRACKET
              | LR_SQ_BRACKET RR_SQ_BRACKET
     
 
 constant: string_literal | decimal_literal
-    | "-" decimal_literal
+    | decimal_literal
     | boolean_literal
     | REAL_LITERAL
-    | NOT? (NULL_LITERAL | NULL_SPEC_LITERAL)
     | array_literal
     
 
@@ -245,13 +214,10 @@ data_type: BOOLEAN                                         ->simple_data_type
 
 length_one_dimension: "(" decimal_literal ")"
     
-
 length_two_dimension: "(" decimal_literal "," decimal_literal ")"
     
-
 length_dimension_list: "(" ( decimal_literal  ",")* decimal_literal ")"
     
-
 //    Common Lists
 
 uid_list: uid ("," uid)*
@@ -275,10 +241,9 @@ if_exists: IF EXISTS
 
 if_not_exists: IF NOT EXISTS
 
-
 //    Functions
 
-function_call: udf_function                                              ->udf_function_call
+function_call: udf_function                                      ->udf_function_call
     | aggregate_windowed_function                                ->aggregate_function_call
     
 
@@ -289,17 +254,17 @@ aggregate_windowed_function: (AVG | MAX | MIN | SUM) "(" (ALL | DISTINCT)? funct
                            | COUNT "(" ("*" | ALL? function_arg) ")"
     
 
-function_args: (constant | full_column_name | function_call | expression) ("," (constant | full_column_name | function_call | expression))*
+function_args: (function_arg) ("," function_arg)*
     
-function_arg: constant | full_column_name | function_call | expression
+function_arg: constant | expression
 
 //    Expressions, predicates
 
 // Simplified approach for expression
-expression: (NOT | "!") expression                            ->not_expression
+expression: (NOT | "!") expression                                   ->not_expression
     | expression logical_operator expression                         ->logical_expression
-    | predicate IS NOT? (TRUE | FALSE | UNKNOWN)          ->is_expression
-    | predicate                                                     ->predicate_expression
+    | predicate IS NOT? (TRUE | FALSE | UNKNOWN)                     ->is_expression
+    | predicate                                                      ->predicate_expression
     
 
 predicate: predicate NOT? IN "(" (select_statement | expressions) ")"     ->in_predicate
@@ -307,11 +272,13 @@ predicate: predicate NOT? IN "(" (select_statement | expressions) ")"     ->in_p
     | predicate comparison_operator predicate             ->binary_comparison_predicate
     | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"         ->subquery_comparison_predicate
     | predicate NOT? LIKE predicate (STRING_LITERAL)?               ->like_predicate
-    | (LOCAL_ID VAR_ASSIGN)? expression_atom                         ->expression_atom_predicate
-    
+    | assign_var                        ->expression_atom_predicate   
+    | expression_atom 
+
+assign_var.1: LOCAL_ID VAR_ASSIGN expression_atom  
 
 // Add in ASTVisitor null_notnull in constant
-expression_atom: constant                                                      ->constant_expression_atom
+expression_atom.2: constant                                                      ->constant_expression_atom
     | full_column_name                                                ->full_column_name_expression_atom
     | function_call                                                  ->function_call_expression_atom
     | unary_operator expression_atom                                  ->unary_expression_atom
@@ -321,17 +288,17 @@ expression_atom: constant                                                      -
     | expression_atom math_operator expression_atom         ->math_expression_atom
     
 
-unary_operator: "!" | "~" | "+" | "-" | NOT
+unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
     
-comparison_operator: "=" | ">" | "<" | "<" "=" | ">" "="
-    | "<" ">" | "!" "=" | "<" "=" ">"
-    | "@" ">" | "<" "@"
+comparison_operator: "=" | ">" | "<" | "<=" | ">="
+    | "<>" | "!=" | "<=>"
+    | "@>" | "<@"
     
-logical_operator: AND | "&" "&" | XOR | OR | "|" "|"
+logical_operator: AND | "&&" | XOR | OR | "||"
     
-bit_operator: "<" "<" | ">" ">" | "&" | "^" | "|"
+bit_operator: "<<" | ">>" | "&" | "^" | "|"
 
-math_operator: "*" | "/" | "%" | DIV | MOD | "+" | "-" | "--"
+math_operator: STAR | DIVIDE | MODULUS | DIV | MOD | PLUS | MINUS | MINUSMINUS
 
 // KEYWORDS
 
@@ -502,7 +469,7 @@ OR_ASSIGN:                           "|="
 
 STAR:                                "*"
 DIVIDE:                              "/"
-MODULE:                              "%"
+MODULUS:                              "%"
 PLUS:                                "+"
 MINUSMINUS:                          "--"
 MINUS:                               "-"
@@ -551,8 +518,6 @@ REAL_LITERAL:                        (DEC_DIGIT+)? "." DEC_DIGIT+
                                      | DEC_DIGIT+ "." EXPONENT_NUM_PART
                                      | (DEC_DIGIT+)? "." (DEC_DIGIT+ EXPONENT_NUM_PART)
                                      | DEC_DIGIT+ EXPONENT_NUM_PART
-NULL_SPEC_LITERAL:                   "\\" "N"
-
 
 
 // Hack for dotID
@@ -575,16 +540,15 @@ GLOBAL_ID:                           "@" "@" (/[A-Z0-9._$]+/ | BQUOTA_STRING)
 
 EXPONENT_NUM_PART:          /"E" "-"? DEC_DIGIT+/
 ID_LITERAL:                 /[A-Za-z_$0-9]*?[A-Za-z_$]+?[A-Za-z_$0-9]*/
-DQUOTA_STRING:              /"\"" ( "\\". | "\"\"" | ~("\""| "\\") )* "\""/
-SQUOTA_STRING:              /"\"" ("\\". | "\"\"" | ~("\"" | "\\"))* "\""/
-BQUOTA_STRING:              /"`" ( "\\". | "``" | ~("`"|"\\"))* "`"/
+DQUOTA_STRING:              /"[^";]*"/
+SQUOTA_STRING:              /'[^';]*'/
+BQUOTA_STRING:              /`[^'`]*`/
 DEC_DIGIT:                  /[0-9]/
-BIT_STRING_L:               /"B" "\"" [01]+ "\""/
 
 // LARK
 
 NEWLINE: "\n"
-COMMENT: "--" /[^\n]*/ NEWLINE
+COMMENT: MINUSMINUS /[^\n]*/ NEWLINE
 MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//
 
 %import common.CNAME
