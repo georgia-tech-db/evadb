@@ -14,6 +14,7 @@
 # limitations under the License.
 from sqlalchemy import Column, Integer
 from sqlalchemy.exc import DatabaseError
+import sqlalchemy_utils
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import create_database, database_exists, drop_database
 

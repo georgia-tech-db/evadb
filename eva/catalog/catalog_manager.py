@@ -310,11 +310,13 @@ class CatalogManager(object):
 
     def create_transcript_metadata(
             self,
+            table_id: int,
             video_name: str,
             word: str,
             start_time: str,
             end_time: str,
             confidence: str
     ) -> TranscriptMetadata:
-        metadata = self._transcript_metadata_service.create_transcript_metadata(video_name, word, start_time, end_time, confidence)
+        metadata = self._transcript_metadata_service.create_transcript_metadata(table_id, video_name, word, start_time,
+                                                                                end_time, confidence)
         return metadata

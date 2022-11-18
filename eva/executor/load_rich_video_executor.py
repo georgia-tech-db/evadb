@@ -34,8 +34,11 @@ class LoadRichVideoExecutor(LoadVideoExecutor):
             # TODO: make results typed
             catalog = CatalogManager()
             results = audio_utils.transcribe_file_with_word_time_offsets(self.node.file_path)
+            filename = str(self.node.file_path).split('/')[-1]
+            id = self.node.table_metainfo.id
             for result in results:
-                catalog.create_transcript_metadata(str(self.node.file_path), result['word'], result['start'], result['end'], result['conf'])
+                catalog.create_transcript_metadata(id, filename, result['word'], result['start'],
+                                                   result['end'], result['conf'])
 
             yield Batch(
                 pd.DataFrame(

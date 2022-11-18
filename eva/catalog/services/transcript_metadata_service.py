@@ -22,10 +22,12 @@ from eva.utils.logging_manager import logger
 class TranscriptMetadataService(BaseService):
     def __init__(self):
         super().__init__(TranscriptMetadata)
-    def create_transcript_metadata(self, video_name: str, word: str, start_time: str, end_time: str, confidence: str) -> TranscriptMetadata:
+
+    def create_transcript_metadata(self, table_id: int, video_name: str, word: str, start_time: str, end_time: str,
+                                   confidence: str) -> TranscriptMetadata:
         """Creates a new transcript metadata entry
         """
-        metadata = self.model(video_name, word, start_time, end_time, confidence)
+        metadata = self.model(table_id, video_name, word, start_time, end_time, confidence)
         metadata = metadata.save()
         return metadata
 
@@ -38,6 +40,7 @@ class TranscriptMetadataService(BaseService):
             return self.model.query.filter(self.model._word == word)
         except NoResultFound:
             return None
+
     def get_all_transcript_metadata(self):
         try:
             return self.model.query.all()

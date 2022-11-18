@@ -24,6 +24,8 @@ class TranscriptMetadata(BaseModel):
     __tablename__ = "transcript_metadata"
 
     # _id = Column("id", Integer, primary_key=True, autoincrement=True)
+    # a table contains many videos, video_name helps distinguish which video transcript this word is for
+    _table_id = Column('table_id', Integer, ForeignKey("df_metadata.id"))
     _video_name = Column("video_name", String(100))
     _word = Column("word", String(100))
     _start_time = Column("start_time", String(100))
@@ -33,6 +35,7 @@ class TranscriptMetadata(BaseModel):
     def __init__(
             self,
             # id: str,
+            table_id: int,
             video_name: str,
             word: str,
             start_time: str,
@@ -40,6 +43,7 @@ class TranscriptMetadata(BaseModel):
             confidence: str
     ):
         # self._id = id
+        self._table_id = table_id
         self._video_name = video_name
         self._word = word
         self._start_time = start_time
@@ -49,6 +53,10 @@ class TranscriptMetadata(BaseModel):
     @property
     def id(self):
         return self._id
+
+    @property
+    def table_id(self):
+        return self._table_id
 
     @property
     def video_name(self):
@@ -71,8 +79,9 @@ class TranscriptMetadata(BaseModel):
         return self._confidence
 
     def __str__(self):
-        column_str = "Column: (%s, %s, %s, %s, %s)" % (
+        column_str = "Column: (%s, %s, %s, %s, %s, %s)" % (
             self._video_name,
+            self._table_id,
             self._word,
             self._start_time,
             self._end_time,
@@ -84,7 +93,8 @@ class TranscriptMetadata(BaseModel):
     def __eq__(self, other):
         return (
                 self.id == other.id
-                and self.video_name == other.vide_name
+                and self.table_id == other.table_id
+                and self.video_name == other.video_name
                 and self.word == other.word
                 and self.start_time == other.start_time
                 and self.end_time == other.end_time
@@ -95,6 +105,7 @@ class TranscriptMetadata(BaseModel):
         return hash(
             (
                 self.id,
+                self.table_id,
                 self.video_name,
                 self.word,
                 self.start_time,
