@@ -19,6 +19,7 @@ from eva.parser.evaql.evaql_lexer import evaql_lexer
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor import ParserVisitor
 
+from eva.parser.lark_parser import LarkParser
 
 class AntlrErrorListener(ErrorListener):
 
@@ -63,6 +64,7 @@ class Parser(object):
     _instance = None
     _visitor = None
     _error_listener = None
+    _lark_parser = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -72,6 +74,7 @@ class Parser(object):
     def __init__(self):
         self._visitor = ParserVisitor()
         self._error_listener = AntlrErrorListener()
+        self._lark_parser = LarkParser()
 
     def parse(self, query_string: str) -> list:
         lexer = evaql_lexer(InputStream(query_string))
@@ -82,5 +85,8 @@ class Parser(object):
         parser._listeners = [self._error_listener]
 
         tree = parser.root()
+
+        # Call lark
+        self._lark_parser.parse(query_string)
 
         return self._visitor.visit(tree)
