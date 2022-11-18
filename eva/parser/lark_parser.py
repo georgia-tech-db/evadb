@@ -14,6 +14,7 @@
 # limitations under the License.
 from lark import Lark
 
+
 class LarkParser(object):
     """
     Parser for EVA QL based on Lark
@@ -28,11 +29,16 @@ class LarkParser(object):
         return cls._instance
 
     def __init__(self):
-        f = open('eva/parser/eva.lark')
+        f = open("eva/parser/eva.lark")
         sql_grammar = f.read()
-        self._parser = Lark(sql_grammar, parser='lalr')
+        self._parser = Lark(sql_grammar, parser="lalr")
 
     def parse(self, query_string: str) -> list:
+
+        # Add semi-colon if missing
+        if not query_string.endswith(";"):
+            query_string += ";"
+
         tree = self._parser.parse(query_string)
         output = tree.pretty()
         print(output)

@@ -10,7 +10,7 @@ ddl_statement: create_database | create_table | create_index | create_udf | crea
 dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement | upload_statement
     
-utility_statement: describe_statement | show_statement
+utility_statement: describe_statement | show_statement | help_statement | explain_statement
 
 // Data Definition Language
 
@@ -30,7 +30,7 @@ rename_table: RENAME TABLE table_name TO table_name
 create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl
 
 // Create Materialized View
-create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" COLUMNS "=" uid_list ")") AS select_statement 
+create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
 
 // Details
 udf_name: uid
@@ -72,7 +72,7 @@ drop_udf: DROP UDF if_exists? udf_name
 
 delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (LIMIT decimal_literal)?
     
-insert_statement: INSERT INTO? table_name (("(" COLUMNS "=" uid_list ")")? insert_statement_value)
+insert_statement: INSERT INTO? table_name (("(" uid_list ")")? insert_statement_value)
     
 select_statement: query_specification                                            ->simple_select
                | select_statement UNION ALL? select_statement   ->union_select
@@ -83,7 +83,7 @@ load_statement: LOAD FILE file_name INTO table_name ("(" uid_list ")")? (WITH fi
     
 file_options: FORMAT (CSV|VIDEO)
     
-upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" COLUMNS "=" uid_list ")"))? (WITH file_options)?
+upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" uid_list ")"))? (WITH file_options)?
     
 file_name: string_literal
     
@@ -152,6 +152,10 @@ describe_statement: DESCRIBE table_name
 help_statement: HELP STRING_LITERAL
     
 show_statement: SHOW (UDFS | TABLES)
+
+explain_statement: EXPLAIN explainable_statement
+
+explainable_statement : select_statement | insert_statement | update_statement | delete_statement | create_materialized_view
 
 // Common Clauses
 
@@ -431,7 +435,6 @@ FCOUNT: 						     "FCOUNT"
 // Common Keywords, but can be ID
 
 AUTO_INCREMENT:                      "AUTO_INCREMENT"
-COLUMNS:                             "COLUMNS"
 HELP:                                "HELP"
 TEMPTABLE:                           "TEMPTABLE"
 VALUE:                               "VALUE"
@@ -558,4 +561,3 @@ MULTILINE_COMMENT: /\/\*(\*(?!\/)|[^*])*\*\//
 %ignore WS
 %ignore COMMENT
 %ignore MULTILINE_COMMENT
-%ignore NEWLINE
