@@ -17,6 +17,7 @@ from pathlib import Path
 import eva
 
 EVA_INSTALLATION_DIR = Path(eva.__file__).parent
+EVA_ROOT_DIR = Path(eva.__file__).parent.parent
 EVA_DEFAULT_DIR = Path.home() / ".eva"
 EVA_DATASET_DIR = "eva_datasets"
 EVA_UPLOAD_DIR = "tmp"

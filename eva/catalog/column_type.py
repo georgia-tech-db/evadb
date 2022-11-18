@@ -19,6 +19,12 @@ class Dimension(IntEnum):
     ANYDIM = -1
 
 
+class TableType(IntEnum):
+    STRUCTURAL_DATA = auto()
+    VIDEO_DATA = auto()
+    IMAGE_DATA = auto()
+
+
 class ColumnType(Enum):
     BOOLEAN = 1
     INTEGER = 2

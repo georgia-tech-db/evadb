@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from eva.configuration.constants import EVA_INSTALLATION_DIR, EVA_ROOT_DIR
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
@@ -53,6 +54,20 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(query)
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 2 * len(expected_batch))
+
+    def test_should_load_images_in_table(self):
+        path = f"{EVA_ROOT_DIR}/data/mnist/images/*.jpg"
+        query = f"""LOAD FILE "{path}" INTO MyImages
+                   WITH FORMAT IMAGE;"""
+        execute_query_fetch_all(query)
+
+        select_query = """SELECT name, data FROM MyImages;"""
+
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 20)
+        
+        file_names = actual_batch.project(['myimages.name']).frames
+        
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):
@@ -124,7 +139,9 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
+        expected_batch = create_dummy_csv_batches(
+            target_columns=select_columns
+        )
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 

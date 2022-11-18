@@ -284,6 +284,7 @@ def copy_sample_videos_to_upload_dir():
         "data/actions/actions.mp4",
         os.path.join(upload_dir_from_config, "actions.mp4"),
     )
+    
 
 
 def file_remove(path):

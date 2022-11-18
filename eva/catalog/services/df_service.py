@@ -19,6 +19,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
+from eva.catalog.column_type import TableType
 
 
 class DatasetService(BaseService):
@@ -26,14 +27,14 @@ class DatasetService(BaseService):
         super().__init__(DataFrameMetadata)
 
     def create_dataset(
-        self, name, file_url, identifier_id="id", is_video=False
+        self, name: str, file_url: str, identifier_id, table_type: TableType
     ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
             name (str): name of the dataset
             file_url (str): file path of the dataset.
-            is_video (bool): True if the table is a video
+            table_type (TableType): type of data in the table
         Returns:
             DataFrameMetadata object
         """
@@ -41,7 +42,7 @@ class DatasetService(BaseService):
             name=name,
             file_url=file_url,
             identifier_id=identifier_id,
-            is_video=is_video,
+            table_type=int(table_type),
         )
         metadata = metadata.save()
         return metadata
@@ -91,7 +92,9 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata - metadata for given dataset_name
         """
-        return self.model.query.filter(self.model._name == dataset_name).one_or_none()
+        return self.model.query.filter(
+            self.model._name == dataset_name
+        ).one_or_none()
 
     def drop_dataset_by_name(self, database_name: str, dataset_name: str):
         """Delete dataset from the db
@@ -116,7 +119,9 @@ class DatasetService(BaseService):
         self, new_name: str, curr_database_name: str, curr_dataset_name: str
     ):
         try:
-            dataset = self.dataset_object_by_name(curr_database_name, curr_dataset_name)
+            dataset = self.dataset_object_by_name(
+                curr_database_name, curr_dataset_name
+            )
             dataset.update(_name=new_name)
 
         except Exception as e:

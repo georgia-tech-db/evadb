@@ -45,7 +45,8 @@ class Load(evaql_parserVisitor):
         # Check the file format
         if ctx.CSV() is not None:
             file_format = FileFormatType.CSV
-
+        elif ctx.IMAGE() is not None:
+            file_format = FileFormatType.IMAGE
         # parse and add more file options in future
         file_options = {}
         file_options["file_format"] = file_format

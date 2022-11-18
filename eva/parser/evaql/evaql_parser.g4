@@ -187,11 +187,12 @@ loadStatement
         (
             ('(' columns=uidList ')')
         )?
-      (WITH fileOptions)?
+      fileOptions?
     ;
 
+
 fileOptions
-    : FORMAT fileFormat=(CSV|VIDEO)
+    : FORMAT fileFormat=(CSV|VIDEO|IMAGE)
     ;
 
 uploadStatement
@@ -202,7 +203,7 @@ uploadStatement
         (
             ('(' columns=uidList ')')
         )?
-      (WITH fileOptions)?
+      (fileOptions)?
     ;
 
 fileName
