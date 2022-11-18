@@ -5,7 +5,7 @@ Getting Started
 
 Installation
 --------------
-EVA requires Python 3.7 or later. To install EVA, we recommend using pip::
+EVA supports Python (versions 3.7 and higher). To install EVA, we recommend using pip::
 
     pip install evadb
 
@@ -33,17 +33,23 @@ EVA provides an API for connecting to the server in Python code::
 
 Once the connection is established, you can run queries using the cursor::
 
-    cursor.execute("""SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo""")
+    cursor.execute("""LOAD FILE "mnist.mp4" INTO MNISTVid;""")
     response = cursor.fetch_all()
+    print(response)
+    cursor.execute("""SELECT data, MnistCNN(data).label 
+                      FROM MNISTVid 
+                      WHERE id < 5;""")
+    response = cursor.fetch_all()
+    print(response)
 
-.. admonition:: Sample Jupyter Notebook.
+.. admonition:: Illustrative Jupyter Notebook.
 
-   An illustrative notebook focusing on object detection using EVA is located `here <https://github.com/georgia-tech-db/eva/blob/master/tutorials/object_detection.ipynb>`_.
+   An illustrative notebook focusing on object detection using EVA is located `here <https://github.com/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_.
 
 - Command Line Interface::
 
-EVA offers a command line interface (CLI) to query the server for quick testing and debugging::
+EVA also exports a command line interface (CLI) to query the server for quick testing and debugging::
 
     python eva/eva_client
     >>> LOAD FILE "eva/data/mnist/mnist.mp4" INTO MNISTVid;
-    >>> SELECT id, data FROM MNISTVid WHERE id < 5
+    >>> SELECT id, data FROM MNISTVid WHERE id < 5;

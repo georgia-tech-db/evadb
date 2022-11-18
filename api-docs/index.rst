@@ -6,18 +6,18 @@ Exploratory Video Analytics
 What is EVA?
 ------------
 
-`EVA <https://github.com/georgia-tech-db/eva>`_ is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
+`EVA <https://github.com/georgia-tech-db/eva>`_ is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
 
-What does EVA do?
------------------
+Key Features
+------------
 
-* EVA **enables querying of visual data** in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models.
+1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as functions similar to SUM() or AVG().
 
-* EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
+2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps arounds your custom deep learning model. In fact, all the built-in models that are included in EVA are also supported as user-defined functions.
 
-* EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+3. EVA comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by time-tested relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
 
-Starting EVA
+Next Steps
 ------------
 
 .. grid:: 1 1 2 2
@@ -45,8 +45,6 @@ Starting EVA
         
 
         A step-by-step tour of creating custom User Defined Functions for EVA.
-
-
 
 
 .. spelling::
