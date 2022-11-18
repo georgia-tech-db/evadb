@@ -78,8 +78,6 @@ class TimeDistributed(torch.nn.Module):
 
     def __repr__(self):
         return f"TimeDistributed({self.module})"
-
-
 class AnimalDetector(PytorchAbstractClassifierUDF):
     @property
     def name(self) -> str:
@@ -243,3 +241,98 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         return outcome
 
         
+class AnimalDetectorPlus(AnimalDetector):
+    @property
+    def labels(self) -> 'List[str]':
+        return ['aardvark',
+            'antelope_duiker',
+            'badger',
+            'bat',
+            'bird',
+            'blank',
+            'cattle',
+            'cheetah',
+            'chimpanzee_bonobo',
+            'civet_genet',
+            'elephant',
+            'equid',
+            'forest_buffalo',
+            'fox',
+            'giraffe',
+            'gorilla',
+            'hare_rabbit',
+            'hippopotamus',
+            'hog',
+            'human',
+            'hyena',
+            'large_flightless_bird',
+            'leopard',
+            'lion',
+            'mongoose',
+            'monkey_prosimian',
+            'pangolin',
+            'porcupine',
+            'reptile',
+            'rodent',
+            'small_cat',
+            'wild_dog_jackal']
+
+    def setup(self, threshold= 0.85):
+        self.threshold = threshold
+        # pull the necessary checkpoints and model architectures
+        output_directory = os.path.join(EVA_DEFAULT_DIR, "udfs", "models")
+        subprocess.run(["mkdir", "-p", output_directory])
+        base_module_arc_path = os.path.join(output_directory, "base_module_arc_timedistributed")
+        base_module_ckt_path = os.path.join(output_directory, "base_module_timedistributed.pt")
+        classifier_ckt_path = os.path.join(output_directory, "classifier_timedistributed.pt")
+        file_urls = [
+            "https://www.dropbox.com/s/uh9qx9afvsklcy8/base_module_arc_timedistributed?dl=0",
+            "https://www.dropbox.com/s/sndqlvg59kkq0tq/base_module_timedistributed.pt?dl=0",
+            "https://www.dropbox.com/s/kiet243u2jocacc/classifier_timedistributed.pt?dl=0",
+        ]
+        file_paths = [
+            base_module_arc_path,
+            base_module_ckt_path,
+            classifier_ckt_path,
+        ]
+        # pull model from dropbox if not present
+        for i in range(len(file_urls)):
+            if not os.path.exists(file_paths[i]):
+                subprocess.run(["wget", file_urls[i], "--output-document", file_paths[i]])
+
+        
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        # init self.base
+        module = None
+        with open(base_module_arc_path,"rb") as f:
+            module = pickle.load(f)
+        module.load_state_dict(torch.load(base_module_ckt_path, map_location=device))
+        self.base = TimeDistributed(module)
+
+        # init self.classifier
+        self.classifier = torch.nn.Sequential(
+            nn.Linear(2152, 256),
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.Linear(256, 64),
+            nn.Flatten(),
+            nn.Linear(1024, 32),
+
+        )
+        self.classifier.load_state_dict(torch.load(classifier_ckt_path, map_location=device))
+    
+    def forward(self, frames):
+        torch.set_grad_enabled(False)
+        frames = AnimalDetector.transform_video(frames)
+        transform = AnimalDetector.image_model_transforms()
+        frames = transform(frames)
+        frames = frames.unsqueeze(0)
+        to_base = frames
+        to_classifier = self.base(to_base)
+        y_hat = self.classifier(to_classifier)
+        pred = torch.sigmoid(y_hat).cpu().numpy()
+        outcome = pd.DataFrame()
+        for frame_output in pred:
+            outcome = outcome.append({'labels': self.labels, 'scores': frame_output}, ignore_index=True,)
+        return outcome
