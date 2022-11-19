@@ -39,12 +39,6 @@ parts:
       - file: source/reference/udf
         title: Register UDFs
 
-      - file: source/reference/connecting
-        title: Connect
-
-      - file: source/reference/data_import
-        title: Data Import
-
   - caption: Developer Guide
     chapters:
       - file: source/contribute/index
