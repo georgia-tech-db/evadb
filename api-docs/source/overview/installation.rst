@@ -76,10 +76,11 @@ Run a query over the video to retrieve the output of the MNIST CNN function that
 
 That's it! You can now run more complex queries.
 
-Part 3: Register an user-defined function (UDF):
+Part 3: Register an user-defined function (UDF)
 ----
 
 User-defined functions allow us to combine SQL with deep learning models. These functions can wrap around deep learning models. 
+
 Download an user-defined function for classifying MNIST images.
 
 .. code-block:: bash
@@ -107,7 +108,13 @@ Run a more interesting query using the newly registered UDF
                               WHERE id = 30;""")
             response = cursor.fetch_all()
 
-Part 4: Start a Command Line Client
+Visualize the Output
+~~~~
+
+    The output of such queries are `shown in the notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
+
+
+Part 5: Start a Command Line Client
 ----
 
 Besides the notebook interface, EVA also exports a command line interface for querying the server. This interface allows for quick querying from the terminal:
