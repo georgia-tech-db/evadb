@@ -11,8 +11,6 @@ parts:
         title: Starting EVA Server
       - file: source/tutorials/01-mnist.ipynb
         title: MNIST Image Classification
-      - file: source/tutorials/gpu
-        title: Configure GPU
       - file: source/tutorials/02-object-detection.ipynb
         title: Object Detection
       - file: source/tutorials/03-emotion-analysis.ipynb
@@ -37,6 +35,9 @@ parts:
 
       - file: source/reference/udf
         title: User-Defined Functions
+
+      - file: source/tutorials/gpu
+        title: Configure GPU
 
   - caption: Developer Guide
     chapters:
