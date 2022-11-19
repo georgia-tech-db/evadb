@@ -36,7 +36,7 @@ parts:
       - file: source/reference/udf
         title: User-Defined Functions
 
-      - file: source/tutorials/gpu
+      - file: source/reference/gpu
         title: Configure GPU
 
   - caption: Developer Guide

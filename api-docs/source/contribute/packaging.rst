@@ -30,12 +30,12 @@ Please follow the following steps to package datasets:
 * Create a folder for your dataset and give it a descriptive name.
 * This dataset folder should contain 2 sub-folders named 'info' and 'videos'. For each video entry in the videos folder, there should be a corresponding CSV file in the info folder with the same name. The structure should look like:
 
-    .. image:: Images/packaging_folderstructure.png
+    .. image:: images/packaging_folderstructure.png
 
 * The videos folder should contain the raw videos in a standard format like mp4 or mov.
 * The info folder should contain the meta information corresponding to each video in CSV format. Each row of this CSV file should correspond to 1 unique object in a given frame. Please make sure the columns in your CSV file exactly match to these names. Here is a snapshot of a sample CSV file:
 
-    .. image:: Images/packaging_metafile.png
+    .. image:: images/packaging_metafile.png
 
     The columns represent the following:
         * id - (Integer) Auto incrementing index that is unique across all files (Since the CSV files are written to the same meta table, we want it to be unique across all files)
