@@ -111,7 +111,7 @@ Run a more interesting query using the newly registered UDF
 Visualize the Output
 ~~~~
 
-    The output of such queries are `shown in the notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
+The output of the query is `visualized in the notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html#visualize-output-of-query-on-the-video>`_.
 
 
 Part 5: Start a Command Line Client
