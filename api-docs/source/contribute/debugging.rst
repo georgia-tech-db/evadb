@@ -4,12 +4,12 @@ Debugging
 We recommend using a debugger in Visual Studio Code for debugging EVA. This tutorial presents a
 detailed step-by-step process of using the debugger.
 
-Pre-requisites
-~~~~
+Part 1: Pre-requisites
+====
 
 Ensure that Python extensions are installed in Visual Studio Code using these `instructions <https://realpython.com/python-development-visual-studio-code>`__.
 
-Part 1: Set up Debugger in Visual Studio Code
+Part 2: Set up Debugger for EVA
 ====
 
 When you press the debug icon, you will be given an option to create a ``launch.json`` file.
