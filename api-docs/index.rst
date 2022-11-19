@@ -49,19 +49,15 @@ Illustrative EVA Applications
 :desert_island: Traffic Analysis Application using Object Detection Model
 ~~~~
 
-.. list-table:: Title
-   :widths: 300 300 
-   :header-rows: 1
-
-   * - Source Video
-     - Query Result
-   * - 
+Source Video
+====
 
 ..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp
     :width: 300
     :alt: Source Video
 
-     -  
+Query Result
+====
 
 ..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp
     :width: 300
@@ -70,19 +66,15 @@ Illustrative EVA Applications
 :desert_island: MNIST Digit Recognition using Image Classification Model
 ~~~~
 
-.. list-table:: Title
-   :widths: 150 150 
-   :header-rows: 1
-
-   * - Source Video
-     - Query Result
-   * - 
+Source Video
+====
 
 ..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp
     :width: 150
     :alt: Source Video
 
-     -  
+Query Result
+====
 
 ..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp
     :width: 150
@@ -91,19 +83,15 @@ Illustrative EVA Applications
 :desert_island: Movie Analysis Application using Face Detection + Emotion Classfication Models
 ~~~~
 
-.. list-table:: Title
-   :widths: 400 400 
-   :header-rows: 1
-
-   * - Source Video
-     - Query Result
-   * - 
+Source Video
+====
 
 ..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
     :width: 400
     :alt: Source Video
 
-     -  
+Query Result
+====
 
 ..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp
     :width: 400
