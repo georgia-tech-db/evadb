@@ -26,6 +26,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
+    "sphinxemoji.sphinxemoji",
     "sphinx_external_toc",
     "sphinx_design",
     "myst_nb"
