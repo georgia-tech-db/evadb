@@ -1,7 +1,7 @@
 Exploratory Video Analytics
 ===================================================
 
-|pypi_status| |CI Status| |Coverage Status| |License| |documentation_status| |Discuss| |Python Versions|
+|pypi_status| |License| |Discuss| |Python Versions|
 
 What is EVA?
 ------------
