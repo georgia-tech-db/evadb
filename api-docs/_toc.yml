@@ -22,21 +22,21 @@ parts:
 
   - caption: Reference
     chapters:
-      - file: source/reference/index
-        title: EVA Query Language Reference
+      - file: source/reference/evaql
+        title: Query Language 
         sections:
-          - file: source/reference/sql/upload
-          - file: source/reference/sql/load
-          - file: source/reference/sql/select
-          - file: source/reference/sql/insert
-          - file: source/reference/sql/drop
-          - file: source/reference/sql/create
-          - file: source/reference/sql/rename
-          - file: source/reference/sql/show
+          - file: source/reference/evaql/upload
+          - file: source/reference/evaql/load
+          - file: source/reference/evaql/select
+          - file: source/reference/evaql/insert
+          - file: source/reference/evaql/drop
+          - file: source/reference/evaql/create
+          - file: source/reference/evaql/rename
+          - file: source/reference/evaql/show
             title: SHOW INFO keyword
 
       - file: source/reference/udf
-        title: Writing an User-Defined Function
+        title: User-Defined Functions
 
   - caption: Developer Guide
     chapters:

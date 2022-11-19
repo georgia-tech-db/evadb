@@ -3,30 +3,32 @@
 Getting Started
 ====
 
-Install EVA
+Part 1: Install EVA
 ----
 
-EVA supports Python (versions 3.7 and higher). To install EVA, we recommend using the pip package manager::
+EVA supports Python (versions >= 3.7). To install EVA, we recommend using the pip package manager:
 
-    pip install evadb
+    .. code-block:: bash
+
+      pip install evadb
 
 
 Launch EVA server
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To launch the server, run the following command on the terminal:
+EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To launch the EVA server, run the following command on the terminal:
 
-    eva_server &
+    .. code-block:: bash
 
-Start Jupyter Notebook 
+       eva_server &
+
+Part 2: Start a Jupyter Notebook Client
 ----
 
-.. admonition:: Illustrative Jupyter Notebook
-
-   Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. More illustrative notebooks are available in the `tutorials folder<https://github.com/georgia-tech-db/eva/tree/master/tutorials>`_.
+Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works out of the box on Colab. More illustrative notebooks are available in the `tutorials folder <https://github.com/georgia-tech-db/eva/tree/master/tutorials>`_.
 
 Connect to the EVA server
-----
+~~~~
 
     To connect to the EVA server in the notebook, use the following Python code:
 
@@ -43,7 +45,7 @@ Connect to the EVA server
         cursor = connection.cursor()
 
 Load video for analysis
-----
+~~~~
 
     Download the MNIST video.
 
@@ -60,7 +62,7 @@ Load video for analysis
         print(response)
 
 Run a query
----
+~~~~
 
     Run a query over the video to retrieve the output of the MNIST CNN function that is included in EVA as a built-in user-defined function (UDF).
 
@@ -72,23 +74,9 @@ Run a query
         response = cursor.fetch_all()
         print(response)
 
-That's it. You can now run more complex queries.
+That's it! You can now run more complex queries.
 
-Visualize video:
-----
-
-        Install `ipywidgets` for visualization.
-
-        .. code-block:: bash
-
-            pip install ipywidgets
-
-        .. code-block:: python
-
-            from ipywidgets import Video
-            Video.from_file("mnist.mp4", embed=True)
-
-Register an user-defined function (UDF):
+Part 3: Register an user-defined function (UDF):
 ----
 
         User-defined functions allow us to combine SQL with deep learning models. These functions can wrap around deep learning models. 
@@ -109,8 +97,8 @@ Register an user-defined function (UDF):
             response = cursor.fetch_all()
             print(response)
 
-Run a more complex query using the added UDF
-----
+Run a more interesting query using the newly registered UDF
+~~~~
 
         .. code-block:: python
 
@@ -119,33 +107,34 @@ Run a more complex query using the added UDF
                               WHERE id = 30;""")
             response = cursor.fetch_all()
 
-Command Line Interface:
+Part 4: Start a Command Line Client
 ----
 
-Besides the Jupyter notebook interface, EVA also exports a command line interface (CLI) for querying the server. This allows for quick querying 
-from the terminal:
+Besides the notebook interface, EVA also exports a command line interface for querying the server. This interface allows for quick querying from the terminal:
 
-    >>> eva_client
-    eva=# LOAD FILE "eva/data/mnist/mnist.mp4" INTO MNISTVid;
-    @status: ResponseStatus.SUCCESS
-    @batch:
+    .. code-block:: bash
 
-    0 Video successfully added at location: data/mnist/mnist.p4
-    @query_time: 0.045
+        >>> eva_client
+        eva=# LOAD FILE "mnist.mp4" INTO MNISTVid;
+        @status: ResponseStatus.SUCCESS
+        @batch:
 
-    eva=# SELECT id, data FROM MNISTVid WHERE id < 1000;
-    @status: ResponseStatus.SUCCESS
-    @batch:
-             mnistvid.id     mnistvid.data 
-        0          0           [[[ 0 2 0]\n [0 0 0]\n...         
-        1          1           [[[ 2 2 0]\n [1 1 0]\n...         
-        2          2           [[[ 2 2 0]\n [1 2 2]\n...         
-        ..       ...
-      997        997           [[[ 0 2 0]\n [0 0 0]\n...         
-      998        998           [[[ 0 2 0]\n [0 0 0]\n...         
-      999        999           [[[ 2 2 0]\n [1 1 0]\n...         
+        0 Video successfully added at location: mnist.p4
+        @query_time: 0.045
 
-    [1000 rows x 2 columns]
-    @query_time: 0.216  
-
-    eva=# exit
+        eva=# SELECT id, data FROM MNISTVid WHERE id < 1000;
+        @status: ResponseStatus.SUCCESS
+        @batch:
+                 mnistvid.id     mnistvid.data 
+            0          0           [[[ 0 2 0]\n [0 0 0]\n...         
+            1          1           [[[ 2 2 0]\n [1 1 0]\n...         
+            2          2           [[[ 2 2 0]\n [1 2 2]\n...         
+            ..       ...
+          997        997           [[[ 0 2 0]\n [0 0 0]\n...         
+          998        998           [[[ 0 2 0]\n [0 0 0]\n...         
+          999        999           [[[ 2 2 0]\n [1 1 0]\n...         
+    
+        [1000 rows x 2 columns]
+        @query_time: 0.216  
+    
+        eva=# exit

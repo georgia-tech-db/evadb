@@ -11,9 +11,9 @@ What is EVA?
 Key Features
 ------------
 
-1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as functions similar to SUM() or AVG().
+1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as user-defined functions similar to built-in functions like SUM().
 
-2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps arounds your custom deep learning model. In fact, all the built-in models that are included in EVA are also supported as user-defined functions.
+2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps arounds your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
 
 3. EVA comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by time-tested relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
 
@@ -25,40 +25,31 @@ Next Steps
     :margin: 0
     :padding: 3 4 0 0
 
-    .. grid-item-card:: :doc:`Tutorial: Intro to EVA <source/tutorials/tutorials>`
-        :link: source/tutorials/tutorials
+    .. grid-item-card:: :doc:`Tutorial:  to EVA <source/tutorials/overview>`
+        :link: source/overview/installation
         :link-type: doc
         
+        Getting Started
 
-        A simple example of using EVA.
-
-    .. grid-item-card:: :doc:`SQL Commands <source/reference/index>`
-        :link: source/reference/index
+    .. grid-item-card:: :doc:`SQL Commands <source/reference/evaql>`
+        :link: source/reference/evaql
         :link-type: doc
         
-
-        All SQL commands supported by EVA.
+        Query Language
     
     .. grid-item-card:: :doc:`Registering UDFs <source/reference/udf>`
         :link: source/reference/udf
         :link-type: doc
         
-
-        A step-by-step tour of creating custom User Defined Functions for EVA.
+        User Defined Functions
 
 
 .. spelling::
 
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb
-.. |CI Status| image:: https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg
-   :target: https://circleci.com/gh/georgia-tech-db/eva
-.. |Coverage Status| image:: https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master
-   :target: https://coveralls.io/github/georgia-tech-db/eva?branch=master
 .. |License| image:: https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache
-    :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
-.. |documentation_status| image:: https://readthedocs.org/projects/exvian/badge/?version=latest
-   :target: https://evadb.readthedocs.io/en/latest/index.html
+   :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
 .. |Discuss| image:: https://img.shields.io/badge/-Discuss!-blueviolet
    :target: https://github.com/georgia-tech-db/eva/discussions
 .. |Python Versions| image:: https://img.shields.io/badge/Python--versions-3.7+-brightgreen
