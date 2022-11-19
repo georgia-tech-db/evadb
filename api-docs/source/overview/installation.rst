@@ -14,7 +14,7 @@ EVA supports Python (versions 3.7 and higher). To install EVA, we recommend usin
 Starting EVA Server
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To start the server, run the following command on the terminal:::
+EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To start the server, run the following command on the terminal:
 
     eva_server &
 
@@ -24,7 +24,7 @@ Running Queries on EVA
 EVA exports two interfaces for users: (1) 
 `Jupyter Notebook <https://jupyter.org/try-jupyter/retro/notebooks/?path=notebooks/Intro.ipynb>`_ interface and (2) command line interface.
 
-Jupyter Notebook Interface::
+Jupyter Notebook Interface:
 ~~~~
 
 To connect to the EVA server in the notebook, use the following Python code::
@@ -57,7 +57,7 @@ After the connection is established, we can use the connection's cursor to run q
 
    Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA.
 
-Command Line Interface::
+Command Line Interface:
 ~~~~
 
 EVA also exports a command line interface (CLI) to query the server for quick testing::
