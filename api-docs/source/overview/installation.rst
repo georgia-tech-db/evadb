@@ -3,7 +3,7 @@
 Getting Started
 ====
 
-Installation
+Install EVA
 ----
 
 EVA supports Python (versions 3.7 and higher). To install EVA, we recommend using the pip package manager::
@@ -11,56 +11,119 @@ EVA supports Python (versions 3.7 and higher). To install EVA, we recommend usin
     pip install evadb
 
 
-Starting EVA Server
+Launch EVA server
 ----
 
-EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To start the server, run the following command on the terminal:
+EVA is based on a `client-server architecture <https://www.postgresql.org/docs/15/tutorial-arch.html>`_. To launch the server, run the following command on the terminal:
 
     eva_server &
 
-Running Queries on EVA
+Start Jupyter Notebook 
 ----
-
-EVA exports two interfaces for users: (1) 
-`Jupyter Notebook <https://jupyter.org/try-jupyter/retro/notebooks/?path=notebooks/Intro.ipynb>`_ interface and (2) command line interface.
-
-Jupyter Notebook Interface:
-~~~~
-
-To connect to the EVA server in the notebook, use the following Python code::
-
-    from src.server.db_api import connect
-    import nest_asyncio
-    nest_asyncio.apply()
-
-    # hostname and port of the server where EVA is running
-    connection = connect(host = '0.0.0.0', port = 5432) 
-    cursor = connection.cursor()
-
-After the connection is established, we can use the connection's cursor to run queries::
-
-    # load a video into the EVA server
-    cursor.execute("""LOAD FILE "mnist.mp4" INTO MNISTVid;""")
-    response = cursor.fetch_all()
-    print(response)
-
-    # run a query over the video 
-    # retrieve the output of the MNIST CNN model that is included
-    # in EVA as a built-in user-defined function
-    cursor.execute("""SELECT id, MnistCNN(data).label 
-                      FROM MNISTVid 
-                      WHERE id < 5;""")
-    response = cursor.fetch_all()
-    print(response)
 
 .. admonition:: Illustrative Jupyter Notebook
 
-   Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA.
+   Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. More illustrative notebooks are available in the `tutorials folder<https://github.com/georgia-tech-db/eva/tree/master/tutorials>`_.
+
+Connect to the EVA server
+----
+
+    To connect to the EVA server in the notebook, use the following Python code:
+
+    .. code-block:: python
+
+        # allow nested asyncio calls for client to connect with server
+        import nest_asyncio
+        nest_asyncio.apply()
+
+        # hostname and port of the server where EVA is running
+        connection = connect(host = '0.0.0.0', port = 5432)
+
+        # cursor allows the notebook client to send queries to the server
+        cursor = connection.cursor()
+
+Load video for analysis
+----
+
+    Download the MNIST video.
+
+    .. code-block:: bash
+
+        !wget -nc https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4
+
+    Use the LOAD statement is used to load a video onto the EVA server. 
+
+    .. code-block:: python
+
+        cursor.execute('LOAD FILE "mnist.mp4" INTO MNISTVid;')
+        response = cursor.fetch_all()
+        print(response)
+
+Run a query
+---
+
+    Run a query over the video to retrieve the output of the MNIST CNN function that is included in EVA as a built-in user-defined function (UDF).
+
+    .. code-block:: python
+
+        cursor.execute("""SELECT id, MnistCNN(data).label 
+                        FROM MNISTVid 
+                        WHERE id < 5;""")
+        response = cursor.fetch_all()
+        print(response)
+
+That's it. You can now run more complex queries.
+
+Visualize video:
+----
+
+        Install `ipywidgets` for visualization.
+
+        .. code-block:: bash
+
+            pip install ipywidgets
+
+        .. code-block:: python
+
+            from ipywidgets import Video
+            Video.from_file("mnist.mp4", embed=True)
+
+Register an user-defined function (UDF):
+----
+
+        User-defined functions allow us to combine SQL with deep learning models. These functions can wrap around deep learning models. 
+        Download an user-defined function for classifying MNIST images.
+
+        .. code-block:: bash
+
+            !wget -nc https://raw.githubusercontent.com/georgia-tech-db/eva/master/tutorials/apps/mnist/eva_mnist_udf.py
+
+        .. code-block:: python
+
+            cursor.execute("""CREATE UDF IF NOT EXISTS MnistCNN
+                              INPUT  (data NDARRAY (3, 28, 28))
+                              OUTPUT (label TEXT(2))
+                              TYPE  Classification
+                              IMPL  'eva_mnist_udf.py';
+                           """)
+            response = cursor.fetch_all()
+            print(response)
+
+Run a more complex query using the added UDF
+----
+
+        .. code-block:: python
+
+            cursor.execute("""SELECT data, MnistCNN(data).label 
+                              FROM MNISTVid
+                              WHERE id = 30;""")
+            response = cursor.fetch_all()
 
 Command Line Interface:
-~~~~
+----
 
-EVA also exports a command line interface (CLI) to query the server for quick testing::
+Besides the Jupyter notebook interface, EVA also exports a command line interface (CLI) for querying the server. This allows for quick querying 
+from the terminal:
 
     >>> eva_client
     eva=# LOAD FILE "eva/data/mnist/mnist.mp4" INTO MNISTVid;
