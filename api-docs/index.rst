@@ -25,23 +25,23 @@ Next Steps
     :margin: 0
     :padding: 3 4 0 0
 
-    .. grid-item-card:: :doc:`Tutorial:  to EVA <source/tutorials/overview>`
+    .. grid-item-card:: :doc:`Getting Started <source/tutorials/overview>`
         :link: source/overview/installation
         :link-type: doc
         
-        Getting Started
+        A step-by-step guide to installing EVA and running queries
 
-    .. grid-item-card:: :doc:`SQL Commands <source/reference/evaql>`
+    .. grid-item-card:: :doc:`Query Language<source/reference/evaql>`
         :link: source/reference/evaql
         :link-type: doc
         
-        Query Language
+        List of all the query statements supported by EVA
     
-    .. grid-item-card:: :doc:`Registering UDFs <source/reference/udf>`
+    .. grid-item-card:: :doc:`User Defined Functions <source/reference/udf>`
         :link: source/reference/udf
         :link-type: doc
         
-        User Defined Functions
+        A step-by-step tour of registering a user defined function that wraps around a custom deep learning model
 
 
 .. spelling::
