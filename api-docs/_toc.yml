@@ -42,12 +42,12 @@ parts:
   - caption: Developer Guide
     chapters:
       - file: source/contribute/index
-        title: Contributing
+        title: Contributing to EVA
       - file: source/contribute/debugging
-        title: Debugging EVA
+        title: Debugging 
       - file: source/contribute/new_command
         title: Extending EVA
       - file: source/contribute/release
-        title: Releasing EVA
+        title: Releasing 
       - file: source/contribute/packaging
         title: Packaging Models
