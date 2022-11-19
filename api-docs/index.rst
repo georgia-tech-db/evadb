@@ -25,7 +25,7 @@ Next Steps
     :margin: 0
     :padding: 3 4 0 0
 
-    .. grid-item-card:: :doc:`Getting Started <source/tutorials/overview>`
+    .. grid-item-card:: :doc:`Getting Started <source/overview/installation>`
         :link: source/overview/installation
         :link-type: doc
         
