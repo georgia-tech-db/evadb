@@ -101,12 +101,12 @@ Download an user-defined function for classifying MNIST images.
 Run a more interesting query using the newly registered UDF
 ~~~~
 
-        .. code-block:: python
+.. code-block:: python
 
-            cursor.execute("""SELECT data, MnistCNN(data).label 
-                              FROM MNISTVid
-                              WHERE id = 30;""")
-            response = cursor.fetch_all()
+    cursor.execute("""SELECT data, MnistCNN(data).label 
+                        FROM MNISTVid
+                        WHERE id = 30;""")
+    response = cursor.fetch_all()
 
 Visualize the Output
 ~~~~
