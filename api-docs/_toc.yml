@@ -5,26 +5,24 @@ parts:
     chapters:
       - file: source/overview/installation
 
-  - caption: Tutorial
+  - caption: User Guides
     chapters:
       - file: source/tutorials/tutorials
       - file: source/tutorials/01-mnist
-        title: MNIST
-      - file: source/tutorials/00-start-server
-        title: EVA Server
-      - file: source/tutorials/02-object-detection
+        title: MNIST Image Classification
+      - file: source/tutorials/00-start-server.ipynb
+        title: Starting EVA Server
+      - file: source/tutorials/02-object-detection.ipynb
         title: Object Detection
       - file: source/tutorials/03-emotion-analysis
         title: Emotion Analysis
-      - file: source/tutorials/04-movie-analysis-interstellar.ipynb
-        title: Movie Analysis Interstellar
-      - file: source/tutorials/05-emotion-palette.ipynb
-        title: Emotion Palette
+      - file: source/tutorials/04-custom-model.ipynb
+        title: Using a Custom Model
 
   - caption: Reference
     chapters:
       - file: source/reference/index
-        title: SQL Reference
+        title: EVA Query Language Reference
         sections:
           - file: source/reference/sql/upload
           - file: source/reference/sql/load
@@ -37,7 +35,7 @@ parts:
             title: SHOW INFO keyword
 
       - file: source/reference/udf
-        title: Register UDFs
+        title: Writing an User-Defined Function
 
   - caption: Developer Guide
     chapters:
