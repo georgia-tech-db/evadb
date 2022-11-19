@@ -25,7 +25,9 @@ Part 2: Release Steps
 
 1. Ensure that you're in the top-level ``eva`` directory.
 2. Ensure that your branch is in sync with the ``master`` branch:
-   
+
+.. code-block:: bash
+
        $ git pull origin master
 
 3. Add a new entry in the Changelog for the release.
