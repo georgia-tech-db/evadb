@@ -1,46 +1,26 @@
 Debugging
-~~~~~~~~~
+-----
 
-Using a debugger in the visual studio code, is one of the optimal ways
-of debugging your User Defined Function(UDF). This tutorial gives a
-detailed step-by-step process of using a debugger with Eva. This
-tutorial is python-specific. However, a similar debugging process can be
-followed for other languages and frameworks as well.
+We recommend using a debugger in Visual Studio Code for debugging EVA. This tutorial presents a
+detailed step-by-step process of using the debugger.
 
-Pre-requisites:
----------------
+Pre-requisites
+~~~~
 
-Python should be installed and its environment should be defined in the
-VS Code. If not pre-installed, use the extensions section to install
-python and set-up the environment. Follow the `offical
-instructions <https://realpython.com/python-development-visual-studio-code>`__.
+Ensure that Python extensions are installed in Visual Studio Code using these `instructions <https://realpython.com/python-development-visual-studio-code>`__.
 
-STEP 1: Installing and setting-up debugger on Visual Studio Code
-----------------------------------------------------------------
+Part 1: Set up Debugger in Visual Studio Code
+====
 
---------------
+When you press the debug icon, you will be given an option to create a ``launch.json`` file.
 
-The debug option in Visual Studio Code is as follows:
+While creating the JSON file, you will be prompted to select the environment to be used. Select the python environment from the ``command palette`` at the top. If the Python environment cannot be seen in the drop-down menu, try installing the python extension, and repeat the process.
 
-The debug icon when pressed will give you the option to create a
-launch.json file.
+Once you select the python environment, a ``launch.json`` file will be created with the default configurations set to debug a simple .py file.
 
-While creating the JSON file, you will be prompted to select the
-environment to be used. Select the python environment from the command
-Palette at the top. If the python environment cannot be seen in the
-drop-down menu, try installing the python extension, and repeat the
-process.
+More configurations can further be added to the file, to modify the environment variables or to debug an entire folder or workspace directory. Use the following configuration in the JSON file:
 
-Once you select the python environment, a ``launch.json`` file will be
-created with the default configurations set to debug a simple .py file.
-
-More configurations can further be added to the file, to modify the
-environment variables or to debug an entire folder or workspace
-directory.
-
-Use the following approach for debugging the eva set-up:
-
-::
+.. code-block:: json
 
    {
 
@@ -61,18 +41,18 @@ Use the following approach for debugging the eva set-up:
    }
 
 You can modify the fields of the above JSON file as follows:
+    
+    ``name``: It is the reader-friendly name to appear in the Debug launch
+    configuration dropdown.
+    
+    ``type``: The type of debugger to use for this launch configuration.
+    
+    ``program``: The executable or file to run when launching the debugger.
+    In the above example, test_integration.py will be executed by the
+    debugger.
+    
+    ``env``: Here you specify the environment variables. In the above
+    example, the path for the conda environment for Eva has been specified.
 
-``name``: It is the reader-friendly name to appear in the Debug launch
-configuration dropdown.
-
-``type``: The type of debugger to use for this launch configuration.
-
-``program``: The executable or file to run when launching the debugger.
-In the above example, test_integration.py will be executed by the
-debugger.
-
-``env``: Here you specify the environment variables. In the above
-example, the path for the conda environment for Eva has been specified.
-
-Using these configurations, the debugger can be executed both locally as
-well as on the remote server.
+Using these configuration variables, you can run the debugger both locally as
+well as on a remote server.

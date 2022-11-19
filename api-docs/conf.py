@@ -96,8 +96,7 @@ html_sidebars = {
 
 # Adding custom added css files
 html_static_path = ['_static']
-html_css_files = ['custom.css']
-
+html_css_files = ['_static/custom.css']
 
 # Adding the Tutorial notebooks to ./api-docs/source/tutorials/
 
