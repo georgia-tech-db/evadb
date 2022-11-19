@@ -25,7 +25,7 @@ EVA is based on a `client-server architecture <https://www.postgresql.org/docs/1
 Part 2: Start a Jupyter Notebook Client
 ----
 
-Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works out of the box on Colab. More illustrative notebooks are available in the `tutorials folder <https://github.com/georgia-tech-db/eva/tree/master/tutorials>`_.
+Here is an `illustrative Jupyter notebook <https://evadb.readthedocs.io/en/latest/source/tutorials/01-mnist.html>`_ focusing on MNIST image classification using EVA. The notebook works on `Google Colab <https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/01-mnist.ipynb>`_. 
 
 Connect to the EVA server
 ~~~~
