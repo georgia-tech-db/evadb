@@ -46,56 +46,44 @@ Next Steps
 Illustrative EVA Applications 
 ----
 
-:desert_island: Traffic Analysis Application using Object Detection Model
+|:desert_island:| Traffic Analysis Application using Object Detection Model
 ~~~~
 
-Source Video
-====
-
-..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp
-    :width: 300
+.. |pic1| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp
+    :width: 45%
     :alt: Source Video
 
-Query Result
-====
-
-..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp
-    :width: 300
+.. |pic2| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp
+    :width: 45%
     :alt: Query Result
 
-:desert_island: MNIST Digit Recognition using Image Classification Model
+|pic1| |pic2|
+
+|:desert_island:| MNIST Digit Recognition using Image Classification Model
 ~~~~
 
-Source Video
-====
-
-..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp
-    :width: 150
+..  |pic3| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp
+    :width: 20%
     :alt: Source Video
 
-Query Result
-====
-
-..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp
-    :width: 150
+..  |pic4| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp
+    :width: 20%
     :alt: Query Result
 
-:desert_island: Movie Analysis Application using Face Detection + Emotion Classfication Models
+|pic3| |pic4|
+
+|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classfication Models
 ~~~~
 
-Source Video
-====
-
-..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
-    :width: 400
+..  |pic5| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
+    :width: 45%
     :alt: Source Video
 
-Query Result
-====
-
-..  figure:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp
-    :width: 400
+..  |pic6| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp
+    :width: 45%
     :alt: Query Result
+
+|pic5| |pic6|
 
 Community
 ----
@@ -104,7 +92,7 @@ Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
-    :width: 400
+    :width: 80%
     :alt: EVA Slack Channel
 
 .. spelling::
