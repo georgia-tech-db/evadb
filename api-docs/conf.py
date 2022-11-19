@@ -26,8 +26,6 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.githubpages",
     "sphinx.ext.extlinks",
-    "sphinx_sitemap",
-
     "sphinx_external_toc",
     "sphinx_design",
     "myst_nb"
@@ -49,7 +47,7 @@ author = u"Georgia Tech Database Group"
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "sphinx"
+#pygments_style = "sphinx"
 
 # List of substitutions
 rst_prolog = """
@@ -67,8 +65,6 @@ notfound_urls_prefix = ""
 
 # The theme to use for pages.
 html_theme = "furo"
-#html_theme_path = ["themes"]
-
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for the theme, see the
@@ -77,6 +73,13 @@ html_theme_options = {
     "sidebar_hide_name": True,
     "navigation_with_keys": True,
     "top_of_page_button": "edit",
+    "light_css_variables": {
+        "color-background-secondary": "#fff",
+        "color-sidebar-background-border": "none",
+    },
+    "dark_css_variables": {
+        "color-background-secondary": "#000",
+    }
 }
 
 external_toc_path = "_toc.yml"  # optional, default: _toc.yml
@@ -94,9 +97,9 @@ html_sidebars = {
     ]
 }
 
-# Adding custom added css files
+# Adding custom css file
 html_static_path = ['_static']
-html_css_files = ['_static/custom.css']
+html_css_files = ['custom.css']
 
 # Adding the Tutorial notebooks to ./api-docs/source/tutorials/
 
