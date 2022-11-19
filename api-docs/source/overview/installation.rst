@@ -53,11 +53,11 @@ Download the MNIST video.
 
     !wget -nc https://www.dropbox.com/s/yxljxz6zxoqu54v/mnist.mp4
 
-Use the LOAD statement is used to load a video onto the EVA server. 
+Use the LOAD statement is used to load a video onto a table in EVA server. 
 
 .. code-block:: python
 
-    cursor.execute('LOAD FILE "mnist.mp4" INTO MNISTVid;')
+    cursor.execute('LOAD FILE "mnist.mp4" INTO MNISTVideoTable;')
     response = cursor.fetch_all()
     print(response)
 
@@ -69,7 +69,7 @@ Run a query over the video to retrieve the output of the MNIST CNN function that
 .. code-block:: python
 
     cursor.execute("""SELECT id, MnistCNN(data).label 
-                    FROM MNISTVid 
+                    FROM MNISTVideoTable 
                     WHERE id < 5;""")
     response = cursor.fetch_all()
     print(response)
@@ -90,10 +90,10 @@ Download an user-defined function for classifying MNIST images.
 .. code-block:: python
 
     cursor.execute("""CREATE UDF IF NOT EXISTS MnistCNN
-                        INPUT  (data NDARRAY (3, 28, 28))
-                        OUTPUT (label TEXT(2))
-                        TYPE  Classification
-                        IMPL  'eva_mnist_udf.py';
+                      INPUT  (data NDARRAY (3, 28, 28))
+                      OUTPUT (label TEXT(2))
+                      TYPE  Classification
+                      IMPL  'eva_mnist_udf.py';
                     """)
     response = cursor.fetch_all()
     print(response)
@@ -104,8 +104,8 @@ Run a more interesting query using the newly registered UDF
 .. code-block:: python
 
     cursor.execute("""SELECT data, MnistCNN(data).label 
-                        FROM MNISTVid
-                        WHERE id = 30;""")
+                      FROM MNISTVideoTable
+                      WHERE id = 30;""")
     response = cursor.fetch_all()
 
 Visualize the Output
@@ -133,9 +133,9 @@ Besides the notebook interface, EVA also exports a command line interface for qu
     @status: ResponseStatus.SUCCESS
     @batch:
                 mnistvid.id     mnistvid.data 
-        0          0           [[[ 0 2 0]\n [0 0 0]\n...         
-        1          1           [[[ 2 2 0]\n [1 1 0]\n...         
-        2          2           [[[ 2 2 0]\n [1 2 2]\n...         
+        0          0             [[[ 0 2 0]\n [0 0 0]\n...         
+        1          1             [[[ 2 2 0]\n [1 1 0]\n...         
+        2          2             [[[ 2 2 0]\n [1 2 2]\n...         
         ..       ...
         997        997           [[[ 0 2 0]\n [0 0 0]\n...         
         998        998           [[[ 0 2 0]\n [0 0 0]\n...         
