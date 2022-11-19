@@ -42,19 +42,19 @@ You can however **choose to override** these methods depending on your requireme
     * Define variables here that will be required across all methods.
     * Model loading happens here. You can choose to load custom models or models from torch.
 
-        * Example of loading a custom model:
-            .. code-block:: python
+    * Example of loading a custom model:
+.. code-block:: python
 
-                custom_model_path = os.path.join(EVA_DIR, "data", "models", "vehicle_make_predictor", "car_recognition.pt")
-                self.car_make_model = CarRecognitionModel()
-                self.car_make_model.load_state_dict(torch.load(custom_model_path))
-                self.car_make_model.eval()
+    custom_model_path = os.path.join(EVA_DIR, "data", "models", "vehicle_make_predictor", "car_recognition.pt")
+    self.car_make_model = CarRecognitionModel()
+    self.car_make_model.load_state_dict(torch.load(custom_model_path))
+    self.car_make_model.eval()
 
-        * Example of loading a torch model:
-            .. code-block:: python
+    * Example of loading a torch model:
+.. code-block:: python
 
-                self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
-                self.model.eval()
+    self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True)
+    self.model.eval()
 
 * `labels()` method:
 
@@ -66,22 +66,23 @@ You can however **choose to override** these methods depending on your requireme
     * This is where all your model inference logic goes.
     * While doing the computations, keep in mind that each call of this method is with a batch of frames.
     * Output from each invoke of the model needs to be appended to a dataframe and returned as follows:
-        .. code-block:: python
 
-            predictions = self.model(frames)
-            outcome = pd.DataFrame()
-            for prediction in predictions:
+.. code-block:: python
 
-                ## YOUR INFERENCE LOGIC
+    predictions = self.model(frames)
+    outcome = pd.DataFrame()
+    for prediction in predictions:
 
-                # column names depend on your implementation
-                outcome = outcome.append(
-                    {
-                        "labels": pred_class,
-                        "scores": pred_score,
-                        "boxes": pred_boxes
-                    },
-                    ignore_index=True)
+        ## YOUR INFERENCE LOGIC
+
+        # column names depend on your implementation
+        outcome = outcome.append(
+            {
+                "labels": pred_class,
+                "scores": pred_score,
+                "boxes": pred_boxes
+            },
+            ignore_index=True)
 
 In case you have any other functional requirements (defining custom transformations etc.) you can choose to add more methods. Make sure each method you write is clear, concise and well-documented.
 
@@ -109,14 +110,14 @@ Now that you have implemented your UDF we need to register it in EVA. You can th
 
     Here, is an example query that registers a UDF that wraps around the 'FastRCNNObjectDetector' model that performs Object Detection.
 
-        .. code-block:: sql
+.. code-block:: sql
 
-            CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
-            INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-            OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                    scores NDARRAY FLOAT32(ANYDIM))
-            TYPE  Classification
-            IMPL  'eva/udfs/fastrcnn_object_detector.py';
+    CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
+    INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+    OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+            scores NDARRAY FLOAT32(ANYDIM))
+    TYPE  Classification
+    IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
     * Input is a frame of type NDARRAY with shape (3, ANYDIM, ANYDIM). 3 channels and any width or height.
     * We return 3 variables for this UDF:
@@ -128,12 +129,12 @@ Now that you have implemented your UDF we need to register it in EVA. You can th
 
 3. Now you can execute your UDF on any video:
 
-    .. code-block:: sql
+.. code-block:: sql
 
-        SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo;
+    SELECT id, Unnest(FastRCNNObjectDetector(data)) FROM MyVideo;
 
 4. You can drop the UDF when you no longer need it.
 
-        .. code-block:: sql
+.. code-block:: sql
 
-            DROP UDF IF EXISTS FastRCNNObjectDetector;
+    DROP UDF IF EXISTS FastRCNNObjectDetector;
