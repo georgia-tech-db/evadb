@@ -1,5 +1,5 @@
 Exploratory Video Analytics
-===================================================
+=====
 
 |pypi_status| |License| |Discuss| |Python Versions|
 
