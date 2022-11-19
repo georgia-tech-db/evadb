@@ -31,11 +31,11 @@ Next Steps
         
         A step-by-step guide to installing EVA and running queries
 
-    .. grid-item-card:: :doc:`Query Language<source/reference/evaql>`
+    .. grid-item-card:: :doc:`Query Language <source/reference/evaql>`
         :link: source/reference/evaql
         :link-type: doc
         
-        List of all the query statements supported by EVA
+        List of all the query commands supported by EVA
     
     .. grid-item-card:: :doc:`User Defined Functions <source/reference/udf>`
         :link: source/reference/udf
