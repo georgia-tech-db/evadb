@@ -1,62 +1,43 @@
-UPLOAD and LOAD keyword
-=======================
+LOAD statement
+======
 
-Syntax
-------
+.. _1-load-the-video-file:
 
-Example Queries
----------------
-
-Before loading any video and structure data (e.g., csv files) into EVA,
-we need to **UPLOAD** the file to the EVA server.
-
-.. _1-upload-the-data-file-to-the-eva-server:
-
-1. Upload the data file to the EVA server
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Load Video file
+~~~~~
 
 .. code:: mysql
 
-    UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
+   LOAD FILE 'test_video.mp4' INTO MyVideo;
 
-In this case:
+-  **test_video.mp4** is the filesystem path where the video file is located.
+-  **MyVideo** is the table name where this video is added. Subsequent queries over the video will refer to this table name.
 
--  the video file is stored on the local path
-   **data/ua_detrac/uda_detrac.mp4**.
--  After the UPLOAD, the video file will be stored on the
-   **[prefix]/test_video.mp4** on the server.
--  The **[prefix]** can be configured in **~/eva/eva.yml** on the
-   server.
+When **LOAD**ing a video, there is no need to create a schema for the table. EVA automatically generates the following schema with two columns:
 
-.. _2-load-the-video-file:
+.. list-table:: MyVideo
+   :widths: 25 50
+   :header-rows: 1
 
-2. Load the video file
-~~~~~~~~~~~~~~~~~~~~~~
+   * - id
+     - data
+   * - 1
+     - [[[ 0 2 0]\n [0 0 0]\n...
+   * - 2
+     - [[[ 1 1 0]\n [0 1 2]\n...
+   ...
+   * - 1000
+     - [[[ 1 2 0]\n [2 1 0]\n...
 
-.. code:: mysql
 
-   LOAD DATA INFILE 'test_video.mp4' INTO MyVideo WITH FORMAT VIDEO;
+Every row in this table contains a frame id and frame content (in numpy format).
 
--  **test_video.mp4** is the path (there is no need to specify the
-   [prefix]) on the server when UPLOAD the video file.
--  **MyVideo** is the table name for this video, and we will use this
-   table name to refer the video in the subsequent queries.
--  **WITH FORMAT VIDEO** is optional. By default, EVA considers it as a
-   video **LOAD** query.
+.. _2-load-the-csv-file:
 
-When **LOAD** a video file, we don't need to create a schema for the
-table. Instead, EVA will automitically generate that. The below is the
-schame that EVA uses for video tables. \|id|data\| \|-|-\|
-\|1|numpy.ndarray([...])\| \|2|numpy.ndarray([...])\| Every row is a
-tuple of frame id and frame content (in numpy).
+Load CSV file
+~~~~~
 
-.. _3-load-the-csv-file:
-
-3. Load the csv file
-~~~~~~~~~~~~~~~~~~~~
-
-To **LOAD** a csv file, we need to first create a schema so EVA knows
-the columns and types.
+To **LOAD** a CSV file, we need to first specify the table schema.
 
 .. code:: mysql
 
@@ -69,10 +50,11 @@ the columns and types.
                    bbox NDARRAY FLOAT32(4),
                    object_id INTEGER
                );
-   LOAD DATA INFILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
 
--  **test_metadata.csv** needs to be uploaded to the server using
-   **UPLOAD**, similar to the **test_video.mp4**.
--  The csv file can contain more columns than needed, EVA will only load
-   the columns in the defined schema.
--  **WITH FORMAT CSV** is required.
+   LOAD FILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
+
+-  **test_metadata.csv** needs to be loaded onto the server using
+   **LOAD** statement.
+-  The CSV file may contain additional columns. EVA will only load
+   the columns listed in the defined schema.
+-  **WITH FORMAT CSV** is required to distinguish between videos and CSV files.
