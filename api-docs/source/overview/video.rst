@@ -1,7 +1,7 @@
 Video Database Systems
 ====
 
-Over the last decade, deep learning models have radically changed the world of computer vision. They are accurate on a variety of tasks ranging from image classification to emotion detection. However, there are two challenges associated that prevents a lot of users from benefiting from these models.
+Over the last decade, deep learning models have radically changed the world of computer vision. They are accurate on a variety of tasks ranging from image classification to emotion detection. However, there are two challenges that prevent a lot of users from benefiting from these models.
 
 Usability and Application Maintainability
 ^^^^
