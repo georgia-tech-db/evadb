@@ -1,5 +1,12 @@
+.. meta::
+   :description:
+       EVA Multimedia Database System -- Where SQL meets Deep Learning.
+   :keywords: database, deep learning, video analytics
+
 EVA DATABASE SYSTEM
 =====
+
+..  rubric:: Multimedia Database System -- Where SQL meets Deep Learning
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
@@ -7,6 +14,8 @@ EVA DATABASE SYSTEM
     :alt: EVA Banner
 
 |pypi_status| |License| |Discuss| |Python Versions|
+
+----------
 
 What is EVA?
 ------------
