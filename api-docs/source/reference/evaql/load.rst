@@ -10,10 +10,10 @@ Load Video file
 
    LOAD FILE 'test_video.mp4' INTO MyVideo;
 
--  **test_video.mp4** is the filesystem path where the video file is located.
--  **MyVideo** is the table name where this video is added. Subsequent queries over the video will refer to this table name.
+-  **test_video.mp4** is the location of the video file in the filesystem on the client.
+-  **MyVideo** is the name of the table in EVA where this video is loaded. Subsequent queries over the video must refer to this table name.
 
-When **LOAD**ing a video, there is no need to create a schema for the table. EVA automatically generates the following schema with two columns:
+When a video is loaded, there is no need to specify the schema for the video table. EVA automatically generates the following schema:
 
 .. list-table:: MyVideo
    :widths: 25 50
@@ -28,7 +28,6 @@ When **LOAD**ing a video, there is no need to create a schema for the table. EVA
    ...
    * - 1000
      - [[[ 1 2 0]\n [2 1 0]\n...
-
 
 Every row in this table contains a frame id and frame content (in numpy format).
 
