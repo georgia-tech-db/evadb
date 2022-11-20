@@ -11,7 +11,18 @@ EVA DATABASE SYSTEM
 What is EVA?
 ------------
 
-`EVA <https://github.com/georgia-tech-db/eva>`_ is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with an actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
+EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+
+ * examining the "emotion palette" of different actors
+ * finding gameplays that lead to a touchdown in a football game
+
+EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. The source code is available at https://github.com/georgia-tech-db/eva.
+
+If you are wondering why you might need a video database system, start with page on the "Introduction to Video Database Systems". It describes how these systems let users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets, and why you should use EVA.
+
+The page on :ref: `Getting Started <source/overview/installation>` shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend the database system to support your custom deep learning models in the form of user-defined functions.
+
+The :ref: `User Guides <source/tutorials/index>` section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
 
 Key Features
 ------------
