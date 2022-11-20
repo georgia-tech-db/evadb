@@ -33,5 +33,5 @@ Example Queries
 
    SELECT id, frame FROM DETRAC WHERE array_count(FastRCNNObjectDetector(frame).labels, 'car') > 3;
 
-.. |Flow chart showing the syntax of the SELECT keyword| image:: images/select.svg
-.. |Flow chart showing the syntax of the FROM keyword| image:: images/from.svg
+.. |Flow chart showing the syntax of the SELECT keyword| image:: /images/reference/select.svg
+.. |Flow chart showing the syntax of the FROM keyword| image:: /images/reference/from.svg
