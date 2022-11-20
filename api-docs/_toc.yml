@@ -3,10 +3,12 @@ root: index
 parts:
   - caption: Overview
     chapters:
+      - file: source/overview/video
       - file: source/overview/installation
 
   - caption: User Guides
     chapters:
+      - file: source/tutorials/index
       - file: source/tutorials/00-start-eva-server.ipynb
         title: Starting EVA Server
       - file: source/tutorials/01-mnist.ipynb
