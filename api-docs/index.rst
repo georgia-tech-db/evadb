@@ -1,7 +1,7 @@
 EVA DATABASE SYSTEM
 =====
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
     :width: 100%
     :alt: EVA Banner
@@ -95,7 +95,7 @@ Community
 
 Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/api-docs/images/eva/eva-slack.jpg
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
     :width: 100%
     :alt: EVA Slack Channel
