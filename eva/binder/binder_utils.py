@@ -39,8 +39,6 @@ class BinderError(Exception):
 def create_multimedia_metadata(name: str, format_type: FileFormatType):
     if format_type is FileFormatType.VIDEO:
         return create_video_metadata(name)
-    elif format_type is FileFormatType.IMAGE:
-        return create_image_table_metadata(name)
     else:
         raise BinderError(f"Format Type {format_type} is not supported")
 
@@ -75,39 +73,6 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
         col_metadata,
         identifier_column="id",
         table_type=TableType.VIDEO_DATA,
-    )
-    return metadata
-
-
-def create_image_table_metadata(name: str) -> DataFrameMetadata:
-    """Create image table metadata object.
-        We have predefined columns for such a object
-        name:  image path
-        data: image data
-
-    Arguments:
-        name (str): name of the metadata to be added to the catalog
-
-    Returns:
-        DataFrameMetadata:  corresponding metadata for the input table info
-    """
-    catalog = CatalogManager()
-    columns = [
-        ColumnDefinition(
-            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
-        ),
-        ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-        ),
-    ]
-    col_metadata = create_column_metadata(columns)
-    uri = str(generate_file_path(name))
-    metadata = catalog.create_metadata(
-        name,
-        uri,
-        col_metadata,
-        identifier_column="id",
-        table_type=TableType.IMAGE_DATA,
     )
     return metadata
 

@@ -192,7 +192,7 @@ loadStatement
 
 
 fileFormat
-    : (CSV|VIDEO|IMAGE)
+    : (CSV|VIDEO)
     ;
 
 

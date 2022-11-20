@@ -22,7 +22,6 @@ from test.util import (
 )
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -53,18 +52,6 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(query)
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 2 * len(expected_batch))
-
-    def test_should_load_images_in_table(self):
-        path = f"{EVA_ROOT_DIR}/data/mnist/images/*.jpg"
-        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
-        execute_query_fetch_all(query)
-
-        select_query = """SELECT name, data FROM MyImages;"""
-
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 20)
-
-        file_names = actual_batch.project(["myimages.name"]).frames
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):
