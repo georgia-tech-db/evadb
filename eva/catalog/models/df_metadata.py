@@ -32,9 +32,7 @@ class DataFrameMetadata(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(
-        self, name: str, file_url: str, table_type: int, identifier_id="id"
-    ):
+    def __init__(self, name: str, file_url: str, table_type: int, identifier_id="id"):
         self._name = name
         self._file_url = file_url
         self._schema = None

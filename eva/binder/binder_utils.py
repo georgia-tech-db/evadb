@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
@@ -163,15 +163,12 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(
-        table_info.database_name, table_info.table_name
-    )
+    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
     if obj:
         table_info.table_obj = obj
     else:
-        error = (
-            "{} does not exist. Create the table using"
-            " CREATE TABLE.".format(table_info.table_name)
+        error = "{} does not exist. Create the table using" " CREATE TABLE.".format(
+            table_info.table_name
         )
         logger.error(error)
         raise BinderError(error)
@@ -221,6 +218,6 @@ def check_groupby_pattern(groupby_string: str) -> None:
 
 
 def check_table_object_is_video(table_ref: TableRef) -> None:
-    if not table_ref.table.table_obj.is_video:
+    if table_ref.table.table_obj.table_type == TableType.VIDEO_DATA:
         err_msg = "GROUP BY only supported for video tables"
         raise BinderError(err_msg)

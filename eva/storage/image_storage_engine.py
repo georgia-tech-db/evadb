@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
-from pathlib import Path
-import struct
+import io
 import shutil
-import cv2, io
-import numpy as np
+import struct
+from pathlib import Path
+from typing import Iterator
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.readers.opencv_image_reader import CVImageReader
-from eva.models.storage.batch import Batch
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.models.storage.batch import Batch
+from eva.readers.opencv_image_reader import CVImageReader
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 
 # from eva.utils.logging_manager import LoggingManager
 # from eva.utils.logging_manager import LoggingLevel
@@ -106,9 +105,7 @@ class OpenCVImageStorageEngine(AbstractStorageEngine):
         metadata_file = Path(dir_path) / self.metadata
         if metadata_file.exists():
             if not overwrite:
-                print(
-                    "Trying to overwrite metadata. Please set overwrite = True"
-                )
+                print("Trying to overwrite metadata. Please set overwrite = True")
                 return
         # <version> <num_files> <length> <file_name1> <length> <file_name2>
         with open(metadata_file, "wb") as f:

@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.column_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -263,9 +263,7 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(
-        self, database_name: str, table_name: str
-    ) -> bool:
+    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -276,9 +274,7 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(
-            database_name, table_name
-        )
+        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
 
     def drop_udf(self, udf_name: str) -> bool:
         """

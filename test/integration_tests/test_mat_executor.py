@@ -38,9 +38,9 @@ class MaterializedViewTest(unittest.TestCase):
         CatalogManager().reset()
         create_sample_video()
         copy_sample_videos_to_upload_dir()
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
-        query = """LOAD FILE 'ua_detrac.mp4'
+        query = """LOAD VIDEO 'ua_detrac.mp4'
                    INTO UATRAC;"""
         execute_query_fetch_all(query)
         load_inbuilt_udfs()

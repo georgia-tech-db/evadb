@@ -45,5 +45,5 @@ Once the connection is established, you can run queries using the cursor::
 EVA offers a command line interface (CLI) to query the server for quick testing and debugging::
 
     python eva/eva_client
-    >>> LOAD FILE "eva/data/mnist/mnist.mp4" INTO MNISTVid;
+    >>> LOAD VIDEO "eva/data/mnist/mnist.mp4" INTO MNISTVid;
     >>> SELECT id, data FROM MNISTVid WHERE id < 5

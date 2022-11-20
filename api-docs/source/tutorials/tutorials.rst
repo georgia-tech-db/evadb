@@ -74,7 +74,7 @@ Quickstart Tutorial
 
         .. code-block:: python
 
-            cursor.execute('LOAD FILE "../data/ua_detrac/ua_detrac.mp4" INTO MyVideo')
+            cursor.execute('LOAD VIDEO "../data/ua_detrac/ua_detrac.mp4" INTO MyVideo')
             response = cursor.fetch_all()
             print(response)
 

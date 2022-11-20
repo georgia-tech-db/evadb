@@ -22,7 +22,6 @@ from eva.binder.binder_utils import (
     check_groupby_pattern,
     check_table_object_is_video,
     create_multimedia_metadata,
-    create_video_metadata,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -32,9 +31,7 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
-from eva.parser.create_mat_view_statement import (
-    CreateMaterializedViewStatement,
-)
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.load_statement import LoadDataStatement
@@ -114,9 +111,7 @@ class StatementBinder:
             self._binder_context = current_context
 
     @bind.register(CreateMaterializedViewStatement)
-    def _bind_create_mat_statement(
-        self, node: CreateMaterializedViewStatement
-    ):
+    def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
 
@@ -147,9 +142,7 @@ class StatementBinder:
                     Path(node.path).exists()
                     or Path(Path(upload_dir) / node.path).exists()
                 ):
-                    create_multimedia_metadata(
-                        name, node.file_options["file_format"]
-                    )
+                    create_multimedia_metadata(name, node.file_options["file_format"])
 
                 # else raise error
                 else:
@@ -218,9 +211,7 @@ class StatementBinder:
             func_expr.alias = node.alias
             self.bind(func_expr)
             output_cols = []
-            for obj, alias in zip(
-                func_expr.output_objs, func_expr.alias.col_names
-            ):
+            for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
                 alias_obj = self._catalog.udf_io(
                     alias,
                     data_type=obj.type,
@@ -275,9 +266,7 @@ class StatementBinder:
                 if obj.name.lower() == node.output:
                     node.output_objs = [obj]
             if not node.output_objs:
-                err_msg = (
-                    f"Output {node.output} does not exist for {udf_obj.name}."
-                )
+                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
                 logger.error(err_msg)
                 raise BinderError(err_msg)
             node.projection_columns = [node.output]
@@ -286,16 +275,12 @@ class StatementBinder:
             node.projection_columns = [obj.name.lower() for obj in output_objs]
 
         default_alias_name = node.name.lower()
-        default_output_col_aliases = [
-            str(obj.name.lower()) for obj in node.output_objs
-        ]
+        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
         if not node.alias:
             node.alias = Alias(default_alias_name, default_output_col_aliases)
         else:
             if not len(node.alias.col_names):
-                node.alias = Alias(
-                    node.alias.alias_name, default_output_col_aliases
-                )
+                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
             else:
                 output_aliases = [
                     str(col_name.lower()) for col_name in node.alias.col_names

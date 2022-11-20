@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from PIL import Image
+from typing import Dict, Iterator
+
 import cv2
-from typing import Iterator, Dict
 
 from eva.readers.abstract_reader import AbstractReader
+
 # from eva.utils.logging_manager import LoggingLevel
 # from eva.utils.logging_manager import LoggingManager
 # from eva.expression.expression_utils import parse_predicate

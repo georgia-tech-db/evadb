@@ -20,7 +20,7 @@ import numpy as np
 import pandas as pd
 from antlr4 import TerminalNode
 
-from eva.catalog.column_type import NdArrayType
+from eva.catalog.catalog_type import NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.models.storage.batch import Batch
 from eva.parser.evaql.evaql_parser import evaql_parser

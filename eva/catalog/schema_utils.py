@@ -16,7 +16,7 @@ from typing import Dict, List
 
 from sqlalchemy import TEXT, Column, Float, Integer, LargeBinary
 
-from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.utils.logging_manager import logger
 

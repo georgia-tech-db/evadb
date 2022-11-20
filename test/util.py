@@ -219,8 +219,7 @@ def create_table(table_name, num_rows, num_columns):
     columns = ["a{}".format(i) for i in range(num_columns)]
     df = create_csv(num_rows, columns)
     # load the CSV
-    load_query = """LOAD FILE 'dummy.csv' INTO {}
-                   WITH FORMAT CSV;""".format(
+    load_query = """LOAD CSV 'dummy.csv' INTO {};""".format(
         table_name
     )
     execute_query_fetch_all(load_query)

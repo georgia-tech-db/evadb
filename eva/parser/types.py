@@ -64,6 +64,7 @@ class FileFormatType(Enum):
     """
     Manages enums for all order by sort types
     """
+
     IMAGE = auto()
     VIDEO = auto()
     CSV = auto()

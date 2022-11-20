@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
 from pathlib import Path
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.storage.storage_engine import ImageStorageEngine
-from eva.models.storage.batch import Batch
+
+import pandas as pd
+
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
+from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.storage_engine import StorageEngine
 
 
 class LoadImageExecutor(AbstractExecutor):
@@ -43,13 +45,12 @@ class LoadImageExecutor(AbstractExecutor):
             if image_path.exists():
                 image_file_path = image_path
         if image_file_path is None:
-            error = "Failed to find the video file {}".format(
-                self.node.file_path
-            )
+            error = "Failed to find the video file {}".format(self.node.file_path)
 
             raise RuntimeError(error)
 
-        success = ImageStorageEngine.create(self.node.table_metainfo)
+        storage_engine = StorageEngine.factory(self.node.table_metainfo)
+        success = storage_engine.create(self.node.table_metainfo)
 
         if not success:
             raise RuntimeError("ImageStorageEngine create call failed")
@@ -58,11 +59,9 @@ class LoadImageExecutor(AbstractExecutor):
         for file in image_file_path.iterdir():
             if file.is_file():
                 if file.suffix in [".png", ".jpeg", ".jpg"]:
-                    ImageStorageEngine.write(self.node.table_metainfo, file)
+                    storage_engine.write(self.node.table_metainfo, file)
                     file_count += 1
 
         yield Batch(
-            pd.DataFrame(
-                {"Number of loaded images": str(file_count)}, index=[0]
-            )
+            pd.DataFrame({"Number of loaded images": str(file_count)}, index=[0])
         )

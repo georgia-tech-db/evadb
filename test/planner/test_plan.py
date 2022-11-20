@@ -15,7 +15,7 @@
 import unittest
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import FileFormatType

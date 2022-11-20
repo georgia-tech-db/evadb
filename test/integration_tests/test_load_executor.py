@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from eva.configuration.constants import EVA_INSTALLATION_DIR, EVA_ROOT_DIR
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
@@ -23,6 +22,7 @@ from test.util import (
 )
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -39,8 +39,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD FILE 'dummy.avi' INTO MyVideo
-                   WITH FORMAT VIDEO;"""
+        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         select_query = """SELECT name, id, data FROM MyVideo;"""
@@ -57,17 +56,15 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_should_load_images_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/mnist/images/*.jpg"
-        query = f"""LOAD FILE "{path}" INTO MyImages
-                   WITH FORMAT IMAGE;"""
+        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
         execute_query_fetch_all(query)
 
         select_query = """SELECT name, data FROM MyImages;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 20)
-        
-        file_names = actual_batch.project(['myimages.name']).frames
-        
+
+        file_names = actual_batch.project(["myimages.name"]).frames
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):
@@ -89,8 +86,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD FILE 'dummy.csv' INTO MyVideoCSV
-                   WITH FORMAT CSV;"""
+        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV;"""
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -126,8 +122,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD FILE 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name)
-                   WITH FORMAT CSV;"""
+        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -139,9 +134,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         # assert the batches are equal
         select_columns = ["id", "frame_id", "video_id", "dataset_name"]
-        expected_batch = create_dummy_csv_batches(
-            target_columns=select_columns
-        )
+        expected_batch = create_dummy_csv_batches(target_columns=select_columns)
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 

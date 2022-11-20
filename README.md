@@ -63,7 +63,7 @@ eva_client     # launch client
 2. Load a video onto the server using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
-LOAD FILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
+LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
 ```
 
 3. That's it! You can now start running queries over the loaded video:

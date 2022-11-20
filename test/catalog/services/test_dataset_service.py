@@ -16,6 +16,7 @@ import unittest
 
 from mock import patch
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.services.df_service import DatasetService
 
 DATASET_ID = 123
@@ -24,18 +25,24 @@ DATASET_NAME = "name"
 DATABASE_NAME = "test"
 IDENTIFIER = "data_id"
 DATASET_NEW_NAME = "new_name"
+TABLE_TYPE = TableType.STRUCTURAL_DATA
 
 
 class DatasetServiceTest(unittest.TestCase):
     @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_create_dataset_should_create_model(self, mocked):
         service = DatasetService()
-        service.create_dataset(DATASET_NAME, DATASET_URL, identifier_id=IDENTIFIER)
+        service.create_dataset(
+            DATASET_NAME,
+            DATASET_URL,
+            table_type=TABLE_TYPE,
+            identifier_id=IDENTIFIER,
+        )
         mocked.assert_called_with(
             name=DATASET_NAME,
             file_url=DATASET_URL,
             identifier_id=IDENTIFIER,
-            is_video=False,
+            table_type=TABLE_TYPE,
         )
         mocked.return_value.save.assert_called_once()
 

@@ -12,15 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.catalog.catalog_type import TableType
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import str_to_class
 
-StorageEngine = str_to_class(
-    ConfigurationManager().get_value("storage", "engine")
-)()
-VideoStorageEngine = str_to_class(
-    ConfigurationManager().get_value("storage", "video_engine")
-)()
-ImageStorageEngine = str_to_class(
-    ConfigurationManager().get_value("storage", "image_engine")
-)()
+
+class StorageEngine:
+    storages = {
+        TableType.STRUCTURAL_DATA: str_to_class(
+            ConfigurationManager().get_value("storage", "engine")
+        )(),
+        TableType.VIDEO_DATA: str_to_class(
+            ConfigurationManager().get_value("storage", "video_engine")
+        )(),
+        TableType.IMAGE_DATA: str_to_class(
+            ConfigurationManager().get_value("storage", "image_engine")
+        )(),
+    }
+
+    @classmethod
+    def factory(cls, table_metadata: DataFrameMetadata) -> AbstractStorageEngine:
+        if table_metadata.table_type in cls.storages:
+            return cls.storages[table_metadata.table_type]
+
+        raise RuntimeError(f"Invalid table type {table_metadata.table_type}")

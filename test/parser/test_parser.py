@@ -15,7 +15,7 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -484,8 +484,8 @@ class ParserTests(unittest.TestCase):
 
     def test_load_video_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD FILE 'data/video.mp4'
-                             INTO MyVideo WITH FORMAT VIDEO;"""
+        load_data_query = """LOAD VIDEO 'data/video.mp4'
+                             INTO MyVideo"""
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
         column_list = None
@@ -505,10 +505,9 @@ class ParserTests(unittest.TestCase):
 
     def test_load_csv_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD FILE 'data/meta.csv'
+        load_data_query = """LOAD CSV 'data/meta.csv'
                              INTO
-                             MyMeta (id, frame_id, video_id, label)
-                             WITH FORMAT CSV;"""
+                             MyMeta (id, frame_id, video_id, label);"""
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
         expected_stmt = LoadDataStatement(
