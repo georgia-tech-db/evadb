@@ -103,6 +103,14 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
+8. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
+```mysql
+   -- Analyse emotions of faces in a video
+   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
+   FROM HAPPY JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   WHERE id < 15;
+```
+
 ## Illustrative EVA Applications 
 
 ### :desert_island: Traffic Analysis Application using Object Detection Model
@@ -125,7 +133,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
-<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.jpg" alt="EVA Slack Channel" width="500">
 </a>
 
