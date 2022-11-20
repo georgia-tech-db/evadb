@@ -16,23 +16,8 @@ LOAD VIDEO
 -  **test_video.mp4** is the location of the video file in the filesystem on the client.
 -  **MyVideo** is the name of the table in EVA where this video is loaded. Subsequent queries over the video must refer to this table name.
 
-When a video is loaded, there is no need to specify the schema for the video table. EVA automatically generates the following schema:
-
-.. list-table:: MyVideo
-   :widths: 25 50
-   :header-rows: 1
-
-   * - id
-     - data
-   * - 1
-     - [[[ 0 2 0]\n [0 0 0]\n...
-   * - 2
-     - [[[ 1 1 0]\n [0 1 2]\n...
-   ...
-   * - 1000
-     - [[[ 1 2 0]\n [2 1 0]\n...
-
-Every row in this table contains a frame id and frame content (in numpy format).
+When a video is loaded, there is no need to specify the schema for the video table. EVA automatically generates the following schema with two columns:
+``id`` and ``data``, that correspond to the frame id and frame content (in Numpy format).
 
 .. _2-load-the-csv-file:
 
