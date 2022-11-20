@@ -4,7 +4,7 @@ EVA Query Language Reference
 EVA Query Language (EVAQL) is derived from SQL. It is tailored for video analytics. EVAQL allows users to invoke deep learning models in the form
 of user-defined functions (UDFs).
 
-Here is an example where the user defines a UDF wrapping around the FastRCNN object detection model. The user may utilize this UDF in subsequently queries to detect objects.
+Here is an example where the user defines a UDF wrapping around the FastRCNN object detection model. The user then issues a query with this function to detect objects.
 
 .. code:: sql
 
@@ -24,4 +24,3 @@ Here is an example where the user defines a UDF wrapping around the FastRCNN obj
 This page presents a list of all the EVAQL statements that you can leverage in your Jupyter Notebooks.
 
 .. tableofcontents::
-    
