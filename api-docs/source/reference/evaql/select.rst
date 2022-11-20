@@ -1,7 +1,10 @@
 SELECT
 ======
 
-1. Search frames with a car
+SELECT FRAMES WITH PREDICATES
+----
+
+Search for frames with a car
 
 .. code:: sql
 
@@ -10,7 +13,7 @@ SELECT
    WHERE ['car'] <@ FastRCNNObjectDetector(frame).labels
    ORDER BY id;
 
-2. Search frames with a pedestrian and a car
+Search frames with a pedestrian and a car
 
 .. code:: sql
 
@@ -18,7 +21,7 @@ SELECT
    FROM MyVideo 
    WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(frame).labels;
 
-3. Search frames containing greater than 3 cars
+Search for frames containing greater than 3 cars
 
 .. code:: sql
 
@@ -26,8 +29,10 @@ SELECT
    WHERE Array_Count(FastRCNNObjectDetector(data).label, 'car') > 3
    ORDER BY id;
 
+SELECT WITH MULTIPLE UDFS
+----
 
-4. Compose multiple user-defined functions in a single query
+Compose multiple user-defined functions in a single query to construct semantically complex queries.
 
 .. code:: sql
 
