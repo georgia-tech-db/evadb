@@ -1,7 +1,7 @@
 Exploratory Video Analytics
 =====
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.jpg
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
     :width: 80%
     :alt: EVA Banner
