@@ -1,6 +1,6 @@
 <div >
-  <a href="https://georgia-tech-db.github.io/eva/index.html">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
+  <a href="https://evadb.readthedocs.io/">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
   </a>
   <div>
         <h3>Try It Out!</h3>
@@ -103,12 +103,20 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
+8. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
+```mysql
+   -- Analyse emotions of faces in a video
+   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
+   FROM HAPPY JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   WHERE id < 15;
+```
+
 ## Illustrative EVA Applications 
 
 ### :desert_island: Traffic Analysis Application using Object Detection Model
 | Source Video  | Query Result |
 |---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
 ### :desert_island: MNIST Digit Recognition using Image Classification Model
 | Source Video  | Query Result |
@@ -125,8 +133,8 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
-<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg" alt="EVA Slack Channel" width="500">
+<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.jpg" alt="EVA Slack Channel" width="500">
 </a>
 
 ## Contributing to EVA

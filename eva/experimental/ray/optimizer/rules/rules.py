@@ -72,7 +72,7 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
+        upper = ExchangePlan(parallelism=2)
         upper.append_child(after)
         return upper
 
@@ -115,6 +115,6 @@ class LogicalGetToSeqScan(Rule):
             [isinstance(expr, FunctionExpression) for expr in before.target_list]
         ):
             return scan
-        upper = ExchangePlan(parallelism=2, ray_conf={"num_gpus": 1})
+        upper = ExchangePlan(parallelism=2)
         upper.append_child(scan)
         return upper

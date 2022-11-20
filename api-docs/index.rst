@@ -1,23 +1,28 @@
-Exploratory Video Analytics
-===================================================
+EVA DATABASE SYSTEM
+=====
 
-|pypi_status| |CI Status| |Coverage Status| |License| |documentation_status| |Discuss| |Python Versions|
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png
+    :target: https://github.com/georgia-tech-db/eva
+    :width: 100%
+    :alt: EVA Banner
+
+|pypi_status| |License| |Discuss| |Python Versions|
 
 What is EVA?
 ------------
 
-`EVA <https://github.com/georgia-tech-db/eva>`_ is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
+`EVA <https://github.com/georgia-tech-db/eva>`_ is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with an actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
 
-What does EVA do?
------------------
+Key Features
+------------
 
-* EVA **enables querying of visual data** in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models.
+1. With EVA, you can **easily combine SQL and deep learning models to build next-generation database applications**. EVA treats deep learning models as  functions similar to traditional SQL functions like SUM().
 
-* EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
+2. EVA is **extensible by design**. You can write an **user-defined function** (UDF) that wraps arounds your custom deep learning model. In fact, all the built-in models that are included in EVA are written as user-defined functions.
 
-* EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+3. EVA comes with a collection of **built-in sampling, caching, and filtering optimizations** inspired by relational database systems. These optimizations help **speed up queries on large datasets and save money spent on model inference**.
 
-Starting EVA
+Next Steps
 ------------
 
 .. grid:: 1 1 2 2
@@ -25,43 +30,84 @@ Starting EVA
     :margin: 0
     :padding: 3 4 0 0
 
-    .. grid-item-card:: :doc:`Tutorial: Intro to EVA <source/tutorials/tutorials>`
-        :link: source/tutorials/tutorials
+    .. grid-item-card:: :doc:`Getting Started <source/overview/installation>`
+        :link: source/overview/installation
         :link-type: doc
         
+        A step-by-step guide to installing EVA and running queries
 
-        A simple example of using EVA.
-
-    .. grid-item-card:: :doc:`SQL Commands <source/reference/index>`
-        :link: source/reference/index
+    .. grid-item-card:: :doc:`Query Language <source/reference/evaql>`
+        :link: source/reference/evaql
         :link-type: doc
         
-
-        All SQL commands supported by EVA.
+        List of all the query commands supported by EVA
     
-    .. grid-item-card:: :doc:`Registering UDFs <source/reference/udf>`
+    .. grid-item-card:: :doc:`User Defined Functions <source/reference/udf>`
         :link: source/reference/udf
         :link-type: doc
         
+        A step-by-step tour of registering a user defined function that wraps around a custom deep learning model
 
-        A step-by-step tour of creating custom User Defined Functions for EVA.
+Illustrative EVA Applications 
+----
 
+|:desert_island:| Traffic Analysis Application using Object Detection Model
+~~~~
 
+.. |pic1| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp
+    :width: 45%
+    :alt: Source Video
 
+.. |pic2| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp
+    :width: 45%
+    :alt: Query Result
+
+|pic1| |pic2|
+
+|:desert_island:| MNIST Digit Recognition using Image Classification Model
+~~~~
+
+..  |pic3| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp
+    :width: 20%
+    :alt: Source Video
+
+..  |pic4| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp
+    :width: 20%
+    :alt: Query Result
+
+|pic3| |pic4|
+
+|:desert_island:| Movie Analysis Application using Face Detection + Emotion Classfication Models
+~~~~
+
+..  |pic5| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp
+    :width: 45%
+    :alt: Source Video
+
+..  |pic6| image:: https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp
+    :width: 45%
+    :alt: Query Result
+
+|pic5| |pic6|
+
+Community
+----
+
+Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
+
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/api-docs/images/eva/eva-slack.jpg
+    :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
+    :width: 100%
+    :alt: EVA Slack Channel
 
 .. spelling::
 
 .. |pypi_status| image:: https://img.shields.io/pypi/v/evadb.svg
    :target: https://pypi.org/project/evadb
-.. |CI Status| image:: https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg
-   :target: https://circleci.com/gh/georgia-tech-db/eva
-.. |Coverage Status| image:: https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master
-   :target: https://coveralls.io/github/georgia-tech-db/eva?branch=master
 .. |License| image:: https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache
-    :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
-.. |documentation_status| image:: https://readthedocs.org/projects/exvian/badge/?version=latest
-   :target: https://evadb.readthedocs.io/en/latest/index.html
+   :target: https://github.com/georgia-tech-db/eva/blob/master/LICENSE.txt
 .. |Discuss| image:: https://img.shields.io/badge/-Discuss!-blueviolet
    :target: https://github.com/georgia-tech-db/eva/discussions
 .. |Python Versions| image:: https://img.shields.io/badge/Python--versions-3.7+-brightgreen
    :target: https://github.com/georgia-tech-db/eva
+
