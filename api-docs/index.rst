@@ -1,4 +1,4 @@
-EVA MULTIMEDIA DATABASE SYSTEM
+EVA DATABASE SYSTEM
 =====
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png
