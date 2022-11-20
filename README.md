@@ -1,5 +1,5 @@
 <div >
-  <a href="https://georgia-tech-db.github.io/eva/index.html">
+  <a href="https://evadb.readthedocs.io/">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
   </a>
   <div>

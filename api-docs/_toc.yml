@@ -5,55 +5,48 @@ parts:
     chapters:
       - file: source/overview/installation
 
-  - caption: Tutorial
+  - caption: User Guides
     chapters:
-      - file: source/tutorials/tutorials
-      - file: source/tutorials/01-mnist
-        title: MNIST
-      - file: source/tutorials/00-start-server
-        title: EVA Server
-      - file: source/tutorials/02-object-detection
+      - file: source/tutorials/00-start-eva-server.ipynb
+        title: Starting EVA Server
+      - file: source/tutorials/01-mnist.ipynb
+        title: MNIST Image Classification
+      - file: source/tutorials/02-object-detection.ipynb
         title: Object Detection
-      - file: source/tutorials/03-emotion-analysis
+      - file: source/tutorials/03-emotion-analysis.ipynb
         title: Emotion Analysis
-      - file: source/tutorials/04-movie-analysis-interstellar.ipynb
-        title: Movie Analysis Interstellar
-      - file: source/tutorials/05-emotion-palette.ipynb
-        title: Emotion Palette
+      - file: source/tutorials/04-custom-model.ipynb
+        title: Using a Custom Model
 
-  - caption: Reference
+  - caption: User Reference
     chapters:
-      - file: source/reference/index
-        title: SQL Reference
+      - file: source/reference/evaql
+        title: Query Language 
         sections:
-          - file: source/reference/sql/upload
-          - file: source/reference/sql/load
-          - file: source/reference/sql/select
-          - file: source/reference/sql/insert
-          - file: source/reference/sql/drop
-          - file: source/reference/sql/create
-          - file: source/reference/sql/rename
-          - file: source/reference/sql/show
-            title: SHOW INFO keyword
+          - file: source/reference/evaql/load
+          - file: source/reference/evaql/select
+          - file: source/reference/evaql/explain
+          - file: source/reference/evaql/show
+          - file: source/reference/evaql/create
+          - file: source/reference/evaql/drop
+          - file: source/reference/evaql/insert
+          - file: source/reference/evaql/rename
 
       - file: source/reference/udf
-        title: Register UDFs
+        title: User-Defined Functions
 
-      - file: source/reference/connecting
-        title: Connect
-
-      - file: source/reference/data_import
-        title: Data Import
+      - file: source/reference/gpu
+        title: Configure GPU
 
   - caption: Developer Guide
     chapters:
       - file: source/contribute/index
-        title: Contributing
+        title: Contributing to EVA
       - file: source/contribute/debugging
-        title: Debugging EVA
+        title: Debugging 
       - file: source/contribute/new_command
         title: Extending EVA
       - file: source/contribute/release
-        title: Releasing EVA
+        title: Releasing 
       - file: source/contribute/packaging
         title: Packaging Models
