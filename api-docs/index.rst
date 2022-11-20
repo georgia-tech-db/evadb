@@ -68,6 +68,8 @@ Next Steps
         
         A step-by-step tour of registering a user defined function that wraps around a custom deep learning model
 
+----------
+
 Illustrative EVA Applications 
 ----
 
@@ -109,6 +111,8 @@ Illustrative EVA Applications
     :alt: Query Result
 
 |pic5| |pic6|
+
+----------
 
 Community
 ----

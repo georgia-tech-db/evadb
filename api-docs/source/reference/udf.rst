@@ -85,6 +85,7 @@ You can however **choose to override** these methods depending on your requireme
 
 In case you have any other functional requirements (defining custom transformations etc.) you can choose to add more methods. Make sure each method you write is clear, concise and well-documented.
 
+----------
 
 Part 2: Registering and using the UDF in queries
 -------
