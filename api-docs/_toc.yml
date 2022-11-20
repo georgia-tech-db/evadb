@@ -23,15 +23,14 @@ parts:
       - file: source/reference/evaql
         title: Query Language 
         sections:
-          - file: source/reference/evaql/upload
           - file: source/reference/evaql/load
           - file: source/reference/evaql/select
-          - file: source/reference/evaql/insert
-          - file: source/reference/evaql/drop
-          - file: source/reference/evaql/create
-          - file: source/reference/evaql/rename
+          - file: source/reference/evaql/explain
           - file: source/reference/evaql/show
-            title: SHOW INFO keyword
+          - file: source/reference/evaql/create
+          - file: source/reference/evaql/drop
+          - file: source/reference/evaql/insert
+          - file: source/reference/evaql/rename
 
       - file: source/reference/udf
         title: User-Defined Functions
