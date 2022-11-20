@@ -18,7 +18,7 @@ EVA is a **database system tailored for video analytics** -- think PostgreSQL fo
 
 EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. The source code is available at https://github.com/georgia-tech-db/eva.
 
-If you are wondering why you might need a video database system, start with page on the "Introduction to Video Database Systems". It describes how these systems let users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets, and why you should use EVA.
+If you are wondering why you might need a video database system, start with page on the introduction to ::ref `Video Database Systems <source/overview/video>`. It describes how these systems let users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets, and why you should use EVA.
 
 The page on :ref: `Getting Started <source/overview/installation>` shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend the database system to support your custom deep learning models in the form of user-defined functions.
 

@@ -3,6 +3,7 @@ root: index
 parts:
   - caption: Overview
     chapters:
+      - file: source/overview/video
       - file: source/overview/installation
 
   - caption: User Guides
