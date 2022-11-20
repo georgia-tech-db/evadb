@@ -1,15 +1,7 @@
-SELECT keyword
+SELECT query
 ==============
 
-Syntax
-------
-
-|Flow chart showing the syntax of the SELECT keyword|
-
-|Flow chart showing the syntax of the FROM keyword|
-
-Example Queries
----------------
+Illustrative queries:
 
 1. Search frames with a car
 
@@ -32,6 +24,3 @@ Example Queries
 .. code:: sql
 
    SELECT id, frame FROM DETRAC WHERE array_count(FastRCNNObjectDetector(frame).labels, 'car') > 3;
-
-.. |Flow chart showing the syntax of the SELECT keyword| image:: /images/reference/select.svg
-.. |Flow chart showing the syntax of the FROM keyword| image:: /images/reference/from.svg
