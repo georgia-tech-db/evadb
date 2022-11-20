@@ -1,5 +1,5 @@
-LOAD statement
-======
+LOAD
+====
 
 .. _1-load-the-video-file:
 
@@ -9,6 +9,9 @@ Load Video file
 .. code:: mysql
 
    LOAD FILE 'test_video.mp4' INTO MyVideo;
+
+   --- Alternate syntax that explicitly specifies format
+   LOAD FILE 'dummy.avi' INTO MyVideo WITH FORMAT VIDEO;
 
 -  **test_video.mp4** is the location of the video file in the filesystem on the client.
 -  **MyVideo** is the name of the table in EVA where this video is loaded. Subsequent queries over the video must refer to this table name.
