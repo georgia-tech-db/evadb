@@ -1,4 +1,4 @@
-Exploratory Video Analytics
+EVA MULTIMEDIA DATABASE SYSTEM
 =====
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png
