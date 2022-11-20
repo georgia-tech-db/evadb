@@ -11,10 +11,6 @@ from eva.optimizer.column_mapper import ColumnMapper
 
 
 class ColumnDeriver:
-    """
-    Derives the id for the column names in the optimal plans
-    """
-
     def __init__(self):
         pass
     
@@ -37,7 +33,7 @@ class ColumnDeriver:
         
         return prev_map, prev_merged
 
-    def merge(self, map1, map2):
+    def merge(self, map1: dict, map2: dict) -> dict:
         fin_map = map1
         for key,val in map2.items():
             if key not in fin_map:
@@ -64,7 +60,7 @@ class ColumnDeriver:
         column_name_to_id_mapping = {}
         prev_map = {}
 
-        prev_map, merged = self.scan_children(node_children)
+        prev_map, merged_map = self.scan_children(node_children)
             
         video_columns_map = {}
         attribute_id = 0
@@ -74,13 +70,9 @@ class ColumnDeriver:
             video_columns_map[col_name] = attribute_id
             attribute_id+=1
         
-        # #TODO: remove this logic after updating the catalog orderin
-        #video_columns_map = {"myvideo.id": 0, "myvideo.data":1, "myvideo.name": 2}
-        
-        
         column_name_to_id_mapping = self.merge(prev_map, video_columns_map)
 
-        return column_name_to_id_mapping, merged
+        return column_name_to_id_mapping, merged_map
 
     @scan_node_for_attributes.register(SeqScanPlan)
     def _for_seq_scan_plan(self, node:SeqScanPlan, alias_prefix:str=None) -> dict:
@@ -96,11 +88,9 @@ class ColumnDeriver:
         """
         left_child_map, _ = self.scan_node_for_attributes(node.children[0], alias_prefix)
         right_child_map, _ = self.scan_node_for_attributes(node.children[1], alias_prefix)
-        
         col_update_map = left_child_map.copy()
         merged_id_map = self.merge(left_child_map, right_child_map)
         
-
         #update column numbers
         
         attribute_id_counter = len(col_update_map)
@@ -136,7 +126,6 @@ class ColumnDeriver:
             col_map[alias_prefix+"."+col_name] = id_counter
             id_counter+=1
 
-        
         column_name_to_id_mapping = self.merge(prev_map, col_map)
         
         return column_name_to_id_mapping, merged
