@@ -1,6 +1,11 @@
 Exploratory Video Analytics
 =====
 
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.jpg
+    :target: https://github.com/georgia-tech-db/eva
+    :width: 80%
+    :alt: EVA Banner
+
 |pypi_status| |License| |Discuss| |Python Versions|
 
 What is EVA?
