@@ -3,7 +3,7 @@ Exploratory Video Analytics
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
-    :width: 80%
+    :width: 100%
     :alt: EVA Banner
 
 |pypi_status| |License| |Discuss| |Python Versions|
@@ -97,7 +97,7 @@ Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
-    :width: 80%
+    :width: 100%
     :alt: EVA Slack Channel
 
 .. spelling::
