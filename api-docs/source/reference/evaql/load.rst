@@ -4,7 +4,7 @@ LOAD
 .. _1-load-the-video-file:
 
 Load Video file
-~~~~~
+----
 
 .. code:: mysql
 
@@ -37,7 +37,7 @@ Every row in this table contains a frame id and frame content (in numpy format).
 .. _2-load-the-csv-file:
 
 Load CSV file
-~~~~~
+----
 
 To **LOAD** a CSV file, we need to first specify the table schema.
 

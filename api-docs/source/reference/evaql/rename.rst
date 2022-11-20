@@ -1,7 +1,8 @@
 RENAME
 ======
 
-1. Rename a table.
+RENAME TABLE
+----
 
 .. code:: sql
 

@@ -1,7 +1,10 @@
 SHOW 
 ====
 
-1. List the registered user-defined functions
+SHOW UDFS
+----
+
+List the registered user-defined functions
 
 .. code:: sql
 

@@ -1,7 +1,10 @@
 INSERT 
 =======
 
-1. Insert a tuple into a table.
+INSERT INTO TABLE
+-----
+
+Insert a tuple into a table.
 
 .. code:: mysql
 
