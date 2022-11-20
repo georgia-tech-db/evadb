@@ -6,9 +6,12 @@ Over the last decade, deep learning models have radically changed the world of c
 Usability and Application Maintainability
 ^^^^
 
-To use a vision model, the user must do a lot of imperative programming across low-level libraries, like OpenCV and PyTorch. This is a tedious process that often leads to a complex program that glues together these libraries to accomplish the given task. This imperative programming requirement **significantly reduces the set of people that can benefit from these models**.
+To use a vision model, the user must do a lot of imperative programming across low-level libraries, like OpenCV and PyTorch. This is a tedious process that often leads to a complex program that glues together these libraries to accomplish the given task. This imperative programming requirement **prevents a lot of people who have expertise in other domains from benefiting from these models**.
 
-EVA makes it easier to leverage these models by supporting a declarative SQL-like query language called EVAQL. With this language, the user may **compose multiple models in a single query** to accomplish complicated tasks with **minimal programming**. Here is a illustrative query that examines the emotions of actors in a movie by leveraging multiple models that take care of detection faces and analyzing the emotions of the detected bounding boxes:
+Historically, database systems have been successful because the **query language is simple enough** in its basic structure that users without prior experience were able to learn a usable subset on their first sitting. 
+EVA supports a declarative SQL-like query language, called EVAQL, that is designed to make it easier for users to leverage these models. With this language, the user may **compose multiple models in a single query** to accomplish complicated tasks with **minimal programming**. 
+
+Here is a illustrative query that examines the emotions of actors in a movie by leveraging multiple deep learning models that take care of detection faces and analyzing the emotions of the detected bounding boxes:
 
 .. code:: sql
 
