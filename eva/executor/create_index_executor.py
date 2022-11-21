@@ -12,22 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from copy import deepcopy
+from pathlib import Path
+
 import faiss
 import pandas as pd
 
-from pathlib import Path
-from copy import deepcopy
-
 from eva.catalog.catalog_manager import CatalogManager
-from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.create_index_plan import CreateIndexPlan
-from eva.utils.logging_manager import logger
-from eva.models.storage.batch import Batch
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
+from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.planner.create_index_plan import CreateIndexPlan
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -86,29 +86,41 @@ class CreateIndexExecutor(AbstractExecutor):
             [2],
             False,
         )
-        save_file_path = EVA_DEFAULT_DIR / INDEX_DIR / Path("{}_{}.index".format(
-            self.node.index_type, self.node.name))
+        save_file_path = (
+            EVA_DEFAULT_DIR
+            / INDEX_DIR
+            / Path("{}_{}.index".format(self.node.index_type, self.node.name))
+        )
 
         io_list = [input_index_io, id_index_io, distance_index_io]
 
         # Build secondary index to map from index Logical ID to Row ID.
         # Use save_file_path's hash value to retrieve the table.
         col_list = [
-            ColumnDefinition("logical_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)),
-            ColumnDefinition("row_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)),
+            ColumnDefinition(
+                "logical_id",
+                ColumnType.INTEGER,
+                None,
+                [],
+                ColConstraintInfo(unique=True),
+            ),
+            ColumnDefinition(
+                "row_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+            ),
         ]
         col_metadata = [
             CatalogManager().create_column_metadata(
-                col.name,
-                col.type,
-                col.array_type,
-                col.dimension,
-                col.cci
-            ) for col in col_list
+                col.name, col.type, col.array_type, col.dimension, col.cci
+            )
+            for col in col_list
         ]
         tb_metadata = CatalogManager().create_metadata(
             "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
-            str(EVA_DEFAULT_DIR / INDEX_DIR / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))),
+            str(
+                EVA_DEFAULT_DIR
+                / INDEX_DIR
+                / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))
+            ),
             col_metadata,
             identifier_column="logical_id",
             is_video=False,
@@ -118,7 +130,9 @@ class CreateIndexExecutor(AbstractExecutor):
         # Write exact mapping for now.
         logical_id = [i for i in range(feat_size)]
         secondary_index = Batch(
-            pd.DataFrame(data={"logical_id": logical_id, "row_id": deepcopy(logical_id)})
+            pd.DataFrame(
+                data={"logical_id": logical_id, "row_id": deepcopy(logical_id)}
+            )
         )
         StorageEngine.write(tb_metadata, secondary_index)
 
@@ -134,7 +148,9 @@ class CreateIndexExecutor(AbstractExecutor):
         )
 
         yield Batch(
-            pd.DataFrame([f"Index {self.node.name} successfully added to the database."])
+            pd.DataFrame(
+                [f"Index {self.node.name} successfully added to the database."]
+            )
         )
 
     def _create_index(self, index_type: IndexType, input_dim: int):

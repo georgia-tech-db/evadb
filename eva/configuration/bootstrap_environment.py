@@ -25,8 +25,8 @@ from eva.configuration.constants import (
     EVA_DATASET_DIR,
     EVA_DEFAULT_DIR,
     EVA_UPLOAD_DIR,
-    UDF_DIR,
     INDEX_DIR,
+    UDF_DIR,
 )
 from eva.utils.logging_manager import logger as eva_logger
 

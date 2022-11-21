@@ -16,8 +16,8 @@ from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
-from eva.catalog.models.base_model import BaseModel
 from eva.catalog.index_type import IndexType
+from eva.catalog.models.base_model import BaseModel
 
 
 class IndexMetadata(BaseModel):

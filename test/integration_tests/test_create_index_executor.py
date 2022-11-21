@@ -12,22 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import faiss
 import unittest
+from pathlib import Path
+
+import faiss
 import numpy as np
 import pandas as pd
 
-from pathlib import Path
-
 from eva.catalog.catalog_manager import CatalogManager
-from eva.models.storage.batch import Batch
 from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.server.command_handler import execute_query_fetch_all
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from eva.utils.generic_utils import generate_file_path
-from eva.storage.storage_engine import StorageEngine
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
+from eva.models.storage.batch import Batch
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.server.command_handler import execute_query_fetch_all
+from eva.storage.storage_engine import StorageEngine
+from eva.utils.generic_utils import generate_file_path
 
 
 class CreateIndexTest(unittest.TestCase):
@@ -43,17 +43,16 @@ class CreateIndexTest(unittest.TestCase):
 
         # Create table.
         col_list = [
-            ColumnDefinition("feat_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)),
-            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, [1, 3]) ,
+            ColumnDefinition(
+                "feat_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+            ),
+            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, [1, 3]),
         ]
         col_metadata = [
             CatalogManager().create_column_metadata(
-                col.name,
-                col.type,
-                col.array_type,
-                col.dimension,
-                col.cci
-            ) for col in col_list
+                col.name, col.type, col.array_type, col.dimension, col.cci
+            )
+            for col in col_list
         ]
         tb_metadata = CatalogManager().create_metadata(
             "testCreateIndexFeatTable",
@@ -66,10 +65,12 @@ class CreateIndexTest(unittest.TestCase):
 
         # Create pandas dataframe.
         batch_data = Batch(
-            pd.DataFrame(data={
-                "feat_id": [0, 1, 2],
-                "feat": [feat1, feat2, feat3],
-            })
+            pd.DataFrame(
+                data={
+                    "feat_id": [0, 1, 2],
+                    "feat": [feat1, feat2, feat3],
+                }
+            )
         )
         StorageEngine.write(tb_metadata, batch_data)
 
@@ -80,16 +81,19 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
     def test_should_create_index(self):
-        query = (
-            "CREATE INDEX testCreateIndexName USING HNSW ON testCreateIndexFeatTable (feat);"
-        )
+        query = "CREATE INDEX testCreateIndexName USING HNSW ON testCreateIndexFeatTable (feat);"
         execute_query_fetch_all(query)
 
         # Test index metadata.
         index_metadata = CatalogManager().get_index_by_name("testCreateIndexName")
         self.assertEqual(index_metadata.type, IndexType.HNSW)
-        self.assertEqual(index_metadata.save_file_path, str(EVA_DEFAULT_DIR / INDEX_DIR / Path("{}_{}.index".format(
-            index_metadata.type, index_metadata.name)))
+        self.assertEqual(
+            index_metadata.save_file_path,
+            str(
+                EVA_DEFAULT_DIR
+                / INDEX_DIR
+                / Path("{}_{}.index".format(index_metadata.type, index_metadata.name))
+            ),
         )
 
         # Test on disk index.

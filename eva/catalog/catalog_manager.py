@@ -15,6 +15,7 @@
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.index_type import IndexType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
