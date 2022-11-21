@@ -48,8 +48,9 @@ jobs:
             sudo apt-get install lsof 
             pip install --upgrade pip
             pip install evadb
-            eva_server&
-            sleep 2
+            eva_server &> eva.txt &
+            sleep 3
+            grep "serving" eva.txt || return -1
             eva_client
 
       - run:
