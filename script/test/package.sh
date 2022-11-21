@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ## Test package installation
 
 eva_server &>> eva.txt &
