@@ -34,6 +34,7 @@ from eva.catalog.services.index_io_service import IndexIOService
 from eva.parser.table_ref import TableInfo
 from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.generic_utils import generate_file_path
+from eva.catalog.index_type import IndexType
 from eva.utils.logging_manager import logger
 
 
@@ -414,10 +415,10 @@ class CatalogManager(object):
         self,
         name: str,
         save_file_path: str,
-        type: str,
+        index_type: IndexType,
         index_io_list: List[IndexIO],
     ) -> IndexMetadata:
-        metadata = self._index_io_service.create_index(name, save_file_path, type)
+        metadata = self._index_service.create_index(name, save_file_path, index_type)
         for index_io in index_io_list:
             index_io.index_id = metadata.id
         self._index_io_service.add_index_io(index_io_list)

@@ -31,6 +31,7 @@ from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.select_statement import SelectStatement
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.utils.generic_utils import path_to_class
@@ -74,6 +75,10 @@ class StatementBinder:
     @bind.register(ExplainStatement)
     def _bind_explain_statement(self, node: ExplainStatement):
         self.bind(node.explainable_stmt)
+
+    @bind.register(CreateIndexStatement)
+    def _bind_create_index_statement(self, node: CreateIndexStatement):
+        self.bind(node.table_ref)
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):

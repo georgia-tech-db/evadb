@@ -14,8 +14,10 @@
 # limitations under the License.
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.types import Enum
 
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.index_type import IndexType
 
 
 class IndexMetadata(BaseModel):
@@ -23,14 +25,14 @@ class IndexMetadata(BaseModel):
 
     _name = Column("name", String(100), unique=True)
     _save_file_path = Column("save_file_path", String(128))
-    _type = Column("type", String(100))
+    _type = Column("type", Enum(IndexType), default=Enum)
     _index_io = relationship(
         "IndexIO",
         back_populates="_index",
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, save_file_path: str, type: str):
+    def __init__(self, name: str, save_file_path: str, type: IndexType):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type

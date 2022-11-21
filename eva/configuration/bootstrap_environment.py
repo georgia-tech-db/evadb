@@ -26,6 +26,7 @@ from eva.configuration.constants import (
     EVA_DEFAULT_DIR,
     EVA_UPLOAD_DIR,
     UDF_DIR,
+    INDEX_DIR,
 )
 from eva.utils.logging_manager import logger as eva_logger
 
@@ -57,9 +58,11 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
     default_install_dir = eva_installation_dir
     dataset_location = EVA_DEFAULT_DIR / EVA_DATASET_DIR
     upload_dir = eva_config_dir / EVA_UPLOAD_DIR
+    index_dir = eva_config_dir / INDEX_DIR
 
     eva_config_dir.mkdir(parents=True, exist_ok=True)
     upload_dir.mkdir(parents=True, exist_ok=True)
+    index_dir.mkdir(parents=True, exist_ok=True)
 
     # copy eva.yml into config path
     if not config_file_path.exists():
