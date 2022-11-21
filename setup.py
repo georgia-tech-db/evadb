@@ -118,8 +118,7 @@ DEV_REQUIRES = (
 ) 
 
 EXTRA_REQUIRES = {
-    "dev": DEV_REQUIRES,
-    "experimental": EXPERIMENTAL_REQUIRES
+    "dev": DEV_REQUIRES
 }
 
 setup(
