@@ -333,6 +333,13 @@ class AnimalDetectorPlus(AnimalDetector):
         y_hat = self.classifier(to_classifier)
         pred = torch.sigmoid(y_hat).cpu().numpy()
         outcome = pd.DataFrame()
+        def sort_series_by_score(series: 'pd.Series'):
+            assert len(series.labels) == len(series.scores)
+            sorted_zip = sorted(zip(series.labels, series.scores),key=lambda pair: pair[1],reverse=True)
+            series.labels = [x for x, _ in sorted_zip] 
+            series.scores = [x for _, x in sorted_zip]
+
         for frame_output in pred:
             outcome = outcome.append({'labels': self.labels, 'scores': frame_output}, ignore_index=True,)
+            sort_series_by_score(outcome.iloc[-1])
         return outcome
