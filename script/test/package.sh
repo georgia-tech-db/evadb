@@ -9,12 +9,14 @@ grep "serving" eva.txt
 test_code=$?
 if [ $test_code -ne 0 ];
 then
+    echo "Server did not start"
     exit $test_code
 fi
 
 eva_client &> client.txt &
 if [ $test_code -ne 0 ];
 then
+    echo "Client did not start"
     exit $test_code
 fi
 
