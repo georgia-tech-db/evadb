@@ -50,7 +50,7 @@ jobs:
             pip install evadb
             eva_server &> eva.txt &
             sleep 3
-            grep "serving" eva.txt || return -1
+            grep "serving" eva.txt || exit -1
             eva_client
 
       - run:
