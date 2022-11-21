@@ -418,7 +418,7 @@ class ParserVisitorTests(unittest.TestCase):
         params = {
             ctx.stringLiteral.return_value: path,
             ctx.tableName.return_value: table,
-            ctx.fileOptions.return_value: file_options,
+            ctx.fileFormat.return_value: file_format,
             ctx.uidList.return_value: column_list,
         }
 
@@ -432,7 +432,7 @@ class ParserVisitorTests(unittest.TestCase):
             [
                 call(ctx.stringLiteral()),
                 call(ctx.tableName()),
-                call(ctx.fileOptions()),
+                call(ctx.fileFormat()),
                 call(ctx.uidList()),
             ]
         )

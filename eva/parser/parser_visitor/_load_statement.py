@@ -47,3 +47,11 @@ class Load(evaql_parserVisitor):
             file_format = FileFormatType.CSV
 
         return file_format
+
+    def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
+        file_options = {}
+        if ctx.fileFormat():
+            file_format = self.visit(ctx.fileFormat())
+            file_options["file_format"] = file_format
+
+        return file_options

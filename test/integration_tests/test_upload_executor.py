@@ -46,7 +46,7 @@ class UploadExecutorTest(unittest.TestCase):
             + '"'
             + self.video_blob
             + '" '
-            + "INTO MyVideo WITH FORMAT VIDEO;"
+            + "INTO MyVideo;"
         )
         execute_query_fetch_all(query)
         expected_blob = self.video_blob
@@ -77,7 +77,7 @@ class UploadExecutorTest(unittest.TestCase):
             + '"'
             + self.video_blob
             + '" '
-            + "INTO MyVideo WITH FORMAT VIDEO;"
+            + "INTO MyVideo;"
         )
         execute_query_fetch_all(query)
 
@@ -113,7 +113,7 @@ class UploadExecutorTest(unittest.TestCase):
             + '"'
             + self.csv_blob
             + '" '
-            + "INTO MyVideoCSV WITH FORMAT CSV;"
+            + "INTO MyVideoCSV;"
         )
         execute_query_fetch_all(query)
 

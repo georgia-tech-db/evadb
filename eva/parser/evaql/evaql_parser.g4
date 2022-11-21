@@ -196,15 +196,23 @@ fileFormat
     ;
 
 
+fileOptions
+    : FORMAT fileFormat
+    ;
+
 uploadStatement
     : UPLOAD
-      fileFormat
-      PATH stringLiteral
+      PATH fileName
       BLOB videoBlob
       INTO tableName
         (
             ('(' columns=uidList ')')
         )?
+      (WITH fileOptions)?
+    ;
+
+fileName
+    : stringLiteral
     ;
 
 
