@@ -48,11 +48,7 @@ jobs:
             sudo apt-get install lsof 
             pip install --upgrade pip
             pip install evadb
-            eva_server &> eva.txt &
-            sleep 3
-            head -n20 eva.txt
-            grep "serving" eva.txt || exit -1
-            eva_client
+            sh script/test/package.sh
 
       - run:
           name: Install EVA package from repo with all dependencies
