@@ -3,7 +3,7 @@
 eva_server &>> eva.txt &
 sleep 10
 echo "Contents of server log"
-head -n20 eva.txt
+cat eva.txt
 
 # check if server started
 grep "serving" eva.txt
