@@ -195,7 +195,8 @@ class StatementBinderTests(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), err_msg)
 
-    def test_bind_select_statement(self):
+    @patch("eva.binder.statement_binder.check_table_object_is_video")
+    def test_bind_select_statement(self, is_video_mock):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
@@ -209,6 +210,7 @@ class StatementBinderTests(unittest.TestCase):
             mock_binder.assert_any_call(select_statement.where_clause)
             mock_binder.assert_any_call(select_statement.groupby_clause)
             mock_binder.assert_any_call(select_statement.union_link)
+            is_video_mock.assert_called()
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
 

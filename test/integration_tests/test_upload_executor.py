@@ -113,7 +113,7 @@ class UploadExecutorTest(unittest.TestCase):
             + '"'
             + self.csv_blob
             + '" '
-            + "INTO MyVideoCSV;"
+            + "INTO MyVideoCSV WITH FORMAT CSV;"
         )
         execute_query_fetch_all(query)
 
