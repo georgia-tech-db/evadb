@@ -960,13 +960,24 @@ class LogicalJoin(Operator):
         )
 
     def __hash__(self) -> int:
+
+        if self.left_keys is not None:
+            left_keys = tuple(self.left_keys)
+        else:
+            left_keys = None
+
+        if self.right_keys is not None:
+            right_keys = tuple(self.right_keys)
+        else:
+            right_keys = None
+
         return hash(
             (
                 super().__hash__(),
                 self.join_type,
                 self.join_predicate,
-                self.left_keys,
-                self.right_keys,
+                left_keys,
+                right_keys,
                 tuple(self.join_project),
             )
         )

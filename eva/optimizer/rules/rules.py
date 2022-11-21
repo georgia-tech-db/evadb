@@ -19,6 +19,9 @@ from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING, Optional, List
 
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.abstract_expression import ExpressionType
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -37,6 +40,8 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_history import UdfHistory
 from eva.binder.binder_utils import create_table_metadata
+from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.models.df_column import DataFrameColumn
 
 
 if TYPE_CHECKING:
@@ -450,15 +455,10 @@ class UdfReuseForFunctionScan(Rule):
             # function scan plan
             function_scan = lateral_join.children[1]
 
-            # We check the historical invocation of the same UDF and find the
-            # table that stores the results.
-            # We should also check the input relation of the function scan 
-            # (right child of lateral join), which is tricky.
-
-            # first call should return None
+            # first call would return None
             view = self._check_udf_history(function_scan) 
 
-
+            # you have a history of this udf
             if view is not None:
 
                 # Left join btw input_relation and the mat view
@@ -468,28 +468,34 @@ class UdfReuseForFunctionScan(Rule):
                 left_join.append_child(get)
 
                 # Set the guard predicate for the lateral_join
-                lateral_join = self._set_guard_predicate(lateral_join)
+                # TODO: Ignore for now, since we don't have predicate
+                #lateral_join = self._set_guard_predicate(lateral_join)
                 lateral_join.children[0] = left_join
 
-            # if view is none
+                # generate insert operator
+                insert = self._generate_insert_operator(view, function_scan)
+
+                # function scan is now the child of the insert operator
+                insert.append_child(function_scan)
+
+                # set insert operator as the right child of the lateral join
+                lateral_join.children[1] = insert
+
+            # no udf history
             else:
 
-                # Create a new materialized view
-                view = self._generate_view_name(function_scan)
+                # create udf historical record
+                self._create_udf_history(function_scan)
 
+                # create mat operator
+                mat = self._generate_mat_operator(view, function_scan)
 
-            # We need to modify the function scan so it yields the input arguments.
-            # Optimization: frame -> frame id.
-            modified_function_scan = self._function_scan_for_mat(function_scan)
+                # function scan is now the child of the mat operator
+                mat.append_child(function_scan)
 
-            # Create the mat operator
-            mat = self._generate_mat_operator(view, modified_function_scan) 
+                # set mat operator as the right child of the lateral join
+                lateral_join.children[1] = mat
 
-            mat.append_child(modified_function_scan)
-
-            # We need to change the mat executor, so it yields results to
-            # the parent.
-            lateral_join.children[1] = mat
 
             return lateral_join
 
@@ -506,6 +512,7 @@ class UdfReuseForFunctionScan(Rule):
         # get udf histories for this udf id
         udf_histories = history_service.udf_history_by_udfid(udf_id)
 
+        # if there are histories for this UDF, check if the col list matches
         if udf_histories:
 
             # iterate over the histories and check if col history matches
@@ -513,7 +520,7 @@ class UdfReuseForFunctionScan(Rule):
                 col_histories = list(
                     [entry[0] for entry  in history_col_service.get_cols_by_udf_history_id(udf_history.id)]
                 )
-                
+
                 # TODO: What about the predicate matching?
                 # if there is a match, return the udf_history
                 if col_histories == cols:
@@ -527,71 +534,62 @@ class UdfReuseForFunctionScan(Rule):
     def _check_udf_history(self, fs: LogicalFunctionScan) \
             -> Optional[DataFrameMetadata]:
 
-        udf_id = -1
-        col_defs = []
-        col_ids = []
-        for col_obj in fs.func_expr.output_objs:
-            udf_id = col_obj.udf_id
-            col_defs.append(
-                ColumnDefinition(
-                    col_name=col_obj.name,
-                    col_type=col_obj.type,
-                    col_array_type=col_obj.array_type,
-                    col_dim=col_obj.array_dimensions
-                )
-            )
-            col_ids.append(col_obj.id)
+        # Hardcode all info for now
+        udf_id = fs.func_expr.output_objs[0].udf_id
+        col_ids = [1]
+        metadata_id = 1
 
         udf_history = self._read_udf_history_catalog(udf_id, col_ids)
 
         # if there is a match, return the mat view
         if udf_history:
-            view_ref = TableRef(
-                TableInfo(table_name=udf_history.materialize_view),
-            )
-            mat_view = LogicalCreateMaterializedView(
-                view=view_ref,
-                col_list=col_defs,
-                if_not_exists=True
-            )
-            return mat_view
+
+            catalog = CatalogManager()
+            df_mat = catalog.get_dataset_metadata("", udf_history.materialize_view)
+
+            return df_mat
 
         # if no match, return None
         else:
             return None
 
-    def _generate_view_name(self, fs: LogicalFunctionScan) \
+    def _create_udf_history(self, fs: LogicalFunctionScan) \
             -> DataFrameMetadata:
 
-        # TODO: This part can maybe moved to utils. 
-        # get col info for input cols
-        # we are now assuming no nested udf
-        col_defs = []
-        col_ids = []
-        metadata_id = -1
-        udf_id = fs.func_expr.output_objs[0].udf_id
-        for child in fs.func_expr.children:
+        # hardcode the col info as id for now
+        col_defs = [
+            ColumnDefinition(
+                col_name="frame_id",
+                col_type=ColumnType.INTEGER,
+                col_array_type=NdArrayType.ANYTYPE,
+                col_dim=[]
+            )
+        ]
+
+        # append udf output cols
+        for op_obj in fs.func_expr.output_objs:
             col_defs.append(
                 ColumnDefinition(
-                    col_name=child.col_object.name,
-                    col_type=child.col_object.type,
-                    col_array_type=child.col_object.array_type,
-                    col_dim=child.col_object.array_dimensions
+                    col_name=op_obj.name,
+                    col_type=op_obj.type,
+                    col_array_type=op_obj.array_type,
+                    col_dim=op_obj.array_dimensions
                 )
             )
-            col_ids.append(child.col_object.id)
-            metadata_id = child.col_object.metadata_id
-             
-        # TODO: What should be the name of the view?
-        # TODO: How to handle predicate info?
-        import time
+
+        udf_id = fs.func_expr.output_objs[0].udf_id
+        col_ids = [1]
+
+
+        # TODO: What should be the name of the view? -> Later
+        # TODO: How to handle predicate info? -> Later 
         catalog = CatalogManager()
 
         # create a udf history instance
         udf_history = catalog._udf_history_service.create_udf_history(
             udf_id=udf_id, 
             predicate=None, 
-            materialize_view=f"test_view_{str(int(time.time()))}",
+            materialize_view=f"test_view",
         )
 
         # create a udf history col instance
@@ -602,19 +600,16 @@ class UdfReuseForFunctionScan(Rule):
 
         # get a ref to the mat view
         view_ref = TableRef(
-            TableInfo(table_name=udf_history.materialize_view),
+            TableInfo(table_name="test_view"),
         )
 
-        # create a table metadata instance
-        metadata = create_table_metadata(
+        # create table metadata for the mat view
+        table_metadata = create_table_metadata(
             table_ref=view_ref,
             columns=col_defs,
         )
-        
-        # create a new view
-        mat_view = LogicalCreateMaterializedView(view=view_ref, col_list=col_defs, if_not_exists=True)
 
-        return mat_view
+        return table_metadata
         
 
     def _function_scan_for_mat(self, fs: LogicalFunctionScan) \
@@ -624,31 +619,125 @@ class UdfReuseForFunctionScan(Rule):
         
         raise NotImplementedError
 
+    def _generate_insert_operator(self,
+        view: DataFrameMetadata,
+        fs: LogicalFunctionScan
+    ) -> LogicalInsert:
+
+
+        # hardcode the col info as id for now
+        col_defs = [
+            ColumnDefinition(
+                col_name="frame_id",
+                col_type=ColumnType.INTEGER,
+                col_array_type=NdArrayType.ANYTYPE,
+                col_dim=[]
+            )
+        ]
+
+        # append udf output cols
+        for op_obj in fs.func_expr.output_objs:
+            col_defs.append(
+                ColumnDefinition(
+                    col_name=op_obj.name,
+                    col_type=op_obj.type,
+                    col_array_type=op_obj.array_type,
+                    col_dim=op_obj.array_dimensions
+                )
+            )
+
+        # create insert operator
+        insert = LogicalInsert(
+            table_metainfo=view,
+            column_list=col_defs,
+            value_list=fs.func_expr.output_objs,
+        )
+
+        return insert
+
     def _generate_mat_operator(self,
         view: DataFrameMetadata, 
         fs: LogicalFunctionScan
     ) -> LogicalCreateMaterializedView:
 
-        # TODO: Need to return a mat operator
+        # get a ref to the mat view
+        view_ref = TableRef(
+            TableInfo(table_name="test_view"),
+        )
 
-        raise NotImplementedError
+        # hardcode the col info as id for now
+        col_defs = [
+            ColumnDefinition(
+                col_name="frame_id",
+                col_type=ColumnType.INTEGER,
+                col_array_type=NdArrayType.ANYTYPE,
+                col_dim=[]
+            )
+        ]
+
+        # append udf output cols
+        for op_obj in fs.func_expr.output_objs:
+            col_defs.append(
+                ColumnDefinition(
+                    col_name=op_obj.name,
+                    col_type=op_obj.type,
+                    col_array_type=op_obj.array_type,
+                    col_dim=op_obj.array_dimensions
+                )
+            )
+
+        mat = LogicalCreateMaterializedView(view=view_ref, col_list=col_defs, if_not_exists=True)
+
+        return mat
 
     def _generate_left_join(self, lj: LogicalJoin, view: DataFrameMetadata) \
             -> LogicalJoin:
 
-        # TODO: Not sure 
+        # TODO: Inner join?
+        join_type = JoinType.INNER_JOIN
 
-        raise NotImplementedError
+        # Create a logical join with left_key as id of video and right_key as id of view
+        # the join should be done on the id
+        tuple_value_exp_left = TupleValueExpression(
+            col_name="id",
+            table_alias="top_gun",
+            col_idx=2,
+        )
+        tuple_value_exp_right = TupleValueExpression(
+            col_name="frame_id",
+            table_alias="test_view",
+            col_idx=4,
+        )
+
+        left_join = LogicalJoin(
+            join_type=join_type,
+            join_predicate=ComparisonExpression(
+                ExpressionType.COMPARE_EQUAL,
+                tuple_value_exp_left,
+                tuple_value_exp_right,
+            ),
+        )
+
+        return left_join
+
 
     def _generate_get(self, view: DataFrameMetadata) -> LogicalGet:
+
+        # need to create a new get operator to read from view
+        new_get = LogicalGet(
+            video=TableRef(
+                TableInfo(table_name=view.name),
+            ),
+            dataset_metadata=view,
+            alias="",
+        )
+
+        return new_get
+
         
-        # TODO: Not sure 
-
-        raise NotImplementedError
-
     def _set_guard_predicate(self, ls: LogicalJoin) -> LogicalJoin:
 
-        # TODO: Not sure 
+        # TODO: Need to set the guard predicate
 
         raise NotImplementedError
 
@@ -765,6 +854,7 @@ class LogicalCreateToPhysical(Rule):
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list, before.if_not_exists)
+
         return after
 
 
@@ -1225,7 +1315,11 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
-        self._logical_rules = [LogicalInnerJoinCommutativity()]
+        self._logical_rules = [
+            LogicalInnerJoinCommutativity(),
+            # TODO: Add a flag to enable/disable this rule
+            UdfReuseForFunctionScan(),
+        ]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
@@ -1234,8 +1328,6 @@ class RulesManager:
             # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
-            # TODO: Add a flag to enable/disable this rule
-            UdfReuseForFunctionScan(),
         ]
 
         self._implementation_rules = [
