@@ -79,8 +79,8 @@ class EvaCommandInterpreter(Cmd):
 VERSION_DICT: Dict[str, str] = {}
 
 current_file_dir = os.path.dirname(__file__)
-version_file_path = os.path.join(os.path.join(current_file_dir, os.pardir), 
-                                 os.pardir)
+current_file_parent_dir = os.path.join(current_file_dir, os.pardir)
+version_file_path = os.path.join(current_file_parent_dir, "version.py")
 
 with open(version_file_path, "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
