@@ -1,6 +1,6 @@
 ## Test package installation
 
-eva_server &> eva.txt &
+eva_server &
 sleep 10
 echo "Contents of server log"
 head -n20 eva.txt
