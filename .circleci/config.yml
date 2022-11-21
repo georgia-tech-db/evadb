@@ -49,8 +49,6 @@ jobs:
             pip install --upgrade pip
             pip install evadb
             eva_server&
-            sleep 1
-            kill -9 "$(lsof -ti:5432)
 
       - run:
           name: Install EVA package from repo with all dependencies
