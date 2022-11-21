@@ -71,6 +71,25 @@ class UdfHistoryService(BaseService):
         ).all()
         return result
 
+    def udf_history_by_materialized_view(self, materialized_view: str) \
+            -> Optional[UdfHistory]:
+        """Return the udf history entry that matches the materialized view
+        provided.
+
+        Arguments:
+            materialized_view (str): materialized view name
+
+        Returns:
+           UdfHistory, None if no such entry found.
+        """
+
+        try:
+            return self.model.query.filter(
+                self.model._materialize_view == materialized_view
+            ).one()
+        except NoResultFound:
+            return None
+
 
 
 
