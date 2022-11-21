@@ -49,6 +49,8 @@ jobs:
             pip install --upgrade pip
             pip install evadb
             eva_server&
+            sleep 2
+            eva_client
 
       - run:
           name: Install EVA package from repo with all dependencies
