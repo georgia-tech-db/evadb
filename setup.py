@@ -47,7 +47,8 @@ minimal_requirement = [
     "antlr4-python3-runtime==4.8",
     "lark>=1.0.0",
     "pyyaml>=5.1,<5.2",
-    "importlib-metadata<5.0"
+    "importlib-metadata<5.0",
+    "ray>=1.13.0"    
 ]
 
 formatter_libs = [
@@ -61,7 +62,7 @@ test_libs = [
     "pytest-virtualenv",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
-    "flake8>=3.9.1"    
+    "flake8>=3.9.1"
 ]
 
 notebook_libs = [
@@ -74,7 +75,7 @@ notebook_libs = [
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
     "torch>=1.10.0",
-    "torchvision>=0.11.1",
+    "torchvision>=0.11.1",    
 ]
 
 benchmark_libs = [
@@ -101,28 +102,23 @@ udf_libs = [
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = [
-    "ray>=1.13.0"
 ]
 
-INSTALL_REQUIRES = minimal_requirement 
-UDF_REQUIRES = INSTALL_REQUIRES + integration_test_libs + udf_libs
-EXPERIMENTAL_REQUIRES = experimental_libs
+INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
 DEV_REQUIRES = (
-    minimal_requirement
+    INSTALL_REQUIRES
     + formatter_libs
     + test_libs
     + notebook_libs
-    + integration_test_libs
     + benchmark_libs
     + doc_libs
     + database_libs
     + dist_libs
-    + udf_libs
-) + EXPERIMENTAL_REQUIRES
+    + experimental_libs
+) 
 
 EXTRA_REQUIRES = {
     "dev": DEV_REQUIRES,
-    "udf": UDF_REQUIRES,
     "experimental": EXPERIMENTAL_REQUIRES
 }
 

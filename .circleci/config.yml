@@ -42,19 +42,27 @@ jobs:
             - v11-pip-cache-{{ checksum "setup.py" }}
 
       - run:
-          name: Install EVA package with test dependencies
+          name: Install only EVA package from pip
+          command: |
+            sudo apt-get update          
+            sudo apt-get install lsof 
+            pip install --upgrade pip
+            pip install evadb
+            eva_server&
+            sleep 1
+            kill -9 "$(lsof -ti:5432)
+
+      - run:
+          name: Install EVA package from repo with all dependencies
           command: |
             "python<< parameters.v >>" -m venv test_evadb
             source test_evadb/bin/activate
-            pip install --upgrade pip
             sh script/antlr4/generate_parser.sh
             pip install ".[dev]"
 
       - run:
           name: Test and upload coverage report to coveralls
           command: |
-            sudo apt-get update          
-            sudo apt-get install lsof 
             source test_evadb/bin/activate
             sh script/test/test.sh
             coveralls
