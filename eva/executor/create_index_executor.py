@@ -17,6 +17,7 @@ from pathlib import Path
 
 import faiss
 import pandas as pd
+import numpy as np
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
@@ -55,7 +56,11 @@ class CreateIndexExecutor(AbstractExecutor):
         index = None
         input_dim, feat_size = -1, 0
         for batch in StorageEngine.read(df_metadata, 1):
-            feat = batch.column_as_numpy_array(self.node.col_list[0].name)[0]
+            # Feature column name.
+            feat_col_name = self.node.col_list[0].name
+            # Pandas wraps numpy array as an object inside a numpy
+            # array. Use zero index to get the actual numpy array.
+            feat = batch.column_as_numpy_array(feat_col_name)[0]
             if index is None:
                 input_dim = feat.shape[-1]
                 index = self._create_index(self.node.index_type, input_dim)
