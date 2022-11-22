@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.df_column import DataFrameColumn
 

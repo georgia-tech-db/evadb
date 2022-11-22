@@ -40,7 +40,7 @@ class SelectExecutorTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -140,7 +140,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD FILE 'data/mnist/mnist.mp4'
+        query = """LOAD VIDEO 'data/mnist/mnist.mp4'
                    INTO MNIST;"""
         execute_query_fetch_all(query)
 

@@ -17,7 +17,7 @@ from typing import Iterator, List
 import numpy as np
 import pandas as pd
 
-from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata

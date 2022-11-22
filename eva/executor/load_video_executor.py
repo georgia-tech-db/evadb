@@ -20,7 +20,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.storage.storage_engine import VideoStorageEngine
+from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -56,8 +56,9 @@ class LoadVideoExecutor(AbstractExecutor):
             logger.error(error)
             raise RuntimeError(error)
 
-        VideoStorageEngine.create(self.node.table_metainfo, if_not_exists=True)
-        success = VideoStorageEngine.write(
+        storage_engine = StorageEngine.factory(self.node.table_metainfo)
+        storage_engine.create(self.node.table_metainfo, if_not_exists=True)
+        success = storage_engine.write(
             self.node.table_metainfo,
             Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
         )

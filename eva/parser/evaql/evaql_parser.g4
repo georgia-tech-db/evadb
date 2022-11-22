@@ -182,16 +182,22 @@ updateStatement
 
 loadStatement
     : LOAD 
-      FILE fileName
+      fileFormat
+      stringLiteral
       INTO tableName
         (
             ('(' columns=uidList ')')
         )?
-      (WITH fileOptions)?
     ;
 
+
+fileFormat
+    : (CSV|VIDEO)
+    ;
+
+
 fileOptions
-    : FORMAT fileFormat=(CSV|VIDEO)
+    : FORMAT fileFormat
     ;
 
 uploadStatement
@@ -208,6 +214,7 @@ uploadStatement
 fileName
     : stringLiteral
     ;
+
 
 videoBlob
     : stringLiteral

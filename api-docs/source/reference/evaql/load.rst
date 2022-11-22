@@ -8,10 +8,8 @@ LOAD VIDEO
 
 .. code:: mysql
 
-   LOAD FILE 'test_video.mp4' INTO MyVideo;
+   LOAD VIDEO 'test_video.mp4' INTO MyVideo;
 
-   --- Alternate syntax that explicitly specifies format
-   LOAD FILE 'dummy.avi' INTO MyVideo WITH FORMAT VIDEO;
 
 -  **test_video.mp4** is the location of the video file in the filesystem on the client.
 -  **MyVideo** is the name of the table in EVA where this video is loaded. Subsequent queries over the video must refer to this table name.
@@ -38,10 +36,9 @@ To **LOAD** a CSV file, we need to first specify the table schema.
                    object_id INTEGER
                );
 
-   LOAD FILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
+   LOAD CSV 'test_metadata.csv' INTO MyCSV;
 
 -  **test_metadata.csv** needs to be loaded onto the server using
    **LOAD** statement.
 -  The CSV file may contain additional columns. EVA will only load
    the columns listed in the defined schema.
--  **WITH FORMAT CSV** is required to distinguish between videos and CSV files.
