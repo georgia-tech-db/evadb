@@ -19,7 +19,7 @@ import faiss
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.column_type import ColumnType, NdArrayType, Dimension
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
@@ -67,7 +67,7 @@ class CreateIndexExecutor(AbstractExecutor):
             "input_feature",
             ColumnType.NDARRAY,
             NdArrayType.FLOAT32,
-            [2],
+            [Dimension.ANYDIM, input_dim],
             True,
         )
 
@@ -76,14 +76,14 @@ class CreateIndexExecutor(AbstractExecutor):
             "logical_id",
             ColumnType.NDARRAY,
             NdArrayType.INT64,
-            [2],
+            [Dimension.ANYDIM, 1],
             False,
         )
         distance_index_io = CatalogManager().index_io(
             "distance",
             ColumnType.NDARRAY,
             NdArrayType.FLOAT32,
-            [2],
+            [Dimension.ANYDIM, 1],
             False,
         )
         save_file_path = (
