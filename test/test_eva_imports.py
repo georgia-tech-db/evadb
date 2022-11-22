@@ -7,7 +7,7 @@ class EVAImportTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
     
-    def test_all_eva_imports(self):
+    def test_eva_cli_imports(self):
         """
         Testing imports for running client and server packages,
         when current working directory is changed.
