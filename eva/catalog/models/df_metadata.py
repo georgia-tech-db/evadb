@@ -12,9 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Enum, String
 from sqlalchemy.orm import relationship
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.base_model import BaseModel
 
@@ -25,7 +26,7 @@ class DataFrameMetadata(BaseModel):
     _name = Column("name", String(100), unique=True)
     _file_url = Column("file_url", String(100))
     _unique_identifier_column = Column("identifier_column", String(100))
-    _table_type = Column("table_type", Integer)
+    _table_type = Column("table_type", Enum(TableType))
     _columns = relationship(
         "DataFrameColumn",
         back_populates="_dataset",

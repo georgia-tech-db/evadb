@@ -21,8 +21,8 @@ from eva.utils.generic_utils import str_to_class
 
 class StorageEngine:
     storages = {
-        TableType.STRUCTURAL_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "engine")
+        TableType.STRUCTURED_DATA: str_to_class(
+            ConfigurationManager().get_value("storage", "structured_data_engine")
         )(),
         TableType.VIDEO_DATA: str_to_class(
             ConfigurationManager().get_value("storage", "video_engine")

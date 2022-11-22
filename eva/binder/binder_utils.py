@@ -88,7 +88,7 @@ def create_table_metadata(
         table_name,
         file_url,
         column_metadata_list,
-        table_type=TableType.STRUCTURAL_DATA,
+        table_type=TableType.STRUCTURED_DATA,
     )
     return metadata
 

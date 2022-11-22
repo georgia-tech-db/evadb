@@ -20,7 +20,7 @@ class Dimension(IntEnum):
 
 
 class TableType(IntEnum):
-    STRUCTURAL_DATA = auto()
+    STRUCTURED_DATA = auto()
     VIDEO_DATA = auto()
 
 

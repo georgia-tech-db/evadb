@@ -25,7 +25,7 @@ DATASET_NAME = "name"
 DATABASE_NAME = "test"
 IDENTIFIER = "data_id"
 DATASET_NEW_NAME = "new_name"
-TABLE_TYPE = TableType.STRUCTURAL_DATA
+TABLE_TYPE = TableType.STRUCTURED_DATA
 
 
 class DatasetServiceTest(unittest.TestCase):
