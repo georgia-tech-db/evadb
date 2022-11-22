@@ -17,7 +17,6 @@ from pathlib import Path
 
 import faiss
 import pandas as pd
-import numpy as np
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
