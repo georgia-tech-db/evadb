@@ -14,11 +14,11 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
-from mock import patch
 
 import faiss
 import numpy as np
 import pandas as pd
+from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.column_type import ColumnType, NdArrayType
@@ -103,10 +103,11 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(logical_id[0][0], 0)
 
         # Test secondary index.
-        secondary_index_tb_name = "secondary_index_{}_{}".format(index_metadata.type, index_metadata.name)
+        secondary_index_tb_name = "secondary_index_{}_{}".format(
+            index_metadata.type, index_metadata.name
+        )
         secondary_index_metadata = CatalogManager().get_dataset_metadata(
-            None,
-            secondary_index_tb_name
+            None, secondary_index_tb_name
         )
         size = 0
         for i, batch in enumerate(StorageEngine.read(secondary_index_metadata, 1)):
@@ -129,7 +130,9 @@ class CreateIndexTest(unittest.TestCase):
             execute_query_fetch_all(query)
 
         # Check secondary index is dropped.
-        secondary_index_tb_name = "secondary_index_{}_{}".format("HNSW", "testCreateIndexName")
+        secondary_index_tb_name = "secondary_index_{}_{}".format(
+            "HNSW", "testCreateIndexName"
+        )
         self.assertFalse(
             CatalogManager().check_table_exists(None, secondary_index_tb_name)
         )

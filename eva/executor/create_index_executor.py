@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from copy import deepcopy
 from pathlib import Path
 
-import os
 import faiss
 import pandas as pd
 
@@ -111,7 +111,11 @@ class CreateIndexExecutor(AbstractExecutor):
                     ColConstraintInfo(unique=True),
                 ),
                 ColumnDefinition(
-                    "row_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+                    "row_id",
+                    ColumnType.INTEGER,
+                    None,
+                    [],
+                    ColConstraintInfo(unique=True),
                 ),
             ]
             col_metadata = [
@@ -125,7 +129,9 @@ class CreateIndexExecutor(AbstractExecutor):
                 str(
                     EVA_DEFAULT_DIR
                     / INDEX_DIR
-                    / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))
+                    / Path(
+                        "{}_{}.secindex".format(self.node.index_type, self.node.name)
+                    )
                 ),
                 col_metadata,
                 identifier_column="logical_id",
@@ -165,14 +171,15 @@ class CreateIndexExecutor(AbstractExecutor):
                 os.remove(save_file_path)
 
             # Drop secondary index table.
-            secondary_index_tb_name = "secondary_index_{}_{}".format(self.node.index_type, self.node.name)
+            secondary_index_tb_name = "secondary_index_{}_{}".format(
+                self.node.index_type, self.node.name
+            )
             if catalog_manager.check_table_exists(
                 None,
                 secondary_index_tb_name,
             ):
                 secondary_index_metadata = catalog_manager.get_dataset_metadata(
-                    None,
-                    secondary_index_tb_name
+                    None, secondary_index_tb_name
                 )
                 StorageEngine.drop(secondary_index_metadata)
                 catalog_manager.drop_dataset_metadata(
