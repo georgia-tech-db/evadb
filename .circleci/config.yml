@@ -80,19 +80,19 @@ jobs:
           paths:
             - ./test_evadb/
     
-    win-unittest:
-        executor: win/default
-        steps:
-        - checkout
+  win-unittest:
+    executor: win/default
+    steps:
+      - checkout
 
-        - run: 
-            name: Test windows
-            command: |
-              Set-StrictMode -Version Latest
-              $ErrorActionPreference = 'Stop'
-              function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
-              pip install --upgrade pip
-              pip install evadb
-              ThrowOnFailure "Python test failed!"
+      - run: 
+          name: Test windows
+          command: |
+            Set-StrictMode -Version Latest
+            $ErrorActionPreference = 'Stop'
+            function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
+            pip install --upgrade pip
+            pip install evadb
+            ThrowOnFailure "Python test failed!"
 
 
