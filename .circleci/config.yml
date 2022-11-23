@@ -95,11 +95,11 @@ jobs:
             Set-StrictMode -Version Latest
             $ErrorActionPreference = 'Stop'
             function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
-            "python<< parameters.v >>" -m venv test_evadb
-            source test_evadb/bin/activate
-            sh script/antlr4/generate_parser.sh
+            virtualenv test_evadb
+            test_evadb\Scripts\activate
+            sh script\antlr4\generate_parser.sh
             pip install ".[dev]"       
-            sh script/test/test.sh
+            sh script\test\test.sh
             ThrowOnFailure "Python test failed!"
 
 
