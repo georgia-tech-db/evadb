@@ -1,8 +1,12 @@
 version: 2.1
 
+orbs:
+  win: circleci/windows@2.2.0
+
 workflows:
   main:
     jobs:
+        - win-unittest
         - test:
             name: "Python v3.7"
             v: "3.7"
@@ -75,3 +79,20 @@ jobs:
           key: v11-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./test_evadb/
+    
+    win-unittest:
+        executor: win/default
+        steps:
+        - checkout
+
+        - run: 
+            name: Test windows
+            command: |
+              Set-StrictMode -Version Latest
+              $ErrorActionPreference = 'Stop'
+              function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
+              pip install --upgrade pip
+              pip install evadb
+              ThrowOnFailure "Python test failed!"
+
+
