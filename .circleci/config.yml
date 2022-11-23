@@ -95,6 +95,9 @@ jobs:
             Set-StrictMode -Version Latest
             $ErrorActionPreference = 'Stop'
             function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
+            pip install wget
+            wget --no-check-certificate https://www.antlr.org/download/antlr-4.8-complete.jar
+            wget.exe --no-check-certificate https://www.antlr.org/download/antlr-4.8-complete.jar
             pip install virtualenv
             virtualenv test_evadb
             test_evadb\Scripts\activate
