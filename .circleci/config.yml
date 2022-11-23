@@ -82,6 +82,10 @@ jobs:
     
   win-unittest:
     executor: win/default
+    parameters:
+      v:
+        type: string
+        default: "3.7" 
     steps:
       - checkout
 
