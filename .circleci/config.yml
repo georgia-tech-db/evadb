@@ -96,7 +96,7 @@ jobs:
             $ErrorActionPreference = 'Stop'
             function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
             pip install wget
-            python -m wget --no-check-certificate https://www.antlr.org/download/antlr-4.8-complete.jar
+            python -m wget https://www.antlr.org/download/antlr-4.8-complete.jar
             pip install virtualenv
             virtualenv test_evadb
             test_evadb\Scripts\activate
