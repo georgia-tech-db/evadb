@@ -15,7 +15,7 @@ class ColumnDeriver:
         pass
     
     @singledispatchmethod
-    def scan_node_for_attributes(self, node:AbstractPlan, alias_prefix:str=None) -> dict:
+    def derive_column_mapping(self, node:AbstractPlan, alias_prefix:str=None) -> dict:
         raise NotImplementedError(f"Cannot bind {type(node)}")
 
     def scan_children(self, children:list, alias_prefix:str=None) -> dict:
@@ -27,7 +27,7 @@ class ColumnDeriver:
         
         prev_merged = {}
         for child in children:
-            curr_map, merged = self.scan_node_for_attributes(child, alias_prefix)
+            curr_map, merged = self.derive_column_mapping(child, alias_prefix)
             prev_map.update(curr_map)
             prev_merged.update(merged)
         
@@ -40,16 +40,16 @@ class ColumnDeriver:
                 fin_map[key] = val
         return fin_map
 
-    @scan_node_for_attributes.register(AbstractPlan)
+    @derive_column_mapping.register(AbstractPlan)
     def _for_abstract_plan(self, node:AbstractPlan, alias_prefix:str=None) -> dict:
         return {},{}
 
-    @scan_node_for_attributes.register(ProjectPlan)
+    @derive_column_mapping.register(ProjectPlan)
     def _for_project_plan(self, node:ProjectPlan, alias_prefix:str=None) -> dict:
         child_nodes = node.children
         return self.scan_children(child_nodes)
     
-    @scan_node_for_attributes.register(StoragePlan)
+    @derive_column_mapping.register(StoragePlan)
     def _for_storage_plan(self, node:StoragePlan, alias_prefix:str=None):
         """
         Scans the children of the Storage Plan node. Also gets the columns from
@@ -74,12 +74,12 @@ class ColumnDeriver:
 
         return column_name_to_id_mapping, merged_map
 
-    @scan_node_for_attributes.register(SeqScanPlan)
+    @derive_column_mapping.register(SeqScanPlan)
     def _for_seq_scan_plan(self, node:SeqScanPlan, alias_prefix:str=None) -> dict:
         alias_prefix = node.alias.alias_name
         return self.scan_children(node.children, alias_prefix)
 
-    @scan_node_for_attributes.register(LateralJoinPlan)
+    @derive_column_mapping.register(LateralJoinPlan)
     def _for_lateral_join_plan(self,node:LateralJoinPlan, alias_prefix:str=None) -> dict:
         """
         Scans the left child first and then the right child. Makes the assumption
@@ -102,7 +102,7 @@ class ColumnDeriver:
         
         return merged_id_map, col_update_map
 
-    @scan_node_for_attributes.register(FunctionScanPlan)
+    @derive_column_mapping.register(FunctionScanPlan)
     def _for_func_scan_plan(self, node:FunctionScanPlan, alias_prefix:str=None) -> dict:
         """
         To map the columns in the FunctionScanPlan node to ids
@@ -130,7 +130,7 @@ class ColumnDeriver:
         
         return column_name_to_id_mapping, merged
 
-    @scan_node_for_attributes.register(TupleValueExpression)
+    @derive_column_mapping.register(TupleValueExpression)
     def _for_tuple_value_expr(self, node:TupleValueExpression, alias_prefix:str=None) -> dict:
         column_name_to_id_mapping = {}
         attribute_id_counter = 0
@@ -141,12 +141,12 @@ class ColumnDeriver:
             
         return  column_name_to_id_mapping, {}
 
-    @scan_node_for_attributes.register(ConstantValueExpression)
+    @derive_column_mapping.register(ConstantValueExpression)
     def _for_const_val_expr(self, node: ConstantValueExpression, alias_prefix:str=None) -> dict:
         return {}, {}
 
     def __call__(self, node):
-        column_to_id_map, updated_col_map = self.scan_node_for_attributes(node)
+        column_to_id_map, updated_col_map = self.derive_column_mapping(node)
         column_mapper = ColumnMapper(column_to_id_map, updated_col_map)
-        updated_node = column_mapper.map_node_attributes_to_id(node)
+        updated_node = column_mapper.column_names_to_idx(node)
         return updated_node

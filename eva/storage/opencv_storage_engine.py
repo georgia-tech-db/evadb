@@ -89,6 +89,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 predicate=predicate,
                 sampling_rate=sampling_rate,
             )
+            #get the order of columns as stored in the catalog
             column_order = []
             for i in range(len(table.columns)):
                 column_order.append(table.columns[i].name)
@@ -96,6 +97,8 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             for batch in reader.read():
                 column_name = table.columns[0].name
                 batch.frames[column_name] = str(video_file_name)
+                #reordering columns to generate the correct indices for the columns
+                #this later used to generate the aliasing index which is used by the executor
                 batch.reorder_columns(column_order)
                 yield batch
 

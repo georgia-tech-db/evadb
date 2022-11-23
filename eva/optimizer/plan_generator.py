@@ -85,7 +85,8 @@ class PlanGenerator:
         # Build Optimal Tree
         optimal_plan = self.build_optimal_physical_plan(root_grp_id, optimizer_context)
 
-        #map columns to ids
+        # map the column names to their corresponding indices or column numbers
+        # in the Pandas dataframe
         column_deriver = ColumnDeriver()
         optimal_plan = column_deriver(optimal_plan)
 
