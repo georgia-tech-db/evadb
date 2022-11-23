@@ -17,6 +17,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+from eva.catalog.catalog_utils import is_video_table
 from eva.parser.types import FileFormatType
 
 if TYPE_CHECKING:
@@ -122,7 +123,7 @@ def create_table_metadata(
         table_name,
         file_url,
         column_metadata_list,
-        table_type=TableType.STRUCTURAL_DATA,
+        table_type=TableType.STRUCTURED_DATA,
     )
     return metadata
 
@@ -218,6 +219,6 @@ def check_groupby_pattern(groupby_string: str) -> None:
 
 
 def check_table_object_is_video(table_ref: TableRef) -> None:
-    if table_ref.table.table_obj.table_type == TableType.VIDEO_DATA:
+    if not is_video_table(table_ref.table.table_obj):
         err_msg = "GROUP BY only supported for video tables"
         raise BinderError(err_msg)

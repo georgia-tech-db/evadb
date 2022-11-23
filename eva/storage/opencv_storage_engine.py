@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Iterator
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.sql_config import SQLConfig
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
@@ -32,11 +33,13 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         self.curr_version = ConfigurationManager().get_value(
             "storage", "video_engine_version"
         )
+        self._sql_session = SQLConfig().session
+        self._sql_engine = SQLConfig().engine
 
     def create(self, table: DataFrameMetadata, if_not_exists=True):
         """
-        Create the directory to store the video and metadata related to
-        the table (dataset) name
+        Create the directory to store the video.
+        Create a sqlite table to persist the file urls
         """
         dir_path = Path(table.file_url)
         try:
@@ -50,6 +53,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             )
             logger.error(error)
             raise FileExistsError(error)
+        
         return True
 
     def drop(self, table: DataFrameMetadata):
@@ -59,6 +63,9 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         except Exception as e:
             logger.exception(f"Failed to drop the video table {e}")
 
+    def delete(self, table: DataFrameMetadata, rows: Batch):
+        return
+    
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
             dir_path = Path(table.file_url)

@@ -196,6 +196,11 @@ fileFormat
     ;
 
 
+fileOptions
+    : FORMAT fileFormat
+    ;
+
+
 uploadStatement
     : UPLOAD
       fileFormat
@@ -206,6 +211,7 @@ uploadStatement
             ('(' columns=uidList ')')
         )?
     ;
+
 
 
 videoBlob

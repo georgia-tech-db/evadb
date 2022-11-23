@@ -13,14 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_image
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class LoadImageExecutor(AbstractExecutor):
@@ -34,34 +38,57 @@ class LoadImageExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """ """
-        image_file_path = None
-        # Validate file_path
-        if Path(self.node.file_path).exists():
-            image_file_path = self.node.file_path
-        # check in the upload directory
+
+        try:
+            storage_engine = StorageEngine.factory(self.node.table_metainfo)
+            # ToDo: create based on if the metadata object exists in the catalog
+            success = storage_engine.create(
+                self.node.table_metainfo, if_not_exists=True
+            )
+            if not success:
+                raise RuntimeError(f"StorageEngine {storage_engine} create call failed")
+
+            file_count = 0
+            corrupt_files = []
+            for file_path in iter_path_regex(self.node.file_path):
+                if file_path.is_file():
+                    # we should validate the file before loading
+                    if validate_image(file_path):
+                        storage_engine.write(self.node.table_metainfo, file_path)
+                        file_count += 1
+                    else:
+                        corrupt_files.append(file_path)
+        except Exception as e:
+            self._rollback_load(file_count, corrupt_files)
+            err_msg = f"Load command with error {str(e)}"
+            logger.error(err_msg)
+            raise ExecutorError(err_msg)
+
+        if corrupt_files:
+            yield Batch(
+                pd.DataFrame(
+                    {
+                        "Number of loaded images": str(file_count),
+                        "Failed to load files": str(corrupt_files),
+                    },
+                    index=[0],
+                )
+            )
         else:
-            image_path = Path(self.upload_path / self.node.file_path)
-            if image_path.exists():
-                image_file_path = image_path
-        if image_file_path is None:
-            error = "Failed to find the video file {}".format(self.node.file_path)
+            yield Batch(
+                pd.DataFrame(
+                    {
+                        "Number of loaded images": str(file_count),
+                    },
+                    index=[0],
+                )
+            )
 
-            raise RuntimeError(error)
-
-        storage_engine = StorageEngine.factory(self.node.table_metainfo)
-        success = storage_engine.create(self.node.table_metainfo)
-
-        if not success:
-            raise RuntimeError("ImageStorageEngine create call failed")
-
-        file_count = 0
-        for file in image_file_path.iterdir():
-            if file.is_file():
-                if file.suffix in [".png", ".jpeg", ".jpg"]:
-                    storage_engine.write(self.node.table_metainfo, file)
-                    file_count += 1
-
-        yield Batch(
-            pd.DataFrame({"Number of loaded images": str(file_count)}, index=[0])
-        )
+    def _rollback_load(
+        self,
+        storage_engine: AbstractStorageEngine,
+        file_count: int,
+        corrupt_files: List[Path],
+    ):
+        for file_path in corrupt_files:
+            storage_engine.delete(self.node.table_metainfo, file_path)

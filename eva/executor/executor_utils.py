@@ -12,7 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+import glob
+import os
+from pathlib import Path
+from typing import Generator, List
+
+import cv2
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
@@ -35,3 +40,12 @@ def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
         batch.drop_zero(outcomes)
         batch.reset_index()
     return batch
+
+
+def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
+    return glob.iglob(os.path.expanduser(path_regex), recursive=True)
+
+
+def validate_image(image_path: Path) -> bool:
+    data = cv2.imread(str(image_path))
+    return data is not None

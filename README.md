@@ -1,6 +1,6 @@
 <div >
-  <a href="https://georgia-tech-db.github.io/eva/index.html">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
+  <a href="https://evadb.readthedocs.io/">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
   </a>
   <div>
         <h3>Try It Out!</h3>
@@ -21,7 +21,18 @@
 
 # EVA Multimedia Database System
 
-EVA is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
+EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+
+ * examining the "emotion palette" of different actors
+ * finding gameplays that lead to a touchdown in a football game
+
+EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. 
+
+If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/latest/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
+
+The <a href="https://evadb.readthedocs.io/en/latest/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
+
+The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
 
 ## Why EVA? ##
 
@@ -103,12 +114,20 @@ TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
 
+8. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
+```mysql
+   -- Analyse emotions of faces in a video
+   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
+   FROM HAPPY JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   WHERE id < 15;
+```
+
 ## Illustrative EVA Applications 
 
 ### :desert_island: Traffic Analysis Application using Object Detection Model
 | Source Video  | Query Result |
 |---------------|--------------|
-|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
 ### :desert_island: MNIST Digit Recognition using Image Classification Model
 | Source Video  | Query Result |
@@ -125,8 +144,8 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
-<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
-    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/docs/assets/img/eva-slack.jpg" alt="EVA Slack Channel" width="500">
+<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.jpg" alt="EVA Slack Channel" width="500">
 </a>
 
 ## Contributing to EVA

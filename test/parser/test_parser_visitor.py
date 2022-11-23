@@ -416,9 +416,9 @@ class ParserVisitorTests(unittest.TestCase):
         file_options = {}
         file_options["file_format"] = file_format
         params = {
-            ctx.fileName.return_value: path,
+            ctx.stringLiteral.return_value: path,
             ctx.tableName.return_value: table,
-            ctx.fileOptions.return_value: file_options,
+            ctx.fileFormat.return_value: file_format,
             ctx.uidList.return_value: column_list,
         }
 
@@ -430,9 +430,9 @@ class ParserVisitorTests(unittest.TestCase):
         visitor.visitLoadStatement(ctx)
         mock_visit.assert_has_calls(
             [
-                call(ctx.fileName()),
+                call(ctx.stringLiteral()),
                 call(ctx.tableName()),
-                call(ctx.fileOptions()),
+                call(ctx.fileFormat()),
                 call(ctx.uidList()),
             ]
         )
