@@ -95,6 +95,7 @@ jobs:
             Set-StrictMode -Version Latest
             $ErrorActionPreference = 'Stop'
             function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
+            pip install virtualenv
             virtualenv test_evadb
             test_evadb\Scripts\activate
             sh script\antlr4\generate_parser.sh
