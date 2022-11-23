@@ -80,25 +80,22 @@ jobs:
           paths:
             - ./test_evadb/
     
-    win-unittest:
-        executor: win/default
-        parameters:
-          v:
-           type: string
-           default: "3.7" 
-        steps:
-        - checkout
+  win-unittest:
+    executor: win/default
+    steps:
+      - checkout
 
-        - run: 
-            name: Test windows
-            command: |
-              Set-StrictMode -Version Latest
-              $ErrorActionPreference = 'Stop'
-              function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
-              "python<< parameters.v >>" -m venv test_evadb
-              source test_evadb/bin/activate
-              sh script/antlr4/generate_parser.sh
-              pip install ".[dev]"              
-              ThrowOnFailure "Python test failed!"
+      - run: 
+          name: Test windows
+          command: |
+            Set-StrictMode -Version Latest
+            $ErrorActionPreference = 'Stop'
+            function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
+            "python<< parameters.v >>" -m venv test_evadb
+            source test_evadb/bin/activate
+            sh script/antlr4/generate_parser.sh
+            pip install ".[dev]"       
+            sh script/test/test.sh
+            ThrowOnFailure "Python test failed!"
 
 
