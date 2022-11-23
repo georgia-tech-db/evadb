@@ -48,10 +48,11 @@ class LoadCSVExecutor(AbstractExecutor):
             batch_mem_size=self.node.batch_mem_size,
         )
 
+        storage_engine = StorageEngine.factory(self.node.table_metainfo)
         # write with storage engine in batches
         num_loaded_frames = 0
         for batch in csv_reader.read():
-            StorageEngine.write(self.node.table_metainfo, batch)
+            storage_engine.write(self.node.table_metainfo, batch)
             num_loaded_frames += len(batch)
 
         # yield result

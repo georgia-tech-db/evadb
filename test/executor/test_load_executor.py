@@ -27,11 +27,8 @@ from eva.parser.types import FileFormatType
 
 
 class LoadExecutorTest(unittest.TestCase):
-    @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
-    @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
-    def test_should_call_opencv_reader_and_storage_engine(
-        self, write_mock, create_mock
-    ):
+    @patch("eva.executor.load_video_executor.StorageEngine.factory")
+    def test_should_call_opencv_reader_and_storage_engine(self, factory_mock):
         file_path = "video"
         table_metainfo = "info"
         batch_mem_size = 3000
@@ -52,8 +49,10 @@ class LoadExecutorTest(unittest.TestCase):
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.return_value = True
             batch = next(load_executor.exec())
-            create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
-            write_mock.assert_called_once_with(
+            factory_mock.return_value.create.assert_called_once_with(
+                table_metainfo, if_not_exists=True
+            )
+            factory_mock.return_value.write.assert_called_once_with(
                 table_metainfo, Batch(pd.DataFrame([{"video_file_path": file_path}]))
             )
             expected = Batch(
@@ -61,9 +60,8 @@ class LoadExecutorTest(unittest.TestCase):
             )
             self.assertEqual(batch, expected)
 
-    @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
-    @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
-    def test_should_search_in_upload_directory(self, write_mock, create_mock):
+    @patch("eva.executor.load_video_executor.StorageEngine.factory")
+    def test_should_search_in_upload_directory(self, factory_mock):
         self.upload_path = Path(
             ConfigurationManager().get_value("storage", "upload_dir")
         )
@@ -88,8 +86,10 @@ class LoadExecutorTest(unittest.TestCase):
             mock_exists.side_effect = [False, True]
             batch = next(load_executor.exec())
             location = self.upload_path / file_path
-            create_mock.assert_called_once_with(table_metainfo, if_not_exists=True)
-            write_mock.assert_called_once_with(
+            factory_mock.return_value.create.assert_called_once_with(
+                table_metainfo, if_not_exists=True
+            )
+            factory_mock.return_value.write.assert_called_once_with(
                 table_metainfo,
                 Batch(pd.DataFrame([{"video_file_path": str(location)}])),
             )
@@ -98,9 +98,8 @@ class LoadExecutorTest(unittest.TestCase):
             )
             self.assertEqual(batch, expected)
 
-    @patch("eva.executor.load_video_executor.VideoStorageEngine.create")
-    @patch("eva.executor.load_video_executor.VideoStorageEngine.write")
-    def test_should_fail_to_find_file(self, write_mock, create_mock):
+    @patch("eva.executor.load_video_executor.StorageEngine.factory")
+    def test_should_fail_to_find_file(self, factory_mock):
         file_path = "video"
         table_metainfo = "info"
         batch_mem_size = 3000
@@ -125,8 +124,8 @@ class LoadExecutorTest(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 next(load_executor.exec())
 
-    @patch("eva.storage.storage_engine.StorageEngine.write")
-    def test_should_call_csv_reader_and_storage_engine(self, write_mock):
+    @patch("eva.executor.load_video_executor.StorageEngine.factory")
+    def test_should_call_csv_reader_and_storage_engine(self, factory_mock):
         batch_frames = [list(range(5))] * 2
 
         # creates a dummy.csv
@@ -156,7 +155,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
-        write_mock.has_calls(
+        factory_mock.return_value.write.has_calls(
             call(table_metainfo, batch_frames[0]),
             call(table_metainfo, batch_frames[1]),
         )

@@ -75,7 +75,7 @@ class TestRules(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
 

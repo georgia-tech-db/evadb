@@ -21,7 +21,7 @@ from eva.binder.binder_utils import (
     bind_table_info,
     check_groupby_pattern,
     check_table_object_is_video,
-    create_video_metadata,
+    create_multimedia_metadata,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
@@ -122,12 +122,12 @@ class StatementBinder:
     ):
         table_ref = node.table_ref
         name = table_ref.table.table_name
-        if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Sanity check to make sure there is no existing video table with same name
+        if node.file_options["file_format"] in [FileFormatType.VIDEO]:
+            # Sanity check to make sure there is no existing table with same name
             if self._catalog.check_table_exists(
                 table_ref.table.database_name, table_ref.table.table_name
             ):
-                msg = f"Adding to an existing video table {name}."
+                msg = f"Adding to an existing table {name}."
                 logger.info(msg)
             else:
 
@@ -139,11 +139,11 @@ class StatementBinder:
                     Path(node.path).exists()
                     or Path(Path(upload_dir) / node.path).exists()
                 ):
-                    create_video_metadata(name)
+                    create_multimedia_metadata(name, node.file_options["file_format"])
 
                 # else raise error
                 else:
-                    err_msg = f"Video file {node.path} does not exist."
+                    err_msg = f"Path {node.path} does not exist."
                     logger.error(err_msg)
                     raise BinderError(err_msg)
 

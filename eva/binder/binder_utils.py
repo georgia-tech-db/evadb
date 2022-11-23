@@ -17,11 +17,14 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+from eva.catalog.catalog_utils import is_video_table
+from eva.parser.types import FileFormatType
+
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
@@ -32,6 +35,13 @@ from eva.utils.logging_manager import logger
 
 class BinderError(Exception):
     pass
+
+
+def create_multimedia_metadata(name: str, format_type: FileFormatType):
+    if format_type is FileFormatType.VIDEO:
+        return create_video_metadata(name)
+    else:
+        raise BinderError(f"Format Type {format_type} is not supported")
 
 
 def create_video_metadata(name: str) -> DataFrameMetadata:
@@ -59,7 +69,11 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="id", is_video=True
+        name,
+        uri,
+        col_metadata,
+        identifier_column="id",
+        table_type=TableType.VIDEO_DATA,
     )
     return metadata
 
@@ -71,7 +85,10 @@ def create_table_metadata(
     column_metadata_list = create_column_metadata(columns)
     file_url = str(generate_file_path(table_name))
     metadata = CatalogManager().create_metadata(
-        table_name, file_url, column_metadata_list
+        table_name,
+        file_url,
+        column_metadata_list,
+        table_type=TableType.STRUCTURED_DATA,
     )
     return metadata
 
@@ -167,6 +184,6 @@ def check_groupby_pattern(groupby_string: str) -> None:
 
 
 def check_table_object_is_video(table_ref: TableRef) -> None:
-    if not table_ref.table.table_obj.is_video:
+    if not is_video_table(table_ref.table.table_obj):
         err_msg = "GROUP BY only supported for video tables"
         raise BinderError(err_msg)
