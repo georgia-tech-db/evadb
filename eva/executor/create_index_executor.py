@@ -160,14 +160,14 @@ class CreateIndexExecutor(AbstractExecutor):
             )
         except Exception as e:
             # Roll back in reverse order.
-            # Delete on-disk index. 
+            # Delete on-disk index.
             if os.path.exists(save_file_path):
                 os.remove(save_file_path)
 
             # Drop secondary index table.
             secondary_index_tb_name = "secondary_index_{}_{}".format(self.node.index_type, self.node.name)
             if catalog_manager.check_table_exists(
-                None, 
+                None,
                 secondary_index_tb_name,
             ):
                 secondary_index_metadata = catalog_manager.get_dataset_metadata(

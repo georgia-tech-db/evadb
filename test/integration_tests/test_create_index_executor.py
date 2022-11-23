@@ -125,7 +125,7 @@ class CreateIndexTest(unittest.TestCase):
         faiss_mock.write_index.side_effect = Exception("Test exception.")
 
         query = "CREATE INDEX testCreateIndexName USING HNSW ON testCreateIndexFeatTable (feat);"
-        with self.assertRaises(Exception) as context:
+        with self.assertRaises(Exception):
             execute_query_fetch_all(query)
 
         # Check secondary index is dropped.
