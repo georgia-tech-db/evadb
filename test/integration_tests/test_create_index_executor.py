@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 from pathlib import Path
+from mock import patch
 
 import faiss
 import numpy as np
@@ -76,7 +77,6 @@ class CreateIndexTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # TODO: Drop the created index after support drop command on index.
         query = "DROP TABLE testCreateIndexFeatTable;"
         execute_query_fetch_all(query)
 
@@ -103,9 +103,10 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(logical_id[0][0], 0)
 
         # Test secondary index.
+        secondary_index_tb_name = "secondary_index_{}_{}".format(index_metadata.type, index_metadata.name)
         secondary_index_metadata = CatalogManager().get_dataset_metadata(
             None,
-            "secondary_index_{}_{}".format(index_metadata.type, index_metadata.name),
+            secondary_index_tb_name
         )
         size = 0
         for i, batch in enumerate(StorageEngine.read(secondary_index_metadata, 1)):
@@ -114,3 +115,21 @@ class CreateIndexTest(unittest.TestCase):
             self.assertEqual(df_data["row_id"][0], i)
             size += 1
         self.assertEqual(size, 3)
+
+        # Cleanup.
+        CatalogManager().drop_index("testCreateIndexName")
+        CatalogManager().drop_dataset_metadata(None, secondary_index_tb_name)
+
+    @patch("eva.executor.create_index_executor.faiss")
+    def test_should_cleanup_when_exception(self, faiss_mock):
+        faiss_mock.write_index.side_effect = Exception("Test exception.")
+
+        query = "CREATE INDEX testCreateIndexName USING HNSW ON testCreateIndexFeatTable (feat);"
+        with self.assertRaises(Exception) as context:
+            execute_query_fetch_all(query)
+
+        # Check secondary index is dropped.
+        secondary_index_tb_name = "secondary_index_{}_{}".format("HNSW", "testCreateIndexName")
+        self.assertFalse(
+            CatalogManager().check_table_exists(None, secondary_index_tb_name)
+        )

@@ -15,6 +15,7 @@
 from copy import deepcopy
 from pathlib import Path
 
+import os
 import faiss
 import pandas as pd
 
@@ -44,118 +45,143 @@ class CreateIndexExecutor(AbstractExecutor):
             logger.error(msg)
             raise RuntimeError(msg)
 
-        # Get feature tables.
-        table_ref = self.node.table_ref
-        df_metadata = CatalogManager().get_dataset_metadata(
-            table_ref.table.database_name, table_ref.table.table_name
-        )
-
-        # Add features to index.
-        # TODO: batch size is hardcoded for now.
-        index = None
-        input_dim, feat_size = -1, 0
-        for batch in StorageEngine.read(df_metadata, 1):
-            # Feature column name.
-            feat_col_name = self.node.col_list[0].name
-            # Pandas wraps numpy array as an object inside a numpy
-            # array. Use zero index to get the actual numpy array.
-            feat = batch.column_as_numpy_array(feat_col_name)[0]
-            if index is None:
-                input_dim = feat.shape[-1]
-                index = self._create_index(self.node.index_type, input_dim)
-            index.add(feat)
-            feat_size += 1
-
-        # Input dimension is inferred from the actual feature.
-        input_index_io = CatalogManager().index_io(
-            "input_feature",
-            ColumnType.NDARRAY,
-            NdArrayType.FLOAT32,
-            [Dimension.ANYDIM, input_dim],
-            True,
-        )
-
-        # Output dimension can be hardcoded.
-        id_index_io = CatalogManager().index_io(
-            "logical_id",
-            ColumnType.NDARRAY,
-            NdArrayType.INT64,
-            [Dimension.ANYDIM, 1],
-            False,
-        )
-        distance_index_io = CatalogManager().index_io(
-            "distance",
-            ColumnType.NDARRAY,
-            NdArrayType.FLOAT32,
-            [Dimension.ANYDIM, 1],
-            False,
-        )
-        save_file_path = (
-            EVA_DEFAULT_DIR
-            / INDEX_DIR
-            / Path("{}_{}.index".format(self.node.index_type, self.node.name))
-        )
-
-        io_list = [input_index_io, id_index_io, distance_index_io]
-
-        # Build secondary index to map from index Logical ID to Row ID.
-        # Use save_file_path's hash value to retrieve the table.
-        col_list = [
-            ColumnDefinition(
-                "logical_id",
-                ColumnType.INTEGER,
-                None,
-                [],
-                ColConstraintInfo(unique=True),
-            ),
-            ColumnDefinition(
-                "row_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
-            ),
-        ]
-        col_metadata = [
-            CatalogManager().create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension, col.cci
+        try:
+            # Get feature tables.
+            table_ref = self.node.table_ref
+            df_metadata = catalog_manager.get_dataset_metadata(
+                table_ref.table.database_name, table_ref.table.table_name
             )
-            for col in col_list
-        ]
-        tb_metadata = CatalogManager().create_metadata(
-            "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
-            str(
+
+            # Add features to index.
+            # TODO: batch size is hardcoded for now.
+            index = None
+            input_dim, feat_size = -1, 0
+            for batch in StorageEngine.read(df_metadata, 1):
+                # Feature column name.
+                feat_col_name = self.node.col_list[0].name
+                # Pandas wraps numpy array as an object inside a numpy
+                # array. Use zero index to get the actual numpy array.
+                feat = batch.column_as_numpy_array(feat_col_name)[0]
+                if index is None:
+                    input_dim = feat.shape[-1]
+                    index = self._create_index(self.node.index_type, input_dim)
+                index.add(feat)
+                feat_size += 1
+
+            # Input dimension is inferred from the actual feature.
+            input_index_io = catalog_manager.index_io(
+                "input_feature",
+                ColumnType.NDARRAY,
+                NdArrayType.FLOAT32,
+                [Dimension.ANYDIM, input_dim],
+                True,
+            )
+
+            # Output dimension can be hardcoded.
+            id_index_io = catalog_manager.index_io(
+                "logical_id",
+                ColumnType.NDARRAY,
+                NdArrayType.INT64,
+                [Dimension.ANYDIM, 1],
+                False,
+            )
+            distance_index_io = catalog_manager.index_io(
+                "distance",
+                ColumnType.NDARRAY,
+                NdArrayType.FLOAT32,
+                [Dimension.ANYDIM, 1],
+                False,
+            )
+            save_file_path = (
                 EVA_DEFAULT_DIR
                 / INDEX_DIR
-                / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))
-            ),
-            col_metadata,
-            identifier_column="logical_id",
-            is_video=False,
-        )
-        StorageEngine.create(tb_metadata)
-
-        # Write exact mapping for now.
-        logical_id = [i for i in range(feat_size)]
-        secondary_index = Batch(
-            pd.DataFrame(
-                data={"logical_id": logical_id, "row_id": deepcopy(logical_id)}
+                / Path("{}_{}.index".format(self.node.index_type, self.node.name))
             )
-        )
-        StorageEngine.write(tb_metadata, secondary_index)
 
-        # Persist index.
-        faiss.write_index(index, str(save_file_path))
+            io_list = [input_index_io, id_index_io, distance_index_io]
 
-        # Save to catalog.
-        CatalogManager().create_index(
-            self.node.name,
-            str(save_file_path),
-            self.node.index_type,
-            io_list,
-        )
-
-        yield Batch(
-            pd.DataFrame(
-                [f"Index {self.node.name} successfully added to the database."]
+            # Build secondary index to map from index Logical ID to Row ID.
+            # Use save_file_path's hash value to retrieve the table.
+            col_list = [
+                ColumnDefinition(
+                    "logical_id",
+                    ColumnType.INTEGER,
+                    None,
+                    [],
+                    ColConstraintInfo(unique=True),
+                ),
+                ColumnDefinition(
+                    "row_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+                ),
+            ]
+            col_metadata = [
+                catalog_manager.create_column_metadata(
+                    col.name, col.type, col.array_type, col.dimension, col.cci
+                )
+                for col in col_list
+            ]
+            tb_metadata = catalog_manager.create_metadata(
+                "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
+                str(
+                    EVA_DEFAULT_DIR
+                    / INDEX_DIR
+                    / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))
+                ),
+                col_metadata,
+                identifier_column="logical_id",
+                is_video=False,
             )
-        )
+            StorageEngine.create(tb_metadata)
+
+            # Write exact mapping for now.
+            logical_id = [i for i in range(feat_size)]
+            secondary_index = Batch(
+                pd.DataFrame(
+                    data={"logical_id": logical_id, "row_id": deepcopy(logical_id)}
+                )
+            )
+            StorageEngine.write(tb_metadata, secondary_index)
+
+            # Persist index.
+            faiss.write_index(index, str(save_file_path))
+
+            # Save to catalog.
+            catalog_manager.create_index(
+                self.node.name,
+                str(save_file_path),
+                self.node.index_type,
+                io_list,
+            )
+
+            yield Batch(
+                pd.DataFrame(
+                    [f"Index {self.node.name} successfully added to the database."]
+                )
+            )
+        except Exception as e:
+            # Roll back in reverse order.
+            # Delete on-disk index. 
+            if os.path.exists(save_file_path):
+                os.remove(save_file_path)
+
+            # Drop secondary index table.
+            secondary_index_tb_name = "secondary_index_{}_{}".format(self.node.index_type, self.node.name)
+            if catalog_manager.check_table_exists(
+                None, 
+                secondary_index_tb_name,
+            ):
+                secondary_index_metadata = catalog_manager.get_dataset_metadata(
+                    None,
+                    secondary_index_tb_name
+                )
+                StorageEngine.drop(secondary_index_metadata)
+                catalog_manager.drop_dataset_metadata(
+                    None,
+                    secondary_index_tb_name,
+                )
+
+            # Throw exception back to user.
+            raise e
 
     def _create_index(self, index_type: IndexType, input_dim: int):
         if index_type == IndexType.HNSW:
