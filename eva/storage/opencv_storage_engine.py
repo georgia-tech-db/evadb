@@ -16,6 +16,7 @@ import shutil
 import struct
 from pathlib import Path
 from typing import Iterator
+from eva.catalog.catalog_type import TableType
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.sql_config import SQLConfig
@@ -24,6 +25,7 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
+from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -33,8 +35,9 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         self.curr_version = ConfigurationManager().get_value(
             "storage", "video_engine_version"
         )
-        self._sql_session = SQLConfig().session
-        self._sql_engine = SQLConfig().engine
+        self._database_handler: AbstractStorageEngine = StorageEngine.storages[
+            TableType.STRUCTURED_DATA
+        ]
 
     def create(self, table: DataFrameMetadata, if_not_exists=True):
         """
@@ -53,7 +56,9 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             )
             logger.error(error)
             raise FileExistsError(error)
-        
+
+        DataFrameMetadata()
+        self._database_handler.create(table)
         return True
 
     def drop(self, table: DataFrameMetadata):
@@ -65,13 +70,14 @@ class OpenCVStorageEngine(AbstractStorageEngine):
 
     def delete(self, table: DataFrameMetadata, rows: Batch):
         return
-    
+
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
             dir_path = Path(table.file_url)
             for video_file_path in rows.video_file_paths():
                 video_file = Path(video_file_path)
                 shutil.copy2(str(video_file), str(dir_path))
+                
                 self._create_video_metadata(dir_path, video_file.name)
         except Exception:
             error = "Current video storage engine only supports loading videos on disk."
