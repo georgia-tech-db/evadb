@@ -15,10 +15,14 @@
 from pathlib import Path
 
 import eva
+from eva.version import VERSION
 
 EVA_INSTALLATION_DIR = Path(eva.__file__).parent
-EVA_ROOT_DIR = Path(eva.__file__).parent.parent
-EVA_DEFAULT_DIR = Path.home() / ".eva"
+# Using eva version to govern the EVA_DEFAULT_DIR
+# This means we won't support backward compatibility as each version will maintain its own copy of database.
+# Ideally, if the new release is not breaking backward compatibilty, we can keep using the same copy.
+# We can revisit it later
+EVA_DEFAULT_DIR = Path.home() / ".eva" / str(VERSION)
 EVA_DATASET_DIR = "eva_datasets"
 EVA_UPLOAD_DIR = "tmp"
 EVA_CONFIG_FILE = "eva.yml"
