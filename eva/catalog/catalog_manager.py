@@ -104,9 +104,7 @@ class CatalogManager(object):
         )
 
         # Append row_id to table metadata.
-        column_list = [
-            DataFrameColumn("_row_id", ColumnType.INTEGER)
-        ] + column_list
+        column_list = [DataFrameColumn("_row_id", ColumnType.INTEGER)] + column_list
 
         for column in column_list:
             column.metadata_id = metadata.id
