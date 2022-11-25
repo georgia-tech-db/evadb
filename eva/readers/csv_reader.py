@@ -47,8 +47,10 @@ class CSVReader(AbstractReader):
 
         # TODO: Need to add strong sanity checks on the columns.
 
-        # read the csv in chunks, and only keep the columns we need
-        col_list_names = [col.col_name for col in self._column_list]
+        # Read the csv in chunks, and only keep the columns we need.
+        # Ignore _row_id that we don't need to take care of.
+        col_list_names = [col.col_name for col in self._column_list if col.col_name != "_row_id"]
+
         col_map = {col.col_name: col for col in self._column_list}
         for chunk in pd.read_csv(self.file_url, chunksize=512, usecols=col_list_names):
 
