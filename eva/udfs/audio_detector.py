@@ -12,14 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 
-import numpy as np
 import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.utils.audio_utils import *
-
 
 class PhraseMatch(AbstractUDF):
     """
@@ -31,41 +27,51 @@ class PhraseMatch(AbstractUDF):
     def name(self) -> str:
         return "phraseMatch"
 
-    def setup(self, threshold=0.85):
+    def setup(self, threshold=0.85, word_gap_time_limit=0.5):
         # Count something as a phrase only if there's < 0.5 sec difference between the end and the start of words
-        self.word_gap_time_limit = 0.5
+        self.word_gap_time_limit = word_gap_time_limit
         self.threshold = threshold
+        self.prop_idx = {
+            "WORD": 3,
+            "START": 4,
+            "END": 5
+        }
 
-    def forward(self, data: pd.DataFrame) -> pd.DataFrame:
-        print(data)
-
-        # TODO: need to modify the phrase search algo
-        #  Sample usage
-        output = pd.DataFrame()
-        for index, row in data.iterrows():
-            output = output.append({"phrase": row[3], "start_time": row[4], "end_time": row[5]}, ignore_index=True)
-        return output
-
-        phrases = []
+    def forward(self,   data: pd.DataFrame) -> pd.DataFrame:
+        phrases = pd.DataFrame()
 
         # TODO: This should come from the query.
         phrase_length = 2
 
-        # TODO: Change according to the repr of data.
-        word_buffer = [data[0]]
-        # TODO: Some attribute of data?
-        for word_entry in data[1:]:
+        word_buffer = [{
+            "word": data.iloc[0][self.prop_idx["WORD"]],
+            "start_time": float(data.iloc[0][self.prop_idx["START"]]),
+            "end_time": float(data.iloc[0][self.prop_idx["END"]])
+        }]
+
+        for _, row in data.iterrows():
+            print(row)
+            word_entry = {
+                "word": row[self.prop_idx["WORD"]],
+                "start_time": float(row[self.prop_idx["START"]]),
+                "end_time": float(row[self.prop_idx["END"]])
+            }
 
             # The new word was spoken close enough in time
-            if int(word_entry["start_time"]) - int(word_buffer[-1]["end_time"]) <= self.word_gap_time_limit:
+            if word_entry["start_time"] - word_buffer[-1]["end_time"] <= self.word_gap_time_limit:
                 word_buffer.append(word_entry)
 
                 if len(word_buffer) == phrase_length:
-                    phrases.append({
-                        "start_time": word_buffer[0]["start_time"],
-                        "end_time": word_buffer[-1]["end_time"],
-                        "phrase": " ".join(buff_entry["word"] for buff_entry in word_buffer)}
-                    )
+                    phrases = pd.concat([
+                        phrases,
+                        pd.DataFrame([
+                            {
+                                "phrase": " ".join(buff_entry["word"] for buff_entry in word_buffer),
+                                "start_time": word_buffer[0]["start_time"],
+                                "end_time": word_buffer[-1]["end_time"]
+                            }
+                        ])
+                    ])
 
                     # Trim away the first word in the buffer
                     word_buffer = word_buffer[1:]
@@ -74,6 +80,4 @@ class PhraseMatch(AbstractUDF):
             else:
                 word_buffer = [word_entry]
 
-        # Putting this in here to check what's returned
-        phrases.append({"start_time": "", "end_time": "", "phrase": ""})
         return phrases
