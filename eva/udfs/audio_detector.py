@@ -20,7 +20,7 @@ import pandas as pd
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.utils.audio_utils import *
 
-class WordMatch(AbstractUDF):
+class PhraseMatch(AbstractUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score
@@ -28,30 +28,44 @@ class WordMatch(AbstractUDF):
 
     @property
     def name(self) -> str:
-        return "wordMatch"
+        return "phraseMatch"
 
     def setup(self, threshold=0.85):
+        # Count something as a phrase only if there's < 0.5 sec difference between the end and the start of words
+        self.word_gap_time_limit = 0.5
         self.threshold = threshold
 
-    def forward(self, args: pd.DataFrame) -> pd.DataFrame:
-        table_name = args[args.columns[0]][0]
-        target_word = args[args.columns[-1]][0]
+    def forward(self, data: pd.DataFrame) -> pd.DataFrame:
+        print(data)
 
-        print(f"Tbl: ${table_name}, Word: ${target_word}")
+        phrases = []
 
-        outcome = pd.DataFrame()
+        # TODO: This should come from the query.
+        phrase_length = 2
 
-        # TODO: Get this from audio_utils
-        video_word_list = []
+        # TODO: Change according to the repr of data.
+        word_buffer = [data[0]]
+        # TODO: Some attribute of data?
+        for word_entry in data[1:]:
 
-        for word in video_word_list:
-            pass
-            # TODO: Replace this with something more sensible
-            # outcome = outcome.append(
-            #     {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
-            #     ignore_index=True,
-            # )
+            # The new word was spoken close enough in time
+            if int(word_entry["start_time"]) - int(word_buffer[-1]["end_time"]) <= self.word_gap_time_limit:
+                word_buffer.append(word_entry)
+
+                if len(word_buffer) == phrase_length:
+                    phrases.append({
+                        "start_time": word_buffer[0]["start_time"],
+                        "end_time": word_buffer[-1]["end_time"],
+                        "phrase": " ".join(buff_entry["word"] for buff_entry in word_buffer)}
+                    )
+
+                    # Trim away the first word in the buffer
+                    word_buffer = word_buffer[1:]
+
+            # The new world was spoken with a gap, reset the buffer.
+            else:
+                word_buffer = [word_entry]
 
         # Putting this in here to check what's returned
-        outcome.append({"time_region": np.array(["test-start", "test-end"])})
-        return outcome
+        phrases.append({"start_time": "", "end_time": "", "phrase": ""})
+        return phrases
