@@ -175,7 +175,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # Stacking all frames, and changing to numpy
         # bcoz of yolov5 error with Tensors
         
-        for i in frames:
+        for i in range(frames.shape[0]):
             img_b = frames[i][0]
             img_g = frames[i][1]
             img_r = frames[i][2]
@@ -183,7 +183,6 @@ class YoloV5(PytorchAbstractClassifierUDF):
             img_rgb = img_rgb.cpu().detach().numpy()
             img_rgb = img_rgb*255
             predictions = self.model(img_rgb)
-            predictions.print()
 
             single_result = predictions.pandas().xyxy[0]
 
