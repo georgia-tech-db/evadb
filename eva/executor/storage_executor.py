@@ -35,5 +35,9 @@ class StorageExecutor(AbstractExecutor):
                 predicate=self.node.predicate,
                 sampling_rate=self.node.sampling_rate,
             )
+        # TODO: Finish this
+        # elif self.node.is_rich_video:
+        #     return RichVideoStorageEngine.read()
+
         else:
             return StorageEngine.read(self.node.video, self.node.batch_mem_size)

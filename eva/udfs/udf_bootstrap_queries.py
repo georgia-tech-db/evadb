@@ -99,5 +99,4 @@ def init_builtin_udfs(mode="debug"):
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:
-        print("Executing: ", query)
         execute_query_fetch_all(query)

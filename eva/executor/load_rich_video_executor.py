@@ -18,19 +18,49 @@ import pandas as pd
 import eva.utils.audio_utils as audio_utils
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.executor.load_video_executor import LoadVideoExecutor
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.storage_engine import RichVideoStorageEngine
+from eva.utils.logging_manager import logger
 
 
-class LoadRichVideoExecutor(LoadVideoExecutor):
+class LoadRichVideoExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
+        config = ConfigurationManager()
+        self.upload_dir = Path(config.get_value("storage", "upload_dir"))
+
+    def validate(self):
+        pass
 
     def exec(self):
-        # TODO: super exec not creating table if it doesn't exist
-        if super().exec() is not None:
 
+        video_file_path = None
+        # Validate file_path
+        if Path(self.node.file_path).exists():
+            video_file_path = self.node.file_path
+        # check in the upload directory
+        else:
+            video_path = Path(Path(self.upload_dir) / self.node.file_path)
+            if video_path.exists():
+                video_file_path = video_path
+
+        if video_file_path is None:
+            error = "Failed to find a video file at location: {}".format(
+                self.node.file_path
+            )
+            logger.error(error)
+            raise RuntimeError(error)
+
+        RichVideoStorageEngine.create(self.node.table_metainfo, if_not_exists=True)
+        success = RichVideoStorageEngine.write(
+            self.node.table_metainfo,
+            Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
+        )
+
+        if success:
             # TODO: make results typed
             catalog = CatalogManager()
             results = audio_utils.transcribe_file_with_word_time_offsets(self.node.file_path)
@@ -45,4 +75,3 @@ class LoadRichVideoExecutor(LoadVideoExecutor):
                     [f"Rich video successfully added at location: {self.node.file_path}"]
                 )
             )
-
