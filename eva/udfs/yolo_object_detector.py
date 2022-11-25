@@ -1,4 +1,3 @@
-# flake8: noqa
 # coding=utf-8
 # Copyright 2018-2022 EVA
 #
@@ -15,7 +14,6 @@
 # limitations under the License.
 from typing import List
 
-import numpy as np
 import pandas as pd
 
 from eva.models.catalog.frame_info import FrameInfo
@@ -25,6 +23,7 @@ from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 try:
     from torch import Tensor
     import torch
+
 except ImportError as e:
     raise ImportError(
         f"Failed to import with error {e}, \
@@ -43,7 +42,6 @@ except ImportError as e:
     )
 
 
-
 class YoloV5(PytorchAbstractClassifierUDF):
     """
     Arguments:
@@ -58,7 +56,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
     def setup(self, threshold=0.85):
         self.threshold = threshold
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5m')
-        
+
     @property
     def input_format(self) -> FrameInfo:
         return FrameInfo(-1, -1, 3, ColorSpace.RGB)
@@ -173,15 +171,15 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
         """
         # Stacking all frames, and changing to numpy
-        # bcoz of yolov5 error with Tensors
-        
+        # because of yolov5 error with Tensors
+
         for i in range(frames.shape[0]):
             img_b = frames[i][0]
             img_g = frames[i][1]
             img_r = frames[i][2]
             img_rgb = torch.stack((img_r, img_g, img_b), dim=2)
             img_rgb = img_rgb.cpu().detach().numpy()
-            img_rgb = img_rgb*255
+            img_rgb = img_rgb * 255
             predictions = self.model(img_rgb)
 
             single_result = predictions.pandas().xyxy[0]
