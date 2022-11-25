@@ -86,5 +86,5 @@ class YoloV5Test(unittest.TestCase):
         result.append(detector.forward(frame_dog))
         result.append(detector.forward(frame_cat))
 
-        self.assertEqual(["dog"], result[0].labels.tolist()[0])
-        self.assertEqual(["cat", "dog"], result[1].labels.tolist()[0])
+        self.assertEqual(["dog"], result[0]["labels"].tolist()[0])
+        self.assertEqual(["cat", "dog"], result[1]["labels"].tolist()[0])
