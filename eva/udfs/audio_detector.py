@@ -50,7 +50,6 @@ class PhraseMatch(AbstractUDF):
         }]
 
         for _, row in data.iterrows():
-            print(row)
             word_entry = {
                 "word": row[self.prop_idx["WORD"]],
                 "start_time": float(row[self.prop_idx["START"]]),
