@@ -98,10 +98,7 @@ udf_libs = [
     "facenet-pytorch>=2.5.2",
     "easyocr>=1.5.0",
     "ipython",
-    # "psutil",
-    # "thop>=0.1.1",
     "tqdm>=4.64.0",
-    # "tensorboard>=2.4.1",
     "seaborn>=0.11.0"
 ]
 
