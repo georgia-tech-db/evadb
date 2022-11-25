@@ -17,10 +17,10 @@ import sys
 import unittest
 
 import cv2
-import torch
 import mock
-import pandas as pd
 import numpy as np
+import pandas as pd
+import torch
 
 NUM_FRAMES = 10
 
@@ -48,18 +48,14 @@ class YoloV5Test(unittest.TestCase):
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torch": None}):
-                from eva.udfs.yolo_object_detector import (  # noqa: F401
-                    YoloV5,
-                )
+                from eva.udfs.yolo_object_detector import YoloV5  # noqa: F401
 
                 pass
 
     def test_should_raise_import_error_with_missing_torchvision(self):
         with self.assertRaises(ImportError):
             with mock.patch.dict(sys.modules, {"torchvision": None}):
-                from eva.udfs.yolo_object_detector import (  # noqa: F401
-                    YoloV5,
-                )
+                from eva.udfs.yolo_object_detector import YoloV5  # noqa: F401
 
                 pass
 
@@ -79,8 +75,8 @@ class YoloV5Test(unittest.TestCase):
         }
         test_df_dog = pd.DataFrame([frame_dog])
         test_df_cat = pd.DataFrame([frame_dog_cat])
-        frame_dog = numpy_to_yolo_format(test_df_dog['data'].values[0])
-        frame_cat = numpy_to_yolo_format(test_df_cat['data'].values[0])
+        frame_dog = numpy_to_yolo_format(test_df_dog["data"].values[0])
+        frame_cat = numpy_to_yolo_format(test_df_cat["data"].values[0])
         detector = YoloV5()
         result = []
         result.append(detector.forward(frame_dog))

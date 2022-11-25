@@ -21,8 +21,8 @@ from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 try:
-    from torch import Tensor
     import torch
+    from torch import Tensor
 
 except ImportError as e:
     raise ImportError(
@@ -30,8 +30,8 @@ except ImportError as e:
         please try `pip install torch`"
     )
 try:
-    import tqdm  # noqa: F401
     import seaborn  # noqa: F401
+    import tqdm  # noqa: F401
 except ImportError as e:
     raise ImportError(
         f"""please install yolov5 dependencies \n
@@ -55,7 +55,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5m')
+        self.model = torch.hub.load("ultralytics/yolov5", "yolov5m")
 
     @property
     def input_format(self) -> FrameInfo:
@@ -186,11 +186,10 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
             outcome = pd.DataFrame()
 
-            pred_class = single_result['name'].tolist()
-            pred_score = single_result['confidence'].tolist()
-            pred_boxes = single_result[['xmin', 'ymin', 'xmax', 'ymax']].apply(
-                lambda x: list(x),
-                axis=1
+            pred_class = single_result["name"].tolist()
+            pred_score = single_result["confidence"].tolist()
+            pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
+                lambda x: list(x), axis=1
             )
 
             outcome = outcome.append(
