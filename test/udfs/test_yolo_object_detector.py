@@ -17,12 +17,23 @@ import sys
 import unittest
 
 import cv2
+import torch
 import mock
 import pandas as pd
-
-from eva.models.storage.batch import Batch
+import numpy as np
 
 NUM_FRAMES = 10
+
+
+def numpy_to_yolo_format(numpy_image):
+    numpy_image = numpy_image.astype(np.float64)
+    numpy_image = numpy_image / 255
+    r = torch.tensor(numpy_image[:, :, 0])
+    g = torch.tensor(numpy_image[:, :, 1])
+    b = torch.tensor(numpy_image[:, :, 2])
+    rgb = torch.stack((r, g, b), dim=0)
+    rgb = rgb.unsqueeze(0)
+    return rgb
 
 
 class YoloV5Test(unittest.TestCase):
@@ -66,9 +77,14 @@ class YoloV5Test(unittest.TestCase):
                 os.path.join(self.base_path, "data", "dog_cat.jpg")
             ),
         }
-        frame_batch = Batch(pd.DataFrame([frame_dog, frame_dog_cat]))
+        test_df_dog = pd.DataFrame([frame_dog])
+        test_df_cat = pd.DataFrame([frame_dog_cat])
+        frame_dog = numpy_to_yolo_format(test_df_dog['data'].values[0])
+        frame_cat = numpy_to_yolo_format(test_df_cat['data'].values[0])
         detector = YoloV5()
-        result = detector.classify(frame_batch)
+        result = []
+        result.append(detector.forward(frame_dog))
+        result.append(detector.forward(frame_cat))
 
-        self.assertEqual(["dog"], result[0].labels)
-        self.assertEqual(["cat", "dog"], result[1].labels)
+        self.assertEqual(["dog"], result[0].labels.tolist()[0])
+        self.assertEqual(["cat", "dog"], result[1].labels.tolist()[0])
