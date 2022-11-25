@@ -62,6 +62,23 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     )
     return metadata
 
+def create_rich_video_metadata(name: str) -> DataFrameMetadata:
+    catalog = CatalogManager()
+    columns = [
+        ColumnDefinition(
+            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+        ),
+        ColumnDefinition("id", ColumnType.INTEGER, None, []),
+        ColumnDefinition(
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+        ),
+    ]
+    col_metadata = create_column_metadata(columns)
+    uri = str(generate_file_path(name))
+    metadata = catalog.create_metadata(
+        name, uri, col_metadata, identifier_column="id", is_video=False, is_rich_video=True
+    )
+    return metadata
 
 def create_table_metadata(
     table_ref: TableRef, columns: List[ColumnDefinition]

@@ -80,8 +80,9 @@ class FunctionExpression(AbstractExpression):
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
-        if len(child_batches):
-            new_batch = Batch.merge_column_wise(child_batches)
+        # TODO: Should work with the following two lines uncommented
+        # if len(child_batches):
+        #     new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
         outcomes = func(new_batch.frames)

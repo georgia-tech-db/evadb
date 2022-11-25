@@ -26,18 +26,20 @@ class DataFrameMetadata(BaseModel):
     _file_url = Column("file_url", String(100))
     _unique_identifier_column = Column("identifier_column", String(100))
     _is_video = Column("is_video", Boolean)
+    _is_rich_video = Column("is_rich_video", Boolean)
     _columns = relationship(
         "DataFrameColumn",
         back_populates="_dataset",
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, file_url: str, identifier_id="id", is_video=False):
+    def __init__(self, name: str, file_url: str, identifier_id="id", is_video=False, is_rich_video=False):
         self._name = name
         self._file_url = file_url
         self._schema = None
         self._unique_identifier_column = identifier_id
         self._is_video = is_video
+        self._is_rich_video = is_rich_video
 
     @property
     def schema(self):
@@ -71,6 +73,10 @@ class DataFrameMetadata(BaseModel):
     def is_video(self):
         return self._is_video
 
+    @property
+    def is_rich_video(self):
+        return self._is_rich_video
+
     def __eq__(self, other):
         return (
             self.id == other.id
@@ -79,6 +85,7 @@ class DataFrameMetadata(BaseModel):
             and self.identifier_column == other.identifier_column
             and self.name == other.name
             and self.is_video == other.is_video
+            and self._is_rich_video == other.is_rich_video
         )
 
     def __hash__(self) -> int:
@@ -90,5 +97,6 @@ class DataFrameMetadata(BaseModel):
                 self.identifier_column,
                 self.name,
                 self.is_video,
+                self.is_rich_video
             )
         )

@@ -19,6 +19,7 @@ from typing import Union
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
+    create_rich_video_metadata,
     create_video_metadata,
     extend_star,
 )
@@ -130,7 +131,10 @@ class StatementBinder:
                     Path(node.path).exists()
                     or Path(Path(upload_dir) / node.path).exists()
                 ):
-                    create_video_metadata(name)
+                    if node.file_options["file_format"] == FileFormatType.VIDEO:
+                        create_video_metadata(name)
+                    elif node.file_options["file_format"] == FileFormatType.RICH_VIDEO:
+                        create_rich_video_metadata(name)
 
                 # else raise error
                 else:

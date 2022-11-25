@@ -17,7 +17,7 @@ from typing import Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.storage_plan import StoragePlan
-from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
+from eva.storage.storage_engine import StorageEngine, VideoStorageEngine, RichVideoStorageEngine
 
 
 class StorageExecutor(AbstractExecutor):
@@ -35,9 +35,12 @@ class StorageExecutor(AbstractExecutor):
                 predicate=self.node.predicate,
                 sampling_rate=self.node.sampling_rate,
             )
-        # TODO: Finish this
-        # elif self.node.is_rich_video:
-        #     return RichVideoStorageEngine.read()
-
+        elif self.node.video.is_rich_video:
+            return RichVideoStorageEngine.read(
+                self.node.video,
+                self.node.batch_mem_size,
+                predicate=self.node.predicate,
+                sampling_rate=self.node.sampling_rate,
+            )
         else:
             return StorageEngine.read(self.node.video, self.node.batch_mem_size)

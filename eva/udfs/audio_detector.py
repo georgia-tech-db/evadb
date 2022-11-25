@@ -20,6 +20,7 @@ import pandas as pd
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.utils.audio_utils import *
 
+
 class PhraseMatch(AbstractUDF):
     """
     Arguments:
@@ -37,6 +38,13 @@ class PhraseMatch(AbstractUDF):
 
     def forward(self, data: pd.DataFrame) -> pd.DataFrame:
         print(data)
+
+        # TODO: need to modify the phrase search algo
+        #  Sample usage
+        output = pd.DataFrame()
+        for index, row in data.iterrows():
+            output = output.append({"phrase": row[3], "start_time": row[4], "end_time": row[5]}, ignore_index=True)
+        return output
 
         phrases = []
 

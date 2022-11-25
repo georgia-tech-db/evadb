@@ -17,17 +17,22 @@ import struct
 from pathlib import Path
 from typing import Iterator
 
+import pandas as pd
+
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.services.transcript_metadata_service import TranscriptMetadataService
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
+from eva.utils.generic_utils import get_size
 from eva.utils.logging_manager import logger
 
 
 class RichVideoStorageEngine(AbstractStorageEngine):
 
     def __init__(self):
+        self.transcript_metadata_service = TranscriptMetadataService()
         self.metadata = "metadata"
         self.curr_version = ConfigurationManager().get_value(
             "storage", "rich_video_engine_version"
@@ -69,7 +74,17 @@ class RichVideoStorageEngine(AbstractStorageEngine):
             predicate: AbstractExpression = None,
             sampling_rate: int = None,
     ) -> Iterator[Batch]:
-        pass
+
+        data_batch = []
+        metadata = self.transcript_metadata_service.get_all_transcript_metadata()
+
+        # TODO: Add logic to make batches of size batch_mem_size
+        for row in metadata:
+            data_batch.append(
+                {"id": row.id, "table_id": row.table_id, "video_name": row.video_name, "word": row.word,
+                 "start_time": row.start_time, "end_time": row.end_time, "confidence": row.confidence})
+        if data_batch:
+            yield Batch(pd.DataFrame(data_batch))
 
     def _create_video_metadata(self, dir_path, video_file):
         # File structure

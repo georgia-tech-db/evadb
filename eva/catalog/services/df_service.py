@@ -26,7 +26,7 @@ class DatasetService(BaseService):
         super().__init__(DataFrameMetadata)
 
     def create_dataset(
-        self, name, file_url, identifier_id="id", is_video=False
+        self, name, file_url, identifier_id="id", is_video=False, is_rich_video=False
     ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
@@ -34,6 +34,7 @@ class DatasetService(BaseService):
             name (str): name of the dataset
             file_url (str): file path of the dataset.
             is_video (bool): True if the table is a video
+            is_rich_video (bool): True if the table is a rich video
         Returns:
             DataFrameMetadata object
         """
@@ -42,6 +43,7 @@ class DatasetService(BaseService):
             file_url=file_url,
             identifier_id=identifier_id,
             is_video=is_video,
+            is_rich_video=is_rich_video
         )
         metadata = metadata.save()
         return metadata
