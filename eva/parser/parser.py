@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pprint import pprint
+
 from antlr4 import CommonTokenStream, InputStream
 from antlr4.error.ErrorListener import ErrorListener
 
@@ -87,6 +89,12 @@ class Parser(object):
         tree = parser.root()
 
         # Call lark
-        self._lark_parser.parse(query_string)
+        lark_output = self._lark_parser.parse(query_string)
+        antlr_output = self._visitor.visit(tree)
 
-        return self._visitor.visit(tree)
+        if lark_output != antlr_output:
+            pprint("Different parse trees: ")
+            pprint(lark_output[0][0].__str__())
+            pprint(antlr_output[0].__str__())
+
+        return antlr_output

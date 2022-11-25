@@ -1,6 +1,6 @@
 // Top Level Description
 
-?start: (sql_statement? SEMI)+ 
+?start: sql_statement?
 
 sql_statement: ddl_statement | dml_statement | utility_statement
         

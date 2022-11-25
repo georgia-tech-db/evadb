@@ -12,7 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pprint import pprint
+
 from lark import Lark
+
+from eva.parser.lark_interpreter import LarkInterpreter
 
 
 class LarkParser(object):
@@ -35,11 +39,12 @@ class LarkParser(object):
 
     def parse(self, query_string: str) -> list:
 
-        # Add semi-colon if missing
-        if not query_string.endswith(";"):
-            query_string += ";"
+        # strip semi-colon
+        query_string = query_string.rstrip(";")
 
         tree = self._parser.parse(query_string)
-        output = tree.pretty()
-        print(output)
-        return None
+        pprint(tree.pretty())
+        output = LarkInterpreter(query_string).visit(tree)
+
+        pprint(output)
+        return output
