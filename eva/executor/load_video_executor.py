@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from eva.binder.binder_utils import create_video_metadata
+from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
@@ -29,6 +31,7 @@ class LoadVideoExecutor(AbstractExecutor):
         super().__init__(node)
         config = ConfigurationManager()
         self.upload_dir = Path(config.get_value("storage", "upload_dir"))
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -39,8 +42,8 @@ class LoadVideoExecutor(AbstractExecutor):
         using storage engine
         """
 
+        # Validate video file_path
         video_file_path = None
-        # Validate file_path
         if Path(self.node.file_path).exists():
             video_file_path = self.node.file_path
         # check in the upload directory
@@ -55,6 +58,18 @@ class LoadVideoExecutor(AbstractExecutor):
             )
             logger.error(error)
             raise RuntimeError(error)
+
+        # Create catalog entry
+        table_ref = self.node.table_ref
+        database_name = table_ref.table.database_name
+        table_name = table_ref.table.table_name
+        # Sanity check to make sure there is no existing table with same name
+        if self.catalog.check_table_exists(database_name, table_name):
+            msg = f"Adding to an existing table {name}."
+            logger.info(msg)
+        # Create the catalog entry
+        else:
+            table_ref.table_obj = create_video_metadata(table_name)
 
         storage_engine = StorageEngine.factory(self.node.table_metainfo)
         storage_engine.create(self.node.table_metainfo, if_not_exists=True)
