@@ -37,7 +37,7 @@ class PhraseMatch(AbstractUDF):
             "END": 5
         }
 
-    def forward(self,   data: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, data: pd.DataFrame) -> pd.DataFrame:
         phrases = pd.DataFrame()
 
         # TODO: This should come from the query.
@@ -49,12 +49,23 @@ class PhraseMatch(AbstractUDF):
             "end_time": float(data.iloc[0][self.prop_idx["END"]])
         }]
 
+        first = True
         for _, row in data.iterrows():
+            if first:
+                first = False
+                continue
+
             word_entry = {
                 "word": row[self.prop_idx["WORD"]],
                 "start_time": float(row[self.prop_idx["START"]]),
                 "end_time": float(row[self.prop_idx["END"]])
             }
+
+            if phrase_length == 1:
+                word_entry["phrase"] = word_entry["word"]
+                del word_entry["word"]
+                phrases = pd.concat([phrases, pd.DataFrame([word_entry])])
+                continue
 
             # The new word was spoken close enough in time
             if word_entry["start_time"] - word_buffer[-1]["end_time"] <= self.word_gap_time_limit:
