@@ -12,30 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pprint import pprint
-
-from lark import visitors
 
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.table_ref import TableInfo, TableRef
+from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableRef
+from eva.parser.types import StatementType
 
-
-class LarkInterpreter(visitors.Interpreter):
-    def __init__(self, query):
-        super().__init__()
-        self.query = query
-        pprint(query)
-
-    def start(self, tree):
-        return self.visit_children(tree)
-
-    def sql_statement(self, tree):
-        return self.visit(tree.children[0])
-
+class RenameTable:
     def rename_table(self, tree):
         old_table_info = self.visit(tree.children[2])
         new_table_info = self.visit(tree.children[4])
-
         return RenameTableStatement(TableRef(old_table_info), new_table_info)
 
     def table_name(self, tree):

@@ -16,7 +16,7 @@ from pprint import pprint
 
 from lark import Lark
 
-from eva.parser.lark_interpreter import LarkInterpreter
+from eva.parser.lark_visitor import LarkInterpreter
 
 
 class LarkParser(object):
