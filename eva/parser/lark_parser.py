@@ -39,12 +39,19 @@ class LarkParser(object):
 
     def parse(self, query_string: str) -> list:
 
-        # strip semi-colon
-        query_string = query_string.rstrip(";")
+        # remove trailing white space
+        query_string = query_string.rstrip()
+        
+        # add semi-colon if needed
+        if not query_string.endswith(";"):
+            query_string += ";"
 
+        pprint(query_string)
         tree = self._parser.parse(query_string)
-        pprint(tree.pretty())
+        #pprint(tree.pretty())
         output = LarkInterpreter(query_string).visit(tree)
 
-        pprint(output)
-        return output
+        flat_list = [item for sublist in output for item in sublist]
+
+        #pprint(flat_list)
+        return flat_list

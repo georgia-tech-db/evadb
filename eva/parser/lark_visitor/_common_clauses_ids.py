@@ -36,7 +36,7 @@ class CommonClauses:
         return self.visit(tree.children[0])
 
     def uid(self, tree):
-        return self.visit(tree.children[0])
+        return self.visit(tree.children[0])        
 
     def simple_id(self, tree):
         simple_id = str(tree.children[0])

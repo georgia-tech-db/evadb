@@ -778,3 +778,9 @@ class ParserTests(unittest.TestCase):
         )
         expected_stmt = SelectStatement([tuple_frame], from_table)
         self.assertEqual(select_stmt, expected_stmt)
+
+    def test_lark(self):
+        #query = """SELECT a.id, b FROM MyVideo;"""
+        query = "RENAME TABLE foo TO bar; RENAME TABLE foo TO bar;"
+        parser = Parser()
+        parser.parse(query)

@@ -15,8 +15,8 @@
 from lark import visitors
 from pprint import pprint
 
-from eva.parser.parser_visitor._rename_statement import RenameTable
-from eva.parser.parser_visitor._common_clauses_ids import CommonClauses
+from eva.parser.lark_visitor._rename_statement import RenameTable
+from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
 
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which
@@ -40,3 +40,4 @@ class LarkInterpreter(
 
     def sql_statement(self, tree):
         return self.visit(tree.children[0])
+
