@@ -17,7 +17,7 @@ import pandas as pd
 
 from eva.udfs.abstract.abstract_udf import AbstractUDF
 
-class PhraseMatch(AbstractUDF):
+class Phrases(AbstractUDF):
     """
     Arguments:
         threshold (float): Threshold for classifier confidence score

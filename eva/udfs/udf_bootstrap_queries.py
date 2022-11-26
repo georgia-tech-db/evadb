@@ -77,7 +77,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
-Phrase_match_udf_query = """CREATE UDF IF NOT EXISTS PhraseMatch 
+Phrases_udf_query = """CREATE UDF IF NOT EXISTS Phrases 
     INPUT    (N_Words ANYTYPE)
     OUTPUT   (start_time ANYTYPE, end_time ANYTYPE, phrase ANYTYPE)
     TYPE     AudioUDF
@@ -95,7 +95,7 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query, Phrase_match_udf_query]
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query, Phrases_udf_query]
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:
