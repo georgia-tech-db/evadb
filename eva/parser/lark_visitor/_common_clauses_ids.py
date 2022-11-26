@@ -20,6 +20,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
 from eva.utils.logging_manager import logger
+from eva.expression.tuple_value_expression import TupleValueExpression
 
 
 class CommonClauses:
@@ -36,7 +37,23 @@ class CommonClauses:
         return self.visit(tree.children[0])
 
     def uid(self, tree):
-        return self.visit(tree.children[0])        
+        return self.visit(tree.children[0])
+
+    def full_column_name(self, tree):
+        uid = self.visit(tree.children[0])
+        print(uid)
+
+        # check for dottedid
+        if len(tree.children) > 1:
+            dotted_id = self.visit(tree.children[1])
+            return TupleValueExpression(table_alias=uid, col_name=dotted_id)
+        else:
+            return TupleValueExpression(col_name=uid)
+
+    def dotted_id(self, tree):
+        dotted_id =  str(tree.children[0])
+        dotted_id = dotted_id.lstrip(".")
+        return dotted_id
 
     def simple_id(self, tree):
         simple_id = str(tree.children[0])

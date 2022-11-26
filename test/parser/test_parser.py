@@ -780,7 +780,6 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        #query = """SELECT a.id, b FROM MyVideo;"""
-        query = "RENAME TABLE foo TO bar; RENAME TABLE foo TO bar;"
+        query = """SELECT a.id, b FROM MyVideo;"""
         parser = Parser()
         parser.parse(query)
