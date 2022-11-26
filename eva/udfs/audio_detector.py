@@ -40,21 +40,22 @@ class Phrases(AbstractUDF):
     def forward(self, data: pd.DataFrame) -> pd.DataFrame:
         phrases = pd.DataFrame()
 
-        # TODO: This should come from the query.
-        phrase_length = 2
+        first_row = data.iloc[0].values.tolist()
+        phrase_length = first_row[-1]
 
         word_buffer = [{
-            "word": data.iloc[0][self.prop_idx["WORD"]],
-            "start_time": float(data.iloc[0][self.prop_idx["START"]]),
-            "end_time": float(data.iloc[0][self.prop_idx["END"]])
+            "word": first_row[self.prop_idx["WORD"]],
+            "start_time": float(first_row[self.prop_idx["START"]]),
+            "end_time": float(first_row[self.prop_idx["END"]])
         }]
 
         first = True
-        for _, row in data.iterrows():
+        for _, row_df in data.iterrows():
             if first:
                 first = False
                 continue
 
+            row = row_df.values.tolist()
             word_entry = {
                 "word": row[self.prop_idx["WORD"]],
                 "start_time": float(row[self.prop_idx["START"]]),

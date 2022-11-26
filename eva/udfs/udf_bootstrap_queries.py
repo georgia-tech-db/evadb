@@ -78,7 +78,7 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
 )
 
 Phrases_udf_query = """CREATE UDF IF NOT EXISTS Phrases 
-    INPUT    (N_Words ANYTYPE)
+    INPUT    (n_words ANYTYPE)
     OUTPUT   (start_time ANYTYPE, end_time ANYTYPE, phrase ANYTYPE)
     TYPE     AudioUDF
     IMPL     "{}/udfs/audio_detector.py";
