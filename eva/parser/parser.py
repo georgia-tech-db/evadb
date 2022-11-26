@@ -92,9 +92,9 @@ class Parser(object):
         lark_output = self._lark_parser.parse(query_string)
         antlr_output = self._visitor.visit(tree)
 
-        if lark_output != antlr_output:
-            pprint("Different parse trees: ")
-            pprint(lark_output[0][0].__str__())
-            pprint(antlr_output[0].__str__())
+        #if lark_output != antlr_output:
+        #    pprint("Different parse trees: ")
+        #    pprint(lark_output[0][0].__str__())
+        #    pprint(antlr_output[0].__str__())
 
         return antlr_output

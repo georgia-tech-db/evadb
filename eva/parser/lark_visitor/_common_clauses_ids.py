@@ -19,10 +19,25 @@ from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
+from eva.utils.logging_manager import logger
 
-class RenameTable:
-    def rename_table(self, tree):
-        old_table_info = self.visit(tree.children[2])
-        new_table_info = self.visit(tree.children[4])
-        return RenameTableStatement(TableRef(old_table_info), new_table_info)
-        
+
+class CommonClauses:
+
+    def table_name(self, tree):
+        table_name = self.visit(tree.children[0])
+        if table_name is not None:
+            return TableInfo(table_name)
+        else:
+            error = "Invalid Table Name"
+            logger.error(error)
+
+    def full_id(self, tree):
+        return self.visit(tree.children[0])
+
+    def uid(self, tree):
+        return self.visit(tree.children[0])
+
+    def simple_id(self, tree):
+        simple_id = str(tree.children[0])
+        return simple_id

@@ -16,6 +16,7 @@ from lark import visitors
 from pprint import pprint
 
 from eva.parser.parser_visitor._rename_statement import RenameTable
+from eva.parser.parser_visitor._common_clauses_ids import CommonClauses
 
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which
@@ -27,6 +28,7 @@ from eva.parser.parser_visitor._rename_statement import RenameTable
 class LarkInterpreter(
     visitors.Interpreter,
     RenameTable,
+    CommonClauses
 ):
     def __init__(self, query):
         super().__init__()
