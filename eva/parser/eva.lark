@@ -1,13 +1,13 @@
 // Top Level Description
 
-start: (sql_statement? ";")+
+start: (_sql_statement? ";")+
 
-sql_statement: ddl_statement | dml_statement | utility_statement
+_sql_statement: ddl_statement | _dml_statement | utility_statement
         
 ddl_statement: create_database | create_table | create_index | create_udf | create_materialized_view
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
-dml_statement: select_statement | insert_statement | update_statement
+_dml_statement: _select_statement | insert_statement | update_statement
     | delete_statement | load_statement | upload_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
@@ -20,7 +20,7 @@ create_database: CREATE DATABASE if_not_exists? uid
 
 create_index: CREATE INDEX uid index_type? ON table_name index_column_names
 
-create_table: CREATE TABLE if_not_exists? table_name create_definitions ->column_create_table
+create_table: CREATE TABLE if_not_exists? table_name create_definitions 
     
 // Rename statements
 
@@ -30,7 +30,7 @@ rename_table: RENAME TABLE table_name TO table_name
 create_udf: CREATE UDF if_not_exists? udf_name INPUT create_definitions OUTPUT create_definitions TYPE udf_type IMPL udf_impl
 
 // Create Materialized View
-create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS select_statement 
+create_materialized_view: CREATE MATERIALIZED VIEW if_not_exists? table_name ("(" uid_list ")") AS _select_statement 
 
 // Details
 udf_name: uid
@@ -43,18 +43,16 @@ index_type: USING (BTREE | HASH)
 
 create_definitions: "(" create_definition ("," create_definition)* ")"
 
-create_definition: uid column_definition    ->column_declaration
-                 | index_column_definition  ->index_declaration
+create_definition: uid column_definition   
+                 | index_column_definition 
 
 column_definition: data_type column_constraint*
     
-column_constraint: null_notnull                                                   ->null_column_constraint
-    | DEFAULT default_value                                         ->default_column_constraint
-    | PRIMARY? KEY                                                  ->primary_key_column_constraint
-    | UNIQUE KEY?                                                   ->unique_key_column_constraint
+column_constraint: null_notnull                                                       | DEFAULT default_value                                             | PRIMARY? KEY                                                  
+    | UNIQUE KEY?                                                  
     
-index_column_definition: INDEX uid? index_type? index_column_names ->simple_index_declaration
-    
+index_column_definition: INDEX uid? index_type? index_column_names 
+
 //    Drop statements
 
 drop_database: DROP DATABASE if_exists? uid
@@ -74,8 +72,8 @@ delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (L
     
 insert_statement: INSERT INTO? table_name (("(" uid_list ")")? insert_statement_value)
     
-select_statement: query_specification                                            ->simple_select
-               | select_statement UNION ALL? select_statement   ->union_select
+_select_statement: query_specification                                            
+               | _select_statement UNION ALL? _select_statement  
     
 update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
     
@@ -91,7 +89,7 @@ video_blob: string_literal
     
 // details
 
-insert_statement_value: select_statement
+insert_statement_value: _select_statement
     | (VALUES | VALUE) "(" expressions_with_defaults ")" ("," "(" expressions_with_defaults ")")*
     
 
@@ -104,23 +102,22 @@ order_by_expression: expression (ASC | DESC)?
 // Forcing EXPLICIT JOIN KEYWORD
 table_sources: table_source
     
-table_source: table_source_item_with_sample join_part*  ->table_source_base
+table_source: table_source_item_with_sample join_part* 
     
 table_source_item_with_sample: table_source_item (AS? uid)? sample_clause?
 
-table_source_item: table_name      ->atom_table_item
-    | subquery_table_source_item   ->subquery_table_item
+table_source_item: table_name | subquery_table_source_item  
     
 
 table_valued_function: function_call                                
     | UNNEST LR_BRACKET function_call RR_BRACKET   
     
-subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_BRACKET)
+subquery_table_source_item: (_select_statement | LR_BRACKET _select_statement RR_BRACKET)
     
 sample_clause: SAMPLE decimal_literal
 
-join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
-         | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
+join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  
+         | JOIN LATERAL table_valued_function alias_clause? 
     
 alias_clause: AS? uid "(" uid_list ")" | AS? uid
     
@@ -132,8 +129,8 @@ query_specification: SELECT select_elements from_clause order_by_clause? limit_c
     
 select_elements: ("*" | select_element ) ("," select_element)*
     
-select_element: full_id "." "*"                                                ->select_star_element
-    | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                    ->select_expression_element
+select_element: full_id "." "*"                                                
+    | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                    
     
 from_clause: FROM table_sources (WHERE expression)? (GROUP BY  group_by_item ("," group_by_item)* )? (HAVING expression)?
     
@@ -155,7 +152,7 @@ show_statement: SHOW (UDFS | TABLES)
 
 explain_statement: EXPLAIN explainable_statement
 
-explainable_statement : select_statement | insert_statement | update_statement | delete_statement | create_materialized_view
+explainable_statement : _select_statement | insert_statement | update_statement | delete_statement | create_materialized_view
 
 // Common Clauses
 
@@ -208,12 +205,12 @@ array_type: INT8 | UINT8 | INT16 | INT32 | INT64
     | STR | DATETIME | ANYTYPE
     
 
-data_type: BOOLEAN                                         ->simple_data_type
-    | TEXT length_one_dimension?                        ->dimension_data_type
-    | INTEGER UNSIGNED?                               ->integer_data_type
-    | FLOAT length_two_dimension? UNSIGNED?             ->dimension_data_type
-    | NDARRAY array_type? length_dimension_list?         ->array_data_type
-    | ANYTYPE                                         ->any_data_type
+data_type: BOOLEAN                                        
+    | TEXT length_one_dimension?                       
+    | INTEGER UNSIGNED?                             
+    | FLOAT length_two_dimension? UNSIGNED?            
+    | NDARRAY array_type? length_dimension_list?        
+    | ANYTYPE                                       
     
 
 length_one_dimension: "(" decimal_literal ")"
@@ -247,9 +244,7 @@ if_not_exists: IF NOT EXISTS
 
 //    Functions
 
-function_call: udf_function                                      ->udf_function_call
-    | aggregate_windowed_function                                ->aggregate_function_call
-    
+function_call: udf_function  | aggregate_windowed_function 
 
 udf_function: simple_id "(" function_args ")" dotted_id?
     
@@ -265,32 +260,28 @@ function_arg: constant | expression
 //    Expressions, predicates
 
 // Simplified approach for expression
-expression: (NOT | "!") expression                                   ->not_expression
-    | expression logical_operator expression                         ->logical_expression
-    | predicate IS NOT? (TRUE | FALSE | UNKNOWN)                     ->is_expression
-    | predicate                                                      ->predicate_expression
+expression: (NOT | "!") expression  | expression logical_operator expression | predicate IS NOT? (TRUE | FALSE | UNKNOWN) | predicate     
     
 
-predicate: predicate NOT? IN "(" (select_statement | expressions) ")"     ->in_predicate
-    | predicate IS null_notnull                                      ->is_null_predicate
-    | predicate comparison_operator predicate             ->binary_comparison_predicate
-    | predicate comparison_operator (ALL | ANY | SOME) "(" select_statement ")"         ->subquery_comparison_predicate
-    | predicate NOT? LIKE predicate (STRING_LITERAL)?               ->like_predicate
-    | assign_var                        ->expression_atom_predicate   
+predicate: predicate NOT? IN "(" (_select_statement | expressions) ")"  
+    | predicate IS null_notnull   
+    | predicate comparison_operator predicate  
+    | predicate comparison_operator (ALL | ANY | SOME) "(" _select_statement ")"       
+    | predicate NOT? LIKE predicate (STRING_LITERAL)?   
+    | assign_var  
     | expression_atom 
 
 assign_var.1: LOCAL_ID VAR_ASSIGN expression_atom  
 
 // Add in ASTVisitor null_notnull in constant
-expression_atom.2: constant                                                      ->constant_expression_atom
-    | full_column_name                                                ->full_column_name_expression_atom
-    | function_call                                                  ->function_call_expression_atom
-    | unary_operator expression_atom                                  ->unary_expression_atom
-    | "(" expression ("," expression)* ")"                          ->nested_expression_atom
-    | "(" select_statement ")"                                       ->subquery_expession_atom
-    | expression_atom bit_operator expression_atom          ->bit_expression_atom
-    | expression_atom math_operator expression_atom         ->math_expression_atom
-    
+expression_atom.2: constant                                                     
+    | full_column_name                                                
+    | function_call                                                  
+    | unary_operator expression_atom                                  
+    | "(" expression ("," expression)* ")"                          
+    | "(" _select_statement ")"                                       
+    | expression_atom bit_operator expression_atom          
+    | expression_atom math_operator expression_atom
 
 unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
     
@@ -357,7 +348,7 @@ PRIMARY:                             "PRIMARY"
 REFERENCES:                          "REFERENCES"
 RENAME:                              "RENAME"
 SAMPLE:                              "SAMPLE"
-SELECT:                              "SELECT"
+SELECT:                             "SELECT"
 SET:                                 "SET"
 SHUTDOWN:                            "SHUTDOWN"
 SHOW:                                "SHOW"

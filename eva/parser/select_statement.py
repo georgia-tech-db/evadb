@@ -128,13 +128,14 @@ class SelectStatement(AbstractStatement):
     def __str__(self) -> str:
 
         target_list_str = ""
-        for expr in self._target_list:
-            target_list_str += str(expr)
+        if self._target_list is not None:
+            for expr in self._target_list:
+                target_list_str += str(expr)
 
         _orderby_list_str = ""
-        for expr in self._orderby_list:
-            _orderby_list_str += str(expr[0])
-            _orderby_list_str += str(expr[1])
+        if self._orderby_list is not None:
+            for expr in self._orderby_list:
+                _orderby_list_str += str(expr)
 
         print_str = "SELECT {} FROM {}".format(
             target_list_str, 

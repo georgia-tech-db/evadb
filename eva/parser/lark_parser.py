@@ -15,7 +15,6 @@
 from pprint import pprint
 
 from lark import Lark
-from itertools import chain
 
 from eva.parser.lark_visitor import LarkInterpreter
 
@@ -47,11 +46,8 @@ class LarkParser(object):
         if not query_string.endswith(";"):
             query_string += ";"
 
-        pprint(query_string)
         tree = self._parser.parse(query_string)
         #pprint(tree.pretty())
         output = LarkInterpreter(query_string).visit(tree)
 
-        output = list(chain.from_iterable(output))
-        output = list(chain.from_iterable(output))
         return output

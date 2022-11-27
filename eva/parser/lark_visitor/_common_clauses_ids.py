@@ -57,3 +57,7 @@ class CommonClauses:
     def simple_id(self, tree):
         simple_id = str(tree.children[0])
         return simple_id
+
+    def decimal_literal(self, tree):
+        decimal_literal = float(tree.children[0])
+        return decimal_literal

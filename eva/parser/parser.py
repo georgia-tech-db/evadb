@@ -22,6 +22,8 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.lark_parser import LarkParser
 from eva.parser.parser_visitor import ParserVisitor
 
+from deepdiff import DeepDiff
+
 class AntlrErrorListener(ErrorListener):
 
     # Reference
@@ -97,5 +99,8 @@ class Parser(object):
             pprint(lark_output[0].__str__())
             pprint("-------- ANTLR  --------")
             pprint(antlr_output[0].__str__())
+            #pprint("-------- DDIFF  --------")
+            #d = DeepDiff(lark_output[0], antlr_output[0])
+            #pprint(d)
 
         return antlr_output

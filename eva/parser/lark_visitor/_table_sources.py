@@ -18,7 +18,6 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
 from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
-from itertools import chain
 
 ##################################################################
 # TABLE SOURCES
@@ -42,7 +41,7 @@ class TableSources:
     def table_sources(self, tree):
         return self.visit(tree.children[0])
 
-    def table_source_base(self, tree):
+    def table_source(self, tree):
         left_node = self.visit(tree.children[0])
         join_nodes = [left_node]
         for table_join_index in tree.children[1:]:
@@ -73,7 +72,7 @@ class TableSources:
         return TableRef(table, alias, sample_freq)
 
     def table_source_item(self, tree):
-        return self.visit_children()
+        return self.visit(tree.children[0])
 
     def query_specification(self, tree):
         target_list = None
@@ -124,11 +123,12 @@ class TableSources:
         groupby_clause = None
         # TODO ACTION Group By
 
-        if tree.find_data("table_sources"):
-            from_table = self.visit(tree.children[1])
-        if tree.find_data("where_expr"):
-            where_clause = self.visit(tree.children[1])
-        if tree.find_data("group_by_clause"):
-            groupby_clause = self.visit(tree.children[1])
+        for child in tree.children[1:]:
+            if child.data == "table_sources":
+                from_table = self.visit(child)
+            if child.data == "where_expr":
+                where_clause = self.visit(child)
+            if child.data == "group_by_clause":
+                groupby_clause = self.visit(child)
 
         return {"from": from_table, "where": where_clause, "groupby": groupby_clause}

@@ -61,9 +61,9 @@ class ConstantValueExpression(AbstractExpression):
     def __str__(self) -> str:
         expr_str = "ConstantValueExpression: ( "
         if self._value:
-            expr_str = " _value: " + str(self._value) + " ,"
+            expr_str += " _value: " + str(self._value) + " ,"
         if self._v_type:
-            expr_str = " _v_type: " + str(self._v_type) + " ,"
+            expr_str += " _v_type: " + str(self._v_type) + " ,"
         expr_str += " ) \n"
         return expr_str
 
