@@ -286,4 +286,7 @@ class CreateTable(evaql_parserVisitor):
             for uid in self.visit(ctx.uidList())
         ]
 
+        if len(col_list) != 1:
+            raise Exception("Only support one feature column.")
+
         return CreateIndexStatement(index_name, table_ref, col_list, index_type)

@@ -52,7 +52,7 @@ class ParserTests(unittest.TestCase):
         parser = Parser()
 
         create_index_query = (
-            "CREATE INDEX testindex USING HNSW ON MyVideo (id, feature);"
+            "CREATE INDEX testindex USING HNSW ON MyVideo (featCol);"
         )
         eva_stmt_list = parser.parse(create_index_query)
 
@@ -65,13 +65,22 @@ class ParserTests(unittest.TestCase):
             "testindex",
             TableRef(TableInfo("MyVideo")),
             [
-                ColumnDefinition("id", None, None, None),
-                ColumnDefinition("feature", None, None, None),
+                ColumnDefinition("featCol", None, None, None),
             ],
             IndexType.HNSW,
         )
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
+
+    def test_create_index_exception_statement(self):
+        parser = Parser()
+
+        create_index_query = (
+            "CREATE INDEX testindex USING HNSW ON MyVideo (featCol1, featCol2);"
+        )
+
+        with self.assertRaises(Exception):
+            parser.parse(create_index_query)
 
     def test_explain_dml_statement(self):
         parser = Parser()
