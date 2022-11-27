@@ -51,9 +51,7 @@ class ParserTests(unittest.TestCase):
     def test_create_index_statement(self):
         parser = Parser()
 
-        create_index_query = (
-            "CREATE INDEX testindex USING HNSW ON MyVideo (featCol);"
-        )
+        create_index_query = "CREATE INDEX testindex USING HNSW ON MyVideo (featCol);"
         eva_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
