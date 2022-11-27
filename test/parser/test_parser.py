@@ -780,6 +780,9 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
+        query = """RENAME TABLE a TO b;"""
+        parser = Parser()
+        parser.parse(query)
         query = """SELECT a.id, b FROM MyVideo WHERE id > 5 LIMIT 5;"""
         parser = Parser()
         parser.parse(query)

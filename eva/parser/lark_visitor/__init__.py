@@ -12,8 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from lark import visitors
+from lark import visitors, Tree
 from pprint import pprint
+from typing import List, TypeVar
 
 from eva.parser.lark_visitor._rename_statement import RenameTable
 from eva.parser.lark_visitor._common_clauses_ids import CommonClauses
@@ -26,10 +27,26 @@ from eva.parser.lark_visitor._expressions import Expressions
 # overloads the required visitors' functions.
 # Then make the new class as a parent class for ParserVisitor.
 
+_Leaf_T = TypeVar('_Leaf_T')
+
+class LarkBaseInterpreter(
+    visitors.Interpreter
+):
+    # Override default behavior of Interpreter
+    def visit_children(self, tree: Tree[_Leaf_T]) -> List:
+
+        output = [self._visit_tree(child) if isinstance(child, Tree) else child
+                for child in tree.children]
+        
+        # special case to flatten list
+        if len(output) == 1:
+            output = output[0]
+        
+        return output
 
 # Modified, add RenameTable
 class LarkInterpreter(
-    visitors.Interpreter,
+    LarkBaseInterpreter,
     Select,
     RenameTable,
     CommonClauses,

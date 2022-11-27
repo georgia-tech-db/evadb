@@ -36,7 +36,6 @@ class TableSources:
             select_list = []
             for child in tree.children:
                 element = self.visit(child)
-                element = element[0][0][0][0]
                 select_list.append(element)
         return select_list
 

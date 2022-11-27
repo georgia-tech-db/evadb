@@ -99,8 +99,8 @@ class Parser(object):
             pprint(lark_output[0].__str__())
             pprint("-------- ANTLR  --------")
             pprint(antlr_output[0].__str__())
-            #pprint("-------- DDIFF  --------")
-            #d = DeepDiff(lark_output[0], antlr_output[0])
-            #pprint(d)
+            pprint("-------- DDIFF  --------")
+            d = DeepDiff(lark_output[0], antlr_output[0])
+            pprint(d)
 
         return antlr_output

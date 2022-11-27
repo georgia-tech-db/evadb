@@ -75,7 +75,7 @@ delete_statement: DELETE FROM table_name (WHERE expression)? order_by_clause? (L
     
 insert_statement: INSERT INTO? table_name (("(" uid_list ")")? insert_statement_value)
     
-select_statement: _query_specification                          ->simple_select
+select_statement: query_specification                          ->simple_select
               | select_statement UNION ALL? select_statement  ->union_select
     
 update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
@@ -127,9 +127,9 @@ alias_clause: AS? uid "(" uid_list ")" | AS? uid
     
 // Select Statement Details
 
-query_expression: "(" _query_specification ")" | "(" query_expression ")"
+query_expression: "(" query_specification ")" | "(" query_expression ")"
     
-_query_specification: SELECT select_elements from_clause order_by_clause? limit_clause? error_bounds_expression? confidence_level_expression?
+query_specification: SELECT select_elements from_clause order_by_clause? limit_clause? error_bounds_expression? confidence_level_expression?
     
 select_elements: ("*" | select_element ) ("," select_element)*
     
