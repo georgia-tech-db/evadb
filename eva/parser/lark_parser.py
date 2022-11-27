@@ -15,6 +15,7 @@
 from pprint import pprint
 
 from lark import Lark
+from itertools import chain
 
 from eva.parser.lark_visitor import LarkInterpreter
 
@@ -51,7 +52,6 @@ class LarkParser(object):
         #pprint(tree.pretty())
         output = LarkInterpreter(query_string).visit(tree)
 
-        flat_list = [item for sublist in output for item in sublist]
-
-        #pprint(flat_list)
-        return flat_list
+        output = list(chain.from_iterable(output))
+        output = list(chain.from_iterable(output))
+        return output

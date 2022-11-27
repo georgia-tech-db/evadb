@@ -22,7 +22,6 @@ from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.lark_parser import LarkParser
 from eva.parser.parser_visitor import ParserVisitor
 
-
 class AntlrErrorListener(ErrorListener):
 
     # Reference
@@ -94,9 +93,9 @@ class Parser(object):
 
         if lark_output != antlr_output:
             pprint("Different parse trees: ")
-            pprint("--------")
-            pprint(lark_output)
-            pprint("--------")
-            pprint(antlr_output)
+            pprint("--------  LARK  --------")
+            pprint(lark_output[0].__str__())
+            pprint("-------- ANTLR  --------")
+            pprint(antlr_output[0].__str__())
 
         return antlr_output

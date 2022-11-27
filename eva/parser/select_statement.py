@@ -126,7 +126,19 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {}".format(self._target_list, self._from_table)
+
+        target_list_str = ""
+        for expr in self._target_list:
+            target_list_str += str(expr)
+
+        _orderby_list_str = ""
+        for expr in self._orderby_list:
+            _orderby_list_str += str(expr[0])
+            _orderby_list_str += str(expr[1])
+
+        print_str = "SELECT {} FROM {}".format(
+            target_list_str, 
+            str(self._from_table))
         print_str += " WHERE " + str(self._where_clause)
         if self._union_link is not None:
             if not self._union_all:
@@ -138,7 +150,7 @@ class SelectStatement(AbstractStatement):
             print_str += " GROUP BY " + str(self._groupby_clause)
 
         if self._orderby_list is not None:
-            print_str += " ORDER BY " + str(self._orderby_list)
+            print_str += " ORDER BY " + _orderby_list_str
 
         if self._limit_count is not None:
             print_str += " LIMIT " + str(self._limit_count)

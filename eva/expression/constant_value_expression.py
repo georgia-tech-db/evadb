@@ -58,5 +58,14 @@ class ConstantValueExpression(AbstractExpression):
         else:
             return is_equal and self.value == other.value
 
+    def __str__(self) -> str:
+        expr_str = "ConstantValueExpression: ( "
+        if self._value:
+            expr_str = " _value: " + str(self._value) + " ,"
+        if self._v_type:
+            expr_str = " _v_type: " + str(self._v_type) + " ,"
+        expr_str += " ) \n"
+        return expr_str
+
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.v_type, str(self.value)))

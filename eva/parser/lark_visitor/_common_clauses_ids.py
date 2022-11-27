@@ -41,7 +41,6 @@ class CommonClauses:
 
     def full_column_name(self, tree):
         uid = self.visit(tree.children[0])
-        print(uid)
 
         # check for dottedid
         if len(tree.children) > 1:

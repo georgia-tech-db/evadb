@@ -27,7 +27,7 @@ class TupleValueExpression(AbstractExpression):
         self,
         col_name: str = None,
         table_alias: str = None,
-        col_idx: int = -1,
+        col_idx: int = None,
         col_object: DataFrameColumn = None,
         col_alias=None,
     ):
@@ -94,6 +94,23 @@ class TupleValueExpression(AbstractExpression):
             and self._col_idx == other._col_idx
         )
 
+    def __str__(self) -> str:
+        expr_str = "TupleValueExpression: ("
+        if self.table_alias:
+            expr_str += " table_alias: " + str(self.table_alias) + " ,"
+        if self.table_metadata_id:
+            expr_str += " table_metadata_id: " + str(self.table_metadata_id) + " ,"
+        if self.col_name:
+            expr_str += " col_name: " + self.col_name + " ,"
+        if self.col_alias:
+            expr_str += " col_alias: " + str(self.col_alias) + " ,"
+        if self.col_object:
+            expr_str += " col_object: " + str(self.col_object) + " ,"
+        if self._col_idx:
+            expr_str += " _col_idx: " + str(self._col_idx) + " ,"
+        expr_str += ")\n"
+        return expr_str
+    
     def __hash__(self) -> int:
         return hash(
             (
