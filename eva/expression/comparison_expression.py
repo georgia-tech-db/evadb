@@ -69,6 +69,17 @@ class ComparisonExpression(AbstractExpression):
         else:
             raise NotImplementedError
 
+    def __str__(self) -> str:
+        expr_str = "ComparisonExpression: ("
+        if self.etype:
+            expr_str += " exp_type: " + str(self.etype) + " ,"
+        if self.get_child(0):
+            expr_str += " left: " + str(self.get_child(0)) + " ,"
+        if self.get_child(1):
+            expr_str += " right: " + str(self.get_child(1)) + " ,"
+        expr_str += ")\n"
+        return expr_str
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, ComparisonExpression):

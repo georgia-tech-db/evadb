@@ -19,6 +19,8 @@ from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpressio
 from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
 
+from lark import Tree
+
 ##################################################################
 # TABLE SOURCES
 ##################################################################
@@ -123,12 +125,13 @@ class TableSources:
         groupby_clause = None
         # TODO ACTION Group By
 
-        for child in tree.children[1:]:
-            if child.data == "table_sources":
-                from_table = self.visit(child)
-            if child.data == "where_expr":
-                where_clause = self.visit(child)
-            if child.data == "group_by_clause":
-                groupby_clause = self.visit(child)
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "table_sources":
+                    from_table = self.visit(child)
+                if child.data == "where_expr":
+                    where_clause = self.visit(child)
+                if child.data == "group_by_clause":
+                    groupby_clause = self.visit(child)
 
         return {"from": from_table, "where": where_clause, "groupby": groupby_clause}
