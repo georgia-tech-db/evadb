@@ -77,9 +77,9 @@ class Expressions:
         return LogicalExpression(op, left, right)
 
     def binary_comparison_predicate(self, tree):
-        left = self.visit(ctx.left)
-        right = self.visit(ctx.right)
-        op = self.visit(ctx.comparisonOperator())
+        left = self.visit(tree.children[0])
+        op = self.visit(tree.children[1])
+        right = self.visit(tree.children[2])
         return ComparisonExpression(op, left, right)
 
     def nested_expression_atom(self, tree):
