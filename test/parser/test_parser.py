@@ -780,6 +780,6 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT a.id, b FROM MyVideo LIMIT 5;"""
+        query = """SELECT a.id, b FROM MyVideo WHERE id > 5 LIMIT 5;"""
         parser = Parser()
         parser.parse(query)
