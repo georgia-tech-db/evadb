@@ -1,0 +1,131 @@
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import ast
+
+import numpy as np
+
+from eva.catalog.column_type import ColumnType
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.logical_expression import LogicalExpression
+
+from lark import Tree
+
+##################################################################
+# EXPRESSIONS
+##################################################################
+class Expressions:
+
+    def string_literal(self, tree):
+        # Fix a bug here; 'VAN' Literal gets converted to "'VAN'";
+        # Multiple quotes should be removed
+
+        if ctx.STRING_LITERAL() is not None:
+            return ConstantValueExpression(ctx.getText()[1:-1], ColumnType.TEXT)
+        # todo handle other types
+        return self.visitChildren(ctx)
+
+    def array_literal(self, tree):
+        res = ConstantValueExpression(
+            np.array(ast.literal_eval(ctx.getText())), ColumnType.NDARRAY
+        )
+        return res
+
+    def expression_atom(self, tree):
+        output = self.visit_children(tree)
+        # flatten
+        output = output[0]
+        return output
+    
+    def comparison_expression(self, tree):
+        print(tree.pretty())
+        left = self.visit_children(tree.children[0])
+        return left
+
+    def constant(self, tree):
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "real_literal":
+                    real_literal = self.visit(child)
+                    return ConstantValueExpression(real_literal, 
+                           ColumnType.FLOAT)
+                elif child.data == "decimal_literal":
+                    decimal_literal = self.visit(child)
+                    return ConstantValueExpression(decimal_literal,
+                           ColumnType.INTEGER)
+
+    def logical_expression(self, tree):
+        if len(ctx.children) < 3:
+            # error scenario, should have 3 children
+            return None
+        left = self.visit(ctx.getChild(0))
+        op = self.visit(ctx.getChild(1))
+        right = self.visit(ctx.getChild(2))
+        return LogicalExpression(op, left, right)
+
+    def binary_comparison_predicate(self, tree):
+        left = self.visit(ctx.left)
+        right = self.visit(ctx.right)
+        op = self.visit(ctx.comparisonOperator())
+        return ComparisonExpression(op, left, right)
+
+    def nested_expression_atom(self, tree):
+        # ToDo Can there be >1 expression in this case
+        expr = ctx.expression(0)
+        return self.visit(expr)
+
+    def comparison_operator(self, tree):
+        op = str(tree.children[0])
+        if op == "=":
+            return ExpressionType.COMPARE_EQUAL
+        elif op == "<":
+            return ExpressionType.COMPARE_LESSER
+        elif op == ">":
+            return ExpressionType.COMPARE_GREATER
+        elif op == ">=":
+            return ExpressionType.COMPARE_GEQ
+        elif op == "<=":
+            return ExpressionType.COMPARE_LEQ
+        elif op == "!=":
+            return ExpressionType.COMPARE_NEQ
+        elif op == "@>":
+            return ExpressionType.COMPARE_CONTAINS
+        elif op == "<@":
+            return ExpressionType.COMPARE_IS_CONTAINED
+        else:
+            return ExpressionType.INVALID
+
+    def logical_operator(self, tree):
+        op = ctx.getText()
+
+        if op == "OR":
+            return ExpressionType.LOGICAL_OR
+        elif op == "AND":
+            return ExpressionType.LOGICAL_AND
+        else:
+            return ExpressionType.INVALID
+
+    def expressions_with_defaults(self, tree):
+        expr_list = []
+        expressions_with_defaults_count = len(ctx.expressionOrDefault())
+        for i in range(expressions_with_defaults_count):
+            expression = self.visit(ctx.expressionOrDefault(i))
+            expr_list.append(expression)
+
+        return expr_list
+
+    def sample_clause(self, tree):
+        return ConstantValueExpression(self.visitChildren(ctx))

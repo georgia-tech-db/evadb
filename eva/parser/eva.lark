@@ -132,15 +132,17 @@ select_elements: ("*" | select_element ) ("," select_element)*
 select_element: full_id "." "*"                                                
     | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?                    
     
-from_clause: FROM table_sources (WHERE expression)? (GROUP BY  group_by_item ("," group_by_item)* )? (HAVING expression)?
-    
+from_clause: FROM table_sources (WHERE where_expr)? (GROUP BY  group_by_item ("," group_by_item)* )? (HAVING expression)?
+
+where_expr: expression
+
 group_by_item: expression (ASC | DESC)?
     
 limit_clause: LIMIT ((decimal_literal ",")? decimal_literal  | decimal_literal OFFSET decimal_literal)
     
-error_bounds_expression: ERROR_BOUNDS REAL_LITERAL
+error_bounds_expression: ERROR_BOUNDS real_literal
 	
-confidence_level_expression: CONFIDENCE_LEVEL REAL_LITERAL
+confidence_level_expression: CONFIDENCE_LEVEL real_literal
 	
 // Utility Statements
 
@@ -177,8 +179,6 @@ simple_id: ID
 dotted_id: DOT_ID | "." uid
 
 //    Literals
-
-decimal_literal: DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL | ANYDIM
     
 string_literal: STRING_LITERAL
 
@@ -188,14 +188,12 @@ null_notnull: NOT? NULL_LITERAL
 
 array_literal: LR_SQ_BRACKET  constant ("," constant)* RR_SQ_BRACKET
              | LR_SQ_BRACKET RR_SQ_BRACKET
-    
 
-constant: string_literal | decimal_literal
-    | decimal_literal
-    | boolean_literal
-    | REAL_LITERAL
-    | array_literal
-    
+constant: string_literal | decimal_literal | boolean_literal | real_literal | array_literal
+
+real_literal: REAL_LITERAL
+
+decimal_literal: DECIMAL_LITERAL | ZERO_DECIMAL | ONE_DECIMAL | TWO_DECIMAL | ANYDIM
 
 //    Data Types
 
@@ -265,7 +263,7 @@ expression: (NOT | "!") expression  | expression logical_operator expression | p
 
 predicate: predicate NOT? IN "(" (_select_statement | expressions) ")"  
     | predicate IS null_notnull   
-    | predicate comparison_operator predicate  
+    | predicate comparison_operator predicate  -> binary_comparison_predicate
     | predicate comparison_operator (ALL | ANY | SOME) "(" _select_statement ")"       
     | predicate NOT? LIKE predicate (STRING_LITERAL)?   
     | assign_var  
@@ -285,11 +283,9 @@ expression_atom.2: constant
 
 unary_operator: EXCLAMATION_SYMBOL | BIT_NOT_OP | PLUS | MINUS | NOT 
     
-comparison_operator: "=" | ">" | "<" | "<=" | ">="
-    | "<>" | "!=" | "<=>"
-    | "@>" | "<@"
+comparison_operator: EQUAL_SYMBOL | GREATER_SYMBOL | GREATER_OR_EQUAL_SYMBOL LESS_SYMBOL | LESS_OR_EQUAL_SYMBOL | NOT_EQUAL_SYMBOL | CONTAINS_SYMBOL | CONTAINED_IN_SYMBOL
     
-logical_operator: AND | "&&" | XOR | OR | "||"
+logical_operator: AND | XOR | OR 
     
 bit_operator: "<<" | ">>" | "&" | "^" | "|"
 
@@ -477,7 +473,11 @@ EQUAL_SYMBOL:                        "="
 GREATER_SYMBOL:                      ">"
 LESS_SYMBOL:                         "<"
 EXCLAMATION_SYMBOL:                  "!"
-
+GREATER_OR_EQUAL_SYMBOL:             "<="
+LESS_OR_EQUAL_SYMBOL:                ">="
+NOT_EQUAL_SYMBOL:                    "<>"
+CONTAINS_SYMBOL:                     "@>"
+CONTAINED_IN_SYMBOL:                 "<@"
 
 // Operators. Bit
 

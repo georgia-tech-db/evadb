@@ -59,5 +59,9 @@ class CommonClauses:
         return simple_id
 
     def decimal_literal(self, tree):
-        decimal_literal = float(tree.children[0])
+        decimal_literal = int(tree.children[0])
         return decimal_literal
+
+    def real_literal(self, tree):
+        real_literal = float(tree.children[0])
+        return real_literal

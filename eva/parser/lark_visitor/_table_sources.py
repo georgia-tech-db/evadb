@@ -36,7 +36,7 @@ class TableSources:
             select_list = []
             for child in tree.children:
                 element = self.visit(child)
-                element = element[0][0][0][0]
+                element = element[0][0][0]
                 select_list.append(element)
         return select_list
 
@@ -129,9 +129,9 @@ class TableSources:
             if isinstance(child, Tree):
                 if child.data == "table_sources":
                     from_table = self.visit(child)
-                if child.data == "where_expr":
+                elif child.data == "where_expr":
                     where_clause = self.visit(child)
-                if child.data == "group_by_clause":
+                elif child.data == "group_by_clause":
                     groupby_clause = self.visit(child)
 
         return {"from": from_table, "where": where_clause, "groupby": groupby_clause}

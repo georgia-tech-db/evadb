@@ -591,7 +591,7 @@ predicate
     | predicate IS nullNotnull                                      #isNullPredicate
     | left=predicate comparisonOperator right=predicate             #binaryComparisonPredicate
     | predicate comparisonOperator
-      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'         #subqueryComparisonPredicate
+      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'       #subqueryComparisonPredicate
     | predicate NOT? LIKE predicate (STRING_LITERAL)?               #likePredicate
     | (LOCAL_ID VAR_ASSIGN)? expressionAtom                         #expressionAtomPredicate
     ;
