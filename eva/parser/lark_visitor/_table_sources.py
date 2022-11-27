@@ -43,10 +43,10 @@ class TableSources:
         return self.visit(tree.children[0])
 
     def table_source_base(self, tree):
-        left_node = self.visit(ctx.tableSourceItemWithSample())
+        left_node = self.visit(tree.children[0])
         join_nodes = [left_node]
-        for table_join_index in range(len(ctx.joinPart())):
-            table = self.visit(ctx.joinPart(table_join_index))
+        for table_join_index in tree.children[1:]:
+            table = self.visit(table_join_index)
             join_nodes.append(table)
 
         num_table_joins = len(join_nodes)
@@ -61,6 +61,19 @@ class TableSources:
             return join_nodes[-1]
         else:
             return join_nodes[0]
+    
+    def table_source_item_with_sample(self, tree):
+        sample_freq = None
+        alias = None
+        table = self.visit(tree.children[0])
+        #if ctx.sampleClause():
+        #    sample_freq = self.visit(ctx.sampleClause())
+        #if ctx.AS():
+        #    alias = Alias(self.visit(ctx.uid()))
+        return TableRef(table, alias, sample_freq)
+
+    def table_source_item(self, tree):
+        return self.visit_children()
 
     def query_specification(self, tree):
         target_list = None
@@ -112,9 +125,9 @@ class TableSources:
         # TODO ACTION Group By
 
         if tree.find_data("table_sources"):
-            from_table = self.visit(tree.find_data("table_sources"))
+            from_table = self.visit(tree.children[1])
         if tree.find_data("where_expr"):
-            where_clause = self.visit(tree.find_data("where_expr"))
+            where_clause = self.visit(tree.children[1])
         if tree.find_data("group_by_clause"):
             groupby_clause = self.visit(tree.children[1])
 
