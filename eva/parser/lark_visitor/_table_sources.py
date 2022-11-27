@@ -42,7 +42,7 @@ class TableSources:
     def table_sources(self, tree):
         return self.visit(tree.children[0])
 
-    def table_source(self, tree):
+    def table_source_base(self, tree):
         left_node = self.visit(tree.children[0])
         join_nodes = [left_node]
         for table_join_index in tree.children[1:]:
@@ -134,3 +134,81 @@ class TableSources:
                     groupby_clause = self.visit(child)
 
         return {"from": from_table, "where": where_clause, "groupby": groupby_clause}
+
+    # Join
+    def inner_join(self, tree):
+        table = self.visit(ctx.tableSourceItemWithSample())
+        if ctx.ON() is None:
+            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
+        join_predicates = self.visit(ctx.expression())
+        return TableRef(
+            JoinNode(
+                None,
+                table,
+                predicate=join_predicates,
+                join_type=JoinType.INNER_JOIN,
+            )
+        )
+
+    def lateral_join(self, tree):
+        tve = self.visit(ctx.tableValuedFunction())
+        alias = None
+        if ctx.aliasClause():
+            alias = self.visit(ctx.aliasClause())
+        else:
+            err_msg = f"TableValuedFunction {tve.func_expr.name} should have alias."
+            logger.error(err_msg)
+            raise SyntaxError(err_msg)
+        join_type = JoinType.LATERAL_JOIN
+
+        return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
+
+    def table_valued_function(self, tree):
+        func_expr = self.visit(ctx.functionCall())
+        has_unnest = False
+        if ctx.UNNEST():
+            has_unnest = True
+        return TableValuedExpression(func_expr, do_unnest=has_unnest)
+
+    # Nested sub query
+    def subquery_table_item(self, tree):
+        return self.visit(ctx.subqueryTableSourceItem())
+
+    def subquery_table_source_item(self, tree):
+        return self.visit(ctx.selectStatement())
+
+    def union_select(self, tree):
+        left_selectStatement = self.visit(ctx.left)
+        right_selectStatement = self.visit(ctx.right)
+        # This makes a difference becasue the LL parser (Left-to-right)
+        while right_selectStatement.union_link is not None:
+            right_selectStatement = right_selectStatement.union_link
+        # We need to check the correctness for union operator.
+        # Here when parsing or later operator, plan?
+        right_selectStatement.union_link = left_selectStatement
+        if ctx.unionAll is None:
+            right_selectStatement.union_all = False
+        else:
+            right_selectStatement.union_all = True
+        return right_selectStatement
+
+    def group_by_clause(self, tree):
+        groupby_clause = None
+        if ctx.groupByItem():
+            # TODO ACTION: Check what happens if 0 size is possible
+            if len(ctx.groupByItem()) > 1:
+                err_msg = "Parsing error: We do not \
+                        support multiple attributes in GROUP BY"
+                logger.error(err_msg)
+                raise SyntaxError(err_msg)
+            groupby_clause = self.visit(ctx.groupByItem()[0])
+        return groupby_clause
+
+    def alias_clause(self, tree):
+        alias_name = self.visit(ctx.uid())
+        column_list = []
+        if ctx.uidList():
+            column_list = self.visit(ctx.uidList())
+            column_list = [col.col_name for col in column_list]
+
+        return Alias(alias_name, column_list)
