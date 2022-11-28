@@ -267,9 +267,8 @@ class StatementToPlanConvertor:
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
-        table_metainfo = statement.table_ref.table.table_obj
         load_data_opr = LogicalLoadData(
-            table_metainfo,
+            statement.table_ref,
             statement.path,
             statement.column_list,
             statement.file_options,
@@ -281,11 +280,10 @@ class StatementToPlanConvertor:
         Arguments:
             statement(UploadStatement): [Upload statement]
         """
-        table_metainfo = statement.table_ref.table.table_obj
         upload_opr = LogicalUpload(
             statement.path,
             statement.video_blob,
-            table_metainfo,
+            statement.table_ref,
             statement.column_list,
             statement.file_options,
         )

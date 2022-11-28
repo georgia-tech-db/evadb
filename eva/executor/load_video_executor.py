@@ -64,17 +64,21 @@ class LoadVideoExecutor(AbstractExecutor):
         database_name = table_ref.table.database_name
         table_name = table_ref.table.table_name
         # Sanity check to make sure there is no existing table with same name
-        if self.catalog.check_table_exists(database_name, table_name):
-            msg = f"Adding to an existing table {name}."
+        do_create = False
+        table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+        if table_obj:
+            msg = f"Adding to an existing table {table_name}."
             logger.info(msg)
         # Create the catalog entry
         else:
-            table_ref.table_obj = create_video_metadata(table_name)
+            table_obj = create_video_metadata(table_name)
+            do_create = True
 
-        storage_engine = StorageEngine.factory(self.node.table_metainfo)
-        storage_engine.create(self.node.table_metainfo, if_not_exists=True)
+        storage_engine = StorageEngine.factory(table_obj)
+        if do_create:
+            storage_engine.create(table_obj)
         success = storage_engine.write(
-            self.node.table_metainfo,
+            table_obj,
             Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
         )
 
