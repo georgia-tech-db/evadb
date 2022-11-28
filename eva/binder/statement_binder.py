@@ -13,20 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from pathlib import Path
-from typing import Union
 
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
     check_groupby_pattern,
     check_table_object_is_video,
-    create_multimedia_metadata,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -37,7 +33,6 @@ from eva.parser.explain_statement import ExplainStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
