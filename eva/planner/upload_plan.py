@@ -16,8 +16,8 @@
 from pathlib import Path
 from typing import List
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.table_ref import TableRef
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -37,7 +37,7 @@ class UploadPlan(AbstractPlan):
         self,
         file_path: Path,
         video_blob: str,
-        table_metainfo: DataFrameMetadata,
+        table_ref: TableRef,
         batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
@@ -45,7 +45,7 @@ class UploadPlan(AbstractPlan):
         super().__init__(PlanOprType.UPLOAD)
         self._file_path = file_path
         self._video_blob = video_blob
-        self._table_metainfo = table_metainfo
+        self._table_ref = table_ref
         self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
@@ -59,8 +59,8 @@ class UploadPlan(AbstractPlan):
         return self._video_blob
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table_ref(self):
+        return self._table_ref
 
     @property
     def batch_mem_size(self):
@@ -83,7 +83,7 @@ class UploadPlan(AbstractPlan):
             file_options={})".format(
             self.file_path,
             "string of video blob",
-            self.table_metainfo,
+            self.table_ref,
             self.batch_mem_size,
             self.column_list,
             self.file_options,
@@ -95,7 +95,7 @@ class UploadPlan(AbstractPlan):
                 super().__hash__(),
                 self.file_path,
                 self.video_blob,
-                self.table_metainfo,
+                self.table_ref,
                 self.batch_mem_size,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
