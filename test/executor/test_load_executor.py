@@ -17,18 +17,16 @@ from pathlib import Path
 from test.util import create_sample_csv, file_remove
 
 import pandas as pd
-from mock import call, patch, MagicMock
+from mock import MagicMock, call, patch
 
-from eva.executor.load_executor import LoadDataExecutor
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.executor.load_executor import LoadDataExecutor
 from eva.models.storage.batch import Batch
-from eva.parser.types import FileFormatType
 from eva.parser.table_ref import TableInfo
+from eva.parser.types import FileFormatType
 
 
 class LoadExecutorTest(unittest.TestCase):
-
     def _create_load_video_plan(self):
         file_path = "video"
         table_info = TableInfo("video")
@@ -47,9 +45,14 @@ class LoadExecutorTest(unittest.TestCase):
         return plan
 
     @patch("eva.catalog.catalog_manager.CatalogManager.create_video_metadata")
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata", return_value=None)
+    @patch(
+        "eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata",
+        return_value=None,
+    )
     @patch("eva.executor.load_video_executor.StorageEngine.factory")
-    def test_should_call_opencv_reader_and_storage_engine(self, factory_mock, get_mock, create_mock):
+    def test_should_call_opencv_reader_and_storage_engine(
+        self, factory_mock, get_mock, create_mock
+    ):
         table_obj = MagicMock()
         create_mock.return_value = table_obj
 
@@ -63,14 +66,21 @@ class LoadExecutorTest(unittest.TestCase):
                 table_obj, Batch(pd.DataFrame([{"video_file_path": plan.file_path}]))
             )
             expected = Batch(
-                pd.DataFrame([{f"Video successfully added at location: {plan.file_path}"}])
+                pd.DataFrame(
+                    [{f"Video successfully added at location: {plan.file_path}"}]
+                )
             )
             self.assertEqual(batch, expected)
 
     @patch("eva.catalog.catalog_manager.CatalogManager.create_video_metadata")
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata", return_value=None)
+    @patch(
+        "eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata",
+        return_value=None,
+    )
     @patch("eva.executor.load_video_executor.StorageEngine.factory")
-    def test_should_search_in_upload_directory(self, factory_mock, catalog_mock, create_mock):
+    def test_should_search_in_upload_directory(
+        self, factory_mock, catalog_mock, create_mock
+    ):
         table_obj = MagicMock()
         create_mock.return_value = table_obj
         plan = self._create_load_video_plan()
@@ -102,7 +112,9 @@ class LoadExecutorTest(unittest.TestCase):
 
     @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata")
     @patch("eva.executor.load_video_executor.StorageEngine.factory")
-    def test_should_call_csv_reader_and_storage_engine(self, factory_mock, catalog_mock):
+    def test_should_call_csv_reader_and_storage_engine(
+        self, factory_mock, catalog_mock
+    ):
         batch_frames = [list(range(5))] * 2
 
         # creates a dummy.csv
@@ -118,7 +130,7 @@ class LoadExecutorTest(unittest.TestCase):
             type("DataFrameColumn", (), {"name": "frame_id"}),
             type("DataFrameColumn", (), {"name": "video_id"}),
         ]
-        table_obj = MagicMock(columns = column_list)
+        table_obj = MagicMock(columns=column_list)
         catalog_mock.return_value = table_obj
         plan = type(
             "LoadDataPlan",

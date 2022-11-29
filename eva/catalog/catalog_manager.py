@@ -26,6 +26,7 @@ from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
+from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
@@ -140,7 +141,6 @@ class CatalogManager(object):
         )
         return metadata
 
-
     def create_table_metadata(
         self, table_info: TableInfo, columns: List[ColumnDefinition]
     ) -> DataFrameMetadata:
@@ -159,13 +159,13 @@ class CatalogManager(object):
         """Create column metadata for the input parsed column list. This function
         will not commit the provided column into catalog table.
         Will only return in memory list of ColumnDataframe objects
-    
+
         Arguments:
             col_list {List[ColumnDefinition]} -- parsed col list to be created
         """
         if isinstance(col_list, ColumnDefinition):
             col_list = [col_list]
-    
+
         result_list = []
         for col in col_list:
             if col is None:
@@ -176,7 +176,7 @@ class CatalogManager(object):
                     col.name, col.type, col.array_type, col.dimension, col.cci
                 )
             )
-    
+
         return result_list
 
     def create_column_metadata(

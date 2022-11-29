@@ -29,6 +29,8 @@ class CreateExecutor(AbstractExecutor):
 
     def exec(self):
         if not handle_if_not_exists(self.node.table_ref, self.node.if_not_exists):
-            metadata = self.catalog.create_table_metadata(self.node.table_ref, self.node.column_list)
+            metadata = self.catalog.create_table_metadata(
+                self.node.table_ref, self.node.column_list
+            )
             storage_engine = StorageEngine.factory(metadata)
             storage_engine.create(table=metadata)

@@ -18,18 +18,14 @@ import re
 from typing import TYPE_CHECKING, List
 
 from eva.catalog.catalog_utils import is_video_table
-from eva.parser.types import FileFormatType
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
-from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
