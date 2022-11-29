@@ -19,6 +19,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.storage.storage_engine import StorageEngine
@@ -56,7 +57,7 @@ class LoadVideoExecutor(AbstractExecutor):
                 self.node.file_path
             )
             logger.error(error)
-            raise RuntimeError(error)
+            raise ExecutorError(error)
 
         # Create catalog entry
         table_info = self.node.table_info

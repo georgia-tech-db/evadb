@@ -19,6 +19,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
@@ -51,7 +52,7 @@ class LoadCSVExecutor(AbstractExecutor):
         if table_obj is None:
             error = f"{table_name} does not exist."
             logger.error(error)
-            raise RuntimeError(error)
+            raise ExecutorError(error)
 
         # Get the column information
         column_list = []

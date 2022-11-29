@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.binder.binder_utils import handle_if_not_exists
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
 from eva.expression.abstract_expression import ExpressionType
 from eva.parser.create_statement import ColumnDefinition
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
@@ -49,7 +49,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                 )
 
                 logger.error(err_msg)
-                raise RuntimeError(err_msg)
+                raise ExecutorError(err_msg)
 
             # gather child projected column objects
             child_objs = []
@@ -66,7 +66,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                     len(self.node.columns), len(child_objs)
                 )
                 logger.error(err_msg)
-                raise RuntimeError(err_msg)
+                raise ExecutorError(err_msg)
 
             col_defs = []
             # Copy column type info from child columns

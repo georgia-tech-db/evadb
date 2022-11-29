@@ -55,21 +55,6 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         raise BinderError(error)
 
 
-def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
-    if CatalogManager().check_table_exists(
-        table_ref.table.database_name, table_ref.table.table_name
-    ):
-        err_msg = "Table: {} already exists".format(table_ref)
-        if if_not_exist:
-            logger.warn(err_msg)
-            return True
-        else:
-            logger.error(err_msg)
-            raise BinderError(err_msg)
-    else:
-        return False
-
-
 def extend_star(
     binder_context: StatementBinderContext,
 ) -> List[TupleValueExpression]:
