@@ -16,7 +16,7 @@ import unittest
 
 from mock import MagicMock, patch
 
-from eva.binder.binder_utils import BinderError, bind_table_info, handle_if_not_exists
+from eva.binder.binder_utils import BinderError, bind_table_info
 
 
 class BinderUtilsTest(unittest.TestCase):
@@ -38,14 +38,3 @@ class BinderUtilsTest(unittest.TestCase):
             catalog = mock.return_value
             catalog.get_dataset_metadata.return_value = None
             bind_table_info(video)
-
-    @patch("eva.binder.binder_utils.CatalogManager.check_table_exists")
-    def test_handle_if_not_exists_raises_error(self, check_mock):
-        check_mock.return_value = True
-        with self.assertRaises(BinderError):
-            handle_if_not_exists(check_mock, False)
-
-    @patch("eva.binder.binder_utils.CatalogManager.check_table_exists")
-    def test_handle_if_not_exists_return_True(self, check_mock):
-        check_mock.return_value = True
-        self.assertTrue(handle_if_not_exists(check_mock, True))
