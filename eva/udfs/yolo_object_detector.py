@@ -174,10 +174,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # because of yolov5 error with Tensors
 
         outcome = pd.DataFrame()
-        img_rgb = torch.stack([
-            frames[:, 0],
-            frames[:, 1],
-            frames[:, 2]], dim=3)
+        img_rgb = torch.stack([frames[:, 0], frames[:, 1], frames[:, 2]], dim=3)
         img_rgb = img_rgb.cpu().detach().numpy()
         img_rgb = img_rgb * 255
         predictions = None
@@ -199,9 +196,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
             )
 
             outcome = outcome.append(
-                {"labels": pred_class,
-                 "scores": pred_score,
-                 "bboxes": pred_boxes},
+                {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
                 ignore_index=True,
             )
         return outcome

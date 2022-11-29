@@ -53,6 +53,13 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
+    def test_should_run_pytorch_and_yolo(self):
+        select_query = """SELECT YoloV5(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
+
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_ssd(self):
         create_udf_query = """CREATE UDF SSDObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
