@@ -173,19 +173,25 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # Stacking all frames, and changing to numpy
         # because of yolov5 error with Tensors
 
-        for i in range(frames.shape[0]):
-            img_b = frames[i][0]
-            img_g = frames[i][1]
-            img_r = frames[i][2]
-            img_rgb = torch.stack((img_r, img_g, img_b), dim=2)
-            img_rgb = img_rgb.cpu().detach().numpy()
-            img_rgb = img_rgb * 255
+        outcome = pd.DataFrame()
+        img_rgb = torch.stack([
+            frames[:, 0],
+            frames[:, 1],
+            frames[:, 2]], dim=3)
+        img_rgb = img_rgb.cpu().detach().numpy()
+        img_rgb = img_rgb * 255
+        predictions = None
+        model_pred = []
+
+        if img_rgb.shape[0] > 5:  # batch of greater than 5
             predictions = self.model(img_rgb)
+            model_pred = predictions.pandas().xyxy
+        else:
+            for i in range(img_rgb.shape[0]):
+                predictions = self.model(img_rgb[0])
+                model_pred.append(predictions.pandas().xyxy[0])
 
-            single_result = predictions.pandas().xyxy[0]
-
-            outcome = pd.DataFrame()
-
+        for single_result in model_pred:
             pred_class = single_result["name"].tolist()
             pred_score = single_result["confidence"].tolist()
             pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
@@ -193,7 +199,9 @@ class YoloV5(PytorchAbstractClassifierUDF):
             )
 
             outcome = outcome.append(
-                {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
+                {"labels": pred_class,
+                 "scores": pred_score,
+                 "bboxes": pred_boxes},
                 ignore_index=True,
             )
         return outcome
