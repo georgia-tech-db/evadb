@@ -30,7 +30,7 @@ class LoadExecutorTest(unittest.TestCase):
     @patch("eva.executor.load_video_executor.StorageEngine.factory")
     def test_should_call_opencv_reader_and_storage_engine(self, factory_mock):
         file_path = "video"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -38,7 +38,7 @@ class LoadExecutorTest(unittest.TestCase):
             "LoadDataPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "file_path": file_path,
                 "batch_mem_size": batch_mem_size,
                 "file_options": file_options,
@@ -50,10 +50,10 @@ class LoadExecutorTest(unittest.TestCase):
             mock_exists.return_value = True
             batch = next(load_executor.exec())
             factory_mock.return_value.create.assert_called_once_with(
-                table_metainfo, if_not_exists=True
+                table_ref, if_not_exists=True
             )
             factory_mock.return_value.write.assert_called_once_with(
-                table_metainfo, Batch(pd.DataFrame([{"video_file_path": file_path}]))
+                table_ref, Batch(pd.DataFrame([{"video_file_path": file_path}]))
             )
             expected = Batch(
                 pd.DataFrame([{f"Video successfully added at location: {file_path}"}])
@@ -66,7 +66,7 @@ class LoadExecutorTest(unittest.TestCase):
             ConfigurationManager().get_value("storage", "upload_dir")
         )
         file_path = "video"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -74,7 +74,7 @@ class LoadExecutorTest(unittest.TestCase):
             "LoadDataPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "file_path": file_path,
                 "batch_mem_size": batch_mem_size,
                 "file_options": file_options,
@@ -87,10 +87,10 @@ class LoadExecutorTest(unittest.TestCase):
             batch = next(load_executor.exec())
             location = self.upload_path / file_path
             factory_mock.return_value.create.assert_called_once_with(
-                table_metainfo, if_not_exists=True
+                table_ref, if_not_exists=True
             )
             factory_mock.return_value.write.assert_called_once_with(
-                table_metainfo,
+                table_ref,
                 Batch(pd.DataFrame([{"video_file_path": str(location)}])),
             )
             expected = Batch(
@@ -132,7 +132,7 @@ class LoadExecutorTest(unittest.TestCase):
         create_sample_csv()
 
         file_path = "dummy.csv"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
@@ -145,7 +145,7 @@ class LoadExecutorTest(unittest.TestCase):
             "LoadDataPlan",
             (),
             {
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "file_path": file_path,
                 "batch_mem_size": batch_mem_size,
                 "column_list": column_list,
@@ -156,8 +156,8 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
         factory_mock.return_value.write.has_calls(
-            call(table_metainfo, batch_frames[0]),
-            call(table_metainfo, batch_frames[1]),
+            call(table_ref, batch_frames[0]),
+            call(table_ref, batch_frames[1]),
         )
 
         # Note: We call exec() from the child classes.

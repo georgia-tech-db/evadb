@@ -31,7 +31,7 @@ class UploadExecutorTest(unittest.TestCase):
     def test_should_call_opencv_reader_and_storage_engine(self, factory_mock):
         file_path = "video"
         video_blob = "b'AAAA'"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -41,7 +41,7 @@ class UploadExecutorTest(unittest.TestCase):
             {
                 "file_path": file_path,
                 "video_blob": video_blob,
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "batch_mem_size": batch_mem_size,
                 "file_options": file_options,
             },
@@ -52,10 +52,10 @@ class UploadExecutorTest(unittest.TestCase):
             mock_exists.return_value = True
             batch = next(upload_executor.exec())
             factory_mock.return_value.create.assert_called_once_with(
-                table_metainfo, if_not_exists=True
+                table_ref, if_not_exists=True
             )
             factory_mock.return_value.write.assert_called_once_with(
-                table_metainfo, Batch(pd.DataFrame([{"video_file_path": file_path}]))
+                table_ref, Batch(pd.DataFrame([{"video_file_path": file_path}]))
             )
             location = file_path
             expected = Batch(
@@ -71,7 +71,7 @@ class UploadExecutorTest(unittest.TestCase):
         )
         file_path = "video"
         video_blob = "b'AAAA'"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -81,7 +81,7 @@ class UploadExecutorTest(unittest.TestCase):
             {
                 "file_path": file_path,
                 "video_blob": video_blob,
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "batch_mem_size": batch_mem_size,
                 "file_options": file_options,
             },
@@ -94,10 +94,10 @@ class UploadExecutorTest(unittest.TestCase):
             location = self.upload_dir / file_path
 
             factory_mock.return_value.create.assert_called_once_with(
-                table_metainfo, if_not_exists=True
+                table_ref, if_not_exists=True
             )
             factory_mock.return_value.write.assert_called_once_with(
-                table_metainfo,
+                table_ref,
                 Batch(pd.DataFrame([{"video_file_path": str(location)}])),
             )
             expected = Batch(
@@ -109,7 +109,7 @@ class UploadExecutorTest(unittest.TestCase):
     def test_should_fail_to_find_file(self, factory_mock):
         file_path = "video"
         video_blob = "b'AAAA'"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
@@ -120,7 +120,7 @@ class UploadExecutorTest(unittest.TestCase):
             {
                 "file_path": file_path,
                 "video_blob": video_blob,
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "batch_mem_size": batch_mem_size,
                 "column_list": column_list,
                 "file_options": file_options,
@@ -141,7 +141,7 @@ class UploadExecutorTest(unittest.TestCase):
         csv_blob = create_sample_csv_as_blob()
 
         file_path = "dummy.csv"
-        table_metainfo = "info"
+        table_ref = "ref"
         batch_mem_size = 3000
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
@@ -156,7 +156,7 @@ class UploadExecutorTest(unittest.TestCase):
             {
                 "file_path": file_path,
                 "video_blob": csv_blob,
-                "table_metainfo": table_metainfo,
+                "table_ref": table_ref,
                 "batch_mem_size": batch_mem_size,
                 "column_list": column_list,
                 "file_options": file_options,
@@ -166,7 +166,7 @@ class UploadExecutorTest(unittest.TestCase):
         upload_executor = UploadExecutor(plan)
         batch = next(upload_executor.exec())
         factory_mock.return_value.write.has_calls(
-            call(table_metainfo, batch_frames[0]), call(table_metainfo, batch_frames[1])
+            call(table_ref, batch_frames[0]), call(table_ref, batch_frames[1])
         )
 
         # Note: We call exec() from the child classes.
