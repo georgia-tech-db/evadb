@@ -84,7 +84,7 @@ class ParserTests(unittest.TestCase):
 
         # check inner stmt from
         self.assertIsNotNone(
-            inner_stmt.view_ref, TableRef(TableInfo("uadetrac_fastRCNN"))
+            inner_stmt.view_info, TableRef(TableInfo("uadetrac_fastRCNN"))
         )
 
     def test_create_statement(self):
@@ -655,7 +655,7 @@ class ParserTests(unittest.TestCase):
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)
         expected_stmt = CreateMaterializedViewStatement(
-            TableRef(TableInfo("uadtrac_fastRCNN")),
+            TableInfo("uadtrac_fastRCNN"),
             [
                 ColumnDefinition("id", None, None, None),
                 ColumnDefinition("labels", None, None, None),

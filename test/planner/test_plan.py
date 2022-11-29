@@ -38,17 +38,16 @@ class PlanNodeTests(unittest.TestCase):
 
     def test_create_plan(self):
         dummy_info = TableInfo("dummy")
-        dummy_table = TableRef(dummy_info)
 
         CatalogManager().reset()
         columns = [
             DataFrameColumn("id", ColumnType.INTEGER),
             DataFrameColumn("name", ColumnType.TEXT, array_dimensions=[50]),
         ]
-        dummy_plan_node = CreatePlan(dummy_table, columns, False)
+        dummy_plan_node = CreatePlan(dummy_info, columns, False)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.CREATE)
         self.assertEqual(dummy_plan_node.if_not_exists, False)
-        self.assertEqual(dummy_plan_node.table_ref.table.table_name, "dummy")
+        self.assertEqual(dummy_plan_node.table_info.table_name, "dummy")
         self.assertEqual(dummy_plan_node.column_list[0].name, "id")
         self.assertEqual(dummy_plan_node.column_list[1].name, "name")
 
