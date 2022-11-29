@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Raw Form Example{% endblock %}
+
+{% block content %}
+    <form method="POST">
+        <p>
+            <label for="first">Video Path</label>
+            <input id="first" name="video_path" type="text">
+        </p>
+        <p>
+            <label for="last">Phrase to search</label>
+            <input id="last" name="phrase" type="text">
+        </p>
+        <input type="submit" value="Upload and Search">
+    </form>
+
+<!--    <video width="320" height="240" controls>-->
+<!--&lt;!&ndash;         <source src="splash.mp4#t=10,20" type="video/mp4">  &ndash;&gt;-->
+<!--        <source src={{ video_pos }} type="video/mp4">-->
+<!--    </video>-->
+{% endblock %}

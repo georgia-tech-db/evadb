@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Suggestions</title>
+</head>
+
+<body>
+
+<p>
+    <label for="first">Video Path</label>
+    <input id="first" name="video_path" type="text">
+<!--    <input id="first"  type='file' accept='video/*'><br>-->
+</p>
+<p>
+    <label for="last">Phrase to search</label>
+    <input id="last" name="phrase" type="text">
+</p>
+<input type="submit" value="Upload and Search" id="submit">
+
+<div id="place_for_suggestions"></div>
+
+<video id="player" controls autoplay>
+  <source src="" id="source" type="video/mp4"/>
+</video>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<script>
+$("#submit").click(function(){
+    var path = $("#first").val();
+    var phrase = $("#last").val();
+    console.log(path)
+    console.log(phrase)
+
+    $.ajax({
+      url: "/search",
+      type: "get",
+      data: {video_path: path, phrase: phrase},
+      success: function(response) {
+        if (response) {
+            start = parseInt(response);
+            // start webserver locally to server the video
+            $("#source").get(0).src = "http://localhost:8000" + path + "#t=" + start + ',' + (start + 5);
+            $("#player").get(0).play();
+        }
+      },
+      error: function(xhr) {
+        //Do Something to handle error
+      }
+    });
+});
+
+</script>
+
+</body>
+
+</html>
