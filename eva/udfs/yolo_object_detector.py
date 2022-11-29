@@ -188,7 +188,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
             model_pred = predictions.pandas().xyxy
         else:
             for i in range(img_rgb.shape[0]):
-                predictions = self.model(img_rgb[0])
+                predictions = self.model(img_rgb[i])
                 model_pred.append(predictions.pandas().xyxy[0])
 
         for single_result in model_pred:
