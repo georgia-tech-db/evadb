@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -34,22 +34,22 @@ class LoadDataPlan(AbstractPlan):
 
     def __init__(
         self,
-        table_ref: TableRef,
+        table_info: TableInfo,
         file_path: Path,
         batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
     ):
         super().__init__(PlanOprType.LOAD_DATA)
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._file_path = file_path
         self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
 
     @property
-    def table_ref(self):
-        return self._table_ref
+    def table_info(self):
+        return self._table_info
 
     @property
     def file_path(self):
@@ -72,7 +72,7 @@ class LoadDataPlan(AbstractPlan):
             batch_mem_size={}, \
             column_list={}, \
             file_options={})".format(
-            self.table_ref,
+            self.table_info,
             self.file_path,
             self.batch_mem_size,
             self.column_list,
@@ -83,7 +83,7 @@ class LoadDataPlan(AbstractPlan):
         return hash(
             (
                 super().__hash__(),
-                self.table_ref,
+                self.table_info,
                 self.file_path,
                 self.batch_mem_size,
                 tuple(self.column_list),

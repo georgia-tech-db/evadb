@@ -17,7 +17,7 @@ from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
 
 
@@ -26,19 +26,19 @@ class LoadDataStatement(AbstractStatement):
     Load Data Statement constructed after parsing the input query
 
     Arguments:
-    table (TableRef): table reference to load into
+    table (TableInfo): table to load into
     path (str): path from where data needs to be loaded
     """
 
     def __init__(
         self,
-        table_ref: TableRef,
+        table_info: TableInfo,
         path: str,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
     ):
         super().__init__(StatementType.LOAD_DATA)
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._path = Path(path)
         self._column_list = column_list
         self._file_options = file_options
@@ -50,13 +50,13 @@ class LoadDataStatement(AbstractStatement):
         )
 
         print_str = "LOAD {} INTO {}({}) WITH {}".format(
-            self._path.name, self._table_ref, self._column_list, self._file_options
+            self._path.name, self._table_info, self._column_list, self._file_options
         )
         return print_str
 
     @property
-    def table_ref(self) -> TableRef:
-        return self._table_ref
+    def table_info(self) -> TableInfo:
+        return self._table_info
 
     @property
     def path(self) -> Path:
@@ -78,7 +78,7 @@ class LoadDataStatement(AbstractStatement):
         if not isinstance(other, LoadDataStatement):
             return False
         return (
-            self.table_ref == other.table_ref
+            self.table_info == other.table_info
             and self.path == other.path
             and self.column_list == other.column_list
             and self.file_options == other.file_options
@@ -88,7 +88,7 @@ class LoadDataStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.table_ref,
+                self.table_info,
                 self.path,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),

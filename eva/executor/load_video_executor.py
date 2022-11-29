@@ -16,7 +16,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from eva.binder.binder_utils import create_video_metadata
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
@@ -60,9 +59,9 @@ class LoadVideoExecutor(AbstractExecutor):
             raise RuntimeError(error)
 
         # Create catalog entry
-        table_ref = self.node.table_ref
-        database_name = table_ref.table.database_name
-        table_name = table_ref.table.table_name
+        table_info = self.node.table_info
+        database_name = table_info.database_name
+        table_name = table_info.table_name
         # Sanity check to make sure there is no existing table with same name
         do_create = False
         table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
@@ -71,7 +70,7 @@ class LoadVideoExecutor(AbstractExecutor):
             logger.info(msg)
         # Create the catalog entry
         else:
-            table_obj = create_video_metadata(table_name)
+            table_obj = self.catalog.create_video_metadata(table_name)
             do_create = True
 
         storage_engine = StorageEngine.factory(table_obj)

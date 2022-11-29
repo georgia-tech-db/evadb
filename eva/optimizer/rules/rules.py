@@ -481,7 +481,7 @@ class LogicalLoadToPhysical(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
-            before.table_ref,
+            before.table_info,
             before.path,
             batch_mem_size,
             before.column_list,
@@ -515,7 +515,7 @@ class LogicalUploadToPhysical(Rule):
         after = UploadPlan(
             before.path,
             before.video_blob,
-            before.table_ref,
+            before.table_info,
             batch_mem_size,
             before.column_list,
             before.file_options,

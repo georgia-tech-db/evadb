@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.binder.binder_utils import create_table_metadata, handle_if_not_exists
+from eva.binder.binder_utils import handle_if_not_exists
+from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.expression.abstract_expression import ExpressionType
 from eva.parser.create_statement import ColumnDefinition
@@ -25,6 +26,7 @@ from eva.utils.logging_manager import logger
 class CreateMaterializedViewExecutor(AbstractExecutor):
     def __init__(self, node: CreateMaterializedViewPlan):
         super().__init__(node)
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -79,7 +81,7 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                     )
                 )
 
-            view_metainfo = create_table_metadata(self.node.view, col_defs)
+            view_metainfo = self.catalog.create_table_metadata(self.node.view, col_defs)
             storage_engine = StorageEngine.factory(view_metainfo)
             storage_engine.create(table=view_metainfo)
 

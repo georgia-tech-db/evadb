@@ -268,7 +268,7 @@ class StatementToPlanConvertor:
             statement(LoadDataStatement): [Load data statement]
         """
         load_data_opr = LogicalLoadData(
-            statement.table_ref,
+            statement.table_info,
             statement.path,
             statement.column_list,
             statement.file_options,
@@ -283,7 +283,7 @@ class StatementToPlanConvertor:
         upload_opr = LogicalUpload(
             statement.path,
             statement.video_blob,
-            statement.table_ref,
+            statement.table_info,
             statement.column_list,
             statement.file_options,
         )
