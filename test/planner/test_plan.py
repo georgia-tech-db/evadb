@@ -105,7 +105,7 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(node.if_exists, True)
 
     def test_load_data_plan(self):
-        table_ref = "ref"
+        table_info = "info"
         file_path = "test.mp4"
         file_format = FileFormatType.VIDEO
         file_options = {}
@@ -116,25 +116,22 @@ class PlanNodeTests(unittest.TestCase):
             batch_mem_size={}, \
             column_list={}, \
             file_options={})".format(
-            table_ref, file_path, batch_mem_size, column_list, file_options
+            table_info, file_path, batch_mem_size, column_list, file_options
         )
         plan = LoadDataPlan(
-            table_ref, file_path, batch_mem_size, column_list, file_options
+            table_info, file_path, batch_mem_size, column_list, file_options
         )
         self.assertEqual(plan.opr_type, PlanOprType.LOAD_DATA)
-        self.assertEqual(plan.table_ref, table_ref)
+        self.assertEqual(plan.table_info, table_info)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(plan.batch_mem_size, batch_mem_size)
-
-        print(f"plan: {str(plan)}")
-        print(f"plan_str: {plan_str}")
 
         self.assertEqual(str(plan), plan_str)
 
     def test_upload_plan(self):
         file_path = "test.mp4"
         video_blob = "b'AAAA'"
-        table_ref = "ref"
+        table_info = "info"
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options["file_format"] = file_format
@@ -148,7 +145,7 @@ class PlanNodeTests(unittest.TestCase):
             file_options={})".format(
             file_path,
             "string of video blob",
-            table_ref,
+            table_info,
             batch_mem_size,
             column_list,
             file_options,
@@ -156,7 +153,7 @@ class PlanNodeTests(unittest.TestCase):
         plan = UploadPlan(
             file_path,
             video_blob,
-            table_ref,
+            table_info,
             batch_mem_size,
             column_list,
             file_options,
@@ -164,7 +161,7 @@ class PlanNodeTests(unittest.TestCase):
         self.assertEqual(plan.opr_type, PlanOprType.UPLOAD)
         self.assertEqual(plan.file_path, file_path)
         self.assertEqual(plan.video_blob, video_blob)
-        self.assertEqual(plan.table_ref, table_ref)
+        self.assertEqual(plan.table_info, table_info)
         self.assertEqual(plan.batch_mem_size, batch_mem_size)
 
         self.assertEqual(str(plan), plan_str)

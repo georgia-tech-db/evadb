@@ -214,12 +214,12 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [Create statement]
         """
-        table_ref = statement.table_ref
-        if table_ref is None:
+        table_info = statement.table_info
+        if table_info is None:
             logger.error("Missing Table Name In Create Statement")
 
         create_opr = LogicalCreate(
-            table_ref, statement.column_list, statement.if_not_exists
+            table_info, statement.column_list, statement.if_not_exists
         )
         self._plan = create_opr
 
@@ -291,7 +291,7 @@ class StatementToPlanConvertor:
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
-            statement.view_ref, statement.col_list, statement.if_not_exists
+            statement.view_info, statement.col_list, statement.if_not_exists
         )
 
         self.visit_select(statement.query)

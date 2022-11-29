@@ -457,7 +457,7 @@ class LogicalCreate(Operator):
 
     def __init__(
         self,
-        video: TableRef,
+        video: TableInfo,
         column_list: List[ColumnDefinition],
         if_not_exists: bool = False,
         children: List = None,
@@ -1004,7 +1004,7 @@ class LogicalCreateMaterializedView(Operator):
 
     def __init__(
         self,
-        view: TableRef,
+        view: TableInfo,
         col_list: List[ColumnDefinition],
         if_not_exists: bool = False,
         children=None,

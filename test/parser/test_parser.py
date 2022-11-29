@@ -490,7 +490,7 @@ class ParserTests(unittest.TestCase):
         file_options["file_format"] = FileFormatType.VIDEO
         column_list = None
         expected_stmt = LoadDataStatement(
-            TableRef(TableInfo("MyVideo")),
+            TableInfo("MyVideo"),
             Path("data/video.mp4"),
             column_list,
             file_options,
@@ -511,7 +511,7 @@ class ParserTests(unittest.TestCase):
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
         expected_stmt = LoadDataStatement(
-            TableRef(TableInfo("MyMeta")),
+            TableInfo("MyMeta"),
             Path("data/meta.csv"),
             [
                 TupleValueExpression("id"),
@@ -541,7 +541,7 @@ class ParserTests(unittest.TestCase):
         expected_stmt = UploadStatement(
             Path("data/video.mp4"),
             "b'AAAA'",
-            TableRef(TableInfo("MyVideo")),
+            TableInfo("MyVideo"),
             column_list,
             file_options,
         )
@@ -567,7 +567,7 @@ class ParserTests(unittest.TestCase):
         expected_stmt = UploadStatement(
             Path("data/meta.csv"),
             "b'AAAA'",
-            TableRef(TableInfo("MyMeta")),
+            TableInfo("MyMeta"),
             [
                 TupleValueExpression("id"),
                 TupleValueExpression("frame_id"),
