@@ -17,6 +17,7 @@ from typing import Iterator, List
 import numpy as np
 import pandas as pd
 
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.df_column import DataFrameColumn
@@ -74,7 +75,7 @@ class SQLStorageEngine(AbstractStorageEngine):
 
         # During table creation, assume row_id is automatically handled by
         # the sqlalchemy engine.
-        table_columns = [col for col in table.columns if col.name != "_row_id"]
+        table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
         sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table_columns)
 
         attr_dict.update(sqlalchemy_schema)
@@ -114,7 +115,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         # During table writes, assume row_id is automatically handled by
         # the sqlalchemy engine. Another assumption we make here is the
         # updated data need not to take care of row_id.
-        table_columns = [col for col in table.columns if col.name != "_row_id"]
+        table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
 
         # ToDo: validate the data type before inserting into the table
         for record in rows.frames.values:
