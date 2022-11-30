@@ -17,8 +17,8 @@ from typing import Dict, Iterator
 import numpy as np
 import pandas as pd
 
-from eva.sql_config import IDENTIFIER_COLUMN
 from eva.readers.abstract_reader import AbstractReader
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.logging_manager import logger
 
 
@@ -51,7 +51,9 @@ class CSVReader(AbstractReader):
         # Read the csv in chunks, and only keep the columns we need.
         # Ignore _row_id that we don't need to take care of.
         col_list_names = [
-            col.col_name for col in self._column_list if col.col_name != IDENTIFIER_COLUMN
+            col.col_name
+            for col in self._column_list
+            if col.col_name != IDENTIFIER_COLUMN
         ]
 
         col_map = {col.col_name: col for col in self._column_list}

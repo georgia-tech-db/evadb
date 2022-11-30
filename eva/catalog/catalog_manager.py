@@ -14,7 +14,6 @@
 # limitations under the License.
 from typing import List
 
-from eva.sql_config import IDENTIFIER_COLUMN
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
@@ -27,6 +26,7 @@ from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo
 from eva.parser.table_ref import TableInfo
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.logging_manager import logger
 
 
@@ -105,7 +105,9 @@ class CatalogManager(object):
         )
 
         # Append row_id to table metadata.
-        column_list = [DataFrameColumn(IDENTIFIER_COLUMN, ColumnType.INTEGER)] + column_list
+        column_list = [
+            DataFrameColumn(IDENTIFIER_COLUMN, ColumnType.INTEGER)
+        ] + column_list
 
         for column in column_list:
             column.metadata_id = metadata.id

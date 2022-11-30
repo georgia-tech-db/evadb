@@ -17,7 +17,6 @@ from typing import Iterator, List
 import numpy as np
 import pandas as pd
 
-from eva.sql_config import IDENTIFIER_COLUMN
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.df_column import DataFrameColumn
@@ -25,6 +24,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import SQLConfig
 from eva.models.storage.batch import Batch
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
