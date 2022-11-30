@@ -21,6 +21,7 @@ from mock import MagicMock, call, patch
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.load_executor import LoadDataExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
@@ -107,7 +108,7 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor = LoadDataExecutor(self._create_load_video_plan())
         with patch.object(Path, "exists") as mock_exists:
             mock_exists.side_effect = [False, False]
-            with self.assertRaises(RuntimeError):
+            with self.assertRaises(ExecutorError):
                 next(load_executor.exec())
 
     @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata")
