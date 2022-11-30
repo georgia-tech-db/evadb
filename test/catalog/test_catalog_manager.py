@@ -15,7 +15,7 @@
 import unittest
 
 import mock
-from mock import MagicMock
+from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
@@ -99,7 +99,7 @@ class CatalogManagerTests(unittest.TestCase):
         for column in columns:
             column.metadata_id = ds_mock.return_value.create_dataset.return_value.id
 
-        dcs_mock.return_value.create_column.assert_called_with(columns)
+        dcs_mock.return_value.create_column.assert_called_with([ANY] + columns)
 
         expected = ds_mock.return_value.create_dataset.return_value
         expected.schema = dcs_mock.return_value.create_column.return_value
