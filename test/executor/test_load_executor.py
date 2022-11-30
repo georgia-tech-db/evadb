@@ -111,6 +111,30 @@ class LoadExecutorTest(unittest.TestCase):
             with self.assertRaises(ExecutorError):
                 next(load_executor.exec())
 
+    @patch(
+        "eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata",
+        return_value=None,
+    )
+    def test_should_fail_to_find_table(self, catalog_mock):
+        file_path = "dummy.csv"
+        table_info = TableInfo("dummy")
+        batch_mem_size = 3000
+        file_options = {"file_format": FileFormatType.CSV}
+        plan = type(
+            "LoadDataPlan",
+            (),
+            {
+                "table_info": table_info,
+                "file_path": file_path,
+                "batch_mem_size": batch_mem_size,
+                "file_options": file_options,
+            },
+        )
+
+        load_executor = LoadDataExecutor(plan)
+        with self.assertRaises(ExecutorError):
+            next(load_executor.exec())
+
     @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata")
     @patch("eva.executor.load_video_executor.StorageEngine.factory")
     def test_should_call_csv_reader_and_storage_engine(
