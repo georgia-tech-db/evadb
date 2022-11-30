@@ -26,6 +26,7 @@ from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo
 from eva.parser.table_ref import TableInfo
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.logging_manager import logger
 
 
@@ -102,9 +103,16 @@ class CatalogManager(object):
             identifier_id=identifier_column,
             table_type=table_type,
         )
+
+        # Append row_id to table metadata.
+        column_list = [
+            DataFrameColumn(IDENTIFIER_COLUMN, ColumnType.INTEGER)
+        ] + column_list
+
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
+
         metadata.schema = column_list
         return metadata
 
