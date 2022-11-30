@@ -91,6 +91,7 @@ def bootstrap_environment(eva_config_dir: Path, eva_installation_dir: Path):
         config_obj["core"]["datasets_dir"] = str(dataset_location.resolve())
         config_obj["core"]["catalog_database_uri"] = DB_DEFAULT_URI
         config_obj["storage"]["upload_dir"] = str(upload_dir.resolve())
+        config_obj["storage"]["index_dir"] = str(index_dir.resolve())
 
         yml_file.seek(0)
         yml_file.write(yaml.dump(config_obj))

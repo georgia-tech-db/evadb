@@ -20,7 +20,7 @@ import faiss
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
+from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType, TableType
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
@@ -56,7 +56,8 @@ class CreateIndexExecutor(AbstractExecutor):
             # TODO: batch size is hardcoded for now.
             index = None
             input_dim, feat_size = -1, 0
-            for batch in StorageEngine.read(df_metadata, 1):
+            storage_engine = StorageEngine.factory(df_metadata)
+            for batch in storage_engine.read(df_metadata, 1):
                 # Feature column name.
                 feat_col_name = self.node.col_list[0].name
                 # Pandas wraps numpy array as an object inside a numpy
@@ -135,9 +136,10 @@ class CreateIndexExecutor(AbstractExecutor):
                 ),
                 col_metadata,
                 identifier_column="logical_id",
-                is_video=False,
+                table_type=TableType.STRUCTURED_DATA,
             )
-            StorageEngine.create(tb_metadata)
+            storage_engine = StorageEngine.factory(tb_metadata)
+            storage_engine.create(tb_metadata)
 
             # Write exact mapping for now.
             logical_id = [i for i in range(feat_size)]
@@ -146,7 +148,7 @@ class CreateIndexExecutor(AbstractExecutor):
                     data={"logical_id": logical_id, "row_id": deepcopy(logical_id)}
                 )
             )
-            StorageEngine.write(tb_metadata, secondary_index)
+            storage_engine.write(tb_metadata, secondary_index)
 
             # Persist index.
             faiss.write_index(index, str(save_file_path))
@@ -167,6 +169,11 @@ class CreateIndexExecutor(AbstractExecutor):
         except Exception as e:
             # Roll back in reverse order.
             # Delete on-disk index.
+            save_file_path = (
+                EVA_DEFAULT_DIR
+                / INDEX_DIR
+                / Path("{}_{}.index".format(self.node.index_type, self.node.name))
+            )
             if os.path.exists(save_file_path):
                 os.remove(save_file_path)
 
@@ -181,7 +188,8 @@ class CreateIndexExecutor(AbstractExecutor):
                 secondary_index_metadata = catalog_manager.get_dataset_metadata(
                     None, secondary_index_tb_name
                 )
-                StorageEngine.drop(secondary_index_metadata)
+                storage_engine = StorageEngine.factory(secondary_index_metadata)
+                storage_engine.drop(secondary_index_metadata)
                 catalog_manager.drop_dataset_metadata(
                     None,
                     secondary_index_tb_name,

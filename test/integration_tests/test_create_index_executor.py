@@ -21,7 +21,7 @@ import pandas as pd
 from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.models.storage.batch import Batch
@@ -29,6 +29,7 @@ from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.generic_utils import generate_file_path
+from eva.catalog.catalog_type import TableType
 
 
 class CreateIndexTest(unittest.TestCase):
@@ -60,9 +61,10 @@ class CreateIndexTest(unittest.TestCase):
             str(generate_file_path("testCreateIndexFeatTable")),
             col_metadata,
             identifier_column="feat_id",
-            is_video=False,
+            table_type=TableType.STRUCTURED_DATA,
         )
-        StorageEngine.create(tb_metadata)
+        storage_engine = StorageEngine.factory(tb_metadata)
+        storage_engine.create(tb_metadata)
 
         # Create pandas dataframe.
         batch_data = Batch(
@@ -73,7 +75,7 @@ class CreateIndexTest(unittest.TestCase):
                 }
             )
         )
-        StorageEngine.write(tb_metadata, batch_data)
+        storage_engine.write(tb_metadata, batch_data)
 
     @classmethod
     def tearDownClass(cls):
@@ -110,7 +112,8 @@ class CreateIndexTest(unittest.TestCase):
             None, secondary_index_tb_name
         )
         size = 0
-        for i, batch in enumerate(StorageEngine.read(secondary_index_metadata, 1)):
+        storage_engine = StorageEngine.factory(secondary_index_metadata)
+        for i, batch in enumerate(storage_engine.read(secondary_index_metadata, 1)):
             df_data = batch.frames
             self.assertEqual(df_data["logical_id"][0], i)
             self.assertEqual(df_data["row_id"][0], i)
