@@ -23,7 +23,11 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.parser.create_statement import (
+    ColConstraintInfo,
+    ColumnDefinition,
+    CreateTableStatement,
+)
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
@@ -100,11 +104,38 @@ class ParserTests(unittest.TestCase):
             );"""
         )
 
+        expected_cci = ColConstraintInfo()
+        expected_cci.nullable = True
+        unique_cci = ColConstraintInfo()
+        unique_cci.unique = True
+        unique_cci.nullable = False
+        expected_stmt = CreateTableStatement(
+            TableInfo("Persons"),
+            True,
+            [
+                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, [], unique_cci),
+                ColumnDefinition(
+                    "Frame_Data", ColumnType.TEXT, None, [10], expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Value", ColumnType.FLOAT, None, [1000, 201], expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Array",
+                    ColumnType.NDARRAY,
+                    NdArrayType.UINT8,
+                    [5, 100, 2432, 4324, 100],
+                    expected_cci,
+                ),
+            ],
+        )
+
         for query in single_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+            self.assertEqual(eva_statement_list[0], expected_stmt)
 
     def test_rename_statement(self):
         parser = Parser()
