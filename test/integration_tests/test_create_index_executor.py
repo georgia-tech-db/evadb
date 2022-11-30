@@ -21,7 +21,7 @@ import pandas as pd
 from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.models.storage.batch import Batch
@@ -29,7 +29,6 @@ from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.generic_utils import generate_file_path
-from eva.catalog.catalog_type import TableType
 
 
 class CreateIndexTest(unittest.TestCase):
