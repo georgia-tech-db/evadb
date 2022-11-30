@@ -20,8 +20,8 @@ import pandas as pd
 from mock import MagicMock, call, patch
 
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.executor.load_executor import LoadDataExecutor
 from eva.executor.executor_utils import ExecutorError
+from eva.executor.load_executor import LoadDataExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
