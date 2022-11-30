@@ -168,9 +168,6 @@ class CatalogManager(object):
 
         result_list = []
         for col in col_list:
-            if col is None:
-                logger.warn("Empty column while creating column metadata")
-                result_list.append(col)
             result_list.append(
                 self.create_column_metadata(
                     col.name, col.type, col.array_type, col.dimension, col.cci
