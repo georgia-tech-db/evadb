@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-from copy import deepcopy
 from pathlib import Path
 
 import faiss
@@ -29,6 +28,7 @@ from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.planner.create_index_plan import CreateIndexPlan
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
+from eva.sql_config import IDENTIFIER_COLUMN
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -56,10 +56,12 @@ class CreateIndexExecutor(AbstractExecutor):
             # TODO: batch size is hardcoded for now.
             index = None
             input_dim, feat_size = -1, 0
+            logical_to_row_id = dict()
             storage_engine = StorageEngine.factory(df_metadata)
             for batch in storage_engine.read(df_metadata, 1):
                 # Feature column name.
                 feat_col_name = self.node.col_list[0].name
+
                 # Pandas wraps numpy array as an object inside a numpy
                 # array. Use zero index to get the actual numpy array.
                 feat = batch.column_as_numpy_array(feat_col_name)[0]
@@ -67,6 +69,11 @@ class CreateIndexExecutor(AbstractExecutor):
                     input_dim = feat.shape[-1]
                     index = self._create_index(self.node.index_type, input_dim)
                 index.add(feat)
+
+                # Secondary mapping.
+                row_id = batch.column_as_numpy_array(IDENTIFIER_COLUMN)[0]
+                logical_to_row_id[feat_size] = row_id
+
                 feat_size += 1
 
             # Input dimension is inferred from the actual feature.
@@ -142,10 +149,11 @@ class CreateIndexExecutor(AbstractExecutor):
             storage_engine.create(tb_metadata)
 
             # Write exact mapping for now.
-            logical_id = [i for i in range(feat_size)]
+            logical_id, row_id = list(logical_to_row_id.keys()), list(logical_to_row_id.values())
+            print(logical_id, row_id)
             secondary_index = Batch(
                 pd.DataFrame(
-                    data={"logical_id": logical_id, "row_id": deepcopy(logical_id)}
+                    data={"logical_id": logical_id, "row_id": row_id}
                 )
             )
             storage_engine.write(tb_metadata, secondary_index)

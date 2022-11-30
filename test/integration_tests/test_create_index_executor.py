@@ -115,7 +115,8 @@ class CreateIndexTest(unittest.TestCase):
         for i, batch in enumerate(storage_engine.read(secondary_index_metadata, 1)):
             df_data = batch.frames
             self.assertEqual(df_data["logical_id"][0], i)
-            self.assertEqual(df_data["row_id"][0], i)
+            # Row ID is not 0 indexed.
+            self.assertEqual(df_data["row_id"][0], i + 1)
             size += 1
         self.assertEqual(size, 3)
 
