@@ -26,9 +26,9 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.planner.create_index_plan import CreateIndexPlan
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
-from eva.sql_config import IDENTIFIER_COLUMN
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -149,12 +149,12 @@ class CreateIndexExecutor(AbstractExecutor):
             storage_engine.create(tb_metadata)
 
             # Write exact mapping for now.
-            logical_id, row_id = list(logical_to_row_id.keys()), list(logical_to_row_id.values())
+            logical_id, row_id = list(logical_to_row_id.keys()), list(
+                logical_to_row_id.values()
+            )
             print(logical_id, row_id)
             secondary_index = Batch(
-                pd.DataFrame(
-                    data={"logical_id": logical_id, "row_id": row_id}
-                )
+                pd.DataFrame(data={"logical_id": logical_id, "row_id": row_id})
             )
             storage_engine.write(tb_metadata, secondary_index)
 
