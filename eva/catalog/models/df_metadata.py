@@ -101,14 +101,14 @@ class TableMetadata:
     _name = String(100)
     _file_url = String(100)
     _unique_identifier_column = String(100)
-    _is_video = bool()
+    _table_type = bool()
 
     def __init__(self, obj):
         self._name = obj.name
         self._file_url = obj.file_url
         self._schema = TableSchema(obj.schema)
         self._unique_identifier_column = obj.identifier_column
-        self._is_video = obj.is_video
+        self._table_type = obj.table_type
         self._id = obj.id
 
     @property
@@ -136,8 +136,8 @@ class TableMetadata:
         return self._unique_identifier_column
 
     @property
-    def is_video(self):
-        return self._is_video
+    def table_type(self):
+        return self._table_type
 
     def __eq__(self, other):
         return (
@@ -146,7 +146,7 @@ class TableMetadata:
             and self.schema == other.schema
             and self.identifier_column == other.identifier_column
             and self.name == other.name
-            and self.is_video == other.is_video
+            and self.table_type == other.table_type
         )
 
     def __hash__(self) -> int:
@@ -157,6 +157,6 @@ class TableMetadata:
                 self.schema,
                 self.identifier_column,
                 self.name,
-                self.is_video,
+                self.table_type,
             )
         )
