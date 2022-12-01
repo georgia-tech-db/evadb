@@ -148,7 +148,7 @@ class TableColumn:  # [TODO] Needs a copy constructor
     _array_dimensions = String(100)
     _metadata_id = Integer()
 
-    def __init__ (self, obj):
+    def __init__(self, obj):
         self._name = obj.name
         self._type = obj.type
         self._is_nullable = obj.is_nullable
