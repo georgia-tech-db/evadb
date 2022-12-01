@@ -23,6 +23,7 @@ from eva.optimizer.operators import (
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
+    LogicalGroupBy,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
@@ -119,15 +120,19 @@ class StatementToPlanConvertor:
         if predicate is not None:
             self._visit_select_predicate(predicate)
 
+        # union
+        if statement.union_link is not None:
+            self._visit_union(statement.union_link, statement.union_all)
+
+        # TODO ACTION: Group By
+        if statement.groupby_clause is not None:
+            self._visit_groupby(statement.groupby_clause)
+
         # Projection operator
         select_columns = statement.target_list
 
         if select_columns is not None:
             self._visit_projection(select_columns)
-
-        # union
-        if statement.union_link is not None:
-            self._visit_union(statement.union_link, statement.union_all)
 
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
@@ -139,6 +144,11 @@ class StatementToPlanConvertor:
         sample_opr = LogicalSample(sample_freq)
         sample_opr.append_child(self._plan)
         self._plan = sample_opr
+
+    def _visit_groupby(self, groupby_clause):
+        groupby_opr = LogicalGroupBy(groupby_clause)
+        groupby_opr.append_child(self._plan)
+        self._plan = groupby_opr
 
     def _visit_orderby(self, orderby_list):
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]

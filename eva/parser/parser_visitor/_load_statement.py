@@ -21,16 +21,16 @@ from eva.parser.types import FileFormatType
 
 class Load(evaql_parserVisitor):
     def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):
-        file_path = self.visit(ctx.fileName()).value
+        file_path = self.visit(ctx.stringLiteral()).value
         table = TableRef(self.visit(ctx.tableName()))
 
         # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
+        if ctx.fileFormat():
+            file_format = self.visit(ctx.fileFormat())
+
         file_options = {}
         file_options["file_format"] = file_format
-
-        if ctx.fileOptions():
-            file_options = self.visit(ctx.fileOptions())
 
         # set default for column_list as None
         column_list = None
@@ -40,14 +40,18 @@ class Load(evaql_parserVisitor):
         stmt = LoadDataStatement(table, file_path, column_list, file_options)
         return stmt
 
-    def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
+    def visitFileFormat(self, ctx: evaql_parser.FileFormatContext):
         file_format = FileFormatType.VIDEO
         # Check the file format
         if ctx.CSV() is not None:
             file_format = FileFormatType.CSV
 
-        # parse and add more file options in future
+        return file_format
+
+    def visitFileOptions(self, ctx: evaql_parser.FileOptionsContext):
         file_options = {}
-        file_options["file_format"] = file_format
+        if ctx.fileFormat():
+            file_format = self.visit(ctx.fileFormat())
+            file_options["file_format"] = file_format
 
         return file_options

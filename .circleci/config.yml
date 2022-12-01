@@ -1,54 +1,77 @@
 version: 2.1
 
+workflows:
+  main:
+    jobs:
+        - test:
+            name: "Python v3.7"
+            v: "3.7"
+        - test:
+            name: "Python v3.8"
+            v: "3.8"
+        - test:
+            name: "Python v3.9"
+            v: "3.9"
+        - test:
+            name: "Python v3.10"
+            v: "3.10"
+        #- test:
+        #    name: "Python v3.11"  # missing Torchvision
+        #    v: "3.11"
+
 jobs:
-  build-and-test:
+  test: 
+    parameters:
+      v:
+        type: string
+        default: "3.7" 
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       # This comes with python and openjdk11
-      - image: cimg/python:3.7-browsers
+      - image: "cimg/python:<< parameters.v >>-browsers"
     steps:
       - checkout
 
       - restore_cache:
           keys:
-            - v9-model_cache-{{ checksum "setup.py" }}
+            - v11-model_cache-{{ checksum "setup.py" }}
 
       - restore_cache:
           keys:
-            - v9-pip-cache-{{ checksum "setup.py" }}
+            - v11-pip-cache-{{ checksum "setup.py" }}
 
       - run:
-          name: Install EVA package with test dependencies
+          name: Install only EVA package from pip
           command: |
-            python -m venv eva_dev_env
-            . eva_dev_env/bin/activate
+            sudo apt-get update          
+            sudo apt-get install lsof 
             pip install --upgrade pip
+            pip install evadb
+            bash script/test/package.sh
+
+      - run:
+          name: Install EVA package from repo with all dependencies
+          command: |
+            "python<< parameters.v >>" -m venv test_evadb
+            source test_evadb/bin/activate
             sh script/antlr4/generate_parser.sh
             pip install ".[dev]"
 
       - run:
           name: Test and upload coverage report to coveralls
           command: |
-            sudo apt-get update          
-            sudo apt-get install lsof 
-            . eva_dev_env/bin/activate
+            source test_evadb/bin/activate
             sh script/test/test.sh
             coveralls
 
       - save_cache:
-          key: v9-model_cache-{{ checksum "setup.py" }}
+          key: v11-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
       - save_cache:
-          key: v9-pip-cache-{{ checksum "setup.py" }}
+          key: v11-pip-cache-{{ checksum "setup.py" }}
           paths:
-            - ./eva_dev_env/
-
-
-workflows:
-  main:
-    jobs:
-      - build-and-test
+            - ./test_evadb/

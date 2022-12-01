@@ -182,16 +182,22 @@ updateStatement
 
 loadStatement
     : LOAD 
-      FILE fileName
+      fileFormat
+      stringLiteral
       INTO tableName
         (
             ('(' columns=uidList ')')
         )?
-      (WITH fileOptions)?
     ;
 
+
+fileFormat
+    : (CSV|VIDEO)
+    ;
+
+
 fileOptions
-    : FORMAT fileFormat=(CSV|VIDEO)
+    : FORMAT fileFormat
     ;
 
 uploadStatement
@@ -208,6 +214,7 @@ uploadStatement
 fileName
     : stringLiteral
     ;
+
 
 videoBlob
     : stringLiteral
@@ -274,8 +281,8 @@ tableSourceItem
     ;
 
 tableValuedFunction
-    : functionCall                                
-    | UNNEST LR_BRACKET functionCall RR_BRACKET   
+    : functionCall
+    | UNNEST LR_BRACKET functionCall RR_BRACKET
     ;
 
 subqueryTableSourceItem
@@ -288,7 +295,6 @@ subqueryTableSourceItem
 sampleClause
     : SAMPLE decimalLiteral
     ;
-
 
 joinPart
     : JOIN tableSourceItemWithSample
@@ -335,10 +341,11 @@ selectElement
 fromClause
     : FROM tableSources
       (WHERE whereExpr=expression)?
-      (
-        GROUP BY
-        groupByItem (',' groupByItem)*
-      )?
+      groupbyClause?
+    ;
+
+groupbyClause
+    : GROUP BY groupByItem (',' groupByItem)*
       (HAVING havingExpr=expression)?
     ;
 
@@ -554,9 +561,13 @@ udfFunction
 
 
 aggregateWindowedFunction
-    : (AVG | MAX | MIN | SUM)
+    :aggregateFunctionName
       '(' aggregator=(ALL | DISTINCT)? functionArg ')'
     | COUNT '(' (starArg='*' | aggregator=ALL? functionArg) ')'
+    ;
+
+aggregateFunctionName
+    : (AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT)
     ;
 
 functionArgs

@@ -48,6 +48,7 @@ from eva.optimizer.rules.rules import (
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
+    LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
@@ -74,7 +75,7 @@ class TestRules(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
 
@@ -114,6 +115,9 @@ class TestRules(unittest.TestCase):
         )
         self.assertTrue(
             Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
+            Promise.LOGICAL_GROUPBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
             Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
@@ -182,6 +186,7 @@ class TestRules(unittest.TestCase):
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),

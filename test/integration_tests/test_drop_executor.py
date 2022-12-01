@@ -32,14 +32,14 @@ class DropExecutorTest(unittest.TestCase):
     # integration test
     def test_should_drop_table(self):
         catalog_manager = CatalogManager()
-        query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         metadata_obj = catalog_manager.get_dataset_metadata(None, "MyVideo")
         video_dir = metadata_obj.file_url
         self.assertFalse(metadata_obj is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
-        self.assertEqual(len(column_objects), 3)
+        self.assertEqual(len(column_objects), 4)
         self.assertTrue(Path(video_dir).exists())
         drop_query = """DROP TABLE MyVideo;"""
         execute_query_fetch_all(drop_query)

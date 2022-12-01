@@ -15,7 +15,7 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -254,6 +254,44 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
 
+    def test_select_statement_groupby_class(self):
+        """Testing sample frequency"""
+
+        parser = Parser()
+
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.AGGREGATION_FIRST
+        )
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "TAIPAI")
+
+        # sample_freq
+        self.assertEqual(
+            select_stmt.groupby_clause,
+            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+        )
+
+    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
+        # GROUP BY with multiple attributes should raise Syntax Error
+        parser = Parser()
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
+        self.assertRaises(SyntaxError, parser.parse, select_query)
+
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement
         Class: SelectStatement"""
@@ -446,8 +484,8 @@ class ParserTests(unittest.TestCase):
 
     def test_load_video_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD FILE 'data/video.mp4'
-                             INTO MyVideo WITH FORMAT VIDEO;"""
+        load_data_query = """LOAD VIDEO 'data/video.mp4'
+                             INTO MyVideo"""
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
         column_list = None
@@ -467,10 +505,9 @@ class ParserTests(unittest.TestCase):
 
     def test_load_csv_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD FILE 'data/meta.csv'
+        load_data_query = """LOAD CSV 'data/meta.csv'
                              INTO
-                             MyMeta (id, frame_id, video_id, label)
-                             WITH FORMAT CSV;"""
+                             MyMeta (id, frame_id, video_id, label);"""
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
         expected_stmt = LoadDataStatement(
