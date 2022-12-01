@@ -1,3 +1,4 @@
+from typing import List
 import pytesseract
 import PIL
 from detoxify import Detoxify
