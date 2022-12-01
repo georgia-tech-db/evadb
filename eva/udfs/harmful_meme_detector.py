@@ -16,7 +16,7 @@ class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
 
     @property
     def name(self) -> str:
-        return "harmfulMeme"
+        return "HarmfulMemeDetector"
     @property
     def labels(self) -> List[str]:
         return [
@@ -40,6 +40,8 @@ class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
     #     return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
     def forward(self, frames: Tensor):
+        print("forward start")
+
         frames = frames * 255
         frames = np.array(frames, dtype=np.uint8)
         if np.ndim(frames) > 3:
@@ -57,4 +59,6 @@ class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
                 continue
             if prediction_result[key] >= self.threshold:
                 outcome = outcome.append(key)
+
+        print("forward finish")
         return outcome
