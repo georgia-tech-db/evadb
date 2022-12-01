@@ -45,15 +45,22 @@ class HarmfulMemeDetector(AbstractClassifierUDF):
     def forward(self, frames: np.ndarray) -> pd.DataFrame:
         # reconstruct dimension of the input
         frames_list = frames.values.tolist()
-        frames = np.array(frames_list)[0][0]
+        frames = np.array(frames_list)
+        frames = np.squeeze(frames, 1)
+        logger.warn(frames.shape)
+        # frames = frames[0][0]
 
-        image = PIL.Image.fromarray(frames.astype('uint8'), 'RGB')
-        text = pytesseract.image_to_string(image)
-        logger.warn(text)
-        prediction_result = self.model.predict(text)
         outcome = pd.DataFrame()
-        if prediction_result["toxicity"] >= self.threshold:
-            outcome = outcome.append({"labels": "toxic"}, ignore_index=True)
-        else:
-            outcome = outcome.append({"labels": "not toxic"}, ignore_index=True)
+
+        for i in range(0, frames.shape[0]):
+            frame = frames[i]
+
+            image = PIL.Image.fromarray(frame.astype('uint8'), 'RGB')
+            text = pytesseract.image_to_string(image)
+            logger.warn(text)
+            prediction_result = self.model.predict(text)
+            if prediction_result["toxicity"] >= self.threshold:
+                outcome = outcome.append({"labels": "toxic"}, ignore_index=True)
+            else:
+                outcome = outcome.append({"labels": "not toxic"}, ignore_index=True)
         return outcome
