@@ -96,7 +96,7 @@ class DataFrameMetadata(BaseModel):
 
 class TableMetadata:
     __tablename__ = "df_metadata"
-
+    _id = int()
     _name = String(100)
     _file_url = String(100)
     _unique_identifier_column = String(100)
@@ -108,6 +108,7 @@ class TableMetadata:
         self._schema = obj.schema
         self._unique_identifier_column = obj.identifier_column
         self._is_video = obj.is_video
+        self._id = obj.id
 
     @property
     def schema(self):
