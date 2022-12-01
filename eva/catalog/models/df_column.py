@@ -156,12 +156,12 @@ class TableColumn:
         self._array_dimensions = obj.array_dimensions
         self._metadata_id = obj.metadata_id
 
-    def non_copy_constructor(self, name, type, arr_type, array_dim, nullable):
+    def non_copy_constructor(self, name, type, array_type, array_dimensions, is_nullable):
         self._column_name = name
         self._type = type
-        self._array_type = arr_type
-        self.array_dimensions = array_dim
-        self._is_nullable = nullable
+        self._array_type = array_type
+        self._array_dimensions = array_dimensions
+        self._is_nullable = is_nullable
 
     def __init__(self, *args):
         if len(*args) > 1:
