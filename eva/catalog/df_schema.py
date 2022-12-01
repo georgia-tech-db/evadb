@@ -45,9 +45,9 @@ class DataFrameSchema(object):
 
 
 class TableSchema:
-    def __init__(self, name: str, column_list: List[TableColumn]):
-        self._name = name
-        self._column_list = column_list
+    def __init__(self, obj):
+        self._name = obj.name
+        self._column_list = TableColumn(obj.column_list)
 
     def __str__(self):
         schema_str = "SCHEMA:: (" + self._name + ")\n"

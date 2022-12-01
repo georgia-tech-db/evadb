@@ -148,21 +148,13 @@ class TableColumn:  # [TODO] Needs a copy constructor
     _array_dimensions = String(100)
     _metadata_id = Integer()
 
-    def __init__(
-        self,
-        name: str,
-        type: ColumnType,
-        is_nullable: bool = False,
-        array_type: NdArrayType = None,
-        array_dimensions: List[int] = [],
-        metadata_id: int = None,
-    ):
-        self._name = name
-        self._type = type
-        self._is_nullable = is_nullable
-        self._array_type = array_type
-        self.array_dimensions = array_dimensions
-        self._metadata_id = metadata_id
+    def __init__ (self, obj):
+        self._name = obj.name
+        self._type = obj.type
+        self._is_nullable = obj.is_nullable
+        self._array_type = obj.array_type
+        self.array_dimensions = obj.array_dimensions
+        self._metadata_id = obj.metadata_id
 
     @property
     def id(self):
