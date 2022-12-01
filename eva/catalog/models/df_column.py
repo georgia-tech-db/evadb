@@ -140,7 +140,7 @@ class DataFrameColumn(BaseModel):
         )
 
 
-class TableColumn:  # [TODO] Needs a copy constructor
+class TableColumn:
     _name = String(100)
     _type = Enum(ColumnType)
     _is_nullable = Boolean()
@@ -148,13 +148,26 @@ class TableColumn:  # [TODO] Needs a copy constructor
     _array_dimensions = String(100)
     _metadata_id = Integer()
 
-    def __init__(self, obj):
+    def copy_constructor(self, obj):
         self._name = obj.name
         self._type = obj.type
         self._is_nullable = obj.is_nullable
         self._array_type = obj.array_type
-        self.array_dimensions = obj.array_dimensions
+        self._array_dimensions = obj.array_dimensions
         self._metadata_id = obj.metadata_id
+
+    def non_copy_constructor(self, name, type, arr_type, array_dim, nullable):
+        self._column_name = name
+        self._type = type
+        self._array_type = arr_type
+        self.array_dimensions = array_dim
+        self._is_nullable = nullable
+
+    def __init__(self, *args):
+        if len(*args) > 1:
+            self.non_copy_constructor(*args)
+        else:
+            self.copy_constructor(*args)
 
     @property
     def id(self):
