@@ -105,7 +105,7 @@ class TableMetadata:
     def __init__(self, obj):
         self._name = obj.name
         self._file_url = obj.file_url
-        self._schema = obj.schema
+        self._schema = TableSchema(obj.schema)
         self._unique_identifier_column = obj.identifier_column
         self._is_video = obj.is_video
         self._id = obj.id
