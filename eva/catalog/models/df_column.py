@@ -156,7 +156,9 @@ class TableColumn:
         self._array_dimensions = obj.array_dimensions
         self._metadata_id = obj.metadata_id
 
-    def non_copy_constructor(self, name, type, array_type, array_dimensions, is_nullable):
+    def non_copy_constructor(
+        self, name, type, array_type, array_dimensions, is_nullable
+    ):
         self._column_name = name
         self._type = type
         self._array_type = array_type
