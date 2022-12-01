@@ -162,7 +162,7 @@ class StatementBinderContext:
         """
         alias_cols = []
         for alias, table_obj in self._table_alias_map.items():
-            alias_cols += list([(alias, col.name) for col in table_obj.columns])
+            alias_cols += list([(alias, col.name) for col in table_obj.schema.column_list])
         for alias, dtable_obj in self._derived_table_alias_map.items():
             alias_cols += list([(alias, col.name) for col in dtable_obj])
         return alias_cols
