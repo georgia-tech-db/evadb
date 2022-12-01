@@ -14,7 +14,17 @@ class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
     @property
     def name(self) -> str:
         return "harmfulMeme"
-
+    @property
+    def labels(self) -> List[str]:
+        return [
+            "toxic",
+            "not toxic",
+            "severe_toxicity",
+            "obscene",
+            "threat",
+            "insult",
+            "identity_attack"
+        ]
     def setup(self, threshold=0.2):
         self.threshold = threshold
         # self.model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
