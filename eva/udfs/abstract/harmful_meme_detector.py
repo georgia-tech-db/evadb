@@ -1,7 +1,7 @@
 import pytesseract
 # from PIL import Image
 from detoxify import Detoxify
-# import pandas as pd
+import pandas as pd
 
 
 class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
@@ -30,13 +30,14 @@ class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
 
         text = pytesseract.image_to_string(this_image)
         prediction_result = Detoxify('original').predict(text)
-        outcome = {}
-        outcome["toxic"] = "toxic" if prediction_result["toxicity"] >= self.threshold else "not toxic"
-        labels = []
+        outcome = pd.DataFrame()
+        if prediction_result["toxicity"] >= self.threshold:
+            outcome = outcome.append("toxic")
+        else:
+            outcome = outcome.append("not toxic")
         for key in prediction_result.keys():
             if key == "toxicity":
                 continue
             if prediction_result[key] >= self.threshold:
-                labels.append(key)
-        outcome["labels"] = labels
+                outcome = outcome.append(key)
         return outcome
