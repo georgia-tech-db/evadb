@@ -15,7 +15,7 @@
 from typing import List
 
 from eva.catalog.models.df_column import DataFrameColumn
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -32,18 +32,18 @@ class CreatePlan(AbstractPlan):
 
     def __init__(
         self,
-        table_ref: TableRef,
+        table_info: TableInfo,
         column_list: List[DataFrameColumn],
         if_not_exists: bool = False,
     ):
         super().__init__(PlanOprType.CREATE)
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._column_list = column_list
         self._if_not_exists = if_not_exists
 
     @property
-    def table_ref(self):
-        return self._table_ref
+    def table_info(self):
+        return self._table_info
 
     @property
     def if_not_exists(self):
@@ -57,14 +57,14 @@ class CreatePlan(AbstractPlan):
         return "CreatePlan(table_ref={}, \
             column_list={}, \
             if_not_exists={})".format(
-            self._table_ref, self._column_list, self._if_not_exists
+            self._table_info, self._column_list, self._if_not_exists
         )
 
     def __hash__(self) -> int:
         return hash(
             (
                 super().__hash__(),
-                self.table_ref,
+                self.table_info,
                 self.if_not_exists,
                 tuple(self.column_list),
             )
