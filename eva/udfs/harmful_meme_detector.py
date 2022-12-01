@@ -2,7 +2,7 @@ import pytesseract
 # from PIL import Image
 from detoxify import Detoxify
 import pandas as pd
-
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
     """
