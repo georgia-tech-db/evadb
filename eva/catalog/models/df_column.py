@@ -169,7 +169,7 @@ class TableColumn:
         if len(args) > 1:
             self.non_copy_constructor(*args)
         else:
-            self.copy_constructor(*args)
+            self.copy_constructor(args)
 
     @property
     def id(self):
