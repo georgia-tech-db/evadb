@@ -71,7 +71,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         to create the table
         """
         attr_dict = {"__tablename__": table.name}
-        sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table.columns)
+        sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table.schema.column_list)
         attr_dict.update(sqlalchemy_schema)
         # dynamic schema generation
         # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
@@ -108,7 +108,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         # ToDo: validate the data type before inserting into the table
         for record in rows.frames.values:
             row_data = {col: record[idx] for idx, col in enumerate(columns)}
-            data.append(self._dict_to_sql_row(row_data, table.columns))
+            data.append(self._dict_to_sql_row(row_data, table.schema.column_list))
         self._sql_engine.execute(new_table.insert(), data)
         self._sql_session.commit()
 
@@ -135,7 +135,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         for row in result:
             # Todo: Verfiy the order of columns in row matches the table.columns
             # ignore the first dummy (_row_id) primary column
-            data_batch.append(self._sql_row_to_dict(row[1:], table.columns))
+            data_batch.append(self._sql_row_to_dict(row[1:], table.schema.column_list))
             if row_size is None:
                 row_size = 0
                 row_size = get_size(data_batch)
