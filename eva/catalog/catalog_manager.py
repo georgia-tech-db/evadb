@@ -127,9 +127,9 @@ class CatalogManager(object):
         return TableColumn(
             column_name,
             data_type,
-            array_type=array_type,
-            array_dimensions=dimensions,
-            is_nullable=cci.nullable,
+            array_type,
+            dimensions,
+            cci.nullable,
         )
 
     def get_dataset_metadata(
