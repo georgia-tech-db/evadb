@@ -166,7 +166,7 @@ class TableColumn:
         self._is_nullable = is_nullable
 
     def __init__(self, *args):
-        if len(*args) > 1:
+        if len(args) > 1:
             self.non_copy_constructor(*args)
         else:
             self.copy_constructor(*args)
