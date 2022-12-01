@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_metadata import TableMetadata
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
