@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn, TableColumn
+from eva.catalog.models.df_column import DataFrameColumn
 
 
 class DataFrameSchema(object):
