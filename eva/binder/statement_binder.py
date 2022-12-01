@@ -162,7 +162,7 @@ class StatementBinder:
         # else we curate the column list from the metadata
         else:
             column_list = []
-            for column in table_ref_obj.columns:
+            for column in table_ref_obj.schema.column_list:
                 column_list.append(
                     TupleValueExpression(
                         col_name=column.name,
