@@ -129,12 +129,14 @@ class ParserTests(unittest.TestCase):
                 ),
             ],
         )
+        expected_stmt_str = "CREATE TABLE Persons (True)"
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+            self.assertEqual(str(eva_statement_list[0]), expected_stmt_str)
             self.assertEqual(eva_statement_list[0], expected_stmt)
 
     def test_rename_statement(self):
