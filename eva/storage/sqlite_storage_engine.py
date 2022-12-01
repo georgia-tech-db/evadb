@@ -75,7 +75,9 @@ class SQLStorageEngine(AbstractStorageEngine):
 
         # During table creation, assume row_id is automatically handled by
         # the sqlalchemy engine.
-        table_columns = [col for col in table.schema.column_list if col.name != IDENTIFIER_COLUMN]
+        table_columns = [
+            col for col in table.schema.column_list if col.name != IDENTIFIER_COLUMN
+        ]
         sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table_columns)
 
         attr_dict.update(sqlalchemy_schema)
@@ -115,7 +117,9 @@ class SQLStorageEngine(AbstractStorageEngine):
         # During table writes, assume row_id is automatically handled by
         # the sqlalchemy engine. Another assumption we make here is the
         # updated data need not to take care of row_id.
-        table_columns = [col for col in table.schema.column_list if col.name != IDENTIFIER_COLUMN]
+        table_columns = [
+            col for col in table.schema.column_list if col.name != IDENTIFIER_COLUMN
+        ]
 
         # ToDo: validate the data type before inserting into the table
         for record in rows.frames.values:
