@@ -141,14 +141,9 @@ class Functions(evaql_parserVisitor):
     ):
         return ctx.getText()
 
-    def getAggregateFunctionType(self, agg_func_name):
-        agg_func_type = None
-        if agg_func_name == "FIRST":
-            agg_func_type = ExpressionType.AGGREGATION_FIRST
-        elif agg_func_name == "LAST":
-            agg_func_type = ExpressionType.AGGREGATION_LAST
-        elif agg_func_name == "SEGMENT":
-            agg_func_type = ExpressionType.AGGREGATION_SEGMENT
+    def getAggregateFunctionType(self, agg_func_name: str):
+        agg_enum_name = 'AGGREGATION_' + agg_func_name.upper()
+        if agg_enum_name in ExpressionType:
+            return ExpressionType[agg_enum_name]
         else:
             logger.error("Aggregate Function {} not supported.".format(agg_func_name))
-        return agg_func_type
