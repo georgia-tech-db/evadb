@@ -54,8 +54,9 @@ createDatabase
 
 createIndex
     : CREATE
-      INDEX uid indexType?
+      INDEX uid
       ON tableName ('(' columns=uidList ')')
+      indexType?
     ;
 
 createTable

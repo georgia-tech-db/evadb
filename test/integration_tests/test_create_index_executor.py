@@ -82,7 +82,7 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
     def test_should_create_index(self):
-        query = "CREATE INDEX testCreateIndexName USING HNSW ON testCreateIndexFeatTable (feat);"
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING HNSW;"
         execute_query_fetch_all(query)
 
         # Test index metadata.
@@ -128,7 +128,7 @@ class CreateIndexTest(unittest.TestCase):
     def test_should_cleanup_when_exception(self, faiss_mock):
         faiss_mock.write_index.side_effect = Exception("Test exception.")
 
-        query = "CREATE INDEX testCreateIndexName USING HNSW ON testCreateIndexFeatTable (feat);"
+        query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING HNSW;"
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
 
