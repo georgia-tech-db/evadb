@@ -101,7 +101,7 @@ class TableMetadata:
     _name = String(100)
     _file_url = String(100)
     _unique_identifier_column = String(100)
-    _is_video = Boolean()
+    _is_video = bool()
 
     def __init__(self, obj):
         self._name = obj.name
