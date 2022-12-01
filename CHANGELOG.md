@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+## [0.1.1] - 2022-11-20
+### [Added]
+
+* PR #498: docs: more details
+* PR #495: docs: improve read-the-docs 
+* PR #488: docs: fix notebooks
+* PR #486: docs: update notebooks + banner
+* PR #476: feat: GPU jenkins support
+
 ## [0.1.0] - 2022-11-12
 ### [Added]
 

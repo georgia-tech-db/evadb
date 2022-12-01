@@ -93,7 +93,7 @@ def start_server(
     stop_server_future: future for externally stopping the server
     """
 
-    logger.critical("Start Server")
+    logger.info("Start Server")
 
     # Register signal handler
     def raiseSystemExit(_, __):
@@ -112,7 +112,7 @@ def start_server(
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        logger.critical(
+        logger.info(
             "PID(" + str(os.getpid()) + ") serving on " + str(socket.getsockname())
         )
 

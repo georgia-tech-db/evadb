@@ -28,6 +28,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinxemoji.sphinxemoji",
     "sphinx_external_toc",
+    "sphinx.ext.autosectionlabel",
     "sphinx_design",
     "myst_nb"
 ]

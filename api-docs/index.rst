@@ -1,5 +1,12 @@
+.. meta::
+   :description:
+       EVA Multimedia Database System -- Where SQL meets Deep Learning.
+   :keywords: database, deep learning, video analytics
+
 EVA DATABASE SYSTEM
 =====
+
+..  rubric:: Multimedia Database System -- Where SQL meets Deep Learning
 
 ..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png
     :target: https://github.com/georgia-tech-db/eva
@@ -8,10 +15,23 @@ EVA DATABASE SYSTEM
 
 |pypi_status| |License| |Discuss| |Python Versions|
 
+----------
+
 What is EVA?
 ------------
 
-`EVA <https://github.com/georgia-tech-db/eva>`_ is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with an actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
+EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+
+ * examining the "emotion palette" of different actors
+ * finding gameplays that lead to a touchdown in a football game
+
+EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. The source code is available at https://github.com/georgia-tech-db/eva.
+
+If you are wondering why you might need a video database system, start with page on `Video Database Systems <source/overview/video.html>`_. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
+
+The `Getting Started <source/overview/installation.html>`_ page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
+
+The `User Guides <source/tutorials/index.html>`_ section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
 
 Key Features
 ------------
@@ -47,6 +67,8 @@ Next Steps
         :link-type: doc
         
         A step-by-step tour of registering a user defined function that wraps around a custom deep learning model
+
+----------
 
 Illustrative EVA Applications 
 ----
@@ -90,12 +112,14 @@ Illustrative EVA Applications
 
 |pic5| |pic6|
 
+----------
+
 Community
 ----
 
 Join the EVA community on `Slack <https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg>`_ to ask questions and to share your ideas for improving EVA.
 
-..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/api-docs/images/eva/eva-slack.jpg
+..  figure:: https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.jpg
     :target: https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg
     :width: 100%
     :alt: EVA Slack Channel

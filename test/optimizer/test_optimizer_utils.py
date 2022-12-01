@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_statement import ColumnDefinition
 

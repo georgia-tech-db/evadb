@@ -17,13 +17,14 @@ from typing import Iterator, List
 import numpy as np
 import pandas as pd
 
-from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import SQLConfig
 from eva.models.storage.batch import Batch
+from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
@@ -71,7 +72,12 @@ class SQLStorageEngine(AbstractStorageEngine):
         to create the table
         """
         attr_dict = {"__tablename__": table.name}
-        sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table.schema.column_list)
+
+        # During table creation, assume row_id is automatically handled by
+        # the sqlalchemy engine.
+        table_columns = [col for col in table.schema.column_list if col.name != IDENTIFIER_COLUMN]
+        sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table_columns)
+
         attr_dict.update(sqlalchemy_schema)
         # dynamic schema generation
         # https://sparrigan.github.io/sql/sqla/2016/01/03/dynamic-tables.html
@@ -105,10 +111,16 @@ class SQLStorageEngine(AbstractStorageEngine):
         new_table = BaseModel.metadata.tables[table.name]
         columns = rows.frames.keys()
         data = []
+
+        # During table writes, assume row_id is automatically handled by
+        # the sqlalchemy engine. Another assumption we make here is the
+        # updated data need not to take care of row_id.
+        table_columns = [col for col in table.schema.column_list if col.name != IDENTIFIER_COLUMN]
+
         # ToDo: validate the data type before inserting into the table
         for record in rows.frames.values:
             row_data = {col: record[idx] for idx, col in enumerate(columns)}
-            data.append(self._dict_to_sql_row(row_data, table.schema.column_list))
+            data.append(self._dict_to_sql_row(row_data, table_columns))
         self._sql_engine.execute(new_table.insert(), data)
         self._sql_session.commit()
 
@@ -134,8 +146,9 @@ class SQLStorageEngine(AbstractStorageEngine):
         row_size = None
         for row in result:
             # Todo: Verfiy the order of columns in row matches the table.columns
-            # ignore the first dummy (_row_id) primary column
-            data_batch.append(self._sql_row_to_dict(row[1:], table.schema.column_list))
+            # For table read, we provide row_id so that user can also retrieve
+            # row_id from the table.
+            data_batch.append(self._sql_row_to_dict(row, table.schema.column_list))
             if row_size is None:
                 row_size = 0
                 row_size = get_size(data_batch)

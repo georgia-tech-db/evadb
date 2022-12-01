@@ -19,7 +19,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConst
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
-from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
+from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
 
 

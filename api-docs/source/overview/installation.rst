@@ -57,7 +57,7 @@ Use the LOAD statement is used to load a video onto a table in EVA server.
 
 .. code-block:: python
 
-    cursor.execute('LOAD FILE "mnist.mp4" INTO MNISTVideoTable;')
+    cursor.execute('LOAD VIDEO "mnist.mp4" INTO MNISTVideoTable;')
     response = cursor.fetch_all()
     print(response)
 
@@ -122,7 +122,7 @@ Besides the notebook interface, EVA also exports a command line interface for qu
 .. code-block:: bash
 
     >>> eva_client
-    eva=# LOAD FILE "mnist.mp4" INTO MNISTVid;
+    eva=# LOAD VIDEO "mnist.mp4" INTO MNISTVid;
     @status: ResponseStatus.SUCCESS
     @batch:
 

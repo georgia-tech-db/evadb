@@ -21,7 +21,18 @@
 
 # EVA Multimedia Database System
 
-EVA is a new database system tailored for video analytics -- think PostgreSQL for videos. It supports a SQL-like language for querying videos (e.g., finding frames in a movie with your favorite actor or finding touchdowns in a football game). It comes with a wide range of commonly used computer vision models.
+EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
+
+ * examining the "emotion palette" of different actors
+ * finding gameplays that lead to a touchdown in a football game
+
+EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. 
+
+If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/latest/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
+
+The <a href="https://evadb.readthedocs.io/en/latest/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
+
+The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
 
 ## Why EVA? ##
 
@@ -63,7 +74,7 @@ eva_client     # launch client
 2. Load a video onto the server using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
-LOAD FILE "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
+LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
 ```
 
 3. That's it! You can now start running queries over the loaded video:
