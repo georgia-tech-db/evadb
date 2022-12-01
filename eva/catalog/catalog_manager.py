@@ -16,8 +16,8 @@ from typing import List
 
 from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.catalog.models.base_model import drop_db, init_db
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.df_column import DataFrameColumn, TableColumn
+from eva.catalog.models.df_metadata import DataFrameMetadata, TableMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
@@ -80,7 +80,7 @@ class CatalogManager(object):
         column_list: List[DataFrameColumn],
         identifier_column="id",
         is_video=False,
-    ) -> DataFrameMetadata:
+    ) -> TableMetadata:
         """Creates metadata object
 
         Creates a metadata object and column objects and persists them in
@@ -103,7 +103,7 @@ class CatalogManager(object):
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
         metadata.schema = column_list
-        return metadata
+        return TableMetadata(metadata)
 
     def create_column_metadata(
         self,
@@ -112,7 +112,7 @@ class CatalogManager(object):
         array_type: NdArrayType,
         dimensions: List[int],
         cci: ColConstraintInfo,
-    ) -> DataFrameColumn:
+    ) -> TableColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
@@ -124,7 +124,7 @@ class CatalogManager(object):
             array_type {NdArrayType} -- type of ndarray
             dimensions {List[int]} -- dimensions of the column created
         """
-        return DataFrameColumn(
+        return TableColumn(
             column_name,
             data_type,
             array_type=array_type,
@@ -134,7 +134,7 @@ class CatalogManager(object):
 
     def get_dataset_metadata(
         self, database_name: str, dataset_name: str
-    ) -> DataFrameMetadata:
+    ) -> TableMetadata:
         """
         Returns the Dataset metadata for the given dataset name
         Arguments:
@@ -155,16 +155,16 @@ class CatalogManager(object):
             metadata.id, None
         )
         metadata.schema = df_columns
-        return metadata
+        return TableMetadata(metadata)
 
     def get_column_object(
         self, table_obj: DataFrameMetadata, col_name: str
-    ) -> DataFrameColumn:
+    ) -> TableColumn:
         col_objs = self._column_service.columns_by_dataset_id_and_names(
             table_obj.id, column_names=[col_name]
         )
         if col_objs:
-            return col_objs[0]
+            return TableColumn(col_objs[0])
         else:
             return None
 

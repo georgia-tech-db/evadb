@@ -15,7 +15,7 @@
 from sqlalchemy import Boolean, Column, String
 from sqlalchemy.orm import relationship
 
-from eva.catalog.df_schema import DataFrameSchema
+from eva.catalog.df_schema import DataFrameSchema, TableSchema
 from eva.catalog.models.base_model import BaseModel
 
 
@@ -62,6 +62,72 @@ class DataFrameMetadata(BaseModel):
     @property
     def columns(self):
         return self._columns
+
+    @property
+    def identifier_column(self):
+        return self._unique_identifier_column
+
+    @property
+    def is_video(self):
+        return self._is_video
+
+    def __eq__(self, other):
+        return (
+            self.id == other.id
+            and self.file_url == other.file_url
+            and self.schema == other.schema
+            and self.identifier_column == other.identifier_column
+            and self.name == other.name
+            and self.is_video == other.is_video
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.id,
+                self.file_url,
+                self.schema,
+                self.identifier_column,
+                self.name,
+                self.is_video,
+            )
+        )
+
+
+class TableMetadata:
+    __tablename__ = "df_metadata"
+
+    _name = String(100)
+    _file_url = String(100)
+    _unique_identifier_column = String(100)
+    _is_video = Boolean()
+
+    def __init__(self, obj):
+        self._name = obj.name
+        self._file_url = obj.file_url
+        self._schema = obj.schema
+        self._unique_identifier_column = obj.identifier_column
+        self._is_video = obj.is_video
+
+    @property
+    def schema(self):
+        return self._schema
+
+    @schema.setter
+    def schema(self, column_list):
+        self._schema = TableSchema(self._name, column_list)
+
+    @property
+    def id(self):
+        return self._id
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def file_url(self):
+        return self._file_url
 
     @property
     def identifier_column(self):

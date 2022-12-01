@@ -14,12 +14,38 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.df_column import DataFrameColumn, TableColumn
 
 
 class DataFrameSchema(object):
     def __init__(self, name: str, column_list: List[DataFrameColumn]):
 
+        self._name = name
+        self._column_list = column_list
+
+    def __str__(self):
+        schema_str = "SCHEMA:: (" + self._name + ")\n"
+        for column in self._column_list:
+            schema_str += str(column)
+        return schema_str
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def column_list(self):
+        return self._column_list
+
+    def __eq__(self, other):
+        return self.name == other.name and self._column_list == other.column_list
+
+    def __hash__(self) -> int:
+        return hash((self.name, tuple(self.column_list)))
+
+
+class TableSchema:
+    def __init__(self, name: str, column_list: List[TableColumn]):
         self._name = name
         self._column_list = column_list
 
