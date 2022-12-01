@@ -1,8 +1,10 @@
 import pytesseract
-# from PIL import Image
+import PIL
 from detoxify import Detoxify
 import pandas as pd
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
+import numpy as np
+from torch import Tensor
 
 class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
     """
@@ -36,9 +38,13 @@ class HarmfulMemeDetector(PytorchAbstractClassifierUDF):
     # def input_format(self) -> FrameInfo:
     #     return FrameInfo(-1, -1, 3, ColorSpace.RGB)
 
-    def forward(self, this_image):
-
-        text = pytesseract.image_to_string(this_image)
+    def forward(self, frames: Tensor):
+        frames = frames * 255
+        frames = np.array(frames, dtype=np.uint8)
+        if np.ndim(frames) > 3:
+            frames = frames[0]
+        image = PIL.Image.fromarray(frames)
+        text = pytesseract.image_to_string(image)
         prediction_result = Detoxify('original').predict(text)
         outcome = pd.DataFrame()
         if prediction_result["toxicity"] >= self.threshold:
