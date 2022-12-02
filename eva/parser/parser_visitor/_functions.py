@@ -126,7 +126,9 @@ class Functions(evaql_parserVisitor):
     def visitAggregateWindowedFunction(
         self, ctx: evaql_parser.AggregateWindowedFunctionContext
     ):
-        if ctx.aggregateFunctionName():
+        if ctx.COUNT():
+            agg_func_name = "COUNT"
+        elif ctx.aggregateFunctionName():
             agg_func_name = self.visit(ctx.aggregateFunctionName())
         else:
             logger.error("Aggregate function name missing.")
@@ -142,8 +144,7 @@ class Functions(evaql_parserVisitor):
         return ctx.getText()
 
     def getAggregateFunctionType(self, agg_func_name: str):
-        agg_enum_name = 'AGGREGATION_' + agg_func_name.upper()
-        if agg_enum_name in ExpressionType:
-            return ExpressionType[agg_enum_name]
-        else:
+        try:
+            return ExpressionType["AGGREGATION_" + agg_func_name.upper()]
+        except KeyError:
             logger.error("Aggregate Function {} not supported.".format(agg_func_name))
