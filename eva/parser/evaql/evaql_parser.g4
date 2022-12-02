@@ -32,6 +32,7 @@ ddlStatement
 dmlStatement
     : selectStatement | insertStatement | updateStatement
     | deleteStatement | loadStatement | uploadStatement
+    | openStatement
     ;
 
 utilityStatement
@@ -188,6 +189,11 @@ loadStatement
         (
             ('(' columns=uidList ')')
         )?
+    ;
+
+openStatement
+    : OPEN
+      stringLiteral
     ;
 
 

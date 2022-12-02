@@ -60,6 +60,7 @@ NOT:                                 'NOT';
 NULL_LITERAL:                        'NULL';
 OFFSET:                              'OFFSET';
 ON:                                  'ON';
+OPEN:                                'OPEN';
 OR:                                  'OR';
 ORDER:                               'ORDER';
 PATH:                                'PATH';

@@ -33,6 +33,7 @@ from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.load_statement import LoadDataStatement
+from eva.parser.open_statement import OpenStatement
 from eva.parser.parser import Parser
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
@@ -183,6 +184,16 @@ class ParserTests(unittest.TestCase):
         expected_stmt2 = DropUDFStatement("MyUDF", True)
         self.assertEqual(str(expected_stmt1), drop_udf_query1)
         self.assertEqual(str(expected_stmt2), drop_udf_query2)
+
+    def test_open_statement(self):
+        parser = Parser()
+        open_query = """OPEN '/test1/test2.jpg'"""
+        expected_stmt = OpenStatement("/test1/test2.jpg")
+        eva_statement_list = parser.parse(open_query)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.OPEN)
+        open_stmt = eva_statement_list[0]
+        self.assertEqual(open_stmt, expected_stmt)
 
     def test_single_statement_queries(self):
         parser = Parser()

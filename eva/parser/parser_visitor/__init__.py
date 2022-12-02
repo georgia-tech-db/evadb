@@ -28,6 +28,7 @@ from eva.parser.parser_visitor._select_statement import Select
 from eva.parser.parser_visitor._show_statements import Show
 from eva.parser.parser_visitor._table_sources import TableSources
 from eva.parser.parser_visitor._upload_statement import Upload
+from eva.parser.parser_visitor._open_statement import Open
 
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which
@@ -50,6 +51,7 @@ class ParserVisitor(
     DropTable,
     Show,
     Explain,
+    Open,
 ):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:

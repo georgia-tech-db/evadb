@@ -40,6 +40,7 @@ class StatementType(Enum):
     SHOW = (auto(),)
     DROP_UDF = auto()
     EXPLAIN = (auto(),)
+    OPEN = (auto(),)
     # add other types
 
 
