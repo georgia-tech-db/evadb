@@ -227,7 +227,8 @@ class AnimalDetector(PytorchAbstractClassifierUDF):
         transform = AnimalDetector.image_model_transforms()
         frames = transform(frames)
         frames = frames.unsqueeze(0)
-        to_base = frames
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        to_base = frames.to(device)
         to_classifier = self.base(to_base)
         y_hat = self.classifier(to_classifier)
         pred = torch.sigmoid(y_hat).cpu().numpy()
@@ -328,7 +329,8 @@ class AnimalDetectorPlus(AnimalDetector):
         transform = AnimalDetector.image_model_transforms()
         frames = transform(frames)
         frames = frames.unsqueeze(0)
-        to_base = frames
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        to_base = frames.to(device)
         to_classifier = self.base(to_base)
         y_hat = self.classifier(to_classifier)
         pred = torch.sigmoid(y_hat).cpu().numpy()
