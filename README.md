@@ -1,5 +1,5 @@
-> code cannot run in colab because the pip version of evadb is incompatible with the current github version in terms of udf
-
+> ~~code cannot run in colab because the pip version of evadb is incompatible with the current github version in terms of udf~~
+> run animalDetector in colab: https://colab.research.google.com/drive/1SSHVsPru7oBjLV2TkYwpe6dv-3DSP1pM?usp=sharing
 How to run locally 
 
 ```
