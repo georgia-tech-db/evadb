@@ -24,8 +24,10 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
-from eva.parser.create_statement import ColConstraintInfo
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
+from eva.sql_config import IDENTIFIER_COLUMN
+from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
@@ -102,11 +104,85 @@ class CatalogManager(object):
             identifier_id=identifier_column,
             table_type=table_type,
         )
+
+        # Append row_id to table metadata.
+        column_list = [
+            DataFrameColumn(IDENTIFIER_COLUMN, ColumnType.INTEGER)
+        ] + column_list
+
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
+
         metadata.schema = column_list
         return metadata
+
+    def create_video_metadata(self, name: str) -> DataFrameMetadata:
+        """Create video metadata object.
+            We have predefined columns for such a object
+            id:  the frame id
+            data: the frame data
+
+        Arguments:
+            name (str): name of the metadata to be added to the catalog
+
+        Returns:
+            DataFrameMetadata:  corresponding metadata for the input table info
+        """
+        columns = [
+            ColumnDefinition(
+                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            ),
+            ColumnDefinition("id", ColumnType.INTEGER, None, []),
+            ColumnDefinition(
+                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            ),
+        ]
+        col_metadata = self.create_columns_metadata(columns)
+        uri = str(generate_file_path(name))
+        metadata = self.create_metadata(
+            name,
+            uri,
+            col_metadata,
+            identifier_column="id",
+            table_type=TableType.VIDEO_DATA,
+        )
+        return metadata
+
+    def create_table_metadata(
+        self, table_info: TableInfo, columns: List[ColumnDefinition]
+    ) -> DataFrameMetadata:
+        table_name = table_info.table_name
+        column_metadata_list = self.create_columns_metadata(columns)
+        file_url = str(generate_file_path(table_name))
+        metadata = self.create_metadata(
+            table_name,
+            file_url,
+            column_metadata_list,
+            table_type=TableType.STRUCTURED_DATA,
+        )
+        return metadata
+
+    def create_columns_metadata(self, col_list: List[ColumnDefinition]):
+        """Create column metadata for the input parsed column list. This function
+        will not commit the provided column into catalog table.
+        Will only return in memory list of ColumnDataframe objects
+
+        Arguments:
+            col_list {List[ColumnDefinition]} -- parsed col list to be created
+        """
+        if isinstance(col_list, ColumnDefinition):
+            col_list = [col_list]
+
+        result_list = []
+        for col in col_list:
+            result_list.append(
+                self.create_column_metadata(
+                    col.name, col.type, col.array_type, col.dimension, col.cci
+                )
+            )
+
+        return result_list
 
     def create_column_metadata(
         self,

@@ -25,7 +25,6 @@ from eva.expression.abstract_expression import ExpressionType
 from eva.models.storage.batch import Batch
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor import ParserVisitor
-from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 
 
@@ -437,9 +436,7 @@ class ParserVisitorTests(unittest.TestCase):
             ]
         )
         mock_load.assert_called_once()
-        mock_load.assert_called_with(
-            TableRef("myVideo"), "video.mp4", column_list, file_options
-        )
+        mock_load.assert_called_with("myVideo", "video.mp4", column_list, file_options)
 
     ##################################################################
     # UPLOAD Statement
@@ -482,5 +479,5 @@ class ParserVisitorTests(unittest.TestCase):
         )
         mock_upload.assert_called_once()
         mock_upload.assert_called_with(
-            "video.mp4", "b'AAAA'", TableRef("myVideo"), column_list, file_options
+            "video.mp4", "b'AAAA'", "myVideo", column_list, file_options
         )
