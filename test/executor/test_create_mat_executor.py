@@ -18,6 +18,7 @@ from unittest.mock import MagicMock
 from mock import patch
 
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.types import PlanOprType
@@ -35,7 +36,7 @@ class CreateMaterializedExecutorTest(unittest.TestCase):
                 continue
             child = MagicMock()
             child.node.opr_type = child_opr_type
-            with self.assertRaises(RuntimeError):
+            with self.assertRaises(ExecutorError):
                 create_udf_executor = CreateMaterializedViewExecutor(plan)
                 create_udf_executor.append_child(child)
                 create_udf_executor.exec()
@@ -49,7 +50,7 @@ class CreateMaterializedExecutorTest(unittest.TestCase):
         child = MagicMock()
         child.node.opr_type = PlanOprType.SEQUENTIAL_SCAN
         child.project_expr.__len__.return_value = 3
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ExecutorError):
             create_udf_executor = CreateMaterializedViewExecutor(plan)
             create_udf_executor.append_child(child)
             create_udf_executor.exec()
