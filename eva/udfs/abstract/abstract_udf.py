@@ -13,16 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABCMeta, abstractmethod
+from functools import lru_cache, wraps
 from typing import List, Union
 
 import pandas as pd
+import numpy as np
 from numpy.typing import ArrayLike
 
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 
+import eva.eva_server as server
 InputType = Union[pd.DataFrame, ArrayLike]
 
+
+def mutable_to_tuple(mutable):
+        '''mutable is an ndarray or a dataframe
+        convert it to tuple so it can be hashable
+        '''
+        return mutable.to_string()
+
+def get_freeze_args (*args, **kwargs):
+    args = tuple([mutable_to_tuple(arg) if isinstance(arg, (pd.DataFrame, np.ndarray)) else arg for arg in args])
+    kwargs = {k: mutable_to_tuple(v) if isinstance(v, (pd.DataFrame, np.ndarray)) else v for k, v in kwargs.items()}
+    return args, kwargs
 
 class AbstractUDF(metaclass=ABCMeta):
     """
@@ -31,7 +45,7 @@ class AbstractUDF(metaclass=ABCMeta):
     Load and initialize the machine learning model in the __init__.
 
     """
-
+        
     def __init__(self, *args, **kwargs):
         self.setup(*args, **kwargs)
 
@@ -40,7 +54,7 @@ class AbstractUDF(metaclass=ABCMeta):
 
     def __str__(self):
         return self.name
-
+    
     """Abstract Methods all UDFs must implement. """
 
     @abstractmethod

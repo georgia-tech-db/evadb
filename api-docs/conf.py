@@ -8,7 +8,7 @@ from datetime import date
 sys.path.insert(0, os.path.abspath(".."))
 
 # -- Global variables
-
+cache = {}
 # The full version, including alpha/beta/rc tags
 VERSION_DICT = {}
 with open("../eva/version.py", "r") as version_file:

@@ -28,7 +28,7 @@ sys.path.append(EVA_CODE_DIR)
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import start_server  # noqa: E402
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
-
+import eva.globals as globals
 
 def eva():
     """
@@ -61,8 +61,8 @@ def eva():
 def main():
     mode = ConfigurationManager().get_value("core", "mode")
     init_builtin_udfs(mode=mode)
+    globals.init()
     eva()
-
 
 if __name__ == "__main__":
     # execute only if run as the entry point into the program
