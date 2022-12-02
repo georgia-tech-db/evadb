@@ -59,7 +59,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
     @property
     def input_format(self) -> FrameInfo:
-        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+        return FrameInfo(640, 1280, 3, ColorSpace.RGB)
 
     @property
     def labels(self) -> List[str]:
@@ -175,15 +175,11 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
         outcome = pd.DataFrame()
 
+        frames = torch.permute(frames, (0, 2, 3, 1))
+        predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
+
         for i in range(frames.shape[0]):
-            img_b = frames[i][0]
-            img_g = frames[i][1]
-            img_r = frames[i][2]
-            img_rgb = torch.stack((img_r, img_g, img_b), dim=2)
-            img_rgb = img_rgb.cpu().detach().numpy()
-            img_rgb = img_rgb * 255
-            predictions = self.model(img_rgb)
-            single_result = predictions.pandas().xyxy[0]
+            single_result = predictions.pandas().xyxy[i]
             pred_class = single_result["name"].tolist()
             pred_score = single_result["confidence"].tolist()
             pred_boxes = single_result[["xmin", "ymin", "xmax", "ymax"]].apply(
