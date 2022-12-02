@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# This script should return a non-zero value if either
-# linter fails or the pytest fails. This is important for the CI system.
+# generates a report for tests marked as benchmark tests
+
 
 # temporarily remove __init__.py from root if it exists
 if [ -f ./__init__.py ]; then
