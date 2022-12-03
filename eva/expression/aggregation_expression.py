@@ -55,6 +55,7 @@ class AggregationExpression(AbstractExpression):
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
         batch.reset_index()
+        batch.modify_column_alias(self.etype.name)
         # TODO ACTION:
         # Add raise exception if data type doesn't match
 
