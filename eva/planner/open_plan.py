@@ -14,29 +14,23 @@
 # limitations under the License.
 from pathlib import Path
 
-from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
+from eva.planner.abstract_plan import AbstractPlan
+from eva.planner.types import PlanOprType
 
 
-class OpenStatement(AbstractStatement):
-    def __init__(self, path: str):
-        super().__init__(StatementType.OPEN)
-        self._path = Path(path)
+class OpenPlan(AbstractPlan):
+    def __init__(self, path: Path):
+        super().__init__(PlanOprType.OPEN)
+        self._path = path
 
     @property
     def path(self):
         return self._path
 
-    def __str__(self) -> str:
-        print_str = "OPEN {}".format(
+    def __str__(self):
+        return "OpenPlan(path={})".format(
             self._path
         )
-        return print_str
-
-    def __eq__(self, other):
-        if not isinstance(other, OpenStatement):
-            return False
-        return self._path == other.path
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.path))
+        return hash((super().__hash__(), self._path))

@@ -48,6 +48,7 @@ from eva.optimizer.rules.rules import (
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
     LogicalOrderByToPhysical,
+    LogicalOpenToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,
@@ -114,6 +115,7 @@ class RulesManager:
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
+            LogicalOpenToPhysical(),
         ]
 
         if ray_enabled:

@@ -56,6 +56,7 @@ class OperatorType(IntEnum):
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
+    LOGICALOPEN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1098,3 +1099,22 @@ class LogicalExplain(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._explainable_opr))
+
+
+class LogicalOpen(Operator):
+    def __init__(self, path: Path, children: List = None):
+        super().__init__(OperatorType.LOGICALOPEN, children)
+        self._path = path
+
+    @property
+    def path(self):
+        return self._path
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalOpen):
+            return False
+        return is_subtree_equal and self._path == other.path
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self._path))

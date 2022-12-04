@@ -62,6 +62,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalOpen,
     Operator,
     OperatorType,
 )
@@ -83,6 +84,7 @@ from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
+from eva.planner.open_plan import OpenPlan
 
 ##############################################
 # REWRITE RULES START
@@ -848,6 +850,22 @@ class LogicalExplainToPhysical(Rule):
         after = ExplainPlan(before.explainable_opr)
         for child in before.children:
             after.append_child(child)
+        return after
+
+
+class LogicalOpenToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALOPEN)
+        super().__init__(RuleType.LOGICAL_OPEN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_OPEN_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalOpen, context: OptimizerContext):
+        after = OpenPlan(before.path)
         return after
 
 

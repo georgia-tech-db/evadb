@@ -35,6 +35,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalOpen,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
@@ -51,6 +52,7 @@ from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.open_statement import OpenStatement
 from eva.utils.logging_manager import logger
 
 
@@ -274,6 +276,12 @@ class StatementToPlanConvertor:
             statement.file_options,
         )
         self._plan = load_data_opr
+
+    def visit_open_data(self, statement: OpenStatement):
+        open_opr = LogicalOpen(
+            statement.path
+        )
+        self._plan = open_opr
 
     def visit_upload(self, statement: UploadStatement):
         """Convertor for parsed upload statement
