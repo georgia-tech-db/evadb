@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator, List
+from typing import Any, Dict, Iterator, List
 
 import numpy as np
 import pandas as pd
+from sqlalchemy import and_
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -76,7 +77,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         # During table creation, assume row_id is automatically handled by
         # the sqlalchemy engine.
         table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
-        sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table_columns)
+        sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(table_columns)
 
         attr_dict.update(sqlalchemy_schema)
         # dynamic schema generation
@@ -157,3 +158,29 @@ class SQLStorageEngine(AbstractStorageEngine):
                 data_batch = []
         if data_batch:
             yield Batch(pd.DataFrame(data_batch))
+
+    def delete(self, table: DataFrameMetadata, where_clause: Dict[str, Any]):
+        """Delete tuples from the table where rows satisfy the where_clause.
+        The current implementation only handles equality predicates.
+
+        Argument:
+            table: table metadata object of the table
+            where_clause (Dict[str, Any]): where clause use to find the tuples to remove. The key should be the column name and value should be the tuple value. The function assumes an equality condition
+        """
+        sqlite_table = BaseModel.metadata.tables[table.name]
+        table_columns = [
+            col.name for col in sqlite_table.columns if col.name != "_row_id"
+        ]
+        filter_clause = []
+        # verify where clause and convert to sqlalchemy supported filter
+        # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
+        for column, value in where_clause.items():
+            if column not in table_columns:
+                raise Exception(
+                    f"where_clause contains a column {column} not in the table {sqlite_table}"
+                )
+            filter_clause.append(sqlite_table.columns[column] == value)
+
+        d = sqlite_table.delete().where(and_(*filter_clause))
+        self._sql_engine.execute(d)
+        self._sql_session.commit()

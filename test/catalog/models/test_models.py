@@ -99,7 +99,7 @@ class CatalogModelsTest(unittest.TestCase):
         df_metadata1.schema = col_list
         self.assertNotEqual(df_metadata, df_metadata1)
         df_metadata2 = DataFrameMetadata(
-            "name2", "eva_dataset", table_type=TableType.VIDEO_DATA
+            "name2", "eva_dataset", table_type=TableType.IMAGE_DATA
         )
         df_metadata2.schema = col_list[1:]
         self.assertNotEqual(df_metadata1, df_metadata2)

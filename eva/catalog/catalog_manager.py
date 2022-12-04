@@ -150,7 +150,10 @@ class CatalogManager(object):
         return metadata
 
     def create_table_metadata(
-        self, table_info: TableInfo, columns: List[ColumnDefinition]
+        self,
+        table_info: TableInfo,
+        columns: List[ColumnDefinition],
+        identifier_column: str = "id",
     ) -> DataFrameMetadata:
         table_name = table_info.table_name
         column_metadata_list = self.create_columns_metadata(columns)
@@ -159,6 +162,7 @@ class CatalogManager(object):
             table_name,
             file_url,
             column_metadata_list,
+            identifier_column=identifier_column,
             table_type=TableType.STRUCTURED_DATA,
         )
         return metadata
@@ -190,7 +194,7 @@ class CatalogManager(object):
         data_type: ColumnType,
         array_type: NdArrayType,
         dimensions: List[int],
-        cci: ColConstraintInfo,
+        cci: ColConstraintInfo = ColConstraintInfo(),
     ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
@@ -383,3 +387,27 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    def get_video_metadata_table(
+        self,
+        input_table: DataFrameMetadata,
+    ) -> DataFrameMetadata:
+        """Get a video metadata table.
+        Create one if it does not exists
+        We use this table to store all the video filenames and corresponding information
+        Args:
+            input_table (DataFrameMetadata): input video table
+
+        Returns:
+            DataFrameMetadata: metadata table maintained by the system
+        """
+        name = f"_metadata_{input_table.name}"
+        obj = self.get_dataset_metadata(None, name)
+        if obj:
+            return obj
+        else:
+            columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
+            obj = self.create_table_metadata(
+                TableInfo(name), columns, identifier_column=columns[0].name
+            )
+            return obj

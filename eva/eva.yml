@@ -20,6 +20,9 @@ storage:
   structured_data_engine: "eva.storage.sqlite_storage_engine.SQLStorageEngine"
   video_engine: "eva.storage.opencv_storage_engine.OpenCVStorageEngine"
   video_engine_version: 0
+  image_engine: "eva.storage.image_storage_engine.OpenCVImageStorageEngine"
+  image_engine_version: 0
+
 server:
   host: "0.0.0.0"
   port: 5432

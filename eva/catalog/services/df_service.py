@@ -19,6 +19,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from eva.catalog.catalog_type import TableType
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
+from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
 
 
@@ -38,14 +39,21 @@ class DatasetService(BaseService):
         Returns:
             DataFrameMetadata object
         """
-        metadata = self.model(
-            name=name,
-            file_url=file_url,
-            identifier_id=identifier_id,
-            table_type=int(table_type),
-        )
-        metadata = metadata.save()
-        return metadata
+        try:
+            metadata = self.model(
+                name=name,
+                file_url=file_url,
+                identifier_id=identifier_id,
+                table_type=int(table_type),
+            )
+            metadata = metadata.save()
+        except Exception as e:
+            logger.exception(
+                f"Failed to create catalog dataset with exception {str(e)}"
+            )
+            raise CatalogError(e)
+        else:
+            return metadata
 
     def dataset_by_name(self, name: str) -> int:
         """
