@@ -27,9 +27,6 @@ class StorageEngine:
         TableType.VIDEO_DATA: str_to_class(
             ConfigurationManager().get_value("storage", "video_engine")
         )(),
-        TableType.IMAGE_DATA: str_to_class(
-            ConfigurationManager().get_value("storage", "image_engine")
-        )(),
     }
 
     @classmethod

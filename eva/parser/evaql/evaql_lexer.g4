@@ -89,7 +89,6 @@ USING:                               'USING';
 VALUES:                              'VALUES';
 WHERE:                               'WHERE';
 XOR:                                 'XOR';
-IMAGE:                               'IMAGE';
 
 // File Formats
 WITH:                 'WITH';

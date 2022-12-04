@@ -64,17 +64,6 @@ def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
     return glob.iglob(os.path.expanduser(path_regex), recursive=True)
 
 
-def validate_image(image_path: Path) -> bool:
-    try:
-        data = cv2.imread(str(image_path))
-        return data is not None
-    except Exception as e:
-        logger.warning(
-            f"Unexpected Exception {e} occured while reading image file {image_path}"
-        )
-        return False
-
-
 def validate_video(video_path: Path) -> bool:
     try:
         vid = cv2.VideoCapture(str(video_path))
