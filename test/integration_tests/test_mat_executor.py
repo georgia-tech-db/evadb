@@ -25,6 +25,7 @@ import pandas as pd
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -36,19 +37,20 @@ class MaterializedViewTest(unittest.TestCase):
     def setUpClass(cls):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        video_file_path = create_sample_video()
         copy_sample_videos_to_upload_dir()
-        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
-        query = """LOAD VIDEO 'ua_detrac.mp4'
-                   INTO UATRAC;"""
-        execute_query_fetch_all(query)
+        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO UATRAC;")
         load_inbuilt_udfs()
 
     @classmethod
     def tearDownClass(cls):
         file_remove("dummy.avi")
         file_remove("ua_detrac.mp4")
+        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE UATRAC;")
 
     def test_should_mat_view_with_dummy(self):
         materialized_query = """CREATE MATERIALIZED VIEW dummy_view (id, label)

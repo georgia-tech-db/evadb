@@ -25,8 +25,8 @@ class ExplainExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        create_sample_video(NUM_FRAMES)
-        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        video_file_path = create_sample_video(NUM_FRAMES)
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -42,6 +42,7 @@ class ExplainExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
         drop_query = """DROP TABLE table3;"""
         execute_query_fetch_all(drop_query)
+        execute_query_fetch_all("DROP TABLE MyVideo;")
 
     def test_explain_simple_select(self):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"

@@ -42,6 +42,7 @@ class LoadVideoExecutor(AbstractExecutor):
         using storage engine
         """
         try:
+            valid_files = []
             # Create catalog entry
             table_info = self.node.table_info
             database_name = table_info.database_name
@@ -65,7 +66,6 @@ class LoadVideoExecutor(AbstractExecutor):
                         f"StorageEngine {storage_engine} create call failed"
                     )
 
-            valid_files = []
             for file_path in iter_path_regex(self.node.file_path):
                 file_path = Path(file_path)
                 if validate_video(file_path):

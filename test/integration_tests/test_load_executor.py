@@ -38,7 +38,7 @@ class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        self.video_file_path = create_sample_video()
         create_sample_csv()
 
     def tearDown(self):
@@ -47,7 +47,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
 
         select_query = """SELECT name, id, data FROM MyVideo;"""
@@ -57,10 +57,7 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
 
-        # Try adding video to an existing table
-        execute_query_fetch_all(query)
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 2 * len(expected_batch))
+        execute_query_fetch_all("DROP TABLE MyVideo;")
 
     def test_should_load_videos_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
@@ -69,12 +66,17 @@ class LoadExecutorTest(unittest.TestCase):
         expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
         self.assertEqual(result, expected)
 
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
+
     def test_should_load_videos_with_same_name_but_different_path(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
         expected = Batch(pd.DataFrame(["Number of loaded videos: 3"]))
         self.assertEqual(result, expected)
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_fail_to_load_videos_with_same_path(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
@@ -87,6 +89,9 @@ class LoadExecutorTest(unittest.TestCase):
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
 
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
+
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
         with tempfile.NamedTemporaryFile() as tmp:
@@ -97,6 +102,8 @@ class LoadExecutorTest(unittest.TestCase):
                 str(cm.exception),
                 f"Load video failed: encountered invalid file {tmp.name}",
             )
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_fail_to_load_invalid_files_as_video(self):
         path = f"{EVA_ROOT_DIR}/data/**"
@@ -105,6 +112,8 @@ class LoadExecutorTest(unittest.TestCase):
             execute_query_fetch_all(query)
         result = execute_query_fetch_all("SELECT name FROM MyVideos;")
         self.assertEqual(len(result), 0)
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_rollback_if_video_load_fails(self):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
@@ -136,6 +145,9 @@ class LoadExecutorTest(unittest.TestCase):
                 result = execute_query_fetch_all("SELECT name FROM MyVideos")
                 self.assertEqual(len(result), 0)
 
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
+
     def test_should_rollback_and_preserve_previous_state(self):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
         valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
@@ -157,6 +169,9 @@ class LoadExecutorTest(unittest.TestCase):
                 result = execute_query_fetch_all("SELECT name FROM MyVideos")
                 file_names = np.unique(result.frames)
                 self.assertEqual(len(file_names), 1)
+
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):

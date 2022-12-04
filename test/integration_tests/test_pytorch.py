@@ -20,6 +20,7 @@ import mock
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -28,15 +29,12 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         copy_sample_videos_to_upload_dir()
-        query = """LOAD VIDEO 'ua_detrac.mp4'
-                   INTO MyVideo;"""
-        execute_query_fetch_all(query)
-        query = """LOAD VIDEO 'mnist.mp4'
-                   INTO MNIST;"""
-        execute_query_fetch_all(query)
-        query = """LOAD VIDEO 'actions.mp4'
-                   INTO Actions;"""
-        execute_query_fetch_all(query)
+        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
+        actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
+        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
+        execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
+        execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
         load_inbuilt_udfs()
 
     @classmethod
@@ -44,6 +42,9 @@ class PytorchTest(unittest.TestCase):
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
+        execute_query_fetch_all("DROP TABLE Actions;")
+        execute_query_fetch_all("DROP TABLE MNIST;")
+        execute_query_fetch_all("DROP TABLE MyVideo;")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):

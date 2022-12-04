@@ -35,14 +35,21 @@ class DropExecutorTest(unittest.TestCase):
         query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
+        # catalog should contain vidoe table and the metedata table
         metadata_obj = catalog_manager.get_dataset_metadata(None, "MyVideo")
         video_dir = metadata_obj.file_url
         self.assertFalse(metadata_obj is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
         self.assertEqual(len(column_objects), 4)
         self.assertTrue(Path(video_dir).exists())
+        # metadata table
+        video_metadata_table = catalog_manager.get_video_metadata_table(metadata_obj)
+        self.assertTrue(video_metadata_table is not None)
+
         drop_query = """DROP TABLE MyVideo;"""
         execute_query_fetch_all(drop_query)
+        with self.assertRaises(Exception):
+            catalog_manager.get_video_metadata_table(metadata_obj)
         self.assertTrue(catalog_manager.get_dataset_metadata(None, "MyVideo") is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
         self.assertEqual(len(column_objects), 0)

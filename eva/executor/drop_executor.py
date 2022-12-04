@@ -52,9 +52,7 @@ class DropExecutor(AbstractExecutor):
             raise ExecutorError(str(err))
         storage_engine.drop(table=table_ref.table.table_obj)
 
-        success = catalog_manager.drop_dataset_metadata(
-            table_ref.table.database_name, table_ref.table.table_name
-        )
+        success = catalog_manager.drop_dataset_metadata(table_ref.table.table_obj)
 
         if not success:
             err_msg = "Failed to drop {}".format(table_ref)

@@ -102,24 +102,22 @@ class DatasetService(BaseService):
         """
         return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
-    def drop_dataset_by_name(self, database_name: str, dataset_name: str):
+    def drop_dataset(self, dataset: DataFrameMetadata):
         """Delete dataset from the db
         Arguments:
-            database_name  (str): Database to which dataset belongs
-            dataset_name (str): name of the dataset
+            dataset  (DataFrameMetadata): dataset to delete
         Returns:
             True if successfully removed else false
         """
         try:
-            dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
             return True
         except Exception as e:
-            err_msg = "Delete dataset failed for name {} with error {}".format(
-                dataset_name, str(e)
+            err_msg = (
+                f"Delete dataset failed for name {dataset.name} with error {str(e)}."
             )
-            logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            logger.exception(err_msg)
+            raise CatalogError(err_msg)
 
     def rename_dataset_by_name(
         self, new_name: str, curr_database_name: str, curr_dataset_name: str

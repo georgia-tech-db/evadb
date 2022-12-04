@@ -37,6 +37,9 @@ class OpenCVStorageEngine(AbstractStorageEngine):
     def _get_metadata_table(self, table: DataFrameMetadata):
         return CatalogManager().get_video_metadata_table(table)
 
+    def _create_metadata_table(self, table: DataFrameMetadata):
+        return CatalogManager().create_video_metadata_table(table)
+
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
         # convert video_path to file name
         # This is done to support duplicate video_names with different complete paths. Without conversion, we cannot copy files with same name but different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4
@@ -62,14 +65,17 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             logger.error(error)
             raise FileExistsError(error)
 
-        self._rdb_handler.create(self._get_metadata_table(table))
+        self._rdb_handler.create(self._create_metadata_table(table))
         return True
 
     def drop(self, table: DataFrameMetadata):
         dir_path = Path(table.file_url)
         try:
             shutil.rmtree(str(dir_path))
-            self._rdb_handler.drop(self._get_metadata_table(table))
+            metadata_table = self._get_metadata_table(table)
+            self._rdb_handler.drop(metadata_table)
+            # remove the metadata table from the catalog
+            CatalogManager().drop_dataset_metadata(metadata_table)
         except Exception as e:
             logger.exception(f"Failed to drop the video table {e}")
 
@@ -82,7 +88,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 self._rdb_handler.delete(
                     video_metadata_table,
                     where_clause={
-                        video_metadata_table.identifier_column: dst_file_name
+                        video_metadata_table.identifier_column: str(video_file_path)
                     },
                 )
                 video_file.unlink()
@@ -106,7 +112,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 shutil.copy2(str(video_file), str(dst_path))
                 self._rdb_handler.write(
                     self._get_metadata_table(table),
-                    Batch(pd.DataFrame({"file_url": [dst_file_name]})),
+                    Batch(pd.DataFrame({"file_url": [str(video_file)]})),
                 )
 
         except CatalogError:
@@ -130,7 +136,8 @@ class OpenCVStorageEngine(AbstractStorageEngine):
 
         for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
             for video_file_name in video_files.frames["file_url"]:
-                video_file = Path(table.file_url) / video_file_name
+                system_file_name = self._xform_file_url_to_file_name(video_file_name)
+                video_file = Path(table.file_url) / system_file_name
                 reader = OpenCVReader(
                     str(video_file),
                     batch_mem_size=batch_mem_size,

@@ -18,6 +18,7 @@ import re
 from typing import TYPE_CHECKING, List
 
 from eva.catalog.catalog_utils import is_video_table
+from eva.sql_config import IDENTIFIER_COLUMN
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
@@ -64,6 +65,7 @@ def extend_star(
         [
             TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs
+            if col_name != IDENTIFIER_COLUMN
         ]
     )
     return target_list

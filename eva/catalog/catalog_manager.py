@@ -27,6 +27,7 @@ from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.sql_config import IDENTIFIER_COLUMN
+from eva.utils.errors import CatalogError
 from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
@@ -343,18 +344,18 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
+    def drop_dataset_metadata(self, obj: DataFrameMetadata) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
 
         Arguments:
-           table_name: table name to be deleted.
+           obj: dataframe metadata entry to remove
 
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
+        return self._dataset_service.drop_dataset(obj)
 
     def drop_udf(self, udf_name: str) -> bool:
         """
@@ -389,8 +390,27 @@ class CatalogManager(object):
         return self._udf_service.get_all_udfs()
 
     def get_video_metadata_table(
-        self,
-        input_table: DataFrameMetadata,
+        self, input_table: DataFrameMetadata
+    ) -> DataFrameMetadata:
+        """Get a video metadata table.
+        Raise if it does not exists
+        Args:
+            input_table (DataFrameMetadata): input video table
+
+        Returns:
+            DataFrameMetadata: metadata table maintained by the system
+        """
+        name = f"_metadata_{input_table.name}"
+        obj = self.get_dataset_metadata(None, name)
+        if not obj:
+            err = f"Table with name {name} does not exist in catalog"
+            logger.exception(err)
+            raise CatalogError(err)
+
+        return obj
+
+    def create_video_metadata_table(
+        self, input_table: DataFrameMetadata
     ) -> DataFrameMetadata:
         """Get a video metadata table.
         Create one if it does not exists
@@ -404,10 +424,12 @@ class CatalogManager(object):
         name = f"_metadata_{input_table.name}"
         obj = self.get_dataset_metadata(None, name)
         if obj:
-            return obj
-        else:
-            columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
-            obj = self.create_table_metadata(
-                TableInfo(name), columns, identifier_column=columns[0].name
-            )
-            return obj
+            err_msg = f"Table with name {name} already exists"
+            logger.exception(err_msg)
+            raise CatalogError(err_msg)
+
+        columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
+        obj = self.create_table_metadata(
+            TableInfo(name), columns, identifier_column=columns[0].name
+        )
+        return obj
