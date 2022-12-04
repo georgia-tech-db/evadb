@@ -48,28 +48,36 @@ class LoadImageExecutor(AbstractExecutor):
             if not success:
                 raise RuntimeError(f"StorageEngine {storage_engine} create call failed")
 
-            file_count = 0
-            corrupt_files = []
+            invalid_files = []
+            valid_files = []
             for file_path in iter_path_regex(self.node.file_path):
                 if file_path.is_file():
                     # we should validate the file before loading
                     if validate_image(file_path):
-                        storage_engine.write(self.node.table_metainfo, file_path)
-                        file_count += 1
+                        storage_engine.write(
+                            self.node.table_metainfo,
+                            Batch(
+                                pd.DataFrame(
+                                    [{"file_path": str(file_path)}]
+                                )
+                            ),
+                        )
+                        valid_files.append(file_path)
                     else:
-                        corrupt_files.append(file_path)
+                        invalid_files.append(file_path)
         except Exception as e:
-            self._rollback_load(file_count, corrupt_files)
+            self._rollback_load(valid_files)
             err_msg = f"Load command with error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
 
-        if corrupt_files:
+        loaded_file_count = len(valid_files)
+        if invalid_files:
             yield Batch(
                 pd.DataFrame(
                     {
-                        "Number of loaded images": str(file_count),
-                        "Failed to load files": str(corrupt_files),
+                        "Number of loaded images": str(loaded_file_count),
+                        "Failed to load files": str(invalid_files),
                     },
                     index=[0],
                 )
@@ -78,7 +86,7 @@ class LoadImageExecutor(AbstractExecutor):
             yield Batch(
                 pd.DataFrame(
                     {
-                        "Number of loaded images": str(file_count),
+                        "Number of loaded images": str(loaded_file_count),
                     },
                     index=[0],
                 )
@@ -87,8 +95,7 @@ class LoadImageExecutor(AbstractExecutor):
     def _rollback_load(
         self,
         storage_engine: AbstractStorageEngine,
-        file_count: int,
-        corrupt_files: List[Path],
+        valid_files: List[Path],
     ):
-        for file_path in corrupt_files:
+        for file_path in valid_files:
             storage_engine.delete(self.node.table_metainfo, file_path)

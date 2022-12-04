@@ -133,22 +133,22 @@ class StatementBinder:
                 msg = f"Adding to an existing table {name}."
                 logger.info(msg)
             else:
-
+                
                 # create catalog entry only if the file path exists
-                upload_dir = Path(
-                    ConfigurationManager().get_value("storage", "upload_dir")
-                )
-                if (
-                    Path(node.path).exists()
-                    or Path(Path(upload_dir) / node.path).exists()
-                ):
-                    create_multimedia_metadata(name, node.file_options["file_format"])
+                # upload_dir = Path(
+                #     ConfigurationManager().get_value("storage", "upload_dir")
+                # )
+                # if (
+                #     Path(node.path).exists()
+                #     or Path(Path(upload_dir) / node.path).exists()
+                # ):
+                create_multimedia_metadata(name, node.file_options["file_format"])
 
-                # else raise error
-                else:
-                    err_msg = f"Path {node.path} does not exist."
-                    logger.error(err_msg)
-                    raise BinderError(err_msg)
+                # # else raise error
+                # else:
+                #     err_msg = f"Path {node.path} does not exist."
+                #     logger.error(err_msg)
+                #     raise BinderError(err_msg)
 
         self.bind(table_ref)
 

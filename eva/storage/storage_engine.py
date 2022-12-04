@@ -38,3 +38,4 @@ class StorageEngine:
             return cls.storages[table_metadata.table_type]
 
         raise RuntimeError(f"Invalid table type {table_metadata.table_type}")
+

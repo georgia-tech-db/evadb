@@ -21,6 +21,7 @@ import cv2
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
+from eva.utils.logging_manager import logger
 
 
 class ExecutorError(Exception):
@@ -47,5 +48,24 @@ def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
 
 
 def validate_image(image_path: Path) -> bool:
-    data = cv2.imread(str(image_path))
-    return data is not None
+    try:
+        data = cv2.imread(str(image_path))
+        return data is not None
+    except Exception as e:
+        logger.warning(
+            f"Unexpected Exception {e} occured while reading image file {image_path}"
+        )
+        return False
+
+
+def validate_video(video_path: Path) -> bool:
+    try:
+        vid = cv2.VideoCapture(video_path)
+        if not vid.isOpened():
+            return False
+        return True
+    except Exception as e:
+        logger.warning(
+            f"Unexpected Exception {e} occured while reading video file {video_path}"
+        )
+        return False

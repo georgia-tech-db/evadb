@@ -312,3 +312,22 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    def get_video_metadata_table(
+        self,
+        input_table: DataFrameMetadata,
+    ) -> DataFrameMetadata:
+        """Return an in-memory object of video metadata table.
+        We use this table to store all the video filenames and corresponding information
+        Args:
+            input_table (DataFrameMetadata): input vidoe table
+
+        Returns:
+            DataFrameMetadata: metadata table maintained by the system
+        """
+        name = f"_metadata_{input_table.name}"
+        metadata = DataFrameMetadata(name, "", TableType.STRUCTURED_DATA, identifier_id="file_url")
+        metadata.columns = [
+            self.create_column_metadata("file_url", ColumnType.TEXT, None, None)
+        ]
+        return metadata

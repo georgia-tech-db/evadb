@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator, List
+from typing import Any, Dict, Iterator, List
 
 import numpy as np
 import pandas as pd
@@ -75,7 +75,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         # During table creation, assume row_id is automatically handled by
         # the sqlalchemy engine.
         table_columns = [col for col in table.columns if col.name != "_row_id"]
-        sqlalchemy_schema = SchemaUtils.get_sqlalchemy_schema(table_columns)
+        sqlalchemy_schema = SchemaUtils.xform_to_sqlalchemy_schema(table_columns)
 
         attr_dict.update(sqlalchemy_schema)
         # dynamic schema generation
@@ -156,3 +156,23 @@ class SQLStorageEngine(AbstractStorageEngine):
                 data_batch = []
         if data_batch:
             yield Batch(pd.DataFrame(data_batch))
+
+    def delete(self, table: DataFrameMetadata, where_clause: Dict[str, Any]):
+        """Delete tuples from the table where rows satisfy the where_clause.
+        The current implementation only handles equality predicates.
+
+        Argument:
+            table: table metadata object of the table
+            where_clause (Dict[str, Any]): the where clause use to find the tuples to remove. The key should be the column name and value should be the tuple value. The function assumes an equality condition
+        """
+        sqlite_table = BaseModel.metadata.tables[table.name]
+        table_columns = [col for col in sqlite_table.columns if col.name != "_row_id"]
+        # verify where clause
+        for column in where_clause:
+            if column not in table_columns:
+                raise Exception(
+                    f"where_clause contains a column {column} not in the table {sqlite_table}"
+                )
+        d = sqlite_table.delete().where(**where_clause)
+        self._sql_engine.execute(d)
+        self._sql_session.commit()

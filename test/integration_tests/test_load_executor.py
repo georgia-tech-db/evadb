@@ -66,6 +66,18 @@ class LoadExecutorTest(unittest.TestCase):
 
         file_names = actual_batch.project(["myimages.name"]).frames
 
+    def test_should_load_videos_in_table(self):
+        path = f"{EVA_ROOT_DIR}/data/**/*.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        execute_query_fetch_all(query)
+
+        select_query = """SELECT name, data FROM MyImages;"""
+
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 20)
+
+        file_names = actual_batch.project(["myimages.name"]).frames
+        
     # integration tests for csv
     def test_should_load_csv_in_table(self):
 

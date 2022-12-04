@@ -18,12 +18,13 @@ from sqlalchemy import TEXT, Column, Float, Integer, LargeBinary
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.utils.logging_manager import logger
 
 
 class SchemaUtils(object):
     @staticmethod
-    def get_sqlalchemy_column(df_column: DataFrameColumn) -> Column:
+    def xform_to_sqlalchemy_column(df_column: DataFrameColumn) -> Column:
         column_type = df_column.type
 
         sqlalchemy_column = None
@@ -41,7 +42,7 @@ class SchemaUtils(object):
         return sqlalchemy_column
 
     @staticmethod
-    def get_sqlalchemy_schema(
+    def xform_to_sqlalchemy_schema(
         column_list: List[DataFrameColumn],
     ) -> Dict[str, Column]:
         """Converts the list of DataFrameColumns to SQLAlchemyColumns

@@ -12,10 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import shutil
 import struct
 from pathlib import Path
 from typing import Iterator
+
+from sqlalchemy import Column
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -25,19 +29,17 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.storage.storage_engine import StorageEngine
+from eva.storage.sqlite_storage_engine import SQLStorageEngine
 from eva.utils.logging_manager import logger
 
 
 class OpenCVStorageEngine(AbstractStorageEngine):
     def __init__(self):
-        self.metadata = "metadata"
-        self.curr_version = ConfigurationManager().get_value(
-            "storage", "video_engine_version"
-        )
-        self._database_handler: AbstractStorageEngine = StorageEngine.storages[
-            TableType.STRUCTURED_DATA
-        ]
+        self._rdb_handler: SQLStorageEngine = SQLStorageEngine()
+
+    @staticmethod
+    def _get_metadata_table(table: DataFrameMetadata):
+        return CatalogManager().get_video_metadata_table(table)
 
     def create(self, table: DataFrameMetadata, if_not_exists=True):
         """
@@ -57,28 +59,42 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             logger.error(error)
             raise FileExistsError(error)
 
-        DataFrameMetadata()
-        self._database_handler.create(table)
+        self._rdb_handler.create(self._get_metadata_table(table))
         return True
 
     def drop(self, table: DataFrameMetadata):
         dir_path = Path(table.file_url)
         try:
             shutil.rmtree(str(dir_path))
+            self._rdb_handler.drop(self._get_metadata_table(table))
         except Exception as e:
             logger.exception(f"Failed to drop the video table {e}")
 
     def delete(self, table: DataFrameMetadata, rows: Batch):
-        return
+        try:
+            video_metadata_table = self._get_metadata_table(table)
+            for video_file_path in rows.file_paths():
+                video_file = Path(table.file_url) / video_file_path
+                video_file.unlink()
+                self._rdb_handler.delete(
+                    video_metadata_table,
+                    where_clause={video_metadata_table.identifier_id: video_file_path},
+                )
+        except Exception:
+            error = f"Deleting file path {video_file_path} failed"
+            logger.exception(error)
+            raise RuntimeError(error)
+        return True
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
             dir_path = Path(table.file_url)
-            for video_file_path in rows.video_file_paths():
+            for video_file_path in rows.file_paths():
                 video_file = Path(video_file_path)
                 shutil.copy2(str(video_file), str(dir_path))
-                
-                self._create_video_metadata(dir_path, video_file.name)
+                self._rdb_handler.write(
+                    self._get_metadata_table(table, video_file.name)
+                )
         except Exception:
             error = "Current video storage engine only supports loading videos on disk."
             logger.exception(error)
@@ -93,8 +109,9 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         sampling_rate: int = None,
     ) -> Iterator[Batch]:
 
-        metadata_file = Path(table.file_url) / self.metadata
-        for video_file_name in self._get_video_file_path(metadata_file):
+        for video_file_name in self._rdb_handler.read(
+            self._get_metadata_table(table), 1
+        ):
             video_file = Path(table.file_url) / video_file_name
             reader = OpenCVReader(
                 str(video_file),
@@ -106,36 +123,6 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 column_name = table.columns[0].name
                 batch.frames[column_name] = str(video_file_name)
                 yield batch
-
-    def _get_video_file_path(self, metadata_file):
-        with open(metadata_file, "rb") as f:
-            while True:
-                buf = f.read(struct.calcsize("!H"))
-                if not buf:
-                    break
-                (version,) = struct.unpack("!H", buf)
-                if version > self.curr_version:
-                    error = "Invalid metadata version {}".format(version)
-                    logger.error(error)
-                    raise RuntimeError(error)
-                (length,) = struct.unpack("!H", f.read(struct.calcsize("!H")))
-                path = f.read(length)
-                yield Path(path.decode())
-
-    def _create_video_metadata(self, dir_path, video_file):
-        # File structure
-        # <version> <length> <file_name>
-        with open(dir_path / self.metadata, "ab") as f:
-            # write version number
-            file_path_bytes = str(video_file).encode()
-            length = len(file_path_bytes)
-            data = struct.pack(
-                "!HH%ds" % (length,),
-                self.curr_version,
-                length,
-                file_path_bytes,
-            )
-            f.write(data)
 
     def _open(self, table):
         pass

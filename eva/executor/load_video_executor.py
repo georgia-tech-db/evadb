@@ -13,13 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_video
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
@@ -39,35 +42,60 @@ class LoadVideoExecutor(AbstractExecutor):
         using storage engine
         """
 
-        video_file_path = None
-        # Validate file_path
-        if Path(self.node.file_path).exists():
-            video_file_path = self.node.file_path
-        # check in the upload directory
-        else:
-            video_path = Path(Path(self.upload_dir) / self.node.file_path)
-            if video_path.exists():
-                video_file_path = video_path
-
-        if video_file_path is None:
-            error = "Failed to find a video file at location: {}".format(
-                self.node.file_path
+        try:
+            storage_engine = StorageEngine.factory(self.node.table_metainfo)
+            # ToDo: create based on if the metadata object exists in the catalog
+            success = storage_engine.create(
+                self.node.table_metainfo, if_not_exists=True
             )
-            logger.error(error)
-            raise RuntimeError(error)
+            if not success:
+                raise RuntimeError(f"StorageEngine {storage_engine} create call failed")
 
-        storage_engine = StorageEngine.factory(self.node.table_metainfo)
-        storage_engine.create(self.node.table_metainfo, if_not_exists=True)
-        success = storage_engine.write(
-            self.node.table_metainfo,
-            Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
-        )
+            valid_files = []
+            invalid_files = []
+            for file_path in iter_path_regex(self.node.file_path):
+                if file_path.is_file():
+                    # ToDo: we should validate the file before loading
+                    if validate_video(file_path):
+                        storage_engine.write(
+                            self.node.table_metainfo,
+                            Batch(pd.DataFrame([{"file_path": str(file_path)}])),
+                        )
+                        valid_files.append(file_path)
+                    else:
+                        raise ValueError(file_path)
 
-        # ToDo: Add logic for indexing the video file
-        # Create an index of I frames to speed up random video seek
-        if success:
+        except RuntimeError as e:
+            raise ExecutorError(str(e))
+        except ValueError as e:
+            self._rollback_load(storage_engine, valid_files)
+            err_msg = f"Encountered invalid file while loading video {str(e)}"
+            logger.error(err_msg)
+            raise ExecutorError(err_msg)
+        except Exception as e:
+            self._rollback_load(storage_engine, valid_files)
+            err_msg = f"Video Load command with unexpected error {str(e)}"
+            logger.error(err_msg)
+            raise ExecutorError(err_msg)
+        else:
             yield Batch(
                 pd.DataFrame(
-                    [f"Video successfully added at location: {video_file_path}"]
+                    {
+                        "Number of loaded images": str(len(valid_files)),
+                    },
+                    index=[0],
                 )
+            )
+
+    def _rollback_load(
+        self,
+        storage_engine: AbstractStorageEngine,
+        valid_files: List[Path],
+    ):
+        try:
+            rows = Batch(pd.DataFrame(data={"file_path": list(valid_files)}))
+            storage_engine.delete(self.node.table_metainfo, rows)
+        except Exception as e:
+            logger.exception(
+                f"Unexpected Exception {e} occured while rolling back. This is bad as the video table can be in a corrupt state. Please verify the video table {self.node.table_metainfo} for correctness."
             )
