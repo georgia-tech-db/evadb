@@ -29,6 +29,7 @@ from eva.planner.create_index_plan import CreateIndexPlan
 from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
+from eva.executor.executor_utils import ExecutorError
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -43,22 +44,19 @@ class CreateIndexExecutor(AbstractExecutor):
         if catalog_manager.get_index_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
             logger.error(msg)
-            raise RuntimeError(msg)
+            raise ExecutorError(msg)
 
         try:
             # Get feature tables.
-            table_ref = self.node.table_ref
-            df_metadata = catalog_manager.get_dataset_metadata(
-                table_ref.table.database_name, table_ref.table.table_name
-            )
+            feat_df_metadata = self.node.table_ref.table_obj
 
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             index = None
-            input_dim, feat_size = -1, 0
+            input_dim, num_rows = -1, 0
             logical_to_row_id = dict()
-            storage_engine = StorageEngine.factory(df_metadata)
-            for batch in storage_engine.read(df_metadata, 1):
+            storage_engine = StorageEngine.factory(feat_df_metadata)
+            for batch in storage_engine.read(feat_df_metadata, 1):
                 # Feature column name.
                 feat_col_name = self.node.col_list[0].name
 
@@ -72,99 +70,34 @@ class CreateIndexExecutor(AbstractExecutor):
 
                 # Secondary mapping.
                 row_id = batch.column_as_numpy_array(IDENTIFIER_COLUMN)[0]
-                logical_to_row_id[feat_size] = row_id
+                logical_to_row_id[num_rows] = row_id
 
-                feat_size += 1
+                num_rows += 1
 
-            # Input dimension is inferred from the actual feature.
-            input_index_io = catalog_manager.index_io(
-                "input_feature",
-                ColumnType.NDARRAY,
-                NdArrayType.FLOAT32,
-                [Dimension.ANYDIM, input_dim],
-                True,
-            )
+            # Get index IO list.
+            io_list = self._get_index_io_list(input_dim)
 
-            # Output dimension can be hardcoded.
-            id_index_io = catalog_manager.index_io(
-                "logical_id",
-                ColumnType.NDARRAY,
-                NdArrayType.INT64,
-                [Dimension.ANYDIM, 1],
-                False,
-            )
-            distance_index_io = catalog_manager.index_io(
-                "distance",
-                ColumnType.NDARRAY,
-                NdArrayType.FLOAT32,
-                [Dimension.ANYDIM, 1],
-                False,
-            )
-            save_file_path = (
-                EVA_DEFAULT_DIR
-                / INDEX_DIR
-                / Path("{}_{}.index".format(self.node.index_type, self.node.name))
-            )
+            # Build secondary index maaping.
+            secondary_index_df_metadata = self._create_secondary_index_table()
+            storage_engine = StorageEngine.factory(secondary_index_df_metadata)
+            storage_engine.create(secondary_index_df_metadata)
 
-            io_list = [input_index_io, id_index_io, distance_index_io]
-
-            # Build secondary index to map from index Logical ID to Row ID.
-            # Use save_file_path's hash value to retrieve the table.
-            col_list = [
-                ColumnDefinition(
-                    "logical_id",
-                    ColumnType.INTEGER,
-                    None,
-                    [],
-                    ColConstraintInfo(unique=True),
-                ),
-                ColumnDefinition(
-                    "row_id",
-                    ColumnType.INTEGER,
-                    None,
-                    [],
-                    ColConstraintInfo(unique=True),
-                ),
-            ]
-            col_metadata = [
-                catalog_manager.create_column_metadata(
-                    col.name, col.type, col.array_type, col.dimension, col.cci
-                )
-                for col in col_list
-            ]
-            tb_metadata = catalog_manager.create_metadata(
-                "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
-                str(
-                    EVA_DEFAULT_DIR
-                    / INDEX_DIR
-                    / Path(
-                        "{}_{}.secindex".format(self.node.index_type, self.node.name)
-                    )
-                ),
-                col_metadata,
-                identifier_column="logical_id",
-                table_type=TableType.STRUCTURED_DATA,
-            )
-            storage_engine = StorageEngine.factory(tb_metadata)
-            storage_engine.create(tb_metadata)
-
-            # Write exact mapping for now.
+            # Write mapping.
             logical_id, row_id = list(logical_to_row_id.keys()), list(
                 logical_to_row_id.values()
             )
-            print(logical_id, row_id)
             secondary_index = Batch(
                 pd.DataFrame(data={"logical_id": logical_id, "row_id": row_id})
             )
-            storage_engine.write(tb_metadata, secondary_index)
+            storage_engine.write(secondary_index_df_metadata, secondary_index)
 
             # Persist index.
-            faiss.write_index(index, str(save_file_path))
+            faiss.write_index(index, self._get_index_save_path())
 
             # Save to catalog.
             catalog_manager.create_index(
                 self.node.name,
-                str(save_file_path),
+                self._get_index_save_path(),
                 self.node.index_type,
                 io_list,
             )
@@ -177,13 +110,8 @@ class CreateIndexExecutor(AbstractExecutor):
         except Exception as e:
             # Roll back in reverse order.
             # Delete on-disk index.
-            save_file_path = (
-                EVA_DEFAULT_DIR
-                / INDEX_DIR
-                / Path("{}_{}.index".format(self.node.index_type, self.node.name))
-            )
-            if os.path.exists(save_file_path):
-                os.remove(save_file_path)
+            if os.path.exists(self._get_index_save_path()):
+                os.remove(self._get_index_save_path())
 
             # Drop secondary index table.
             secondary_index_tb_name = "secondary_index_{}_{}".format(
@@ -204,10 +132,87 @@ class CreateIndexExecutor(AbstractExecutor):
                 )
 
             # Throw exception back to user.
-            raise e
+            raise ExecutorError(str(e))
+
+    
+    def _get_index_save_path(self):
+        return str(EVA_DEFAULT_DIR / INDEX_DIR / Path("{}_{}.index".format(self.node.index_type, self.node.name)))
+
+    
+    def _get_index_io_list(self, input_dim):
+        # Input dimension is inferred from the actual feature.
+        catalog_manager = CatalogManager()
+        input_index_io = catalog_manager.index_io(
+                "input_feature",
+                ColumnType.NDARRAY,
+                NdArrayType.FLOAT32,
+                [Dimension.ANYDIM, input_dim],
+                True,
+            )
+
+        # Output dimension can be hardcoded.
+        id_index_io = catalog_manager.index_io(
+                "logical_id",
+                ColumnType.NDARRAY,
+                NdArrayType.INT64,
+                [Dimension.ANYDIM, 1],
+                False,
+            )
+        distance_index_io = catalog_manager.index_io(
+                "distance",
+                ColumnType.NDARRAY,
+                NdArrayType.FLOAT32,
+                [Dimension.ANYDIM, 1],
+                False,
+            )
+
+        return [input_index_io, id_index_io, distance_index_io]
+
+    
+    def _create_secondary_index_table(self):
+        # Build secondary index to map from index Logical ID to Row ID.
+        # Use save_file_path's hash value to retrieve the table.
+        col_list = [
+                ColumnDefinition(
+                    "logical_id",
+                    ColumnType.INTEGER,
+                    None,
+                    [],
+                    ColConstraintInfo(unique=True),
+                ),
+                ColumnDefinition(
+                    "row_id",
+                    ColumnType.INTEGER,
+                    None,
+                    [],
+                    ColConstraintInfo(unique=True),
+                ),
+            ]
+        col_metadata = [
+                catalog_manager.create_column_metadata(
+                    col.name, col.type, col.array_type, col.dimension, col.cci
+                )
+                for col in col_list
+            ]
+        catalog_manager = CatalogManager()
+        df_metadata = catalog_manager.create_metadata(
+                "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
+                str(
+                    EVA_DEFAULT_DIR
+                    / INDEX_DIR
+                    / Path(
+                        "{}_{}.secindex".format(self.node.index_type, self.node.name)
+                    )
+                ),
+                col_metadata,
+                identifier_column="logical_id",
+                table_type=TableType.STRUCTURED_DATA,
+        )
+        return df_metadata
+
 
     def _create_index(self, index_type: IndexType, input_dim: int):
         if index_type == IndexType.HNSW:
             return faiss.IndexHNSWFlat(input_dim, 32)
         else:
-            raise Exception(f"Index Type {index_type} is not supported.")
+            raise ExecutorError(f"Index Type {index_type} is not supported.")
