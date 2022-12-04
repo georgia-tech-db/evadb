@@ -44,20 +44,20 @@ class LoadExecutorTest(unittest.TestCase):
     def tearDown(self):
         file_remove("dummy.avi")
         file_remove("dummy.csv")
+        # clean up
+        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideos;"
         execute_query_fetch_all(query)
 
-        select_query = """SELECT name, id, data FROM MyVideo;"""
+        select_query = """SELECT name, id, data FROM MyVideos;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
-
-        execute_query_fetch_all("DROP TABLE MyVideo;")
 
     def test_should_load_videos_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
@@ -66,17 +66,12 @@ class LoadExecutorTest(unittest.TestCase):
         expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
         self.assertEqual(result, expected)
 
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
-
     def test_should_load_videos_with_same_name_but_different_path(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
         expected = Batch(pd.DataFrame(["Number of loaded videos: 3"]))
         self.assertEqual(result, expected)
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_fail_to_load_videos_with_same_path(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
@@ -88,9 +83,6 @@ class LoadExecutorTest(unittest.TestCase):
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
-
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
@@ -145,9 +137,6 @@ class LoadExecutorTest(unittest.TestCase):
                 result = execute_query_fetch_all("SELECT name FROM MyVideos")
                 self.assertEqual(len(result), 0)
 
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
-
     def test_should_rollback_and_preserve_previous_state(self):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
         valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
@@ -169,9 +158,6 @@ class LoadExecutorTest(unittest.TestCase):
                 result = execute_query_fetch_all("SELECT name FROM MyVideos")
                 file_names = np.unique(result.frames)
                 self.assertEqual(len(file_names), 1)
-
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):

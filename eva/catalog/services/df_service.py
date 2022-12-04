@@ -113,9 +113,7 @@ class DatasetService(BaseService):
             dataset.delete()
             return True
         except Exception as e:
-            err_msg = (
-                f"Delete dataset failed for name {dataset.name} with error {str(e)}."
-            )
+            err_msg = f"Delete dataset failed for {dataset} with error {str(e)}."
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
