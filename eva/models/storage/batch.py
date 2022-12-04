@@ -278,7 +278,7 @@ class Batch:
         if not len(batches):
             return Batch()
         frames = [batch.frames for batch in batches]
-        new_frames = pd.concat(frames, axis=1, copy=False)
+        new_frames = pd.concat(frames, axis=1, copy=False).fillna(method="ffill")
         if new_frames.columns.duplicated().any():
             logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
