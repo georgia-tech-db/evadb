@@ -90,7 +90,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 sampling_rate=sampling_rate,
             )
             for batch in reader.read():
-                column_name = table.columns[0].name
+                column_name = table.columns[1].name
                 batch.frames[column_name] = str(video_file_name)
                 yield batch
 

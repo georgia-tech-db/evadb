@@ -33,7 +33,7 @@ class EvaCommandInterpreter(Cmd):
         quit_loop = False
         while quit_loop is not True:
             try:
-                self.cmdloop()
+                self.cmdloop(intro)
                 quit_loop = True
             except KeyboardInterrupt:
                 print("\ncommand interrupted...\n")
@@ -77,7 +77,12 @@ class EvaCommandInterpreter(Cmd):
 
 # version.py defines the VERSION and VERSION_SHORT variables
 VERSION_DICT: Dict[str, str] = {}
-with open("eva/version.py", "r") as version_file:
+
+current_file_dir = os.path.dirname(__file__)
+current_file_parent_dir = os.path.join(current_file_dir, os.pardir)
+version_file_path = os.path.join(current_file_parent_dir, "version.py")
+
+with open(version_file_path, "r") as version_file:
     exec(version_file.read(), VERSION_DICT)
 
 

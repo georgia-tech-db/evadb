@@ -26,7 +26,7 @@ class ExplainExecutorTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)

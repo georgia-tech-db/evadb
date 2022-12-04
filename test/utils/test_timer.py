@@ -42,7 +42,7 @@ class TimerTests(unittest.TestCase):
     def test_timer_with_query(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
         response = asyncio.run(handle_request(transport, load_query))
