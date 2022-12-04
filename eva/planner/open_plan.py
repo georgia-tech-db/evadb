@@ -28,9 +28,7 @@ class OpenPlan(AbstractPlan):
         return self._path
 
     def __str__(self):
-        return "OpenPlan(path={})".format(
-            self._path
-        )
+        return "OpenPlan(path={})".format(self._path)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._path))

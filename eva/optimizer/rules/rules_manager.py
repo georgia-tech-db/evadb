@@ -47,8 +47,8 @@ from eva.optimizer.rules.rules import (
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
-    LogicalOrderByToPhysical,
     LogicalOpenToPhysical,
+    LogicalOrderByToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalProjectToPhysical as SequentialLogicalProjectToPhysical,

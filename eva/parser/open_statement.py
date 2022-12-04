@@ -28,9 +28,7 @@ class OpenStatement(AbstractStatement):
         return self._path
 
     def __str__(self) -> str:
-        print_str = "OPEN {}".format(
-            self._path
-        )
+        print_str = "OPEN {}".format(self._path)
         return print_str
 
     def __eq__(self, other):

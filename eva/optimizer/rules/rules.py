@@ -54,6 +54,7 @@ from eva.optimizer.operators import (
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
+    LogicalOpen,
     LogicalOrderBy,
     LogicalProject,
     LogicalQueryDerivedGet,
@@ -62,7 +63,6 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
-    LogicalOpen,
     Operator,
     OperatorType,
 )
@@ -77,6 +77,7 @@ from eva.planner.insert_plan import InsertPlan
 from eva.planner.lateral_join_plan import LateralJoinPlan
 from eva.planner.limit_plan import LimitPlan
 from eva.planner.load_data_plan import LoadDataPlan
+from eva.planner.open_plan import OpenPlan
 from eva.planner.orderby_plan import OrderByPlan
 from eva.planner.rename_plan import RenamePlan
 from eva.planner.sample_plan import SamplePlan
@@ -84,7 +85,6 @@ from eva.planner.seq_scan_plan import SeqScanPlan
 from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
-from eva.planner.open_plan import OpenPlan
 
 ##############################################
 # REWRITE RULES START
