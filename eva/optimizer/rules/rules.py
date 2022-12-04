@@ -428,13 +428,13 @@ class LogicalCreateUDFToPhysical(Rule):
         return after
 
 
-class LogicalCreateIndexToPhysical(Rule):
+class LogicalCreateIndexToFaiss(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
-        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_PHYSICAL, pattern)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_FAISS, pattern)
 
     def promise(self):
-        return Promise.LOGICAL_CREATE_INDEX_TO_PHYSICAL
+        return Promise.LOGICAL_CREATE_INDEX_TO_FAISS
 
     def check(self, before: Operator, context: OptimizerContext):
         return True
