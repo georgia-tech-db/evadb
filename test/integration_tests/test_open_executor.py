@@ -39,7 +39,7 @@ class OpenExecutorTest(unittest.TestCase):
         upload_dir_from_config = config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
 
-        select_query = "OPEN '{}'".format(img_path)
+        select_query = "OPEN('{}')".format(img_path)
         batch = execute_query_fetch_all(select_query)
         actual_img = batch.frames["data"].to_numpy()[0]
 

@@ -187,7 +187,7 @@ class ParserTests(unittest.TestCase):
 
     def test_open_statement(self):
         parser = Parser()
-        open_query = """OPEN '/test1/test2.jpg'"""
+        open_query = """OPEN('/test1/test2.jpg')"""
         expected_stmt = OpenStatement("/test1/test2.jpg")
         eva_statement_list = parser.parse(open_query)
         self.assertEqual(len(eva_statement_list), 1)

@@ -193,7 +193,7 @@ loadStatement
 
 openStatement
     : OPEN
-      stringLiteral
+      '(' stringLiteral ')'
     ;
 
 
