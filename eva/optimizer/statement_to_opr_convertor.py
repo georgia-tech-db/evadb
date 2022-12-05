@@ -277,7 +277,7 @@ class StatementToPlanConvertor:
         )
         self._plan = load_data_opr
 
-    def visit_open_data(self, statement: OpenStatement):
+    def visit_open(self, statement: OpenStatement):
         open_opr = LogicalOpen(statement.path)
         self._plan = open_opr
 
@@ -344,6 +344,8 @@ class StatementToPlanConvertor:
             self.visit_show(statement)
         elif isinstance(statement, ExplainStatement):
             self.visit_explain(statement)
+        elif isinstance(statement, OpenStatement):
+            self.visit_open(statement)
         return self._plan
 
     @property

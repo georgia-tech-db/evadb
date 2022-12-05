@@ -44,6 +44,7 @@ from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
+from eva.parser.open_statement import OpenStatement
 from eva.parser.table_ref import TableInfo, TableRef
 
 
@@ -175,6 +176,16 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         convertor = StatementToPlanConvertor()
         mock = MagicMock()
         convertor.visit_insert = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
+    def test_visit_should_call_open(self):
+        stmt = MagicMock(spec=OpenStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_open = mock
 
         convertor.visit(stmt)
         mock.assert_called_once()
