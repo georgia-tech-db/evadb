@@ -48,7 +48,7 @@ class CreateIndexExecutor(AbstractExecutor):
 
         try:
             # Get feature tables.
-            feat_df_metadata = self.node.table_ref.table_obj
+            feat_df_metadata = self.node.table_ref.table.table_obj
 
             # Add features to index.
             # TODO: batch size is hardcoded for now.
@@ -134,82 +134,79 @@ class CreateIndexExecutor(AbstractExecutor):
             # Throw exception back to user.
             raise ExecutorError(str(e))
 
-    
     def _get_index_save_path(self):
         return str(EVA_DEFAULT_DIR / INDEX_DIR / Path("{}_{}.index".format(self.node.index_type, self.node.name)))
 
-    
     def _get_index_io_list(self, input_dim):
         # Input dimension is inferred from the actual feature.
         catalog_manager = CatalogManager()
         input_index_io = catalog_manager.index_io(
-                "input_feature",
-                ColumnType.NDARRAY,
-                NdArrayType.FLOAT32,
-                [Dimension.ANYDIM, input_dim],
-                True,
-            )
+            "input_feature",
+            ColumnType.NDARRAY,
+            NdArrayType.FLOAT32,
+            [Dimension.ANYDIM, input_dim],
+            True,
+        )
 
         # Output dimension can be hardcoded.
         id_index_io = catalog_manager.index_io(
-                "logical_id",
-                ColumnType.NDARRAY,
-                NdArrayType.INT64,
-                [Dimension.ANYDIM, 1],
-                False,
-            )
+            "logical_id",
+            ColumnType.NDARRAY,
+            NdArrayType.INT64,
+            [Dimension.ANYDIM, 1],
+            False,
+        )
         distance_index_io = catalog_manager.index_io(
-                "distance",
-                ColumnType.NDARRAY,
-                NdArrayType.FLOAT32,
-                [Dimension.ANYDIM, 1],
-                False,
-            )
+            "distance",
+            ColumnType.NDARRAY,
+            NdArrayType.FLOAT32,
+            [Dimension.ANYDIM, 1],
+            False,
+        )
 
         return [input_index_io, id_index_io, distance_index_io]
 
-    
     def _create_secondary_index_table(self):
         # Build secondary index to map from index Logical ID to Row ID.
         # Use save_file_path's hash value to retrieve the table.
+        catalog_manager = CatalogManager()
         col_list = [
-                ColumnDefinition(
-                    "logical_id",
-                    ColumnType.INTEGER,
-                    None,
-                    [],
-                    ColConstraintInfo(unique=True),
-                ),
-                ColumnDefinition(
-                    "row_id",
-                    ColumnType.INTEGER,
-                    None,
-                    [],
-                    ColConstraintInfo(unique=True),
-                ),
-            ]
+            ColumnDefinition(
+                "logical_id",
+                ColumnType.INTEGER,
+                None,
+                [],
+                ColConstraintInfo(unique=True),
+            ),
+            ColumnDefinition(
+                "row_id",
+                ColumnType.INTEGER,
+                None,
+                [],
+                ColConstraintInfo(unique=True),
+            ),
+        ]
         col_metadata = [
-                catalog_manager.create_column_metadata(
-                    col.name, col.type, col.array_type, col.dimension, col.cci
-                )
-                for col in col_list
-            ]
+            catalog_manager.create_column_metadata(
+                col.name, col.type, col.array_type, col.dimension, col.cci
+            )
+            for col in col_list
+        ]
         catalog_manager = CatalogManager()
         df_metadata = catalog_manager.create_metadata(
-                "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
-                str(
-                    EVA_DEFAULT_DIR
-                    / INDEX_DIR
-                    / Path(
-                        "{}_{}.secindex".format(self.node.index_type, self.node.name)
-                    )
-                ),
-                col_metadata,
-                identifier_column="logical_id",
-                table_type=TableType.STRUCTURED_DATA,
+            "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
+            str(
+                EVA_DEFAULT_DIR
+                / INDEX_DIR
+                / Path(
+                    "{}_{}.secindex".format(self.node.index_type, self.node.name)
+                )
+            ),
+            col_metadata,
+            identifier_column="logical_id",
+            table_type=TableType.STRUCTURED_DATA,
         )
         return df_metadata
-
 
     def _create_index(self, index_type: IndexType, input_dim: int):
         if index_type == IndexType.HNSW:

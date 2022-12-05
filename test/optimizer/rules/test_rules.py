@@ -38,7 +38,7 @@ from eva.optimizer.rules.rules import (
     EmbedProjectIntoDerivedGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
-    LogicalCreateIndexToPhysical,
+    LogicalCreateIndexToFaiss,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -145,7 +145,7 @@ class TestRules(unittest.TestCase):
             Promise.LOGICAL_EXPLAIN_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
-            Promise.LOGICAL_CREATE_INDEX_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+            Promise.LOGICAL_CREATE_INDEX_TO_FAISS < Promise.IMPLEMENTATION_DELIMETER
         )
 
     def test_supported_rules(self):
@@ -201,7 +201,7 @@ class TestRules(unittest.TestCase):
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
-            LogicalCreateIndexToPhysical(),
+            LogicalCreateIndexToFaiss(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

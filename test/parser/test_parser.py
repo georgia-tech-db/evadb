@@ -70,6 +70,7 @@ class ParserTests(unittest.TestCase):
         actual_stmt = eva_stmt_list[0]
         self.assertEqual(actual_stmt, expected_stmt)
 
+    @unittest.skip("Skip parser exception handling testcase, moved to binder")
     def test_create_index_exception_statement(self):
         parser = Parser()
 

@@ -21,6 +21,7 @@ from eva.binder.binder_utils import (
     check_table_object_is_video,
     extend_star,
 )
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
@@ -79,6 +80,15 @@ class StatementBinder:
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
         self.bind(node.table_ref)
+
+        # TODO: create index currently only supports single numpy column
+        assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
+
+        col_def = node.col_list[0]
+        table_ref_obj = node.table_ref.table.table_obj
+        col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+        assert col.type == ColumnType.NDARRAY, "Index input needs to be numpy array"
+        assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):

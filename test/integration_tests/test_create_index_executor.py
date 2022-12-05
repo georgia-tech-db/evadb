@@ -29,11 +29,16 @@ from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.generic_utils import generate_file_path
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.executor_utils import ExecutorError
 
 
 class CreateIndexTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # Bootstrap configuration manager.
+        ConfigurationManager()
+
         # Reset catalog.
         CatalogManager().reset()
 
@@ -129,7 +134,7 @@ class CreateIndexTest(unittest.TestCase):
         faiss_mock.write_index.side_effect = Exception("Test exception.")
 
         query = "CREATE INDEX testCreateIndexName ON testCreateIndexFeatTable (feat) USING HNSW;"
-        with self.assertRaises(Exception):
+        with self.assertRaises(ExecutorError):
             execute_query_fetch_all(query)
 
         # Check secondary index is dropped.
