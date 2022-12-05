@@ -33,12 +33,12 @@ class IndexIO(BaseModel):
     _array_dimensions = Column("array_dimensions", String(100))
 
     # Faiss index has both inputs and outputs as well. Both inputs and outputs
-    # are numpy arrays. 
-    # Input: 
+    # are numpy arrays.
+    # Input:
     #   [Number of feature vectors, feature vector dimension]. The input needs
     #   to be float32.
     # Outputs:
-    #   Distance: [Number of searched feature vectors, Top N similar feature vectors]. 
+    #   Distance: [Number of searched feature vectors, Top N similar feature vectors].
     #   The distance output is also float32.
     #   LogicalID: [Number of searched feature vectors. Top N similar feature vectors].
     #   The logical id output is int64.
