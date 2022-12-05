@@ -30,12 +30,9 @@ from eva.catalog.services.index_service import IndexService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from eva.catalog.services.index_service import IndexService
-from eva.catalog.services.index_io_service import IndexIOService
 from eva.parser.table_ref import TableInfo
 from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.generic_utils import generate_file_path
-from eva.catalog.index_type import IndexType
 from eva.utils.logging_manager import logger
 
 
