@@ -24,6 +24,36 @@ from eva.catalog.models.base_model import BaseModel
 
 
 class IndexIO(BaseModel):
+    """ This class specifies the input and output format of Faiss index. Faiss index
+    can search for the most N closest feature vectors.
+    
+    In a nutshell, Faiss takes two-dimensional numpy array as its input. The
+    index outputs two two-dimensional numpy arrays: a distance output and a logical ID output. 
+    Distance output shows the distance between most N closest feature vectors and the
+    searched feature vector. Logical ID output indicates the ID (according to the added
+    order) of most N closest feature vectors.
+
+    Input feature vector: 
+        Description: 2D because index can search a batch of feature vectors together. 
+                     Feature vector dimension has to be 1D.
+        Type: np.float32
+        Shape: [batch size, feature vector dimension]
+
+    Output distance vector:
+        Description: 2D due to batched feature vectors search. Following others, `shape[0]`
+                     indicates the batch size. `shape[1]` varieis depending on number of
+                     top N feature vectors to fetch. E.g., `shape[1] = 3`, if index is asked
+                     to return top 3 most similar feature vectors.
+        Type: np.float32
+        Shape: [batch size, N]
+
+    Output logical ID:
+        Description: 2D due to batched feature vectors search. The shape is same as the 
+                     distance vector. It represents the logical ID of similar feature vectors.
+        Type: np.int64
+        Shape: [batch size, N]
+    """
+
     __tablename__ = "index_column"
 
     _name = Column("name", String(100))
@@ -31,17 +61,6 @@ class IndexIO(BaseModel):
     _is_nullable = Column("is_nullable", Boolean, default=False)
     _array_type = Column("array_type", Enum(NdArrayType), nullable=True)
     _array_dimensions = Column("array_dimensions", String(100))
-
-    # Faiss index has both inputs and outputs as well. Both inputs and outputs
-    # are numpy arrays.
-    # Input:
-    #   [Number of feature vectors, feature vector dimension]. The input needs
-    #   to be float32.
-    # Outputs:
-    #   Distance: [Number of searched feature vectors, Top N similar feature vectors].
-    #   The distance output is also float32.
-    #   LogicalID: [Number of searched feature vectors. Top N similar feature vectors].
-    #   The logical id output is int64.
     _is_input = Column("is_input", Boolean, default=True)
 
     _index_id = Column("index_id", Integer, ForeignKey("index._row_id"))
