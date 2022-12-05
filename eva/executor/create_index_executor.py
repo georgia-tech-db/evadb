@@ -152,7 +152,10 @@ class CreateIndexExecutor(AbstractExecutor):
             True,
         )
 
-        # Output dimension can be hardcoded.
+        # Output dimension depends on number of searched
+        # feature vectors and top N similar feature vectors.
+        # IndexIO has detailed documentation about input and
+        # output format of index.
         id_index_io = catalog_manager.index_io(
             "logical_id",
             ColumnType.NDARRAY,
