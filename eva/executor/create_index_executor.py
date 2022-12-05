@@ -157,14 +157,14 @@ class CreateIndexExecutor(AbstractExecutor):
             "logical_id",
             ColumnType.NDARRAY,
             NdArrayType.INT64,
-            [Dimension.ANYDIM, 1],
+            [Dimension.ANYDIM, Dimension.ANYDIM],
             False,
         )
         distance_index_io = catalog_manager.index_io(
             "distance",
             ColumnType.NDARRAY,
             NdArrayType.FLOAT32,
-            [Dimension.ANYDIM, 1],
+            [Dimension.ANYDIM, Dimension.ANYDIM],
             False,
         )
 

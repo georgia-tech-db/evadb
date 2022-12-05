@@ -31,6 +31,17 @@ class IndexIO(BaseModel):
     _is_nullable = Column("is_nullable", Boolean, default=False)
     _array_type = Column("array_type", Enum(NdArrayType), nullable=True)
     _array_dimensions = Column("array_dimensions", String(100))
+
+    # Faiss index has both inputs and outputs as well. Both inputs and outputs
+    # are numpy arrays. 
+    # Input: 
+    #   [Number of feature vectors, feature vector dimension]. The input needs
+    #   to be float32.
+    # Outputs:
+    #   Distance: [Number of searched feature vectors, Top N similar feature vectors]. 
+    #   The distance output is also float32.
+    #   LogicalID: [Number of searched feature vectors. Top N similar feature vectors].
+    #   The logical id output is int64.
     _is_input = Column("is_input", Boolean, default=True)
 
     _index_id = Column("index_id", Integer, ForeignKey("index._row_id"))
