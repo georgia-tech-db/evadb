@@ -40,6 +40,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
+from eva.executor.open_executor import OpenExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
@@ -127,6 +128,8 @@ class PlanExecutor:
             executor_node = ShowInfoExecutor(node=plan)
         elif plan_opr_type == PlanOprType.EXPLAIN:
             executor_node = ExplainExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.OPEN:
+            executor_node = OpenExecutor(node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
