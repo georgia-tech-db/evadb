@@ -24,17 +24,17 @@ from eva.catalog.models.base_model import BaseModel
 
 
 class IndexIO(BaseModel):
-    """ This class specifies the input and output format of Faiss index. Faiss index
+    """This class specifies the input and output format of Faiss index. Faiss index
     can search for the most N closest feature vectors.
-    
+
     In a nutshell, Faiss takes two-dimensional numpy array as its input. The
-    index outputs two two-dimensional numpy arrays: a distance output and a logical ID output. 
+    index outputs two two-dimensional numpy arrays: a distance output and a logical ID output.
     Distance output shows the distance between most N closest feature vectors and the
     searched feature vector. Logical ID output indicates the ID (according to the added
     order) of most N closest feature vectors.
 
-    Input feature vector: 
-        Description: 2D because index can search a batch of feature vectors together. 
+    Input feature vector:
+        Description: 2D because index can search a batch of feature vectors together.
                      Feature vector dimension has to be 1D.
         Type: np.float32
         Shape: [batch size, feature vector dimension]
@@ -48,7 +48,7 @@ class IndexIO(BaseModel):
         Shape: [batch size, N]
 
     Output logical ID:
-        Description: 2D due to batched feature vectors search. The shape is same as the 
+        Description: 2D due to batched feature vectors search. The shape is same as the
                      distance vector. It represents the logical ID of similar feature vectors.
         Type: np.int64
         Shape: [batch size, N]

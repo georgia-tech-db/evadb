@@ -23,9 +23,9 @@ from eva.parser.create_statement import (
 )
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
-from eva.parser.table_ref import TableRef
 
 
 ##################################################################
