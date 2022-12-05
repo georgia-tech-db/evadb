@@ -21,9 +21,9 @@ from eva.binder.binder_utils import (
     check_table_object_is_video,
     extend_star,
 )
-from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression

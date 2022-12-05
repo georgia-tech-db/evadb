@@ -23,13 +23,13 @@ from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType, TableTy
 from eva.catalog.index_type import IndexType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.planner.create_index_plan import CreateIndexPlan
 from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
-from eva.executor.executor_utils import ExecutorError
 
 
 class CreateIndexExecutor(AbstractExecutor):
@@ -135,7 +135,11 @@ class CreateIndexExecutor(AbstractExecutor):
             raise ExecutorError(str(e))
 
     def _get_index_save_path(self):
-        return str(EVA_DEFAULT_DIR / INDEX_DIR / Path("{}_{}.index".format(self.node.index_type, self.node.name)))
+        return str(
+            EVA_DEFAULT_DIR
+            / INDEX_DIR
+            / Path("{}_{}.index".format(self.node.index_type, self.node.name))
+        )
 
     def _get_index_io_list(self, input_dim):
         # Input dimension is inferred from the actual feature.
@@ -198,9 +202,7 @@ class CreateIndexExecutor(AbstractExecutor):
             str(
                 EVA_DEFAULT_DIR
                 / INDEX_DIR
-                / Path(
-                    "{}_{}.secindex".format(self.node.index_type, self.node.name)
-                )
+                / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))
             ),
             col_metadata,
             identifier_column="logical_id",
