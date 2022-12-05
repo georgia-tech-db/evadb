@@ -117,16 +117,12 @@ class DatasetService(BaseService):
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
-    def rename_dataset_by_name(
-        self, new_name: str, curr_database_name: str, curr_dataset_name: str
-    ):
+    def rename_dataset(self, dataset: DataFrameMetadata, new_name: str):
         try:
-            dataset = self.dataset_object_by_name(curr_database_name, curr_dataset_name)
             dataset.update(_name=new_name)
-
         except Exception as e:
             err_msg = "Update dataset name failed for {} with error {}".format(
-                curr_dataset_name, str(e)
+                dataset.name, str(e)
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)

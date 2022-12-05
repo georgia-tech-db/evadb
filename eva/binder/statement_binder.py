@@ -23,12 +23,14 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import TableType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.explain_statement import ExplainStatement
+from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
@@ -106,6 +108,14 @@ class StatementBinder:
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
+
+    @bind.register(RenameTableStatement)
+    def _bind_rename_table_statement(self, node: RenameTableStatement):
+        self.bind(node.old_table_ref)
+        if node.old_table_ref.table.table_obj.table_type == TableType.STRUCTURED_DATA:
+            err_msg = "Rename not yet supported on structured data"
+            logger.exception(err_msg)
+            raise BinderError(err_msg)
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):

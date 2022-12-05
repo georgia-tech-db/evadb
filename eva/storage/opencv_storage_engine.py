@@ -23,6 +23,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
+from eva.parser.table_ref import TableInfo
 from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
@@ -149,8 +150,15 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                     batch.frames[column_name] = str(video_file_name)
                     yield batch
 
-    def _open(self, table):
-        pass
+    def rename(self, old_table: DataFrameMetadata, new_name: TableInfo):
+        try:
+            CatalogManager().rename_table(old_table, new_name)
+        except CatalogError as err:
+            raise Exception(f"Failed to rename table {new_name} with exception {err}")
+        except Exception as e:
+            raise Exception(
+                f"Unexpected exception {str(e)} occured during rename operation"
+            )
 
     def _close(self, table):
         pass

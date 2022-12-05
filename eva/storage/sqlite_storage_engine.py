@@ -25,6 +25,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import SQLConfig
 from eva.models.storage.batch import Batch
+from eva.parser.table_ref import TableInfo
 from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
@@ -184,3 +185,16 @@ class SQLStorageEngine(AbstractStorageEngine):
         d = sqlite_table.delete().where(and_(*filter_clause))
         self._sql_engine.execute(d)
         self._sql_session.commit()
+
+    def rename(self, old_table: DataFrameMetadata, new_name: TableInfo):
+        raise Exception("Rename not supported for structured data table")
+        # try:
+        #     old_name = old_table.name
+        #     CatalogManager().rename_table(old_table, new_name)
+        #     self._sql_session.commit()
+        # except CatalogError as err:
+        #     raise Exception(f"Failed to rename table {old_name} with exception {err}")
+        # except Exception as e:
+        #     raise Exception(
+        #         f"Unexpected exception {str(e)} occured during rename operation"
+        #     )

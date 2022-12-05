@@ -370,12 +370,8 @@ class CatalogManager(object):
         """
         return self._udf_service.drop_udf_by_name(udf_name)
 
-    def rename_table(self, new_name: TableInfo, curr_table: TableInfo):
-        return self._dataset_service.rename_dataset_by_name(
-            new_name.table_name,
-            curr_table.database_name,
-            curr_table.table_name,
-        )
+    def rename_table(self, curr_table: DataFrameMetadata, new_name: TableInfo):
+        return self._dataset_service.rename_dataset(curr_table, new_name.table_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(
@@ -400,10 +396,11 @@ class CatalogManager(object):
         Returns:
             DataFrameMetadata: metadata table maintained by the system
         """
-        name = f"_metadata_{input_table.name}"
-        obj = self.get_dataset_metadata(None, name)
+        # use file_url as the metadata table name
+        video_metadata_name = input_table.file_url
+        obj = self.get_dataset_metadata(None, video_metadata_name)
         if not obj:
-            err = f"Table with name {name} does not exist in catalog"
+            err = f"Table with name {video_metadata_name} does not exist in catalog"
             logger.exception(err)
             raise CatalogError(err)
 
@@ -421,15 +418,16 @@ class CatalogManager(object):
         Returns:
             DataFrameMetadata: metadata table maintained by the system
         """
-        name = f"_metadata_{input_table.name}"
-        obj = self.get_dataset_metadata(None, name)
+        # use file_url as the metadata table name
+        video_metadata_name = input_table.file_url
+        obj = self.get_dataset_metadata(None, video_metadata_name)
         if obj:
-            err_msg = f"Table with name {name} already exists"
+            err_msg = f"Table with name {video_metadata_name} already exists"
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
         columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
         obj = self.create_table_metadata(
-            TableInfo(name), columns, identifier_column=columns[0].name
+            TableInfo(video_metadata_name), columns, identifier_column=columns[0].name
         )
         return obj
