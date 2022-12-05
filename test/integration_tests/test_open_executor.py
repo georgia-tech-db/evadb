@@ -14,12 +14,13 @@
 # limitations under the License.
 import os
 import unittest
+from test.util import create_sample_image, file_remove
+
 import numpy as np
 
-from test.util import create_sample_image, file_remove
 from eva.catalog.catalog_manager import CatalogManager
-from eva.server.command_handler import execute_query_fetch_all
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.server.command_handler import execute_query_fetch_all
 
 
 class OpenExecutorTest(unittest.TestCase):

@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+
 import cv2
 import pandas as pd
 
-from eva.executor.executor_utils import ExecutorError
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.planner.open_plan import OpenPlan
 

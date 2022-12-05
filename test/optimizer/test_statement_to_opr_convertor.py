@@ -42,9 +42,9 @@ from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.open_statement import OpenStatement
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
-from eva.parser.open_statement import OpenStatement
 from eva.parser.table_ref import TableInfo, TableRef
 
 

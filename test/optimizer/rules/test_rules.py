@@ -55,6 +55,7 @@ from eva.optimizer.rules.rules import (
     LogicalLateralJoinToPhysical,
     LogicalLimitToPhysical,
     LogicalLoadToPhysical,
+    LogicalOpenToPhysical,
     LogicalOrderByToPhysical,
     LogicalProjectToPhysical,
     LogicalRenameToPhysical,
@@ -62,7 +63,6 @@ from eva.optimizer.rules.rules import (
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
-    LogicalOpenToPhysical,
     Promise,
     PushDownFilterThroughJoin,
 )
