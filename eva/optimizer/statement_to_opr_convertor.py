@@ -232,7 +232,7 @@ class StatementToPlanConvertor:
         self._plan = rename_opr
 
     def visit_drop(self, statement: DropTableStatement):
-        drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
+        drop_opr = LogicalDrop(statement.table_infos, statement.if_exists)
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):

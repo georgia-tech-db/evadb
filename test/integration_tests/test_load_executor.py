@@ -45,19 +45,20 @@ class LoadExecutorTest(unittest.TestCase):
         file_remove("dummy.avi")
         file_remove("dummy.csv")
         # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideos;"
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
 
-        select_query = """SELECT name, id, data FROM MyVideos;"""
+        select_query = """SELECT name, id, data FROM MyVideo;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_should_load_videos_in_table(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
@@ -94,8 +95,6 @@ class LoadExecutorTest(unittest.TestCase):
                 str(cm.exception),
                 f"Load video failed: encountered invalid file {tmp.name}",
             )
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_fail_to_load_invalid_files_as_video(self):
         path = f"{EVA_ROOT_DIR}/data/**"
@@ -104,8 +103,6 @@ class LoadExecutorTest(unittest.TestCase):
             execute_query_fetch_all(query)
         result = execute_query_fetch_all("SELECT name FROM MyVideos;")
         self.assertEqual(len(result), 0)
-        # clean up
-        execute_query_fetch_all("DROP TABLE MyVideos;")
 
     def test_should_rollback_if_video_load_fails(self):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
@@ -197,7 +194,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # clean up
-        drop_query = "DROP TABLE MyVideoCSV;"
+        drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)
 
     def test_should_load_csv_with_columns_in_table(self):
@@ -232,5 +229,5 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # clean up
-        drop_query = "DROP TABLE MyVideoCSV;"
+        drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)

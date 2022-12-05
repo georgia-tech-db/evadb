@@ -156,7 +156,7 @@ class ParserTests(unittest.TestCase):
     def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
-        expected_stmt = DropTableStatement([TableRef(TableInfo("student_info"))], False)
+        expected_stmt = DropTableStatement([TableInfo("student_info")], False)
         eva_statement_list = parser.parse(drop_queries)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)

@@ -28,7 +28,6 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.drop_statement import DropTableStatement
 from eva.parser.explain_statement import ExplainStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
@@ -107,11 +106,6 @@ class StatementBinder:
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
-
-    @bind.register(DropTableStatement)
-    def _bind_drop_table_statement(self, node: DropTableStatement):
-        for table in node.table_refs:
-            self.bind(table)
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):

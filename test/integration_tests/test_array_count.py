@@ -33,7 +33,7 @@ class ArrayCountTests(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         file_remove("dummy.avi")
 
     # integration test

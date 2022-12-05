@@ -42,9 +42,9 @@ class PytorchTest(unittest.TestCase):
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
-        execute_query_fetch_all("DROP TABLE Actions;")
-        execute_query_fetch_all("DROP TABLE MNIST;")
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):

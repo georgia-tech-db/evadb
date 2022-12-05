@@ -42,7 +42,7 @@ class ExplainExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
         drop_query = """DROP TABLE table3;"""
         execute_query_fetch_all(drop_query)
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_explain_simple_select(self):
         select_query = "EXPLAIN SELECT id, data FROM MyVideo"

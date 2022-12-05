@@ -399,7 +399,7 @@ class LogicalDropToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_refs, before.if_exists)
+        after = DropPlan(before.table_infos, before.if_exists)
         return after
 
 

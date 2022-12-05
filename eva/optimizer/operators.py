@@ -541,14 +541,14 @@ class LogicalDrop(Operator):
     Logical node for drop table operations
     """
 
-    def __init__(self, table_refs: List[TableRef], if_exists: bool, children=None):
+    def __init__(self, table_infos: List[TableInfo], if_exists: bool, children=None):
         super().__init__(OperatorType.LOGICALDROP, children)
-        self._table_refs = table_refs
+        self._table_infos = table_infos
         self._if_exists = if_exists
 
     @property
-    def table_refs(self):
-        return self._table_refs
+    def table_infos(self):
+        return self._table_infos
 
     @property
     def if_exists(self):
@@ -560,12 +560,12 @@ class LogicalDrop(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_refs == other.table_refs
+            and self.table_infos == other.table_infos
             and self.if_exists == other.if_exists
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self._table_refs), self._if_exists))
+        return hash((super().__hash__(), tuple(self._table_infos), self._if_exists))
 
 
 class LogicalCreateUDF(Operator):

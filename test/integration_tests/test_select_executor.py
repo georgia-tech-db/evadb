@@ -56,7 +56,7 @@ class SelectExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
         drop_query = """DROP TABLE table3;"""
         execute_query_fetch_all(drop_query)
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column

@@ -81,7 +81,7 @@ class TestRules(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation

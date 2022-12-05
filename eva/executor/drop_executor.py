@@ -18,6 +18,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
+from eva.parser.table_ref import TableInfo
 from eva.planner.drop_plan import DropPlan
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
@@ -33,35 +34,40 @@ class DropExecutor(AbstractExecutor):
     def exec(self):
         """Drop table executor"""
         catalog_manager = CatalogManager()
-        if len(self.node.table_refs) > 1:
+        if len(self.node.table_infos) > 1:
             logger.exception("Drop supports only single table")
-        table_ref = self.node.table_refs[0]
+        table_info: TableInfo = self.node.table_infos[0]
 
         if not catalog_manager.check_table_exists(
-            table_ref.table.database_name, table_ref.table.table_name
+            table_info.database_name, table_info.table_name
         ):
-            err_msg = "Table: {} does not exist".format(table_ref)
+            err_msg = "Table: {} does not exist".format(table_info)
             if self.node.if_exists:
                 logger.warn(err_msg)
+                return Batch(pd.DataFrame([err_msg]))
             else:
                 logger.exception(err_msg)
+                raise ExecutorError(err_msg)
 
         try:
-            storage_engine = StorageEngine.factory(table_ref.table.table_obj)
+            table_obj = catalog_manager.get_dataset_metadata(
+                table_info.database_name, table_info.table_name
+            )
+            storage_engine = StorageEngine.factory(table_obj)
         except RuntimeError as err:
             raise ExecutorError(str(err))
-        storage_engine.drop(table=table_ref.table.table_obj)
+        storage_engine.drop(table=table_obj)
 
-        success = catalog_manager.drop_dataset_metadata(table_ref.table.table_obj)
+        success = catalog_manager.drop_dataset_metadata(table_obj)
 
         if not success:
-            err_msg = "Failed to drop {}".format(table_ref)
+            err_msg = "Failed to drop {}".format(table_info)
             logger.exception(err_msg)
             raise ExecutorError(err_msg)
 
         yield Batch(
             pd.DataFrame(
-                {"Table Successfully dropped: {}".format(table_ref.table.table_name)},
+                {"Table Successfully dropped: {}".format(table_info.table_name)},
                 index=[0],
             )
         )

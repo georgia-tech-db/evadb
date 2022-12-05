@@ -48,7 +48,7 @@ class UDFExecutorTest(unittest.TestCase):
 
     def tearDown(self):
         file_remove("dummy.avi")
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     # integration test
 

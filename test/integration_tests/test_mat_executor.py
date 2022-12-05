@@ -49,7 +49,7 @@ class MaterializedViewTest(unittest.TestCase):
     def tearDownClass(cls):
         file_remove("dummy.avi")
         file_remove("ua_detrac.mp4")
-        execute_query_fetch_all("DROP TABLE MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
         execute_query_fetch_all("DROP TABLE UATRAC;")
 
     def test_should_mat_view_with_dummy(self):
