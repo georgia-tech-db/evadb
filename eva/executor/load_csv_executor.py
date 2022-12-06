@@ -16,12 +16,16 @@ import os
 
 import pandas as pd
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.readers.csv_reader import CSVReader
 from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class LoadCSVExecutor(AbstractExecutor):
@@ -29,6 +33,7 @@ class LoadCSVExecutor(AbstractExecutor):
         super().__init__(node)
         config = ConfigurationManager()
         self.upload_dir = config.get_value("storage", "upload_dir")
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -39,20 +44,41 @@ class LoadCSVExecutor(AbstractExecutor):
         using storage engine
         """
 
+        # Check table existence
+        table_info = self.node.table_info
+        database_name = table_info.database_name
+        table_name = table_info.table_name
+        table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+        if table_obj is None:
+            error = f"{table_name} does not exist."
+            logger.error(error)
+            raise ExecutorError(error)
+
+        # Get the column information
+        column_list = []
+        for column in table_obj.columns:
+            column_list.append(
+                TupleValueExpression(
+                    col_name=column.name,
+                    table_alias=table_obj.name.lower(),
+                    col_object=column,
+                )
+            )
+
         # Read the CSV file
         # converters is a dictionary of functions that convert the values
         # in the column to the desired type
         csv_reader = CSVReader(
             os.path.join(self.upload_dir, self.node.file_path),
-            column_list=self.node.column_list,
+            column_list=column_list,
             batch_mem_size=self.node.batch_mem_size,
         )
 
-        storage_engine = StorageEngine.factory(self.node.table_metainfo)
+        storage_engine = StorageEngine.factory(table_obj)
         # write with storage engine in batches
         num_loaded_frames = 0
         for batch in csv_reader.read():
-            storage_engine.write(self.node.table_metainfo, batch)
+            storage_engine.write(table_obj, batch)
             num_loaded_frames += len(batch)
 
         # yield result

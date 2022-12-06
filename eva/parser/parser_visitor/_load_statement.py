@@ -15,14 +15,13 @@
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.load_statement import LoadDataStatement
-from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 
 
 class Load(evaql_parserVisitor):
     def visitLoadStatement(self, ctx: evaql_parser.LoadStatementContext):
         file_path = self.visit(ctx.stringLiteral()).value
-        table = TableRef(self.visit(ctx.tableName()))
+        table = self.visit(ctx.tableName())
 
         # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
