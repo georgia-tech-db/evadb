@@ -31,7 +31,7 @@ class BatchEncoder(json.JSONEncoder):
 
 def as_batch(d):
     if "__dataframe__" in d:
-        return pd.read_json(d["__dataframe__"])
+        return pd.read_json(d["__dataframe__"], convert_dates=False)
     else:
         return d
 

@@ -77,6 +77,14 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
     EVA_INSTALLATION_DIR
 )
 
+Timestamp_udf_query ="""CREATE UDF
+            IF NOT EXISTS  Timestamp
+            INPUT (seconds INTEGER)
+            OUTPUT (timestamp NDARRAY STR(8))
+            TYPE NdarrayUDF
+            IMPL "eva/udfs/timestamp.py";
+        """
+
 
 def init_builtin_udfs(mode="debug"):
     """
@@ -86,7 +94,7 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query, Timestamp_udf_query]
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:
