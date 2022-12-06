@@ -3,14 +3,11 @@ import pytesseract
 import PIL
 from detoxify import Detoxify
 import pandas as pd
-from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 import numpy as np
-from torch import Tensor
 from eva.utils.logging_manager import logger
 from eva.models.catalog.frame_info import FrameInfo
-from torchvision.transforms import Compose, ToTensor, Normalize, Grayscale
-from PIL import Image
+from eva.models.catalog.properties import ColorSpace
 
 class HarmfulMemeDetector(AbstractClassifierUDF):
     """
