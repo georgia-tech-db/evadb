@@ -14,14 +14,14 @@
 # limitations under the License.
 import os
 import unittest
-import numpy as np
+from test.util import create_sample_image
 
+import numpy as np
 from mock import patch
 
-from test.util import create_sample_image
-from eva.udfs.ndarray.open import Open
-from eva.executor.executor_utils import ExecutorError
 from eva.configuration.configuration_manager import ConfigurationManager
+from eva.executor.executor_utils import ExecutorError
+from eva.udfs.ndarray.open import Open
 
 
 class OpenTests(unittest.TestCase):

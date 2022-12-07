@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+
 import cv2
 import numpy as np
 import pandas as pd
 
-from pathlib import Path
-
-from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.executor.executor_utils import ExecutorError
+from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class Open(AbstractUDF):
