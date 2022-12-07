@@ -37,6 +37,7 @@ To connect to the EVA server in the notebook, use the following Python code:
     # allow nested asyncio calls for client to connect with server
     import nest_asyncio
     nest_asyncio.apply()
+    from eva.server.db_api import connect
 
     # hostname and port of the server where EVA is running
     connection = connect(host = '0.0.0.0', port = 5432)
