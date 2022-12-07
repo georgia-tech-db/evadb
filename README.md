@@ -1,4 +1,8 @@
+
 <div >
+For simplicity we put all files under tutorials, please put this model under tutorials folder: https://www.dropbox.com/s/x677jwtae0elm6h/model.pth?dl=0
+and name it as model.pth
+
   <a href="https://evadb.readthedocs.io/">
     <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
   </a>
