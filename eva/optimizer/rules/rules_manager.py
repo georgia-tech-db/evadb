@@ -61,6 +61,8 @@ from eva.optimizer.rules.rules import (
     PushDownFilterThroughJoin,
 )
 
+from eva.optimizer.rules.rules import UdfReuseForFunctionScan
+
 
 class RulesManager:
     """Singelton class to manage all the rules in our system"""
@@ -73,7 +75,11 @@ class RulesManager:
         return cls._instance
 
     def __init__(self):
-        self._logical_rules = [LogicalInnerJoinCommutativity()]
+        self._logical_rules = [
+            LogicalInnerJoinCommutativity(), 
+            # TODO: Add flag to enable/disable this rule
+            UdfReuseForFunctionScan()
+        ]
 
         self._rewrite_rules = [
             EmbedFilterIntoGet(),

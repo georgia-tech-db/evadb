@@ -14,11 +14,13 @@
 # limitations under the License.
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.insert_plan import InsertPlan
-
+from eva.storage.storage_engine import StorageEngine
+from eva.catalog.catalog_manager import CatalogManager
 
 class InsertExecutor(AbstractExecutor):
     def __init__(self, node: InsertPlan):
         super().__init__(node)
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -29,4 +31,18 @@ class InsertExecutor(AbstractExecutor):
         provided.
         Right now we assume there are no missing values
         """
-        raise NotImplementedError
+        
+        # get table details
+        table_info = self.node.table_info
+        database_name = table_info.database_name
+        table_name = table_info.table_name
+        table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+        storage_engine = StorageEngine.factory(table_obj)
+
+        # get child executor
+        child = self.children[0]
+        for rows in child.exec():
+
+            # write rows to storage engine and yield
+            storage_engine.write(table_obj, rows)
+            yield rows

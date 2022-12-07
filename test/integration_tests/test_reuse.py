@@ -39,7 +39,7 @@ class ReuseTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         #create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE './data/top_gun.mp4' INTO top_gun;"""
+        load_query = """LOAD VIDEO './data/top_gun.mp4' INTO top_gun;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         #cls.table1 = create_table("table1", 100, 3)

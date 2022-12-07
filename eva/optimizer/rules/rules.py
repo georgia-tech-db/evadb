@@ -97,158 +97,6 @@ from eva.planner.storage_plan import StoragePlan
 from eva.planner.union_plan import UnionPlan
 from eva.planner.upload_plan import UploadPlan
 
-# Modified
-
-
-class RuleType(Flag):
-    """
-    Manages enums for all the supported rules
-    """
-
-    # Don't move this enum, else will break rule exploration logic
-    INVALID_RULE = 0
-
-    # REWRITE RULES(LOGICAL -> LOGICAL)
-    EMBED_FILTER_INTO_GET = auto()
-    EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_SAMPLE_INTO_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
-    UDF_REUSE_FUNCTION_SCAN = auto()
-    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
-    REWRITE_DELIMETER = auto()
-
-    # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
-    LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
-    TRANSFORMATION_DELIMETER = auto()
-
-    # IMPLEMENTATION RULES (LOGICAL -> PHYSICAL)
-    LOGICAL_UNION_TO_PHYSICAL = auto()
-    LOGICAL_ORDERBY_TO_PHYSICAL = auto()
-    LOGICAL_LIMIT_TO_PHYSICAL = auto()
-    LOGICAL_INSERT_TO_PHYSICAL = auto()
-    LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_TO_PHYSICAL = auto()
-    LOGICAL_RENAME_TO_PHYSICAL = auto()
-    LOGICAL_DROP_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
-    LOGICAL_GET_TO_SEQSCAN = auto()
-    LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
-    LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
-    LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
-    LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
-    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
-    LOGICAL_FILTER_TO_PHYSICAL = auto()
-    LOGICAL_PROJECT_TO_PHYSICAL = auto()
-    LOGICAL_SHOW_TO_PHYSICAL = auto()
-    LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
-    IMPLEMENTATION_DELIMETER = auto()
-
-    NUM_RULES = auto()
-
-
-class Promise(IntEnum):
-    """
-    Manages order in which rules should be applied.
-    Rule with a higher enum will be preferred in case of
-    conflict
-    """
-
-    # IMPLEMENTATION RULES
-    LOGICAL_UNION_TO_PHYSICAL = auto()
-    LOGICAL_MATERIALIZED_VIEW_TO_PHYSICAL = auto()
-    LOGICAL_ORDERBY_TO_PHYSICAL = auto()
-    LOGICAL_LIMIT_TO_PHYSICAL = auto()
-    LOGICAL_INSERT_TO_PHYSICAL = auto()
-    LOGICAL_RENAME_TO_PHYSICAL = auto()
-    LOGICAL_DROP_TO_PHYSICAL = auto()
-    LOGICAL_LOAD_TO_PHYSICAL = auto()
-    LOGICAL_UPLOAD_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_TO_PHYSICAL = auto()
-    LOGICAL_CREATE_UDF_TO_PHYSICAL = auto()
-    LOGICAL_SAMPLE_TO_UNIFORMSAMPLE = auto()
-    LOGICAL_GET_TO_SEQSCAN = auto()
-    LOGICAL_DERIVED_GET_TO_PHYSICAL = auto()
-    LOGICAL_LATERAL_JOIN_TO_PHYSICAL = auto()
-    LOGICAL_JOIN_TO_PHYSICAL_HASH_JOIN = auto()
-    LOGICAL_FUNCTION_SCAN_TO_PHYSICAL = auto()
-    LOGICAL_FILTER_TO_PHYSICAL = auto()
-    LOGICAL_PROJECT_TO_PHYSICAL = auto()
-    LOGICAL_SHOW_TO_PHYSICAL = auto()
-    LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
-    IMPLEMENTATION_DELIMETER = auto()
-
-    # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
-    LOGICAL_INNER_JOIN_COMMUTATIVITY = auto()
-
-    # REWRITE RULES
-    EMBED_FILTER_INTO_GET = auto()
-    EMBED_PROJECT_INTO_GET = auto()
-    EMBED_FILTER_INTO_DERIVED_GET = auto()
-    EMBED_PROJECT_INTO_DERIVED_GET = auto()
-    EMBED_SAMPLE_INTO_GET = auto()
-    UDF_REUSE_FUNCTION_SCAN = auto()
-    PUSHDOWN_FILTER_THROUGH_JOIN = auto()
-
-
-class Rule(ABC):
-    """Base class to define any optimization rule
-
-    Arguments:
-        rule_type(RuleType): type of the rule, can be rewrite,
-            logical->physical
-        pattern: the match pattern for the rule
-    """
-
-    def __init__(self, rule_type: RuleType, pattern=None):
-        self._pattern = pattern
-        self._rule_type = rule_type
-
-    @property
-    def rule_type(self):
-        return self._rule_type
-
-    @property
-    def pattern(self):
-        return self._pattern
-
-    @pattern.setter
-    def pattern(self, pattern):
-        self._pattern = pattern
-
-    def top_match(self, opr: Operator) -> bool:
-        return opr.opr_type == self.pattern.opr_type
-
-    @abstractmethod
-    def promise(self) -> int:
-        raise NotImplementedError
-
-    @abstractmethod
-    def check(self, before: Operator, context: OptimizerContext) -> bool:
-        """Check whether the rule is applicable for the input_expr
-
-        Args:
-            before (Operator): the before operator expression
-
-        Returns:
-            bool: If the rule is applicable, return true, else false
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def apply(self, before: Operator) -> Operator:
-        """Transform the before expression to the after expression
-
-        Args:
-            before (Operator): the before expression
-
-        Returns:
-            Operator: the transformed expression
-        """
-        raise NotImplementedError
-
 
 ##############################################
 # REWRITE RULES START
@@ -463,6 +311,8 @@ class UdfReuseForFunctionScan(Rule):
 
             # first call would return None
             view = self._check_udf_history(function_scan) 
+            x = 1
+
 
             # you have a history of this udf
             if view is not None:
@@ -486,6 +336,8 @@ class UdfReuseForFunctionScan(Rule):
 
                 # set insert operator as the right child of the lateral join
                 lateral_join.children[1] = insert
+
+                # TODO: This flow is buggy, need to fix. What to return?
 
             # no udf history
             else:
@@ -604,14 +456,10 @@ class UdfReuseForFunctionScan(Rule):
             cols=col_ids
         )
 
-        # get a ref to the mat view
-        view_ref = TableRef(
-            TableInfo(table_name="test_view"),
-        )
 
         # create table metadata for the mat view
         table_metadata = catalog.create_table_metadata(
-            table_ref=view_ref,
+            table_info=TableInfo(table_name="test_view"),
             columns=col_defs,
         )
 
@@ -860,7 +708,6 @@ class LogicalCreateToPhysical(Rule):
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list, before.if_not_exists)
-
         return after
 
 
@@ -1346,74 +1193,3 @@ class LogicalExplainToPhysical(Rule):
 
 # IMPLEMENTATION RULES END
 ##############################################
-
-
-class RulesManager:
-    """Singelton class to manage all the rules in our system"""
-
-    _instance = None
-
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(RulesManager, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self):
-        self._logical_rules = [
-            LogicalInnerJoinCommutativity(),
-            # TODO: Add a flag to enable/disable this rule
-            UdfReuseForFunctionScan(),
-        ]
-
-        self._rewrite_rules = [
-            EmbedFilterIntoGet(),
-            # EmbedFilterIntoDerivedGet(),
-            EmbedProjectIntoGet(),
-            # EmbedProjectIntoDerivedGet(),
-            EmbedSampleIntoGet(),
-            PushDownFilterThroughJoin(),
-        ]
-
-        self._implementation_rules = [
-            LogicalCreateToPhysical(),
-            LogicalRenameToPhysical(),
-            LogicalDropToPhysical(),
-            LogicalCreateUDFToPhysical(),
-            LogicalDropUDFToPhysical(),
-            LogicalInsertToPhysical(),
-            LogicalLoadToPhysical(),
-            LogicalUploadToPhysical(),
-            LogicalSampleToUniformSample(),
-            LogicalGetToSeqScan(),
-            LogicalDerivedGetToPhysical(),
-            LogicalUnionToPhysical(),
-            LogicalOrderByToPhysical(),
-            LogicalLimitToPhysical(),
-            LogicalLateralJoinToPhysical(),
-            LogicalJoinToPhysicalHashJoin(),
-            LogicalFunctionScanToPhysical(),
-            LogicalCreateMaterializedViewToPhysical(),
-            LogicalFilterToPhysical(),
-            LogicalProjectToPhysical(),
-            LogicalShowToPhysical(),
-        ]
-        self._all_rules = (
-            self._rewrite_rules + self._logical_rules + self._implementation_rules
-        )
-
-    @property
-    def rewrite_rules(self):
-        return self._rewrite_rules
-
-    @property
-    def implementation_rules(self):
-        return self._implementation_rules
-
-    @property
-    def logical_rules(self):
-        return self._logical_rules
-
-    @property
-    def all_rules(self):
-        return self._all_rules
-

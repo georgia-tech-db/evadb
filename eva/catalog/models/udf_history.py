@@ -21,7 +21,7 @@ from eva.catalog.models.base_model import BaseModel
 class UdfHistory(BaseModel):
     __tablename__ = "udf_history"
 
-    _udf_id = Column("udf_id", Integer, ForeignKey("udf.id"))
+    _udf_id = Column("udf_id", Integer, ForeignKey("udf._row_id"))
     _predicate = Column("predicate", String(2048))
     _materialize_view = Column("materialize_view", String(128))
 
