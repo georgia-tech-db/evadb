@@ -17,6 +17,7 @@ from antlr4 import TerminalNode
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
 from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.evaql.evaql_parser import evaql_parser
@@ -132,8 +133,13 @@ class Functions(evaql_parserVisitor):
             agg_func_name = self.visit(ctx.aggregateFunctionName())
         else:
             logger.error("Aggregate function name missing.")
+
         agg_func_type = self.getAggregateFunctionType(agg_func_name)
-        agg_func_arg = self.visit(ctx.functionArg())
+        agg_func_arg = (
+            TupleValueExpression(col_name="id")
+            if ctx.STAR()
+            else self.visit(ctx.functionArg())
+        )
         agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
 
         return agg_expr
