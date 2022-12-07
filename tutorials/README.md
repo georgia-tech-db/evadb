@@ -1,3 +1,6 @@
+For simplicity we put all files under tutorials, please put this model under tutorials folder: https://www.dropbox.com/s/x677jwtae0elm6h/model.pth?dl=0
+and name it as model.pth.
+
 ## Quickstart Tutorial
 
 ### Configure GPU (Recommended)
