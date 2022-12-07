@@ -14,8 +14,6 @@
 # limitations under the License.
 from typing import Callable, List
 
-import pandas as pd
-
 from eva.catalog.models.udf_io import UdfIO
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
@@ -56,6 +54,7 @@ class FunctionExpression(AbstractExpression):
         self._context = Context()
         self._name = name
         self._function = func
+        self._function_instance = None
         self._output = output
         self.alias = alias
         self.output_objs: List[UdfIO] = []
@@ -80,22 +79,38 @@ class FunctionExpression(AbstractExpression):
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
+
         if len(child_batches):
+            batch_sizes = [len(child_batch) for child_batch in child_batches]
+            are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
+            maximum_batch_size = max(batch_sizes)
+            if not are_all_equal_length:
+                for child_batch in child_batches:
+                    if len(child_batch) != maximum_batch_size:
+                        if len(child_batch) == 1:
+                            # duplicate row inplace
+                            child_batch.repeat(maximum_batch_size)
+                        else:
+                            raise Exception(
+                                "Not all columns in the batch have equal elements"
+                            )
             new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
-        outcomes = func(new_batch.frames)
-        outcomes = Batch(pd.DataFrame(outcomes))
+        outcomes = new_batch
+        outcomes.apply_function_expression(func)
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
         return outcomes
 
     def _gpu_enabled_function(self):
-        if isinstance(self._function, GPUCompatible):
-            device = self._context.gpu_device()
-            if device != NO_GPU:
-                return self._function.to_device(device)
-        return self._function
+        if self._function_instance is None:
+            self._function_instance = self.function()
+            if isinstance(self._function_instance, GPUCompatible):
+                device = self._context.gpu_device()
+                if device != NO_GPU:
+                    self._function_instance = self._function_instance.to_device(device)
+        return self._function_instance
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

@@ -20,7 +20,9 @@ from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
+from eva.executor.explain_executor import ExplainExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
+from eva.executor.groupby_executor import GroupByExecutor
 from eva.executor.hash_join_executor import HashJoinExecutor
 from eva.executor.insert_executor import InsertExecutor
 from eva.executor.join_build_executor import BuildJoinExecutor
@@ -38,6 +40,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
+from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
@@ -96,6 +99,8 @@ class PlanExecutor:
             executor_node = LoadDataExecutor(node=plan)
         elif plan_opr_type == PlanOprType.UPLOAD:
             executor_node = UploadExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.GROUP_BY:
+            executor_node = GroupByExecutor(node=plan)
         elif plan_opr_type == PlanOprType.ORDER_BY:
             executor_node = OrderByExecutor(node=plan)
         elif plan_opr_type == PlanOprType.LIMIT:
@@ -112,15 +117,22 @@ class PlanExecutor:
             executor_node = FunctionScanExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_MATERIALIZED_VIEW:
             executor_node = CreateMaterializedViewExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.EXCHANGE:
+            executor_node = ExchangeExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PROJECT:
             executor_node = ProjectExecutor(node=plan)
         elif plan_opr_type == PlanOprType.PREDICATE_FILTER:
             executor_node = PredicateExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SHOW_INFO:
             executor_node = ShowInfoExecutor(node=plan)
-        # Build Executor Tree for children
-        for children in plan.children:
-            executor_node.append_child(self._build_execution_tree(children))
+        elif plan_opr_type == PlanOprType.EXPLAIN:
+            executor_node = ExplainExecutor(node=plan)
+
+        # EXPLAIN does not need to build execution tree for its children
+        if plan_opr_type != PlanOprType.EXPLAIN:
+            # Build Executor Tree for children
+            for children in plan.children:
+                executor_node.append_child(self._build_execution_tree(children))
 
         return executor_node
 

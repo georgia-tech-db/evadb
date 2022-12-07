@@ -171,3 +171,10 @@ develop.sh
 *build/
 eva_dev_env/
 test_eva/
+test_eva_db/
+test_evadb/
+
+# tutorials
+tutorials/*.py
+*.pth
+eva.txt

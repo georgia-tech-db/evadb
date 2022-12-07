@@ -24,7 +24,7 @@ class StoragePlan(AbstractPlan):
     and returning to the higher levels.
 
     Arguments:
-        video (DataFrameMetadata): Required meta-data for fetching data
+        table (DataFrameMetadata): Required meta-data for fetching data
         batch_mem_size (int): memory size of the batch read from disk
         skip_frames (int): skip frequency
         offset (int): storage offset for retrieving data
@@ -36,7 +36,7 @@ class StoragePlan(AbstractPlan):
 
     def __init__(
         self,
-        video: DataFrameMetadata,
+        table: DataFrameMetadata,
         batch_mem_size: int,
         skip_frames: int = 0,
         offset: int = None,
@@ -47,7 +47,7 @@ class StoragePlan(AbstractPlan):
         sampling_rate: int = None,
     ):
         super().__init__(PlanOprType.STORAGE_PLAN)
-        self._video = video
+        self._table = table
         self._batch_mem_size = batch_mem_size
         self._skip_frames = skip_frames
         self._offset = offset
@@ -58,8 +58,8 @@ class StoragePlan(AbstractPlan):
         self._sampling_rate = sampling_rate
 
     @property
-    def video(self):
-        return self._video
+    def table(self):
+        return self._table
 
     @property
     def batch_mem_size(self):
@@ -93,11 +93,32 @@ class StoragePlan(AbstractPlan):
     def sampling_rate(self):
         return self._sampling_rate
 
+    def __str__(self):
+        return "StoragePlan(video={}, \
+            batch_mem_size={}, \
+            skip_frames={}, \
+            offset={}, \
+            limit={}, \
+            total_shards={}, \
+            curr_shard={}, \
+            predicate={}, \
+            sampling_rate={})".format(
+            self._table,
+            self._batch_mem_size,
+            self._skip_frames,
+            self._offset,
+            self._limit,
+            self._total_shards,
+            self._curr_shard,
+            self._predicate,
+            self._sampling_rate,
+        )
+
     def __hash__(self) -> int:
         return hash(
             (
                 super().__hash__(),
-                self.video,
+                self.table,
                 self.batch_mem_size,
                 self.skip_frames,
                 self.offset,

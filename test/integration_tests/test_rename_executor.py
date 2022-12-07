@@ -31,7 +31,7 @@ class RenameExecutorTest(unittest.TestCase):
     # integration test
     def test_should_rename_table(self):
         catalog_manager = CatalogManager()
-        query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         self.assertTrue(

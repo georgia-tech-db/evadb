@@ -15,7 +15,7 @@
 from typing import List
 
 from eva.parser.create_statement import ColumnDefinition
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
 
@@ -32,7 +32,7 @@ class CreateMaterializedViewPlan(AbstractPlan):
 
     def __init__(
         self,
-        view: TableRef,
+        view: TableInfo,
         columns: List[ColumnDefinition],
         if_not_exists: bool = False,
     ):
@@ -52,6 +52,13 @@ class CreateMaterializedViewPlan(AbstractPlan):
     @property
     def columns(self):
         return self._columns
+
+    def __str__(self):
+        return "CreateMaterializedViewPlan(view={}, \
+            columns={}, \
+            if_not_exists={})".format(
+            self._view, self._columns, self._if_not_exists
+        )
 
     def __hash__(self) -> int:
         return hash(

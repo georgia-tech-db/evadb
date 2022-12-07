@@ -1,17 +1,14 @@
-Adding new command
-==================
+Extending EVA 
+=============
 
-This document is the note of tracing implementation of CREATE command.
-We also list all the file that need to be modified or added to extend a
-new DDL command to EVA. We hope this tutorial will be helpful when
-future users trying to implement new command in EVA.
+This document details the steps involved in adding support for a new operator (or command) in EVA. We illustrate the process using a DDL command.
 
-command_handler
----------------
+Command Handler
+----
 
 An input query string is handled by **Parser**,
-**StatementTOPlanConvertor**, **PlanGenerator**, and **PlanExcutor**. So
-let's discuss each part separately.
+**StatementTOPlanConvertor**, **PlanGenerator**, and **PlanExecutor**. 
+We discuss each part separately.
 
 .. code:: python
 
@@ -92,12 +89,12 @@ parser/
 
 .. _2-statementtoplanconvertor:
 
-2. StatementToPlanConvertor
+2. Statement To Plan Convertor
 ---------------------------
 
 The part transforms the statement into corresponding logical plan.
 
-optimizer
+Optimizer
 ~~~~~~~~~
 
 -  ``operators.py``
@@ -163,7 +160,7 @@ optimizer
 
 .. _3-plangenerator:
 
-3. PlanGenerator
+3. Plan Generator
 ----------------
 
 The part transformed logical plan to physical plan. The modified files
@@ -219,19 +216,17 @@ optimizer/rules
 
 .. _4-planexcutor:
 
-4. PlanExcutor
+4. Plan Executor
 --------------
 
-PlanExecutor uses data stored in physical plan to accomplish the
-command.
+``PlanExecutor`` uses data stored in physical plan to run the command.
 
 executor/
 ~~~~~~~~~
 
--  ``[cmd]_excutor.py`` - implement excutor that make change on
-   **catalog**, **metadata**, or **storage engine** to done the command.
+-  ``[cmd]_executor.py`` - implement an executor that make changes in
+   **catalog**, **metadata**, or **storage engine** to run the command.
 
-   -  The excutors of different commands has huge difference.
    -  May need to create helper function in CatalogManager,
       DatasetService, DataFrameMetadata, etc.
 
@@ -249,22 +244,21 @@ executor/
 
               StorageEngine.create(table=metadata)
 
-Some additional note
+Additional Notes
 --------------------
 
-Data tructure of EVA database:
+Key data structures in EVA:
 
--  **Catalog**: Record DataFrameMetadata for all tables.
+-  **Catalog**: Records ``DataFrameMetadata`` for all tables.
 
-   -  data stored in DataFrameMetadata: name, file_url, identifier_id,
-      schema
+   -  data stored in DataFrameMetadata: ``name``, ``file_url``, ``identifier_id``,
+      ``schema``
 
-      -  file_url - used to access the real table in storage engine.
+      -  ``file_url`` - used to access the real table in storage engine.
 
-   -  For RENAME cmd, we used old_table_name to access the corresponing
-      entry in metadata table, and modified name of the entry.
+   -  For the ``RENAME`` table command, we use the ``old_table_name`` to access the corresponing entry in metadata table, and the ``modified name`` of the table.
 
--  **Storage engine**:
+-  **Storage Engine**:
 
-   -  APIs are defined in ``src/storage``, currently only support
+   -  API is defined in ``src/storage``, currently only supports
       create, read, write.

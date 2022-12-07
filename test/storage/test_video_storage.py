@@ -19,11 +19,11 @@ from unittest.mock import MagicMock
 import mock
 from mock import mock_open
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.storage.storage_engine import VideoStorageEngine
+from eva.storage.storage_engine import StorageEngine
 
 
 class VideoStorageEngineTest(unittest.TestCase):
@@ -32,7 +32,9 @@ class VideoStorageEngineTest(unittest.TestCase):
         self.table = None
 
     def create_sample_table(self):
-        table_info = DataFrameMetadata("dataset", "dataset")
+        table_info = DataFrameMetadata(
+            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+        )
         column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn(
             "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
@@ -41,7 +43,9 @@ class VideoStorageEngineTest(unittest.TestCase):
         return table_info
 
     def setUp(self):
-        self.video_engine = VideoStorageEngine
+        mock = MagicMock()
+        mock.table_type = TableType.VIDEO_DATA
+        self.video_engine = StorageEngine.factory(mock)
         self.table = self.create_sample_table()
         self.curr_version = ConfigurationManager().get_value(
             "storage", "video_engine_version"
@@ -68,4 +72,4 @@ class VideoStorageEngineTest(unittest.TestCase):
         table = MagicMock()
         table.file_url = Exception()
         with self.assertRaises(Exception):
-            self.video_engine.write(MagicMock(), batch)
+            self.video_engine.write(table, batch)

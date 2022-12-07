@@ -23,6 +23,8 @@ from test.util import (
 from mock import MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
+from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.expression.expression_utils import expression_tree_to_conjunction_list
 from eva.optimizer.operators import (
     LogicalFilter,
@@ -42,9 +44,11 @@ from eva.optimizer.rules.rules import (
     LogicalDerivedGetToPhysical,
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
+    LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
     LogicalGetToSeqScan,
+    LogicalGroupByToPhysical,
     LogicalInnerJoinCommutativity,
     LogicalInsertToPhysical,
     LogicalJoinToPhysicalHashJoin,
@@ -60,8 +64,8 @@ from eva.optimizer.rules.rules import (
     LogicalUploadToPhysical,
     Promise,
     PushDownFilterThroughJoin,
-    RulesManager,
 )
+from eva.optimizer.rules.rules_manager import RulesManager
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -71,7 +75,7 @@ class TestRules(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
 
@@ -113,6 +117,9 @@ class TestRules(unittest.TestCase):
             Promise.LOGICAL_LIMIT_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
+            Promise.LOGICAL_GROUPBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
             Promise.LOGICAL_ORDERBY_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
         self.assertTrue(
@@ -132,6 +139,9 @@ class TestRules(unittest.TestCase):
         )
         self.assertTrue(
             Promise.LOGICAL_DROP_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
+        )
+        self.assertTrue(
+            Promise.LOGICAL_EXPLAIN_TO_PHYSICAL < Promise.IMPLEMENTATION_DELIMETER
         )
 
     def test_supported_rules(self):
@@ -176,6 +186,7 @@ class TestRules(unittest.TestCase):
             LogicalGetToSeqScan(),
             LogicalDerivedGetToPhysical(),
             LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
             LogicalOrderByToPhysical(),
             LogicalLimitToPhysical(),
             LogicalLateralJoinToPhysical(),
@@ -185,7 +196,12 @@ class TestRules(unittest.TestCase):
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalExplainToPhysical(),
         ]
+
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        if ray_enabled:
+            supported_implementation_rules.append(LogicalExchangeToPhysical())
         self.assertEqual(
             len(supported_implementation_rules),
             len(RulesManager().implementation_rules),

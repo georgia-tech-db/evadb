@@ -28,17 +28,22 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         copy_sample_videos_to_upload_dir()
-        query = """LOAD FILE 'ua_detrac.mp4'
+        query = """LOAD VIDEO 'ua_detrac.mp4'
                    INTO MyVideo;"""
         execute_query_fetch_all(query)
-        query = """LOAD FILE 'mnist.mp4'
+        query = """LOAD VIDEO 'mnist.mp4'
                    INTO MNIST;"""
+        execute_query_fetch_all(query)
+        query = """LOAD VIDEO 'actions.mp4'
+                   INTO Actions;"""
         execute_query_fetch_all(query)
         load_inbuilt_udfs()
 
     @classmethod
     def tearDownClass(cls):
         file_remove("ua_detrac.mp4")
+        file_remove("mnist.mp4")
+        file_remove("actions.mp4")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -67,6 +72,34 @@ class PytorchTest(unittest.TestCase):
             self.assertTrue("car" in res["ssdobjectdetector.label"][idx])
 
     @pytest.mark.torchtest
+    def test_should_run_pytorch_and_mvit(self):
+        select_query = """SELECT FIRST(id), MVITActionRecognition(SEGMENT(data)) FROM Actions
+                       GROUP BY '16f';"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 9)
+        res = actual_batch.frames
+        # TODO ACTION: Test case for aliases
+        for idx in res.index:
+            self.assertTrue("yoga" in res["mvitactionrecognition.labels"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_fastrcnn_and_mvit(self):
+        select_query = """SELECT FIRST(id),
+                                 FastRCNNObjectDetector(FIRST(data)),
+                                 MVITActionRecognition(SEGMENT(data))
+                       FROM Actions
+                       GROUP BY '16f';"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 9)
+
+        res = actual_batch.frames
+        for idx in res.index:
+            self.assertTrue(
+                "person" in res["fastrcnnobjectdetector.labels"][idx]
+                and "yoga" in res["mvitactionrecognition.labels"][idx]
+            )
+
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
         create_udf_query = """CREATE UDF FaceDetector
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -84,7 +117,7 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_ocr(self):
-        create_udf_query = """CREATE UDF OCRExtractor
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
@@ -137,3 +170,25 @@ class PytorchTest(unittest.TestCase):
                 from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
 
                 pass
+
+    @pytest.mark.torchtest
+    def test_should_run_ocr_on_cropped_data(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  OCRExtraction
+                  IMPL  'eva/udfs/ocr_extractor.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT OCRExtractor(Crop(data, [2, 2, 24, 24])) FROM MNIST
+                        WHERE id >= 150 AND id < 155;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
+
+        # non-trivial test case for MNIST
+        res = actual_batch.frames
+        self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
+        self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)

@@ -12,14 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
-
 from eva.expression.abstract_expression import (
     AbstractExpression,
     ExpressionReturnType,
     ExpressionType,
 )
-from eva.models.storage.batch import Batch
 
 
 class LogicalExpression(AbstractExpression):
@@ -40,22 +37,26 @@ class LogicalExpression(AbstractExpression):
 
     def evaluate(self, *args, **kwargs):
         if self.get_children_count() == 2:
-            left_values = self.get_child(0).evaluate(*args, **kwargs).frames
+
+            left_batch = self.get_child(0).evaluate(*args, **kwargs)
             if self.etype == ExpressionType.LOGICAL_AND:
-                if (~left_values).all().bool():  # check if all are false
-                    return Batch(left_values)
-                kwargs["mask"] = left_values[left_values[0]].index.tolist()
+
+                if left_batch.all_false():  # check if all are false
+                    return left_batch
+                kwargs["mask"] = left_batch.create_mask()
             elif self.etype == ExpressionType.LOGICAL_OR:
-                if left_values.all().bool():  # check if all are true
-                    return Batch(left_values)
-                kwargs["mask"] = left_values[~left_values[0]].index.tolist()
-            right_values = self.get_child(1).evaluate(*args, **kwargs).frames
-            left_values.iloc[kwargs["mask"]] = right_values
-            return Batch(pd.DataFrame(left_values))
+                if left_batch.all_true():  # check if all are true
+                    return left_batch
+                kwargs["mask"] = left_batch.create_inverted_mask()
+            right_batch = self.get_child(1).evaluate(*args, **kwargs)
+            left_batch.update_indices(kwargs["mask"], right_batch)
+
+            return left_batch
         else:
-            values = self.get_child(0).evaluate(*args, **kwargs).frames
+            batch = self.get_child(0).evaluate(*args, **kwargs)
             if self.etype == ExpressionType.LOGICAL_NOT:
-                return Batch(pd.DataFrame(~values))
+                batch.invert()
+                return batch
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

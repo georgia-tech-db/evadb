@@ -76,6 +76,10 @@ class AbstractPlan(ABC):
     def __hash__(self) -> int:
         return hash(self.opr_type)
 
+    @abstractmethod
+    def __str__(self) -> str:
+        return "AbstractPlan"
+
     def __copy__(self):
         # deepcopy the children
         cls = self.__class__

@@ -38,8 +38,7 @@ class LoadExecutorTest(unittest.TestCase):
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD FILE 'dummy.avi' INTO MyVideo
-                   WITH FORMAT VIDEO;"""
+        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
         select_query = """SELECT name, id, data FROM MyVideo;"""
@@ -74,8 +73,7 @@ class LoadExecutorTest(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD FILE 'dummy.csv' INTO MyVideoCSV
-                   WITH FORMAT CSV;"""
+        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV;"""
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -92,6 +90,10 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
 
+        # clean up
+        drop_query = "DROP TABLE MyVideoCSV;"
+        execute_query_fetch_all(drop_query)
+
     def test_should_load_csv_with_columns_in_table(self):
 
         # loading a csv requires a table to be created first
@@ -101,18 +103,13 @@ class LoadExecutorTest(unittest.TestCase):
                 id INTEGER UNIQUE,
                 frame_id INTEGER NOT NULL,
                 video_id INTEGER NOT NULL,
-                dataset_name TEXT(30) NOT NULL,
-                label TEXT(30),
-                bbox NDARRAY FLOAT32(4),
-                object_id INTEGER
+                dataset_name TEXT(30) NOT NULL
             );
-
             """
         execute_query_fetch_all(create_table_query)
 
         # load the CSV
-        load_query = """LOAD FILE 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name)
-                   WITH FORMAT CSV;"""
+        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
         execute_query_fetch_all(load_query)
 
         # execute a select query
@@ -127,3 +124,7 @@ class LoadExecutorTest(unittest.TestCase):
         expected_batch = create_dummy_csv_batches(target_columns=select_columns)
         expected_batch.modify_column_alias("myvideocsv")
         self.assertEqual(actual_batch, expected_batch)
+
+        # clean up
+        drop_query = "DROP TABLE MyVideoCSV;"
+        execute_query_fetch_all(drop_query)

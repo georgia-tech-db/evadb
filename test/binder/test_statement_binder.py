@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from eva.binder.binder_utils import BinderError
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
-from eva.catalog.catalog_manager import CatalogManager
 from eva.parser.alias import Alias
-from eva.parser.types import FileFormatType
 
 
 class StatementBinderTests(unittest.TestCase):
@@ -117,6 +114,13 @@ class StatementBinderTests(unittest.TestCase):
             binder._bind_create_mat_statement(mat_statement)
             mock_binder.assert_called_with(mat_statement.query)
 
+    def test_bind_explain_statement(self):
+        with patch.object(StatementBinder, "bind") as mock_binder:
+            binder = StatementBinder(StatementBinderContext())
+            stmt = MagicMock()
+            binder._bind_explain_statement(stmt)
+            mock_binder.assert_called_with(stmt.explainable_stmt)
+
     @patch("eva.binder.statement_binder.CatalogManager")
     @patch("eva.binder.statement_binder.path_to_class")
     def test_bind_func_expr(self, mock_path_to_class, mock_catalog):
@@ -152,7 +156,7 @@ class StatementBinderTests(unittest.TestCase):
             func_expr.alias,
             Alias("func_expr", ["out1"]),
         )
-        self.assertEqual(func_expr.function, "path_to_class")
+        self.assertEqual(func_expr.function(), "path_to_class")
 
         # Case 2 output not set
         func_expr.output = None
@@ -171,7 +175,7 @@ class StatementBinderTests(unittest.TestCase):
                 ["out1", "out2"],
             ),
         )
-        self.assertEqual(func_expr.function, "path_to_class")
+        self.assertEqual(func_expr.function(), "path_to_class")
 
         # Raise error if the class object cannot be created
         mock_path_to_class.reset_mock()
@@ -188,17 +192,22 @@ class StatementBinderTests(unittest.TestCase):
         )
         self.assertEqual(str(cm.exception), err_msg)
 
-    def test_bind_select_statement(self):
+    @patch("eva.binder.statement_binder.check_table_object_is_video")
+    def test_bind_select_statement(self, is_video_mock):
         with patch.object(StatementBinder, "bind") as mock_binder:
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
-            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+            mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
             select_statement.target_list = mocks[:2]
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
+            select_statement.groupby_clause = mocks[4]
+            select_statement.groupby_clause.value = "8f"
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)
+            mock_binder.assert_any_call(select_statement.groupby_clause)
             mock_binder.assert_any_call(select_statement.union_link)
+            is_video_mock.assert_called()
             for mock in mocks:
                 mock_binder.assert_any_call(mock)
 
@@ -208,73 +217,15 @@ class StatementBinderTests(unittest.TestCase):
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
             select_statement.union_link = None
+            select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 0)
 
             binder = StatementBinder(StatementBinderContext())
             select_statement = MagicMock()
+            select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             self.assertEqual(mock_ctx.call_count, 1)
-
-    @patch("eva.binder.statement_binder.create_video_metadata")
-    @patch("eva.binder.statement_binder.TupleValueExpression")
-    def test_bind_load_video_statement(self, mock_tve, mock_create):
-        load_statement = MagicMock()
-        load_statement.file_options = {"file_format": FileFormatType.VIDEO}
-        load_statement.column_list = None
-        load_statement.path = "video_path"
-        column = MagicMock()
-        table_ref_obj = MagicMock()
-        table_ref_obj.columns = [column]
-        table_ref_obj.name = "table_alias"
-        load_statement.table_ref.table.table_obj = table_ref_obj
-        load_statement.table_ref.table.table_name = "table_name"
-        mock_tve.return_value = tve_return_value = MagicMock()
-
-        with patch.object(StatementBinder, "bind") as mock_binder:
-            with patch.object(Path, "exists") as mock_exists:
-                mock_exists.return_value = True
-                binder = StatementBinder(StatementBinderContext())
-                binder._bind_load_and_upload_data_statement(load_statement)
-                mock_binder.assert_any_call(load_statement.table_ref)
-                mock_create.assert_any_call("table_name")
-                mock_tve.assert_called_with(
-                    col_name=column.name,
-                    table_alias="table_alias",
-                    col_object=column,
-                )
-                mock_binder.assert_any_call(tve_return_value)
-                self.assertEqual(load_statement.column_list, [tve_return_value])
-
-    @patch("eva.binder.statement_binder.create_video_metadata")
-    @patch("eva.binder.statement_binder.TupleValueExpression")
-    def test_bind_load_data_raises(self, mock_tve, mock_create):
-        load_statement = MagicMock()
-        column = MagicMock()
-        file_path = "file_path"
-        load_statement.column_list = [column]
-        load_statement.table_ref.table.table_obj = None
-        with self.assertRaises(BinderError):
-            with patch.object(StatementBinder, "bind"):
-                binder = StatementBinder(StatementBinderContext())
-                binder._bind_load_and_upload_data_statement(load_statement)
-
-        # test should raise if the file path does not exists
-        load_statement.file_options = {"file_format": FileFormatType.VIDEO}
-        load_statement.path = file_path
-        with patch.object(StatementBinder, "bind"):
-            with patch.object(
-                CatalogManager, "check_table_exists"
-            ) as mock_catalog_check:
-                mock_catalog_check.return_value = False
-                with patch.object(Path, "exists") as mock_exists:
-                    mock_exists.return_value = False
-                    with self.assertRaises(BinderError) as cm:
-                        binder = StatementBinder(StatementBinderContext())
-                        binder._bind_load_and_upload_data_statement(load_statement)
-                    self.assertEqual(
-                        str(cm.exception), f"Video file {file_path} does not exist."
-                    )
 
     def test_bind_unknown_object(self):
         class UnknownType:

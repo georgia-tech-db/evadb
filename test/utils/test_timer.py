@@ -42,19 +42,19 @@ class TimerTests(unittest.TestCase):
     def test_timer_with_query(self):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
         response = asyncio.run(handle_request(transport, load_query))
-        self.assertTrue("query_time" in response.to_json())
-        self.assertTrue("error" not in response.to_json())
+        self.assertTrue(response.error is None)
+        self.assertTrue(response.query_time is not None)
 
         # If response is an error, we do not report time
         load_query = """LOAD INFILE 'dummy.avi' INTO MyVideo;"""
         transport = MagicMock()
         transport.write = MagicMock(return_value="response_message")
         response = asyncio.run(handle_request(transport, load_query))
-        self.assertTrue("error" in response.to_json())
-        self.assertTrue("query_time" not in response.to_json())
+        self.assertTrue(response.error is not None)
+        self.assertTrue(response.query_time is None)
 
         file_remove("dummy.avi")

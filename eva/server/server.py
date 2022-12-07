@@ -20,6 +20,7 @@ from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
 from eva.server.networking_utils import realtime_server_status, set_socket_io_timeouts
+from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
 
 
@@ -67,15 +68,12 @@ class EvaServer(asyncio.Protocol):
             self.transport.close()
         EvaServer.__connections__ -= 1
 
-    def data_received(self, data):
-
-        message = data.decode()
-        logger.debug("Request from client: --|" + str(message) + "|--")
-
-        self.buffer.feed_data(message)
+    def data_received(self, data: bytes):
+        # Request from client
+        self.buffer.feed_data(data)
         while self.buffer.has_complete_message():
             request_message = self.buffer.read_message()
-
+            request_message = PickleSerializer.deserialize(request_message)
             if request_message in ["quit", "exit"]:
                 logger.debug("Close client socket")
                 return self.transport.close()
@@ -95,7 +93,7 @@ def start_server(
     stop_server_future: future for externally stopping the server
     """
 
-    logger.critical("Start Server")
+    logger.info("Start Server")
 
     # Register signal handler
     def raiseSystemExit(_, __):
@@ -114,7 +112,7 @@ def start_server(
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        logger.critical(
+        logger.info(
             "PID(" + str(os.getpid()) + ") serving on " + str(socket.getsockname())
         )
 

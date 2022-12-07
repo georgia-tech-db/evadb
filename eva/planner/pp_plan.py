@@ -29,3 +29,6 @@ class PPScanPlan(AbstractScan):
 
     def __init__(self, predicate: AbstractExpression):
         super().__init__(PlanOprType.PP_FILTER, predicate)
+
+    def __str__(self):
+        return "AbstractPlan"
