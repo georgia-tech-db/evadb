@@ -16,7 +16,7 @@ import asyncio
 import sys
 from os.path import abspath, dirname, join
 
-from eva.utils.logging_manager import logger
+
 
 """
 To allow running eva_server from any location
@@ -28,7 +28,7 @@ sys.path.append(EVA_CODE_DIR)
 from eva.configuration.configuration_manager import ConfigurationManager  # noqa: E402
 from eva.server.server import start_server  # noqa: E402
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs  # noqa: E402
-
+from eva.utils.logging_manager import logger
 
 def eva():
     """

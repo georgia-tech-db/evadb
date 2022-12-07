@@ -14,13 +14,16 @@
 # limitations under the License.
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, List
+
+from eva.parser.types import FileFormatType
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.column_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
@@ -33,15 +36,22 @@ class BinderError(Exception):
     pass
 
 
+def create_multimedia_metadata(name: str, format_type: FileFormatType):
+    if format_type is FileFormatType.VIDEO:
+        return create_video_metadata(name)
+    elif format_type is FileFormatType.IMAGE:
+        return create_image_table_metadata(name)
+    else:
+        raise BinderError(f"Format Type {format_type} is not supported")
+
+
 def create_video_metadata(name: str) -> DataFrameMetadata:
     """Create video metadata object.
         We have predefined columns for such a object
         id:  the frame id
         data: the frame data
-
     Arguments:
         name (str): name of the metadata to be added to the catalog
-
     Returns:
         DataFrameMetadata:  corresponding metadata for the input table info
     """
@@ -58,7 +68,43 @@ def create_video_metadata(name: str) -> DataFrameMetadata:
     col_metadata = create_column_metadata(columns)
     uri = str(generate_file_path(name))
     metadata = catalog.create_metadata(
-        name, uri, col_metadata, identifier_column="id", is_video=True
+        name,
+        uri,
+        col_metadata,
+        identifier_column="id",
+        table_type=TableType.VIDEO_DATA,
+    )
+    return metadata
+
+
+def create_image_table_metadata(name: str) -> DataFrameMetadata:
+    """Create image table metadata object.
+        We have predefined columns for such a object
+        name:  image path
+        data: image data
+    Arguments:
+        name (str): name of the metadata to be added to the catalog
+    Returns:
+        DataFrameMetadata:  corresponding metadata for the input table info
+    """
+    catalog = CatalogManager()
+    columns = [
+        ColumnDefinition("id", ColumnType.INTEGER, None, []),
+        ColumnDefinition(
+            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+        ),
+        ColumnDefinition(
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+        ),
+    ]
+    col_metadata = create_column_metadata(columns)
+    uri = str(generate_file_path(name))
+    metadata = catalog.create_metadata(
+        name,
+        uri,
+        col_metadata,
+        identifier_column="id",
+        table_type=TableType.IMAGE_DATA,
     )
     return metadata
 
@@ -70,7 +116,10 @@ def create_table_metadata(
     column_metadata_list = create_column_metadata(columns)
     file_url = str(generate_file_path(table_name))
     metadata = CatalogManager().create_metadata(
-        table_name, file_url, column_metadata_list
+        table_name,
+        file_url,
+        column_metadata_list,
+        table_type=TableType.STRUCTURAL_DATA,
     )
     return metadata
 
@@ -79,7 +128,6 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
     """Create column metadata for the input parsed column list. This function
     will not commit the provided column into catalog table.
     Will only return in memory list of ColumnDataframe objects
-
     Arguments:
         col_list {List[ColumnDefinition]} -- parsed col list to be created
     """
@@ -103,20 +151,21 @@ def create_column_metadata(col_list: List[ColumnDefinition]):
 def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
     """
     Uses catalog to bind the dataset information for given video string.
-
     Arguments:
          video_info (TableInfo): video information obtained in SQL query
-
     Returns:
         DataFrameMetadata  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
+    obj = catalog.get_dataset_metadata(
+        table_info.database_name, table_info.table_name
+    )
     if obj:
         table_info.table_obj = obj
     else:
-        error = "{} does not exist. Create the table using" " CREATE TABLE.".format(
-            table_info.table_name
+        error = (
+            "{} does not exist. Create the table using"
+            " CREATE TABLE.".format(table_info.table_name)
         )
         logger.error(error)
         raise BinderError(error)
@@ -126,7 +175,7 @@ def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
     if CatalogManager().check_table_exists(
         table_ref.table.database_name, table_ref.table.table_name
     ):
-        err_msg = "Table: {} already exsits".format(table_ref)
+        err_msg = "Table: {} already exists".format(table_ref)
         if if_not_exist:
             logger.warn(err_msg)
             return True
@@ -149,3 +198,23 @@ def extend_star(
         ]
     )
     return target_list
+
+
+def check_groupby_pattern(groupby_string: str) -> None:
+    # match the pattern of group by clause (e.g., 16f or 8s)
+    pattern = re.search(r"^\d+[fs]$", groupby_string)
+    # if valid pattern
+    if not pattern:
+        err_msg = "Incorrect GROUP BY pattern: {}".format(groupby_string)
+        raise BinderError(err_msg)
+    match_string = pattern.group(0)
+    if not match_string[-1] == "f":
+        err_msg = "Only grouping by frames (f) is supported"
+        raise BinderError(err_msg)
+    # TODO ACTION condition on segment length?
+
+
+def check_table_object_is_video(table_ref: TableRef) -> None:
+    if not table_ref.table.table_obj.table_type == TableType.VIDEO_DATA:
+        err_msg = "GROUP BY only supported for video tables"
+        raise BinderError(err_msg)

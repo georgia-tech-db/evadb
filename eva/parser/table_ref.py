@@ -131,6 +131,20 @@ class TableValuedExpression:
         return hash((self.func_expr, self.do_unnest))
 
 
+class ImageSource:
+    def __init__(
+        self,
+        source: Union[str, SelectStatement]
+    ):
+        self._source = source
+
+    @property
+    def file_path(self):
+        if isinstance(self._source, str):
+            return self._source
+        return None
+
+
 class TableRef:
     """
     Attributes:

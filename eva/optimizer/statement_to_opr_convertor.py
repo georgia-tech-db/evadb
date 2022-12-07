@@ -12,7 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Optional
+
 from eva.expression.abstract_expression import AbstractExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.operators import (
     LogicalCreate,
     LogicalCreateMaterializedView,
@@ -33,6 +36,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalCreateIndex, LogicalSelectLike
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
@@ -43,11 +47,13 @@ from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_like_statement import SelectLikeStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.show_statement import ShowStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.upload_statement import UploadStatement
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.utils.logging_manager import logger
 
 
@@ -115,13 +121,13 @@ class StatementToPlanConvertor:
         # Filter Operator
         predicate = statement.where_clause
         if predicate is not None:
-            self._visit_select_predicate(predicate)
+            self._visit_select_predicate(predicate, table_ref)
 
         # Projection operator
         select_columns = statement.target_list
 
         if select_columns is not None:
-            self._visit_projection(select_columns)
+            self._visit_projection(select_columns, table_ref)
 
         # union
         if statement.union_link is not None:
@@ -157,13 +163,13 @@ class StatementToPlanConvertor:
         self._plan.append_child(left_child_plan)
         self._plan.append_child(right_child_plan)
 
-    def _visit_projection(self, select_columns):
-        projection_opr = LogicalProject(select_columns)
+    def _visit_projection(self, select_columns, table_ref: TableRef):
+        projection_opr = LogicalProject(select_columns, None, table_ref)
         projection_opr.append_child(self._plan)
         self._plan = projection_opr
 
-    def _visit_select_predicate(self, predicate: AbstractExpression):
-        filter_opr = LogicalFilter(predicate)
+    def _visit_select_predicate(self, predicate: AbstractExpression, table_ref: TableRef):
+        filter_opr = LogicalFilter(predicate, None, table_ref)
         filter_opr.append_child(self._plan)
         self._plan = filter_opr
 
@@ -241,6 +247,43 @@ class StatementToPlanConvertor:
             statement.udf_type,
         )
         self._plan = create_udf_opr
+
+    def visit_create_index(self, statement: CreateIndexStatement):
+        """Convertor for parsed create index statement
+
+        Arguments:
+            statement {CreateIndexStatement} - - Create index Statement
+        """
+
+        create_idx_opr = LogicalCreateIndex(
+            statement.index_name,
+            statement.if_not_exists,
+            statement.table_ref,
+            statement.col_list,
+            statement.faiss_idx_type
+        )
+        
+        sel = SelectStatement(statement.col_list, statement.table_ref)
+        self.visit_select(sel)
+        create_idx_opr.append_child(self._plan)
+        self._plan = create_idx_opr
+
+    def visit_select_like(self, statement: SelectLikeStatement):
+        """Convertor for parsed create index statement
+
+        Arguments:
+            statement {CreateIndexStatement} - - Create index Statement
+        """
+
+        select_like_opr = LogicalSelectLike(
+            statement.table_ref,
+            statement.target_img
+        )
+
+        sel = SelectStatement([TupleValueExpression(col_name="*")], statement.table_ref)
+        self.visit_select(sel)
+        select_like_opr.append_child(self._plan)
+        self._plan = select_like_opr
 
     def visit_drop_udf(self, statement: DropUDFStatement):
         """Convertor for parsed DROP UDF statement
@@ -322,6 +365,10 @@ class StatementToPlanConvertor:
             self.visit_materialized_view(statement)
         elif isinstance(statement, ShowStatement):
             self.visit_show(statement)
+        elif isinstance(statement, CreateIndexStatement):
+            self.visit_create_index(statement)
+        elif isinstance(statement, SelectLikeStatement):
+            self.visit_select_like(statement)
         return self._plan
 
     @property

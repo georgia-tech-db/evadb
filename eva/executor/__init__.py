@@ -13,3 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """executor subdirectory"""
+
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    print("\n\n\ntqdm not installed, please install tqdm for progress bar\n\n\n")
+    tqdm = lambda x:x

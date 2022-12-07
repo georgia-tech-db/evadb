@@ -12,8 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import cv2
+import glob
 import hashlib
 import importlib
+import os
 import sys
 import uuid
 from pathlib import Path
@@ -23,7 +26,7 @@ from eva.utils.logging_manager import logger
 
 
 def validate_kwargs(
-    kwargs, allowed_kwargs, error_message="Keyword argument not understood:"
+        kwargs, allowed_kwargs, error_message="Keyword argument not understood:"
 ):
     """Checks that all keyword arguments are in the set of allowed keys."""
     for kwarg in kwargs:
@@ -130,3 +133,52 @@ def get_size(obj, seen=None):
     elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
         size += sum([get_size(i, seen) for i in obj])
     return size
+
+
+def frames_to_video(image_folder_path: Path) -> Path:
+    """Generates a .avi image file from directory of png or jpg frames
+    and name
+
+    Arguments:
+        image_folder_path (pathlib.Path): image directory containing frames
+
+    Returns:
+        Path: pathlib.Path object
+    """
+    if not image_folder_path.is_dir():
+        raise ValueError(f"frames_to_video: [{image_folder_path}] is not a directory!")
+
+    filenames = list(image_folder_path.glob('*.png')) + list(image_folder_path.glob('*.jpg'))
+    # convert Path object to string
+    filenames = [str(i) for i in filenames]
+    filenames.sort()
+
+    if not filenames:
+        error = "no frame found: {}".format(
+            image_folder_path
+        )
+        logger.error(error)
+        raise RuntimeError(error)
+
+    try:
+        h, w, layers = cv2.imread(filenames[0]).shape
+        output_path = image_folder_path / "output_video.avi"
+        if output_path.exists():
+            logger.warning(f'frames_to_video: {output_path} already exists, overwriting!')
+
+        out = cv2.VideoWriter(str(output_path), cv2.VideoWriter_fourcc(*'mp4v'), 1, (h, w))
+        for filename in filenames:
+            img = cv2.imread(filename)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            out.write(img)
+
+        out.release()
+
+    except Exception as exc:
+        error = "failed to convert frames to video from path: {}".format(
+            image_folder_path
+        )
+        logger.error(error)
+        raise RuntimeError(error) from exc
+
+    return output_path

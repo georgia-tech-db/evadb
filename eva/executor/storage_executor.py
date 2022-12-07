@@ -12,12 +12,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Generator, Iterator
+from eva.catalog.column_type import TableType
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.storage_plan import StoragePlan
-from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
+from eva.storage.storage_engine import (
+    StorageEngine,
+    VideoStorageEngine,
+    ImageStorageEngine,
+)
 
 
 class StorageExecutor(AbstractExecutor):
@@ -27,13 +32,28 @@ class StorageExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
-        if self.node.video.is_video:
+    def exec(self,  *args, **kwargs) -> Iterator[Batch]:
+        predicate = None
+        if "predicate" in kwargs:
+            predicate = kwargs["predicate"]
+            
+        if self.node.video.table_type == TableType.VIDEO_DATA:
             return VideoStorageEngine.read(
                 self.node.video,
                 self.node.batch_mem_size,
-                predicate=self.node.predicate,
+                predicate=self.node.predicate if predicate is None else predicate,
                 sampling_rate=self.node.sampling_rate,
             )
+        elif self.node.video.table_type == TableType.STRUCTURAL_DATA:
+            return StorageEngine.read(
+                self.node.video, self.node.batch_mem_size
+            )
         else:
-            return StorageEngine.read(self.node.video, self.node.batch_mem_size)
+            return ImageStorageEngine.read(
+                self.node.video,
+                self.node.batch_mem_size,
+                self.node.predicate if predicate is None else predicate
+            )
+
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec()

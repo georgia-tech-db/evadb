@@ -14,9 +14,10 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.column_type import ColumnType, NdArrayType, TableType, FaissIndexType, IndexMethod
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.df_index import DataFrameIndex
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
@@ -24,6 +25,7 @@ from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
+from eva.catalog.services.index_service import IndexService
 from eva.parser.create_statement import ColConstraintInfo
 from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
@@ -45,7 +47,7 @@ class CatalogManager(object):
         self._column_service = DatasetColumnService()
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
-
+        self._index_service =IndexService()
     def reset(self):
         """
         This method resets the state of the singleton instance.
@@ -79,25 +81,26 @@ class CatalogManager(object):
         file_url: str,
         column_list: List[DataFrameColumn],
         identifier_column="id",
-        is_video=False,
+        table_type=TableType.VIDEO_DATA,
     ) -> DataFrameMetadata:
         """Creates metadata object
-
         Creates a metadata object and column objects and persists them in
         database. Sets the schema field of the metadata object.
-
         Args:
             name: name of the dataset/video to which this metdata corresponds
             file_url: #todo
             column_list: list of columns
             identifier_column (str):  A unique identifier column for each row
-            is_video (bool): True if the table is a video
+            table_type (TableType): type of the table, video, images etc
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column, is_video=is_video
+            name,
+            file_url,
+            identifier_id=identifier_column,
+            table_type=table_type,
         )
         for column in column_list:
             column.metadata_id = metadata.id
@@ -117,7 +120,6 @@ class CatalogManager(object):
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
         corresponding table_id
-
         Arguments:
             column_name {str} -- column name to be created
             data_type {ColumnType} -- type of column created
@@ -139,7 +141,6 @@ class CatalogManager(object):
         Returns the Dataset metadata for the given dataset name
         Arguments:
             dataset_name (str): name of the dataset
-
         Returns:
             DataFrameMetadata
         """
@@ -184,7 +185,6 @@ class CatalogManager(object):
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog call create_udf with
         corresponding udf_id and io list
-
         Arguments:
             name(str): io name to be created
             data_type(ColumnType): type of io created
@@ -209,7 +209,6 @@ class CatalogManager(object):
     ) -> UdfMetadata:
         """Creates an udf metadata object and udf_io objects and persists them
         in database.
-
         Arguments:
             name(str): name of the udf to which this metdata corresponds
             impl_file_path(str): implementation path of the udf,
@@ -217,7 +216,6 @@ class CatalogManager(object):
             type(str): what kind of udf operator like classification,
                                                         detection etc
             udf_io_list(List[UdfIO]): input/output info of this udf
-
         Returns:
             The persisted UdfMetadata object with the id field populated.
         """
@@ -231,10 +229,8 @@ class CatalogManager(object):
     def get_udf_by_name(self, name: str) -> UdfMetadata:
         """
         Get the UDF information based on name.
-
         Arguments:
              name (str): name of the UDF
-
         Returns:
             UdfMetadata object
         """
@@ -260,27 +256,27 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
+    def drop_dataset_metadata(
+        self, database_name: str, table_name: str
+    ) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
-
         Arguments:
            table_name: table name to be deleted.
-
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
+        return self._dataset_service.drop_dataset_by_name(
+            database_name, table_name
+        )
 
     def drop_udf(self, udf_name: str) -> bool:
         """
         This method drops the udf entry and corresponding udf_io
         from the catalog
-
         Arguments:
            udf_name: udf name to be dropped.
-
         Returns:
            True if successfully deleted else False
         """
@@ -304,3 +300,50 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    def create_index(self,
+        idx_name: str,
+        faiss_idx_type: FaissIndexType,
+        is_faiss_idx: bool,
+        is_res_cache: bool,
+        res_cache_path: str,
+        faiss_idx_path: str,
+        udf_name: str,
+        table_name: str) -> DataFrameIndex:
+
+        dataset_id = self._dataset_service.dataset_by_name(table_name)
+        return self._index_service.create_index(idx_name, faiss_idx_type, IndexMethod.VECTOR, is_faiss_idx,
+                            is_res_cache, res_cache_path, faiss_idx_path, udf_name, dataset_id)
+
+    def get_index(self, table_name: str, udf_name: str, index_type: FaissIndexType, ignore_case=False) -> DataFrameIndex:
+        try:
+            dataset_id = None
+            if ignore_case:
+                dataset_id = self._dataset_service.dataset_by_name_ignore_case(table_name)
+            else:
+                dataset_id = self._dataset_service.dataset_by_name(table_name)
+
+            return self._index_service.get_index(dataset_id, udf_name, index_type)
+        except Exception as e:
+            return None
+
+    def get_all_index(self, table_name: str, udf_name: str) -> List[DataFrameIndex]:
+        try:
+            dataset_id = None
+            dataset_id = self._dataset_service.dataset_by_name(table_name)
+            return self._index_service.get_all_index(dataset_id, udf_name)
+
+        except Exception as e:
+            return None
+
+    def get_res_cache(self, table_name: str, udf_name: str, ignore_case=False) -> DataFrameIndex:
+        try:
+            dataset_id = None
+            if ignore_case:
+                dataset_id = self._dataset_service.dataset_by_name_ignore_case(table_name)
+            else:
+                dataset_id = self._dataset_service.dataset_by_name(table_name)
+
+            return self._index_service.get_res_cache(dataset_id, udf_name)
+        except Exception as e:
+            return None

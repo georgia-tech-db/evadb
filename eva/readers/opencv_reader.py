@@ -59,6 +59,7 @@ class OpenCVReader(AbstractReader):
                 _, frame = video.read()
                 frame_id = begin
                 while frame is not None and frame_id <= end:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     yield {"id": frame_id, "data": frame}
                     _, frame = video.read()
                     frame_id += 1
@@ -72,6 +73,7 @@ class OpenCVReader(AbstractReader):
                     video.set(cv2.CAP_PROP_POS_FRAMES, frame_id)
                     _, frame = video.read()
                     if frame is not None:
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                         yield {"id": frame_id, "data": frame}
                     else:
                         break

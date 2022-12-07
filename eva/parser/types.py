@@ -39,7 +39,8 @@ class StatementType(Enum):
     CREATE_MATERIALIZED_VIEW = (auto(),)
     SHOW = (auto(),)
     DROP_UDF = auto()
-    # add other types
+    CREATE_INDEX = (auto(),)
+    SELECT_LIKE = (auto(),)
 
 
 @unique
@@ -66,7 +67,7 @@ class FileFormatType(Enum):
 
     VIDEO = auto()
     CSV = auto()
-
+    IMAGE = auto()
 
 @unique
 class ShowType(Enum):

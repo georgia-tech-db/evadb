@@ -20,6 +20,8 @@ from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.like_expression import LikeExpression
 
 
 def expression_tree_to_conjunction_list(expression_tree):
@@ -275,3 +277,47 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
     ]
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
+
+
+def find_LIKE_in_exp_tree(expression: AbstractExpression) -> LikeExpression:
+    if expression is None or not isinstance(expression, AbstractExpression):
+        return None
+    
+    if expression.etype == ExpressionType.LIKE:
+        return expression
+    
+    children = expression.children
+    if children is None:
+        return None
+    
+    for child in children:
+        exp = find_LIKE_in_exp_tree(child)
+        if exp is not None:
+            return exp
+
+    return None
+
+'''
+This is doing: given an id list, which is the ids we want to select,
+for example: [8, 2, 4, 7]
+convert it to predicate:
+id==8 OR (id==2 OR (id==4 OR id==7))
+'''
+def convert_id_list_to_expression(id_list: List, table_name: str):
+    def convert_one(id: int):
+        col_exp = TupleValueExpression("id", None, -1, None, table_name + ".id")
+        const_exp = ConstantValueExpression(id)
+        comp_exp = ComparisonExpression(ExpressionType.COMPARE_EQUAL, col_exp, const_exp)
+        return comp_exp
+
+    if (len(id_list) == 1):
+        return convert_one(id_list[0])
+
+    root = LogicalExpression(ExpressionType.LOGICAL_OR, convert_one(id_list[0]), convert_one(id_list[1]))
+
+    for i in range(2, len(id_list)):
+        comp_exp = convert_one(id_list[i])
+        temp = LogicalExpression(ExpressionType.LOGICAL_OR, comp_exp, root)
+        root = temp
+
+    return root

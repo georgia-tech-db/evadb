@@ -15,6 +15,7 @@
 from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
+from eva.parser.table_ref import TableRef
 
 
 class PredicatePlan(AbstractPlan):
@@ -24,8 +25,9 @@ class PredicatePlan(AbstractPlan):
         filtering frames
     """
 
-    def __init__(self, predicate: AbstractExpression):
+    def __init__(self, predicate: AbstractExpression, table_ref: TableRef = None):
         self.predicate = predicate
+        self.table_ref = table_ref
         super().__init__(PlanOprType.PREDICATE_FILTER)
 
     def __hash__(self) -> int:

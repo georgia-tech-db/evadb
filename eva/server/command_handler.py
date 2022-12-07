@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Union
 
+from eva.parser.statement import AbstractStatement
 from eva.binder.statement_binder import StatementBinder
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.executor.plan_executor import PlanExecutor
@@ -27,14 +28,21 @@ from eva.utils.logging_manager import logger
 from eva.utils.timer import Timer
 
 
-def execute_query(query, report_time: bool = False) -> Iterator[Batch]:
+def execute_query(query: Union[str, AbstractStatement], report_time: bool = False) -> Iterator[Batch]:
     """
     Execute the query and return a result generator.
     """
 
     query_compile_time = Timer()
     with query_compile_time:
-        stmt = Parser().parse(query)[0]
+        stmt = None
+        if isinstance(query, str):
+            stmt = Parser().parse(query)[0]
+        elif isinstance(query, AbstractStatement):
+            stmt = query
+        else:
+            raise NotImplementedError("execute_query: unrecognized query object type.")
+        
         StatementBinder(StatementBinderContext()).bind(stmt)
         l_plan = StatementToPlanConvertor().visit(stmt)
         p_plan = PlanGenerator().build(l_plan)
@@ -96,7 +104,8 @@ def handle_request(transport, request_message):
 
     logger.debug(
         "Response to client: --|"
-        + str(response)
+        # this is extremely slow and not very useful
+        # + str(response)
         + "|--\n"
         + "Length: "
         + str(len(responseData))

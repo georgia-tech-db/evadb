@@ -12,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+import os
+
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.load_statement import LoadDataStatement
@@ -26,7 +29,16 @@ class Load(evaql_parserVisitor):
 
         # Set default for file_format as Video
         file_format = FileFormatType.VIDEO
-        file_options = {}
+
+        if Path(file_path).exists():
+            if os.path.isfile(file_path):
+                file_format = FileFormatType.VIDEO
+            elif os.path.isdir(file_path):
+                file_format = FileFormatType.IMAGE
+        else:
+            file_format = FileFormatType.VIDEO
+
+        file_options = dict()
         file_options["file_format"] = file_format
 
         if ctx.fileOptions():

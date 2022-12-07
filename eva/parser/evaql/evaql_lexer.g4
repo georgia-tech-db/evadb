@@ -166,6 +166,9 @@ VIEW:                           'VIEW';
 
 ABS:                                 'ABS';
 
+// LIKE related
+DISTANCE_METRIC:                     'METRIC';
+
 // Operators
 // Operators. Assigns
 

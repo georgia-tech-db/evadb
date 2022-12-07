@@ -14,6 +14,7 @@
 # limitations under the License.
 from pathlib import Path
 
+import os
 import pandas as pd
 
 from eva.configuration.configuration_manager import ConfigurationManager
@@ -21,6 +22,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.storage.storage_engine import VideoStorageEngine
+from eva.utils.generic_utils import frames_to_video
 from eva.utils.logging_manager import logger
 
 
@@ -42,7 +44,13 @@ class LoadVideoExecutor(AbstractExecutor):
         video_file_path = None
         # Validate file_path
         if Path(self.node.file_path).exists():
-            video_file_path = self.node.file_path
+            if os.path.isfile(self.node.file_path):
+                video_file_path = self.node.file_path
+            elif os.path.isdir(self.node.file_path):
+                try:
+                    video_file_path = frames_to_video(self.node.file_path)
+                except RuntimeError:
+                    raise
         # check in the upload directory
         else:
             video_path = Path(Path(self.upload_dir) / self.node.file_path)

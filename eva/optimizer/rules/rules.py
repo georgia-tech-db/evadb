@@ -19,6 +19,7 @@ from enum import Flag, IntEnum, auto
 from typing import TYPE_CHECKING
 
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.expression_utils import find_LIKE_in_exp_tree
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -26,11 +27,14 @@ from eva.optimizer.optimizer_utils import (
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.parser.types import JoinType
+from eva.planner.create_index_plan import CreateIndexPlan
 from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.planner.hash_join_build_plan import HashJoinBuildPlan
 from eva.planner.predicate_plan import PredicatePlan
 from eva.planner.project_plan import ProjectPlan
+from eva.planner.select_like_plan import SelectLikePlan
 from eva.planner.show_info_plan import ShowInfoPlan
+from eva.catalog.column_type import TableType
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -39,6 +43,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
@@ -59,7 +64,7 @@ from eva.optimizer.operators import (
     LogicalUnion,
     LogicalUpload,
     Operator,
-    OperatorType,
+    OperatorType, LogicalSelectLike,
 )
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
@@ -126,7 +131,8 @@ class RuleType(Flag):
     LOGICAL_SHOW_TO_PHYSICAL = auto()
     LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
-
+    LOGICAL_CREATE_INDEX_TO_PHYSICAL = auto()
+    LOGICAL_SELECT_LIKE_TO_PHYSICAL = auto()
     NUM_RULES = auto()
 
 
@@ -159,6 +165,9 @@ class Promise(IntEnum):
     LOGICAL_PROJECT_TO_PHYSICAL = auto()
     LOGICAL_SHOW_TO_PHYSICAL = auto()
     LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
+    LOGICAL_CREATE_INDEX_TO_PHYSICAL = auto()
+    LOGICAL_SELECT_LIKE_TO_PHYSICAL = auto()
+
     IMPLEMENTATION_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -247,7 +256,12 @@ class EmbedFilterIntoGet(Rule):
         # System supports predicate pushdown only while reading video data
         predicate = before.predicate
         lget: LogicalGet = before.children[0]
-        if predicate and lget.dataset_metadata.is_video:
+
+        # If the expression contains LIKE, we do not want it to be pushed down at this time
+        if find_LIKE_in_exp_tree(predicate) is not None:
+            return False
+        table_type = lget.dataset_metadata.table_type
+        if predicate and (table_type == TableType.VIDEO_DATA or table_type == TableType.IMAGE_DATA):
             # System only supports pushing basic range predicates on id
             video_alias = lget.video.alias
             col_alias = f"{video_alias}.id"
@@ -276,7 +290,7 @@ class EmbedFilterIntoGet(Rule):
                 children=lget.children,
             )
             if unsupported_pred:
-                unsupported_opr = LogicalFilter(unsupported_pred)
+                unsupported_opr = LogicalFilter(unsupported_pred, None, lget.video)
                 unsupported_opr.append_child(new_get_opr)
                 return unsupported_opr
             return new_get_opr
@@ -296,7 +310,8 @@ class EmbedSampleIntoGet(Rule):
     def check(self, before: LogicalSample, context: OptimizerContext):
         # System supports sample pushdown only while reading video data
         lget: LogicalGet = before.children[0]
-        if lget.dataset_metadata.is_video:
+        table_type = lget.dataset_metadata.table_type
+        if table_type == TableType.VIDEO_DATA or table_type == TableType.IMAGE_DATA:
             return True
         return False
 
@@ -572,6 +587,53 @@ class LogicalCreateUDFToPhysical(Rule):
         return after
 
 
+class LogicalCreateIndexToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_INDEX_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
+        after = CreateIndexPlan(
+            before.index_name,
+            before.if_not_exists,
+            before.table_ref,
+            before.col_list,
+            before.faiss_idx_type
+        )
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
+class LogicalSelectLikeToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_SELECT_LIKE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_SELECT_LIKE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_SELECT_LIKE_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalSelectLike, context: OptimizerContext):
+        after = SelectLikePlan(
+            before.table_ref,
+            before.target_img
+        )
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
 class LogicalDropUDFToPhysical(Rule):
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALDROPUDF)
@@ -692,7 +754,7 @@ class LogicalGetToSeqScan(Rule):
         )
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
-        after = SeqScanPlan(None, before.target_list, before.alias)
+        after = SeqScanPlan(None, before.target_list, before.alias, table_ref=before.video)
         after.append_child(
             StoragePlan(
                 before.dataset_metadata,
@@ -918,7 +980,7 @@ class LogicalFilterToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFilter, context: OptimizerContext):
-        after = PredicatePlan(before.predicate)
+        after = PredicatePlan(before.predicate, before.table_ref)
         for child in before.children:
             after.append_child(child)
         return after
@@ -937,7 +999,7 @@ class LogicalProjectToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalProject, context: OptimizerContext):
-        after = ProjectPlan(before.target_list)
+        after = ProjectPlan(before.target_list, before.table_ref)
         for child in before.children:
             after.append_child(child)
         return after
@@ -1007,6 +1069,8 @@ class RulesManager:
             LogicalFilterToPhysical(),
             LogicalProjectToPhysical(),
             LogicalShowToPhysical(),
+            LogicalCreateIndexToPhysical(),
+            LogicalSelectLikeToPhysical()
         ]
         self._all_rules = (
             self._rewrite_rules + self._logical_rules + self._implementation_rules

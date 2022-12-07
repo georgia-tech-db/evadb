@@ -16,13 +16,19 @@ import ast
 
 import numpy as np
 
-from eva.catalog.column_type import ColumnType
+from eva.catalog.column_type import ColumnType, DistanceMetric
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.like_expression import LikeExpression
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+
+from eva.utils.logging_manager import logger
 
 
 ##################################################################
@@ -71,6 +77,47 @@ class Expressions(evaql_parserVisitor):
         op = self.visit(ctx.comparisonOperator())
         return ComparisonExpression(op, left, right)
 
+    # call stack:
+    # visitLikePredicate <- visitPredicateExpression <- visitFromClause <- visitQuerySpecification
+    def visitLikePredicate(self, ctx: evaql_parser.LikePredicateContext):
+        column = self.visit(ctx.predicate(0))
+        src_img_path = self.visit(ctx.predicate(1))
+
+        extractor_func = None
+
+        if column is None:
+            raise RuntimeError("No valid column name is provided in the LIKE clause")
+        
+        if isinstance(column, FunctionExpression):
+            extractor_func = column
+        elif isinstance(column, TupleValueExpression):
+            extractor_func = FunctionExpression(None, "FeatureExtractor")
+            extractor_func.append_child(TupleValueExpression(col_name=column.col_name))
+        else:
+            raise RuntimeError("No valid column name is provided in the LIKE clause")
+
+        
+        if src_img_path is not None \
+            and isinstance(src_img_path, ConstantValueExpression) \
+            and src_img_path.v_type == ColumnType.TEXT:
+            pass
+        else:
+            raise RuntimeError("No valid source image path is provided in the LIKE clause")
+
+        flip: bool = ctx.NOT() is not None
+
+        metric = DistanceMetric.L2
+        if ctx.uid() is not None:
+            metric_text = ctx.uid().getText()
+            if metric_text == "L2":
+                metric = DistanceMetric.L2
+            if metric_text == "L1":
+                metric = DistanceMetric.L1
+            if metric_text == "InnerProduct":
+                metric = DistanceMetric.InnerProduct
+
+        return LikeExpression(extractor_func, src_img_path, flip, metric)
+
     def visitNestedExpressionAtom(self, ctx: evaql_parser.NestedExpressionAtomContext):
         # ToDo Can there be >1 expression in this case
         expr = ctx.expression(0)
@@ -100,11 +147,12 @@ class Expressions(evaql_parserVisitor):
     def visitLogicalOperator(self, ctx: evaql_parser.LogicalOperatorContext):
         op = ctx.getText()
 
-        if op == "OR":
+        if op.lower() == "or":
             return ExpressionType.LOGICAL_OR
-        elif op == "AND":
+        elif op.lower() == "and":
             return ExpressionType.LOGICAL_AND
         else:
+            logger.warning("Find invalid logical operator when parsing.")
             return ExpressionType.INVALID
 
     def visitExpressionsWithDefaults(

@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Boolean, Column, String
+from sqlalchemy import Boolean, Column, String, Integer
 from sqlalchemy.orm import relationship
 
 from eva.catalog.df_schema import DataFrameSchema
@@ -25,19 +25,25 @@ class DataFrameMetadata(BaseModel):
     _name = Column("name", String(100), unique=True)
     _file_url = Column("file_url", String(100))
     _unique_identifier_column = Column("identifier_column", String(100))
-    _is_video = Column("is_video", Boolean)
+    _table_type = Column("table_type", Integer)
     _columns = relationship(
         "DataFrameColumn",
         back_populates="_dataset",
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, file_url: str, identifier_id="id", is_video=False):
+    _idx_columns = relationship(
+        "DataFrameIndex",
+        back_populates="_dataset",
+        cascade="all, delete, delete-orphan",
+    )
+
+    def __init__(self, name: str, file_url: str, table_type: int, identifier_id="id"):
         self._name = name
         self._file_url = file_url
         self._schema = None
         self._unique_identifier_column = identifier_id
-        self._is_video = is_video
+        self._table_type = table_type
 
     @property
     def schema(self):
@@ -68,8 +74,8 @@ class DataFrameMetadata(BaseModel):
         return self._unique_identifier_column
 
     @property
-    def is_video(self):
-        return self._is_video
+    def table_type(self):
+        return self._table_type
 
     def __eq__(self, other):
         return (
@@ -78,7 +84,7 @@ class DataFrameMetadata(BaseModel):
             and self.schema == other.schema
             and self.identifier_column == other.identifier_column
             and self.name == other.name
-            and self.is_video == other.is_video
+            and self.table_type == other.table_type
         )
 
     def __hash__(self) -> int:
@@ -89,6 +95,6 @@ class DataFrameMetadata(BaseModel):
                 self.schema,
                 self.identifier_column,
                 self.name,
-                self.is_video,
+                self.table_type,
             )
         )

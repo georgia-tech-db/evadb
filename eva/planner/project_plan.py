@@ -17,7 +17,7 @@ from typing import List
 from eva.expression.abstract_expression import AbstractExpression
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-
+from eva.parser.table_ref import TableRef
 
 class ProjectPlan(AbstractPlan):
     """
@@ -25,8 +25,9 @@ class ProjectPlan(AbstractPlan):
         target_list List[(AbstractExpression)]: projection list
     """
 
-    def __init__(self, target_list: List[AbstractExpression]):
+    def __init__(self, target_list: List[AbstractExpression], table_ref: TableRef = None):
         self.target_list = target_list
+        self.table_ref = table_ref
         super().__init__(PlanOprType.PROJECT)
 
     def __hash__(self) -> int:

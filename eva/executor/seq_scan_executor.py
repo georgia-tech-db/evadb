@@ -19,6 +19,8 @@ from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
 from eva.planner.seq_scan_plan import SeqScanPlan
 
+from eva.executor import tqdm
+
 
 class SequentialScanExecutor(AbstractExecutor):
     """
@@ -37,10 +39,10 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
-
+    def exec(self, *args, **kwargs) -> Iterator[Batch]:
+        print()
         child_executor = self.children[0]
-        for batch in child_executor.exec():
+        for batch in tqdm(child_executor.exec(*args, **kwargs)):
             # apply alias to the batch
             # id, data -> myvideo.id, myvideo.data
             if self.alias:

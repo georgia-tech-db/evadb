@@ -15,6 +15,7 @@
 from typing import Any
 
 import yaml
+import os
 
 from eva.configuration.bootstrap_environment import bootstrap_environment
 from eva.configuration.constants import (
@@ -67,6 +68,13 @@ class ConfigurationManager(object):
     @classmethod
     def get_value(cls, category: str, key: str) -> Any:
         return cls._get(category, key)
+
+    @classmethod
+    def get_index_dir(cls) -> str:
+        eva_dir = cls._get("core", "datasets_dir")
+        eva_dir = os.path.join(eva_dir, "..")
+        eva_idx_dir = os.path.join(eva_dir, "index")
+        return eva_idx_dir
 
     @classmethod
     def update_value(cls, category, key, value) -> None:

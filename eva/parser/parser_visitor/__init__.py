@@ -23,10 +23,12 @@ from eva.parser.parser_visitor._functions import Functions
 from eva.parser.parser_visitor._insert_statements import Insert
 from eva.parser.parser_visitor._load_statement import Load
 from eva.parser.parser_visitor._rename_statement import RenameTable
+from eva.parser.parser_visitor._select_like_statement import SelectLike
 from eva.parser.parser_visitor._select_statement import Select
 from eva.parser.parser_visitor._show_statements import Show
 from eva.parser.parser_visitor._table_sources import TableSources
 from eva.parser.parser_visitor._upload_statement import Upload
+from eva.parser.parser_visitor._index import Index
 
 # To add new functionality to the parser, create a new file under
 # the parser_visitor directory, and implement a new class which
@@ -48,6 +50,8 @@ class ParserVisitor(
     RenameTable,
     DropTable,
     Show,
+    Index,
+    SelectLike,
 ):
     def visitRoot(self, ctx: evaql_parser.RootContext):
         for child in ctx.children:

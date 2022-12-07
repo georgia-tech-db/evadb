@@ -16,6 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.create_executor import CreateExecutor
+from eva.executor.create_index_executor import CreateIndexExecutor
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_executor import DropExecutor
@@ -33,6 +34,7 @@ from eva.executor.predicate_executor import PredicateExecutor
 from eva.executor.project_executor import ProjectExecutor
 from eva.executor.rename_executor import RenameExecutor
 from eva.executor.sample_executor import SampleExecutor
+from eva.executor.select_like_executor import SelectLikeExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
@@ -118,6 +120,10 @@ class PlanExecutor:
             executor_node = PredicateExecutor(node=plan)
         elif plan_opr_type == PlanOprType.SHOW_INFO:
             executor_node = ShowInfoExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.CREATE_INDEX:
+            executor_node = CreateIndexExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.SELECT_LIKE:
+            executor_node = SelectLikeExecutor(node=plan)
         # Build Executor Tree for children
         for children in plan.children:
             executor_node.append_child(self._build_execution_tree(children))

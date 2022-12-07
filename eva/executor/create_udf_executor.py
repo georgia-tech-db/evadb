@@ -37,7 +37,7 @@ class CreateUDFExecutor(AbstractExecutor):
         catalog_manager = CatalogManager()
         # check catalog if it already has this udf entry
         if catalog_manager.get_udf_by_name(self.node.name):
-            if self.node.if_not_exists:
+            if self.node.if_not_exists or self.node.name == "FeatureExtractor":
                 msg = f"UDF {self.node.name} already exists, nothing added."
                 logger.warn(msg)
                 yield Batch(pd.DataFrame([msg]))

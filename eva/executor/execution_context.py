@@ -46,7 +46,7 @@ class Context:
 
     def _possible_addresses(self) -> Set:
         host = socket.gethostname()
-        result_address = {host}
+        result_address = {host, '127.0.0.1'}
         true_host, aliases, address = socket.gethostbyaddr(host)
         result_address.add(true_host)
         result_address.update(set(aliases).union(set(address)))
@@ -83,7 +83,7 @@ class Context:
         """
         return random.choice(self.gpus)
 
-    def gpu_device(self) -> str:
+    def gpu_device(self):
         """
         Selects a GPU on which the task can be executed
         Returns:

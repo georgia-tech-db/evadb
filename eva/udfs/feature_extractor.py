@@ -18,8 +18,8 @@ from typing import List
 import pandas as pd
 import torch
 from torch import Tensor
+import torchvision
 from torchvision import models
-
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 
 
@@ -27,7 +27,11 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
     """ """
 
     def setup(self):
-        self.model = models.resnet50(pretrained=True, progress=False)
+        if torchvision.__version__ < "0.13.0":
+            self.model = models.resnet50(pretrained=True, progress=False)
+        else:
+            self.model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+
         for param in self.model.parameters():
             param.requires_grad = False
         self.model.fc = torch.nn.Identity()
@@ -51,11 +55,26 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
         Returns:
             features (List[float])
         """
-        outcome = pd.DataFrame()
+
+
+        # outcome = pd.DataFrame()
+        # for f in frames:
+        #     with torch.no_grad():
+        #         feature_vector = self.as_numpy(self.model(torch.unsqueeze(f, 0)))
+        #         outcome = outcome.append(
+        #             {"features": feature_vector},
+        #             ignore_index=True,
+        #         )
+        #return outcome
+
+
+        outcome_list = []
         for f in frames:
             with torch.no_grad():
-                outcome = outcome.append(
-                    {"features": self.as_numpy(self.model(torch.unsqueeze(f, 0)))},
-                    ignore_index=True,
-                )
-        return outcome
+                feature_vector = self.as_numpy(self.model(torch.unsqueeze(f, 0)))
+                df = pd.DataFrame(columns=['features'])
+                df.loc[0] = [feature_vector]
+                outcome_list.append(df)
+        outcome2 = pd.concat(outcome_list, ignore_index=True)
+        # assert(outcome2.equals(outcome))
+        return outcome2

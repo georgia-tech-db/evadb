@@ -40,7 +40,7 @@ VERSION = VERSION_DICT["VERSION"]
 minimal_requirement = [
     "numpy==1.23.1",
     "opencv-python==4.5.4.60", # bug in easyocr
-    "pandas==1.4.2",
+    "pandas>=1.5.2",
     "Pillow==9.0.1",
     "sqlalchemy==1.3.20",
     "sqlalchemy-utils==0.36.6",
@@ -49,10 +49,11 @@ minimal_requirement = [
     "antlr4-python3-runtime==4.10",
     "pyyaml==5.1",
     "importlib-metadata<5.0",
+    "faiss-cpu==1.7.2",
 ]
 
 formatter_libs = [
-    "black==22.6.0", 
+    "black==22.6.0",
     "isort==5.10.1"
 ]
 
@@ -62,13 +63,13 @@ test_libs = [
     "pytest-virtualenv",
     "coveralls==3.0.1",
     "mock==4.0.3",
-    "flake8==3.9.1"    
+    "flake8==3.9.1"
 ]
 
 ### NEEDED FOR INTEGRATION TESTS ONLY
 integration_test_libs = [
-    "torch==1.11.0",
-    "torchvision==0.12.0",
+    "torch>=1.11.0",  # install according to GPU device
+    "torchvision>=0.12.0",  # install according to GPU device
 ]
 
 benchmark_libs = [
@@ -136,7 +137,7 @@ setup(
         "Operating System :: OS Independent"
     ],
     packages=find_packages(exclude=[
-        "tests", 
+        "tests",
         "tests.*"
     ]),
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point

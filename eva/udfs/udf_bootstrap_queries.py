@@ -78,6 +78,16 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
 )
 
 
+Featureextractor_udf_query = """CREATE UDF FeatureExtractor
+            INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+            OUTPUT (features NDARRAY FLOAT32(ANYDIM, ANYDIM))
+            TYPE   NdarrayUDF
+            IMPL  '{}/udfs/feature_extractor.py';
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
+
 def init_builtin_udfs(mode="debug"):
     """
     Loads the builtin udfs into the system.
@@ -86,7 +96,8 @@ def init_builtin_udfs(mode="debug"):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
+    queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query, Featureextractor_udf_query]
+    # queries = [Fastrcnn_udf_query, ArrayCount_udf_query, Crop_udf_query]
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:

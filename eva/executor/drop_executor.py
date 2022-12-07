@@ -18,9 +18,9 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.planner.drop_plan import DropPlan
-from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
+from eva.storage.storage_engine import StorageEngine, VideoStorageEngine, ImageStorageEngine
 from eva.utils.logging_manager import logger
-
+from eva.catalog.column_type import TableType
 
 class DropExecutor(AbstractExecutor):
     def __init__(self, node: DropPlan):
@@ -45,7 +45,11 @@ class DropExecutor(AbstractExecutor):
             else:
                 logger.exception(err_msg)
 
-        if table_ref.table.table_obj.is_video:
+        if table_ref.table.table_obj.table_type == TableType.VIDEO_DATA:
+            VideoStorageEngine.drop(table=table_ref.table.table_obj)
+        elif table_ref.table.table_obj.table_type == TableType.IMAGE_DATA:
+            # This just delete the image directory, using VideoStorageEngine
+            # should be OK.
             VideoStorageEngine.drop(table=table_ref.table.table_obj)
         else:
             StorageEngine.drop(table=table_ref.table.table_obj)

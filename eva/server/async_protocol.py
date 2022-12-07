@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import sys
 
 from eva.server.networking_utils import set_socket_io_timeouts
 from eva.utils.logging_manager import logger
@@ -69,7 +70,7 @@ class EvaClient(asyncio.Protocol):
         self.buffer = EvaProtocolBuffer()
         if loop is None:
             loop = asyncio.get_event_loop()
-        self.queue = asyncio.Queue(loop=loop)
+        self.queue = asyncio.Queue() if sys.version_info >= (3, 10) else asyncio.Queue(loop=loop)
         self.loop = loop
         self.id = EvaClient.__connections__
 

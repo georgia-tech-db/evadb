@@ -26,6 +26,8 @@ from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import JoinType, ShowType
 
+from eva.catalog.column_type import FaissIndexType
+
 
 class OperatorType(IntEnum):
     """
@@ -53,6 +55,8 @@ class OperatorType(IntEnum):
     LOGICAL_CREATE_MATERIALIZED_VIEW = auto()
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
+    LOGICALCREATEINDEX = auto()
+    LOGICAL_SELECT_LIKE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -253,8 +257,9 @@ class LogicalQueryDerivedGet(Operator):
 
 
 class LogicalFilter(Operator):
-    def __init__(self, predicate: AbstractExpression, children=None):
+    def __init__(self, predicate: AbstractExpression, children=None, table_ref: TableRef = None):
         self._predicate = predicate
+        self.table_ref = table_ref
         super().__init__(OperatorType.LOGICALFILTER, children)
 
     @property
@@ -272,9 +277,12 @@ class LogicalFilter(Operator):
 
 
 class LogicalProject(Operator):
-    def __init__(self, target_list: List[AbstractExpression], children=None):
+    def __init__(self, target_list: List[AbstractExpression],
+                        children=None,
+                        table_ref: TableRef = None):
         super().__init__(OperatorType.LOGICALPROJECT, children)
         self._target_list = target_list
+        self.table_ref = table_ref
 
     @property
     def target_list(self):
@@ -637,6 +645,123 @@ class LogicalCreateUDF(Operator):
             )
         )
 
+class LogicalCreateIndex(Operator):
+    """
+    Logical node for create index operations
+
+    Attributes:
+
+    """
+
+    def __init__(
+        self,
+        index_name: str,
+        if_not_exists: bool,
+        table_ref: TableRef,
+        col_list: List[AbstractExpression] = None,
+        faiss_idx_type: FaissIndexType = None
+    ):
+        super().__init__(OperatorType.LOGICALCREATEINDEX)
+        self._index_name = index_name
+        self._if_not_exists = if_not_exists
+        self._table_ref = table_ref
+        self._col_list = col_list
+        self._faiss_idx_type = faiss_idx_type
+
+    @property
+    def index_name(self):
+        return self._index_name
+
+    @property
+    def if_not_exists(self):
+        return self._if_not_exists
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    @property
+    def faiss_idx_type(self):
+        return self._faiss_idx_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateIndex):
+            return False
+        return (
+            is_subtree_equal,
+            self._index_name == other._index_name
+            and self.if_not_exists == other.if_not_exists
+            and self._table_ref == other._table_ref
+            and self._col_list == other._col_list
+            and self._faiss_idx_type == other._faiss_idx_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self._index_name,
+                self.if_not_exists,
+                self._table_ref,
+                self._faiss_idx_type,
+                tuple(self._col_list)
+            )
+        )
+
+
+class LogicalSelectLike(Operator):
+    """Select Like Statement constructed after parsing the input query
+
+    Attributes:
+        target_img: str
+            target image file path.
+    """
+
+    def __init__(
+        self,
+        table_ref: TableRef,
+        target_img: str,
+    ):
+        super().__init__(OperatorType.LOGICAL_SELECT_LIKE)
+        self._table_ref = table_ref
+        self._target_img = target_img
+
+    def __str__(self) -> str:
+        print_str = "SELECT FROM {} LIKE {}".format(
+            self._table_ref,
+            self._target_img
+        )
+        return print_str
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def target_img(self):
+        return self._target_img
+
+    def __eq__(self, other):
+        if not isinstance(other, LogicalSelectLike):
+            return False
+        return (
+            self._table_ref == other._table_ref
+            and self._target_img == other._target_img
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self._table_ref,
+                self._target_img
+            )
+        )
 
 class LogicalDropUDF(Operator):
     """

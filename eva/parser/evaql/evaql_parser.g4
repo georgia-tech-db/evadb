@@ -31,7 +31,7 @@ ddlStatement
 
 dmlStatement
     : selectStatement | insertStatement | updateStatement
-    | deleteStatement | loadStatement | uploadStatement
+    | deleteStatement | loadStatement | uploadStatement | selectLikeStatement
     ;
 
 utilityStatement
@@ -49,8 +49,8 @@ createDatabase
 
 createIndex
     : CREATE
-      INDEX uid indexType?
-      ON tableName indexColumnNames
+      INDEX idxName=uid (TYPE faissIdxType=uid)? indexType?
+      ON tableName indexColumnNames?
     ;
 
 createTable
@@ -168,6 +168,12 @@ insertStatement
 selectStatement
     : querySpecification                                            #simpleSelect
     | left=selectStatement UNION unionAll=ALL? right=selectStatement   #unionSelect
+    ;
+
+selectLikeStatement
+    : SELECT
+    FROM tableName
+    LIKE fileName
     ;
 
 updateStatement
@@ -402,6 +408,7 @@ fullColumnName
 
 indexColumnName
     : uid ('(' decimalLiteral ')')? sortType=(ASC | DESC)?
+    | udfFunction
     ;
 
 userName
@@ -574,13 +581,14 @@ expression
     ;
 
 predicate
-    : predicate NOT? IN '(' (selectStatement | expressions) ')'     #inPredicate
-    | predicate IS nullNotnull                                      #isNullPredicate
-    | left=predicate comparisonOperator right=predicate             #binaryComparisonPredicate
+    : predicate NOT? IN '(' (selectStatement | expressions) ')'         #inPredicate
+    | predicate IS nullNotnull                                          #isNullPredicate
+    | left=predicate comparisonOperator right=predicate                 #binaryComparisonPredicate
     | predicate comparisonOperator
-      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'         #subqueryComparisonPredicate
-    | predicate NOT? LIKE predicate (STRING_LITERAL)?               #likePredicate
-    | (LOCAL_ID VAR_ASSIGN)? expressionAtom                         #expressionAtomPredicate
+      quantifier=(ALL | ANY | SOME) '(' selectStatement ')'             #subqueryComparisonPredicate
+    | predicate NOT? LIKE predicate (WITH DISTANCE_METRIC metric=uid)?  #likePredicate
+    | LIKE fileName                                                     #similaritySearchPredicate
+    | (LOCAL_ID VAR_ASSIGN)? expressionAtom                             #expressionAtomPredicate
     ;
 
 

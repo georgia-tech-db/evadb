@@ -48,6 +48,8 @@ class ExpressionType(IntEnum):
     AGGREGATION_MAX = auto()
     AGGREGATION_AVG = auto()
 
+    LIKE = auto()
+
     CASE = auto()
     # add other types
 

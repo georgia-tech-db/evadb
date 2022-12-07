@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Callable, List
+import os
+from typing import Callable, List, Tuple
 
 import pandas as pd
 
@@ -24,6 +25,9 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
 
+from eva.configuration.configuration_manager import ConfigurationManager
+
+import re
 
 class FunctionExpression(AbstractExpression):
     """
@@ -61,6 +65,12 @@ class FunctionExpression(AbstractExpression):
         self.output_objs: List[UdfIO] = []
         self.projection_columns: List[str] = []
 
+        try:
+            gpu=self._context.gpu_device()
+            print(f'\n\nWill use {"GPU-{}".format(gpu) if gpu != NO_GPU else "CPU"} for {self.name}\n\n')
+        except:
+            ...
+
     @property
     def name(self):
         return self._name
@@ -77,15 +87,67 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
+    def get_id_col_name(self, batch: Batch) -> str:
+        df = batch.frames
+        df_cols = df.columns.tolist()
+
+        # check if this batch data contains table name and frame id
+        id_cols = list(filter(lambda x: re.match(r'.*\.id$', x) is not None, df_cols))
+        if not (len(id_cols) == 1):
+            return None
+
+        return id_cols[0]
+
+    def _check_has_cache(self, batch: Batch) -> Tuple[bool, pd.DataFrame]:
+        id_col = self.get_id_col_name(batch)
+        if id_col is None:
+            return False, None
+
+        table_name_lower_case = id_col.split(".")[0]
+        from eva.catalog.catalog_manager import CatalogManager
+        cache_meta = CatalogManager().get_res_cache(table_name_lower_case, self.name, ignore_case=True)
+
+        if cache_meta is None:
+            return False, None
+
+        index_dir = ConfigurationManager().get_index_dir()
+        cache_file_path = os.path.join(index_dir, cache_meta.res_cache_path)
+
+        cached_data = pd.read_pickle(cache_file_path)
+        cached_cols = cached_data.columns.tolist()
+
+        for i in range(len(cached_cols)):
+            cached_cols[i] = cached_cols[i].split(".")[1]
+
+        cached_data.columns = cached_cols
+
+        for col in self.projection_columns:
+            if not (col in cached_cols):
+                return False, None
+
+        return True, cached_data
+
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
         if len(child_batches):
             new_batch = Batch.merge_column_wise(child_batches)
 
-        func = self._gpu_enabled_function()
-        outcomes = func(new_batch.frames)
-        outcomes = Batch(pd.DataFrame(outcomes))
+        has_cache, cached_data = self._check_has_cache(batch)
+
+        outcomes = None
+        if has_cache:
+            id_col = self.get_id_col_name(batch)
+            ids = batch.frames[id_col]
+
+            outcomes = cached_data.iloc[ids].reset_index(drop=True)
+            outcomes = Batch(frames=outcomes)
+
+        else:
+            func = self._gpu_enabled_function()
+            outcomes = func(new_batch.frames)
+            outcomes = Batch(pd.DataFrame(outcomes))
+
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
         return outcomes

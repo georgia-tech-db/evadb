@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import numpy as np
+
 import pandas as pd
 import torch
 from numpy.typing import ArrayLike
@@ -71,10 +72,15 @@ class PytorchAbstractClassifierUDF(AbstractClassifierUDF, nn.Module, GPUCompatib
 
         if gpu_batch_size:
             chunks = torch.split(tens_batch, gpu_batch_size)
-            outcome = pd.DataFrame()
-            for tensor in chunks:
-                outcome = outcome.append(self.forward(tensor), ignore_index=True)
-            return outcome
+
+            # outcome = pd.DataFrame()
+            # for tensor in chunks:
+            #     outcome = outcome.append(self.forward(tensor), ignore_index=True)
+            # return outcome
+
+            outcome2 = pd.concat((self.forward(tensor) for tensor in chunks),ignore_index=True )
+            # assert(outcome.equals(outcome2))
+            return outcome2
         else:
             return self.forward(frames)
 

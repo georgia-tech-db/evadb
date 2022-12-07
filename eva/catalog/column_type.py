@@ -18,6 +18,10 @@ from enum import Enum, IntEnum, auto
 class Dimension(IntEnum):
     ANYDIM = -1
 
+class TableType(IntEnum):
+    STRUCTURAL_DATA = auto()
+    VIDEO_DATA = auto()
+    IMAGE_DATA = auto()
 
 class ColumnType(Enum):
     BOOLEAN = 1
@@ -27,6 +31,34 @@ class ColumnType(Enum):
     NDARRAY = 5
     ANY = 6
 
+# Not used for now
+class IndexMethod(Enum):
+    VECTOR = 1
+
+class FaissIndexType(Enum):
+    FlatL2 = auto()
+    FlatIP = auto()
+
+    IVFFlat = auto()
+    IVFFastScan = auto()
+
+    HNSW2Level = auto()
+    HNSWFlat = auto()
+
+    BinaryFlat = auto()
+    BinaryHashStats = auto()
+    BinaryFromFloat = auto()
+
+    AdditiveQuantizerFastScan = auto()
+    
+    def __str__(self):
+        return Enum.__str__(self).split(".")[-1]
+
+
+class DistanceMetric(Enum):
+    L2 = auto()
+    L1 = auto()
+    InnerProduct = auto()
 
 class NdArrayType(Enum):
     INT8 = auto()

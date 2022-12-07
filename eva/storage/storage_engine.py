@@ -19,3 +19,6 @@ StorageEngine = str_to_class(ConfigurationManager().get_value("storage", "engine
 VideoStorageEngine = str_to_class(
     ConfigurationManager().get_value("storage", "video_engine")
 )()
+ImageStorageEngine = str_to_class(
+    ConfigurationManager().get_value("storage", "image_engine")
+)()

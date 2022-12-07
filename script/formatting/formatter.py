@@ -290,7 +290,8 @@ if __name__ == "__main__":
     else:
         # LOG.info("Default fix modified files")
         MERGEBASE = subprocess.check_output(
-            "git merge-base origin/master HEAD", shell=True, text=True
+            "git merge-base origin/main HEAD", shell=True, text=True
+            # "git merge-base origin/master HEAD", shell=True, text=True
         ).rstrip()
         files = (
             subprocess.check_output(
