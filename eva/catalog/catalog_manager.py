@@ -206,9 +206,9 @@ class CatalogManager(object):
         return DataFrameColumn(
             column_name,
             data_type,
-            array_type,
-            dimensions,
-            cci.nullable,
+            array_type=array_type,
+            array_dimensions=dimensions,
+            is_nullable=cci.nullable
         )
 
     def get_dataset_metadata(
