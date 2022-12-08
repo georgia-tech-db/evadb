@@ -278,6 +278,7 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
 
+
 def extract_alias_from_function_expression(expr: FunctionExpression) -> Alias:
     """Returns the Alias property for the Function Expression based on its name and output.
 
@@ -303,7 +304,7 @@ def extract_alias_from_function_expression(expr: FunctionExpression) -> Alias:
             alias = Alias(expr.alias.alias_name, output_aliases)
 
     return alias
-    
+
 
 def is_function_expression(expr: AbstractExpression) -> bool:
     """Checks if the expr is of type ExpressionType.FUNCTION_EXPRESSION

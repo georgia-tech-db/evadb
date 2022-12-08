@@ -29,7 +29,6 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.expression_utils import extract_alias_from_function_expression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.load_statement import LoadDataStatement
@@ -278,7 +277,7 @@ class StatementBinder:
         else:
             node.output_objs = output_objs
             node.projection_columns = [obj.name.lower() for obj in output_objs]
-        
+
         # resolve Alias only if the UDF has been resolved
         if node.function is not None:
             node.alias = extract_alias_from_function_expression(node)

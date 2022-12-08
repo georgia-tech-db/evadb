@@ -715,7 +715,9 @@ class LogicalGetToSeqScan(Rule):
                             udf_obj.impl_file_path, udf_obj.name
                         )()
                         func_expr.name = udf_obj.name
-                        func_expr.alias = extract_alias_from_function_expression(func_expr) # resolve the alias
+                        func_expr.alias = extract_alias_from_function_expression(
+                            func_expr
+                        )  # resolve the alias
 
                         before.target_list[idx] = func_expr
 
@@ -846,7 +848,9 @@ class LogicalFunctionScanToPhysical(Rule):
             udf_obj = self.catalog.get_udf_by_type(func_expr.function_type)
             func_expr.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)()
             func_expr.name = udf_obj.name
-            func_expr.alias = extract_alias_from_function_expression(func_expr) # resolve the alias as well
+            func_expr.alias = extract_alias_from_function_expression(
+                func_expr
+            )  # resolve the alias as well
             before.func_expr = func_expr
 
         after = FunctionScanPlan(before.func_expr, before.do_unnest)
