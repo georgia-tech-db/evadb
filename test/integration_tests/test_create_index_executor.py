@@ -21,7 +21,7 @@ import pandas as pd
 from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType, IndexType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.executor_utils import ExecutorError

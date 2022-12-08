@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType, IndexType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -416,7 +416,9 @@ class CatalogManager(object):
         index_io_list: List[IndexIO],
         secondary_index_df_metadata: DataFrameMetadata,
     ) -> IndexMetadata:
-        index_metadata = self._index_service.create_index(name, save_file_path, index_type)
+        index_metadata = self._index_service.create_index(
+            name, save_file_path, index_type
+        )
         index_metadata.secondary_index_id = secondary_index_df_metadata.id
         for index_io in index_io_list:
             index_io.index_id = index_metadata.id

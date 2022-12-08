@@ -15,7 +15,7 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, IndexType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression

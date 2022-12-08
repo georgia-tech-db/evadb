@@ -19,7 +19,13 @@ import faiss
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType, TableType, IndexType
+from eva.catalog.catalog_type import (
+    ColumnType,
+    Dimension,
+    IndexType,
+    NdArrayType,
+    TableType,
+)
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
