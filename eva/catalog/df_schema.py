@@ -15,7 +15,7 @@
 from typing import List
 
 from eva.catalog.models.df_column import DataFrameColumn
-
+from eva.catalog.models.df_column import TableColumn
 
 class DataFrameSchema(object):
     def __init__(self, name: str, column_list: List[DataFrameColumn]):
@@ -47,7 +47,10 @@ class DataFrameSchema(object):
 class TableSchema:
     def __init__(self, obj):
         self._name = obj.name
-        self._column_list = obj.column_list
+        converted_col_list = list()
+        for column in obj.column_list:
+            converted_col_list.append(TableColumn(column))
+        self._column_list = converted_col_list
 
     def __str__(self):
         schema_str = "SCHEMA:: (" + self._name + ")\n"

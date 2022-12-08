@@ -95,7 +95,7 @@ class CatalogManager(object):
             identifier_column (str):  A unique identifier column for each row
             table_type (TableType): type of the table, video, images etc
         Returns:
-            The persisted DataFrameMetadata object with the id field populated.
+            The persisted TableMetadata object with the id field populated.
         """
 
         metadata = self._dataset_service.create_dataset(
@@ -117,7 +117,7 @@ class CatalogManager(object):
         metadata.schema = column_list
         return TableMetadata(metadata)
 
-    def create_video_metadata(self, name: str) -> DataFrameMetadata:
+    def create_video_metadata(self, name: str) -> TableMetadata:
         """Create video metadata object.
             We have predefined columns for such a object
             id:  the frame id
@@ -127,7 +127,7 @@ class CatalogManager(object):
             name (str): name of the metadata to be added to the catalog
 
         Returns:
-            DataFrameMetadata:  corresponding metadata for the input table info
+            TableMetadata:  corresponding metadata for the input table info
         """
         columns = [
             ColumnDefinition(
@@ -147,11 +147,11 @@ class CatalogManager(object):
             identifier_column="id",
             table_type=TableType.VIDEO_DATA,
         )
-        return metadata
+        return TableMetadata(metadata)
 
     def create_table_metadata(
         self, table_info: TableInfo, columns: List[ColumnDefinition]
-    ) -> DataFrameMetadata:
+    ) -> TableMetadata:
         table_name = table_info.table_name
         column_metadata_list = self.create_columns_metadata(columns)
         file_url = str(generate_file_path(table_name))
@@ -161,7 +161,7 @@ class CatalogManager(object):
             column_metadata_list,
             table_type=TableType.STRUCTURED_DATA,
         )
-        return metadata
+        return TableMetadata(metadata)
 
     def create_columns_metadata(self, col_list: List[ColumnDefinition]):
         """Create column metadata for the input parsed column list. This function
@@ -191,7 +191,7 @@ class CatalogManager(object):
         array_type: NdArrayType,
         dimensions: List[int],
         cci: ColConstraintInfo,
-    ) -> TableColumn:
+    ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
         If you want to commit it into catalog table call create_metadata with
@@ -203,7 +203,7 @@ class CatalogManager(object):
             array_type {NdArrayType} -- type of ndarray
             dimensions {List[int]} -- dimensions of the column created
         """
-        return TableColumn(
+        return DataFrameColumn(
             column_name,
             data_type,
             array_type,
@@ -220,7 +220,7 @@ class CatalogManager(object):
             dataset_name (str): name of the dataset
 
         Returns:
-            DataFrameMetadata
+            TableMetadata
         """
 
         metadata = self._dataset_service.dataset_object_by_name(
