@@ -169,6 +169,13 @@ class CatalogManagerTests(unittest.TestCase):
         self.assertEqual(actual, udf_mock.return_value.udf_by_name.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfService")
+    def test_get_udf_by_type(self, udf_mock):
+        catalog = CatalogManager()
+        actual = catalog.get_udf_by_type("type")
+        udf_mock.return_value.udf_by_type.assert_called_with("type")
+        self.assertEqual(actual, udf_mock.return_value.udf_by_type.return_value)
+
+    @mock.patch("eva.catalog.catalog_manager.UdfService")
     def test_drop_udf(self, udf_mock):
         CatalogManager().drop_udf("name")
         udf_mock.return_value.drop_udf_by_name.assert_called_with("name")
