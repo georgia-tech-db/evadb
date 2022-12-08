@@ -81,8 +81,11 @@ class StatementBinder:
     def _bind_create_index_statement(self, node: CreateIndexStatement):
         self.bind(node.table_ref)
 
-        # TODO: create index currently only supports single numpy column
+        # TODO: create index currently only supports single numpy column.
         assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
+
+        # TODO: create index currently only works on TableInfo, but will extend later.
+        assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
 
         col_def = node.col_list[0]
         table_ref_obj = node.table_ref.table.table_obj
