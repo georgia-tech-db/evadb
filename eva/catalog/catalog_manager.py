@@ -208,7 +208,7 @@ class CatalogManager(object):
             data_type,
             array_type=array_type,
             array_dimensions=dimensions,
-            is_nullable=cci.nullable
+            is_nullable=cci.nullable,
         )
 
     def get_dataset_metadata(
