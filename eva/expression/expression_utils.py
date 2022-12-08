@@ -18,8 +18,10 @@ from typing import List, Set
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
 
 
 def expression_tree_to_conjunction_list(expression_tree):
@@ -276,6 +278,32 @@ def is_simple_predicate(predicate: AbstractExpression) -> bool:
 
     return _has_simple_expressions(predicate) and contains_single_column(predicate)
 
+def extract_alias_from_function_expression(expr: FunctionExpression) -> Alias:
+    """Returns the Alias property for the Function Expression based on its name and output.
+
+    Args:
+        expr (FunctionExpression): Function Expression to process
+
+    Returns:
+        Alias: the alias property to set to the Function Expression
+    """
+    alias: Alias = None
+
+    default_alias_name = expr.name.lower()
+    default_output_col_aliases = [str(obj.name.lower()) for obj in expr.output_objs]
+    if not expr.alias:
+        alias = Alias(default_alias_name, default_output_col_aliases)
+    else:
+        if not len(expr.alias.col_names):
+            alias = Alias(expr.alias.alias_name, default_output_col_aliases)
+        else:
+            output_aliases = [
+                str(col_name.lower()) for col_name in expr.alias.col_names
+            ]
+            alias = Alias(expr.alias.alias_name, output_aliases)
+
+    return alias
+    
 
 def is_function_expression(expr: AbstractExpression) -> bool:
     """Checks if the expr is of type ExpressionType.FUNCTION_EXPRESSION
