@@ -23,11 +23,9 @@ from eva.udfs.abstract.abstract_udf import AbstractUDF
 
 
 class Open(AbstractUDF):
-    # cache data to avoid expensive open files on disk
-    _DATA_CACHE = dict()
-
     def setup(self):
-        Open._DATA_CACHE = dict()
+        # cache data to avoid expensive open files on disk
+        self._data_cache = dict()
 
     @property
     def name(self):
@@ -40,14 +38,14 @@ class Open(AbstractUDF):
         Returns:
             (pd.DataFrame): The opened image.
         """
-        if path in Open._DATA_CACHE:
-            data = Open._DATA_CACHE[path]
+        if path in self._data_cache:
+            data = self._data_cache[path]
         else:
             try:
                 data = cv2.imread(path).astype(np.float32)
             except Exception as e:
                 raise ExecutorError(str(e))
 
-            Open._DATA_CACHE[path] = data
+            self._data_cache[path] = data
 
         return pd.DataFrame([{"data": data}])
