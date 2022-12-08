@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_column import TableColumn
+from eva.catalog.models.df_column import DataFrameColumn, TableColumn
+
 
 class DataFrameSchema(object):
     def __init__(self, name: str, column_list: List[DataFrameColumn]):
