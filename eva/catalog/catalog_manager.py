@@ -272,9 +272,6 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def get_udf_outputs_by_type(self, type_name: str) -> List[UdfIO]:
-        return self._udf_io_service.get_outputs_by_udf_type(type_name)
-
     def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
