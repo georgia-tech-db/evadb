@@ -279,6 +279,14 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
+    def test_lateral_join_with_logical_udf(self):
+        select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
+                        ObjectDetection(data) AS T(a,b,c) WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(list(actual_batch.columns), ["myvideo.id", "T.a"])
+        self.assertEqual(len(actual_batch), 5)
+
+    @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
         select_query = """SELECT id, T.labels FROM MyVideo JOIN LATERAL
                         FastRCNNObjectDetector(data) AS T WHERE id < 5;"""
