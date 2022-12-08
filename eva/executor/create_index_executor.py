@@ -99,6 +99,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 self._get_index_save_path(),
                 self.node.index_type,
                 io_list,
+                secondary_index_df_metadata,
             )
 
             yield Batch(

@@ -414,12 +414,14 @@ class CatalogManager(object):
         save_file_path: str,
         index_type: IndexType,
         index_io_list: List[IndexIO],
+        secondary_index_df_metadata: DataFrameMetadata,
     ) -> IndexMetadata:
-        metadata = self._index_service.create_index(name, save_file_path, index_type)
+        index_metadata = self._index_service.create_index(name, save_file_path, index_type)
+        index_metadata.secondary_index_id = secondary_index_df_metadata.id
         for index_io in index_io_list:
-            index_io.index_id = metadata.id
+            index_io.index_id = index_metadata.id
         self._index_io_service.add_index_io(index_io_list)
-        return metadata
+        return index_metadata
 
     def get_index_by_name(self, name: str) -> IndexMetadata:
         return self._index_service.index_by_name(name)

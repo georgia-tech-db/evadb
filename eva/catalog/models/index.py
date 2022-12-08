@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
@@ -32,10 +32,14 @@ class IndexMetadata(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, save_file_path: str, type: IndexType):
+    _secondary_index_id = Column("secondary_index_id", Integer, ForeignKey("df_metadata._row_id"))
+    _secondary_index = relationship("DataFrameMetadata")
+
+    def __init__(self, name: str, save_file_path: str, type: IndexType, secondary_index_id: int = None):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type
+        self._secondary_index_id = secondary_index_id
 
     @property
     def id(self):
@@ -53,6 +57,14 @@ class IndexMetadata(BaseModel):
     def type(self):
         return self._type
 
+    @property
+    def secondary_index_id(self):
+        return self._secondary_index_id
+
+    @secondary_index_id.setter
+    def secondary_index_id(self, value):
+        self._secondary_index_id = value
+
     def __str__(self):
         index_str = "index: ({}, {}, {})\n".format(
             self.name, self.save_file_path, self.type
@@ -65,7 +77,8 @@ class IndexMetadata(BaseModel):
             and self.save_file_path == other.save_file_path
             and self.name == other.name
             and self.type == other.type
+            and self.secondary_index_id == other.secondary_index_id
         )
 
     def __hash__(self) -> int:
-        return hash((self.id, self.name, self.save_file_path, self.type))
+        return hash((self.id, self.name, self.save_file_path, self.type, self.secondary_index_id))

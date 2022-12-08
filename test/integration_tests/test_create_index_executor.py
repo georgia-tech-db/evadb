@@ -114,6 +114,7 @@ class CreateIndexTest(unittest.TestCase):
         secondary_index_metadata = CatalogManager().get_dataset_metadata(
             None, secondary_index_tb_name
         )
+        self.assertEqual(index_metadata.secondary_index_id, secondary_index_metadata.id)
         size = 0
         storage_engine = StorageEngine.factory(secondary_index_metadata)
         for i, batch in enumerate(storage_engine.read(secondary_index_metadata, 1)):
