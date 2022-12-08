@@ -41,7 +41,7 @@ class UDFExecutorTest(unittest.TestCase):
         create_udf_query = """CREATE UDF DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
                   OUTPUT (label NDARRAY STR(10))
-                  TYPE  Classification
+                  TYPE  ObjectClassification
                   IMPL  'test/util.py';
         """
         execute_query_fetch_all(create_udf_query)
@@ -172,3 +172,17 @@ class UDFExecutorTest(unittest.TestCase):
         """
         with self.assertRaises(RuntimeError):
             execute_query_fetch_all(create_udf_query)
+
+    def test_logical_udf_select_query(self):
+        logical_udf_select_query = """SELECT id, ObjectClassification(data) FROM MyVideo
+                                WHERE  id < 5"""
+        actual_batch = execute_query_fetch_all(logical_udf_select_query)
+
+        specific_udf_select_query = (
+            """SELECT id, DummyObjectDetector(data) FROM MyVideo WHERE id < 5"""
+        )
+        expected_batch = execute_query_fetch_all(specific_udf_select_query)
+
+        actual_batch.sort()
+        expected_batch.sort()
+        self.assertEqual(actual_batch, expected_batch)
