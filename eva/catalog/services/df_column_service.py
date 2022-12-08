@@ -55,7 +55,7 @@ class DatasetColumnService(BaseService):
     def create_column(self, column_list):
         saved_column_list = []
         for column in column_list:
-            saved_column_list.append(column)
+            saved_column_list.append(column.save())
         return saved_column_list
 
     def get_dataset_columns(self, dataset: DataFrameMetadata) -> List[DataFrameColumn]:
