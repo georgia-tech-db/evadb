@@ -16,7 +16,7 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import List
 
-from eva.catalog.index_type import IndexType
+from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO

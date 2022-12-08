@@ -16,7 +16,7 @@ from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
-from eva.catalog.index_type import IndexType
+from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.base_model import BaseModel
 
 

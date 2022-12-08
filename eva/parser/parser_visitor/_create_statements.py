@@ -12,8 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
-from eva.catalog.index_type import IndexType
+from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType, IndexType
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
