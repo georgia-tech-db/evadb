@@ -60,7 +60,7 @@ class UdfService(BaseService):
         """
 
         try:
-            return self.model.query.filter(self.model._type == name).one()
+            return self.model.query.filter(self.model._type == name).first()
         except NoResultFound:
             return None
 
