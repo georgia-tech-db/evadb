@@ -296,7 +296,10 @@ def copy_sample_videos_to_upload_dir():
 
 
 def file_remove(path):
-    os.remove(os.path.join(upload_dir_from_config, path))
+    try:
+        os.remove(os.path.join(upload_dir_from_config, path))
+    except FileNotFoundError:
+        pass
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
