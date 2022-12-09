@@ -59,10 +59,7 @@ class UdfService(BaseService):
             name (str): name to be searched
         """
 
-        try:
-            return self.model.query.filter(self.model._type == name).first()
-        except NoResultFound:
-            return None
+        return self.model.query.filter(self.model._type == name).first()
 
     def udf_by_id(self, id: int):
         """return the udf entry that matches the id provided.
