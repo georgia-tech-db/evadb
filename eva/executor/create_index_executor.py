@@ -19,11 +19,7 @@ import faiss
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import (
-    ColumnType,
-    IndexType,
-    TableType,
-)
+from eva.catalog.catalog_type import ColumnType, IndexType, TableType
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
@@ -55,7 +51,9 @@ class CreateIndexExecutor(AbstractExecutor):
 
             # Get feature column.
             feat_col_name = self.node.col_list[0].name
-            feat_df_column = [col for col in feat_df_metadata.columns if col.name == feat_col_name][0]
+            feat_df_column = [
+                col for col in feat_df_metadata.columns if col.name == feat_col_name
+            ][0]
 
             # Add features to index.
             # TODO: batch size is hardcoded for now.

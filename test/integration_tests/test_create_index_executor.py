@@ -105,7 +105,9 @@ class CreateIndexTest(unittest.TestCase):
         feat_df_metadata = CatalogManager().get_dataset_metadata(
             None, "testCreateIndexFeatTable"
         )
-        feat_df_column = [col for col in feat_df_metadata.columns if col.name == "feat"][0]
+        feat_df_column = [
+            col for col in feat_df_metadata.columns if col.name == "feat"
+        ][0]
         self.assertEqual(index_metadata.feat_df_column_id, feat_df_column.id)
         self.assertEqual(index_metadata.feat_df_column, feat_df_column)
 

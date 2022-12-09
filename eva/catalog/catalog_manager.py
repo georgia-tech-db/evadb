@@ -388,6 +388,7 @@ class CatalogManager(object):
         return self._udf_service.get_all_udfs()
 
     """ Index related services. """
+
     def create_index(
         self,
         name: str,

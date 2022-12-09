@@ -34,7 +34,9 @@ class IndexMetadata(BaseModel):
     _secondary_index = relationship("DataFrameMetadata")
 
     # Input feature column reference.
-    _feat_df_column_id = Column("df_column_id", Integer, ForeignKey("df_column._row_id"))
+    _feat_df_column_id = Column(
+        "df_column_id", Integer, ForeignKey("df_column._row_id")
+    )
     _feat_df_column = relationship("DataFrameColumn")
 
     def __init__(
