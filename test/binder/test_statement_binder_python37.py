@@ -33,6 +33,7 @@ class StatementBinderPython37Tests(unittest.TestCase):
             mocks = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
             select_statement.target_list = mocks[:2]
             select_statement.orderby_list = [(mocks[2], 0), (mocks[3], 0)]
+            select_statement.groupby_clause = None
             binder._bind_select_statement(select_statement)
             mock_binder.assert_any_call(select_statement.from_table)
             mock_binder.assert_any_call(select_statement.where_clause)

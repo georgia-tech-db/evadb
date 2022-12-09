@@ -14,9 +14,9 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
 
 
@@ -109,22 +109,22 @@ class CreateTableStatement(AbstractStatement):
 
     def __init__(
         self,
-        table_ref: TableRef,
+        table_info: TableInfo,
         if_not_exists: bool,
         column_list: List[ColumnDefinition] = None,
     ):
         super().__init__(StatementType.CREATE)
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._if_not_exists = if_not_exists
         self._column_list = column_list
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ({}) ".format(self._table_ref, self._if_not_exists)
+        print_str = "CREATE TABLE {} ({})".format(self._table_info, self._if_not_exists)
         return print_str
 
     @property
-    def table_ref(self):
-        return self._table_ref
+    def table_info(self):
+        return self._table_info
 
     @property
     def if_not_exists(self):
@@ -138,7 +138,7 @@ class CreateTableStatement(AbstractStatement):
         if not isinstance(other, CreateTableStatement):
             return False
         return (
-            self.table_ref == other.table_ref
+            self.table_info == other.table_info
             and self.if_not_exists == other.if_not_exists
             and self.column_list == other.column_list
         )
@@ -147,7 +147,7 @@ class CreateTableStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.table_ref,
+                self.table_info,
                 self.if_not_exists,
                 tuple(self.column_list),
             )

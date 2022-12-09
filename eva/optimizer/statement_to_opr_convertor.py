@@ -23,6 +23,7 @@ from eva.optimizer.operators import (
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
+    LogicalGroupBy,
     LogicalJoin,
     LogicalLimit,
     LogicalLoadData,
@@ -119,15 +120,19 @@ class StatementToPlanConvertor:
         if predicate is not None:
             self._visit_select_predicate(predicate)
 
+        # union
+        if statement.union_link is not None:
+            self._visit_union(statement.union_link, statement.union_all)
+
+        # TODO ACTION: Group By
+        if statement.groupby_clause is not None:
+            self._visit_groupby(statement.groupby_clause)
+
         # Projection operator
         select_columns = statement.target_list
 
         if select_columns is not None:
             self._visit_projection(select_columns)
-
-        # union
-        if statement.union_link is not None:
-            self._visit_union(statement.union_link, statement.union_all)
 
         if statement.orderby_list is not None:
             self._visit_orderby(statement.orderby_list)
@@ -139,6 +144,11 @@ class StatementToPlanConvertor:
         sample_opr = LogicalSample(sample_freq)
         sample_opr.append_child(self._plan)
         self._plan = sample_opr
+
+    def _visit_groupby(self, groupby_clause):
+        groupby_opr = LogicalGroupBy(groupby_clause)
+        groupby_opr.append_child(self._plan)
+        self._plan = groupby_opr
 
     def _visit_orderby(self, orderby_list):
         # orderby_list structure: List[(TupleValueExpression, EnumInt), ...]
@@ -204,12 +214,12 @@ class StatementToPlanConvertor:
         Arguments:
             statement {AbstractStatement} - - [Create statement]
         """
-        table_ref = statement.table_ref
-        if table_ref is None:
+        table_info = statement.table_info
+        if table_info is None:
             logger.error("Missing Table Name In Create Statement")
 
         create_opr = LogicalCreate(
-            table_ref, statement.column_list, statement.if_not_exists
+            table_info, statement.column_list, statement.if_not_exists
         )
         self._plan = create_opr
 
@@ -257,9 +267,8 @@ class StatementToPlanConvertor:
         Arguments:
             statement(LoadDataStatement): [Load data statement]
         """
-        table_metainfo = statement.table_ref.table.table_obj
         load_data_opr = LogicalLoadData(
-            table_metainfo,
+            statement.table_info,
             statement.path,
             statement.column_list,
             statement.file_options,
@@ -271,11 +280,10 @@ class StatementToPlanConvertor:
         Arguments:
             statement(UploadStatement): [Upload statement]
         """
-        table_metainfo = statement.table_ref.table.table_obj
         upload_opr = LogicalUpload(
             statement.path,
             statement.video_blob,
-            table_metainfo,
+            statement.table_info,
             statement.column_list,
             statement.file_options,
         )
@@ -283,7 +291,7 @@ class StatementToPlanConvertor:
 
     def visit_materialized_view(self, statement: CreateMaterializedViewStatement):
         mat_view_opr = LogicalCreateMaterializedView(
-            statement.view_ref, statement.col_list, statement.if_not_exists
+            statement.view_info, statement.col_list, statement.if_not_exists
         )
 
         self.visit_select(statement.query)

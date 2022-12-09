@@ -97,6 +97,15 @@ face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
     EVA_INSTALLATION_DIR
 )
 
+Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
+        INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+        OUTPUT (labels NDARRAY STR(ANYDIM))
+        TYPE  Classification
+        IMPL  '{}/udfs/mvit_action_recognition.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(mode="debug"):
     """
@@ -108,6 +117,7 @@ def init_builtin_udfs(mode="debug"):
     """
     queries = [
         Fastrcnn_udf_query,
+        Mvit_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)

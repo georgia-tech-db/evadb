@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 from test.util import (
+    create_dummy_4d_batches,
     create_dummy_batches,
     create_sample_video,
     create_table,
@@ -39,7 +40,7 @@ class SelectExecutorTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -139,7 +140,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD FILE 'data/mnist/mnist.mp4'
+        query = """LOAD VIDEO 'data/mnist/mnist.mp4'
                    INTO MNIST;"""
         execute_query_fetch_all(query)
 
@@ -252,6 +253,96 @@ class SelectExecutorTest(unittest.TestCase):
         # Since frames are fetched in random order, this test might be flaky
         # Disabling it for time being
         self.assertEqual(actual_batch, expected_batch[0])
+
+    def test_select_and_groupby(self):
+        # groupby and orderby together not tested because groupby
+        # only applies to video data which is already sorted
+        segment_size = 3
+        select_query = (
+            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+                segment_size
+            )
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        ids = np.arange(NUM_FRAMES)
+        segments = [ids[i : i + segment_size] for i in range(0, len(ids), segment_size)]
+        segments = [i for i in segments if len(i) == segment_size]
+        expected_batch = list(create_dummy_4d_batches(filters=segments))[0]
+        self.assertEqual(len(actual_batch), len(expected_batch))
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
+
+    def test_select_and_groupby_with_last(self):
+        # groupby and orderby together not tested because groupby
+        # only applies to video data which is already sorted
+        segment_size = 3
+        select_query = (
+            "SELECT LAST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+                segment_size
+            )
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        ids = np.arange(NUM_FRAMES)
+        segments = [ids[i : i + segment_size] for i in range(0, len(ids), segment_size)]
+        segments = [i for i in segments if len(i) == segment_size]
+        expected_batch = list(
+            create_dummy_4d_batches(filters=segments, start_id=segment_size - 1)
+        )[0]
+        self.assertEqual(len(actual_batch), len(expected_batch))
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
+
+    def test_select_and_groupby_should_fail_with_incorrect_pattern(self):
+        segment_size = "4a"
+        select_query = (
+            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}f';".format(
+                segment_size
+            )
+        )
+        self.assertRaises(BinderError, execute_query_fetch_all, select_query)
+
+    def test_select_and_groupby_should_fail_with_seconds(self):
+        segment_size = 4
+        select_query = (
+            "SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '{}s';".format(
+                segment_size
+            )
+        )
+        self.assertRaises(BinderError, execute_query_fetch_all, select_query)
+
+    def test_select_and_groupby_should_fail_with_non_video_table(self):
+        segment_size = 4
+        select_query = "SELECT FIRST(a1) FROM table1 GROUP BY '{}f';".format(
+            segment_size
+        )
+        self.assertRaises(BinderError, execute_query_fetch_all, select_query)
+
+    def test_select_and_groupby_with_sample(self):
+        # TODO ACTION: groupby and orderby together not tested because groupby
+        # only applies to video data which is already sorted
+        segment_size = 2
+        sampling_rate = 2
+        select_query = "SELECT FIRST(id), SEGMENT(data) FROM MyVideo SAMPLE {} GROUP BY '{}f';".format(
+            sampling_rate, segment_size
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+        actual_batch.sort()
+        ids = np.arange(0, NUM_FRAMES, sampling_rate)
+
+        segments = [ids[i : i + segment_size] for i in range(0, len(ids), segment_size)]
+        segments = [i for i in segments if len(i) == segment_size]
+        expected_batch = list(create_dummy_4d_batches(filters=segments))[0]
+        self.assertEqual(len(actual_batch), len(expected_batch))
+        self.assertEqual(
+            actual_batch,
+            expected_batch.project(["myvideo.id", "myvideo.data"]),
+        )
 
     def test_select_and_sample_with_predicate(self):
         select_query = (
@@ -485,7 +576,3 @@ class SelectExecutorTest(unittest.TestCase):
                 expected_batch.sort_orderby(["table1.a0"]),
                 actual_batch.sort_orderby(["table1.a0"]),
             )
-
-
-if __name__ == "__main__":
-    unittest.main()

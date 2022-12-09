@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from eva.catalog.catalog_type import TableType
+from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
@@ -47,6 +49,7 @@ from eva.optimizer.operators import (
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
+    LogicalGroupBy,
     LogicalInsert,
     LogicalJoin,
     LogicalLimit,
@@ -67,6 +70,7 @@ from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
 from eva.planner.drop_udf_plan import DropUDFPlan
 from eva.planner.function_scan_plan import FunctionScanPlan
+from eva.planner.groupby_plan import GroupByPlan
 from eva.planner.hash_join_probe_plan import HashJoinProbePlan
 from eva.planner.insert_plan import InsertPlan
 from eva.planner.lateral_join_plan import LateralJoinPlan
@@ -97,7 +101,7 @@ class EmbedFilterIntoGet(Rule):
         # System supports predicate pushdown only while reading video data
         predicate = before.predicate
         lget: LogicalGet = before.children[0]
-        if predicate and lget.dataset_metadata.is_video:
+        if predicate and is_video_table(lget.dataset_metadata):
             # System only supports pushing basic range predicates on id
             video_alias = lget.video.alias
             col_alias = f"{video_alias}.id"
@@ -146,7 +150,7 @@ class EmbedSampleIntoGet(Rule):
     def check(self, before: LogicalSample, context: OptimizerContext):
         # System supports sample pushdown only while reading video data
         lget: LogicalGet = before.children[0]
-        if lget.dataset_metadata.is_video:
+        if lget.dataset_metadata.table_type == TableType.VIDEO_DATA:
             return True
         return False
 
@@ -477,7 +481,7 @@ class LogicalLoadToPhysical(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
-            before.table_metainfo,
+            before.table_info,
             before.path,
             batch_mem_size,
             before.column_list,
@@ -511,7 +515,7 @@ class LogicalUploadToPhysical(Rule):
         after = UploadPlan(
             before.path,
             before.video_blob,
-            before.table_metainfo,
+            before.table_info,
             batch_mem_size,
             before.column_list,
             before.file_options,
@@ -607,6 +611,25 @@ class LogicalUnionToPhysical(Rule):
 
     def apply(self, before: LogicalUnion, context: OptimizerContext):
         after = UnionPlan(before.all)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
+class LogicalGroupByToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALGROUPBY)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_GROUPBY_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_GROUPBY_TO_PHYSICAL
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalGroupBy, context: OptimizerContext):
+        after = GroupByPlan(before.groupby_clause)
         for child in before.children:
             after.append_child(child)
         return after

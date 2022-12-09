@@ -46,6 +46,7 @@ class OperatorType(IntEnum):
     LOGICALUPLOAD = auto()
     LOGICALQUERYDERIVEDGET = auto()
     LOGICALUNION = auto()
+    LOGICALGROUPBY = auto()
     LOGICALORDERBY = auto()
     LOGICALLIMIT = auto()
     LOGICALSAMPLE = auto()
@@ -292,6 +293,25 @@ class LogicalProject(Operator):
         return hash((super().__hash__(), tuple(self.target_list)))
 
 
+class LogicalGroupBy(Operator):
+    def __init__(self, groupby_clause: ConstantValueExpression, children: List = None):
+        super().__init__(OperatorType.LOGICALGROUPBY, children)
+        self._groupby_clause = groupby_clause
+
+    @property
+    def groupby_clause(self):
+        return self._groupby_clause
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalGroupBy):
+            return False
+        return is_subtree_equal and self.groupby_clause == other.groupby_clause
+
+    def __hash__(self) -> int:
+        return hash((super().__hash__(), self.groupby_clause))
+
+
 class LogicalOrderBy(Operator):
     def __init__(self, orderby_list: List, children: List = None):
         super().__init__(OperatorType.LOGICALORDERBY, children)
@@ -437,7 +457,7 @@ class LogicalCreate(Operator):
 
     def __init__(
         self,
-        video: TableRef,
+        video: TableInfo,
         column_list: List[ColumnDefinition],
         if_not_exists: bool = False,
         children: List = None,
@@ -689,21 +709,21 @@ class LogicalLoadData(Operator):
 
     def __init__(
         self,
-        table_metainfo: DataFrameMetadata,
+        table_info: TableInfo,
         path: Path,
         column_list: List[AbstractExpression] = None,
         file_options: dict = dict(),
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
-        self._table_metainfo = table_metainfo
+        self._table_info = table_info
         self._path = path
         self._column_list = column_list or []
         self._file_options = file_options
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table_info(self):
+        return self._table_info
 
     @property
     def path(self):
@@ -721,7 +741,7 @@ class LogicalLoadData(Operator):
         return "LogicalLoadData(table: {}, path: {}, \
                 column_list: {}, \
                 file_options: {})".format(
-            self.table_metainfo, self.path, self.column_list, self.file_options
+            self.table_info, self.path, self.column_list, self.file_options
         )
 
     def __eq__(self, other):
@@ -730,7 +750,7 @@ class LogicalLoadData(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_metainfo == other.table_metainfo
+            and self.table_info == other.table_info
             and self.path == other.path
             and self.column_list == other.column_list
             and self.file_options == other.file_options
@@ -740,7 +760,7 @@ class LogicalLoadData(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.table_metainfo,
+                self.table_info,
                 self.path,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
@@ -761,7 +781,7 @@ class LogicalUpload(Operator):
         self,
         path: Path,
         video_blob: str,
-        table_metainfo: DataFrameMetadata,
+        table_info: TableInfo,
         column_list: List[AbstractExpression] = None,
         file_options: dict = dict(),
         children: List = None,
@@ -769,7 +789,7 @@ class LogicalUpload(Operator):
         super().__init__(OperatorType.LOGICALUPLOAD, children=children)
         self._path = path
         self._video_blob = video_blob
-        self._table_metainfo = table_metainfo
+        self._table_info = table_info
         self._column_list = column_list or []
         self._file_options = file_options
 
@@ -782,8 +802,8 @@ class LogicalUpload(Operator):
         return self._video_blob
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table_info(self):
+        return self._table_info
 
     @property
     def column_list(self):
@@ -801,7 +821,7 @@ class LogicalUpload(Operator):
                 file_options: {})".format(
             self.path,
             "string of video blob",
-            self.table_metainfo,
+            self.table_info,
             self.column_list,
             self.file_options,
         )
@@ -814,7 +834,7 @@ class LogicalUpload(Operator):
             is_subtree_equal
             and self.path == other.path
             and self.video_blob == other.video_blob
-            and self.table_metainfo == other.table_metainfo
+            and self.table_info == other.table_info
             and self.column_list == other.column_list
             and self.file_options == other.file_options
         )
@@ -825,7 +845,7 @@ class LogicalUpload(Operator):
                 super().__hash__(),
                 self.path,
                 self.video_blob,
-                self.table_metainfo,
+                self.table_info,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
             )
@@ -984,7 +1004,7 @@ class LogicalCreateMaterializedView(Operator):
 
     def __init__(
         self,
-        view: TableRef,
+        view: TableInfo,
         col_list: List[ColumnDefinition],
         if_not_exists: bool = False,
         children=None,

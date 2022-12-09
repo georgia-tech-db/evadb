@@ -16,11 +16,13 @@ from pathlib import Path
 
 import pandas as pd
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.storage.storage_engine import VideoStorageEngine
+from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -29,6 +31,7 @@ class LoadVideoExecutor(AbstractExecutor):
         super().__init__(node)
         config = ConfigurationManager()
         self.upload_dir = Path(config.get_value("storage", "upload_dir"))
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -39,8 +42,8 @@ class LoadVideoExecutor(AbstractExecutor):
         using storage engine
         """
 
+        # Validate video file_path
         video_file_path = None
-        # Validate file_path
         if Path(self.node.file_path).exists():
             video_file_path = self.node.file_path
         # check in the upload directory
@@ -54,11 +57,28 @@ class LoadVideoExecutor(AbstractExecutor):
                 self.node.file_path
             )
             logger.error(error)
-            raise RuntimeError(error)
+            raise ExecutorError(error)
 
-        VideoStorageEngine.create(self.node.table_metainfo, if_not_exists=True)
-        success = VideoStorageEngine.write(
-            self.node.table_metainfo,
+        # Create catalog entry
+        table_info = self.node.table_info
+        database_name = table_info.database_name
+        table_name = table_info.table_name
+        # Sanity check to make sure there is no existing table with same name
+        do_create = False
+        table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+        if table_obj:
+            msg = f"Adding to an existing table {table_name}."
+            logger.info(msg)
+        # Create the catalog entry
+        else:
+            table_obj = self.catalog.create_video_metadata(table_name)
+            do_create = True
+
+        storage_engine = StorageEngine.factory(table_obj)
+        if do_create:
+            storage_engine.create(table_obj)
+        success = storage_engine.write(
+            table_obj,
             Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
         )
 

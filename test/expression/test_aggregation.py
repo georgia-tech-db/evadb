@@ -14,6 +14,7 @@
 # limitations under the License.
 import unittest
 
+import numpy as np
 import pandas as pd
 
 from eva.expression.abstract_expression import ExpressionType
@@ -25,6 +26,36 @@ from eva.models.storage.batch import Batch
 class AggregationExpressionsTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def test_aggregation_first(self):
+        columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_FIRST, None, columnName
+        )
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(1, batch.frames.iloc[0][0])
+
+    def test_aggregation_last(self):
+        columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_LAST, None, columnName
+        )
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertEqual(3, batch.frames.iloc[0][0])
+
+    def test_aggregation_segment(self):
+        columnName = TupleValueExpression(col_name=0)
+        columnName.col_alias = 0
+        aggr_expr = AggregationExpression(
+            ExpressionType.AGGREGATION_SEGMENT, None, columnName
+        )
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
+        batch = aggr_expr.evaluate(tuples, None)
+        self.assertTrue((np.array([1, 2, 3]) == batch.frames.iloc[0][0]).all())
 
     def test_aggregation_sum(self):
         columnName = TupleValueExpression(col_name=0)

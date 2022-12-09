@@ -13,18 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from pathlib import Path
-from typing import Union
 
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
-    create_video_metadata,
+    check_groupby_pattern,
+    check_table_object_is_video,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -32,12 +30,9 @@ from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.explain_statement import ExplainStatement
-from eva.parser.load_statement import LoadDataStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.parser.types import FileFormatType
-from eva.parser.upload_statement import UploadStatement
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
@@ -95,6 +90,10 @@ class StatementBinder:
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
                 self.bind(expr)
+        if node.groupby_clause:
+            self.bind(node.groupby_clause)
+            check_groupby_pattern(node.groupby_clause.value)
+            check_table_object_is_video(node.from_table)
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])
@@ -108,68 +107,6 @@ class StatementBinder:
     def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
-
-    @bind.register(LoadDataStatement)
-    @bind.register(UploadStatement)
-    def _bind_load_and_upload_data_statement(
-        self, node: Union[LoadDataStatement, UploadStatement]
-    ):
-        table_ref = node.table_ref
-        name = table_ref.table.table_name
-        if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Sanity check to make sure there is no existing video table with same name
-            if self._catalog.check_table_exists(
-                table_ref.table.database_name, table_ref.table.table_name
-            ):
-                msg = f"Adding to an existing video table {name}."
-                logger.info(msg)
-            else:
-
-                # create catalog entry only if the file path exists
-                upload_dir = Path(
-                    ConfigurationManager().get_value("storage", "upload_dir")
-                )
-                if (
-                    Path(node.path).exists()
-                    or Path(Path(upload_dir) / node.path).exists()
-                ):
-                    create_video_metadata(name)
-
-                # else raise error
-                else:
-                    err_msg = f"Video file {node.path} does not exist."
-                    logger.error(err_msg)
-                    raise BinderError(err_msg)
-
-        self.bind(table_ref)
-
-        table_ref_obj = table_ref.table.table_obj
-        if table_ref_obj is None:
-            error = f"{name} does not exist."
-            logger.error(error)
-            raise BinderError(error)
-
-        # if query had columns specified, we just copy them
-        if node.column_list is not None:
-            column_list = node.column_list
-
-        # else we curate the column list from the metadata
-        else:
-            column_list = []
-            for column in table_ref_obj.columns:
-                column_list.append(
-                    TupleValueExpression(
-                        col_name=column.name,
-                        table_alias=table_ref_obj.name.lower(),
-                        col_object=column,
-                    )
-                )
-
-        # bind the columns
-        for expr in column_list:
-            self.bind(expr)
-
-        node.column_list = column_list
 
     @bind.register(DropTableStatement)
     def _bind_drop_table_statement(self, node: DropTableStatement):

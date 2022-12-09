@@ -15,7 +15,7 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
@@ -23,7 +23,11 @@ from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.parser.create_statement import (
+    ColConstraintInfo,
+    ColumnDefinition,
+    CreateTableStatement,
+)
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
@@ -84,7 +88,7 @@ class ParserTests(unittest.TestCase):
 
         # check inner stmt from
         self.assertIsNotNone(
-            inner_stmt.view_ref, TableRef(TableInfo("uadetrac_fastRCNN"))
+            inner_stmt.view_info, TableRef(TableInfo("uadetrac_fastRCNN"))
         )
 
     def test_create_statement(self):
@@ -100,11 +104,40 @@ class ParserTests(unittest.TestCase):
             );"""
         )
 
+        expected_cci = ColConstraintInfo()
+        expected_cci.nullable = True
+        unique_cci = ColConstraintInfo()
+        unique_cci.unique = True
+        unique_cci.nullable = False
+        expected_stmt = CreateTableStatement(
+            TableInfo("Persons"),
+            True,
+            [
+                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, [], unique_cci),
+                ColumnDefinition(
+                    "Frame_Data", ColumnType.TEXT, None, [10], expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Value", ColumnType.FLOAT, None, [1000, 201], expected_cci
+                ),
+                ColumnDefinition(
+                    "Frame_Array",
+                    ColumnType.NDARRAY,
+                    NdArrayType.UINT8,
+                    [5, 100, 2432, 4324, 100],
+                    expected_cci,
+                ),
+            ],
+        )
+        expected_stmt_str = "CREATE TABLE Persons (True)"
+
         for query in single_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
+            self.assertEqual(str(eva_statement_list[0]), expected_stmt_str)
+            self.assertEqual(eva_statement_list[0], expected_stmt)
 
     def test_rename_statement(self):
         parser = Parser()
@@ -253,6 +286,44 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt_new.target_list, select_stmt.target_list)
         self.assertEqual(select_stmt_new.from_table, select_stmt.from_table)
         self.assertEqual(str(select_stmt_new), str(select_stmt))
+
+    def test_select_statement_groupby_class(self):
+        """Testing sample frequency"""
+
+        parser = Parser()
+
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 1)
+        self.assertEqual(
+            select_stmt.target_list[0].etype, ExpressionType.AGGREGATION_FIRST
+        )
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "TAIPAI")
+
+        # sample_freq
+        self.assertEqual(
+            select_stmt.groupby_clause,
+            ConstantValueExpression("8f", v_type=ColumnType.TEXT),
+        )
+
+    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
+        # GROUP BY with multiple attributes should raise Syntax Error
+        parser = Parser()
+        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
+        self.assertRaises(SyntaxError, parser.parse, select_query)
 
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement
@@ -446,13 +517,13 @@ class ParserTests(unittest.TestCase):
 
     def test_load_video_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD FILE 'data/video.mp4'
-                             INTO MyVideo WITH FORMAT VIDEO;"""
+        load_data_query = """LOAD VIDEO 'data/video.mp4'
+                             INTO MyVideo"""
         file_options = {}
         file_options["file_format"] = FileFormatType.VIDEO
         column_list = None
         expected_stmt = LoadDataStatement(
-            TableRef(TableInfo("MyVideo")),
+            TableInfo("MyVideo"),
             Path("data/video.mp4"),
             column_list,
             file_options,
@@ -467,14 +538,13 @@ class ParserTests(unittest.TestCase):
 
     def test_load_csv_data_statement(self):
         parser = Parser()
-        load_data_query = """LOAD FILE 'data/meta.csv'
+        load_data_query = """LOAD CSV 'data/meta.csv'
                              INTO
-                             MyMeta (id, frame_id, video_id, label)
-                             WITH FORMAT CSV;"""
+                             MyMeta (id, frame_id, video_id, label);"""
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
         expected_stmt = LoadDataStatement(
-            TableRef(TableInfo("MyMeta")),
+            TableInfo("MyMeta"),
             Path("data/meta.csv"),
             [
                 TupleValueExpression("id"),
@@ -504,7 +574,7 @@ class ParserTests(unittest.TestCase):
         expected_stmt = UploadStatement(
             Path("data/video.mp4"),
             "b'AAAA'",
-            TableRef(TableInfo("MyVideo")),
+            TableInfo("MyVideo"),
             column_list,
             file_options,
         )
@@ -530,7 +600,7 @@ class ParserTests(unittest.TestCase):
         expected_stmt = UploadStatement(
             Path("data/meta.csv"),
             "b'AAAA'",
-            TableRef(TableInfo("MyMeta")),
+            TableInfo("MyMeta"),
             [
                 TupleValueExpression("id"),
                 TupleValueExpression("frame_id"),
@@ -618,7 +688,7 @@ class ParserTests(unittest.TestCase):
         mat_view_stmt = parser.parse(query)
         select_stmt = parser.parse(select_query)
         expected_stmt = CreateMaterializedViewStatement(
-            TableRef(TableInfo("uadtrac_fastRCNN")),
+            TableInfo("uadtrac_fastRCNN"),
             [
                 ColumnDefinition("id", None, None, None),
                 ColumnDefinition("labels", None, None, None),

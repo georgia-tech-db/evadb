@@ -19,7 +19,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.planner.drop_plan import DropPlan
-from eva.storage.storage_engine import StorageEngine, VideoStorageEngine
+from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
@@ -40,16 +40,17 @@ class DropExecutor(AbstractExecutor):
         if not catalog_manager.check_table_exists(
             table_ref.table.database_name, table_ref.table.table_name
         ):
-            err_msg = "Table: {} does not exsits".format(table_ref)
+            err_msg = "Table: {} does not exist".format(table_ref)
             if self.node.if_exists:
                 logger.warn(err_msg)
             else:
                 logger.exception(err_msg)
 
-        if table_ref.table.table_obj.is_video:
-            VideoStorageEngine.drop(table=table_ref.table.table_obj)
-        else:
-            StorageEngine.drop(table=table_ref.table.table_obj)
+        try:
+            storage_engine = StorageEngine.factory(table_ref.table.table_obj)
+        except RuntimeError as err:
+            raise ExecutorError(str(err))
+        storage_engine.drop(table=table_ref.table.table_obj)
 
         success = catalog_manager.drop_dataset_metadata(
             table_ref.table.database_name, table_ref.table.table_name
