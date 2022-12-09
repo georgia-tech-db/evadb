@@ -52,7 +52,7 @@ class CreateUDFExecutor(AbstractExecutor):
         if catalog_manager.get_udf_by_type(self.node.udf_type):
             # check if the inputs and outputs of this type match with existing UDF
             pass
-            
+
         io_list = []
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
