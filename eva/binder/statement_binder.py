@@ -230,8 +230,8 @@ class StatementBinder:
         # First, check if it refers to any specific model in the catalog
         udf_obj = self._catalog.get_udf_by_name(node.name)
         if udf_obj is None:
-            if self._catalog.get_udf_by_type(node.name) is not None:
-                # If not, we would want to check if it refers to a type of a model instead
+            # If not, we would want to check if it refers to a type of a model instead
+            if self._catalog.get_udf_by_type(node.name) is None:
                 err_msg = (
                     f"UDF with name {node.name} does not exist in the catalog. "
                     "Please create the UDF using CREATE UDF command."
