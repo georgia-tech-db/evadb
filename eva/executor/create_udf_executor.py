@@ -46,6 +46,13 @@ class CreateUDFExecutor(AbstractExecutor):
                 msg = f"UDF {self.node.name} already exists."
                 logger.error(msg)
                 raise RuntimeError(msg)
+
+        # TODO: enable this once all existing UDFs have a common type, input and output standard
+        # check catalog if a UDF of the same type already exists
+        if catalog_manager.get_udf_by_type(self.node.udf_type):
+            # check if the inputs and outputs of this type match with existing UDF
+            pass
+            
         io_list = []
         io_list.extend(self.node.inputs)
         io_list.extend(self.node.outputs)
