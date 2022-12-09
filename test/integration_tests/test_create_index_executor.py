@@ -101,6 +101,14 @@ class CreateIndexTest(unittest.TestCase):
             ),
         )
 
+        # Test referenced column.
+        feat_df_metadata = CatalogManager().get_dataset_metadata(
+            None, "testCreateIndexFeatTable"
+        )
+        feat_df_column = [col for col in feat_df_metadata.columns if col.name == "feat"][0]
+        self.assertEqual(index_metadata.feat_df_column_id, feat_df_column.id)
+        self.assertEqual(index_metadata.feat_df_column, feat_df_column)
+
         # Test on disk index.
         index = faiss.read_index(index_metadata.save_file_path)
         distance, logical_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
@@ -115,6 +123,8 @@ class CreateIndexTest(unittest.TestCase):
             None, secondary_index_tb_name
         )
         self.assertEqual(index_metadata.secondary_index_id, secondary_index_metadata.id)
+        self.assertEqual(index_metadata.secondary_index, secondary_index_metadata)
+
         size = 0
         storage_engine = StorageEngine.factory(secondary_index_metadata)
         for i, batch in enumerate(storage_engine.read(secondary_index_metadata, 1)):

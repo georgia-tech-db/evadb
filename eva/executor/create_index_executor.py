@@ -21,9 +21,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import (
     ColumnType,
-    Dimension,
     IndexType,
-    NdArrayType,
     TableType,
 )
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
@@ -55,6 +53,10 @@ class CreateIndexExecutor(AbstractExecutor):
             # Get feature tables.
             feat_df_metadata = self.node.table_ref.table.table_obj
 
+            # Get feature column.
+            feat_col_name = self.node.col_list[0].name
+            feat_df_column = [col for col in feat_df_metadata.columns if col.name == feat_col_name][0]
+
             # Add features to index.
             # TODO: batch size is hardcoded for now.
             index = None
@@ -62,9 +64,6 @@ class CreateIndexExecutor(AbstractExecutor):
             logical_to_row_id = dict()
             storage_engine = StorageEngine.factory(feat_df_metadata)
             for batch in storage_engine.read(feat_df_metadata, 1):
-                # Feature column name.
-                feat_col_name = self.node.col_list[0].name
-
                 # Pandas wraps numpy array as an object inside a numpy
                 # array. Use zero index to get the actual numpy array.
                 feat = batch.column_as_numpy_array(feat_col_name)[0]
@@ -78,9 +77,6 @@ class CreateIndexExecutor(AbstractExecutor):
                 logical_to_row_id[num_rows] = row_id
 
                 num_rows += 1
-
-            # Get index IO list.
-            io_list = self._get_index_io_list(input_dim)
 
             # Build secondary index maaping.
             secondary_index_df_metadata = self._create_secondary_index_table()
@@ -104,8 +100,8 @@ class CreateIndexExecutor(AbstractExecutor):
                 self.node.name,
                 self._get_index_save_path(),
                 self.node.index_type,
-                io_list,
                 secondary_index_df_metadata,
+                feat_df_column,
             )
 
             yield Batch(
@@ -147,37 +143,38 @@ class CreateIndexExecutor(AbstractExecutor):
             / Path("{}_{}.index".format(self.node.index_type, self.node.name))
         )
 
-    def _get_index_io_list(self, input_dim):
-        # Input dimension is inferred from the actual feature.
-        catalog_manager = CatalogManager()
-        input_index_io = catalog_manager.index_io(
-            "input_feature",
-            ColumnType.NDARRAY,
-            NdArrayType.FLOAT32,
-            [Dimension.ANYDIM, input_dim],
-            True,
-        )
+    # Comment out since Index IO is not needed for now.
+    # def _get_index_io_list(self, input_dim):
+    #     # Input dimension is inferred from the actual feature.
+    #     catalog_manager = CatalogManager()
+    #     input_index_io = catalog_manager.index_io(
+    #         "input_feature",
+    #         ColumnType.NDARRAY,
+    #         NdArrayType.FLOAT32,
+    #         [Dimension.ANYDIM, input_dim],
+    #         True,
+    #     )
 
-        # Output dimension depends on number of searched
-        # feature vectors and top N similar feature vectors.
-        # IndexIO has detailed documentation about input and
-        # output format of index.
-        id_index_io = catalog_manager.index_io(
-            "logical_id",
-            ColumnType.NDARRAY,
-            NdArrayType.INT64,
-            [Dimension.ANYDIM, Dimension.ANYDIM],
-            False,
-        )
-        distance_index_io = catalog_manager.index_io(
-            "distance",
-            ColumnType.NDARRAY,
-            NdArrayType.FLOAT32,
-            [Dimension.ANYDIM, Dimension.ANYDIM],
-            False,
-        )
+    #     # Output dimension depends on number of searched
+    #     # feature vectors and top N similar feature vectors.
+    #     # IndexIO has detailed documentation about input and
+    #     # output format of index.
+    #     id_index_io = catalog_manager.index_io(
+    #         "logical_id",
+    #         ColumnType.NDARRAY,
+    #         NdArrayType.INT64,
+    #         [Dimension.ANYDIM, Dimension.ANYDIM],
+    #         False,
+    #     )
+    #     distance_index_io = catalog_manager.index_io(
+    #         "distance",
+    #         ColumnType.NDARRAY,
+    #         NdArrayType.FLOAT32,
+    #         [Dimension.ANYDIM, Dimension.ANYDIM],
+    #         False,
+    #     )
 
-        return [input_index_io, id_index_io, distance_index_io]
+    #     return [input_index_io, id_index_io, distance_index_io]
 
     def _create_secondary_index_table(self):
         # Build secondary index to map from index Logical ID to Row ID.

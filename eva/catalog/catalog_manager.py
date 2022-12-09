@@ -19,12 +19,10 @@ from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.index import IndexMetadata
-from eva.catalog.models.index_io import IndexIO
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
-from eva.catalog.services.index_io_service import IndexIOService
 from eva.catalog.services.index_service import IndexService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
@@ -52,7 +50,6 @@ class CatalogManager(object):
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
         self._index_service = IndexService()
-        self._index_io_service = IndexIOService()
 
     def reset(self):
         """
@@ -391,62 +388,23 @@ class CatalogManager(object):
         return self._udf_service.get_all_udfs()
 
     """ Index related services. """
-
-    def index_io(
-        self,
-        io_name: str,
-        data_type: ColumnType,
-        array_type: NdArrayType,
-        dimensions: List[int],
-        is_input: bool,
-    ):
-        return IndexIO(
-            io_name,
-            data_type,
-            array_type=array_type,
-            array_dimensions=dimensions,
-            is_input=is_input,
-        )
-
     def create_index(
         self,
         name: str,
         save_file_path: str,
         index_type: IndexType,
-        index_io_list: List[IndexIO],
         secondary_index_df_metadata: DataFrameMetadata,
+        feat_df_column: DataFrameColumn,
     ) -> IndexMetadata:
         index_metadata = self._index_service.create_index(
             name, save_file_path, index_type
         )
         index_metadata.secondary_index_id = secondary_index_df_metadata.id
-        for index_io in index_io_list:
-            index_io.index_id = index_metadata.id
-        self._index_io_service.add_index_io(index_io_list)
+        index_metadata.feat_df_column_id = feat_df_column.id
         return index_metadata
 
     def get_index_by_name(self, name: str) -> IndexMetadata:
         return self._index_service.index_by_name(name)
-
-    def get_index_inputs(self, index_obj: IndexMetadata) -> List[IndexIO]:
-        if not isinstance(index_obj, IndexMetadata):
-            raise ValueError(
-                """Expected IndexMetadata object, got
-                             {}""".format(
-                    type(index_obj)
-                )
-            )
-        return self._index_io_service.get_inputs_by_index_id(index_obj.id)
-
-    def get_index_outputs(self, index_obj: IndexMetadata) -> List[IndexIO]:
-        if not isinstance(index_obj, IndexMetadata):
-            raise ValueError(
-                """Expected IndexMetadata object, got
-                             {}""".format(
-                    type(index_obj)
-                )
-            )
-        return self._index_io_service.get_outputs_by_index_id(index_obj.id)
 
     def drop_index(self, index_name: str) -> bool:
         return self._index_service.drop_index_by_name(index_name)

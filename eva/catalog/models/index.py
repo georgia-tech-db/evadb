@@ -26,16 +26,16 @@ class IndexMetadata(BaseModel):
     _name = Column("name", String(100), unique=True)
     _save_file_path = Column("save_file_path", String(128))
     _type = Column("type", Enum(IndexType), default=Enum)
-    _index_io = relationship(
-        "IndexIO",
-        back_populates="_index",
-        cascade="all, delete, delete-orphan",
-    )
 
+    # Secondary index reference.
     _secondary_index_id = Column(
         "secondary_index_id", Integer, ForeignKey("df_metadata._row_id")
     )
     _secondary_index = relationship("DataFrameMetadata")
+
+    # Input feature column reference.
+    _feat_df_column_id = Column("df_column_id", Integer, ForeignKey("df_column._row_id"))
+    _feat_df_column = relationship("DataFrameColumn")
 
     def __init__(
         self,
@@ -43,11 +43,13 @@ class IndexMetadata(BaseModel):
         save_file_path: str,
         type: IndexType,
         secondary_index_id: int = None,
+        feat_df_column_id: int = None,
     ):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type
         self._secondary_index_id = secondary_index_id
+        self._feat_df_column_id = feat_df_column_id
 
     @property
     def id(self):
@@ -66,12 +68,28 @@ class IndexMetadata(BaseModel):
         return self._type
 
     @property
+    def secondary_index(self):
+        return self._secondary_index
+
+    @property
+    def feat_df_column(self):
+        return self._feat_df_column
+
+    @property
     def secondary_index_id(self):
         return self._secondary_index_id
 
     @secondary_index_id.setter
     def secondary_index_id(self, value):
         self._secondary_index_id = value
+
+    @property
+    def feat_df_column_id(self):
+        return self._feat_df_column_id
+
+    @feat_df_column_id.setter
+    def feat_df_column_id(self, value):
+        self._feat_df_column_id = value
 
     def __str__(self):
         index_str = "index: ({}, {}, {})\n".format(
