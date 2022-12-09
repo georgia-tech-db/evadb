@@ -147,6 +147,7 @@ class TableColumn:
     _array_type = Enum(NdArrayType)
     _array_dimensions = String(100)
     _metadata_id = Integer()
+    _id = Integer()
 
     def copy_constructor(self, obj):
         self._name = obj.name
@@ -155,6 +156,7 @@ class TableColumn:
         self._array_type = obj.array_type
         self._array_dimensions = obj
         self._metadata_id = obj.metadata_id
+        self._id = obj.id
 
     def non_copy_constructor(
         self, name, type, array_type, array_dimensions, is_nullable
