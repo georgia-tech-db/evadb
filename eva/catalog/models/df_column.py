@@ -196,19 +196,22 @@ class TableColumn:
         return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
-    def array_dimensions(self, value: List[int]):
+    def array_dimensions(self, value):
         # This tranformation converts the ANYDIM enum to
         # None which is expected by petastorm.
         # Before adding data, petastorm verifies _is_compliant_shape
         # and any unknown dimension is expected to be None
         # https://petastorm.readthedocs.io/en/latest/_modules/petastorm/codecs.html#DataframeColumnCodec.encode
-        dimensions = []
-        for dim in value:
-            if dim == Dimension.ANYDIM:
-                dimensions.append(None)
-            else:
-                dimensions.append(dim)
-        self._array_dimensions = str(dimensions)
+        if (isinstance(value, DataFrameColumn)):
+            self._array_dimensions = value.array_dimensions
+        else:
+            dimensions = []
+            for dim in value:
+                if dim == Dimension.ANYDIM:
+                    dimensions.append(None)
+                else:
+                    dimensions.append(dim)
+            self._array_dimensions = str(dimensions)
 
     @property
     def metadata_id(self):
