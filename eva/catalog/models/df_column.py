@@ -202,7 +202,7 @@ class TableColumn:
         # Before adding data, petastorm verifies _is_compliant_shape
         # and any unknown dimension is expected to be None
         # https://petastorm.readthedocs.io/en/latest/_modules/petastorm/codecs.html#DataframeColumnCodec.encode
-        if (isinstance(value, DataFrameColumn)):
+        if isinstance(value, DataFrameColumn):
             self._array_dimensions = value.array_dimensions
         else:
             dimensions = []
