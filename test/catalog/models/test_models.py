@@ -19,7 +19,6 @@ from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.index import IndexMetadata
-from eva.catalog.models.index_io import IndexIO
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 
@@ -182,32 +181,3 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(index, index3)
         index4 = IndexMetadata("index", "FaissSavePath", "HNSW4")
         self.assertNotEqual(index, index4)
-
-    def test_index_io(self):
-        index_io = IndexIO(
-            "name", ColumnType.NDARRAY, True, NdArrayType.UINT8, [2, 3], True, 1
-        )
-        self.assertEqual(index_io.id, None)
-        self.assertEqual(index_io.index_id, 1)
-        self.assertEqual(index_io.is_input, True)
-        self.assertEqual(index_io.is_nullable, True)
-        self.assertEqual(index_io.array_type, NdArrayType.UINT8)
-        self.assertEqual(index_io.array_dimensions, [2, 3])
-        self.assertEqual(index_io.name, "name")
-        self.assertEqual(index_io.type, ColumnType.NDARRAY)
-
-    def test_index_io_equality(self):
-        index_io = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 1)
-        self.assertEqual(index_io, index_io)
-        index_io2 = IndexIO("name2", ColumnType.FLOAT, True, None, [2, 3], True, 1)
-        self.assertNotEqual(index_io, index_io2)
-        index_io2 = IndexIO("name", ColumnType.INTEGER, True, None, [2, 3], True, 1)
-        self.assertNotEqual(index_io, index_io2)
-        index_io2 = IndexIO("name", ColumnType.FLOAT, False, None, [2, 3], True, 1)
-        self.assertNotEqual(index_io, index_io2)
-        index_io2 = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3, 4], True, 1)
-        self.assertNotEqual(index_io, index_io2)
-        index_io2 = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3], False, 1)
-        self.assertNotEqual(index_io, index_io2)
-        index_io2 = IndexIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 2)
-        self.assertNotEqual(index_io, index_io2)
