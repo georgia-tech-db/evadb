@@ -28,5 +28,6 @@ EVA_UPLOAD_DIR = "tmp"
 EVA_CONFIG_FILE = "eva.yml"
 UDF_DIR = "udfs"
 CATALOG_DIR = "catalog"
+INDEX_DIR = "index"
 DATASET_DATAFRAME_NAME = "dataset"
 DB_DEFAULT_URI = "sqlite:///{}/eva_catalog.db".format(EVA_DEFAULT_DIR.resolve())

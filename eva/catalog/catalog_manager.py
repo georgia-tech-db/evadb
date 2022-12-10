@@ -14,14 +14,16 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.index import IndexMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
+from eva.catalog.services.index_service import IndexService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
@@ -47,6 +49,7 @@ class CatalogManager(object):
         self._column_service = DatasetColumnService()
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
+        self._index_service = IndexService()
 
     def reset(self):
         """
@@ -383,3 +386,29 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    """ Index related services. """
+
+    def create_index(
+        self,
+        name: str,
+        save_file_path: str,
+        index_type: IndexType,
+        secondary_index_df_metadata: DataFrameMetadata,
+        feat_df_column: DataFrameColumn,
+    ) -> IndexMetadata:
+        index_metadata = self._index_service.create_index(
+            name, save_file_path, index_type
+        )
+        index_metadata.secondary_index_id = secondary_index_df_metadata.id
+        index_metadata.feat_df_column_id = feat_df_column.id
+        return index_metadata
+
+    def get_index_by_name(self, name: str) -> IndexMetadata:
+        return self._index_service.index_by_name(name)
+
+    def drop_index(self, index_name: str) -> bool:
+        return self._index_service.drop_index_by_name(index_name)
+
+    def get_all_index_entries(self):
+        return self._index_service.get_all_indices()
