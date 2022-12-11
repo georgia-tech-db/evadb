@@ -43,6 +43,16 @@ class LoadVideoExecutor(AbstractExecutor):
         """
         try:
             valid_files = []
+            for file_path in iter_path_regex(self.node.file_path):
+                file_path = Path(file_path)
+                if validate_video(file_path):
+                    valid_files.append(str(file_path))
+                else:
+                    err_msg = (
+                        f"Load video failed: encountered invalid file {str(file_path)}"
+                    )
+                    logger.error(err_msg)
+                    raise ValueError(file_path)
             # Create catalog entry
             table_info = self.node.table_info
             database_name = table_info.database_name
@@ -62,30 +72,16 @@ class LoadVideoExecutor(AbstractExecutor):
             if do_create:
                 success = storage_engine.create(table_obj)
                 if not success:
-                    raise RuntimeError(
+                    raise ExecutorError(
                         f"StorageEngine {storage_engine} create call failed"
                     )
+            storage_engine.write(
+                table_obj,
+                Batch(pd.DataFrame({"file_path": valid_files})),
+            )
 
-            for file_path in iter_path_regex(self.node.file_path):
-                file_path = Path(file_path)
-                if validate_video(file_path):
-                    storage_engine.write(
-                        table_obj,
-                        Batch(pd.DataFrame({"file_path": [str(file_path)]})),
-                    )
-                    valid_files.append(file_path)
-                else:
-                    raise ValueError(file_path)
-
-        except RuntimeError as e:
-            raise ExecutorError(str(e))
-        except ValueError as e:
-            self._rollback_load(storage_engine, table_obj, valid_files)
-            err_msg = f"Load video failed: encountered invalid file {str(e)}"
-            logger.error(err_msg)
-            raise ExecutorError(err_msg)
         except Exception as e:
-            self._rollback_load(storage_engine, table_obj, valid_files)
+            self._rollback_load(storage_engine, table_obj, valid_files, do_create)
             err_msg = f"Load video failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
@@ -99,11 +95,14 @@ class LoadVideoExecutor(AbstractExecutor):
         storage_engine: AbstractStorageEngine,
         table_obj: DataFrameMetadata,
         valid_files: List[Path],
+        do_create: bool,
     ):
         try:
             if valid_files:
                 rows = Batch(pd.DataFrame(data={"file_path": list(valid_files)}))
                 storage_engine.delete(table_obj, rows)
+            if do_create:
+                storage_engine.drop(table_obj)
         except Exception as e:
             logger.exception(
                 f"Unexpected Exception {e} occured while rolling back. This is bad as the video table can be in a corrupt state. Please verify the video table {table_obj} for correctness."

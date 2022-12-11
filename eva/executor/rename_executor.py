@@ -33,7 +33,6 @@ class RenameExecutor(AbstractExecutor):
         """
         try:
             obj = self.node.old_table.table.table_obj
-            print(obj)
             storage_engine = StorageEngine.factory(obj)
             storage_engine.rename(obj, self.node.new_name)
         except Exception as e:

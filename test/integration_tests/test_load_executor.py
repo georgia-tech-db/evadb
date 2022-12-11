@@ -28,6 +28,7 @@ from test.util import (
 import numpy as np
 import pandas as pd
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
@@ -89,20 +90,16 @@ class LoadExecutorTest(unittest.TestCase):
         # should fail on an empty file
         with tempfile.NamedTemporaryFile() as tmp:
             query = f"""LOAD VIDEO "{tmp.name}" INTO MyVideos;"""
-            with self.assertRaises(Exception) as cm:
+            with self.assertRaises(Exception):
                 execute_query_fetch_all(query)
-            self.assertEqual(
-                str(cm.exception),
-                f"Load video failed: encountered invalid file {tmp.name}",
-            )
 
     def test_should_fail_to_load_invalid_files_as_video(self):
         path = f"{EVA_ROOT_DIR}/data/**"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
-        result = execute_query_fetch_all("SELECT name FROM MyVideos;")
-        self.assertEqual(len(result), 0)
+        with self.assertRaises(BinderError):
+            execute_query_fetch_all("SELECT name FROM MyVideos")
 
     def test_should_rollback_if_video_load_fails(self):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
@@ -118,8 +115,8 @@ class LoadExecutorTest(unittest.TestCase):
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
                 with self.assertRaises(Exception):
                     execute_query_fetch_all(query)
-                result = execute_query_fetch_all("SELECT name FROM MyVideos")
-                self.assertEqual(len(result), 0)
+                with self.assertRaises(BinderError):
+                    execute_query_fetch_all("SELECT name FROM MyVideos")
 
             # Load two correct file and one empty file
             # nothing should be added
@@ -131,8 +128,8 @@ class LoadExecutorTest(unittest.TestCase):
                 query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
                 with self.assertRaises(Exception):
                     execute_query_fetch_all(query)
-                result = execute_query_fetch_all("SELECT name FROM MyVideos")
-                self.assertEqual(len(result), 0)
+                with self.assertRaises(BinderError):
+                    execute_query_fetch_all("SELECT name FROM MyVideos")
 
     def test_should_rollback_and_preserve_previous_state(self):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")

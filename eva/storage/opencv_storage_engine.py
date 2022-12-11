@@ -111,10 +111,10 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                         f"Duplicate File: {video_file} already exists in the table {table.name}"
                     )
                 shutil.copy2(str(video_file), str(dst_path))
-                self._rdb_handler.write(
-                    self._get_metadata_table(table),
-                    Batch(pd.DataFrame({"file_url": [str(video_file)]})),
-                )
+            self._rdb_handler.write(
+                self._get_metadata_table(table),
+                Batch(pd.DataFrame({"file_url": list(rows.file_paths())})),
+            )
 
         except CatalogError:
             raise
