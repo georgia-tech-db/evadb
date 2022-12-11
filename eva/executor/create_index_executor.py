@@ -20,13 +20,13 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, IndexType, TableType
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.planner.create_index_plan import CreateIndexPlan
-from eva.sql_config import IDENTIFIER_COLUMN
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 

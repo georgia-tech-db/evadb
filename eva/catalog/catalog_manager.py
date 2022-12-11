@@ -26,9 +26,9 @@ from eva.catalog.services.df_service import DatasetService
 from eva.catalog.services.index_service import IndexService
 from eva.catalog.services.udf_io_service import UdfIOService
 from eva.catalog.services.udf_service import UdfService
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
-from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
