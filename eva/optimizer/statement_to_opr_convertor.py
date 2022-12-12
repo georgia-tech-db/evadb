@@ -15,6 +15,7 @@
 from eva.expression.abstract_expression import AbstractExpression
 from eva.optimizer.operators import (
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
@@ -37,6 +38,7 @@ from eva.optimizer.operators import (
     LogicalUpload,
 )
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import CreateTableStatement
 from eva.parser.create_udf_statement import CreateUDFStatement
@@ -232,7 +234,7 @@ class StatementToPlanConvertor:
         self._plan = rename_opr
 
     def visit_drop(self, statement: DropTableStatement):
-        drop_opr = LogicalDrop(statement.table_refs, statement.if_exists)
+        drop_opr = LogicalDrop(statement.table_infos, statement.if_exists)
         self._plan = drop_opr
 
     def visit_create_udf(self, statement: CreateUDFStatement):
@@ -306,6 +308,15 @@ class StatementToPlanConvertor:
         explain_opr = LogicalExplain([self.visit(statement.explainable_stmt)])
         self._plan = explain_opr
 
+    def visit_create_index(self, statement: CreateIndexStatement):
+        create_index_opr = LogicalCreateIndex(
+            statement.name,
+            statement.table_ref,
+            statement.col_list,
+            statement.index_type,
+        )
+        self._plan = create_index_opr
+
     def visit(self, statement: AbstractStatement):
         """Based on the instance of the statement the corresponding
            visit is called.
@@ -338,6 +349,8 @@ class StatementToPlanConvertor:
             self.visit_show(statement)
         elif isinstance(statement, ExplainStatement):
             self.visit_explain(statement)
+        elif isinstance(statement, CreateIndexStatement):
+            self.visit_create_index(statement)
         return self._plan
 
     @property

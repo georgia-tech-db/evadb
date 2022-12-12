@@ -16,6 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.create_executor import CreateExecutor
+from eva.executor.create_index_executor import CreateIndexExecutor
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_executor import DropExecutor
@@ -127,6 +128,8 @@ class PlanExecutor:
             executor_node = ShowInfoExecutor(node=plan)
         elif plan_opr_type == PlanOprType.EXPLAIN:
             executor_node = ExplainExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.CREATE_INDEX:
+            executor_node = CreateIndexExecutor(node=plan)
 
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:

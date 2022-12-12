@@ -52,6 +52,16 @@ class CommonClauses(evaql_parserVisitor):
         else:
             return TupleValueExpression(col_name=uid)
 
+    def visitUidList(self, ctx: evaql_parser.UidListContext):
+        uid_list = []
+        uid_list_length = len(ctx.uid())
+        for uid_index in range(uid_list_length):
+            uid = self.visit(ctx.uid(uid_index))
+            uid_expr = TupleValueExpression(uid)
+            uid_list.append(uid_expr)
+
+        return uid_list
+
     def visitSimpleId(self, ctx: evaql_parser.SimpleIdContext):
         # todo handle children, right now assuming TupleValueExpr
         return ctx.getText()

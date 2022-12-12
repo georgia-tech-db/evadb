@@ -17,6 +17,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 from eva.configuration.configuration_manager import ConfigurationManager
 
+IDENTIFIER_COLUMN = "_row_id"
+
 
 class SQLConfig:
     """Singleton class for configuring connection to the database.
