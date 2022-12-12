@@ -28,7 +28,7 @@ class OpenTests(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         ConfigurationManager()
-        
+
         # Load built-in UDFs.
         load_inbuilt_udfs()
 
