@@ -116,11 +116,6 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                 Batch(pd.DataFrame({"file_url": list(rows.file_paths())})),
             )
 
-        except CatalogError:
-            raise
-        except FileExistsError as e:
-            logger.exception(str(e))
-            raise RuntimeError(str(e))
         except Exception as e:
             logger.exception(str(e))
             raise RuntimeError(str(e))
