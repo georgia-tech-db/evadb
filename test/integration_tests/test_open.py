@@ -19,6 +19,7 @@ from test.util import create_sample_image, file_remove, load_inbuilt_udfs
 import numpy as np
 import pandas as pd
 
+from test.util import create_sample_image, file_remove, load_inbuilt_udfs
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
@@ -30,7 +31,6 @@ class OpenTests(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
         ConfigurationManager()
-
         # Load built-in UDFs.
         load_inbuilt_udfs()
 
