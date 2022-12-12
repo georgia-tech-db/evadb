@@ -14,11 +14,11 @@
 # limitations under the License.
 import os
 import unittest
-from test.util import create_sample_image
-
 import numpy as np
-from mock import patch
+import pandas as pd
 
+from mock import patch
+from test.util import create_sample_image
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.executor_utils import ExecutorError
 from eva.udfs.ndarray.open import Open
@@ -37,7 +37,7 @@ class OpenTests(unittest.TestCase):
         upload_dir_from_config = self.config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
 
-        df = self.open_instance(img_path)
+        df = self.open_instance(pd.DataFrame([img_path]))
         actual_img = df["data"].to_numpy()[0]
 
         expected_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
@@ -55,12 +55,12 @@ class OpenTests(unittest.TestCase):
 
         # un-cached open
         with patch("eva.udfs.ndarray.open.cv2") as mock_cv2:
-            self.open_instance(img_path)
+            self.open_instance(pd.DataFrame([img_path]))
             mock_cv2.imread.assert_called_once_with(img_path)
 
         # cached open
         with patch("eva.udfs.ndarray.open.cv2") as mock_cv2:
-            self.open_instance(img_path)
+            self.open_instance(pd.DataFrame([img_path]))
             mock_cv2.imread.assert_not_called()
 
     def test_open_path_should_raise_error(self):
@@ -68,4 +68,4 @@ class OpenTests(unittest.TestCase):
         img_path = os.path.join(upload_dir_from_config, "dummy1.jpg")
 
         with self.assertRaises(ExecutorError):
-            self.open_instance(img_path)
+            self.open_instance(pd.DataFrame([img_path]))
