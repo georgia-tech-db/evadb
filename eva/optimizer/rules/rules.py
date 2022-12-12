@@ -311,8 +311,6 @@ class UdfReuseForFunctionScan(Rule):
 
             # first call would return None
             view = self._check_udf_history(function_scan) 
-            x = 1
-
 
             # you have a history of this udf
             if view is not None:
@@ -338,10 +336,11 @@ class UdfReuseForFunctionScan(Rule):
                 lateral_join.children[1] = insert
 
                 # TODO: This flow is buggy, need to fix. What to return?
+                # Fix: Create a LogicalToPhysical for insert the insert operator
 
             # no udf history
             else:
-
+                
                 # create udf historical record
                 self._create_udf_history(function_scan)
 
@@ -457,13 +456,13 @@ class UdfReuseForFunctionScan(Rule):
         )
 
 
-        # create table metadata for the mat view
-        table_metadata = catalog.create_table_metadata(
-            table_info=TableInfo(table_name="test_view"),
-            columns=col_defs,
-        )
+        # # create table metadata for the mat view
+        # table_metadata = catalog.create_table_metadata(
+        #     table_info=TableInfo(table_name="test_view"),
+        #     columns=col_defs,
+        # )
 
-        return table_metadata
+        #return table_metadata
         
 
     def _function_scan_for_mat(self, fs: LogicalFunctionScan) \
@@ -540,7 +539,12 @@ class UdfReuseForFunctionScan(Rule):
                 )
             )
 
-        mat = LogicalCreateMaterializedView(view=view_ref, col_list=col_defs, if_not_exists=True)
+        mat = LogicalCreateMaterializedView(
+            view=view_ref, 
+            col_list=col_defs, 
+            if_not_exists=True, 
+            yield_output=True
+        )
 
         return mat
 
@@ -1112,6 +1116,7 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
             before.view,
             columns=before.col_list,
             if_not_exists=before.if_not_exists,
+            yield_output=before.yield_output,
         )
         for child in before.children:
             after.append_child(child)
