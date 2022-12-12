@@ -18,7 +18,7 @@ import re
 from typing import TYPE_CHECKING, List
 
 from eva.catalog.catalog_utils import is_video_table
-from eva.sql_config import IDENTIFIER_COLUMN
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
