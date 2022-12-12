@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,62 +12,60 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pandas as pd
-import numpy as np
 
-from eva.expression.abstract_expression import AbstractExpression, \
-    ExpressionType, \
-    ExpressionReturnType
+from eva.expression.abstract_expression import (
+    AbstractExpression,
+    ExpressionReturnType,
+    ExpressionType,
+)
 from eva.models.storage.batch import Batch
 
 
 class ComparisonExpression(AbstractExpression):
-    def __init__(self, exp_type: ExpressionType, left: AbstractExpression,
-                 right: AbstractExpression):
+    def __init__(
+        self,
+        exp_type: ExpressionType,
+        left: AbstractExpression,
+        right: AbstractExpression,
+    ):
         children = []
         if left is not None:
             children.append(left)
         if right is not None:
             children.append(right)
-        super().__init__(exp_type, rtype=ExpressionReturnType.BOOLEAN,
-                         children=children)
+        super().__init__(
+            exp_type, rtype=ExpressionReturnType.BOOLEAN, children=children
+        )
 
     def evaluate(self, *args, **kwargs):
         # cast in to numpy array
-        lvalues = self.get_child(0).evaluate(*args, **kwargs).frames.values
-        rvalues = self.get_child(1).evaluate(*args, **kwargs).frames.values
+        lbatch = self.get_child(0).evaluate(*args, **kwargs)
+        rbatch = self.get_child(1).evaluate(*args, **kwargs)
 
-        if len(lvalues) != len(rvalues):
-            if len(lvalues) == 1:
-                lvalues = np.repeat(lvalues, len(rvalues), axis=0)
-            elif len(rvalues) == 1:
-                rvalues = np.repeat(rvalues, len(lvalues), axis=0)
+        if len(lbatch) != len(rbatch):
+            if len(lbatch) == 1:
+                lbatch.repeat(len(rbatch))
+            elif len(rbatch) == 1:
+                rbatch.repeat(len(lbatch))
             else:
-                raise Exception(
-                    "Left and Right batch does not have equal elements")
+                raise Exception("Left and Right batch does not have equal elements")
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
-            return Batch(pd.DataFrame(lvalues == rvalues))
+            return Batch.from_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_GREATER:
-            return Batch(pd.DataFrame(lvalues > rvalues))
+            return Batch.from_greater(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_LESSER:
-            return Batch(pd.DataFrame(lvalues < rvalues))
+            return Batch.from_lesser(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_GEQ:
-            return Batch(pd.DataFrame(lvalues >= rvalues))
+            return Batch.from_greater_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_LEQ:
-            return Batch(pd.DataFrame(lvalues <= rvalues))
+            return Batch.from_lesser_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_NEQ:
-            return Batch(pd.DataFrame(lvalues != rvalues))
+            return Batch.from_not_eq(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_CONTAINS:
-            res = [[all(x in p for x in q)
-                    for p, q in zip(left, right)]
-                   for left, right in zip(lvalues, rvalues)]
-            return Batch(pd.DataFrame(res))
+            return Batch.compare_contains(lbatch, rbatch)
         elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
-            res = [[all(x in q for x in p)
-                    for p, q in zip(left, right)]
-                   for left, right in zip(lvalues, rvalues)]
-            return Batch(pd.DataFrame(res))
+            return Batch.compare_is_contained(lbatch, rbatch)
         else:
             raise NotImplementedError
 
@@ -75,8 +73,7 @@ class ComparisonExpression(AbstractExpression):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, ComparisonExpression):
             return False
-        return (is_subtree_equal
-                and self.etype == other.etype)
+        return is_subtree_equal and self.etype == other.etype
 
     def __hash__(self) -> int:
         return super().__hash__()

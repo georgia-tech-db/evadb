@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
-
-from eva.udfs.udf_bootstrap_queries import (
-    Fastrcnn_udf_query,
-    ArrayCount_udf_query,
-)
+from eva.udfs.udf_bootstrap_queries import ArrayCount_udf_query, Fastrcnn_udf_query
 
 NUM_FRAMES = 10
 
@@ -36,13 +33,13 @@ class ShowExecutorTest(unittest.TestCase):
     # integration test
     def test_show_udfs(self):
         result = execute_query_fetch_all("SHOW UDFS;")
-        self.assertEqual(len(result.frames.columns), 5)
+        self.assertEqual(len(result.columns), 5)
 
         expected = {
             "name": ["FastRCNNObjectDetector", "Array_Count"],
             "inputs": [
                 ["Frame_Array NDARRAY UINT8 [3, None, None]"],
-                ["Input NDARRAY ANYTYPE []", "Key ANY"],
+                ["Input_Array NDARRAY ANYTYPE []", "Search_Key ANY"],
             ],
             "outputs": [
                 [
@@ -50,9 +47,9 @@ class ShowExecutorTest(unittest.TestCase):
                     "bboxes NDARRAY FLOAT32 [None, 4]",
                     "scores NDARRAY FLOAT32 [None]",
                 ],
-                ["count INTEGER"],
+                ["key_count INTEGER"],
             ],
-            "type": ["Classification", "Ndarray"],
+            "type": ["Classification", "NdarrayUDF"],
         }
         expected_df = pd.DataFrame(expected)
         self.assertTrue(all(expected_df.inputs == result.frames.inputs))

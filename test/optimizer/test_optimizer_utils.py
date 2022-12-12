@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
 # limitations under the License.
 import unittest
 
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.optimizer.optimizer_utils import column_definition_to_udf_io
-
 from eva.parser.create_statement import ColumnDefinition
-from eva.catalog.column_type import ColumnType, NdArrayType
 
 
 class OptimizerUtilsTest(unittest.TestCase):
-
     def test_column_definition_to_udf_io(self):
-        col = ColumnDefinition('data', ColumnType.NDARRAY, NdArrayType.UINT8,
-                               [None, None, None])
+        col = ColumnDefinition(
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+        )
         col_list = [col, col]
         actual = column_definition_to_udf_io(col_list, True)
         for io in actual:
-            self.assertEqual(io.name, 'data')
+            self.assertEqual(io.name, "data")
             self.assertEqual(io.type, ColumnType.NDARRAY)
             self.assertEqual(io.is_nullable, False)
             self.assertEqual(io.array_type, NdArrayType.UINT8)
@@ -39,7 +38,7 @@ class OptimizerUtilsTest(unittest.TestCase):
         # input not list
         actual2 = column_definition_to_udf_io(col, True)
         for io in actual2:
-            self.assertEqual(io.name, 'data')
+            self.assertEqual(io.name, "data")
             self.assertEqual(io.type, ColumnType.NDARRAY)
             self.assertEqual(io.is_nullable, False)
             self.assertEqual(io.array_type, NdArrayType.UINT8)

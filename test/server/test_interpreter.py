@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import unittest
-import io
 import contextlib
+import io
+import unittest
+from unittest.mock import MagicMock
 
 from mock import patch
-from unittest.mock import MagicMock
+
 from eva.server.interpreter import EvaCommandInterpreter, start_cmd_client
 
 
@@ -28,12 +28,12 @@ class InterpreterTests(unittest.TestCase):
 
     def test_cmd_emptyline_should_return_false(self):
         prompt = EvaCommandInterpreter()
-        prompt.prompt = '> '
+        prompt.prompt = "> "
 
         with io.StringIO() as buf:
             with contextlib.redirect_stdout(buf):
                 self.assertFalse(prompt.emptyline())
-                self.assertTrue('Enter a valid query' in buf.getvalue())
+                self.assertTrue("Enter a valid query" in buf.getvalue())
 
     def test_cmd_exit_should_return_true(self):
         prompt = EvaCommandInterpreter()
@@ -41,36 +41,36 @@ class InterpreterTests(unittest.TestCase):
         self.assertEqual(SystemExit, prompt.do_quit(None))
         self.assertEqual(SystemExit, prompt.do_exit(None))
 
-    @patch('eva.server.interpreter.EvaCommandInterpreter.emptyline')
+    @patch("eva.server.interpreter.EvaCommandInterpreter.emptyline")
     def test_onecmd_with_emptyline(self, mock_emptyline):
         prompt = EvaCommandInterpreter()
         mock_emptyline.return_value = False
 
-        prompt.onecmd('')
+        prompt.onecmd("")
         mock_emptyline.assert_called_once()
 
     def test_onecmd_with_exit(self):
         prompt = EvaCommandInterpreter()
-        self.assertEqual(SystemExit, prompt.onecmd('exit'))
-        self.assertEqual(SystemExit, prompt.onecmd('quit'))
+        self.assertEqual(SystemExit, prompt.onecmd("exit"))
+        self.assertEqual(SystemExit, prompt.onecmd("quit"))
 
     def test_onecmd_with_do_query(self):
         prompt = EvaCommandInterpreter()
         prompt.cursor = MagicMock()
-        prompt.cursor.fetch_all.return_value = '123'
+        prompt.cursor.fetch_all.return_value = "123"
 
-        query = 'SELECT id FROM MyVIdeo'
+        query = "SELECT id FROM MyVIdeo"
         with io.StringIO() as buf:
             with contextlib.redirect_stdout(buf):
                 self.assertFalse(prompt.onecmd(query))
                 prompt.cursor.execute.assert_called_once_with(query)
                 prompt.cursor.fetch_all.assert_called_once_with()
-                self.assertTrue('123' in buf.getvalue())
+                self.assertTrue("123" in buf.getvalue())
 
     # We are mocking the connect funciton call that gets imported into
     # interpreter instead of the one in db_api.
-    @patch('eva.server.interpreter.connect')
-    @patch('eva.server.interpreter.EvaCommandInterpreter.cmdloop')
+    @patch("eva.server.interpreter.connect")
+    @patch("eva.server.interpreter.EvaCommandInterpreter.cmdloop")
     def test_start_cmd_client(self, mock_cmdloop, mock_connect):
         class MOCKCONNECTION:
             def cursor(self):
@@ -78,7 +78,7 @@ class InterpreterTests(unittest.TestCase):
 
         mock_connect.return_value = MOCKCONNECTION()
 
-        host = '0.0.0.0'
+        host = "0.0.0.0"
         port = 5432
         start_cmd_client(host, port)
 

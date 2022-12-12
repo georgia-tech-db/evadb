@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,26 +12,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.parser.create_statement import CreateTableStatement, ColumnDefinition
+from eva.catalog.catalog_type import ColumnType, Dimension, IndexType, NdArrayType
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import (
+    ColConstraintInfo,
+    ColumnDefinition,
+    CreateTableStatement,
+)
 from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
-from eva.parser.create_statement import ColConstraintInfo
-from eva.parser.create_mat_view_statement \
-    import CreateMaterializedViewStatement
-from eva.catalog.column_type import ColumnType, NdArrayType, Dimension
+from eva.utils.logging_manager import logger
 
 
 ##################################################################
 # CREATE STATEMENTS
 ##################################################################
 class CreateTable(evaql_parserVisitor):
-    def visitColumnCreateTable(
-            self, ctx: evaql_parser.ColumnCreateTableContext):
+    def visitColumnCreateTable(self, ctx: evaql_parser.ColumnCreateTableContext):
 
-        table_ref = None
+        table_info = None
         if_not_exists = False
         create_definitions = []
 
@@ -41,7 +43,7 @@ class CreateTable(evaql_parserVisitor):
                 rule_idx = child.getRuleIndex()
 
                 if rule_idx == evaql_parser.RULE_tableName:
-                    table_ref = TableRef(self.visit(ctx.tableName()))
+                    table_info = self.visit(ctx.tableName())
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
                     if_not_exists = True
@@ -53,13 +55,12 @@ class CreateTable(evaql_parserVisitor):
                 # stop parsing something bad happened
                 return None
 
-        create_stmt = CreateTableStatement(table_ref,
-                                           if_not_exists,
-                                           create_definitions)
+        create_stmt = CreateTableStatement(
+            table_info, if_not_exists, create_definitions
+        )
         return create_stmt
 
-    def visitCreateDefinitions(
-            self, ctx: evaql_parser.CreateDefinitionsContext):
+    def visitCreateDefinitions(self, ctx: evaql_parser.CreateDefinitionsContext):
         column_definitions = []
         child_index = 0
         for child in ctx.children:
@@ -71,18 +72,22 @@ class CreateTable(evaql_parserVisitor):
 
         return column_definitions
 
-    def visitColumnDeclaration(
-            self, ctx: evaql_parser.ColumnDeclarationContext):
+    def visitColumnDeclaration(self, ctx: evaql_parser.ColumnDeclarationContext):
 
-        data_type, array_type, dimensions, column_constraint_information = \
-            self.visit(ctx.columnDefinition())
+        data_type, array_type, dimensions, column_constraint_information = self.visit(
+            ctx.columnDefinition()
+        )
 
         column_name = self.visit(ctx.uid())
 
         if column_name is not None:
             return ColumnDefinition(
-                column_name, data_type, array_type, dimensions,
-                column_constraint_information)
+                column_name,
+                data_type,
+                array_type,
+                dimensions,
+                column_constraint_information,
+            )
 
     def visitColumnDefinition(self, ctx: evaql_parser.ColumnDefinitionContext):
 
@@ -92,17 +97,29 @@ class CreateTable(evaql_parserVisitor):
 
         column_constraint_information = ColConstraintInfo()
 
+        not_null_set = False
         for i in range(constraint_count):
             return_type = self.visit(ctx.columnConstraint(i))
             if return_type == ColumnConstraintEnum.UNIQUE:
-
                 column_constraint_information.unique = True
+                column_constraint_information.nullable = False
+                not_null_set = True
+            elif return_type == ColumnConstraintEnum.NOTNULL:
+                column_constraint_information.nullable = False
+                not_null_set = True
+
+        if not not_null_set:
+            column_constraint_information.nullable = True
 
         return data_type, array_type, dimensions, column_constraint_information
 
     def visitUniqueKeyColumnConstraint(
-            self, ctx: evaql_parser.UniqueKeyColumnConstraintContext):
+        self, ctx: evaql_parser.UniqueKeyColumnConstraintContext
+    ):
         return ColumnConstraintEnum.UNIQUE
+
+    def visitNullColumnConstraint(self, ctx: evaql_parser.NullColumnConstraintContext):
+        return ColumnConstraintEnum.NOTNULL
 
     def visitSimpleDataType(self, ctx: evaql_parser.SimpleDataTypeContext):
 
@@ -128,8 +145,7 @@ class CreateTable(evaql_parserVisitor):
 
         return data_type, array_type, dimensions
 
-    def visitDimensionDataType(
-            self, ctx: evaql_parser.DimensionDataTypeContext):
+    def visitDimensionDataType(self, ctx: evaql_parser.DimensionDataTypeContext):
         data_type = None
         array_type = None
         dimensions = []
@@ -149,6 +165,8 @@ class CreateTable(evaql_parserVisitor):
         dimensions = None
         if ctx.arrayType():
             array_type = self.visit(ctx.arrayType())
+        else:
+            array_type = NdArrayType.ANYTYPE
         if ctx.lengthDimensionList():
             dimensions = self.visit(ctx.lengthDimensionList())
         return data_type, array_type, dimensions
@@ -185,10 +203,13 @@ class CreateTable(evaql_parserVisitor):
             array_type = NdArrayType.DATETIME
         elif ctx.ANYTYPE() is not None:
             array_type = NdArrayType.ANYTYPE
+        else:
+            err_msg = "Unsupported NdArray datatype found in the query"
+            logger.error(err_msg)
+            raise RuntimeError(err_msg)
         return array_type
 
-    def visitLengthOneDimension(
-            self, ctx: evaql_parser.LengthOneDimensionContext):
+    def visitLengthOneDimension(self, ctx: evaql_parser.LengthOneDimensionContext):
         dimensions = []
 
         if ctx.decimalLiteral() is not None:
@@ -196,16 +217,14 @@ class CreateTable(evaql_parserVisitor):
 
         return dimensions
 
-    def visitLengthTwoDimension(
-            self, ctx: evaql_parser.LengthTwoDimensionContext):
+    def visitLengthTwoDimension(self, ctx: evaql_parser.LengthTwoDimensionContext):
         first_decimal = self.visit(ctx.decimalLiteral(0))
         second_decimal = self.visit(ctx.decimalLiteral(1))
 
         dimensions = [first_decimal, second_decimal]
         return dimensions
 
-    def visitLengthDimensionList(
-            self, ctx: evaql_parser.LengthDimensionListContext):
+    def visitLengthDimensionList(self, ctx: evaql_parser.LengthDimensionListContext):
         dimensions = []
         dimension_list_length = len(ctx.decimalLiteral())
         for dimension_list_index in range(dimension_list_length):
@@ -232,17 +251,38 @@ class CreateTable(evaql_parserVisitor):
 
     # MATERIALIZED VIEW
     def visitCreateMaterializedView(
-            self, ctx: evaql_parser.CreateMaterializedViewContext):
-        view_name = self.visit(ctx.tableName())
-        view_ref = TableRef(view_name)
+        self, ctx: evaql_parser.CreateMaterializedViewContext
+    ):
+        view_info = self.visit(ctx.tableName())
         if_not_exists = False
         if ctx.ifNotExists():
             if_not_exists = True
         uid_list = self.visit(ctx.uidList())
         # setting all other column definition attributes as None,
         # need to figure from query
-        col_list = [ColumnDefinition(
-            uid.col_name, None, None, None) for uid in uid_list]
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
+        ]
         query = self.visit(ctx.selectStatement())
-        return CreateMaterializedViewStatement(view_ref, col_list,
-                                               if_not_exists, query)
+        return CreateMaterializedViewStatement(
+            view_info, col_list, if_not_exists, query
+        )
+
+    # INDEX CREATION
+    def visitCreateIndex(self, ctx: evaql_parser.CreateIndexContext):
+        index_name = self.visit(ctx.uid())
+        table_name = self.visit(ctx.tableName())
+        table_ref = TableRef(table_name)
+
+        # index type setup
+        index_type_ctx = ctx.indexType()
+        index_type = None
+        if index_type_ctx.HNSW() is not None:
+            index_type = IndexType.HNSW
+
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None)
+            for uid in self.visit(ctx.uidList())
+        ]
+
+        return CreateIndexStatement(index_name, table_ref, col_list, index_type)

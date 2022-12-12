@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+from typing import List
 
+from eva.catalog.models.udf_io import UdfIO
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from typing import List
-from eva.catalog.models.udf_io import UdfIO
-from pathlib import Path
 
 
 class CreateUDFPlan(AbstractPlan):
@@ -42,12 +42,15 @@ class CreateUDFPlan(AbstractPlan):
             udf type. it ca be object detection, classification etc.
     """
 
-    def __init__(self, name: str,
-                 if_not_exists: bool,
-                 inputs: List[UdfIO],
-                 outputs: List[UdfIO],
-                 impl_file_path: Path,
-                 udf_type: str = None):
+    def __init__(
+        self,
+        name: str,
+        if_not_exists: bool,
+        inputs: List[UdfIO],
+        outputs: List[UdfIO],
+        impl_file_path: Path,
+        udf_type: str = None,
+    ):
         super().__init__(PlanOprType.CREATE_UDF)
         self._name = name
         self._if_not_exists = if_not_exists
@@ -80,10 +83,29 @@ class CreateUDFPlan(AbstractPlan):
     def udf_type(self):
         return self._udf_type
 
+    def __str__(self):
+        return "CreateUDFPlan(name={}, \
+            if_not_exists={}, \
+            inputs={}, \
+            outputs={}, \
+            impl_file_path={}, \
+            udf_type={})".format(
+            self._name,
+            self._if_not_exists,
+            self._inputs,
+            self._outputs,
+            self._impl_path,
+            self._udf_type,
+        )
+
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.if_not_exists,
-                     tuple(self.inputs),
-                     tuple(self.outputs),
-                     self.impl_path,
-                     self.udf_type))
+        return hash(
+            (
+                super().__hash__(),
+                self.if_not_exists,
+                tuple(self.inputs),
+                tuple(self.outputs),
+                self.impl_path,
+                self.udf_type,
+            )
+        )

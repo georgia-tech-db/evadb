@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.planner.insert_plan import InsertPlan
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.planner.insert_plan import InsertPlan
 
 
 class InsertExecutor(AbstractExecutor):
-
     def __init__(self, node: InsertPlan):
         super().__init__(node)
 

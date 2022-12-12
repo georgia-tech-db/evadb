@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import asyncio
-import string
 import os
+import string
+from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
 
-from signal import signal
-from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1
-
-from eva.server.networking_utils import realtime_server_status,\
-    set_socket_io_timeouts
-from eva.server.command_handler import handle_request
 from eva.server.async_protocol import EvaProtocolBuffer
+from eva.server.command_handler import handle_request
+from eva.server.networking_utils import realtime_server_status, set_socket_io_timeouts
+from eva.utils.generic_utils import PickleSerializer
 from eva.utils.logging_manager import logger
 
 
@@ -51,15 +48,15 @@ class EvaServer(asyncio.Protocol):
         self.transport = transport
 
         # Set timeout for sockets
-        if not set_socket_io_timeouts(self.transport,
-                                      self._socket_timeout, 0):
+        if not set_socket_io_timeouts(self.transport, self._socket_timeout, 0):
             self.transport.abort()
             return
 
         # Each client connection creates a new protocol instance
-        peername = transport.get_extra_info('peername')
-        logger.debug('Connection from client: ' + str(peername) +
-                     str(self._socket_timeout))
+        peername = transport.get_extra_info("peername")
+        logger.debug(
+            "Connection from client: " + str(peername) + str(self._socket_timeout)
+        )
         EvaServer.__connections__ += 1
 
     def connection_lost(self, exc):
@@ -71,41 +68,32 @@ class EvaServer(asyncio.Protocol):
             self.transport.close()
         EvaServer.__connections__ -= 1
 
-    def data_received(self, data):
-
-        message = data.decode()
-        logger.debug('Request from client: --|' +
-                     str(message) +
-                     '|--')
-
-        self.buffer.feed_data(message)
+    def data_received(self, data: bytes):
+        # Request from client
+        self.buffer.feed_data(data)
         while self.buffer.has_complete_message():
             request_message = self.buffer.read_message()
-
+            request_message = PickleSerializer.deserialize(request_message)
             if request_message in ["quit", "exit"]:
-                logger.debug('Close client socket')
+                logger.debug("Close client socket")
                 return self.transport.close()
             else:
-                logger.debug('Handle request')
-                asyncio.create_task(
-                    handle_request(self.transport, request_message)
-                )
+                logger.debug("Handle request")
+                asyncio.create_task(handle_request(self.transport, request_message))
 
 
-def start_server(host: string,
-                 port: int,
-                 loop,
-                 socket_timeout: int,
-                 stop_server_future):
+def start_server(
+    host: string, port: int, loop, socket_timeout: int, stop_server_future
+):
     """
-        Start the server.
-        Server objects are asynchronous context managers.
+    Start the server.
+    Server objects are asynchronous context managers.
 
-        hostname: hostname of the server
-        stop_server_future: future for externally stopping the server
+    hostname: hostname of the server
+    stop_server_future: future for externally stopping the server
     """
 
-    logger.critical('Start Server')
+    logger.info("Start Server")
 
     # Register signal handler
     def raiseSystemExit(_, __):
@@ -124,25 +112,27 @@ def start_server(host: string,
     server = loop.run_until_complete(coro)
 
     for socket in server.sockets:
-        logger.critical('PID(' + str(os.getpid()) + ') serving on '
-                        + str(socket.getsockname()))
+        logger.info(
+            "PID(" + str(os.getpid()) + ") serving on " + str(socket.getsockname())
+        )
 
     server_closed = loop.create_task(server.wait_closed())
 
     # Start the realtime status monitor
-    monitor = loop.create_task(realtime_server_status(EvaServer,
-                                                      server_closed))
+    monitor = loop.create_task(realtime_server_status(EvaServer, server_closed))
 
     try:
         loop.run_until_complete(stop_server_future)
 
     except KeyboardInterrupt:
 
-        logger.debug("Server process interrupted")
+        logger.debug("Interrupting server")
 
     finally:
         # Stop monitor
         monitor.cancel()
+
+        logger.debug("Shutting down server")
 
         # Close server
         server.close()
@@ -151,4 +141,4 @@ def start_server(host: string,
         loop.run_until_complete(server.wait_closed())
         loop.close()
 
-        logger.debug("Successfully shutdown server.")
+        logger.debug("Successfully shutdown server")

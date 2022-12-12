@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from enum import IntEnum, unique, auto
+from enum import IntEnum, auto, unique
 
 
 @unique
@@ -47,6 +47,9 @@ class ExpressionType(IntEnum):
     AGGREGATION_MIN = auto()
     AGGREGATION_MAX = auto()
     AGGREGATION_AVG = auto()
+    AGGREGATION_FIRST = auto()
+    AGGREGATION_LAST = auto()
+    AGGREGATION_SEGMENT = auto()
 
     CASE = auto()
     # add other types
@@ -63,11 +66,12 @@ class ExpressionReturnType(IntEnum):
 
 
 class AbstractExpression(ABC):
-
-    def __init__(self,
-                 exp_type: ExpressionType,
-                 rtype: ExpressionReturnType = ExpressionReturnType.INVALID,
-                 children=None):
+    def __init__(
+        self,
+        exp_type: ExpressionType,
+        rtype: ExpressionReturnType = ExpressionReturnType.INVALID,
+        children=None,
+    ):
         self._etype = exp_type
         self._rtype = rtype
         self._children = children or []
@@ -111,7 +115,7 @@ class AbstractExpression(ABC):
     # refactor if need be
     @abstractmethod
     def evaluate(self, *args, **kwargs):
-        NotImplementedError('Must be implemented in subclasses.')
+        NotImplementedError("Must be implemented in subclasses.")
 
     def __eq__(self, other):
         is_subtree_equal = True

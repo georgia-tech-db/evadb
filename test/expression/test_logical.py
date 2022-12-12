@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+
 import pandas as pd
 from mock import Mock
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.logical_expression import LogicalExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.logical_expression import LogicalExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 
 
 class LogicalExpressionsTest(unittest.TestCase):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -34,69 +34,50 @@ class LogicalExpressionsTest(unittest.TestCase):
         const_exp2 = ConstantValueExpression(1)
 
         comparison_expression_left = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_EQUAL, const_exp1, const_exp2
         )
         const_exp1 = ConstantValueExpression(2)
         const_exp2 = ConstantValueExpression(1)
         comparison_expression_right = ComparisonExpression(
-            ExpressionType.COMPARE_GREATER,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_GREATER, const_exp1, const_exp2
         )
         logical_expr = LogicalExpression(
             ExpressionType.LOGICAL_AND,
             comparison_expression_left,
-            comparison_expression_right
+            comparison_expression_right,
         )
-        self.assertEqual(
-            [True], logical_expr.evaluate(None).frames[0].tolist())
+        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
 
     def test_logical_or(self):
         const_exp1 = ConstantValueExpression(1)
         const_exp2 = ConstantValueExpression(1)
 
         comparison_expression_left = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_EQUAL, const_exp1, const_exp2
         )
         const_exp1 = ConstantValueExpression(1)
         const_exp2 = ConstantValueExpression(2)
         comparison_expression_right = ComparisonExpression(
-            ExpressionType.COMPARE_GREATER,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_GREATER, const_exp1, const_exp2
         )
         logical_expr = LogicalExpression(
             ExpressionType.LOGICAL_OR,
             comparison_expression_left,
-            comparison_expression_right
+            comparison_expression_right,
         )
-        self.assertEqual(
-            [True],
-            logical_expr.evaluate(None).frames[0].tolist()
-        )
+        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
 
     def test_logical_not(self):
         const_exp1 = ConstantValueExpression(0)
         const_exp2 = ConstantValueExpression(1)
 
         comparison_expression_right = ComparisonExpression(
-            ExpressionType.COMPARE_GREATER,
-            const_exp1,
-            const_exp2
+            ExpressionType.COMPARE_GREATER, const_exp1, const_exp2
         )
         logical_expr = LogicalExpression(
-            ExpressionType.LOGICAL_NOT,
-            None,
-            comparison_expression_right
+            ExpressionType.LOGICAL_NOT, None, comparison_expression_right
         )
-        self.assertEqual(
-            [True],
-            logical_expr.evaluate(None).frames[0].tolist()
-        )
+        self.assertEqual([True], logical_expr.evaluate(None).frames[0].tolist())
 
     def test_short_circuiting_and_complete(self):
         # tests whether right-hand side is bypassed completely with and
@@ -106,23 +87,17 @@ class LogicalExpressionsTest(unittest.TestCase):
         tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            tup_val_exp_l,
-            tup_val_exp_r
+            ExpressionType.COMPARE_EQUAL, tup_val_exp_l, tup_val_exp_r
         )
         comp_exp_r = Mock(spec=ComparisonExpression)
 
         logical_exp = LogicalExpression(
-            ExpressionType.LOGICAL_AND,
-            comp_exp_l,
-            comp_exp_r
+            ExpressionType.LOGICAL_AND, comp_exp_l, comp_exp_r
         )
 
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [4, 5, 6]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [4, 5, 6]}))
         self.assertEqual(
-            [False, False, False],
-            logical_exp.evaluate(tuples).frames[0].tolist()
+            [False, False, False], logical_exp.evaluate(tuples).frames[0].tolist()
         )
         comp_exp_r.evaluate.assert_not_called()
 
@@ -134,23 +109,17 @@ class LogicalExpressionsTest(unittest.TestCase):
         tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            tup_val_exp_l,
-            tup_val_exp_r
+            ExpressionType.COMPARE_EQUAL, tup_val_exp_l, tup_val_exp_r
         )
         comp_exp_r = Mock(spec=ComparisonExpression)
 
         logical_exp = LogicalExpression(
-            ExpressionType.LOGICAL_OR,
-            comp_exp_l,
-            comp_exp_r
+            ExpressionType.LOGICAL_OR, comp_exp_l, comp_exp_r
         )
 
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3], 1: [1, 2, 3]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [1, 2, 3]}))
         self.assertEqual(
-            [True, True, True],
-            logical_exp.evaluate(tuples).frames[0].tolist()
+            [True, True, True], logical_exp.evaluate(tuples).frames[0].tolist()
         )
         comp_exp_r.evaluate.assert_not_called()
 
@@ -162,24 +131,18 @@ class LogicalExpressionsTest(unittest.TestCase):
         tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            tup_val_exp_l,
-            tup_val_exp_r
+            ExpressionType.COMPARE_EQUAL, tup_val_exp_l, tup_val_exp_r
         )
         comp_exp_r = Mock(spec=ComparisonExpression)
-        comp_exp_r.evaluate = Mock(return_value=Mock(frames=[[True], [False]]))
+        comp_exp_r.evaluate = Mock(return_value=Mock(_frames=[[True], [False]]))
 
         logical_exp = LogicalExpression(
-            ExpressionType.LOGICAL_AND,
-            comp_exp_l,
-            comp_exp_r
+            ExpressionType.LOGICAL_AND, comp_exp_l, comp_exp_r
         )
 
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3, 4], 1: [1, 2, 5, 6]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3, 4], 1: [1, 2, 5, 6]}))
         self.assertEqual(
-            [True, False, False, False],
-            logical_exp.evaluate(tuples).frames[0].tolist()
+            [True, False, False, False], logical_exp.evaluate(tuples).frames[0].tolist()
         )
         comp_exp_r.evaluate.assert_called_once_with(tuples, mask=[0, 1])
 
@@ -191,23 +154,17 @@ class LogicalExpressionsTest(unittest.TestCase):
         tup_val_exp_r.col_alias = 1
 
         comp_exp_l = ComparisonExpression(
-            ExpressionType.COMPARE_EQUAL,
-            tup_val_exp_l,
-            tup_val_exp_r
+            ExpressionType.COMPARE_EQUAL, tup_val_exp_l, tup_val_exp_r
         )
         comp_exp_r = Mock(spec=ComparisonExpression)
-        comp_exp_r.evaluate = Mock(return_value=Mock(frames=[[True], [False]]))
+        comp_exp_r.evaluate = Mock(return_value=Mock(_frames=[[True], [False]]))
 
         logical_exp = LogicalExpression(
-            ExpressionType.LOGICAL_OR,
-            comp_exp_l,
-            comp_exp_r
+            ExpressionType.LOGICAL_OR, comp_exp_l, comp_exp_r
         )
 
-        tuples = Batch(pd.DataFrame(
-            {0: [1, 2, 3, 4], 1: [5, 6, 3, 4]}))
+        tuples = Batch(pd.DataFrame({0: [1, 2, 3, 4], 1: [5, 6, 3, 4]}))
         self.assertEqual(
-            [True, False, True, True],
-            logical_exp.evaluate(tuples).frames[0].tolist()
+            [True, False, True, True], logical_exp.evaluate(tuples).frames[0].tolist()
         )
         comp_exp_r.evaluate.assert_called_once_with(tuples, mask=[0, 1])

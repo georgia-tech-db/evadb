@@ -27,7 +27,6 @@ BLOB:                                'BLOB';
 BY:                                  'BY';
 COLUMN:                              'COLUMN';
 CREATE:                              'CREATE';
-DATA:                                'DATA';
 DATABASE:                            'DATABASE';
 DEFAULT:                             'DEFAULT';
 DELETE:                              'DELETE';
@@ -44,7 +43,7 @@ GROUP:                               'GROUP';
 HAVING:                              'HAVING';
 IF:                                  'IF';
 IN:                                  'IN';
-INFILE:                              'INFILE';
+FILE:                                'FILE';
 INDIR:                               'INDIR';
 INTO:                                'INTO';
 INDEX:                               'INDEX';
@@ -82,6 +81,7 @@ UNION:                               'UNION';
 UNIQUE:                              'UNIQUE';
 UNKNOWN:                             'UNKNOWN';
 UNLOCK:                              'UNLOCK';
+UNNEST:                              'UNNEST';
 UNSIGNED:                            'UNSIGNED';
 UPDATE:                              'UPDATE';
 UPLOAD:                              'UPLOAD';
@@ -102,8 +102,7 @@ ERROR_BOUNDS:						 'ERROR_WITHIN';
 CONFIDENCE_LEVEL:					 'AT_CONFIDENCE';
 
 // Index types
-BTREE:                               'BTREE';
-HASH:                                'HASH';
+HNSW:                                'HNSW';
 
 // Computer vision tasks
 
@@ -140,6 +139,9 @@ MIN:                                 'MIN';
 STD:                                 'STD';
 SUM:                                 'SUM';
 FCOUNT: 						     'FCOUNT';
+FIRST:                               'FIRST';
+LAST:                                'LAST';
+SEGMENT:                             'SEGMENT';
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID

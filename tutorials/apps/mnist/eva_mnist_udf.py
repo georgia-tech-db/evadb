@@ -1,20 +1,20 @@
 import pandas as pd
 from torch import Tensor
 import torch
-from eva.udfs.pytorch_abstract_udf import PytorchAbstractUDF
+from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from torchvision.transforms import Compose, ToTensor, Normalize, Grayscale
+from PIL import Image
 
 
-class MnistCNN(PytorchAbstractUDF):
+class MnistCNN(PytorchAbstractClassifierUDF):
 
     @property
     def name(self) -> str:
         return 'MnistCNN'
 
-    def __init__(self):
-        super().__init__()
+    def setup(self):
         self.model = mnist(pretrained=True)
         self.model.eval()
 
@@ -26,15 +26,16 @@ class MnistCNN(PytorchAbstractUDF):
     def labels(self):
         return list([str(num) for num in range(10)])
 
-    @property
-    def transforms(self) -> Compose:
-        return Compose([
+    def transform(self, images) -> Compose:
+        composed = Compose([
             Grayscale(num_output_channels=1),
             ToTensor(),
             Normalize((0.1307,), (0.3081,))
         ])
+        # reverse the channels from opencv
+        return composed(Image.fromarray(images[:, :, ::-1])).unsqueeze(0)
 
-    def _get_predictions(self, frames: Tensor) -> pd.DataFrame:
+    def forward(self, frames: Tensor) -> pd.DataFrame:
         outcome = pd.DataFrame()
         predictions = self.model(frames)
         for prediction in predictions:

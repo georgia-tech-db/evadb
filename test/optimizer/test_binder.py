@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import copy
 import unittest
 
@@ -20,9 +19,8 @@ from mock import MagicMock
 
 from eva.optimizer.binder import Binder
 from eva.optimizer.cost_model import CostModel
+from eva.optimizer.operators import Dummy, LogicalFilter, LogicalGet, OperatorType
 from eva.optimizer.optimizer_context import OptimizerContext
-from eva.optimizer.operators import (
-    OperatorType, LogicalFilter, LogicalGet, Dummy)
 from eva.optimizer.rules.pattern import Pattern
 
 
@@ -58,8 +56,7 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(child2_ptn)
 
         opt_ctxt = OptimizerContext(CostModel())
-        root_grp_expr = opt_ctxt.add_opr_to_group(
-            root_opr)
+        root_grp_expr = opt_ctxt.add_opr_to_group(root_opr)
 
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
 
@@ -83,12 +80,10 @@ class TestBinder(unittest.TestCase):
 
         sub_child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sub_child_opr_2 = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        sub_root_opr = LogicalFilter(
-            MagicMock(), [sub_child_opr, sub_child_opr_2])
+        sub_root_opr = LogicalFilter(MagicMock(), [sub_child_opr, sub_child_opr_2])
 
         child_opr = LogicalGet(MagicMock(), MagicMock(), MagicMock())
-        root_opr = LogicalFilter(
-            MagicMock(), [child_opr, sub_root_opr])
+        root_opr = LogicalFilter(MagicMock(), [child_opr, sub_root_opr])
 
         child_ptn = Pattern(OperatorType.LOGICALGET)
         root_ptn = Pattern(OperatorType.LOGICALFILTER)
@@ -96,8 +91,7 @@ class TestBinder(unittest.TestCase):
         root_ptn.append_child(Pattern(OperatorType.DUMMY))
 
         opt_ctxt = OptimizerContext(CostModel())
-        root_grp_expr = opt_ctxt.add_opr_to_group(
-            root_opr)
+        root_grp_expr = opt_ctxt.add_opr_to_group(root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
         expected_match = copy.copy(root_opr)
         expected_match.children = [child_opr, Dummy(2)]
@@ -105,8 +99,7 @@ class TestBinder(unittest.TestCase):
             self.helper_pre_order_match(expected_match, match)
 
         opt_ctxt = OptimizerContext(CostModel())
-        sub_root_grp_expr = opt_ctxt.add_opr_to_group(
-            sub_root_opr)
+        sub_root_grp_expr = opt_ctxt.add_opr_to_group(sub_root_opr)
         expected_match = copy.copy(sub_root_opr)
         expected_match.children = [sub_child_opr, Dummy(1)]
         binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)

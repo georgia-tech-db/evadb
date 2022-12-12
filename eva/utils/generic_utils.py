@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,19 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import importlib
-import torch
-import uuid
 import hashlib
-from pathlib import Path
+import importlib
+import pickle
 import sys
+import uuid
+from pathlib import Path
 
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
 
 
-def validate_kwargs(kwargs, allowed_kwargs,
-                    error_message='Keyword argument not understood:'):
+def validate_kwargs(
+    kwargs, allowed_kwargs, error_message="Keyword argument not understood:"
+):
     """Checks that all keyword arguments are in the set of allowed keys."""
     for kwarg in kwargs:
         if kwarg not in allowed_kwargs:
@@ -64,10 +65,9 @@ def path_to_class(filepath: str, classname: str):
         spec.loader.exec_module(module)
         classobj = getattr(module, classname)
     except Exception as e:
-        logger.error(
-            'Failed to import %s from %s\nException: %s'
-            % (classname, filepath, e)
-        )
+        err_msg = f"Failed to import {classname} from {filepath}\nException: {str(e)}"
+        logger.error(err_msg)
+        raise RuntimeError(err_msg)
     return classobj
 
 
@@ -77,10 +77,15 @@ def is_gpu_available() -> bool:
     Returns:
         [bool] True if system has GPUs, else False
     """
-    return torch.cuda.is_available()
+    try:
+        import torch
+
+        return torch.cuda.is_available()
+    except ImportError:
+        return False
 
 
-def generate_file_path(name: str = '') -> Path:
+def generate_file_path(name: str = "") -> Path:
     """Generates a arbitrary file_path(md5 hash) based on the a random salt
     and name
 
@@ -93,11 +98,12 @@ def generate_file_path(name: str = '') -> Path:
     """
     dataset_location = ConfigurationManager().get_value("core", "datasets_dir")
     if dataset_location is None:
-        logger.error('Missing location key in eva.yml')
-        raise KeyError('Missing datasets_dir key in eva.yml')
+        logger.error("Missing dataset location key in eva.yml")
+        raise KeyError("Missing datasets_dir key in eva.yml")
 
     dataset_location = Path(dataset_location)
     dataset_location.mkdir(parents=True, exist_ok=True)
+
     salt = uuid.uuid4().hex
     file_name = hashlib.md5(salt.encode() + name.encode()).hexdigest()
     path = dataset_location / file_name
@@ -106,7 +112,7 @@ def generate_file_path(name: str = '') -> Path:
 
 def get_size(obj, seen=None):
     """Recursively finds size of objects
-        https://goshippo.com/blog/measure-real-size-any-python-object/
+    https://goshippo.com/blog/measure-real-size-any-python-object/
     """
     size = sys.getsizeof(obj)
     if seen is None:
@@ -120,9 +126,18 @@ def get_size(obj, seen=None):
     if isinstance(obj, dict):
         size += sum([get_size(v, seen) for v in obj.values()])
         size += sum([get_size(k, seen) for k in obj.keys()])
-    elif hasattr(obj, '__dict__'):
+    elif hasattr(obj, "__dict__"):
         size += get_size(obj.__dict__, seen)
-    elif hasattr(obj, '__iter__') and not isinstance(obj,
-                                                     (str, bytes, bytearray)):
+    elif hasattr(obj, "__iter__") and not isinstance(obj, (str, bytes, bytearray)):
         size += sum([get_size(i, seen) for i in obj])
     return size
+
+
+class PickleSerializer(object):
+    @classmethod
+    def serialize(cls, data):
+        return pickle.dumps(data, protocol=pickle.HIGHEST_PROTOCOL)
+
+    @classmethod
+    def deserialize(cls, data):
+        return pickle.loads(data)

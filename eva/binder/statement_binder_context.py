@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import Dict, List, Tuple, Union
 
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
@@ -42,9 +42,7 @@ class StatementBinderContext:
 
     def __init__(self):
         self._table_alias_map: Dict[str, DataFrameMetadata] = dict()
-        self._derived_table_alias_map: Dict[
-            str, List[CatalogColumnType]
-        ] = dict()
+        self._derived_table_alias_map: Dict[str, List[CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
 
     def _check_duplicate_alias(self, alias: str):
@@ -56,11 +54,10 @@ class StatementBinderContext:
         Exception:
             Raise exception if found duplication
         """
-        if (
-            alias in self._derived_table_alias_map
-            or alias in self._table_alias_map
-        ):
-            raise RuntimeError("Found duplicate alias {}".format(alias))
+        if alias in self._derived_table_alias_map or alias in self._table_alias_map:
+            err_msg = f"Found duplicate alias {alias}"
+            logger.error(err_msg)
+            raise BinderError(err_msg)
 
     def add_table_alias(self, alias: str, table_name: str):
         """
@@ -76,21 +73,23 @@ class StatementBinderContext:
     def add_derived_table_alias(
         self,
         alias: str,
-        target_list: List[Union[TupleValueExpression, FunctionExpression]],
+        target_list: List[Union[TupleValueExpression, FunctionExpression, UdfIO]],
     ):
         """
         Add a alias -> derived table column mapping
         Arguments:
             alias (str): name of alias
-            target_list: list of Tuplevalue Expression or FunctionExpression
+            target_list: list of Tuplevalue Expression or FunctionExpression or UdfIO
         """
         self._check_duplicate_alias(alias)
         col_list = []
         for expr in target_list:
             if isinstance(expr, FunctionExpression):
                 col_list.extend(expr.output_objs)
-            else:
+            elif isinstance(expr, TupleValueExpression):
                 col_list.append(expr.col_object)
+            else:
+                col_list.append(expr)
 
         self._derived_table_alias_map[alias] = col_list
 
@@ -108,9 +107,9 @@ class StatementBinderContext:
         """
 
         def raise_error():
-            err_msg = "Invalid column = {}".format(col_name)
+            err_msg = f"Found invalid column {col_name}"
             logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            raise BinderError(err_msg)
 
         if not alias:
             alias, col_obj = self._search_all_alias_maps(col_name)
@@ -139,9 +138,7 @@ class StatementBinderContext:
         if table_obj:
             return self._catalog.get_column_object(table_obj, col_name)
 
-    def _check_derived_table_alias_map(
-        self, alias, col_name
-    ) -> CatalogColumnType:
+    def _check_derived_table_alias_map(self, alias, col_name) -> CatalogColumnType:
         """
         Find the column object in derived table alias map
         Arguments:
@@ -165,16 +162,12 @@ class StatementBinderContext:
         """
         alias_cols = []
         for alias, table_obj in self._table_alias_map.items():
-            alias_cols += list(
-                [(alias, col.name) for col in table_obj.columns]
-            )
+            alias_cols += list([(alias, col.name) for col in table_obj.columns])
         for alias, dtable_obj in self._derived_table_alias_map.items():
             alias_cols += list([(alias, col.name) for col in dtable_obj])
         return alias_cols
 
-    def _search_all_alias_maps(
-        self, col_name: str
-    ) -> Tuple[str, CatalogColumnType]:
+    def _search_all_alias_maps(self, col_name: str) -> Tuple[str, CatalogColumnType]:
         """
         Search the alias and column object using column name
         Arguments:
@@ -201,8 +194,8 @@ class StatementBinderContext:
                 alias_match = alias
 
         if num_alias_matches > 1:
-            err_msg = "Ambiguous Column name = {}".format(col_name)
+            err_msg = "Ambiguous Column name {col_name}"
             logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            raise BinderError(err_msg)
 
         return alias_match, match_obj

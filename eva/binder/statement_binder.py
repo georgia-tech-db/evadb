@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,21 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+
+from eva.binder.binder_utils import (
+    BinderError,
+    bind_table_info,
+    check_groupby_pattern,
+    check_table_object_is_video,
+    extend_star,
+)
 from eva.binder.statement_binder_context import StatementBinderContext
-from eva.binder.binder_utils import bind_table_info, create_video_metadata, \
-    extend_star
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_mat_view_statement import \
-    CreateMaterializedViewStatement
+from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.drop_statement import DropTableStatement
-from eva.parser.load_statement import LoadDataStatement
+from eva.parser.explain_statement import ExplainStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.parser.types import FileFormatType
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
@@ -42,6 +49,7 @@ else:
 
         def wrapper(*args, **kw):
             return dispatcher.dispatch(args[1].__class__)(*args, **kw)
+
         wrapper.register = dispatcher.register
         update_wrapper(wrapper, func)
         return wrapper
@@ -54,7 +62,7 @@ class StatementBinder:
 
     @singledispatchmethod
     def bind(self, node):
-        raise NotImplementedError(f'Cannot bind {type(node)}')
+        raise NotImplementedError(f"Cannot bind {type(node)}")
 
     @bind.register(AbstractStatement)
     def _bind_abstract_statement(self, node: AbstractStatement):
@@ -65,6 +73,26 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
+    @bind.register(ExplainStatement)
+    def _bind_explain_statement(self, node: ExplainStatement):
+        self.bind(node.explainable_stmt)
+
+    @bind.register(CreateIndexStatement)
+    def _bind_create_index_statement(self, node: CreateIndexStatement):
+        self.bind(node.table_ref)
+
+        # TODO: create index currently only supports single numpy column.
+        assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
+
+        # TODO: create index currently only works on TableInfo, but will extend later.
+        assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
+
+        col_def = node.col_list[0]
+        table_ref_obj = node.table_ref.table.table_obj
+        col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+        assert col.type == ColumnType.NDARRAY, "Index input needs to be numpy array"
+        assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
+
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         self.bind(node.from_table)
@@ -72,12 +100,18 @@ class StatementBinder:
             self.bind(node.where_clause)
         if node.target_list:
             # SELECT * support
-            if len(node.target_list) == 1 and \
-                    isinstance(node.target_list[0], TupleValueExpression) and \
-                    node.target_list[0].col_name == '*':
+            if (
+                len(node.target_list) == 1
+                and isinstance(node.target_list[0], TupleValueExpression)
+                and node.target_list[0].col_name == "*"
+            ):
                 node.target_list = extend_star(self._binder_context)
             for expr in node.target_list:
                 self.bind(expr)
+        if node.groupby_clause:
+            self.bind(node.groupby_clause)
+            check_groupby_pattern(node.groupby_clause.value)
+            check_table_object_is_video(node.from_table)
         if node.orderby_list:
             for expr in node.orderby_list:
                 self.bind(expr[0])
@@ -88,46 +122,9 @@ class StatementBinder:
             self._binder_context = current_context
 
     @bind.register(CreateMaterializedViewStatement)
-    def _bind_create_mat_statement(self,
-                                   node: CreateMaterializedViewStatement):
+    def _bind_create_mat_statement(self, node: CreateMaterializedViewStatement):
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
-
-    @bind.register(LoadDataStatement)
-    def _bind_load_data_statement(self, node: LoadDataStatement):
-        table_ref = node.table_ref
-        if node.file_options['file_format'] == FileFormatType.VIDEO:
-            # Create a new metadata object
-            create_video_metadata(table_ref.table.table_name)
-
-        self.bind(table_ref)
-
-        table_ref_obj = table_ref.table.table_obj
-        if table_ref_obj is None:
-            error = '{} does not exists. Create the table using \
-                            CREATE TABLE.'.format(table_ref.table.table_name)
-            logger.error(error)
-            raise RuntimeError(error)
-
-        # if query had columns specified, we just copy them
-        if node.column_list is not None:
-            column_list = node.column_list
-
-        # else we curate the column list from the metadata
-        else:
-            column_list = []
-            for column in table_ref_obj.columns:
-                column_list.append(
-                    TupleValueExpression(
-                        col_name=column.name,
-                        table_alias=table_ref_obj.name.lower(),
-                        col_object=column))
-
-        # bind the columns
-        for expr in column_list:
-            self.bind(expr)
-
-        node.column_list = column_list
 
     @bind.register(DropTableStatement)
     def _bind_drop_table_statement(self, node: DropTableStatement):
@@ -139,7 +136,8 @@ class StatementBinder:
         if node.is_table_atom():
             # Table
             self._binder_context.add_table_alias(
-                node.alias, node.table.table_name)
+                node.alias.alias_name, node.table.table_name
+            )
             bind_table_info(node.table)
         elif node.is_select():
             current_context = self._binder_context
@@ -147,24 +145,40 @@ class StatementBinder:
             self.bind(node.select_statement)
             self._binder_context = current_context
             self._binder_context.add_derived_table_alias(
-                node.alias, node.select_statement.target_list)
+                node.alias.alias_name, node.select_statement.target_list
+            )
         elif node.is_join():
             self.bind(node.join_node.left)
             self.bind(node.join_node.right)
             if node.join_node.predicate:
                 self.bind(node.join_node.predicate)
-        elif node.is_func_expr():
-            self.bind(node.func_expr)
+        elif node.is_table_valued_expr():
+            func_expr = node.table_valued_expr.func_expr
+            func_expr.alias = node.alias
+            self.bind(func_expr)
+            output_cols = []
+            for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
+                alias_obj = self._catalog.udf_io(
+                    alias,
+                    data_type=obj.type,
+                    array_type=obj.array_type,
+                    dimensions=obj.array_dimensions,
+                    is_input=obj.is_input,
+                )
+
+                output_cols.append(alias_obj)
             self._binder_context.add_derived_table_alias(
-                node.func_expr.alias, [node.func_expr])
+                func_expr.alias.alias_name, output_cols
+            )
         else:
-            raise ValueError(f'Unsupported node {type(node)}')
+            raise BinderError(f"Unsupported node {type(node)}")
 
     @bind.register(TupleValueExpression)
     def _bind_tuple_expr(self, node: TupleValueExpression):
         table_alias, col_obj = self._binder_context.get_binded_column(
-            node.col_name, node.table_alias)
-        node.col_alias = '{}.{}'.format(table_alias, node.col_name.lower())
+            node.col_name, node.table_alias
+        )
+        node.col_alias = "{}.{}".format(table_alias, node.col_name.lower())
         node.col_object = col_obj
 
     @bind.register(FunctionExpression)
@@ -173,26 +187,56 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        node.alias = node.alias or node.name.lower()
         udf_obj = self._catalog.get_udf_by_name(node.name)
-        assert udf_obj is not None, (
-            'UDF with name {} does not exist in the catalog. Please '
-            'create the UDF using CREATE UDF command'.format(node.name))
+        if udf_obj is None:
+            err_msg = (
+                f"UDF with name {node.name} does not exist in the catalog. "
+                "Please create the UDF using CREATE UDF command."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
+
+        try:
+            node.function = path_to_class(udf_obj.impl_file_path, udf_obj.name)
+        except Exception as e:
+            err_msg = (
+                f"{str(e)}. Please verify that the UDF class name in the"
+                "implementation file matches the UDF name."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)
 
         output_objs = self._catalog.get_udf_outputs(udf_obj)
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:
-                    node.output_col_aliases.append(
-                        '{}.{}'.format(node.alias, obj.name.lower()))
                     node.output_objs = [obj]
-            assert len(node.output_col_aliases) == 1, (
-                'Duplicate columns {} in UDF {}'.format(node.output,
-                                                        udf_obj.name))
+            if not node.output_objs:
+                err_msg = f"Output {node.output} does not exist for {udf_obj.name}."
+                logger.error(err_msg)
+                raise BinderError(err_msg)
+            node.projection_columns = [node.output]
         else:
-            node.output_col_aliases = ['{}.{}'.format(
-                node.alias, obj.name.lower()) for obj in output_objs]
             node.output_objs = output_objs
+            node.projection_columns = [obj.name.lower() for obj in output_objs]
 
-        node.function = path_to_class(
-            udf_obj.impl_file_path, udf_obj.name)()
+        default_alias_name = node.name.lower()
+        default_output_col_aliases = [str(obj.name.lower()) for obj in node.output_objs]
+        if not node.alias:
+            node.alias = Alias(default_alias_name, default_output_col_aliases)
+        else:
+            if not len(node.alias.col_names):
+                node.alias = Alias(node.alias.alias_name, default_output_col_aliases)
+            else:
+                output_aliases = [
+                    str(col_name.lower()) for col_name in node.alias.col_names
+                ]
+                node.alias = Alias(node.alias.alias_name, output_aliases)
+
+        if len(node.alias.col_names) != len(node.output_objs):
+            err_msg = (
+                f"Expected {len(node.output_objs)} output columns for "
+                f"{node.alias.alias_name}, got {len(node.alias.col_names)}."
+            )
+            logger.error(err_msg)
+            raise BinderError(err_msg)

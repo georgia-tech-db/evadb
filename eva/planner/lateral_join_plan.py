@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from eva.planner.types import PlanOprType
-from eva.planner.abstract_join_plan import AbstractJoin
-from eva.parser.types import JoinType
 from eva.expression.abstract_expression import AbstractExpression
+from eva.parser.types import JoinType
+from eva.planner.abstract_join_plan import AbstractJoin
+from eva.planner.types import PlanOprType
 
 
 class LateralJoinPlan(AbstractJoin):
@@ -27,11 +25,15 @@ class LateralJoinPlan(AbstractJoin):
 
     def __init__(self, join_predicate: AbstractExpression):
         self.join_project = []
-        super().__init__(PlanOprType.LATERAL_JOIN,
-                         JoinType.LATERAL_JOIN,
-                         join_predicate
-                         )
+        super().__init__(
+            PlanOprType.LATERAL_JOIN, JoinType.LATERAL_JOIN, join_predicate
+        )
+
+    def __str__(self):
+        return "LateralJoinPlan(join_project={}, \
+            join_predicate={})".format(
+            self.join_project, self.join_predicate
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     tuple(self.join_project)))
+        return hash((super().__hash__(), tuple(self.join_project)))

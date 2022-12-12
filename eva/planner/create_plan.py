@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
+from eva.catalog.models.df_column import DataFrameColumn
+from eva.parser.table_ref import TableInfo
 from eva.planner.abstract_plan import AbstractPlan
 from eva.planner.types import PlanOprType
-from typing import List
-from eva.parser.table_ref import TableRef
-from eva.catalog.models.df_column import DataFrameColumn
 
 
 class CreatePlan(AbstractPlan):
@@ -30,17 +30,20 @@ class CreatePlan(AbstractPlan):
         if_not_exists {bool} -- Whether to override if there is existing table
     """
 
-    def __init__(self, table_ref: TableRef,
-                 column_list: List[DataFrameColumn],
-                 if_not_exists: bool = False):
+    def __init__(
+        self,
+        table_info: TableInfo,
+        column_list: List[DataFrameColumn],
+        if_not_exists: bool = False,
+    ):
         super().__init__(PlanOprType.CREATE)
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._column_list = column_list
         self._if_not_exists = if_not_exists
 
     @property
-    def table_ref(self):
-        return self._table_ref
+    def table_info(self):
+        return self._table_info
 
     @property
     def if_not_exists(self):
@@ -50,8 +53,19 @@ class CreatePlan(AbstractPlan):
     def column_list(self):
         return self._column_list
 
+    def __str__(self):
+        return "CreatePlan(table_ref={}, \
+            column_list={}, \
+            if_not_exists={})".format(
+            self._table_info, self._column_list, self._if_not_exists
+        )
+
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.table_ref,
-                     self.if_not_exists,
-                     tuple(self.column_list)))
+        return hash(
+            (
+                super().__hash__(),
+                self.table_info,
+                self.if_not_exists,
+                tuple(self.column_list),
+            )
+        )

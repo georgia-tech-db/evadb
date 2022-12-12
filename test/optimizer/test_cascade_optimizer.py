@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+from test.util import NUM_FRAMES, create_sample_video, file_remove
+
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.server.command_handler import execute_query_fetch_all
 from eva.models.storage.batch import Batch
-
-from test.util import create_sample_video, NUM_FRAMES, file_remove
+from eva.server.command_handler import execute_query_fetch_all
 
 
 class CascadeOptimizer(unittest.TestCase):
@@ -28,10 +28,10 @@ class CascadeOptimizer(unittest.TestCase):
         create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
-        file_remove('dummy.avi')
+        file_remove("dummy.avi")
 
     def test_logical_to_physical_udf(self):
-        load_query = """LOAD DATA INFILE 'dummy.avi' INTO MyVideo;"""
+        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
@@ -48,8 +48,9 @@ class CascadeOptimizer(unittest.TestCase):
         """
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
-        expected = [{'myvideo.id': i * 2,
-                     'dummyobjectdetector.label': ['person']}
-                    for i in range(NUM_FRAMES // 2)]
+        expected = [
+            {"myvideo.id": i * 2, "dummyobjectdetector.label": ["person"]}
+            for i in range(NUM_FRAMES // 2)
+        ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)

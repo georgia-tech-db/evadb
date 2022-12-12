@@ -1,41 +1,67 @@
+def buildNumber = BUILD_NUMBER as int; if (buildNumber > 1) milestone(buildNumber - 1); milestone(buildNumber) // JENKINS-43353 / JENKINS-58625
+
 pipeline {
   agent {
-    dockerfile {
-      filename 'docker/eva_jenkins.Dockerfile'
+      dockerfile {
+        filename 'docker/jenkins.Dockerfile'
+        args '--gpus all'
+      }
     }
-
+  
+  options{
+     buildDiscarder(logRotator(numToKeepStr: '8', daysToKeepStr: '20'))
   }
+  
+  
   stages {
-    stage('Setup and Build') {
+  
+    stage('Setup and Install Packages') {
       parallel {
         stage('Setup Virtual Environment') {
+          
           steps {
             sh '''python3 -m venv env37
-. env37/bin/activate
-pip install --upgrade pip
-pip install scikit-build
-pip install cython
-pip install flake8==3.9.0 pytest==6.1.2 pytest-cov==2.11.1 mock==4.0.3 coveralls==3.0.1
-python setup.py install '''
+                  . env37/bin/activate
+                  pip install --upgrade pip
+                  pip install scikit-build
+                  pip install cython
+                  pip install -e ."[dev]"
+              '''
           }
         }
-
-        stage('Generate Parser') {
+        stage('Generate Parser Files') {
+          
           steps {
             sh 'sh script/antlr4/generate_parser.sh'
           }
         }
-
       }
     }
 
-    stage('Test') {
+    stage('CUDA GPU Check') {
+    
+      steps {
+          sh '''. env37/bin/activate
+                python3 -c "import torch; torch.cuda.current_device()"
+             '''
+      }
+    }
+
+    stage('Run Tests') {
+    
       steps {
         sh '''. env37/bin/activate
-sh script/test/test.sh
-coveralls'''
+              sh script/test/test.sh
+           '''
+       }
+     }
+
+    stage('Coverage Check') {
+    
+      steps {
+        sh '''. env37/bin/activate
+          coveralls'''
       }
     }
-
   }
 }

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
+from typing import Generator, Iterator
 
+from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
-from eva.executor.abstract_executor import AbstractExecutor
 from eva.planner.seq_scan_plan import SeqScanPlan
 
 
@@ -37,10 +37,11 @@ class SequentialScanExecutor(AbstractExecutor):
     def validate(self):
         pass
 
-    def exec(self) -> Iterator[Batch]:
+    def exec(self, **kwargs) -> Iterator[Batch]:
 
         child_executor = self.children[0]
-        for batch in child_executor.exec():
+
+        for batch in child_executor.exec(**kwargs):
             # apply alias to the batch
             # id, data -> myvideo.id, myvideo.data
             if self.alias:
@@ -53,3 +54,6 @@ class SequentialScanExecutor(AbstractExecutor):
 
             if not batch.empty():
                 yield batch
+
+    def __call__(self, **kwargs) -> Generator[Batch, None, None]:
+        yield from self.exec(**kwargs)

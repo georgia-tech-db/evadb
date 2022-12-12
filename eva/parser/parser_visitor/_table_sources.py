@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef, JoinNode
-
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.parser.evaql.evaql_parser import evaql_parser
-from eva.parser.types import JoinType
 from eva.expression.tuple_value_expression import TupleValueExpression
-
+from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from eva.parser.select_statement import SelectStatement
+from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
+from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
 
 ##################################################################
@@ -55,42 +52,57 @@ class TableSources(evaql_parserVisitor):
     # Join
     def visitInnerJoin(self, ctx: evaql_parser.InnerJoinContext):
         table = self.visit(ctx.tableSourceItemWithSample())
-        if table.is_func_expr():
-            return TableRef(JoinNode(None,
-                                     table,
-                                     join_type=JoinType.LATERAL_JOIN))
+        if ctx.ON() is None:
+            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
+        join_predicates = self.visit(ctx.expression())
+        return TableRef(
+            JoinNode(
+                None,
+                table,
+                predicate=join_predicates,
+                join_type=JoinType.INNER_JOIN,
+            )
+        )
+
+    def visitLateralJoin(self, ctx: evaql_parser.LateralJoinContext):
+        tve = self.visit(ctx.tableValuedFunction())
+        alias = None
+        if ctx.aliasClause():
+            alias = self.visit(ctx.aliasClause())
         else:
-            if ctx.ON() is None:
-                raise Exception(
-                    'ERROR: Syntax error: Join should specify the ON columns')
-            join_predicates = self.visit(ctx.expression())
-            return TableRef(JoinNode(None,
-                                     table,
-                                     predicate=join_predicates,
-                                     join_type=JoinType.INNER_JOIN))
+            err_msg = f"TableValuedFunction {tve.func_expr.name} should have alias."
+            logger.error(err_msg)
+            raise SyntaxError(err_msg)
+        join_type = JoinType.LATERAL_JOIN
+
+        return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
+
+    def visitTableValuedFunction(self, ctx: evaql_parser.TableValuedFunctionContext):
+        func_expr = self.visit(ctx.functionCall())
+        has_unnest = False
+        if ctx.UNNEST():
+            has_unnest = True
+        return TableValuedExpression(func_expr, do_unnest=has_unnest)
 
     def visitTableSourceItemWithSample(
-            self, ctx: evaql_parser.TableSourceItemWithSampleContext):
+        self, ctx: evaql_parser.TableSourceItemWithSampleContext
+    ):
         sample_freq = None
         alias = None
         table = self.visit(ctx.tableSourceItem())
         if ctx.sampleClause():
             sample_freq = self.visit(ctx.sampleClause())
         if ctx.AS():
-            alias = self.visit(ctx.uid())
+            alias = Alias(self.visit(ctx.uid()))
         return TableRef(table, alias, sample_freq)
 
     # Nested sub query
-    def visitSubqueryTableItem(
-            self, ctx: evaql_parser.SubqueryTableItemContext):
+    def visitSubqueryTableItem(self, ctx: evaql_parser.SubqueryTableItemContext):
         return self.visit(ctx.subqueryTableSourceItem())
 
-    def visitLateralFunctionCallItem(
-            self, ctx: evaql_parser.LateralFunctionCallItemContext):
-        return self.visit(ctx.functionCall())
-
     def visitSubqueryTableSourceItem(
-            self, ctx: evaql_parser.SubqueryTableSourceItemContext):
+        self, ctx: evaql_parser.SubqueryTableSourceItemContext
+    ):
         return self.visit(ctx.selectStatement())
 
     def visitUnionSelect(self, ctx: evaql_parser.UnionSelectContext):
@@ -108,11 +120,11 @@ class TableSources(evaql_parserVisitor):
             right_selectStatement.union_all = True
         return right_selectStatement
 
-    def visitQuerySpecification(
-            self, ctx: evaql_parser.QuerySpecificationContext):
+    def visitQuerySpecification(self, ctx: evaql_parser.QuerySpecificationContext):
         target_list = None
         from_clause = None
         where_clause = None
+        groupby_clause = None
         orderby_clause = None
         limit_count = None
 
@@ -126,8 +138,9 @@ class TableSources(evaql_parserVisitor):
 
                 elif rule_idx == evaql_parser.RULE_fromClause:
                     clause = self.visit(child)
-                    from_clause = clause.get('from', None)
-                    where_clause = clause.get('where', None)
+                    from_clause = clause.get("from", None)
+                    where_clause = clause.get("where", None)
+                    groupby_clause = clause.get("groupby", None)
 
                 elif rule_idx == evaql_parser.RULE_orderByClause:
                     orderby_clause = self.visit(ctx.orderByClause())
@@ -137,20 +150,26 @@ class TableSources(evaql_parserVisitor):
 
             except BaseException as e:
                 # stop parsing something bad happened
-                logger.error('Error while parsing \
-                                visitQuerySpecification')
+                logger.error(
+                    "Error while parsing \
+                                visitQuerySpecification"
+                )
                 raise e
 
         select_stmt = SelectStatement(
-            target_list, from_clause, where_clause,
+            target_list,
+            from_clause,
+            where_clause,
+            groupby_clause=groupby_clause,
             orderby_clause_list=orderby_clause,
-            limit_count=limit_count)
+            limit_count=limit_count,
+        )
 
         return select_stmt
 
     def visitSelectElements(self, ctx: evaql_parser.SelectElementsContext):
         if ctx.star:
-            select_list = [TupleValueExpression(col_name='*')]
+            select_list = [TupleValueExpression(col_name="*")]
         else:
             select_list = []
             select_elements_count = len(ctx.selectElement())
@@ -160,13 +179,37 @@ class TableSources(evaql_parserVisitor):
 
         return select_list
 
+    # TODO ACTION
     def visitFromClause(self, ctx: evaql_parser.FromClauseContext):
         from_table = None
         where_clause = None
-
+        groupby_clause = None
+        # TODO ACTION Group By
         if ctx.tableSources():
             from_table = self.visit(ctx.tableSources())
         if ctx.whereExpr is not None:
             where_clause = self.visit(ctx.whereExpr)
+        if ctx.groupbyClause():
+            groupby_clause = self.visit(ctx.groupbyClause())
+        return {"from": from_table, "where": where_clause, "groupby": groupby_clause}
 
-        return {"from": from_table, "where": where_clause}
+    def visitGroupbyClause(self, ctx: evaql_parser.GroupbyClauseContext):
+        groupby_clause = None
+        if ctx.groupByItem():
+            # TODO ACTION: Check what happens if 0 size is possible
+            if len(ctx.groupByItem()) > 1:
+                err_msg = "Parsing error: We do not \
+                        support multiple attributes in GROUP BY"
+                logger.error(err_msg)
+                raise SyntaxError(err_msg)
+            groupby_clause = self.visit(ctx.groupByItem()[0])
+        return groupby_clause
+
+    def visitAliasClause(self, ctx: evaql_parser.AliasClauseContext):
+        alias_name = self.visit(ctx.uid())
+        column_list = []
+        if ctx.uidList():
+            column_list = self.visit(ctx.uidList())
+            column_list = [col.col_name for col in column_list]
+
+        return Alias(alias_name, column_list)

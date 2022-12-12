@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import unique, Enum, auto
+from enum import Enum, auto, unique
 
 
 # Modified, add RENAME
@@ -29,6 +29,7 @@ class PlanOprType(Enum):
     LOAD_DATA = auto()
     UPLOAD = auto()
     UNION = auto()
+    GROUP_BY = auto()
     ORDER_BY = auto()
     LIMIT = auto()
     SAMPLE = auto()
@@ -37,8 +38,11 @@ class PlanOprType(Enum):
     LATERAL_JOIN = auto()
     HASH_BUILD = auto()
     CREATE_MATERIALIZED_VIEW = auto()
+    EXCHANGE = auto()
     PREDICATE_FILTER = auto()
     PROJECT = auto()
     SHOW_INFO = auto()
     DROP_UDF = auto()
+    EXPLAIN = auto()
+    CREATE_INDEX = auto()
     # add other types

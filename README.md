@@ -1,108 +1,110 @@
-# EVA (Exploratory Video Analytics)
+<div >
+  <a href="https://evadb.readthedocs.io/">
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-banner.png" alt="EVA" width="1000px" margin-left="-5px">
+  </a>
+  <div>
+        <h3>Try It Out!</h3>
+        <a href="https://colab.research.google.com/github/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb">
+            <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open EVA on Colab"/>
+        </a>
+        <a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">
+            <img alt="Slack" src="https://img.shields.io/badge/slack-eva-ff69b4.svg?logo=slack">
+        </a>    
+        <a href="https://github.com/georgia-tech-db/eva/discussions">
+            <img alt="Discuss on Github!" src="https://img.shields.io/badge/-Discuss%20on%20Github!-blueviolet">
+        </a>
+        <img alt="PyPI" src="https://img.shields.io/pypi/v/evadb.svg"/>
+        <img alt="License" src="https://img.shields.io/badge/license-Apache%202-brightgreen.svg?logo=apache"/>
+        <img alt="Python Versions" src="https://img.shields.io/badge/Python--versions-3.7%20|%203.8%20|%203.9%20|%203.10-brightgreen"/>
+    </div>
+</div>
 
-[![Build Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
-[![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Documentation Status](https://readthedocs.org/projects/exvian/badge/?version=latest)](https://evagatech.readthedocs.io/en/latest/index.html) [![Join the chat at https://gitter.im/georgia-tech-db/eva](https://badges.gitter.im/georgia-tech-db/eva.svg)](https://gitter.im/georgia-tech-db/eva?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# EVA Multimedia Database System
 
-## What is EVA?
+EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
 
-EVA is a visual data management system (think MySQL for videos). It supports a declarative language similar to SQL and a wide range of commonly used  computer vision models.
+ * examining the "emotion palette" of different actors
+ * finding gameplays that lead to a touchdown in a football game
 
-## What does EVA do?
+EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. 
 
-* EVA **enables querying of visual data** in user facing applications by providing a simple SQL-like interface for a wide range of commonly used computer vision models.
+If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/latest/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
-* EVA **improves throughput** by introducing sampling, filtering, and caching techniques.
+The <a href="https://evadb.readthedocs.io/en/latest/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
 
-* EVA **improves accuracy** by introducing state-of-the-art model specialization and selection algorithms.
+The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
+
+## Why EVA? ##
+
+<details>
+  <summary><b>Easily combine SQL and Deep Learning to build next-generation database applications</b></summary>
+  Easily query videos in user-facing applications with a SQL-like interface for commonly used computer vision models.
+</details>
+
+<details>
+  <summary><b>Speed up queries and save money spent on model inference</b></summary>
+  EVA comes with a collection of built-in sampling, caching, and filtering optimizations inspired by time-tested relational database systems.
+</details>
+
+<details>
+  <summary><b>Extensible by design to support custom deep learning models </b></summary>
+  EVA has first-class support for user-defined functions that wrap around your deep learning models in PyTorch.
+</details>
 
 ## Links
+* [Documentation](https://evadb.readthedocs.io/en/latest/)
+* [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
+* [Join Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Demo](https://ada-00.cc.gatech.edu/eva/playground)
-* [Website](https://georgia-tech-db.github.io/eva/index.html)
-* [Documentation](https://evagatech.readthedocs.io/en/latest/)
-* [Tutorials](https://github.com/georgia-tech-db/eva/tree/master/tutorials)
-* [Chat](https://gitter.im/georgia-tech-db/eva)
 
-## QuickStart
+## Quick Start
 
-1. EVA requires Python 3.8+. To install EVA, we recommend using an virtual environment and the pip package manager:
+1. EVA supports Python versions 3.7 through 3.10. To install EVA, we recommend using the pip package manager.
 
 ```shell
 pip install evadb
 ```
 
-1. Start the EVA server and the client programs
+1. EVA works on Jupyter notebooks -- illustrative notebooks are available in the [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb) folder. EVA adopts a client-server architecture and comes with a terminal-based client. To start the EVA server and a terminal-based client, use the following commands:
 ```shell
-eva_server&   # launch server
-eva_client    # launch client
+eva_server &   # launch server
+eva_client     # launch client
 ```
 
-2. UPLOAD a video using the client terminal (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
+2. Load a video onto the server using the client (we use [ua_detrac.mp4](data/ua_detrac/ua_detrac.mp4) video as an example):
 
 ```mysql
-UPLOAD INFILE 'data/ua_detrac/ua_detrac.mp4' PATH 'test_video.mp4';
+LOAD VIDEO "data/ua_detrac/ua_detrac.mp4" INTO MyVideo;
 ```
 
-3. LOAD the video using the client terminal:
-
-```mysql
-LOAD DATA INFILE 'test_video.mp4' INTO MyVideo;
-```
-
-4. That's it. You can now start issuing queries over that video:
+3. That's it! You can now start running queries over the loaded video:
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE id < 5;
 ```
 
-## More Interesting Queries
-
-1. Search for frames in a video that contain a car
+4. Search for frames in the video that contain a car
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-![QueryResult](https://georgia-tech-db.github.io/eva/Img/car.gif)
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
-2. Search for frames in a video that contain  a pedestrian and a car
+5. Search for frames in the video that contain a pedestrian and a car
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE ['pedestrian', 'car'] <@ FastRCNNObjectDetector(data).labels;
 ```
-3. Search frames in a video containing more than 3 cars
+
+6. Search for frames in the video with more than 3 cars
 
 ```mysql
 SELECT id, data FROM MyVideo WHERE Array_Count(FastRCNNObjectDetector(data).labels, 'car') > 3;
 ```
 
-4. Materialize the objects detected in a video
-
-```mysql
-CREATE MATERIALIZED VIEW IF NOT EXISTS MyVideoObjects (id, labels, scores, bboxes) AS
-SELECT id, FastRCNNObjectDetector(data) FROM MyVideo;
-```
-
-5. Create a metadata table that keeps tracks of details about objects in a video
-
-```mysql
-CREATE TABLE IF NOT EXISTS MyCSV (
-                id INTEGER UNIQUE,
-                frame_id INTEGER,
-                video_id INTEGER,
-                dataset_name TEXT(30),
-                label TEXT(30),
-                bbox NDARRAY FLOAT32(4),
-                object_id INTEGER
-);
-UPLOAD INFILE 'data/ua_detrac/metadata.csv' PATH 'test_metadata.csv';
-LOAD DATA INFILE 'test_metadata.csv' INTO MyCSV WITH FORMAT CSV;
-```
-6. Drop a table
-```mysql
-DROP TABLE MyVideo;
-```
-7. Create a UDF
+7. You can create a new user-defined function (UDF) that wraps around your custom vision model or an off-the-shelf model like FastRCNN:
 ```mysql
 CREATE UDF IF NOT EXISTS MyUDF
 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -111,44 +113,51 @@ OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
 TYPE  Classification
 IMPL  'eva/udfs/fastrcnn_object_detector.py';
 ```
-8. Drop a UDF
+
+8. You can combine multiple user-defined functions in a single query to accomplish more complicated tasks.
 ```mysql
-DROP UDF IF EXISTS MyUDF;
+   -- Analyse emotions of faces in a video
+   SELECT id, bbox, EmotionDetector(Crop(data, bbox)) 
+   FROM HAPPY JOIN LATERAL UNNEST(FaceDetector(data)) AS Face(bbox, conf)  
+   WHERE id < 15;
 ```
 
+## Illustrative EVA Applications 
 
-## Documentation
+### :desert_island: Traffic Analysis Application using Object Detection Model
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
-Documentation for EVA is located [here](https://evagatech.readthedocs.io/).
+### :desert_island: MNIST Digit Recognition using Image Classification Model
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp" width="150"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp" width="150"> |
 
-### Installation Instructions for Developers
+### :desert_island: Movie Analysis Application using Face Detection + Emotion Classfication Models
 
-To install EVA from source, use a virtual environment and the pip package manager. EVA requires JAVA 8 for generating the parser.
+| Source Video  | Query Result |
+|---------------|--------------|
+|<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp" width="400"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp" width="400"> |
 
-```shell
-git clone https://github.com/georgia-tech-db/eva.git && cd eva
-python3 -m venv env38                                # to create a virtual environment
-. env38/bin/activate
-pip install --upgrade pip
-sudo -E apt install -y openjdk-8-jdk openjdk-8-jre   # to install JAVA
-sh script/antlr4/generate_parser.sh                  # to generate the EVA parser
-pip install .
-```
+## Community
 
-</p>
-</details>
+Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg) to ask questions and to share your ideas for improving EVA.
 
+<a href="https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg">              
+    <img src="https://raw.githubusercontent.com/georgia-tech-db/eva/master/api-docs/images/eva/eva-slack.jpg" alt="EVA Slack Channel" width="500">
+</a>
 
-## Contributing
+## Contributing to EVA
+
+[![PyPI Version](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
+[![CI Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
+[![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
 
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
-
-For information on installing from source and contributing to EVA, see our
-[contributing guidelines](./CONTRIBUTING.md).
-
-## Contributors
-
-See the [people page](https://github.com/georgia-tech-db/eva/graphs/contributors) for the full listing of contributors.
+For more information on installing from source and contributing to EVA, see our
+[contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
 
 ## License
 Copyright (c) 2018-2022 [Georgia Tech Database Group](http://db.cc.gatech.edu/)

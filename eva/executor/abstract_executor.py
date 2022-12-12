@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Iterable, List, TypeVar
 
+from eva.models.storage.batch import Batch
 from eva.planner.abstract_plan import AbstractPlan
+
+AbstractExecutor = TypeVar("AbstractExecutor")
 
 
 class AbstractExecutor(ABC):
@@ -29,7 +32,7 @@ class AbstractExecutor(ABC):
         self._node = node
         self._children = []
 
-    def append_child(self, child: 'AbstractExecutor'):
+    def append_child(self, child: AbstractExecutor):
         """
         appends a child exector node
 
@@ -39,7 +42,7 @@ class AbstractExecutor(ABC):
         self._children.append(child)
 
     @property
-    def children(self) -> List['AbstractExecutor']:
+    def children(self) -> List[AbstractExecutor]:
         """
         Returns the list of child executor
         Returns:
@@ -47,20 +50,23 @@ class AbstractExecutor(ABC):
         """
         return self._children
 
+    @children.setter
+    def children(self, children: List["AbstractExecutor"]):
+        self._children = children
+
     @property
     def node(self) -> AbstractPlan:
         return self._node
 
     @abstractmethod
     def validate(self):
-        NotImplementedError('Must be implemented in subclasses.')
+        pass
 
     @abstractmethod
-    def exec(self):
+    def exec(self) -> Iterable[Batch]:
         """
         This method is implemented by every executor.
         Contains logic for that executor;
         For retrival based executor : It fetchs frame batches from
         child nodes and emits it to parent node.
         """
-        NotImplementedError('Must be implemented in subclasses.')

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import unittest
-import time
-import threading
-import mock
 import asyncio
-
+import threading
+import time
+import unittest
 from unittest.mock import MagicMock
 
-from eva.server.server import start_server
-from eva.server.server import EvaServer
+import mock
 
-from asyncio import CancelledError
+from eva.server.networking_utils import serialize_message
+from eva.server.server import EvaServer, start_server
 
 
 class ServerTests(unittest.TestCase):
-
     def setUp(self):
         self.loop = asyncio.new_event_loop()
         self.stop_server_future = self.loop.create_future()
@@ -52,11 +48,14 @@ class ServerTests(unittest.TestCase):
         thread.daemon = True
         thread.start()
 
-        with self.assertRaises(CancelledError):
-            start_server(host=host, port=port,
-                         loop=self.loop,
-                         socket_timeout=socket_timeout,
-                         stop_server_future=self.stop_server_future)
+        with self.assertRaises((SystemExit)):
+            start_server(
+                host=host,
+                port=port,
+                loop=self.loop,
+                socket_timeout=socket_timeout,
+                stop_server_future=self.stop_server_future,
+            )
 
     def test_server_protocol_connection_lost(self):
 
@@ -69,27 +68,21 @@ class ServerTests(unittest.TestCase):
 
         # connection made
         eva_server.connection_made(eva_server.transport)
-        self.assertEqual(EvaServer.__connections__, 1,
-                         "connection not made")
+        self.assertEqual(EvaServer.__connections__, 1, "connection not made")
 
         # connection lost
         eva_server.connection_lost(None)
-        self.assertEqual(EvaServer.__connections__, 0,
-                         "connection not lost")
-        self.assertEqual(EvaServer.__errors__, 0,
-                         "connection not errored out")
+        self.assertEqual(EvaServer.__connections__, 0, "connection not lost")
+        self.assertEqual(EvaServer.__errors__, 0, "connection not errored out")
 
         # connection made
         eva_server.connection_made(eva_server.transport)
-        self.assertEqual(EvaServer.__connections__, 1,
-                         "connection not made")
+        self.assertEqual(EvaServer.__connections__, 1, "connection not made")
 
         # connection lost with error
         eva_server.connection_lost(mock.Mock())
-        self.assertEqual(EvaServer.__connections__, 0,
-                         "connection not lost")
-        self.assertEqual(EvaServer.__errors__, 1,
-                         "connection not errored out")
+        self.assertEqual(EvaServer.__connections__, 0, "connection not lost")
+        self.assertEqual(EvaServer.__errors__, 1, "connection not errored out")
 
     def test_server_protocol_data_received(self):
 
@@ -100,15 +93,14 @@ class ServerTests(unittest.TestCase):
         eva_server.transport.close = MagicMock(return_value="closed")
         eva_server.transport.abort = MagicMock(return_value="aborted")
 
-        # data received
-        data = mock.Mock()
-        data.decode = MagicMock(return_value="4|quit")
-        self.assertEqual(eva_server.data_received(data), "closed",
-                         "transport not closed")
+        quit_message = serialize_message("quit")
+        self.assertEqual(
+            eva_server.data_received(quit_message), "closed", "transport not closed"
+        )
 
         asyncio.set_event_loop(None)
 
+        query_message = serialize_message("query")
         with self.assertRaises(RuntimeError):
-            data.decode = MagicMock(return_value="5|query")
             # error due to lack of asyncio loop
-            eva_server.data_received(data)
+            eva_server.data_received(query_message)

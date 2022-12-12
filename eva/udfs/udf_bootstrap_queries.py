@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,40 +13,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# this file is to list out all the ndarray udf create queries in one place
-# as constants
-
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
-from eva.configuration.dictionary import EVA_INSTALLATION_DIR
 
+EVA_INSTALLATION_DIR = ConfigurationManager().get_value("core", "eva_installation_dir")
+NDARRAY_DIR = "ndarray"
 
 DummyObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS DummyObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (label NDARRAY STR(1))
                   TYPE  Classification
-                  IMPL  'test/util.py';
-        """
+                  IMPL  '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
-DummyMultiObjectDetector_udf_query = """CREATE UDF IF NOT EXISTS  DummyMultiObjectDetector
+DummyMultiObjectDetector_udf_query = """CREATE UDF
+                  IF NOT EXISTS  DummyMultiObjectDetector
                   INPUT  (Frame_Array NDARRAY INT8(3, ANYDIM, ANYDIM))
                   OUTPUT (labels NDARRAY STR(2))
                   TYPE  Classification
-                  IMPL  'test/util.py';
-        """
+                  IMPL  '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
-ArrayCount_udf_query = """CREATE UDF IF NOT EXISTS  Array_Count
-            INPUT(Input NDARRAY ANYTYPE, Key ANYTYPE)
-            OUTPUT(count INTEGER)
-            TYPE Ndarray
-            IMPL "{}/udfs/ndarray_udfs/array_count.py";
-        """.format(EVA_INSTALLATION_DIR)
+ArrayCount_udf_query = """CREATE UDF
+            IF NOT EXISTS  Array_Count
+            INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
+            OUTPUT (key_count INTEGER)
+            TYPE NdarrayUDF
+            IMPL "{}/udfs/{}/array_count.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
+Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
+                INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                        bboxes NDARRAY FLOAT32(ANYDIM, 4))
+                OUTPUT (Cropped_Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE  NdarrayUDF
+                IMPL  "{}/udfs/{}/crop.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
 
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
-                TYPE  Ndarray
-                IMPL  "{}/udfs/ndarray_udfs/unnest.py";
-        """.format(EVA_INSTALLATION_DIR)
+                TYPE  NdarrayUDF
+                IMPL  "{}/udfs/{}/unnest.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
 
 Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
       INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -54,10 +73,41 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
                 scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
       IMPL  '{}/udfs/fastrcnn_object_detector.py';
-      """.format(EVA_INSTALLATION_DIR)
+      """.format(
+    EVA_INSTALLATION_DIR
+)
+
+ocr_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+      INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUTPUT (labels NDARRAY STR(10), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                scores NDARRAY FLOAT32(ANYDIM))
+      TYPE  OCRExtraction
+      IMPL  '{}/udfs/ocr_extractor.py';
+      """.format(
+    EVA_INSTALLATION_DIR
+)
+
+face_detection_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  '{}/udfs/face_detector.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
+Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
+        INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+        OUTPUT (labels NDARRAY STR(ANYDIM))
+        TYPE  Classification
+        IMPL  '{}/udfs/mvit_action_recognition.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
 
 
-def init_builtin_udfs(mode='debug'):
+def init_builtin_udfs(mode="debug"):
     """
     Loads the builtin udfs into the system.
     This should be called when the system bootstraps.
@@ -65,10 +115,16 @@ def init_builtin_udfs(mode='debug'):
     Arguments:
         mode (str): 'debug' or 'release'
     """
-    queries = [Fastrcnn_udf_query, Unnest_udf_query, ArrayCount_udf_query]
-    if mode == 'debug':
-        queries.extend([DummyObjectDetector_udf_query,
-                        DummyMultiObjectDetector_udf_query])
+    queries = [
+        Fastrcnn_udf_query,
+        Mvit_udf_query,
+        ArrayCount_udf_query,
+        Crop_udf_query,
+        # Disabled because required packages (eg., easy_ocr might not be preinstalled)
+        # face_detection_udf_query,
+        # ocr_udf_query,
+    ]
+    queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
     for query in queries:
         execute_query_fetch_all(query)

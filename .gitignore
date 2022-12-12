@@ -97,6 +97,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+env38/
+env_eva/
 
 # Spyder project settings
 .spyderproject
@@ -166,3 +168,16 @@ eva.history
 nohup.out
 *mp4*
 develop.sh
+*build/
+eva_dev_env/
+test_eva/
+test_eva_db/
+test_evadb/
+
+# tutorials
+tutorials/*.py
+*.pth
+
+# benchmark
+.benchmarks
+eva.txt

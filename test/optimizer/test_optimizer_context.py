@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
 import unittest
 
 from mock import MagicMock
-from eva.optimizer.cost_model import CostModel
 
+from eva.optimizer.cost_model import CostModel
 from eva.optimizer.optimizer_context import OptimizerContext
 
 

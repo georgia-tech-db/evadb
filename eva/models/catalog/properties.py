@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from enum import Enum
+from enum import Enum, auto
 
 
 class ColorSpace(Enum):
-    RGB = 1
-    HSV = 2
-    BGR = 3
-    GRAY = 4
+    RGB = auto()
+    HSV = auto()
+    BGR = auto()
+    GRAY = auto()
 
 
 class VideoFormat(Enum):
-    MOV = 1
-    WMV = 2
-    OGG = 3
-    AVI = 4
-    FLV = 5
-    MP4 = 6
-    MPEG = 7
+    MOV = auto()
+    WMV = auto()
+    OGG = auto()
+    AVI = auto()
+    FLV = auto()
+    MP4 = auto()
+    MPEG = auto()

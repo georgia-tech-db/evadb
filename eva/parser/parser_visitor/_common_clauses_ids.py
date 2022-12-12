@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.table_ref import TableInfo
 from eva.parser.evaql.evaql_parser import evaql_parser
+from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
+from eva.parser.table_ref import TableInfo
 from eva.utils.logging_manager import logger
 
 ##################################################################
@@ -32,7 +31,7 @@ class CommonClauses(evaql_parserVisitor):
             table_info = TableInfo(table_name=table_name)
             return table_info
         else:
-            error = 'Invalid Table Name'
+            error = "Invalid Table Name"
             logger.error(error)
 
     def visitFullColumnName(self, ctx: evaql_parser.FullColumnNameContext):
@@ -52,6 +51,16 @@ class CommonClauses(evaql_parserVisitor):
             return TupleValueExpression(table_alias=uid, col_name=dottedIds[0])
         else:
             return TupleValueExpression(col_name=uid)
+
+    def visitUidList(self, ctx: evaql_parser.UidListContext):
+        uid_list = []
+        uid_list_length = len(ctx.uid())
+        for uid_index in range(uid_list_length):
+            uid = self.visit(ctx.uid(uid_index))
+            uid_expr = TupleValueExpression(uid)
+            uid_list.append(uid_expr)
+
+        return uid_list
 
     def visitSimpleId(self, ctx: evaql_parser.SimpleIdContext):
         # todo handle children, right now assuming TupleValueExpr

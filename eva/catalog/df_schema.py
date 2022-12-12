@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,22 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 from typing import List
 
 from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.schema_utils import SchemaUtils
 
 
 class DataFrameSchema(object):
-
     def __init__(self, name: str, column_list: List[DataFrameColumn]):
 
         self._name = name
         self._column_list = column_list
-        self._petastorm_schema = SchemaUtils \
-            .get_petastorm_schema(self._name, self._column_list)
-        self._pyspark_schema = self._petastorm_schema.as_spark_schema()
 
     def __str__(self):
         schema_str = "SCHEMA:: (" + self._name + ")\n"
@@ -43,17 +37,8 @@ class DataFrameSchema(object):
     def column_list(self):
         return self._column_list
 
-    @property
-    def petastorm_schema(self):
-        return self._petastorm_schema
-
-    @property
-    def pyspark_schema(self):
-        return self._pyspark_schema
-
     def __eq__(self, other):
-        return self.name == other.name and \
-            self._column_list == other.column_list
+        return self.name == other.name and self._column_list == other.column_list
 
     def __hash__(self) -> int:
         return hash((self.name, tuple(self.column_list)))

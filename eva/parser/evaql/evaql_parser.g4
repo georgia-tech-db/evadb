@@ -35,7 +35,12 @@ dmlStatement
     ;
 
 utilityStatement
-    : simpleDescribeStatement | helpStatement | showStatement
+    : simpleDescribeStatement | helpStatement | showStatement | explainStatement
+    ;
+
+explainableStatement
+    : selectStatement | insertStatement | updateStatement | deleteStatement
+    | createMaterializedView
     ;
 
 // Data Definition Language
@@ -49,8 +54,9 @@ createDatabase
 
 createIndex
     : CREATE
-      INDEX uid indexType?
-      ON tableName indexColumnNames
+      INDEX uid
+      ON tableName ('(' columns=uidList ')')
+      indexType?
     ;
 
 createTable
@@ -100,7 +106,7 @@ udfImpl
     ;
 
 indexType
-    : USING (BTREE | HASH)
+    : USING HNSW
     ;
 
 createDefinitions
@@ -176,8 +182,29 @@ updateStatement
 
 
 loadStatement
-    : LOAD DATA
-      INFILE fileName
+    : LOAD 
+      fileFormat
+      stringLiteral
+      INTO tableName
+        (
+            ('(' columns=uidList ')')
+        )?
+    ;
+
+
+fileFormat
+    : (CSV|VIDEO)
+    ;
+
+
+fileOptions
+    : FORMAT fileFormat
+    ;
+
+uploadStatement
+    : UPLOAD
+      PATH fileName
+      BLOB videoBlob
       INTO tableName
         (
             ('(' columns=uidList ')')
@@ -185,19 +212,10 @@ loadStatement
       (WITH fileOptions)?
     ;
 
-fileOptions
-    : FORMAT fileFormat=(CSV|VIDEO)
-    ;
-
-uploadStatement
-    : UPLOAD
-      PATH fileName
-      BLOB videoBlob
-    ;
-
 fileName
     : stringLiteral
     ;
+
 
 videoBlob
     : stringLiteral
@@ -261,7 +279,11 @@ tableSourceItemWithSample
 tableSourceItem
     : tableName                                         #atomTableItem
     | subqueryTableSourceItem                           #subqueryTableItem
-    | LATERAL functionCall                              #lateralFunctionCallItem
+    ;
+
+tableValuedFunction
+    : functionCall
+    | UNNEST LR_BRACKET functionCall RR_BRACKET
     ;
 
 subqueryTableSourceItem
@@ -275,14 +297,21 @@ sampleClause
     : SAMPLE decimalLiteral
     ;
 
-
 joinPart
     : JOIN tableSourceItemWithSample
       (
         ON expression
         | USING LR_BRACKET uidList RR_BRACKET
-      )?                                                            #innerJoin
+      )?                                                #innerJoin
+    |
+      JOIN LATERAL tableValuedFunction aliasClause?     #lateralJoin
     ;
+
+aliasClause
+    : AS? uid '(' uidList ')'
+    | AS? uid
+    ;
+
 
 //    Select Statement's Details
 
@@ -313,10 +342,11 @@ selectElement
 fromClause
     : FROM tableSources
       (WHERE whereExpr=expression)?
-      (
-        GROUP BY
-        groupByItem (',' groupByItem)*
-      )?
+      groupbyClause?
+    ;
+
+groupbyClause
+    : GROUP BY groupByItem (',' groupByItem)*
       (HAVING havingExpr=expression)?
     ;
 
@@ -359,6 +389,10 @@ helpStatement
 
 showStatement
     : SHOW (UDFS | TABLES)
+    ;
+
+explainStatement
+    : EXPLAIN explainableStatement
     ;
 
 // Common Clauses
@@ -528,9 +562,13 @@ udfFunction
 
 
 aggregateWindowedFunction
-    : (AVG | MAX | MIN | SUM)
+    :aggregateFunctionName
       '(' aggregator=(ALL | DISTINCT)? functionArg ')'
     | COUNT '(' (starArg='*' | aggregator=ALL? functionArg) ')'
+    ;
+
+aggregateFunctionName
+    : (AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT)
     ;
 
 functionArgs

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
-from eva.parser.statement import AbstractStatement
-
-from eva.parser.types import StatementType
-from eva.parser.table_ref import TableRef
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.select_statement import SelectStatement
-
-from typing import List
+from eva.parser.statement import AbstractStatement
+from eva.parser.table_ref import TableInfo
+from eva.parser.types import StatementType
 
 
 class CreateMaterializedViewStatement(AbstractStatement):
@@ -31,25 +29,28 @@ class CreateMaterializedViewStatement(AbstractStatement):
         query: select statement used to populate the view
     """
 
-    def __init__(self,
-                 view_ref: TableRef,
-                 col_list: List[ColumnDefinition],
-                 if_not_exists: bool,
-                 query: SelectStatement):
+    def __init__(
+        self,
+        view_info: TableInfo,
+        col_list: List[ColumnDefinition],
+        if_not_exists: bool,
+        query: SelectStatement,
+    ):
         super().__init__(StatementType.CREATE_MATERIALIZED_VIEW)
-        self._view_ref = view_ref
+        self._view_info = view_info
         self._col_list = col_list
         self._if_not_exists = if_not_exists
         self._query = query
 
     def __str__(self) -> str:
         print_str = "CREATE MATERIALIZED VIEW {} ({}) AS {} ".format(
-            self._view_ref, self._col_list, self._query)
+            self._view_info, self._col_list, self._query
+        )
         return print_str
 
     @property
-    def view_ref(self):
-        return self._view_ref
+    def view_info(self):
+        return self._view_info
 
     @property
     def if_not_exists(self):
@@ -66,14 +67,20 @@ class CreateMaterializedViewStatement(AbstractStatement):
     def __eq__(self, other):
         if not isinstance(other, CreateMaterializedViewStatement):
             return False
-        return (self.view_ref == other.view_ref
-                and self.col_list == other.col_list
-                and self.if_not_exists == other.if_not_exists
-                and self.query == other.query)
+        return (
+            self.view_info == other.view_info
+            and self.col_list == other.col_list
+            and self.if_not_exists == other.if_not_exists
+            and self.query == other.query
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.view_ref,
-                     tuple(self.col_list),
-                     self.if_not_exists,
-                     self.query))
+        return hash(
+            (
+                super().__hash__(),
+                self.view_ref,
+                tuple(self.col_list),
+                self.if_not_exists,
+                self.query,
+            )
+        )

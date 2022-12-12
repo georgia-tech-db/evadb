@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import Iterator
 
-from eva.models.storage.batch import Batch
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.planner.orderby_plan import OrderByPlan
 
@@ -40,12 +40,12 @@ class OrderByExecutor(AbstractExecutor):
         pass
 
     def extract_column_names(self):
-        """ extracts the string name of the column """
+        """extracts the string name of the column"""
         # self._columns: List[TupleValueExpression]
         return [tve.col_alias for tve in self._columns]
 
     def extract_sort_types(self):
-        """ extracts the sort type for the column """
+        """extracts the sort type for the column"""
         # self._sort_types: List[ParserOrderBySortType]
         sort_type_bools = []
         for st in self._sort_types:
@@ -61,7 +61,7 @@ class OrderByExecutor(AbstractExecutor):
 
         # aggregates the batches into one large batch
         for batch in child_executor.exec():
-            self.batch_sizes.append(batch.batch_size)
+            self.batch_sizes.append(len(batch))
             aggregated_batch_list.append(batch)
         aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
 
@@ -69,7 +69,8 @@ class OrderByExecutor(AbstractExecutor):
         try:
             aggregated_batch.sort_orderby(
                 by=self.extract_column_names(),
-                sort_type=self.extract_sort_types())
+                sort_type=self.extract_sort_types(),
+            )
         except KeyError:
             # pass for now
             pass
@@ -78,7 +79,7 @@ class OrderByExecutor(AbstractExecutor):
         #  on self.batch_sizes which holds the input batches sizes
         index = 0
         for i in self.batch_sizes:
-            batch = aggregated_batch[index: index + i]
+            batch = aggregated_batch[index : index + i]
             batch.reset_index()
             index += i
             yield batch

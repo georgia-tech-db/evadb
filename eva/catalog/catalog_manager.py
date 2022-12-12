@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,21 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 from typing import List
 
-from eva.catalog.column_type import ColumnType, NdArrayType
-from eva.catalog.models.base_model import init_db, drop_db
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
+from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.index import IndexMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.catalog.services.df_column_service import DatasetColumnService
 from eva.catalog.services.df_service import DatasetService
-from eva.catalog.services.udf_service import UdfService
+from eva.catalog.services.index_service import IndexService
 from eva.catalog.services.udf_io_service import UdfIOService
+from eva.catalog.services.udf_service import UdfService
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
+from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
@@ -46,6 +49,7 @@ class CatalogManager(object):
         self._column_service = DatasetColumnService()
         self._udf_service = UdfService()
         self._udf_io_service = UdfIOService()
+        self._index_service = IndexService()
 
     def reset(self):
         """
@@ -80,7 +84,7 @@ class CatalogManager(object):
         file_url: str,
         column_list: List[DataFrameColumn],
         identifier_column="id",
-        is_video=False,
+        table_type=TableType.VIDEO_DATA,
     ) -> DataFrameMetadata:
         """Creates metadata object
 
@@ -92,19 +96,96 @@ class CatalogManager(object):
             file_url: #todo
             column_list: list of columns
             identifier_column (str):  A unique identifier column for each row
-            is_video (bool): True if the table is a video
+            table_type (TableType): type of the table, video, images etc
         Returns:
             The persisted DataFrameMetadata object with the id field populated.
         """
 
         metadata = self._dataset_service.create_dataset(
-            name, file_url, identifier_id=identifier_column, is_video=is_video
+            name,
+            file_url,
+            identifier_id=identifier_column,
+            table_type=table_type,
         )
+
+        # Append row_id to table metadata.
+        column_list = [
+            DataFrameColumn(IDENTIFIER_COLUMN, ColumnType.INTEGER)
+        ] + column_list
+
         for column in column_list:
             column.metadata_id = metadata.id
         column_list = self._column_service.create_column(column_list)
+
         metadata.schema = column_list
         return metadata
+
+    def create_video_metadata(self, name: str) -> DataFrameMetadata:
+        """Create video metadata object.
+            We have predefined columns for such a object
+            id:  the frame id
+            data: the frame data
+
+        Arguments:
+            name (str): name of the metadata to be added to the catalog
+
+        Returns:
+            DataFrameMetadata:  corresponding metadata for the input table info
+        """
+        columns = [
+            ColumnDefinition(
+                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            ),
+            ColumnDefinition("id", ColumnType.INTEGER, None, []),
+            ColumnDefinition(
+                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            ),
+        ]
+        col_metadata = self.create_columns_metadata(columns)
+        uri = str(generate_file_path(name))
+        metadata = self.create_metadata(
+            name,
+            uri,
+            col_metadata,
+            identifier_column="id",
+            table_type=TableType.VIDEO_DATA,
+        )
+        return metadata
+
+    def create_table_metadata(
+        self, table_info: TableInfo, columns: List[ColumnDefinition]
+    ) -> DataFrameMetadata:
+        table_name = table_info.table_name
+        column_metadata_list = self.create_columns_metadata(columns)
+        file_url = str(generate_file_path(table_name))
+        metadata = self.create_metadata(
+            table_name,
+            file_url,
+            column_metadata_list,
+            table_type=TableType.STRUCTURED_DATA,
+        )
+        return metadata
+
+    def create_columns_metadata(self, col_list: List[ColumnDefinition]):
+        """Create column metadata for the input parsed column list. This function
+        will not commit the provided column into catalog table.
+        Will only return in memory list of ColumnDataframe objects
+
+        Arguments:
+            col_list {List[ColumnDefinition]} -- parsed col list to be created
+        """
+        if isinstance(col_list, ColumnDefinition):
+            col_list = [col_list]
+
+        result_list = []
+        for col in col_list:
+            result_list.append(
+                self.create_column_metadata(
+                    col.name, col.type, col.array_type, col.dimension, col.cci
+                )
+            )
+
+        return result_list
 
     def create_column_metadata(
         self,
@@ -112,6 +193,7 @@ class CatalogManager(object):
         data_type: ColumnType,
         array_type: NdArrayType,
         dimensions: List[int],
+        cci: ColConstraintInfo,
     ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
@@ -129,6 +211,7 @@ class CatalogManager(object):
             data_type,
             array_type=array_type,
             array_dimensions=dimensions,
+            is_nullable=cci.nullable,
         )
 
     def get_dataset_metadata(
@@ -259,9 +342,7 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(
-        self, database_name: str, table_name: str
-    ) -> bool:
+    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
@@ -272,9 +353,7 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(
-            database_name, table_name
-        )
+        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
 
     def drop_udf(self, udf_name: str) -> bool:
         """
@@ -307,3 +386,29 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    """ Index related services. """
+
+    def create_index(
+        self,
+        name: str,
+        save_file_path: str,
+        index_type: IndexType,
+        secondary_index_df_metadata: DataFrameMetadata,
+        feat_df_column: DataFrameColumn,
+    ) -> IndexMetadata:
+        index_metadata = self._index_service.create_index(
+            name, save_file_path, index_type
+        )
+        index_metadata.secondary_index_id = secondary_index_df_metadata.id
+        index_metadata.feat_df_column_id = feat_df_column.id
+        return index_metadata
+
+    def get_index_by_name(self, name: str) -> IndexMetadata:
+        return self._index_service.index_by_name(name)
+
+    def drop_index(self, index_name: str) -> bool:
+        return self._index_service.drop_index_by_name(index_name)
+
+    def get_all_index_entries(self):
+        return self._index_service.get_all_indices()

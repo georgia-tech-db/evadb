@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-from abc import ABC
-from eva.planner.types import PlanOprType
+from abc import ABC, abstractmethod
 from typing import List
+
+from eva.planner.types import PlanOprType
 
 
 class AbstractPlan(ABC):
-
     def __init__(self, opr_type):
         self._children = []
         self._parent = None
@@ -44,7 +42,7 @@ class AbstractPlan(ABC):
         return self._parent
 
     @parent.setter
-    def parent(self, node: 'AbstractPlan'):
+    def parent(self, node: "AbstractPlan"):
         """sets parent of current node
 
         Arguments:
@@ -55,7 +53,7 @@ class AbstractPlan(ABC):
         self._parent = node
 
     @property
-    def children(self) -> List['AbstractPlan']:
+    def children(self) -> List["AbstractPlan"]:
         return self._children
 
     @property
@@ -74,15 +72,20 @@ class AbstractPlan(ABC):
     def is_logical(self):
         return False
 
+    @abstractmethod
     def __hash__(self) -> int:
         return hash(self.opr_type)
+
+    @abstractmethod
+    def __str__(self) -> str:
+        return "AbstractPlan"
 
     def __copy__(self):
         # deepcopy the children
         cls = self.__class__
         result = cls.__new__(cls)
         for k, v in self.__dict__.items():
-            if k == '_children':
+            if k == "_children":
                 setattr(result, k, [])
             else:
                 setattr(result, k, v)

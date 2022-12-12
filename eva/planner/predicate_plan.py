@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,8 @@ class PredicatePlan(AbstractPlan):
         self.predicate = predicate
         super().__init__(PlanOprType.PREDICATE_FILTER)
 
+    def __str__(self):
+        return "PredicatePlan(predicate={})".format(self.predicate)
+
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     self.predicate))
+        return hash((super().__hash__(), self.predicate))

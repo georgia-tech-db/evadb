@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,35 +14,38 @@
 # limitations under the License.
 import unittest
 
-from mock import patch, MagicMock
+from mock import MagicMock, patch
 
-from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
-from eva.parser.select_statement import SelectStatement
-from eva.parser.table_ref import TableRef, TableInfo
-from eva.parser.create_udf_statement import CreateUDFStatement
-from eva.parser.drop_udf_statement import DropUDFStatement
-from eva.parser.insert_statement import InsertTableStatement
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.create_statement import CreateTableStatement
 from eva.optimizer.operators import (
-    LogicalQueryDerivedGet,
     LogicalCreate,
     LogicalCreateUDF,
-    LogicalInsert,
-    LogicalLoadData,
-    LogicalRename,
     LogicalDrop,
     LogicalDropUDF,
-    LogicalSample,
-    LogicalGet,
     LogicalFilter,
+    LogicalFunctionScan,
+    LogicalGet,
+    LogicalGroupBy,
+    LogicalInsert,
+    LogicalJoin,
+    LogicalLoadData,
     LogicalOrderBy,
+    LogicalQueryDerivedGet,
+    LogicalRename,
+    LogicalSample,
     LogicalShow,
     LogicalUnion,
-    LogicalFunctionScan,
-    LogicalJoin,
 )
+from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.parser.create_statement import CreateTableStatement
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.explain_statement import ExplainStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_statement import SelectStatement
+from eva.parser.table_ref import TableInfo, TableRef
 
 
 class StatementToOprTest(unittest.TestCase):
@@ -53,15 +56,11 @@ class StatementToOprTest(unittest.TestCase):
         table_ref.is_select.return_value = False
         table_ref.sample_freq = None
         converter.visit_table_ref(table_ref)
-        mock_lget.assert_called_with(
-            table_ref, table_ref.table.table_obj, "alias"
-        )
+        mock_lget.assert_called_with(table_ref, table_ref.table.table_obj, "alias")
         self.assertEqual(mock_lget.return_value, converter._plan)
 
     @patch("eva.optimizer.statement_to_opr_convertor.LogicalFilter")
-    def test_visit_select_predicate_should_add_logical_filter(
-        self, mock_lfilter
-    ):
+    def test_visit_select_predicate_should_add_logical_filter(self, mock_lfilter):
         converter = StatementToPlanConvertor()
         select_predicate = MagicMock()
         converter._visit_select_predicate(select_predicate)
@@ -71,9 +70,7 @@ class StatementToOprTest(unittest.TestCase):
         self.assertEqual(mock_lfilter.return_value, converter._plan)
 
     @patch("eva.optimizer.statement_to_opr_convertor.LogicalProject")
-    def test_visit_projection_should_add_logical_predicate(
-        self, mock_lproject
-    ):
+    def test_visit_projection_should_add_logical_predicate(self, mock_lproject):
         converter = StatementToPlanConvertor()
         projects = MagicMock()
 
@@ -95,9 +92,7 @@ class StatementToOprTest(unittest.TestCase):
 
         converter.visit_table_ref.assert_called_with(statement.from_table)
         converter._visit_projection.assert_called_with(statement.target_list)
-        converter._visit_select_predicate.assert_called_with(
-            statement.where_clause
-        )
+        converter._visit_select_predicate.assert_called_with(statement.where_clause)
 
     def test_visit_select_should_not_call_visits_for_null_values(self):
         converter = StatementToPlanConvertor()
@@ -164,9 +159,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         stmt.if_exists = True
         convertor.visit_drop_udf(stmt)
         l_drop_udf_mock.assert_called_once()
-        l_drop_udf_mock.assert_called_with(
-            stmt.name,
-            stmt.if_exists)
+        l_drop_udf_mock.assert_called_with(stmt.name, stmt.if_exists)
 
     def test_visit_should_call_drop_udf(self):
         stmt = MagicMock(spec=DropUDFStatement)
@@ -208,6 +201,16 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
+    def test_visit_should_call_explain(self):
+        stmt = MagicMock(spec=ExplainStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_explain = mock
+
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_once_with(stmt)
+
     def test_visit_should_call_drop(self):
         stmt = MagicMock(spec=DropTableStatement)
         convertor = StatementToPlanConvertor()
@@ -217,24 +220,25 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         mock.assert_called_once()
         mock.assert_called_with(stmt)
 
+    def test_visit_should_call_create_index(self):
+        stmt = MagicMock(spec=CreateIndexStatement)
+        convertor = StatementToPlanConvertor()
+        mock = MagicMock()
+        convertor.visit_create_index = mock
+        convertor.visit(stmt)
+        mock.assert_called_once()
+        mock.assert_called_with(stmt)
+
     def test_should_return_false_for_unequal_plans_and_true_for_equal_plans(
         self,
     ):
         plans = []
-        create_plan = LogicalCreate(
-            TableRef(TableInfo("video")), [MagicMock()]
-        )
+        create_plan = LogicalCreate(TableRef(TableInfo("video")), [MagicMock()])
         create_udf_plan = LogicalCreateUDF("udf", False, None, None, None)
-        insert_plan = LogicalInsert(
-            MagicMock(), 0, [MagicMock()], [MagicMock()]
-        )
+        insert_plan = LogicalInsert(MagicMock(), 0, [MagicMock()], [MagicMock()])
         query_derived_plan = LogicalQueryDerivedGet(alias="T")
-        load_plan = LogicalLoadData(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock()
-        )
-        rename_plan = LogicalRename(
-            TableRef(TableInfo("old")), TableInfo("new")
-        )
+        load_plan = LogicalLoadData(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        rename_plan = LogicalRename(TableRef(TableInfo("old")), TableInfo("new"))
 
         show_plan = LogicalShow(MagicMock())
         drop_plan = LogicalDrop([MagicMock()], True)
@@ -242,12 +246,11 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         get_plan = LogicalGet(MagicMock(), MagicMock(), MagicMock())
         sample_plan = LogicalSample(MagicMock())
         filter_plan = LogicalFilter(MagicMock())
+        groupby_plan = LogicalGroupBy(MagicMock())
         order_by_plan = LogicalOrderBy(MagicMock())
         union_plan = LogicalUnion(MagicMock())
-        function_scan_plan = LogicalFunctionScan(MagicMock())
-        join_plan = LogicalJoin(
-            MagicMock(), MagicMock(), MagicMock(), MagicMock()
-        )
+        function_scan_plan = LogicalFunctionScan(MagicMock(), MagicMock())
+        join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
 
         create_plan.append_child(create_udf_plan)
 
@@ -262,6 +265,7 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(get_plan)
         plans.append(sample_plan)
         plans.append(filter_plan)
+        plans.append(groupby_plan)
         plans.append(order_by_plan)
         plans.append(union_plan)
         plans.append(function_scan_plan)

@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2018-2020 EVA
+# Copyright 2018-2022 EVA
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,20 +31,26 @@ class SeqScanPlan(AbstractScan):
             An expression used for filtering
     """
 
-    def __init__(self,
-                 predicate: AbstractExpression,
-                 columns: List[AbstractExpression],
-                 alias: str = None):
+    def __init__(
+        self,
+        predicate: AbstractExpression,
+        columns: List[AbstractExpression],
+        alias: str = None,
+    ):
         self._columns = columns
         self.alias = alias
-        super().__init__(PlanOprType.SEQUENTIAL_SCAN,
-                         predicate)
+        super().__init__(PlanOprType.SEQUENTIAL_SCAN, predicate)
 
     @property
     def columns(self):
         return self._columns
 
+    def __str__(self):
+        return "SeqScanPlan(predicate={}, \
+            columns={}, \
+            alias={})".format(
+            self._predicate, self._columns, self.alias
+        )
+
     def __hash__(self) -> int:
-        return hash((super().__hash__(),
-                     tuple(self.columns or []),
-                     self.alias))
+        return hash((super().__hash__(), tuple(self.columns or []), self.alias))
