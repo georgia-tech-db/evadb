@@ -14,7 +14,6 @@
 # limitations under the License.
 from antlr4 import TerminalNode
 
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
 from eva.parser.insert_statement import InsertTableStatement
@@ -52,16 +51,6 @@ class Insert(evaql_parserVisitor):
 
         insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
         return insert_stmt
-
-    def visitUidList(self, ctx: evaql_parser.UidListContext):
-        uid_list = []
-        uid_list_length = len(ctx.uid())
-        for uid_index in range(uid_list_length):
-            uid = self.visit(ctx.uid(uid_index))
-            uid_expr = TupleValueExpression(uid)
-            uid_list.append(uid_expr)
-
-        return uid_list
 
     def visitInsertStatementValue(self, ctx: evaql_parser.InsertStatementValueContext):
         insert_stmt_value = []

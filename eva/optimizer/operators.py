@@ -16,6 +16,7 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import List
 
+from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
@@ -56,6 +57,7 @@ class OperatorType(IntEnum):
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
+    LOGICALCREATEINDEX = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1098,3 +1100,58 @@ class LogicalExplain(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._explainable_opr))
+
+
+class LogicalCreateIndex(Operator):
+    def __init__(
+        self,
+        name: str,
+        table_ref: TableRef,
+        col_list: List[ColumnDefinition],
+        index_type: IndexType,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALCREATEINDEX, children)
+        self._name = name
+        self._table_ref = table_ref
+        self._col_list = col_list
+        self._index_type = index_type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    @property
+    def index_type(self):
+        return self._index_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateIndex):
+            return False
+        return (
+            is_subtree_equal
+            and self.name == other.name
+            and self.table_ref == other.table_ref
+            and self.col_list == other.col_list
+            and self.index_type == other.index_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.table_ref,
+                tuple(self.col_list),
+                self.index_type,
+            )
+        )

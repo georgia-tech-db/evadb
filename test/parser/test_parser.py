@@ -15,13 +15,14 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
@@ -45,6 +46,39 @@ from eva.parser.upload_statement import UploadStatement
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def test_create_index_statement(self):
+        parser = Parser()
+
+        create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;"
+        eva_stmt_list = parser.parse(create_index_query)
+
+        # check stmt itself
+        self.assertIsInstance(eva_stmt_list, list)
+        self.assertEqual(len(eva_stmt_list), 1)
+        self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+
+        expected_stmt = CreateIndexStatement(
+            "testindex",
+            TableRef(TableInfo("MyVideo")),
+            [
+                ColumnDefinition("featCol", None, None, None),
+            ],
+            IndexType.HNSW,
+        )
+        actual_stmt = eva_stmt_list[0]
+        self.assertEqual(actual_stmt, expected_stmt)
+
+    @unittest.skip("Skip parser exception handling testcase, moved to binder")
+    def test_create_index_exception_statement(self):
+        parser = Parser()
+
+        create_index_query = (
+            "CREATE INDEX testindex USING HNSW ON MyVideo (featCol1, featCol2);"
+        )
+
+        with self.assertRaises(Exception):
+            parser.parse(create_index_query)
 
     def test_explain_dml_statement(self):
         parser = Parser()

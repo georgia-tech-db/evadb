@@ -76,9 +76,11 @@ notebook_libs = [
 integration_test_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",    
+    "faiss-gpu>=1.7.2"
 ]
 
 benchmark_libs = [
+    "pytest-benchmark",
 ]
 
 doc_libs = [

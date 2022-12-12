@@ -18,6 +18,7 @@ from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.index import IndexMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 
@@ -156,3 +157,27 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(udf_io, udf_io2)
         udf_io2 = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 2)
         self.assertNotEqual(udf_io, udf_io2)
+
+    def test_index(self):
+        index = IndexMetadata("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index.id, None)
+        self.assertEqual(index.name, "index")
+        self.assertEqual(index.save_file_path, "FaissSavePath")
+        self.assertEqual(index.type, "HNSW")
+        self.assertEqual(str(index), "index: (index, FaissSavePath, HNSW)\n")
+
+    def test_index_hash(self):
+        index1 = IndexMetadata("index", "FaissSavePath", "HNSW")
+        index2 = IndexMetadata("index", "FaissSavePath", "HNSW")
+
+        self.assertEqual(hash(index1), hash(index2))
+
+    def test_index_equality(self):
+        index = IndexMetadata("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index, index)
+        index2 = IndexMetadata("index2", "FaissSavePath", "HNSW")
+        self.assertNotEqual(index, index2)
+        index3 = IndexMetadata("index", "FaissSavePath3", "HNSW")
+        self.assertNotEqual(index, index3)
+        index4 = IndexMetadata("index", "FaissSavePath", "HNSW4")
+        self.assertNotEqual(index, index4)

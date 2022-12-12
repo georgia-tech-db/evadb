@@ -225,6 +225,18 @@ def create_table(table_name, num_rows, num_columns):
     return df
 
 
+def create_sample_image():
+    try:
+        os.remove(os.path.join(upload_dir_from_config, "dummy.jpg"))
+    except FileNotFoundError:
+        pass
+
+    img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+    img[0] -= 1
+    img[2] += 1
+    cv2.imwrite(os.path.join(upload_dir_from_config, "dummy.jpg"), img)
+
+
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
         os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
@@ -285,7 +297,10 @@ def copy_sample_videos_to_upload_dir():
 
 
 def file_remove(path):
-    os.remove(os.path.join(upload_dir_from_config, path))
+    try:
+        os.remove(os.path.join(upload_dir_from_config, path))
+    except FileNotFoundError:
+        pass
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
