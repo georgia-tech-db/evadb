@@ -16,8 +16,14 @@
 import numpy as np
 import pandas as pd
 import torch
-from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
+import torchvision
 
+try:
+    from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
+except ImportError as e:
+    raise ImportError(
+        f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
+    )
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
