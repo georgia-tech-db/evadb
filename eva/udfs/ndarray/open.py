@@ -31,21 +31,22 @@ class Open(AbstractUDF):
     def name(self):
         return "Open"
 
-    def forward(self, path: Path) -> pd.DataFrame:
+    def forward(self, path_df: pd.DataFrame) -> pd.DataFrame:
         """
         Open image from server-side path.
 
         Returns:
             (pd.DataFrame): The opened image.
         """
-        if path in self._data_cache:
-            data = self._data_cache[path]
+        path_str = path_df[0].values[0]
+        if path_str in self._data_cache:
+            data = self._data_cache[path_str]
         else:
             try:
-                data = cv2.imread(path).astype(np.float32)
+                data = cv2.imread(path_str).astype(np.float32)
             except Exception as e:
                 raise ExecutorError(str(e))
 
-            self._data_cache[path] = data
+            self._data_cache[path_str] = data
 
         return pd.DataFrame([{"data": data}])

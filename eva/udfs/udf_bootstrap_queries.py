@@ -60,7 +60,7 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
 
 Open_udf_query = """CREATE UDF IF NOT EXISTS Open
                 INPUT (img_path TEXT(1000))
-                OUTPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
                 TYPE NdarrayUDF
                 IMPL "{}/udfs/{}/open.py";
         """.format(
