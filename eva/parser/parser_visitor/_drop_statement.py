@@ -15,14 +15,13 @@
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.parser.table_ref import TableRef
 
 
 class DropTable(evaql_parserVisitor):
     def visitTables(self, ctx: evaql_parser.TablesContext):
         tables = []
         for child in ctx.children:
-            tables.append(TableRef(self.visit(child)))
+            tables.append(self.visit(child))
         return tables
 
     def visitDropTable(self, ctx: evaql_parser.DropTableContext):

@@ -75,10 +75,14 @@ class TestRules(unittest.TestCase):
     def setUpClass(cls):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
-        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        video_file_path = create_sample_video()
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
+
+    @classmethod
+    def tearDownClass(cls):
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_rules_promises_order(self):
         # Promise of all rewrite should be greater than implementation
