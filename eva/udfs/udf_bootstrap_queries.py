@@ -139,7 +139,10 @@ def init_builtin_udfs(mode="debug"):
         ArrayCount_udf_query,
         Crop_udf_query,
         Open_udf_query,
+<<<<<<< HEAD
         YoloV5_udf_query,
+=======
+>>>>>>> register open as udf
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
