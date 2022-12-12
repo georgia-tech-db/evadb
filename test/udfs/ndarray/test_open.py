@@ -14,15 +14,20 @@
 # limitations under the License.
 import os
 import unittest
+from test.util import create_sample_image
+
 import numpy as np
 import pandas as pd
+<<<<<<< HEAD
 <<<<<<< HEAD
 from mock import patch
 =======
 >>>>>>> fix test cases for open
 
+=======
+>>>>>>> reformat
 from mock import patch
-from test.util import create_sample_image
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.executor_utils import ExecutorError
 from eva.udfs.ndarray.open import Open
