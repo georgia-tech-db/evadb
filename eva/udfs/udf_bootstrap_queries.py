@@ -38,6 +38,16 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
     EVA_INSTALLATION_DIR
 )
 
+DummyFeatureExtractor_udf_query = """CREATE UDF
+                  IF NOT EXISTS DummyFeatureExtractor
+                  INPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (Feature_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  TYPE Classification
+                  IMPL '{}/../test/util.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 ArrayCount_udf_query = """CREATE UDF
             IF NOT EXISTS  Array_Count
             INPUT (Input_Array NDARRAY ANYTYPE, Search_Key ANYTYPE)
@@ -149,7 +159,11 @@ def init_builtin_udfs(mode="debug"):
         # Disabled as it requires specific pytorch package
         # Mvit_udf_query,
     ]
-    queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
+    queries.extend([
+        DummyObjectDetector_udf_query, 
+        DummyMultiObjectDetector_udf_query,
+        DummyFeatureExtractor_udf_query,
+    ])
 
     for query in queries:
         execute_query_fetch_all(query)

@@ -414,3 +414,29 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 3 + 1]
         return np.array([label, label])
+
+
+class DummyFeatureExtractor(AbstractClassifierUDF):
+    """
+    Returns a feature for a frame.
+    """
+    def setup(self, *args, **kwargs):
+        pass
+
+    @property
+    def name(self) -> str:
+        return "DummyFeatureExtractor"
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return []
+
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Return the original input as its feature.
+        ret = pd.DataFrame()
+        ret.append({"features": df["data"].to_numpy()[0]})
+        return ret
