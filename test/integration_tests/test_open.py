@@ -14,8 +14,8 @@
 # limitations under the License.
 import os
 import unittest
-
 from test.util import create_sample_image, file_remove
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -31,7 +31,9 @@ class OpenTests(unittest.TestCase):
 
         # Insert image path.
         create_sample_image()
-        create_table_query = """CREATE TABLE IF NOT EXISTS testOpenTable (num1 INTEGER, num2 INTEGER);"""
+        create_table_query = (
+            """CREATE TABLE IF NOT EXISTS testOpenTable (num1 INTEGER, num2 INTEGER);"""
+        )
         execute_query_fetch_all(create_table_query)
 
     def tearDown(self):
@@ -42,5 +44,7 @@ class OpenTests(unittest.TestCase):
         config = ConfigurationManager()
         upload_dir_from_config = config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
-        select_query = """SELECT * FROM testOpenTable WHERE Open("{}");""".format(img_path)
+        select_query = """SELECT * FROM testOpenTable WHERE Open("{}");""".format(
+            img_path
+        )
         execute_query_fetch_all(select_query)
