@@ -12,17 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import struct
 import unittest
 from unittest.mock import MagicMock
 
 import mock
-from mock import mock_open
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.configuration.configuration_manager import ConfigurationManager
 from eva.storage.storage_engine import StorageEngine
 
 
@@ -47,9 +44,6 @@ class VideoStorageEngineTest(unittest.TestCase):
         mock.table_type = TableType.VIDEO_DATA
         self.video_engine = StorageEngine.factory(mock)
         self.table = self.create_sample_table()
-        self.curr_version = ConfigurationManager().get_value(
-            "storage", "video_engine_version"
-        )
 
     def tearDown(self):
         pass
@@ -59,12 +53,6 @@ class VideoStorageEngineTest(unittest.TestCase):
         m.side_effect = FileExistsError
         with self.assertRaises(FileExistsError):
             self.video_engine.create(self.table, if_not_exists=False)
-
-    def test_invalid_metadata(self):
-        corrupt_meta = struct.pack("!H", self.curr_version + 1)
-        with mock.patch("builtins.open", mock_open(read_data=corrupt_meta)):
-            with self.assertRaises(RuntimeError):
-                list(self.video_engine._get_video_file_path("metadata"))
 
     def test_write(self):
         batch = MagicMock()

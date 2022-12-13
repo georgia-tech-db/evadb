@@ -25,7 +25,7 @@ class CreatePlan(AbstractPlan):
     This plan is used for storing information required for create table
     operations.
     Arguments:
-        video_ref {TableRef} -- video ref for table to be created in storage
+        video_ref {TableInfo} -- video ref for table to be created in storage
         column_list {List[DataFrameColumn]} -- Columns to be added
         if_not_exists {bool} -- Whether to override if there is existing table
     """
