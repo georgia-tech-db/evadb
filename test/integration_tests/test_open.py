@@ -14,10 +14,11 @@
 # limitations under the License.
 import os
 import unittest
+from test.util import create_sample_image, file_remove, load_inbuilt_udfs
+
 import numpy as np
 import pandas as pd
 
-from test.util import create_sample_image, file_remove, load_inbuilt_udfs
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
@@ -57,9 +58,7 @@ class OpenTests(unittest.TestCase):
         config = ConfigurationManager()
         upload_dir_from_config = config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
-        select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(
-            img_path
-        )
+        select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(img_path)
         batch_res = execute_query_fetch_all(select_query)
 
         expected_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
