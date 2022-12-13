@@ -26,6 +26,7 @@ from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
+    LogicalCreateIndexToFaiss,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
     LogicalCreateUDFToPhysical,
@@ -114,6 +115,7 @@ class RulesManager:
             else SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
+            LogicalCreateIndexToFaiss(),
         ]
 
         if ray_enabled:

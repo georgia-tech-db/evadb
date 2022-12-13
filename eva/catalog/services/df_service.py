@@ -16,8 +16,10 @@ from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.services.base_service import BaseService
+from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
 
 
@@ -26,25 +28,32 @@ class DatasetService(BaseService):
         super().__init__(DataFrameMetadata)
 
     def create_dataset(
-        self, name, file_url, identifier_id="id", is_video=False
+        self, name: str, file_url: str, identifier_id, table_type: TableType
     ) -> DataFrameMetadata:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
             name (str): name of the dataset
             file_url (str): file path of the dataset.
-            is_video (bool): True if the table is a video
+            table_type (TableType): type of data in the table
         Returns:
             DataFrameMetadata object
         """
-        metadata = self.model(
-            name=name,
-            file_url=file_url,
-            identifier_id=identifier_id,
-            is_video=is_video,
-        )
-        metadata = metadata.save()
-        return metadata
+        try:
+            metadata = self.model(
+                name=name,
+                file_url=file_url,
+                identifier_id=identifier_id,
+                table_type=int(table_type),
+            )
+            metadata = metadata.save()
+        except Exception as e:
+            logger.exception(
+                f"Failed to create catalog dataset with exception {str(e)}"
+            )
+            raise CatalogError(e)
+        else:
+            return metadata
 
     def dataset_by_name(self, name: str) -> int:
         """
@@ -93,35 +102,27 @@ class DatasetService(BaseService):
         """
         return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
-    def drop_dataset_by_name(self, database_name: str, dataset_name: str):
+    def drop_dataset(self, dataset: DataFrameMetadata):
         """Delete dataset from the db
         Arguments:
-            database_name  (str): Database to which dataset belongs
-            dataset_name (str): name of the dataset
+            dataset  (DataFrameMetadata): dataset to delete
         Returns:
             True if successfully removed else false
         """
         try:
-            dataset = self.dataset_object_by_name(database_name, dataset_name)
             dataset.delete()
             return True
         except Exception as e:
-            err_msg = "Delete dataset failed for name {} with error {}".format(
-                dataset_name, str(e)
-            )
-            logger.error(err_msg)
-            raise RuntimeError(err_msg)
+            err_msg = f"Delete dataset failed for {dataset} with error {str(e)}."
+            logger.exception(err_msg)
+            raise CatalogError(err_msg)
 
-    def rename_dataset_by_name(
-        self, new_name: str, curr_database_name: str, curr_dataset_name: str
-    ):
+    def rename_dataset(self, dataset: DataFrameMetadata, new_name: str):
         try:
-            dataset = self.dataset_object_by_name(curr_database_name, curr_dataset_name)
             dataset.update(_name=new_name)
-
         except Exception as e:
             err_msg = "Update dataset name failed for {} with error {}".format(
-                curr_dataset_name, str(e)
+                dataset.name, str(e)
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)

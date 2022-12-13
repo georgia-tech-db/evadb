@@ -16,6 +16,7 @@ import unittest
 
 from mock import patch
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.services.df_service import DatasetService
 
 DATASET_ID = 123
@@ -24,18 +25,25 @@ DATASET_NAME = "name"
 DATABASE_NAME = "test"
 IDENTIFIER = "data_id"
 DATASET_NEW_NAME = "new_name"
+DATASET_OBJ = "obj"
+TABLE_TYPE = TableType.STRUCTURED_DATA
 
 
 class DatasetServiceTest(unittest.TestCase):
     @patch("eva.catalog.services.df_service.DataFrameMetadata")
     def test_create_dataset_should_create_model(self, mocked):
         service = DatasetService()
-        service.create_dataset(DATASET_NAME, DATASET_URL, identifier_id=IDENTIFIER)
+        service.create_dataset(
+            DATASET_NAME,
+            DATASET_URL,
+            table_type=TABLE_TYPE,
+            identifier_id=IDENTIFIER,
+        )
         mocked.assert_called_with(
             name=DATASET_NAME,
             file_url=DATASET_URL,
             identifier_id=IDENTIFIER,
-            is_video=False,
+            table_type=TABLE_TYPE,
         )
         mocked.return_value.save.assert_called_once()
 
@@ -72,53 +80,3 @@ class DatasetServiceTest(unittest.TestCase):
         expected = mocked.query.filter.return_value.one_or_none.return_value
 
         self.assertEqual(actual, expected)
-
-    @patch("eva.catalog.services.df_service.DatasetService.dataset_object_by_name")
-    def test_rename_dataset_by_name(self, mock_func):
-        service = DatasetService()
-        service.rename_dataset_by_name(
-            DATASET_NEW_NAME, "database_name", "dataset_name"
-        )
-        mock_func.assert_called_once_with("database_name", "dataset_name")
-        mock_func.return_value.update.assert_called_once_with(_name=DATASET_NEW_NAME)
-
-    def test_rename_dataset_by_name_should_raise_exception(self):
-        with patch.object(DatasetService, "dataset_object_by_name") as mock_func:
-            ERR_MSG = "err_message"
-            mock_func.side_effect = Exception(ERR_MSG)
-            service = DatasetService()
-            with self.assertRaises(Exception) as cm:
-                service.rename_dataset_by_name(
-                    DATASET_NEW_NAME, DATABASE_NAME, DATASET_NAME
-                )
-            self.assertEqual(
-                "Update dataset name failed for {} with error {}".format(
-                    DATASET_NAME, ERR_MSG
-                ),
-                str(cm.exception),
-            )
-            mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
-            mock_func.return_value.update.assert_not_called()
-
-    @patch("eva.catalog.services.df_service.DatasetService.dataset_object_by_name")
-    def test_drop_dataset_by_name(self, mock_func):
-        service = DatasetService()
-        service.drop_dataset_by_name(DATABASE_NAME, DATASET_NAME)
-        mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
-        mock_func.return_value.delete.assert_called_once()
-
-    def test_drop_dataset_by_name_should_raise_exception(self):
-        with patch.object(DatasetService, "dataset_object_by_name") as mock_func:
-            ERR_MSG = "err_message"
-            mock_func.side_effect = Exception(ERR_MSG)
-            service = DatasetService()
-            with self.assertRaises(Exception) as cm:
-                service.drop_dataset_by_name(DATABASE_NAME, DATASET_NAME)
-            self.assertEqual(
-                "Delete dataset failed for name {} with error {}".format(
-                    DATASET_NAME, ERR_MSG
-                ),
-                str(cm.exception),
-            )
-            mock_func.assert_called_once_with(DATABASE_NAME, DATASET_NAME)
-            mock_func.return_value.delete.assert_not_called()

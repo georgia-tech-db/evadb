@@ -13,33 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from pathlib import Path
-from typing import Union
 
 from eva.binder.binder_utils import (
     BinderError,
     bind_table_info,
     check_groupby_pattern,
     check_table_object_is_video,
-    create_video_metadata,
     extend_star,
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.drop_statement import DropTableStatement
 from eva.parser.explain_statement import ExplainStatement
-from eva.parser.load_statement import LoadDataStatement
+from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
-from eva.parser.types import FileFormatType
-from eva.parser.upload_statement import UploadStatement
 from eva.utils.generic_utils import path_to_class
 from eva.utils.logging_manager import logger
 
@@ -82,6 +77,22 @@ class StatementBinder:
     def _bind_explain_statement(self, node: ExplainStatement):
         self.bind(node.explainable_stmt)
 
+    @bind.register(CreateIndexStatement)
+    def _bind_create_index_statement(self, node: CreateIndexStatement):
+        self.bind(node.table_ref)
+
+        # TODO: create index currently only supports single numpy column.
+        assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
+
+        # TODO: create index currently only works on TableInfo, but will extend later.
+        assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
+
+        col_def = node.col_list[0]
+        table_ref_obj = node.table_ref.table.table_obj
+        col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+        assert col.type == ColumnType.NDARRAY, "Index input needs to be numpy array"
+        assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
+
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         self.bind(node.from_table)
@@ -115,72 +126,13 @@ class StatementBinder:
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
 
-    @bind.register(LoadDataStatement)
-    @bind.register(UploadStatement)
-    def _bind_load_and_upload_data_statement(
-        self, node: Union[LoadDataStatement, UploadStatement]
-    ):
-        table_ref = node.table_ref
-        name = table_ref.table.table_name
-        if node.file_options["file_format"] == FileFormatType.VIDEO:
-            # Sanity check to make sure there is no existing video table with same name
-            if self._catalog.check_table_exists(
-                table_ref.table.database_name, table_ref.table.table_name
-            ):
-                msg = f"Adding to an existing video table {name}."
-                logger.info(msg)
-            else:
-
-                # create catalog entry only if the file path exists
-                upload_dir = Path(
-                    ConfigurationManager().get_value("storage", "upload_dir")
-                )
-                if (
-                    Path(node.path).exists()
-                    or Path(Path(upload_dir) / node.path).exists()
-                ):
-                    create_video_metadata(name)
-
-                # else raise error
-                else:
-                    err_msg = f"Video file {node.path} does not exist."
-                    logger.error(err_msg)
-                    raise BinderError(err_msg)
-
-        self.bind(table_ref)
-
-        table_ref_obj = table_ref.table.table_obj
-        if table_ref_obj is None:
-            error = f"{name} does not exist."
-            logger.error(error)
-            raise BinderError(error)
-
-        # if query had columns specified, we just copy them
-        if node.column_list is not None:
-            column_list = node.column_list
-
-        # else we curate the column list from the metadata
-        else:
-            column_list = []
-            for column in table_ref_obj.columns:
-                column_list.append(
-                    TupleValueExpression(
-                        col_name=column.name,
-                        table_alias=table_ref_obj.name.lower(),
-                        col_object=column,
-                    )
-                )
-
-        # bind the columns
-        for expr in column_list:
-            self.bind(expr)
-
-        node.column_list = column_list
-
-    @bind.register(DropTableStatement)
-    def _bind_drop_table_statement(self, node: DropTableStatement):
-        for table in node.table_refs:
-            self.bind(table)
+    @bind.register(RenameTableStatement)
+    def _bind_rename_table_statement(self, node: RenameTableStatement):
+        self.bind(node.old_table_ref)
+        if node.old_table_ref.table.table_obj.table_type == TableType.STRUCTURED_DATA:
+            err_msg = "Rename not yet supported on structured data"
+            logger.exception(err_msg)
+            raise BinderError(err_msg)
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):

@@ -54,8 +54,9 @@ createDatabase
 
 createIndex
     : CREATE
-      INDEX uid indexType?
-      ON tableName indexColumnNames
+      INDEX uid
+      ON tableName ('(' columns=uidList ')')
+      indexType?
     ;
 
 createTable
@@ -105,7 +106,7 @@ udfImpl
     ;
 
 indexType
-    : USING (BTREE | HASH)
+    : USING HNSW
     ;
 
 createDefinitions
@@ -182,16 +183,22 @@ updateStatement
 
 loadStatement
     : LOAD 
-      FILE fileName
+      fileFormat
+      stringLiteral
       INTO tableName
         (
             ('(' columns=uidList ')')
         )?
-      (WITH fileOptions)?
     ;
 
+
+fileFormat
+    : (CSV|VIDEO)
+    ;
+
+
 fileOptions
-    : FORMAT fileFormat=(CSV|VIDEO)
+    : FORMAT fileFormat
     ;
 
 uploadStatement
@@ -208,6 +215,7 @@ uploadStatement
 fileName
     : stringLiteral
     ;
+
 
 videoBlob
     : stringLiteral

@@ -16,6 +16,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from eva.catalog.catalog_type import TableType
+from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
@@ -39,6 +41,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
@@ -63,6 +66,7 @@ from eva.optimizer.operators import (
     Operator,
     OperatorType,
 )
+from eva.planner.create_index_plan import CreateIndexPlan
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
@@ -99,7 +103,7 @@ class EmbedFilterIntoGet(Rule):
         # System supports predicate pushdown only while reading video data
         predicate = before.predicate
         lget: LogicalGet = before.children[0]
-        if predicate and lget.dataset_metadata.is_video:
+        if predicate and is_video_table(lget.dataset_metadata):
             # System only supports pushing basic range predicates on id
             video_alias = lget.video.alias
             col_alias = f"{video_alias}.id"
@@ -148,7 +152,7 @@ class EmbedSampleIntoGet(Rule):
     def check(self, before: LogicalSample, context: OptimizerContext):
         # System supports sample pushdown only while reading video data
         lget: LogicalGet = before.children[0]
-        if lget.dataset_metadata.is_video:
+        if lget.dataset_metadata.table_type == TableType.VIDEO_DATA:
             return True
         return False
 
@@ -397,7 +401,7 @@ class LogicalDropToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_refs, before.if_exists)
+        after = DropPlan(before.table_infos, before.if_exists)
         return after
 
 
@@ -420,6 +424,27 @@ class LogicalCreateUDFToPhysical(Rule):
             before.outputs,
             before.impl_path,
             before.udf_type,
+        )
+        return after
+
+
+class LogicalCreateIndexToFaiss(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_FAISS, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_INDEX_TO_FAISS
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
+        after = CreateIndexPlan(
+            before.name,
+            before.table_ref,
+            before.col_list,
+            before.index_type,
         )
         return after
 
@@ -479,7 +504,7 @@ class LogicalLoadToPhysical(Rule):
         if config_batch_mem_size:
             batch_mem_size = config_batch_mem_size
         after = LoadDataPlan(
-            before.table_metainfo,
+            before.table_info,
             before.path,
             batch_mem_size,
             before.column_list,
@@ -513,7 +538,7 @@ class LogicalUploadToPhysical(Rule):
         after = UploadPlan(
             before.path,
             before.video_blob,
-            before.table_metainfo,
+            before.table_info,
             batch_mem_size,
             before.column_list,
             before.file_options,

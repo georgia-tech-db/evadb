@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
+from eva.catalog.catalog_type import ColumnType, Dimension, IndexType, NdArrayType
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
@@ -32,7 +33,7 @@ from eva.utils.logging_manager import logger
 class CreateTable(evaql_parserVisitor):
     def visitColumnCreateTable(self, ctx: evaql_parser.ColumnCreateTableContext):
 
-        table_ref = None
+        table_info = None
         if_not_exists = False
         create_definitions = []
 
@@ -42,7 +43,7 @@ class CreateTable(evaql_parserVisitor):
                 rule_idx = child.getRuleIndex()
 
                 if rule_idx == evaql_parser.RULE_tableName:
-                    table_ref = TableRef(self.visit(ctx.tableName()))
+                    table_info = self.visit(ctx.tableName())
 
                 elif rule_idx == evaql_parser.RULE_ifNotExists:
                     if_not_exists = True
@@ -54,7 +55,9 @@ class CreateTable(evaql_parserVisitor):
                 # stop parsing something bad happened
                 return None
 
-        create_stmt = CreateTableStatement(table_ref, if_not_exists, create_definitions)
+        create_stmt = CreateTableStatement(
+            table_info, if_not_exists, create_definitions
+        )
         return create_stmt
 
     def visitCreateDefinitions(self, ctx: evaql_parser.CreateDefinitionsContext):
@@ -250,8 +253,7 @@ class CreateTable(evaql_parserVisitor):
     def visitCreateMaterializedView(
         self, ctx: evaql_parser.CreateMaterializedViewContext
     ):
-        view_name = self.visit(ctx.tableName())
-        view_ref = TableRef(view_name)
+        view_info = self.visit(ctx.tableName())
         if_not_exists = False
         if ctx.ifNotExists():
             if_not_exists = True
@@ -262,4 +264,25 @@ class CreateTable(evaql_parserVisitor):
             ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
         ]
         query = self.visit(ctx.selectStatement())
-        return CreateMaterializedViewStatement(view_ref, col_list, if_not_exists, query)
+        return CreateMaterializedViewStatement(
+            view_info, col_list, if_not_exists, query
+        )
+
+    # INDEX CREATION
+    def visitCreateIndex(self, ctx: evaql_parser.CreateIndexContext):
+        index_name = self.visit(ctx.uid())
+        table_name = self.visit(ctx.tableName())
+        table_ref = TableRef(table_name)
+
+        # index type setup
+        index_type_ctx = ctx.indexType()
+        index_type = None
+        if index_type_ctx.HNSW() is not None:
+            index_type = IndexType.HNSW
+
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None)
+            for uid in self.visit(ctx.uidList())
+        ]
+
+        return CreateIndexStatement(index_name, table_ref, col_list, index_type)

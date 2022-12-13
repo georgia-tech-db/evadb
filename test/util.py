@@ -219,13 +219,22 @@ def create_table(table_name, num_rows, num_columns):
     columns = ["a{}".format(i) for i in range(num_columns)]
     df = create_csv(num_rows, columns)
     # load the CSV
-    load_query = """LOAD FILE 'dummy.csv' INTO {}
-                   WITH FORMAT CSV;""".format(
-        table_name
-    )
+    load_query = """LOAD CSV 'dummy.csv' INTO {};""".format(table_name)
     execute_query_fetch_all(load_query)
     df.columns = [f"{table_name}.{col}" for col in df.columns]
     return df
+
+
+def create_sample_image():
+    try:
+        os.remove(os.path.join(upload_dir_from_config, "dummy.jpg"))
+    except FileNotFoundError:
+        pass
+
+    img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+    img[0] -= 1
+    img[2] += 1
+    cv2.imwrite(os.path.join(upload_dir_from_config, "dummy.jpg"), img)
 
 
 def create_sample_video(num_frames=NUM_FRAMES):
@@ -245,6 +254,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
     out.release()
+    return os.path.join(upload_dir_from_config, "dummy.avi")
 
 
 def create_sample_video_as_blob(num_frames=NUM_FRAMES):
@@ -287,7 +297,10 @@ def copy_sample_videos_to_upload_dir():
 
 
 def file_remove(path):
-    os.remove(os.path.join(upload_dir_from_config, path))
+    try:
+        os.remove(os.path.join(upload_dir_from_config, path))
+    except FileNotFoundError:
+        pass
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
@@ -297,7 +310,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
     for i in filters:
         data.append(
             {
-                "myvideo.name": "dummy.avi",
+                "myvideo.name": os.path.join(upload_dir_from_config, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8

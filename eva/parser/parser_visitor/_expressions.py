@@ -16,7 +16,7 @@ import ast
 
 import numpy as np
 
-from eva.catalog.column_type import ColumnType
+from eva.catalog.catalog_type import ColumnType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression

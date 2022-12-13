@@ -4,7 +4,6 @@
 
 import io
 import os
-import re
 
 # to read contents of README file
 from pathlib import Path
@@ -39,7 +38,7 @@ VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
     "numpy>=1.19.5",
-    "opencv-python>=4.5.4.60,!=4.6.0.66", # bug in easyocr
+    "opencv-python>=4.5.4.60,!=4.6.0.66",  # bug in easyocr
     "pandas>=1.1.5",
     "Pillow>=8.4.0",
     "sqlalchemy==1.3.20",
@@ -47,11 +46,12 @@ minimal_requirement = [
     "antlr4-python3-runtime==4.8",
     "lark>=1.0.0",
     "pyyaml>=5.1,<5.2",
-    "importlib-metadata<5.0"
+    "importlib-metadata<5.0",
+    "ray>=1.13.0"
 ]
 
 formatter_libs = [
-    "black>=22.6.0", 
+    "black>=22.6.0",
     "isort>=5.10.1"
 ]
 
@@ -61,7 +61,7 @@ test_libs = [
     "pytest-virtualenv",
     "coveralls>=3.0.1",
     "mock>=4.0.3",
-    "flake8>=3.9.1"    
+    "flake8>=3.9.1"
 ]
 
 notebook_libs = [
@@ -75,9 +75,11 @@ notebook_libs = [
 integration_test_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
+    "faiss-gpu>=1.7.2"
 ]
 
 benchmark_libs = [
+    "pytest-benchmark",
 ]
 
 doc_libs = [
@@ -96,34 +98,31 @@ database_libs = [
 ### NEEDED FOR A BATTERIES-LOADED EXPERIENCE
 udf_libs = [
     "facenet-pytorch>=2.5.2",
-    "easyocr>=1.5.0"
+    "easyocr>=1.5.0",
+    "ipython",
+    "tqdm>=4.64.0",
+    "seaborn>=0.11.0"
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES
 experimental_libs = [
-    "ray>=1.13.0"
 ]
 
-INSTALL_REQUIRES = minimal_requirement 
-UDF_REQUIRES = INSTALL_REQUIRES + integration_test_libs + udf_libs
-EXPERIMENTAL_REQUIRES = experimental_libs
+INSTALL_REQUIRES = minimal_requirement + integration_test_libs + udf_libs
 DEV_REQUIRES = (
-    minimal_requirement
+    INSTALL_REQUIRES
     + formatter_libs
     + test_libs
     + notebook_libs
-    + integration_test_libs
     + benchmark_libs
     + doc_libs
     + database_libs
     + dist_libs
-    + udf_libs
-) + EXPERIMENTAL_REQUIRES
+    + experimental_libs
+)
 
 EXTRA_REQUIRES = {
-    "dev": DEV_REQUIRES,
-    "udf": UDF_REQUIRES,
-    "experimental": EXPERIMENTAL_REQUIRES
+    "dev": DEV_REQUIRES
 }
 
 setup(
@@ -146,7 +145,7 @@ setup(
         "Operating System :: OS Independent"
     ],
     packages=find_packages(exclude=[
-        "tests", 
+        "tests",
         "tests.*"
     ]),
     # https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html#the-console-scripts-entry-point

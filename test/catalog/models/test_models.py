@@ -14,10 +14,11 @@
 # limitations under the License.
 import unittest
 
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.index import IndexMetadata
 from eva.catalog.models.udf import UdfMetadata
 from eva.catalog.models.udf_io import UdfIO
 
@@ -64,7 +65,9 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(df_col, df_col1)
 
     def test_df_metadata(self):
-        df_metadata = DataFrameMetadata("name", "eva_dataset")
+        df_metadata = DataFrameMetadata(
+            "name", "eva_dataset", table_type=TableType.VIDEO_DATA
+        )
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
@@ -76,22 +79,29 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(df_metadata.id, None)
         self.assertEqual(df_metadata.identifier_column, "id")
         self.assertEqual(df_metadata.schema, schema)
+        self.assertEqual(df_metadata.table_type, TableType.VIDEO_DATA)
 
     def test_df_metadata_equality(self):
-        df_metadata = DataFrameMetadata("name", "eva_dataset")
+        df_metadata = DataFrameMetadata(
+            "name", "eva_dataset", table_type=TableType.VIDEO_DATA
+        )
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
         df_metadata.schema = col_list
         self.assertEqual(df_metadata, df_metadata)
 
-        df_metadata1 = DataFrameMetadata("name2", "eva_dataset")
+        df_metadata1 = DataFrameMetadata(
+            "name2", "eva_dataset", table_type=TableType.VIDEO_DATA
+        )
         column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
         column_2 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
         df_metadata1.schema = col_list
         self.assertNotEqual(df_metadata, df_metadata1)
-        df_metadata2 = DataFrameMetadata("name2", "eva_dataset")
+        df_metadata2 = DataFrameMetadata(
+            "name2", "eva_dataset", table_type=TableType.VIDEO_DATA
+        )
         df_metadata2.schema = col_list[1:]
         self.assertNotEqual(df_metadata1, df_metadata2)
 
@@ -147,3 +157,27 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertNotEqual(udf_io, udf_io2)
         udf_io2 = UdfIO("name", ColumnType.FLOAT, True, None, [2, 3], True, 2)
         self.assertNotEqual(udf_io, udf_io2)
+
+    def test_index(self):
+        index = IndexMetadata("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index.id, None)
+        self.assertEqual(index.name, "index")
+        self.assertEqual(index.save_file_path, "FaissSavePath")
+        self.assertEqual(index.type, "HNSW")
+        self.assertEqual(str(index), "index: (index, FaissSavePath, HNSW)\n")
+
+    def test_index_hash(self):
+        index1 = IndexMetadata("index", "FaissSavePath", "HNSW")
+        index2 = IndexMetadata("index", "FaissSavePath", "HNSW")
+
+        self.assertEqual(hash(index1), hash(index2))
+
+    def test_index_equality(self):
+        index = IndexMetadata("index", "FaissSavePath", "HNSW")
+        self.assertEqual(index, index)
+        index2 = IndexMetadata("index2", "FaissSavePath", "HNSW")
+        self.assertNotEqual(index, index2)
+        index3 = IndexMetadata("index", "FaissSavePath3", "HNSW")
+        self.assertNotEqual(index, index3)
+        index4 = IndexMetadata("index", "FaissSavePath", "HNSW4")
+        self.assertNotEqual(index, index4)

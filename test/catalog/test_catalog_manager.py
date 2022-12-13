@@ -15,10 +15,10 @@
 import unittest
 
 import mock
-from mock import MagicMock
+from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.column_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.udf import UdfMetadata
 
@@ -55,6 +55,32 @@ class CatalogManagerTests(unittest.TestCase):
             mock_bootstrap.assert_called_once_with()
             mock_shutdown.assert_called_once_with()
 
+    @mock.patch("eva.catalog.catalog_manager.CatalogManager.create_metadata")
+    @mock.patch("eva.catalog.catalog_manager.generate_file_path")
+    def test_create_video_metadata(self, m_gfp, m_cm):
+        x = CatalogManager()
+        name = "eva"
+        uri = "tmp"
+        m_gfp.return_value = uri
+
+        x.create_video_metadata(name)
+
+        col_metadata_list = [
+            DataFrameColumn("name", ColumnType.TEXT, False, None, []),
+            DataFrameColumn("id", ColumnType.INTEGER, False, None, []),
+            DataFrameColumn(
+                "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [None, None, None]
+            ),
+        ]
+
+        m_cm.assert_called_once_with(
+            name,
+            uri,
+            col_metadata_list,
+            identifier_column="id",
+            table_type=TableType.VIDEO_DATA,
+        )
+
     @mock.patch("eva.catalog.catalog_manager.init_db")
     @mock.patch("eva.catalog.catalog_manager.DatasetService")
     @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
@@ -68,12 +94,12 @@ class CatalogManagerTests(unittest.TestCase):
         columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
         actual = catalog.create_metadata(dataset_name, file_url, columns)
         ds_mock.return_value.create_dataset.assert_called_with(
-            dataset_name, file_url, identifier_id="id", is_video=False
+            dataset_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
         )
         for column in columns:
             column.metadata_id = ds_mock.return_value.create_dataset.return_value.id
 
-        dcs_mock.return_value.create_column.assert_called_with(columns)
+        dcs_mock.return_value.create_column.assert_called_with([ANY] + columns)
 
         expected = ds_mock.return_value.create_dataset.return_value
         expected.schema = dcs_mock.return_value.create_column.return_value
@@ -151,15 +177,6 @@ class CatalogManagerTests(unittest.TestCase):
             "udf", "sample.py", "classification"
         )
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
-
-    @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_drop_metadata(self, dcs_mock, ds_mock, initdb_mock):
-        catalog = CatalogManager()
-        catalog.drop_dataset_metadata("database", "table")
-        ds_name_mock = ds_mock.return_value.drop_dataset_by_name
-        ds_name_mock.assert_called_with("database", "table")
 
     @mock.patch("eva.catalog.catalog_manager.UdfService")
     def test_get_udf_by_name(self, udf_mock):

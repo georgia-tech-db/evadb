@@ -39,8 +39,8 @@ class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        create_sample_video(NUM_FRAMES)
-        load_query = """LOAD FILE 'dummy.avi' INTO MyVideo;"""
+        video_file_path = create_sample_video(NUM_FRAMES)
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -56,6 +56,7 @@ class SelectExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
         drop_query = """DROP TABLE table3;"""
         execute_query_fetch_all(drop_query)
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column
@@ -140,7 +141,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
     def test_should_load_and_select_real_video_in_table(self):
-        query = """LOAD FILE 'data/mnist/mnist.mp4'
+        query = """LOAD VIDEO 'data/mnist/mnist.mp4'
                    INTO MNIST;"""
         execute_query_fetch_all(query)
 

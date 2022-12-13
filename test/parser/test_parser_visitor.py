@@ -20,12 +20,11 @@ import numpy as np
 import pandas as pd
 from antlr4 import TerminalNode
 
-from eva.catalog.column_type import NdArrayType
+from eva.catalog.catalog_type import NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.models.storage.batch import Batch
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor import ParserVisitor
-from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 
 
@@ -416,9 +415,9 @@ class ParserVisitorTests(unittest.TestCase):
         file_options = {}
         file_options["file_format"] = file_format
         params = {
-            ctx.fileName.return_value: path,
+            ctx.stringLiteral.return_value: path,
             ctx.tableName.return_value: table,
-            ctx.fileOptions.return_value: file_options,
+            ctx.fileFormat.return_value: file_format,
             ctx.uidList.return_value: column_list,
         }
 
@@ -430,16 +429,14 @@ class ParserVisitorTests(unittest.TestCase):
         visitor.visitLoadStatement(ctx)
         mock_visit.assert_has_calls(
             [
-                call(ctx.fileName()),
+                call(ctx.stringLiteral()),
                 call(ctx.tableName()),
-                call(ctx.fileOptions()),
+                call(ctx.fileFormat()),
                 call(ctx.uidList()),
             ]
         )
         mock_load.assert_called_once()
-        mock_load.assert_called_with(
-            TableRef("myVideo"), "video.mp4", column_list, file_options
-        )
+        mock_load.assert_called_with("myVideo", "video.mp4", column_list, file_options)
 
     ##################################################################
     # UPLOAD Statement
@@ -482,5 +479,5 @@ class ParserVisitorTests(unittest.TestCase):
         )
         mock_upload.assert_called_once()
         mock_upload.assert_called_with(
-            "video.mp4", "b'AAAA'", TableRef("myVideo"), column_list, file_options
+            "video.mp4", "b'AAAA'", "myVideo", column_list, file_options
         )

@@ -12,10 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+import glob
+import os
+from pathlib import Path
+from typing import Generator, List
 
+import cv2
+
+from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
+from eva.parser.table_ref import TableInfo
+from eva.utils.logging_manager import logger
 
 
 class ExecutorError(Exception):
@@ -35,3 +43,34 @@ def apply_predicate(batch: Batch, predicate: AbstractExpression) -> Batch:
         batch.drop_zero(outcomes)
         batch.reset_index()
     return batch
+
+
+def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
+    if CatalogManager().check_table_exists(
+        table_info.database_name, table_info.table_name
+    ):
+        err_msg = "Table: {} already exists".format(table_info)
+        if if_not_exist:
+            logger.warn(err_msg)
+            return True
+        else:
+            logger.error(err_msg)
+            raise ExecutorError(err_msg)
+    else:
+        return False
+
+
+def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
+    return glob.iglob(os.path.expanduser(path_regex), recursive=True)
+
+
+def validate_video(video_path: Path) -> bool:
+    try:
+        vid = cv2.VideoCapture(str(video_path))
+        if not vid.isOpened():
+            return False
+        return True
+    except Exception as e:
+        logger.warning(
+            f"Unexpected Exception {e} occured while reading video file {video_path}"
+        )

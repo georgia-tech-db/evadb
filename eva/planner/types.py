@@ -44,4 +44,5 @@ class PlanOprType(Enum):
     SHOW_INFO = auto()
     DROP_UDF = auto()
     EXPLAIN = auto()
+    CREATE_INDEX = auto()
     # add other types

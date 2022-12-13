@@ -16,6 +16,7 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import List
 
+from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
@@ -56,6 +57,7 @@ class OperatorType(IntEnum):
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
+    LOGICALCREATEINDEX = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -457,7 +459,7 @@ class LogicalCreate(Operator):
 
     def __init__(
         self,
-        video: TableRef,
+        video: TableInfo,
         column_list: List[ColumnDefinition],
         if_not_exists: bool = False,
         children: List = None,
@@ -541,14 +543,14 @@ class LogicalDrop(Operator):
     Logical node for drop table operations
     """
 
-    def __init__(self, table_refs: List[TableRef], if_exists: bool, children=None):
+    def __init__(self, table_infos: List[TableInfo], if_exists: bool, children=None):
         super().__init__(OperatorType.LOGICALDROP, children)
-        self._table_refs = table_refs
+        self._table_infos = table_infos
         self._if_exists = if_exists
 
     @property
-    def table_refs(self):
-        return self._table_refs
+    def table_infos(self):
+        return self._table_infos
 
     @property
     def if_exists(self):
@@ -560,12 +562,12 @@ class LogicalDrop(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_refs == other.table_refs
+            and self.table_infos == other.table_infos
             and self.if_exists == other.if_exists
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self._table_refs), self._if_exists))
+        return hash((super().__hash__(), tuple(self._table_infos), self._if_exists))
 
 
 class LogicalCreateUDF(Operator):
@@ -709,21 +711,21 @@ class LogicalLoadData(Operator):
 
     def __init__(
         self,
-        table_metainfo: DataFrameMetadata,
+        table_info: TableInfo,
         path: Path,
         column_list: List[AbstractExpression] = None,
         file_options: dict = dict(),
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALLOADDATA, children=children)
-        self._table_metainfo = table_metainfo
+        self._table_info = table_info
         self._path = path
         self._column_list = column_list or []
         self._file_options = file_options
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table_info(self):
+        return self._table_info
 
     @property
     def path(self):
@@ -741,7 +743,7 @@ class LogicalLoadData(Operator):
         return "LogicalLoadData(table: {}, path: {}, \
                 column_list: {}, \
                 file_options: {})".format(
-            self.table_metainfo, self.path, self.column_list, self.file_options
+            self.table_info, self.path, self.column_list, self.file_options
         )
 
     def __eq__(self, other):
@@ -750,7 +752,7 @@ class LogicalLoadData(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_metainfo == other.table_metainfo
+            and self.table_info == other.table_info
             and self.path == other.path
             and self.column_list == other.column_list
             and self.file_options == other.file_options
@@ -760,7 +762,7 @@ class LogicalLoadData(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.table_metainfo,
+                self.table_info,
                 self.path,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
@@ -781,7 +783,7 @@ class LogicalUpload(Operator):
         self,
         path: Path,
         video_blob: str,
-        table_metainfo: DataFrameMetadata,
+        table_info: TableInfo,
         column_list: List[AbstractExpression] = None,
         file_options: dict = dict(),
         children: List = None,
@@ -789,7 +791,7 @@ class LogicalUpload(Operator):
         super().__init__(OperatorType.LOGICALUPLOAD, children=children)
         self._path = path
         self._video_blob = video_blob
-        self._table_metainfo = table_metainfo
+        self._table_info = table_info
         self._column_list = column_list or []
         self._file_options = file_options
 
@@ -802,8 +804,8 @@ class LogicalUpload(Operator):
         return self._video_blob
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table_info(self):
+        return self._table_info
 
     @property
     def column_list(self):
@@ -821,7 +823,7 @@ class LogicalUpload(Operator):
                 file_options: {})".format(
             self.path,
             "string of video blob",
-            self.table_metainfo,
+            self.table_info,
             self.column_list,
             self.file_options,
         )
@@ -834,7 +836,7 @@ class LogicalUpload(Operator):
             is_subtree_equal
             and self.path == other.path
             and self.video_blob == other.video_blob
-            and self.table_metainfo == other.table_metainfo
+            and self.table_info == other.table_info
             and self.column_list == other.column_list
             and self.file_options == other.file_options
         )
@@ -845,7 +847,7 @@ class LogicalUpload(Operator):
                 super().__hash__(),
                 self.path,
                 self.video_blob,
-                self.table_metainfo,
+                self.table_info,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),
             )
@@ -1004,7 +1006,7 @@ class LogicalCreateMaterializedView(Operator):
 
     def __init__(
         self,
-        view: TableRef,
+        view: TableInfo,
         col_list: List[ColumnDefinition],
         if_not_exists: bool = False,
         children=None,
@@ -1098,3 +1100,58 @@ class LogicalExplain(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._explainable_opr))
+
+
+class LogicalCreateIndex(Operator):
+    def __init__(
+        self,
+        name: str,
+        table_ref: TableRef,
+        col_list: List[ColumnDefinition],
+        index_type: IndexType,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALCREATEINDEX, children)
+        self._name = name
+        self._table_ref = table_ref
+        self._col_list = col_list
+        self._index_type = index_type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    @property
+    def index_type(self):
+        return self._index_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateIndex):
+            return False
+        return (
+            is_subtree_equal
+            and self.name == other.name
+            and self.table_ref == other.table_ref
+            and self.col_list == other.col_list
+            and self.index_type == other.index_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.table_ref,
+                tuple(self.col_list),
+                self.index_type,
+            )
+        )

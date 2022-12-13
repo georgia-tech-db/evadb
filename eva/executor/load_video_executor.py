@@ -13,22 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 
-from eva.configuration.configuration_manager import ConfigurationManager
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_video
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
-from eva.storage.storage_engine import VideoStorageEngine
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
+from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
 class LoadVideoExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
-        config = ConfigurationManager()
-        self.upload_dir = Path(config.get_value("storage", "upload_dir"))
+        self.catalog = CatalogManager()
 
     def validate(self):
         pass
@@ -38,35 +41,69 @@ class LoadVideoExecutor(AbstractExecutor):
         Read the input video using opencv and persist data
         using storage engine
         """
+        try:
+            valid_files = []
+            for file_path in iter_path_regex(self.node.file_path):
+                file_path = Path(file_path)
+                if validate_video(file_path):
+                    valid_files.append(str(file_path))
+                else:
+                    err_msg = (
+                        f"Load video failed: encountered invalid file {str(file_path)}"
+                    )
+                    logger.error(err_msg)
+                    raise ValueError(file_path)
+            # Create catalog entry
+            table_info = self.node.table_info
+            database_name = table_info.database_name
+            table_name = table_info.table_name
+            # Sanity check to make sure there is no existing table with same name
+            do_create = False
+            table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+            if table_obj:
+                msg = f"Adding to an existing table {table_name}."
+                logger.info(msg)
+            # Create the catalog entry
+            else:
+                table_obj = self.catalog.create_video_metadata(table_name)
+                do_create = True
 
-        video_file_path = None
-        # Validate file_path
-        if Path(self.node.file_path).exists():
-            video_file_path = self.node.file_path
-        # check in the upload directory
-        else:
-            video_path = Path(Path(self.upload_dir) / self.node.file_path)
-            if video_path.exists():
-                video_file_path = video_path
-
-        if video_file_path is None:
-            error = "Failed to find a video file at location: {}".format(
-                self.node.file_path
+            storage_engine = StorageEngine.factory(table_obj)
+            if do_create:
+                success = storage_engine.create(table_obj)
+                if not success:
+                    raise ExecutorError(
+                        f"StorageEngine {storage_engine} create call failed"
+                    )
+            storage_engine.write(
+                table_obj,
+                Batch(pd.DataFrame({"file_path": valid_files})),
             )
-            logger.error(error)
-            raise RuntimeError(error)
 
-        VideoStorageEngine.create(self.node.table_metainfo, if_not_exists=True)
-        success = VideoStorageEngine.write(
-            self.node.table_metainfo,
-            Batch(pd.DataFrame([{"video_file_path": str(video_file_path)}])),
-        )
-
-        # ToDo: Add logic for indexing the video file
-        # Create an index of I frames to speed up random video seek
-        if success:
+        except Exception as e:
+            self._rollback_load(storage_engine, table_obj, valid_files, do_create)
+            err_msg = f"Load video failed: encountered unexpected error {str(e)}"
+            logger.error(err_msg)
+            raise ExecutorError(err_msg)
+        else:
             yield Batch(
-                pd.DataFrame(
-                    [f"Video successfully added at location: {video_file_path}"]
-                )
+                pd.DataFrame([f"Number of loaded videos: {str(len(valid_files))}"])
+            )
+
+    def _rollback_load(
+        self,
+        storage_engine: AbstractStorageEngine,
+        table_obj: DataFrameMetadata,
+        valid_files: List[Path],
+        do_create: bool,
+    ):
+        try:
+            if valid_files:
+                rows = Batch(pd.DataFrame(data={"file_path": list(valid_files)}))
+                storage_engine.delete(table_obj, rows)
+            if do_create:
+                storage_engine.drop(table_obj)
+        except Exception as e:
+            logger.exception(
+                f"Unexpected Exception {e} occured while rolling back. This is bad as the video table can be in a corrupt state. Please verify the video table {table_obj} for correctness."
             )
