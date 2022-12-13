@@ -81,10 +81,19 @@ class LoadExecutorTest(unittest.TestCase):
         result = execute_query_fetch_all(query)
         expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
         self.assertEqual(result, expected)
+
+        # original file should be preserved
+        expected_output = execute_query_fetch_all("SELECT id FROM MyVideos;")
+
         # try adding the same file to the table
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
+
+        # original data should be preserved
+        after_load_fail = execute_query_fetch_all("SELECT id FROM MyVideos;")
+
+        self.assertEqual(expected_output, after_load_fail)
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
