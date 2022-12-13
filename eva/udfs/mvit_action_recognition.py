@@ -20,7 +20,7 @@ import torchvision
 
 try:
     from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
-except ImportError as e:
+except ImportError:
     raise ImportError(
         f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
     )
