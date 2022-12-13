@@ -15,7 +15,6 @@
 
 from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.table_ref import TableInfo, TableRef
-from eva.catalog.column_type import ColumnType, NdArrayType
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType

@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.catalog.column_type import ColumnType, Dimension, NdArrayType
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
