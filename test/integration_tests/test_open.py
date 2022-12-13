@@ -14,10 +14,10 @@
 # limitations under the License.
 import os
 import unittest
-from test.util import create_sample_image, file_remove, load_inbuilt_udfs
-
+import numpy as np
 import pandas as pd
 
+from test.util import create_sample_image, file_remove, load_inbuilt_udfs
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
@@ -52,15 +52,26 @@ class OpenTests(unittest.TestCase):
         drop_table_query = "DROP TABLE testOpenTable;"
         execute_query_fetch_all(drop_table_query)
 
-    @unittest.skip(
-        "Skip because evaluate condition on multi-dimensional array is ambiguious."
-    )
     def test_open_should_open_image(self):
         # Test query runs successfully with Open function call.
         config = ConfigurationManager()
         upload_dir_from_config = config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
-        select_query = """SELECT * FROM testOpenTable WHERE Open("{}");""".format(
+        select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(
             img_path
         )
-        execute_query_fetch_all(select_query)
+        batch_res = execute_query_fetch_all(select_query)
+
+        expected_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+        expected_img[0] -= 1
+        expected_img[2] += 1
+
+        num = batch_res.column_as_numpy_array("testopentable.num")[0]
+        self.assertEqual(1, num)
+        actual_img = batch_res.column_as_numpy_array("open.data")[0]
+        self.assertEqual(np.sum(expected_img), np.sum(actual_img))
+
+        num = batch_res.column_as_numpy_array("testopentable.num")[1]
+        self.assertEqual(2, num)
+        actual_img = batch_res.column_as_numpy_array("open.data")[1]
+        self.assertTrue(np.isnan(actual_img))
