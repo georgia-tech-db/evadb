@@ -126,10 +126,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 )
                 storage_engine = StorageEngine.factory(secondary_index_metadata)
                 storage_engine.drop(secondary_index_metadata)
-                catalog_manager.drop_dataset_metadata(
-                    None,
-                    secondary_index_tb_name,
-                )
+                catalog_manager.drop_dataset_metadata(secondary_index_metadata)
 
             # Throw exception back to user.
             raise ExecutorError(str(e))

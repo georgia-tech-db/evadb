@@ -139,7 +139,7 @@ class CreateIndexTest(unittest.TestCase):
 
         # Cleanup.
         CatalogManager().drop_index("testCreateIndexName")
-        CatalogManager().drop_dataset_metadata(None, secondary_index_tb_name)
+        CatalogManager().drop_dataset_metadata(secondary_index_metadata)
 
     @patch("eva.executor.create_index_executor.faiss")
     def test_should_cleanup_when_exception(self, faiss_mock):
