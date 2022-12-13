@@ -21,6 +21,7 @@ from eva.parser.create_statement import (
     CreateTableStatement,
 )
 
+from lark import Tree
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
@@ -31,7 +32,7 @@ from eva.utils.logging_manager import logger
 ##################################################################
 class CreateTable:
 
-    def column_create_table(self, tree):
+    def create_table(self, tree):
         table_ref = None
         if_not_exists = False
         create_definitions = []
@@ -70,11 +71,18 @@ class CreateTable:
         return column_definitions
 
     def column_declaration(self, tree):
-        data_type, array_type, dimensions, column_constraint_information = self.visit(
-            ctx.columnDefinition()
-        )
-
-        column_name = self.visit(ctx.uid())
+        column_name = None
+        data_type = None 
+        array_type = None  
+        dimensions = None  
+        column_constraint_information = None 
+        
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "uid":
+                    column_name = self.visit(child)
+                elif child.data == "column_definition":
+                    data_type, array_type, dimensions, column_constraint_information = self.visit(child)
 
         if column_name is not None:
             return ColumnDefinition(
@@ -87,24 +95,30 @@ class CreateTable:
 
     def column_definition(self, tree):
 
-        data_type, array_type, dimensions = self.visit(ctx.dataType())
-
-        constraint_count = len(ctx.columnConstraint())
-
-        column_constraint_information = ColConstraintInfo()
-
+        data_type = None 
+        array_type = None  
+        dimensions = None  
+        column_constraint_information = None 
         not_null_set = False
-        for i in range(constraint_count):
-            return_type = self.visit(ctx.columnConstraint(i))
-            if return_type == ColumnConstraintEnum.UNIQUE:
-                column_constraint_information.unique = True
-                column_constraint_information.nullable = False
-                not_null_set = True
-            elif return_type == ColumnConstraintEnum.NOTNULL:
-                column_constraint_information.nullable = False
-                not_null_set = True
 
-        if not not_null_set:
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "data_type":
+                    data_type, array_type, dimensions = self.visit(child)
+                elif child.data == "column_constraint":
+                    if column_constraint_information is None:
+                        column_constraint_information = ColConstraintInfo()
+                        return_type = self.visit(child)
+
+                        if return_type == ColumnConstraintEnum.UNIQUE:
+                            column_constraint_information.unique = True
+                            column_constraint_information.nullable = False
+                            not_null_set = True
+                        elif return_type == ColumnConstraintEnum.NOTNULL:
+                            column_constraint_information.nullable = False
+                            not_null_set = True
+                    
+        if not not_null_set and column_constraint_information is not None:
             column_constraint_information.nullable = True
 
         return data_type, array_type, dimensions, column_constraint_information
