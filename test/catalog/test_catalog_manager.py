@@ -178,15 +178,6 @@ class CatalogManagerTests(unittest.TestCase):
         )
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_drop_metadata(self, dcs_mock, ds_mock, initdb_mock):
-        catalog = CatalogManager()
-        catalog.drop_dataset_metadata("database", "table")
-        ds_name_mock = ds_mock.return_value.drop_dataset_by_name
-        ds_name_mock.assert_called_with("database", "table")
-
     @mock.patch("eva.catalog.catalog_manager.UdfService")
     def test_get_udf_by_name(self, udf_mock):
         catalog = CatalogManager()
