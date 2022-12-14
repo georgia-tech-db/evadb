@@ -18,7 +18,7 @@ import os
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
-from eva.executor.load_multimedia_executor import LoadMultmediaExecutor
+from eva.executor.load_multimedia_executor import LoadMultimediaExecutor
 from eva.parser.types import FileFormatType
 from eva.planner.upload_plan import UploadPlan
 
@@ -51,7 +51,7 @@ class UploadExecutor(AbstractExecutor):
             FileFormatType.VIDEO,
             FileFormatType.IMAGE,
         ]:
-            executor = LoadMultmediaExecutor(self.node)
+            executor = LoadMultimediaExecutor(self.node)
         elif self.node.file_options["file_format"] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
 

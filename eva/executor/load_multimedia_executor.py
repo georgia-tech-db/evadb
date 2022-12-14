@@ -27,7 +27,7 @@ from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
-class LoadMultmediaExecutor(AbstractExecutor):
+class LoadMultimediaExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
         self.catalog = CatalogManager()
