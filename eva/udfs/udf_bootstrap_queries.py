@@ -127,13 +127,14 @@ def init_builtin_udfs(mode="debug"):
     """
     queries = [
         Fastrcnn_udf_query,
-        Mvit_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
         YoloV5_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
+        # Disabled as it requires specific pytorch package
+        # Mvit_udf_query,
     ]
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 
