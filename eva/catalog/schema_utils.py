@@ -23,7 +23,7 @@ from eva.utils.logging_manager import logger
 
 class SchemaUtils(object):
     @staticmethod
-    def get_sqlalchemy_column(df_column: DataFrameColumn) -> Column:
+    def xform_to_sqlalchemy_column(df_column: DataFrameColumn) -> Column:
         column_type = df_column.type
 
         sqlalchemy_column = None
@@ -41,7 +41,7 @@ class SchemaUtils(object):
         return sqlalchemy_column
 
     @staticmethod
-    def get_sqlalchemy_schema(
+    def xform_to_sqlalchemy_schema(
         column_list: List[DataFrameColumn],
     ) -> Dict[str, Column]:
         """Converts the list of DataFrameColumns to SQLAlchemyColumns
@@ -53,6 +53,6 @@ class SchemaUtils(object):
             Dict[str, Column]: mapping from column_name to sqlalchemy column object
         """
         return {
-            column.name: SchemaUtils.get_sqlalchemy_column(column)
+            column.name: SchemaUtils.xform_to_sqlalchemy_column(column)
             for column in column_list
         }

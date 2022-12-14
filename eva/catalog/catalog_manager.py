@@ -29,6 +29,7 @@ from eva.catalog.services.udf_service import UdfService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
+from eva.utils.errors import CatalogError
 from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
@@ -153,7 +154,10 @@ class CatalogManager(object):
         return metadata
 
     def create_table_metadata(
-        self, table_info: TableInfo, columns: List[ColumnDefinition]
+        self,
+        table_info: TableInfo,
+        columns: List[ColumnDefinition],
+        identifier_column: str = "id",
     ) -> DataFrameMetadata:
         table_name = table_info.table_name
         column_metadata_list = self.create_columns_metadata(columns)
@@ -162,6 +166,7 @@ class CatalogManager(object):
             table_name,
             file_url,
             column_metadata_list,
+            identifier_column=identifier_column,
             table_type=TableType.STRUCTURED_DATA,
         )
         return metadata
@@ -193,7 +198,7 @@ class CatalogManager(object):
         data_type: ColumnType,
         array_type: NdArrayType,
         dimensions: List[int],
-        cci: ColConstraintInfo,
+        cci: ColConstraintInfo = ColConstraintInfo(),
     ) -> DataFrameColumn:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
@@ -342,18 +347,18 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(self, database_name: str, table_name: str) -> bool:
+    def drop_dataset_metadata(self, obj: DataFrameMetadata) -> bool:
         """
         This method deletes the table along with its columns from df_metadata
         and df_columns respectively
 
         Arguments:
-           table_name: table name to be deleted.
+           obj: dataframe metadata entry to remove
 
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset_by_name(database_name, table_name)
+        return self._dataset_service.drop_dataset(obj)
 
     def drop_udf(self, udf_name: str) -> bool:
         """
@@ -368,12 +373,8 @@ class CatalogManager(object):
         """
         return self._udf_service.drop_udf_by_name(udf_name)
 
-    def rename_table(self, new_name: TableInfo, curr_table: TableInfo):
-        return self._dataset_service.rename_dataset_by_name(
-            new_name.table_name,
-            curr_table.database_name,
-            curr_table.table_name,
-        )
+    def rename_table(self, curr_table: DataFrameMetadata, new_name: TableInfo):
+        return self._dataset_service.rename_dataset(curr_table, new_name.table_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
         metadata = self._dataset_service.dataset_object_by_name(
@@ -386,6 +387,53 @@ class CatalogManager(object):
 
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
+
+    def get_video_metadata_table(
+        self, input_table: DataFrameMetadata
+    ) -> DataFrameMetadata:
+        """Get a video metadata table.
+        Raise if it does not exists
+        Args:
+            input_table (DataFrameMetadata): input video table
+
+        Returns:
+            DataFrameMetadata: metadata table maintained by the system
+        """
+        # use file_url as the metadata table name
+        video_metadata_name = input_table.file_url
+        obj = self.get_dataset_metadata(None, video_metadata_name)
+        if not obj:
+            err = f"Table with name {video_metadata_name} does not exist in catalog"
+            logger.exception(err)
+            raise CatalogError(err)
+
+        return obj
+
+    def create_video_metadata_table(
+        self, input_table: DataFrameMetadata
+    ) -> DataFrameMetadata:
+        """Get a video metadata table.
+        Create one if it does not exists
+        We use this table to store all the video filenames and corresponding information
+        Args:
+            input_table (DataFrameMetadata): input video table
+
+        Returns:
+            DataFrameMetadata: metadata table maintained by the system
+        """
+        # use file_url as the metadata table name
+        video_metadata_name = input_table.file_url
+        obj = self.get_dataset_metadata(None, video_metadata_name)
+        if obj:
+            err_msg = f"Table with name {video_metadata_name} already exists"
+            logger.exception(err_msg)
+            raise CatalogError(err_msg)
+
+        columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
+        obj = self.create_table_metadata(
+            TableInfo(video_metadata_name), columns, identifier_column=columns[0].name
+        )
+        return obj
 
     """ Index related services. """
 

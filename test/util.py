@@ -254,6 +254,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
     out.release()
+    return os.path.join(upload_dir_from_config, "dummy.avi")
 
 
 def create_sample_video_as_blob(num_frames=NUM_FRAMES):
@@ -309,7 +310,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
     for i in filters:
         data.append(
             {
-                "myvideo.name": "dummy.avi",
+                "myvideo.name": os.path.join(upload_dir_from_config, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8

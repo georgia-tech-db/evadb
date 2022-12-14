@@ -12,7 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import glob
+import shutil
+import tempfile
 import unittest
+from pathlib import Path
 from test.util import (
     create_dummy_batches,
     create_dummy_csv_batches,
@@ -21,7 +25,13 @@ from test.util import (
     file_remove,
 )
 
+import numpy as np
+import pandas as pd
+
+from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
+from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -29,16 +39,18 @@ class LoadExecutorTest(unittest.TestCase):
     def setUp(self):
         # reset the catalog manager before running each test
         CatalogManager().reset()
-        create_sample_video()
+        self.video_file_path = create_sample_video()
         create_sample_csv()
 
     def tearDown(self):
         file_remove("dummy.avi")
         file_remove("dummy.csv")
+        # clean up
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
 
     # integration test for video
     def test_should_load_video_in_table(self):
-        query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
 
         select_query = """SELECT name, id, data FROM MyVideo;"""
@@ -47,11 +59,99 @@ class LoadExecutorTest(unittest.TestCase):
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())[0]
         self.assertEqual(actual_batch, expected_batch)
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
-        # Try adding video to an existing table
-        execute_query_fetch_all(query)
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 2 * len(expected_batch))
+    def test_should_load_videos_in_table(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        result = execute_query_fetch_all(query)
+        expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
+        self.assertEqual(result, expected)
+
+    def test_should_load_videos_with_same_name_but_different_path(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        result = execute_query_fetch_all(query)
+        expected = Batch(pd.DataFrame(["Number of loaded videos: 3"]))
+        self.assertEqual(result, expected)
+
+    def test_should_fail_to_load_videos_with_same_path(self):
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        result = execute_query_fetch_all(query)
+        expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
+        self.assertEqual(result, expected)
+        # try adding the same file to the table
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(query)
+
+    def test_should_fail_to_load_corrupt_video(self):
+        # should fail on an empty file
+        with tempfile.NamedTemporaryFile() as tmp:
+            query = f"""LOAD VIDEO "{tmp.name}" INTO MyVideos;"""
+            with self.assertRaises(Exception):
+                execute_query_fetch_all(query)
+
+    def test_should_fail_to_load_invalid_files_as_video(self):
+        path = f"{EVA_ROOT_DIR}/data/**"
+        query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(query)
+        with self.assertRaises(BinderError):
+            execute_query_fetch_all("SELECT name FROM MyVideos")
+
+    def test_should_rollback_if_video_load_fails(self):
+        path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
+        valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
+
+        with tempfile.NamedTemporaryFile() as empty_file:
+            # Load one correct file and one empty file
+            # nothing should be added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_videos[0]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+                with self.assertRaises(Exception):
+                    execute_query_fetch_all(query)
+                with self.assertRaises(BinderError):
+                    execute_query_fetch_all("SELECT name FROM MyVideos")
+
+            # Load two correct file and one empty file
+            # nothing should be added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_videos[0]), tmp_dir)
+                shutil.copy2(str(valid_videos[1]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+                with self.assertRaises(Exception):
+                    execute_query_fetch_all(query)
+                with self.assertRaises(BinderError):
+                    execute_query_fetch_all("SELECT name FROM MyVideos")
+
+    def test_should_rollback_and_preserve_previous_state(self):
+        path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
+        valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
+        # Load one correct file
+        # commit
+        load_file = f"{EVA_ROOT_DIR}/data/sample_videos/1/1.mp4"
+        execute_query_fetch_all(f"""LOAD VIDEO "{load_file}" INTO MyVideos;""")
+
+        # Load one correct file and one empty file
+        # original file should remain
+        with tempfile.NamedTemporaryFile() as empty_file:
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_videos[1]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
+                with self.assertRaises(Exception):
+                    execute_query_fetch_all(query)
+                result = execute_query_fetch_all("SELECT name FROM MyVideos")
+                file_names = np.unique(result.frames)
+                self.assertEqual(len(file_names), 1)
 
     # integration tests for csv
     def test_should_load_csv_in_table(self):
@@ -91,7 +191,7 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # clean up
-        drop_query = "DROP TABLE MyVideoCSV;"
+        drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)
 
     def test_should_load_csv_with_columns_in_table(self):
@@ -126,5 +226,5 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
         # clean up
-        drop_query = "DROP TABLE MyVideoCSV;"
+        drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)
