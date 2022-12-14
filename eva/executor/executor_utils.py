@@ -53,3 +53,13 @@ def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
             raise ExecutorError(err_msg)
     else:
         return False
+
+def validate_image(image_path: Path) -> bool:
+    try:
+        data = cv2.imread(str(image_path))
+        return data is not None
+    except Exception as e:
+        logger.warning(
+            f"Unexpected Exception {e} occured while reading image file {image_path}"
+        )
+        return False
