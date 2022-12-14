@@ -19,7 +19,6 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.models.storage.batch import Batch
 from eva.readers.image.opencv_image_reader import CVImageReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
 
 
 class ImageStorageEngine(AbstractMediaStorageEngine):

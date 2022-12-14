@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 
@@ -38,10 +37,6 @@ class LoadMultmediaExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """
-        Read the input video using opencv and persist data
-        using storage engine
-        """
         try:
             valid_files = []
             for file_path in iter_path_regex(self.node.file_path):
@@ -82,7 +77,7 @@ class LoadMultmediaExecutor(AbstractExecutor):
             )
 
         except Exception as e:
-            self._rollback_load(storage_engine, table_obj, valid_files, do_create)
+            self._rollback_load(storage_engine, table_obj, do_create)
             err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
@@ -99,13 +94,9 @@ class LoadMultmediaExecutor(AbstractExecutor):
         self,
         storage_engine: AbstractStorageEngine,
         table_obj: DataFrameMetadata,
-        valid_files: List[Path],
         do_create: bool,
     ):
         try:
-            if valid_files:
-                rows = Batch(pd.DataFrame(data={"file_path": list(valid_files)}))
-                storage_engine.delete(table_obj, rows)
             if do_create:
                 storage_engine.drop(table_obj)
         except Exception as e:

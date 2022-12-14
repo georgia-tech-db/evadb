@@ -12,24 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import shutil
-import zlib
 from pathlib import Path
 from typing import Iterator
 
-import pandas as pd
-
-from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
-from eva.parser.table_ref import TableInfo
 from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_media_storage_engine import AbstractMediaStorageEngine
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
-from eva.storage.sqlite_storage_engine import SQLStorageEngine
-from eva.utils.errors import CatalogError
-from eva.utils.logging_manager import logger
 
 
 class OpenCVStorageEngine(AbstractMediaStorageEngine):

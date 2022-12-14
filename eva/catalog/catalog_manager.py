@@ -129,7 +129,7 @@ class CatalogManager(object):
             return self._create_image_table(name)
         else:
             raise CatalogError(f"Format Type {format_type} is not supported")
-    
+
     def _create_image_table(self, name: str) -> DataFrameMetadata:
         """Create image table metadata object.
             We have predefined columns for such a object

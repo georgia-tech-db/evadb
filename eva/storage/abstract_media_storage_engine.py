@@ -12,12 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator
-
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.expression.abstract_expression import AbstractExpression
-from eva.models.storage.batch import Batch
-from eva.storage.abstract_storage_engine import AbstractStorageEngine
 import shutil
 import zlib
 from pathlib import Path
@@ -27,10 +21,8 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
-from eva.readers.opencv_reader import OpenCVReader
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.sqlite_storage_engine import SQLStorageEngine
 from eva.utils.errors import CatalogError
@@ -45,11 +37,11 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         return CatalogManager().get_media_metainfo_table(table)
 
     def _create_metadata_table(self, table: DataFrameMetadata):
-        return CatalogManager().get_media_metainfo_table(table)
+        return CatalogManager().create_media_metainfo_table(table)
 
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
-        # convert video_path to file name
-        # This is done to support duplicate video_names with different complete paths. Without conversion, we cannot copy files with same name but different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4
+        # convert media_path to file name
+        # This is done to support duplicate media_names with different complete paths. Without conversion, we cannot copy files with same name but different paths. Eg., a/b/my.mp4 and a/b/c/my.mp4
         # deterministic hashing
         xfromed_file_name = zlib.adler32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
         return str(xfromed_file_name)
@@ -108,21 +100,28 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
             dir_path = Path(table.file_url)
+            copied_files = []
             for media_file_path in rows.file_paths():
-                file = Path(media_file_path)
-                dst_file_name = self._xform_file_url_to_file_name(file)
+                media_file = Path(media_file_path)
+                dst_file_name = self._xform_file_url_to_file_name(media_file)
                 dst_path = dir_path / dst_file_name
                 if dst_path.exists():
                     raise FileExistsError(
-                        f"Duplicate File: {file} already exists in the table {table.name}"
+                        f"Duplicate File: {media_file} already exists in the table {table.name}"
                     )
-                shutil.copy2(str(file), str(dst_path))
+                shutil.copy2(str(media_file), str(dst_path))
+                copied_files.append(dst_path)
+            # assuming sql write is an atomic operation
             self._rdb_handler.write(
                 self._get_metadata_table(table),
                 Batch(pd.DataFrame({"file_url": list(rows.file_paths())})),
             )
 
         except Exception as e:
+            # delete the copied_files
+            for file in copied_files:
+                logger.info(f"Rollback file {file}")
+                file.unlink()
             logger.exception(str(e))
             raise RuntimeError(str(e))
         else:
