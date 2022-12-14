@@ -76,15 +76,25 @@ class LoadExecutorTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_should_fail_to_load_videos_with_same_path(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/2/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
-        expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
+        expected = Batch(pd.DataFrame(["Number of loaded videos: 1"]))
         self.assertEqual(result, expected)
-        # try adding the same file to the table
+
+        # original file should be preserved
+        expected_output = execute_query_fetch_all("SELECT id FROM MyVideos;")
+
+        # try adding duplicate files to the table
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
+
+        # original data should be preserved
+        after_load_fail = execute_query_fetch_all("SELECT id FROM MyVideos;")
+
+        self.assertEqual(expected_output, after_load_fail)
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
@@ -228,3 +238,7 @@ class LoadExecutorTest(unittest.TestCase):
         # clean up
         drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)
+
+
+if __name__ == "__main__":
+    unittest.main()
