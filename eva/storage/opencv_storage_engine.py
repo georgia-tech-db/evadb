@@ -122,6 +122,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         except Exception as e:
             # delete the copied_files
             for file in copied_files:
+                logger.info(f"Rollback file {file}")
                 file.unlink()
             logger.exception(str(e))
             raise RuntimeError(str(e))
