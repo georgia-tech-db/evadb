@@ -20,7 +20,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_video
+from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
 from eva.planner.load_data_plan import LoadDataPlan
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -28,10 +28,11 @@ from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
 
-class LoadVideoExecutor(AbstractExecutor):
+class LoadMultmediaExecutor(AbstractExecutor):
     def __init__(self, node: LoadDataPlan):
         super().__init__(node)
         self.catalog = CatalogManager()
+        self.media_type = self.node.file_options["file_format"]
 
     def validate(self):
         pass
@@ -45,12 +46,10 @@ class LoadVideoExecutor(AbstractExecutor):
             valid_files = []
             for file_path in iter_path_regex(self.node.file_path):
                 file_path = Path(file_path)
-                if validate_video(file_path):
+                if validate_media(file_path, self.media_type):
                     valid_files.append(str(file_path))
                 else:
-                    err_msg = (
-                        f"Load video failed: encountered invalid file {str(file_path)}"
-                    )
+                    err_msg = f"Load {self.media_type.name} failed due to invalid file {str(file_path)}"
                     logger.error(err_msg)
                     raise ValueError(file_path)
             # Create catalog entry
@@ -65,7 +64,9 @@ class LoadVideoExecutor(AbstractExecutor):
                 logger.info(msg)
             # Create the catalog entry
             else:
-                table_obj = self.catalog.create_video_metadata(table_name)
+                table_obj = self.catalog.create_multimedia_table(
+                    table_name, self.media_type
+                )
                 do_create = True
 
             storage_engine = StorageEngine.factory(table_obj)
@@ -82,12 +83,16 @@ class LoadVideoExecutor(AbstractExecutor):
 
         except Exception as e:
             self._rollback_load(storage_engine, table_obj, valid_files, do_create)
-            err_msg = f"Load video failed: encountered unexpected error {str(e)}"
+            err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
         else:
             yield Batch(
-                pd.DataFrame([f"Number of loaded videos: {str(len(valid_files))}"])
+                pd.DataFrame(
+                    [
+                        f"Number of loaded {self.media_type.name}: {str(len(valid_files))}"
+                    ]
+                )
             )
 
     def _rollback_load(
@@ -105,5 +110,5 @@ class LoadVideoExecutor(AbstractExecutor):
                 storage_engine.drop(table_obj)
         except Exception as e:
             logger.exception(
-                f"Unexpected Exception {e} occured while rolling back. This is bad as the video table can be in a corrupt state. Please verify the video table {table_obj} for correctness."
+                f"Unexpected Exception {e} occured while rolling back. This is bad as the {self.media_type.name} table can be in a corrupt state. Please verify the table {table_obj} for correctness."
             )

@@ -24,15 +24,12 @@ from eva.utils.generic_utils import get_size
 
 class AbstractReader(metaclass=ABCMeta):
     """
-    Abstract class for defining data reader. All other video readers use this
-    abstract class. Video readers are expected to return Batch
+    Abstract class for defining data reader. All other media readers use this
+    abstract class. Media readers are expected to return Batch
     in an iterative manner.
 
     Attributes:
         file_url (str): path to read data from
-        batch_mem_size (int): used to compute the #frames to
-                                            read in batch from video
-        offset (int, optional): Start frame location in video
     """
 
     def __init__(self, file_url: str, batch_mem_size: int, offset=None):

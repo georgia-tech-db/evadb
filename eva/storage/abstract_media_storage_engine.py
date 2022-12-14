@@ -12,6 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Iterator
+
+from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.expression.abstract_expression import AbstractExpression
+from eva.models.storage.batch import Batch
+from eva.storage.abstract_storage_engine import AbstractStorageEngine
 import shutil
 import zlib
 from pathlib import Path
@@ -31,15 +37,15 @@ from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
 
 
-class OpenCVStorageEngine(AbstractStorageEngine):
+class AbstractMediaStorageEngine(AbstractStorageEngine):
     def __init__(self):
         self._rdb_handler: SQLStorageEngine = SQLStorageEngine()
 
     def _get_metadata_table(self, table: DataFrameMetadata):
-        return CatalogManager().get_video_metadata_table(table)
+        return CatalogManager().get_media_metainfo_table(table)
 
     def _create_metadata_table(self, table: DataFrameMetadata):
-        return CatalogManager().create_video_metadata_table(table)
+        return CatalogManager().get_media_metainfo_table(table)
 
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
         # convert video_path to file name
@@ -50,7 +56,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
 
     def create(self, table: DataFrameMetadata, if_not_exists=True):
         """
-        Create the directory to store the video.
+        Create the directory to store the images.
         Create a sqlite table to persist the file urls
         """
         dir_path = Path(table.file_url)
@@ -59,7 +65,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         except FileExistsError:
             if if_not_exists:
                 return True
-            error = "Failed to load the video as directory \
+            error = "Failed to load the image as directory \
                         already exists: {}".format(
                 dir_path
             )
@@ -78,23 +84,23 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             # remove the metadata table from the catalog
             CatalogManager().drop_dataset_metadata(metadata_table)
         except Exception as e:
-            logger.exception(f"Failed to drop the video table {e}")
+            logger.exception(f"Failed to drop the image table {e}")
 
     def delete(self, table: DataFrameMetadata, rows: Batch):
         try:
-            video_metadata_table = self._get_metadata_table(table)
-            for video_file_path in rows.file_paths():
-                dst_file_name = self._xform_file_url_to_file_name(Path(video_file_path))
-                video_file = Path(table.file_url) / dst_file_name
+            media_metadata_table = self._get_metadata_table(table)
+            for media_file_path in rows.file_paths():
+                dst_file_name = self._xform_file_url_to_file_name(Path(media_file_path))
+                image_file = Path(table.file_url) / dst_file_name
                 self._rdb_handler.delete(
-                    video_metadata_table,
+                    media_metadata_table,
                     where_clause={
-                        video_metadata_table.identifier_column: str(video_file_path)
+                        media_metadata_table.identifier_column: str(media_file_path)
                     },
                 )
-                video_file.unlink()
+                image_file.unlink()
         except Exception as e:
-            error = f"Deleting file path {video_file_path} failed with exception {e}"
+            error = f"Deleting file path {media_file_path} failed with exception {e}"
             logger.exception(error)
             raise RuntimeError(error)
         return True
@@ -102,15 +108,15 @@ class OpenCVStorageEngine(AbstractStorageEngine):
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
             dir_path = Path(table.file_url)
-            for video_file_path in rows.file_paths():
-                video_file = Path(video_file_path)
-                dst_file_name = self._xform_file_url_to_file_name(video_file)
+            for media_file_path in rows.file_paths():
+                file = Path(media_file_path)
+                dst_file_name = self._xform_file_url_to_file_name(file)
                 dst_path = dir_path / dst_file_name
                 if dst_path.exists():
                     raise FileExistsError(
-                        f"Duplicate File: {video_file} already exists in the table {table.name}"
+                        f"Duplicate File: {file} already exists in the table {table.name}"
                     )
-                shutil.copy2(str(video_file), str(dst_path))
+                shutil.copy2(str(file), str(dst_path))
             self._rdb_handler.write(
                 self._get_metadata_table(table),
                 Batch(pd.DataFrame({"file_url": list(rows.file_paths())})),
@@ -122,28 +128,8 @@ class OpenCVStorageEngine(AbstractStorageEngine):
         else:
             return True
 
-    def read(
-        self,
-        table: DataFrameMetadata,
-        batch_mem_size: int,
-        predicate: AbstractExpression = None,
-        sampling_rate: int = None,
-    ) -> Iterator[Batch]:
-
-        for video_files in self._rdb_handler.read(self._get_metadata_table(table), 12):
-            for video_file_name in video_files.frames["file_url"]:
-                system_file_name = self._xform_file_url_to_file_name(video_file_name)
-                video_file = Path(table.file_url) / system_file_name
-                reader = OpenCVReader(
-                    str(video_file),
-                    batch_mem_size=batch_mem_size,
-                    predicate=predicate,
-                    sampling_rate=sampling_rate,
-                )
-                for batch in reader.read():
-                    column_name = table.columns[1].name
-                    batch.frames[column_name] = str(video_file_name)
-                    yield batch
+    def read(self, table: DataFrameMetadata) -> Iterator[Batch]:
+        raise NotImplementedError
 
     def rename(self, old_table: DataFrameMetadata, new_name: TableInfo):
         try:
@@ -154,9 +140,3 @@ class OpenCVStorageEngine(AbstractStorageEngine):
             raise Exception(
                 f"Unexpected exception {str(e)} occured during rename operation"
             )
-
-    def _close(self, table):
-        pass
-
-    def _read_init(self, table):
-        pass

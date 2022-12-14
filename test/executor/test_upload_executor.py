@@ -46,7 +46,7 @@ class UploadExecutorTest(unittest.TestCase):
 
         with patch("builtins.open", mock_open()) as m:
             with patch(
-                "eva.executor.upload_executor.LoadVideoExecutor", autospec=True
+                "eva.executor.upload_executor.LoadMultimediaExecutor", autospec=True
             ) as load_mock:
                 load_mock.return_value.exec.return_value = iter([1, 2, 3])
 
