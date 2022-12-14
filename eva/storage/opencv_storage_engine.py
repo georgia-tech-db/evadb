@@ -102,6 +102,7 @@ class OpenCVStorageEngine(AbstractStorageEngine):
     def write(self, table: DataFrameMetadata, rows: Batch):
         try:
             dir_path = Path(table.file_url)
+            copied_files = []
             for video_file_path in rows.file_paths():
                 video_file = Path(video_file_path)
                 dst_file_name = self._xform_file_url_to_file_name(video_file)
@@ -111,12 +112,18 @@ class OpenCVStorageEngine(AbstractStorageEngine):
                         f"Duplicate File: {video_file} already exists in the table {table.name}"
                     )
                 shutil.copy2(str(video_file), str(dst_path))
+                copied_files.append(dst_path)
+            # assuming sql write is an atomic operation
             self._rdb_handler.write(
                 self._get_metadata_table(table),
                 Batch(pd.DataFrame({"file_url": list(rows.file_paths())})),
             )
 
         except Exception as e:
+            # delete the copied_files
+            for file in copied_files:
+                logger.info(f"Rollback file {file}")
+                file.unlink()
             logger.exception(str(e))
             raise RuntimeError(str(e))
         else:

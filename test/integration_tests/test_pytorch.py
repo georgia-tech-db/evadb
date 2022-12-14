@@ -22,6 +22,7 @@ import pytest
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
+from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
 
 
 class PytorchTest(unittest.TestCase):
@@ -81,6 +82,8 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_mvit(self):
+
+        execute_query_fetch_all(Mvit_udf_query)
         select_query = """SELECT FIRST(id), MVITActionRecognition(SEGMENT(data)) FROM Actions
                        GROUP BY '16f';"""
         actual_batch = execute_query_fetch_all(select_query)
@@ -92,6 +95,8 @@ class PytorchTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_and_mvit(self):
+        execute_query_fetch_all(Mvit_udf_query)
+
         select_query = """SELECT FIRST(id),
                                  FastRCNNObjectDetector(FIRST(data)),
                                  MVITActionRecognition(SEGMENT(data))

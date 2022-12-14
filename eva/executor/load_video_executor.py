@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 
@@ -81,7 +80,7 @@ class LoadVideoExecutor(AbstractExecutor):
             )
 
         except Exception as e:
-            self._rollback_load(storage_engine, table_obj, valid_files, do_create)
+            self._rollback_load(storage_engine, table_obj, do_create)
             err_msg = f"Load video failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
@@ -94,13 +93,9 @@ class LoadVideoExecutor(AbstractExecutor):
         self,
         storage_engine: AbstractStorageEngine,
         table_obj: DataFrameMetadata,
-        valid_files: List[Path],
         do_create: bool,
     ):
         try:
-            if valid_files:
-                rows = Batch(pd.DataFrame(data={"file_path": list(valid_files)}))
-                storage_engine.delete(table_obj, rows)
             if do_create:
                 storage_engine.drop(table_obj)
         except Exception as e:
