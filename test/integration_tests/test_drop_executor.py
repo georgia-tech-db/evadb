@@ -42,14 +42,14 @@ class DropExecutorTest(unittest.TestCase):
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
         self.assertEqual(len(column_objects), 4)
         self.assertTrue(Path(video_dir).exists())
-        # metadata table
-        video_metadata_table = catalog_manager.get_video_metadata_table(metadata_obj)
+        # metainfo table
+        video_metadata_table = catalog_manager.get_media_metainfo_table(metadata_obj)
         self.assertTrue(video_metadata_table is not None)
 
         drop_query = """DROP TABLE IF EXISTS MyVideo;"""
         execute_query_fetch_all(drop_query)
         with self.assertRaises(Exception):
-            catalog_manager.get_video_metadata_table(metadata_obj)
+            catalog_manager.get_dataset_metadata(metadata_obj)
         self.assertTrue(catalog_manager.get_dataset_metadata(None, "MyVideo") is None)
         column_objects = catalog_manager.get_all_column_objects(metadata_obj)
         self.assertEqual(len(column_objects), 0)

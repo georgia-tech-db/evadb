@@ -57,13 +57,13 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("eva.catalog.catalog_manager.CatalogManager.create_metadata")
     @mock.patch("eva.catalog.catalog_manager.generate_file_path")
-    def test_create_video_metadata(self, m_gfp, m_cm):
+    def test_create_video_table(self, m_gfp, m_cm):
         x = CatalogManager()
         name = "eva"
         uri = "tmp"
         m_gfp.return_value = uri
 
-        x.create_video_metadata(name)
+        x._create_video_table(name)
 
         col_metadata_list = [
             DataFrameColumn("name", ColumnType.TEXT, False, None, []),

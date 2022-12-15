@@ -68,7 +68,7 @@ class LoadExecutorTest(unittest.TestCase):
             next(load_executor.exec())
 
     @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata")
-    @patch("eva.executor.load_video_executor.StorageEngine.factory")
+    @patch("eva.executor.load_multimedia_executor.StorageEngine.factory")
     def test_should_call_csv_reader_and_storage_engine(
         self, factory_mock, catalog_mock
     ):
