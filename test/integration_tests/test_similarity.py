@@ -43,7 +43,7 @@ class SimilarityTests(unittest.TestCase):
         base_img[2] += 1
 
         # id: 1 -> most dissimilar, id: 5 -> most similar
-        base_img += 5
+        base_img += 4
 
         # Inject data.
         table_df_metadata = CatalogManager().get_dataset_metadata(None, "testSimilarityTable")
@@ -65,5 +65,33 @@ class SimilarityTests(unittest.TestCase):
         config = ConfigurationManager()
         upload_dir_from_config = config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
-        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor");""".format(img_path)
-        execute_query_fetch_all(select_query)
+
+        # Top 1.
+        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor") LIMIT 1;""".format(img_path)
+        actual_batch = execute_query_fetch_all(select_query)
+
+        base_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+        base_img[0] -= 1
+        base_img[2] += 1
+
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[0]
+        self.assertTrue(np.array_equal(actual_open, base_img))
+        actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[0]
+        self.assertEqual(actual_distance, 0)
+
+        # Top 2.
+        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor") LIMIT 2;""".format(img_path)
+        actual_batch = execute_query_fetch_all(select_query)
+
+        base_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+        base_img[0] -= 1
+        base_img[2] += 1
+
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[0]
+        self.assertTrue(np.array_equal(actual_open, base_img))
+        actual_open = actual_batch.frames["testsimilaritytable.data"].to_numpy()[1]
+        self.assertTrue(np.array_equal(actual_open, base_img + 1))
+        actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[0]
+        self.assertEqual(actual_distance, 0)
+        actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[1]
+        self.assertEqual(actual_distance, 27)

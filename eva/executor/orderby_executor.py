@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pandas as pd
+
 from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
@@ -68,11 +70,15 @@ class OrderByExecutor(AbstractExecutor):
 
         # Column can be a functional expression, so if it
         # is not in columns, it needs to be re-evaluated.
+        merge_batch_list = [aggregated_batch]
         for col in self._columns:
             if col.col_alias not in aggregated_batch.frames:
                 batch = col.evaluate(aggregated_batch)
-                aggregated_batch_list.append(batch)
-        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+                merge_batch_list.append(batch)
+        if len(merge_batch_list) > 1:
+            merge_df_list = [batch.frames for batch in merge_batch_list]
+            aggregated_df = pd.concat(merge_df_list, axis=1, join="inner")
+            aggregated_batch = Batch(aggregated_df)
 
         # sorts the batch
         try:
@@ -80,7 +86,7 @@ class OrderByExecutor(AbstractExecutor):
                 by=self.extract_column_names(),
                 sort_type=self.extract_sort_types(),
             )
-        except KeyError as e:
+        except KeyError:
             # raise ExecutorError(str(e))
             pass
 
