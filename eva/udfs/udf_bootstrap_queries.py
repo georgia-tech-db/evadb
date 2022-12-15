@@ -169,7 +169,7 @@ def init_builtin_udfs(mode="debug"):
         # Mvit_udf_query,
     ]
     queries.extend([
-        DummyObjectDetector_udf_query, 
+        DummyObjectDetector_udf_query,
         DummyMultiObjectDetector_udf_query,
         DummyFeatureExtractor_udf_query,
     ])

@@ -12,16 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import torch
 import faiss
-import numpy as np
 import pandas as pd
 
-from eva.executor.executor_utils import ExecutorError
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.udfs.feature_extractor import FeatureExtractor
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.storage.storage_engine import StorageEngine
+from eva.catalog.catalog_manager import CatalogManager
+from eva.utils.generic_utils import path_to_class
 
 
 class Similarity(AbstractUDF):
@@ -36,33 +32,37 @@ class Similarity(AbstractUDF):
         return "Similarity"
 
     def forward(
-        self, 
-        open_df: pd.DataFrame, 
-        input_column: DataFrameColumn, 
-        feat_extractor: FeatureExtractor
+        self,
+        df: pd.DataFrame
     ) -> pd.DataFrame:
         """
         Get similarity score between two feature vectors: 1. feature vector of an opened image;
         and 2. feature vector from base table.
         """
 
-        # # TODO: check if an index exists.
+        def _similarity(row: pd.Series) -> float:
+            open_input, base_input, feature_extractor_name = row.iloc[0], row.iloc[1], row.iloc[2]
 
-        # # Check pairwise distance.
-        # open_feat = feat_extractor(open_df)
-        # open_feat_np = open_feat["features"].to_numpy()[0]
+            udf_metadata = CatalogManager().get_udf_by_name(feature_extractor_name)
+            udf_func = path_to_class(udf_metadata.impl_file_path, udf_metadata.name)
+            udf_obj = udf_func()
 
-        # input_df_metadata = input_column.dataset
-        # storage_engine = StorageEngine.factory(input_df_metadata)
+            open_feat = udf_obj(pd.DataFrame({
+                "data": [open_input],
+            }))
+            open_feat_np = open_feat["features"].to_numpy()[0]
+            base_feat = udf_obj(pd.DataFrame({
+                "data": [base_input]
+            }))
+            base_feat_np = base_feat["features"].to_numpy()[0]
 
-        # for row in storage_engine.read(input_df_metadata, 1):
-        #     feat_np = row.column_as_numpy_array(input_column.name)[0]
-        #     # Use L2 as default, but since it is exact matching, it does not
-        #     # matter which distance metric that we use.
-        #     distance_np = faiss.pairwise_distances(open_feat_np, feat_np)
-        #     distance = self._get_distance(distance_np)
-        #     yield()
+            # Transform to 2D.
+            open_feat_np = open_feat_np.reshape(1, -1)
+            base_feat_np = base_feat_np.reshape(1, -1)
+            distance_np = faiss.pairwise_distances(open_feat_np, base_feat_np)
 
-        return pd.DataFrame([{
-            "distance": 0
-        }])
+            return self._get_distance(distance_np)
+
+        ret = pd.DataFrame()
+        ret["distance"] = df.apply(_similarity, axis=1)
+        return ret

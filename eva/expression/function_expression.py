@@ -70,7 +70,10 @@ class FunctionExpression(AbstractExpression):
 
     @property
     def col_alias(self):
-        return self.alias
+        col_alias_list = []
+        for col in self.alias.col_names:
+            col_alias_list.append("{}.{}".format(self.alias.alias_name, col))
+        return " ".join(col_alias_list)
 
     @property
     def function(self):

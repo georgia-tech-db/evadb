@@ -66,6 +66,14 @@ class OrderByExecutor(AbstractExecutor):
             aggregated_batch_list.append(batch)
         aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
 
+        # Column can be a functional expression, so if it
+        # is not in columns, it needs to be re-evaluated.
+        for col in self._columns:
+            if col.col_alias not in aggregated_batch.frames:
+                batch = col.evaluate(aggregated_batch)
+                aggregated_batch_list.append(batch)
+        aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
+
         # sorts the batch
         try:
             aggregated_batch.sort_orderby(
