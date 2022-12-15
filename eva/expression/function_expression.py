@@ -69,6 +69,10 @@ class FunctionExpression(AbstractExpression):
         return self._output
 
     @property
+    def col_alias(self):
+        return self.alias
+
+    @property
     def function(self):
         return self._function
 

@@ -46,19 +46,23 @@ class Similarity(AbstractUDF):
         and 2. feature vector from base table.
         """
 
-        # TODO: check if an index exists.
+        # # TODO: check if an index exists.
 
-        # Check pairwise distance.
-        open_feat = feat_extractor(open_df)
-        open_feat_np = open_feat["features"].to_numpy()[0]
+        # # Check pairwise distance.
+        # open_feat = feat_extractor(open_df)
+        # open_feat_np = open_feat["features"].to_numpy()[0]
 
-        input_df_metadata = input_column.dataset
-        storage_engine = StorageEngine.factory(input_df_metadata)
+        # input_df_metadata = input_column.dataset
+        # storage_engine = StorageEngine.factory(input_df_metadata)
 
-        for row in storage_engine.read(input_df_metadata, 1):
-            feat_np = row.column_as_numpy_array(input_column.name)[0]
-            # Use L2 as default, but since it is exact matching, it does not
-            # matter which distance metric that we use.
-            distance_np = faiss.pairwise_distances(open_feat_np, feat_np)
-            distance = self._get_distance(distance_np)
-            yield()
+        # for row in storage_engine.read(input_df_metadata, 1):
+        #     feat_np = row.column_as_numpy_array(input_column.name)[0]
+        #     # Use L2 as default, but since it is exact matching, it does not
+        #     # matter which distance metric that we use.
+        #     distance_np = faiss.pairwise_distances(open_feat_np, feat_np)
+        #     distance = self._get_distance(distance_np)
+        #     yield()
+
+        return pd.DataFrame([{
+            "distance": 0
+        }])

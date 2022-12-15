@@ -18,6 +18,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.plan_nodes.orderby_plan import OrderByPlan
+from eva.executor.executor_utils import ExecutorError
 
 
 class OrderByExecutor(AbstractExecutor):
@@ -71,9 +72,8 @@ class OrderByExecutor(AbstractExecutor):
                 by=self.extract_column_names(),
                 sort_type=self.extract_sort_types(),
             )
-        except KeyError:
-            # pass for now
-            pass
+        except KeyError as e:
+            raise ExecutorError(str(e))
 
         # split the aggregated batch into smaller ones based
         #  on self.batch_sizes which holds the input batches sizes
