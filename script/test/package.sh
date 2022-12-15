@@ -3,7 +3,7 @@
 ## Test package installation
 
 eva_server &>> eva.txt &
-sleep 10
+sleep 20
 echo "Contents of server log"
 cat eva.txt
 
