@@ -15,8 +15,8 @@
 import faiss
 import pandas as pd
 
-from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.catalog.catalog_manager import CatalogManager
+from eva.udfs.abstract.abstract_udf import AbstractUDF
 from eva.utils.generic_utils import path_to_class
 
 
@@ -31,29 +31,32 @@ class Similarity(AbstractUDF):
     def name(self):
         return "Similarity"
 
-    def forward(
-        self,
-        df: pd.DataFrame
-    ) -> pd.DataFrame:
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Get similarity score between two feature vectors: 1. feature vector of an opened image;
         and 2. feature vector from base table.
         """
 
         def _similarity(row: pd.Series) -> float:
-            open_input, base_input, feature_extractor_name = row.iloc[0], row.iloc[1], row.iloc[2]
+            open_input, base_input, feature_extractor_name = (
+                row.iloc[0],
+                row.iloc[1],
+                row.iloc[2],
+            )
 
             udf_metadata = CatalogManager().get_udf_by_name(feature_extractor_name)
             udf_func = path_to_class(udf_metadata.impl_file_path, udf_metadata.name)
             udf_obj = udf_func()
 
-            open_feat = udf_obj(pd.DataFrame({
-                "data": [open_input],
-            }))
+            open_feat = udf_obj(
+                pd.DataFrame(
+                    {
+                        "data": [open_input],
+                    }
+                )
+            )
             open_feat_np = open_feat["features"].to_numpy()[0]
-            base_feat = udf_obj(pd.DataFrame({
-                "data": [base_input]
-            }))
+            base_feat = udf_obj(pd.DataFrame({"data": [base_input]}))
             base_feat_np = base_feat["features"].to_numpy()[0]
 
             # Transform to 2D.

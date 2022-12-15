@@ -14,15 +14,16 @@
 # limitations under the License.
 import os
 import unittest
+from test.util import create_sample_image, load_inbuilt_udfs
+
 import numpy as np
 import pandas as pd
 
-from test.util import load_inbuilt_udfs, create_sample_image
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
-from eva.configuration.configuration_manager import ConfigurationManager
 
 
 class SimilarityTests(unittest.TestCase):
@@ -46,14 +47,13 @@ class SimilarityTests(unittest.TestCase):
         base_img += 4
 
         # Inject data.
-        table_df_metadata = CatalogManager().get_dataset_metadata(None, "testSimilarityTable")
+        table_df_metadata = CatalogManager().get_dataset_metadata(
+            None, "testSimilarityTable"
+        )
         storage_engine = StorageEngine.factory(table_df_metadata)
         for _ in range(5):
             storage_engine.write(
-                table_df_metadata,
-                Batch(pd.DataFrame([{
-                    "data": base_img
-                }]))
+                table_df_metadata, Batch(pd.DataFrame([{"data": base_img}]))
             )
             base_img -= 1
 
@@ -67,7 +67,9 @@ class SimilarityTests(unittest.TestCase):
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
 
         # Top 1.
-        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor") LIMIT 1;""".format(img_path)
+        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor") LIMIT 1;""".format(
+            img_path
+        )
         actual_batch = execute_query_fetch_all(select_query)
 
         base_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
@@ -80,7 +82,9 @@ class SimilarityTests(unittest.TestCase):
         self.assertEqual(actual_distance, 0)
 
         # Top 2.
-        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor") LIMIT 2;""".format(img_path)
+        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(Open("{}"), data, "DummyFeatureExtractor") LIMIT 2;""".format(
+            img_path
+        )
         actual_batch = execute_query_fetch_all(select_query)
 
         base_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)

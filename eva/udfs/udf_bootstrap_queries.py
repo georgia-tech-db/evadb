@@ -168,11 +168,13 @@ def init_builtin_udfs(mode="debug"):
         # Disabled as it requires specific pytorch package
         # Mvit_udf_query,
     ]
-    queries.extend([
-        DummyObjectDetector_udf_query,
-        DummyMultiObjectDetector_udf_query,
-        DummyFeatureExtractor_udf_query,
-    ])
+    queries.extend(
+        [
+            DummyObjectDetector_udf_query,
+            DummyMultiObjectDetector_udf_query,
+            DummyFeatureExtractor_udf_query,
+        ]
+    )
 
     for query in queries:
         execute_query_fetch_all(query)

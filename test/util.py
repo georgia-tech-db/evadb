@@ -420,6 +420,7 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
     """
     Returns a feature for a frame.
     """
+
     def setup(self, *args, **kwargs):
         pass
 
@@ -437,7 +438,5 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         # Return the original input as its feature.
-        ret = pd.DataFrame({
-            "features": [df["data"].to_numpy()[0].astype(np.float32)]
-        })
+        ret = pd.DataFrame({"features": [df["data"].to_numpy()[0].astype(np.float32)]})
         return ret
