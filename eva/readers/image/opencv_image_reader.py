@@ -18,10 +18,7 @@ from typing import Dict, Iterator
 import cv2
 
 from eva.readers.abstract_reader import AbstractReader
-
-# from eva.utils.logging_manager import LoggingLevel
-# from eva.utils.logging_manager import LoggingManager
-# from eva.expression.expression_utils import parse_predicate
+from eva.utils.logging_manager import logger
 
 
 class CVImageReader(AbstractReader):
@@ -31,6 +28,8 @@ class CVImageReader(AbstractReader):
     def _read(self) -> Iterator[Dict]:
         frame = cv2.imread(str(self.file_url))
         if frame is None:
-            print("Failed to read image file {}".format(self.file_url))
+            err_msg = f"Failed to read image file {self.file_url}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
         else:
             yield {"data": frame}
