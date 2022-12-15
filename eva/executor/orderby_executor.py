@@ -81,7 +81,8 @@ class OrderByExecutor(AbstractExecutor):
                 sort_type=self.extract_sort_types(),
             )
         except KeyError as e:
-            raise ExecutorError(str(e))
+            # raise ExecutorError(str(e))
+            pass
 
         # split the aggregated batch into smaller ones based
         #  on self.batch_sizes which holds the input batches sizes
