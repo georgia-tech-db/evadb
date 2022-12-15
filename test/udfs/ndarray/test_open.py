@@ -18,14 +18,6 @@ from test.util import create_sample_image
 
 import numpy as np
 import pandas as pd
-<<<<<<< HEAD
-<<<<<<< HEAD
-from mock import patch
-=======
->>>>>>> fix test cases for open
-
-=======
->>>>>>> reformat
 from mock import patch
 
 from eva.configuration.configuration_manager import ConfigurationManager
