@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pathlib import Path
-
 import cv2
 import numpy as np
 import pandas as pd
@@ -31,21 +29,28 @@ class Open(AbstractUDF):
     def name(self):
         return "Open"
 
-    def forward(self, path: Path) -> pd.DataFrame:
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         Open image from server-side path.
 
         Returns:
             (pd.DataFrame): The opened image.
         """
-        if path in self._data_cache:
-            data = self._data_cache[path]
-        else:
-            try:
-                data = cv2.imread(path).astype(np.float32)
-            except Exception as e:
-                raise ExecutorError(str(e))
 
-            self._data_cache[path] = data
+        def _open(row: pd.Series) -> np.ndarray:
+            path_str = row[0]
+            if path_str in self._data_cache:
+                data = self._data_cache[path_str]
+            else:
+                try:
+                    data = cv2.imread(path_str).astype(np.float32)
+                except Exception as e:
+                    raise ExecutorError(str(e))
 
-        return pd.DataFrame([{"data": data}])
+            self._data_cache[path_str] = data
+
+            return data
+
+        ret = pd.DataFrame()
+        ret["data"] = df.apply(_open, axis=1)
+        return ret
