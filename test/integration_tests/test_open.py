@@ -61,16 +61,13 @@ class OpenTests(unittest.TestCase):
         select_query = """SELECT num, Open("{}") FROM testOpenTable;""".format(img_path)
         batch_res = execute_query_fetch_all(select_query)
 
-        expected_img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+        expected_img = np.array(np.ones((3, 3, 3)), dtype=np.float32)
         expected_img[0] -= 1
         expected_img[2] += 1
 
-        num = batch_res.column_as_numpy_array("testopentable.num")[0]
-        self.assertEqual(1, num)
-        actual_img = batch_res.column_as_numpy_array("open.data")[0]
-        self.assertEqual(np.sum(expected_img), np.sum(actual_img))
-
-        num = batch_res.column_as_numpy_array("testopentable.num")[1]
-        self.assertEqual(2, num)
-        actual_img = batch_res.column_as_numpy_array("open.data")[1]
-        self.assertTrue(np.isnan(actual_img))
+        expected_batch = Batch(
+            pd.DataFrame(
+                {"testopentable.num": [1, 2], "open.data": [expected_img, expected_img]}
+            )
+        )
+        self.assertEqual(expected_batch, batch_res)
