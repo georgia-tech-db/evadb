@@ -35,11 +35,11 @@ jobs:
 
       - restore_cache:
           keys:
-            - v11-model_cache-{{ checksum "setup.py" }}
+            - v12-model_cache-{{ checksum "setup.py" }}
 
       - restore_cache:
           keys:
-            - v11-pip-cache-{{ checksum "setup.py" }}
+            - v12-pip-cache-{{ checksum "setup.py" }}
 
       - run:
           name: Install only EVA package from pip
@@ -66,12 +66,12 @@ jobs:
             coveralls
 
       - save_cache:
-          key: v11-model_cache-{{ checksum "setup.py" }}
+          key: v12-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
       - save_cache:
-          key: v11-pip-cache-{{ checksum "setup.py" }}
+          key: v12-pip-cache-{{ checksum "setup.py" }}
           paths:
             - ./test_evadb/
