@@ -21,7 +21,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
-from eva.planner.load_data_plan import LoadDataPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger

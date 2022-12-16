@@ -20,8 +20,8 @@ from mock import patch
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.parser.table_ref import TableInfo, TableRef
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.types import PlanOprType
 
 
 class CreateMaterializedExecutorTest(unittest.TestCase):

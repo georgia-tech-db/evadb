@@ -28,9 +28,9 @@ from eva.optimizer.optimizer_context import OptimizerContext
 from eva.optimizer.optimizer_tasks import BottomUpRewrite, OptimizeGroup, TopDownRewrite
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_manager import RulesManager
-from eva.planner.predicate_plan import PredicatePlan
-from eva.planner.project_plan import ProjectPlan
-from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.predicate_plan import PredicatePlan
+from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class TestOptimizerTask(unittest.TestCase):

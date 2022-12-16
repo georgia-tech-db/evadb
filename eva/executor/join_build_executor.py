@@ -16,7 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 
 
 class BuildJoinExecutor(AbstractExecutor):

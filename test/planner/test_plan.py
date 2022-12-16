@@ -19,17 +19,17 @@ from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import FileFormatType
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.planner.create_plan import CreatePlan
-from eva.planner.create_udf_plan import CreateUDFPlan
-from eva.planner.drop_plan import DropPlan
-from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.insert_plan import InsertPlan
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.types import PlanOprType
-from eva.planner.union_plan import UnionPlan
-from eva.planner.upload_plan import UploadPlan
+from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.create_plan import CreatePlan
+from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.drop_plan import DropPlan
+from eva.plan_nodes.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.insert_plan import InsertPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
+from eva.plan_nodes.rename_plan import RenamePlan
+from eva.plan_nodes.types import PlanOprType
+from eva.plan_nodes.union_plan import UnionPlan
+from eva.plan_nodes.upload_plan import UploadPlan
 
 
 class PlanNodeTests(unittest.TestCase):

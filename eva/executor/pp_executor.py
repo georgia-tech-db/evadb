@@ -16,7 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.pp_plan import PPScanPlan
+from eva.plan_nodes.pp_plan import PPScanPlan
 
 
 class PPExecutor(AbstractExecutor):

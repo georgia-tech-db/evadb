@@ -18,7 +18,7 @@ import pandas as pd
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.groupby_plan import GroupByPlan
+from eva.plan_nodes.groupby_plan import GroupByPlan
 
 
 class GroupByExecutor(AbstractExecutor):

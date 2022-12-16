@@ -26,6 +26,7 @@ from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
+    LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToFaiss,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
@@ -60,6 +61,7 @@ from eva.optimizer.rules.rules import (
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
     PushDownFilterThroughJoin,
+    XformLateralJoinToLinearFlow,
 )
 
 
@@ -83,6 +85,7 @@ class RulesManager:
             # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
+            XformLateralJoinToLinearFlow(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
@@ -116,6 +119,7 @@ class RulesManager:
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
+            LogicalApplyAndMergeToPhysical(),
         ]
 
         if ray_enabled:
