@@ -62,6 +62,7 @@ from eva.optimizer.rules.rules import (
     LogicalUploadToPhysical,
     PushDownFilterThroughJoin,
     XformLateralJoinToLinearFlow,
+    PushDownFilterThroughApplyAndMerge
 )
 
 
@@ -85,6 +86,7 @@ class RulesManager:
             # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),
+            PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
         ]
 
