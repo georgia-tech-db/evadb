@@ -12,18 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from test.util import load_inbuilt_udfs
 
-import pytest
+from typing import Dict, Iterator
 
-from eva.catalog.catalog_manager import CatalogManager
-from eva.server.command_handler import execute_query_fetch_all
+import cv2
+
+from eva.readers.abstract_reader import AbstractReader
+from eva.utils.logging_manager import logger
 
 
-@pytest.fixture(autouse=False)
-def setup_pytorch_tests():
-    CatalogManager().reset()
-    execute_query_fetch_all("LOAD VIDEO 'data/ua_detrac/ua_detrac.mp4' INTO MyVideo;")
-    execute_query_fetch_all("LOAD VIDEO 'data/mnist/mnist.mp4' INTO MNIST;")
-    load_inbuilt_udfs()
-    yield None
+class CVImageReader(AbstractReader):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _read(self) -> Iterator[Dict]:
+        frame = cv2.imread(str(self.file_url))
+        if frame is None:
+            err_msg = f"Failed to read image file {self.file_url}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+        else:
+            yield {"data": frame}

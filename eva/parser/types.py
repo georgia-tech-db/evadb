@@ -68,6 +68,7 @@ class FileFormatType(Enum):
 
     VIDEO = auto()
     CSV = auto()
+    IMAGE = auto()
 
 
 @unique

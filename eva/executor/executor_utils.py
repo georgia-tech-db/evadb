@@ -23,6 +23,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
+from eva.parser.types import FileFormatType
 from eva.utils.logging_manager import logger
 
 
@@ -60,6 +61,17 @@ def handle_if_not_exists(table_info: TableInfo, if_not_exist=False):
         return False
 
 
+def validate_image(image_path: Path) -> bool:
+    try:
+        data = cv2.imread(str(image_path))
+        return data is not None
+    except Exception as e:
+        logger.warning(
+            f"Unexpected Exception {e} occured while reading image file {image_path}"
+        )
+        return False
+
+
 def iter_path_regex(path_regex: Path) -> Generator[str, None, None]:
     return glob.iglob(os.path.expanduser(path_regex), recursive=True)
 
@@ -74,3 +86,12 @@ def validate_video(video_path: Path) -> bool:
         logger.warning(
             f"Unexpected Exception {e} occured while reading video file {video_path}"
         )
+
+
+def validate_media(file_path: Path, media_type: FileFormatType) -> bool:
+    if media_type == FileFormatType.VIDEO:
+        return validate_video(file_path)
+    elif media_type == FileFormatType.IMAGE:
+        return validate_image(file_path)
+    else:
+        raise ValueError(f"Unsupported Media type {str(media_type)}")
