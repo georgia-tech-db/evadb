@@ -22,6 +22,7 @@ class Dimension(IntEnum):
 class TableType(IntEnum):
     STRUCTURED_DATA = auto()
     VIDEO_DATA = auto()
+    IMAGE_DATA = auto()
 
 
 class ColumnType(Enum):
@@ -84,3 +85,12 @@ class NdArrayType(Enum):
             raise ValueError("Can not auto convert %s to numpy type" % t)
 
         return np_type
+
+
+class IndexType(Enum):
+    HNSW = auto()
+
+    def __str__(self):
+        # Overload the str method by getting ride of IndexType.
+        res_str = Enum.__str__(self)
+        return res_str.split(".")[-1]

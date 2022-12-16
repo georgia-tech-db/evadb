@@ -41,6 +41,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
     LogicalCreate,
+    LogicalCreateIndex,
     LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
@@ -65,6 +66,7 @@ from eva.optimizer.operators import (
     Operator,
     OperatorType,
 )
+from eva.planner.create_index_plan import CreateIndexPlan
 from eva.planner.create_plan import CreatePlan
 from eva.planner.create_udf_plan import CreateUDFPlan
 from eva.planner.drop_plan import DropPlan
@@ -399,7 +401,7 @@ class LogicalDropToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
-        after = DropPlan(before.table_refs, before.if_exists)
+        after = DropPlan(before.table_infos, before.if_exists)
         return after
 
 
@@ -422,6 +424,27 @@ class LogicalCreateUDFToPhysical(Rule):
             before.outputs,
             before.impl_path,
             before.udf_type,
+        )
+        return after
+
+
+class LogicalCreateIndexToFaiss(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALCREATEINDEX)
+        super().__init__(RuleType.LOGICAL_CREATE_INDEX_TO_FAISS, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_CREATE_INDEX_TO_FAISS
+
+    def check(self, before: Operator, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalCreateIndex, context: OptimizerContext):
+        after = CreateIndexPlan(
+            before.name,
+            before.table_ref,
+            before.col_list,
+            before.index_type,
         )
         return after
 

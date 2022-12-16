@@ -58,6 +58,15 @@ Crop_udf_query = """CREATE UDF IF NOT EXISTS Crop
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
 
+Open_udf_query = """CREATE UDF IF NOT EXISTS Open
+                INPUT (img_path TEXT(1000))
+                OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE NdarrayUDF
+                IMPL "{}/udfs/{}/open.py";
+        """.format(
+    EVA_INSTALLATION_DIR, NDARRAY_DIR
+)
+
 Unnest_udf_query = """CREATE UDF IF NOT EXISTS Unnest
                 INPUT  (inp NDARRAY ANYTYPE)
                 OUTPUT (out ANYTYPE)
@@ -73,6 +82,16 @@ Fastrcnn_udf_query = """CREATE UDF IF NOT EXISTS FastRCNNObjectDetector
                 scores NDARRAY FLOAT32(ANYDIM))
       TYPE  Classification
       IMPL  '{}/udfs/fastrcnn_object_detector.py';
+      """.format(
+    EVA_INSTALLATION_DIR
+)
+
+YoloV5_udf_query = """CREATE UDF IF NOT EXISTS YoloV5
+      INPUT  (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+      OUTPUT (labels NDARRAY STR(ANYDIM), bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                scores NDARRAY FLOAT32(ANYDIM))
+      TYPE  Classification
+      IMPL  '{}/udfs/yolo_object_detector.py';
       """.format(
     EVA_INSTALLATION_DIR
 )
@@ -117,12 +136,15 @@ def init_builtin_udfs(mode="debug"):
     """
     queries = [
         Fastrcnn_udf_query,
-        Mvit_udf_query,
         ArrayCount_udf_query,
         Crop_udf_query,
+        Open_udf_query,
+        YoloV5_udf_query,
         # Disabled because required packages (eg., easy_ocr might not be preinstalled)
         # face_detection_udf_query,
         # ocr_udf_query,
+        # Disabled as it requires specific pytorch package
+        # Mvit_udf_query,
     ]
     queries.extend([DummyObjectDetector_udf_query, DummyMultiObjectDetector_udf_query])
 

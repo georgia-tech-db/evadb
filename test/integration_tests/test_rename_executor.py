@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-from test.util import create_sample_video, file_remove
+from test.util import create_sample_csv, create_sample_video, file_remove
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
@@ -24,9 +24,11 @@ class RenameExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         create_sample_video()
+        create_sample_csv()
 
     def tearDown(self):
         file_remove("dummy.avi")
+        file_remove("dummy.csv")
 
     # integration test
     def test_should_rename_table(self):
@@ -46,3 +48,31 @@ class RenameExecutorTest(unittest.TestCase):
         self.assertTrue(
             catalog_manager.get_dataset_metadata(None, "MyVideo1") is not None
         )
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+
+    # integration test
+    def test_should_fail_on_rename_structured_table(self):
+        # loading a csv requires a table to be created first
+        create_table_query = """
+
+            CREATE TABLE IF NOT EXISTS MyVideoCSV (
+                id INTEGER UNIQUE,
+                frame_id INTEGER NOT NULL,
+                video_id INTEGER NOT NULL,
+                dataset_name TEXT(30) NOT NULL
+            );
+            """
+        execute_query_fetch_all(create_table_query)
+
+        # load the CSV
+        load_query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
+        execute_query_fetch_all(load_query)
+
+        with self.assertRaises(Exception) as cm:
+            rename_query = """RENAME TABLE MyVideoCSV TO MyVideoCSV1;"""
+            execute_query_fetch_all(rename_query)
+
+        self.assertEqual(
+            str(cm.exception), "Rename not yet supported on structured data"
+        )
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideoCSV;")

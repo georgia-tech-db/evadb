@@ -25,13 +25,13 @@ from eva.server.command_handler import execute_query_fetch_all
 class CascadeOptimizer(unittest.TestCase):
     def setUp(self):
         CatalogManager().reset()
-        create_sample_video(NUM_FRAMES)
+        self.video_file_path = create_sample_video(NUM_FRAMES)
 
     def tearDown(self):
         file_remove("dummy.avi")
 
     def test_logical_to_physical_udf(self):
-        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        load_query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(load_query)
 
         create_udf_query = """CREATE UDF DummyObjectDetector
@@ -54,3 +54,5 @@ class CascadeOptimizer(unittest.TestCase):
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
+
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")

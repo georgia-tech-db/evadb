@@ -23,13 +23,15 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.parser.drop_statement import DropTableStatement
 from eva.parser.explain_statement import ExplainStatement
+from eva.parser.rename_statement import RenameTableStatement
 from eva.parser.select_statement import SelectStatement
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
@@ -75,6 +77,22 @@ class StatementBinder:
     def _bind_explain_statement(self, node: ExplainStatement):
         self.bind(node.explainable_stmt)
 
+    @bind.register(CreateIndexStatement)
+    def _bind_create_index_statement(self, node: CreateIndexStatement):
+        self.bind(node.table_ref)
+
+        # TODO: create index currently only supports single numpy column.
+        assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
+
+        # TODO: create index currently only works on TableInfo, but will extend later.
+        assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
+
+        col_def = node.col_list[0]
+        table_ref_obj = node.table_ref.table.table_obj
+        col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+        assert col.type == ColumnType.NDARRAY, "Index input needs to be numpy array"
+        assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
+
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
         self.bind(node.from_table)
@@ -108,10 +126,13 @@ class StatementBinder:
         self.bind(node.query)
         # Todo Verify if the number projected columns matches table
 
-    @bind.register(DropTableStatement)
-    def _bind_drop_table_statement(self, node: DropTableStatement):
-        for table in node.table_refs:
-            self.bind(table)
+    @bind.register(RenameTableStatement)
+    def _bind_rename_table_statement(self, node: RenameTableStatement):
+        self.bind(node.old_table_ref)
+        if node.old_table_ref.table.table_obj.table_type == TableType.STRUCTURED_DATA:
+            err_msg = "Rename not yet supported on structured data"
+            logger.exception(err_msg)
+            raise BinderError(err_msg)
 
     @bind.register(TableRef)
     def _bind_tableref(self, node: TableRef):

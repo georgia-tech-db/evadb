@@ -95,6 +95,7 @@ WITH:                 'WITH';
 FORMAT:               'FORMAT';
 CSV:                  'CSV';
 VIDEO:                'VIDEO';
+IMAGE:                'IMAGE';
 
 // EVAQL keywords
 
@@ -102,8 +103,7 @@ ERROR_BOUNDS:						 'ERROR_WITHIN';
 CONFIDENCE_LEVEL:					 'AT_CONFIDENCE';
 
 // Index types
-BTREE:                               'BTREE';
-HASH:                                'HASH';
+HNSW:                                'HNSW';
 
 // Computer vision tasks
 

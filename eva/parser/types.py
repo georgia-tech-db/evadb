@@ -40,6 +40,7 @@ class StatementType(Enum):
     SHOW = (auto(),)
     DROP_UDF = auto()
     EXPLAIN = (auto(),)
+    CREATE_INDEX = (auto(),)
     # add other types
 
 
@@ -67,6 +68,7 @@ class FileFormatType(Enum):
 
     VIDEO = auto()
     CSV = auto()
+    IMAGE = auto()
 
 
 @unique

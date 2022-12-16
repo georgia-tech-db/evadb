@@ -2,27 +2,41 @@
 
 ## Test package installation
 
+function is_server_up () {
+    # check if server started
+    grep "serving" eva.txt
+    return $?
+}
+
 eva_server &>> eva.txt &
-sleep 10
+i=0
+while [ $i -lt 3 ];
+do
+    sleep 20
+    is_server_up
+    test_code=$?
+    if [ $test_code == 0 ]; then
+        break
+    fi
+    i+=1
+done
+
 echo "Contents of server log"
 cat eva.txt
 
-# check if server started
-grep "serving" eva.txt
-test_code=$?
-if [ $test_code -ne 0 ];
+if [ "$test_code" -ne 0 ];
 then
     echo "Server did not start"
-    echo $test_code
-    exit $test_code
+    echo "$test_code"
+    exit "$test_code"
 fi
 
 eva_client &> client.txt &
-if [ $test_code -ne 0 ];
+if [ "$test_code" -ne 0 ];
 then
     echo "Client did not start"
-    echo $test_code
-    exit $test_code
+    echo "$test_code"
+    exit "$test_code"
 fi
 
 head -n20 client.txt

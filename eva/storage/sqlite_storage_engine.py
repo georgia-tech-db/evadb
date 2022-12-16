@@ -12,19 +12,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Iterator, List
+from typing import Any, Dict, Iterator, List
 
 import numpy as np
 import pandas as pd
+from sqlalchemy import and_
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.schema_utils import SchemaUtils
-from eva.catalog.sql_config import SQLConfig
+from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from eva.models.storage.batch import Batch
-from eva.sql_config import IDENTIFIER_COLUMN
+from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import PickleSerializer, get_size
 from eva.utils.logging_manager import logger
@@ -92,11 +93,11 @@ class SQLStorageEngine(AbstractStorageEngine):
         try:
             table_to_remove = BaseModel.metadata.tables[table.name]
             table_to_remove.drop()
-            self._sql_session.commit()
             # In-memory metadata does not automatically sync with the database
             # therefore manually removing the table from the in-memory metadata
             # https://github.com/sqlalchemy/sqlalchemy/issues/5112
             BaseModel.metadata.remove(table_to_remove)
+            self._sql_session.commit()
         except Exception as e:
             logger.exception(
                 f"Failed to drop the table {table.name} with Exception {str(e)}"
@@ -161,3 +162,42 @@ class SQLStorageEngine(AbstractStorageEngine):
                 data_batch = []
         if data_batch:
             yield Batch(pd.DataFrame(data_batch))
+
+    def delete(self, table: DataFrameMetadata, where_clause: Dict[str, Any]):
+        """Delete tuples from the table where rows satisfy the where_clause.
+        The current implementation only handles equality predicates.
+
+        Argument:
+            table: table metadata object of the table
+            where_clause (Dict[str, Any]): where clause use to find the tuples to remove. The key should be the column name and value should be the tuple value. The function assumes an equality condition
+        """
+        sqlite_table = BaseModel.metadata.tables[table.name]
+        table_columns = [
+            col.name for col in sqlite_table.columns if col.name != "_row_id"
+        ]
+        filter_clause = []
+        # verify where clause and convert to sqlalchemy supported filter
+        # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
+        for column, value in where_clause.items():
+            if column not in table_columns:
+                raise Exception(
+                    f"where_clause contains a column {column} not in the table {sqlite_table}"
+                )
+            filter_clause.append(sqlite_table.columns[column] == value)
+
+        d = sqlite_table.delete().where(and_(*filter_clause))
+        self._sql_engine.execute(d)
+        self._sql_session.commit()
+
+    def rename(self, old_table: DataFrameMetadata, new_name: TableInfo):
+        raise Exception("Rename not supported for structured data table")
+        # try:
+        #     old_name = old_table.name
+        #     CatalogManager().rename_table(old_table, new_name)
+        #     self._sql_session.commit()
+        # except CatalogError as err:
+        #     raise Exception(f"Failed to rename table {old_name} with exception {err}")
+        # except Exception as e:
+        #     raise Exception(
+        #         f"Unexpected exception {str(e)} occured during rename operation"
+        #     )

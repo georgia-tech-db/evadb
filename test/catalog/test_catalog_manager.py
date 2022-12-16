@@ -57,13 +57,13 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("eva.catalog.catalog_manager.CatalogManager.create_metadata")
     @mock.patch("eva.catalog.catalog_manager.generate_file_path")
-    def test_create_video_metadata(self, m_gfp, m_cm):
+    def test_create_video_table(self, m_gfp, m_cm):
         x = CatalogManager()
         name = "eva"
         uri = "tmp"
         m_gfp.return_value = uri
 
-        x.create_video_metadata(name)
+        x._create_video_table(name)
 
         col_metadata_list = [
             DataFrameColumn("name", ColumnType.TEXT, False, None, []),
@@ -177,15 +177,6 @@ class CatalogManagerTests(unittest.TestCase):
             "udf", "sample.py", "classification"
         )
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
-
-    @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_drop_metadata(self, dcs_mock, ds_mock, initdb_mock):
-        catalog = CatalogManager()
-        catalog.drop_dataset_metadata("database", "table")
-        ds_name_mock = ds_mock.return_value.drop_dataset_by_name
-        ds_name_mock.assert_called_with("database", "table")
 
     @mock.patch("eva.catalog.catalog_manager.UdfService")
     def test_get_udf_by_name(self, udf_mock):

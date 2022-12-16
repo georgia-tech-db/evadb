@@ -12,9 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.planner.rename_plan import RenamePlan
+from eva.storage.storage_engine import StorageEngine
+from eva.utils.logging_manager import logger
 
 
 class RenameExecutor(AbstractExecutor):
@@ -29,4 +31,11 @@ class RenameExecutor(AbstractExecutor):
 
         Calls the catalog to modified metadata corresponding to the table.
         """
-        CatalogManager().rename_table(self.node.new_name, self.node.old_table.table)
+        try:
+            obj = self.node.old_table.table.table_obj
+            storage_engine = StorageEngine.factory(obj)
+            storage_engine.rename(obj, self.node.new_name)
+        except Exception as e:
+            err = f"Rename Failed: {str(e)}"
+            logger.exception(err)
+            raise ExecutorError(err)
