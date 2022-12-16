@@ -12,9 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
-
-import mock
 import pytest
 
 from eva.server.command_handler import execute_query_fetch_all
@@ -26,8 +23,8 @@ from eva.server.command_handler import execute_query_fetch_all
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_should_run_pytorch_and_fastrcnn(benchmark, setup_pytorch_tests):
-    select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
+def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
+    select_query = """SELECT YoloV5(data) FROM MyVideo
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
     assert len(actual_batch) == 5
@@ -140,25 +137,9 @@ def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_should_raise_import_error_with_missing_torch(benchmark, setup_pytorch_tests):
-    with pytest.raises(ImportError):
-        with mock.patch.dict(sys.modules, {"torch": None}):
-            from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
-
-            pass
-
-
-@pytest.mark.torchtest
-@pytest.mark.benchmark(
-    warmup=False,
-    warmup_iterations=1,
-    min_rounds=1,
-)
-def test_should_raise_import_error_with_missing_torchvision(
-    benchmark, setup_pytorch_tests
-):
-    with pytest.raises(ImportError):
-        with mock.patch.dict(sys.modules, {"torchvision.transforms": None}):
-            from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
-
-            pass
+def test_lateral_join(benchmark, setup_pytorch_tests):
+    select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
+                    YoloV5(data) AS T(a,b,c) WHERE id < 5;"""
+    actual_batch = benchmark(execute_query_fetch_all, select_query)
+    assert len(actual_batch) == 5
+    assert list(actual_batch.columns) == ["myvideo.id", "T.a"]

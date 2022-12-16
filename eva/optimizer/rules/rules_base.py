@@ -157,6 +157,18 @@ class Rule(ABC):
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type
 
+    def is_implementation_rule(self):
+        return self.rule_type.value > RuleType.TRANSFORMATION_DELIMETER.value
+
+    def is_logical_rule(self):
+        return (
+            self.rule_type.value > RuleType.REWRITE_DELIMETER.value
+            and self.rule_type.value < RuleType.TRANSFORMATION_DELIMETER.value
+        )
+
+    def is_rewrite_rule(self):
+        return self.rule_type.value < RuleType.REWRITE_DELIMETER.value
+
     @abstractmethod
     def promise(self) -> int:
         raise NotImplementedError

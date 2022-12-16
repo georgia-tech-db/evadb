@@ -357,7 +357,7 @@ class PushDownFilterThroughApplyAndMerge(Rule):
     """If it is feasible to partially or fully push the predicate contained within the logical filter through the ApplyAndMerge operator, we should do so. This is often beneficial, for instance, in order to prevent decoding additional frames beyond those that satisfy the predicate.
     Eg:
 
-    Filter(id < 10 and func.label = 'car')                Filter(func.label = 'car')
+    Filter(id < 10 and func.label = 'car')           Filter(func.label = 'car')
             |                                                   |
         ApplyAndMerge(func)                  ->          ApplyAndMerge(func)
             |                                                   |

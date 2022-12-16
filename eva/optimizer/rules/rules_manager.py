@@ -14,6 +14,9 @@
 # limitations under the License.
 from __future__ import annotations
 
+from contextlib import contextmanager
+from typing import List
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.ray.optimizer.rules.rules import (
@@ -60,23 +63,29 @@ from eva.optimizer.rules.rules import (
     LogicalShowToPhysical,
     LogicalUnionToPhysical,
     LogicalUploadToPhysical,
+    PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     XformLateralJoinToLinearFlow,
-    PushDownFilterThroughApplyAndMerge
 )
+from eva.optimizer.rules.rules_base import Rule
 
 
 class RulesManager:
     """Singelton class to manage all the rules in our system"""
 
-    _instance = None
+    __instance = None
 
     def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super(RulesManager, cls).__new__(cls)
-        return cls._instance
+        if cls.__instance is None:
+            cls.__instance = super(RulesManager, cls).__new__(cls)
+            cls.__instance.__initialized = False
+        return cls.__instance
 
     def __init__(self):
+        if self.__initialized:
+            return
+        self.__initialized = True
+
         self._logical_rules = [LogicalInnerJoinCommutativity()]
 
         self._rewrite_rules = [
@@ -126,9 +135,6 @@ class RulesManager:
 
         if ray_enabled:
             self._implementation_rules.append(LogicalExchangeToPhysical())
-        self._all_rules = (
-            self._rewrite_rules + self._logical_rules + self._implementation_rules
-        )
 
     @property
     def rewrite_rules(self):
@@ -144,4 +150,53 @@ class RulesManager:
 
     @property
     def all_rules(self):
-        return self._all_rules
+        all_rules = (
+            self._rewrite_rules + self._logical_rules + self._implementation_rules
+        )
+        return all_rules
+
+    def disable_rules(self, rules: List[Rule]):
+        def _remove_from_list(rule_list, rule_to_remove):
+            for rule in rule_list:
+                if rule.rule_type == rule_to_remove.rule_type:
+                    rule_list.remove(rule)
+
+        for rule in rules:
+            if rule.is_implementation_rule():
+                _remove_from_list(self._implementation_rules, rule)
+            elif rule.is_rewrite_rule():
+                _remove_from_list(self._rewrite_rules, rule)
+            elif rule.is_logical_rule(rule):
+                _remove_from_list(self._logical_rules, rule)
+            else:
+                raise Exception(f"Provided Invalid rule {rule}")
+
+    def add_rules(self, rules: List[Rule]):
+        def _add_to_list(rule_list, rule_to_remove):
+            if any([rule.rule_type != rule_to_remove.rule_type for rule in rule_list]):
+                rule_list.append(rule)
+
+        for rule in rules:
+            if rule.is_implementation_rule():
+                _add_to_list(self._implementation_rules, rule)
+            elif rule.is_rewrite_rule():
+                _add_to_list(self._rewrite_rules, rule)
+            elif rule.is_logical_rule(rule):
+                _add_to_list(self._logical_rules, rule)
+            else:
+                raise Exception(f"Provided Invalid rule {rule}")
+
+
+@contextmanager
+def disable_rules(rules: List[Rule]):
+    """Use this function to temporarily drop rules.
+        Useful for testing and debugging purposes.
+
+    Args:
+        rules (List[Rule]): List of rules to temporirly drop
+    """
+    try:
+        RulesManager().disable_rules(rules)
+        yield
+    finally:
+        RulesManager().add_rules(rules)
