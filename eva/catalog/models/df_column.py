@@ -154,7 +154,7 @@ class TableColumn:
         self._type = obj.type
         self._is_nullable = obj.is_nullable
         self._array_type = obj.array_type
-        self._array_dimensions = obj
+        self._array_dimensions = obj.array
         self._metadata_id = obj.metadata_id
         self._id = obj.id
 
