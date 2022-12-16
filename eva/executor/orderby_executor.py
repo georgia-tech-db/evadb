@@ -14,8 +14,6 @@
 # limitations under the License.
 from typing import Iterator
 
-import pandas as pd
-
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
@@ -76,9 +74,7 @@ class OrderByExecutor(AbstractExecutor):
                 batch = col.evaluate(aggregated_batch)
                 merge_batch_list.append(batch)
         if len(merge_batch_list) > 1:
-            merge_df_list = [batch.frames for batch in merge_batch_list]
-            aggregated_df = pd.concat(merge_df_list, axis=1, join="inner")
-            aggregated_batch = Batch(aggregated_df)
+            aggregated_batch = Batch.merge_column_wise(merge_batch_list)
 
         # sorts the batch
         try:
