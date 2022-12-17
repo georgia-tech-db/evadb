@@ -18,7 +18,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
 from eva.parser.types import ShowType
-from eva.planner.show_info_plan import ShowInfoPlan
+from eva.plan_nodes.show_info_plan import ShowInfoPlan
 
 
 class ShowInfoExecutor(AbstractExecutor):

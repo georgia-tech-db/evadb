@@ -16,8 +16,8 @@ from typing import List
 
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.parser.table_ref import TableInfo
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
 class CreatePlan(AbstractPlan):

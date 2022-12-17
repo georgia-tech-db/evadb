@@ -14,8 +14,8 @@
 # limitations under the License.
 from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.expression.abstract_expression import AbstractExpression
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
 class StoragePlan(AbstractPlan):

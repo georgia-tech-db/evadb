@@ -17,7 +17,7 @@ from typing import Generator, Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
-from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class SequentialScanExecutor(AbstractExecutor):

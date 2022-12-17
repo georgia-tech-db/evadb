@@ -16,7 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.function_scan_plan import FunctionScanPlan
+from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 
 
 class FunctionScanExecutor(AbstractExecutor):

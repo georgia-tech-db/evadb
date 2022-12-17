@@ -19,7 +19,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
-from eva.planner.drop_plan import DropPlan
+from eva.plan_nodes.drop_plan import DropPlan
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 

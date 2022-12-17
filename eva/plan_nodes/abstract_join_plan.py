@@ -16,8 +16,8 @@
 """
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.types import JoinType
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
 class AbstractJoin(AbstractPlan):

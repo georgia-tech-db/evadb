@@ -17,8 +17,8 @@ from typing import List
 from eva.catalog.models.df_column import DataFrameColumn
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.types import JoinType
-from eva.planner.abstract_join_plan import AbstractJoin
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_join_plan import AbstractJoin
+from eva.plan_nodes.types import PlanOprType
 
 
 class HashJoinProbePlan(AbstractJoin):

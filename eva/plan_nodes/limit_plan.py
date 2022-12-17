@@ -13,31 +13,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
-class SamplePlan(AbstractPlan):
+class LimitPlan(AbstractPlan):
     """
-    This plan is used for storing information required for sample
+    This plan is used for storing information required for limit
     operations.
 
     Arguments:
-        sample_freq: ConstantValueExpression
+        limit_count: ConstantValueExpression
             A ConstantValueExpression which is the count of the
-            gap between frames sampled.
+            number of rows returned
     """
 
-    def __init__(self, sample_freq: ConstantValueExpression):
-        self._sample_freq = sample_freq
-        super().__init__(PlanOprType.SAMPLE)
+    def __init__(self, limit_count: ConstantValueExpression):
+        self._limit_count = limit_count
+        super().__init__(PlanOprType.LIMIT)
 
     @property
-    def sample_freq(self):
-        return self._sample_freq
+    def limit_expression(self):
+        return self._limit_count
+
+    @property
+    def limit_value(self):
+        return self._limit_count.value
 
     def __str__(self):
-        return "SamplePlan(sample_freq={})".format(self._sample_freq)
+        return "LimitPlan(limit_count={})".format(self._limit_count)
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.sample_freq))
+        return hash((super().__hash__(), self._limit_count))

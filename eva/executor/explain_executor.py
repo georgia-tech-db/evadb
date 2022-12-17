@@ -16,8 +16,8 @@ import pandas as pd
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.explain_plan import ExplainPlan
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.explain_plan import ExplainPlan
 
 
 class ExplainExecutor(AbstractExecutor):

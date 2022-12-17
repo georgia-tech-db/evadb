@@ -12,21 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.expression.abstract_expression import AbstractExpression
+from eva.plan_nodes.abstract_scan_plan import AbstractScan
+from eva.plan_nodes.types import PlanOprType
 
 
-class ExplainPlan(AbstractPlan):
-    def __init__(self, explainable_plan: AbstractPlan):
-        super().__init__(PlanOprType.EXPLAIN)
-        self._explainable_plan = explainable_plan
+class PPScanPlan(AbstractScan):
+    """
+    This plan is used for storing information required for probabilistic
+    predicate.
 
-    @property
-    def explainable_plan(self):
-        return self._explainable_plan
+    Arguments:
+        predicate (AbstractExpression): A predicate expression used for
+        filtering frames
+    """
 
-    def __str__(self) -> str:
-        return "ExplainPlan()"
+    def __init__(self, predicate: AbstractExpression):
+        super().__init__(PlanOprType.PP_FILTER, predicate)
 
-    def __hash__(self) -> int:
-        return hash((super().__hash__(), self._explainable_plan))
+    def __str__(self):
+        return "AbstractPlan"

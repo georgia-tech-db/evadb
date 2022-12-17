@@ -18,7 +18,7 @@ from eva.catalog.catalog_type import TableType
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
-from eva.planner.storage_plan import StoragePlan
+from eva.plan_nodes.storage_plan import StoragePlan
 from eva.storage.storage_engine import StorageEngine
 
 

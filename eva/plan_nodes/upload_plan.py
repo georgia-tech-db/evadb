@@ -12,48 +12,55 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from pathlib import Path
 from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.table_ref import TableInfo
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
-class LoadDataPlan(AbstractPlan):
+class UploadPlan(AbstractPlan):
     """
-    This plan is used for storing information required for load data
+    This plan is used for storing information required for upload
     operations.
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table metadata info to load into
-        file_path(Path): file path from where we will load the data
-        batch_mem_size(int): memory size of the batch loaded from disk
+        path(Path): file path (with prefix prepended) where
+                    the data is uploaded
+        video_blob(str): base64 encoded video string
     """
 
     def __init__(
         self,
-        table_info: TableInfo,
         file_path: Path,
+        video_blob: str,
+        table_info: TableInfo,
         batch_mem_size: int,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
     ):
-        super().__init__(PlanOprType.LOAD_DATA)
-        self._table_info = table_info
+        super().__init__(PlanOprType.UPLOAD)
         self._file_path = file_path
+        self._video_blob = video_blob
+        self._table_info = table_info
         self._batch_mem_size = batch_mem_size
         self._column_list = column_list
         self._file_options = file_options
 
     @property
-    def table_info(self):
-        return self._table_info
-
-    @property
     def file_path(self):
         return self._file_path
+
+    @property
+    def video_blob(self):
+        return self._video_blob
+
+    @property
+    def table_info(self):
+        return self._table_info
 
     @property
     def batch_mem_size(self):
@@ -68,12 +75,15 @@ class LoadDataPlan(AbstractPlan):
         return self._file_options
 
     def __str__(self):
-        return "LoadDataPlan(table_id={}, file_path={}, \
+        return "UploadPlan(file_path={}, \
+            video_blob={}, \
+            table_id={}, \
             batch_mem_size={}, \
             column_list={}, \
             file_options={})".format(
-            self.table_info,
             self.file_path,
+            "string of video blob",
+            self.table_info,
             self.batch_mem_size,
             self.column_list,
             self.file_options,
@@ -83,8 +93,9 @@ class LoadDataPlan(AbstractPlan):
         return hash(
             (
                 super().__hash__(),
-                self.table_info,
                 self.file_path,
+                self.video_blob,
+                self.table_info,
                 self.batch_mem_size,
                 tuple(self.column_list),
                 frozenset(self.file_options.items()),

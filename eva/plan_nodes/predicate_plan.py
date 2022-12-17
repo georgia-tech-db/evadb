@@ -12,33 +12,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Any, Dict
-
+from eva.expression.abstract_expression import AbstractExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
 
-class ExchangePlan(AbstractPlan):
+class PredicatePlan(AbstractPlan):
     """
-    This plan is used for storing information required for union operations.
-
     Arguments:
-        all: Bool
-            UNION (deduplication) vs UNION ALL (non-deduplication)
+        predicate (AbstractExpression): A predicate expression used for
+        filtering frames
     """
 
-    def __init__(
-        self, parallelism: int = 1, ray_conf: Dict[str, Any] = {"num_gpus": 1}
-    ):
-        self.parallelism = parallelism
-        self.ray_conf = ray_conf
-        super().__init__(PlanOprType.EXCHANGE)
+    def __init__(self, predicate: AbstractExpression):
+        self.predicate = predicate
+        super().__init__(PlanOprType.PREDICATE_FILTER)
 
-    def __str__(self) -> str:
-        return "ExchangePlan"
+    def __str__(self):
+        return "PredicatePlan(predicate={})".format(self.predicate)
 
     def __hash__(self) -> int:
-        return hash(
-            (super().__hash__(), self.parallelism, frozenset(self.ray_conf.items()))
-        )
+        return hash((super().__hash__(), self.predicate))

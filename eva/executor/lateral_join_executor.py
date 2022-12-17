@@ -17,7 +17,7 @@ from typing import Generator, Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate, apply_project
 from eva.models.storage.batch import Batch
-from eva.planner.lateral_join_plan import LateralJoinPlan
+from eva.plan_nodes.lateral_join_plan import LateralJoinPlan
 
 
 class LateralJoinExecutor(AbstractExecutor):

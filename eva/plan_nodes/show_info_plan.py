@@ -12,24 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.expression.abstract_expression import AbstractExpression
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.parser.types import ShowType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
-class PredicatePlan(AbstractPlan):
-    """
-    Arguments:
-        predicate (AbstractExpression): A predicate expression used for
-        filtering frames
-    """
+class ShowInfoPlan(AbstractPlan):
+    def __init__(self, show_type: ShowType):
+        self._show_type = show_type
+        super().__init__(PlanOprType.SHOW_INFO)
 
-    def __init__(self, predicate: AbstractExpression):
-        self.predicate = predicate
-        super().__init__(PlanOprType.PREDICATE_FILTER)
+    @property
+    def show_type(self):
+        return self._show_type
 
     def __str__(self):
-        return "PredicatePlan(predicate={})".format(self.predicate)
+        return "ShowUDFPlan" if self._show_type == ShowType.UDF else "ShowTablePlan"
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.predicate))
+        return hash((super().__hash__(), self.show_type))

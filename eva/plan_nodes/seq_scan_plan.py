@@ -15,8 +15,8 @@
 from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
-from eva.planner.abstract_scan_plan import AbstractScan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_scan_plan import AbstractScan
+from eva.plan_nodes.types import PlanOprType
 
 
 class SeqScanPlan(AbstractScan):

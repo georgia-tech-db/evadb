@@ -28,17 +28,17 @@ from eva.executor.pp_executor import PPExecutor
 from eva.executor.seq_scan_executor import SequentialScanExecutor
 from eva.executor.upload_executor import UploadExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.create_plan import CreatePlan
-from eva.planner.create_udf_plan import CreateUDFPlan
-from eva.planner.drop_plan import DropPlan
-from eva.planner.drop_udf_plan import DropUDFPlan
-from eva.planner.insert_plan import InsertPlan
-from eva.planner.load_data_plan import LoadDataPlan
-from eva.planner.pp_plan import PPScanPlan
-from eva.planner.rename_plan import RenamePlan
-from eva.planner.seq_scan_plan import SeqScanPlan
-from eva.planner.storage_plan import StoragePlan
-from eva.planner.upload_plan import UploadPlan
+from eva.plan_nodes.create_plan import CreatePlan
+from eva.plan_nodes.create_udf_plan import CreateUDFPlan
+from eva.plan_nodes.drop_plan import DropPlan
+from eva.plan_nodes.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.insert_plan import InsertPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
+from eva.plan_nodes.pp_plan import PPScanPlan
+from eva.plan_nodes.rename_plan import RenamePlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.storage_plan import StoragePlan
+from eva.plan_nodes.upload_plan import UploadPlan
 
 
 class PlanExecutorTest(unittest.TestCase):

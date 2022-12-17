@@ -15,7 +15,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.types import PlanOprType
 
 
 class AbstractPlan(ABC):
