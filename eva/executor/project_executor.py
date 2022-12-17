@@ -17,7 +17,7 @@ from typing import Generator, Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_project
 from eva.models.storage.batch import Batch
-from eva.planner.project_plan import ProjectPlan
+from eva.plan_nodes.project_plan import ProjectPlan
 
 
 class ProjectExecutor(AbstractExecutor):

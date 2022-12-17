@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from typing import Iterable, List, TypeVar
 
 from eva.models.storage.batch import Batch
-from eva.planner.abstract_plan import AbstractPlan
+from eva.plan_nodes.abstract_plan import AbstractPlan
 
 AbstractExecutor = TypeVar("AbstractExecutor")
 

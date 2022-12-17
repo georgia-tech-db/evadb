@@ -21,7 +21,7 @@ import pandas as pd
 from eva.executor.sample_executor import SampleExecutor
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.models.storage.batch import Batch
-from eva.planner.sample_plan import SamplePlan
+from eva.plan_nodes.sample_plan import SamplePlan
 
 
 class SampleExecutorTest(unittest.TestCase):

@@ -31,7 +31,7 @@ from eva.optimizer.operators import Operator
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
-from eva.planner.abstract_plan import AbstractPlan
+from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs

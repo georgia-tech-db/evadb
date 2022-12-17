@@ -22,7 +22,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
-from eva.planner.load_data_plan import LoadDataPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.readers.csv_reader import CSVReader
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger

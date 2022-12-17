@@ -17,7 +17,7 @@ from typing import Generator, Iterator
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import apply_predicate
 from eva.models.storage.batch import Batch
-from eva.planner.predicate_plan import PredicatePlan
+from eva.plan_nodes.predicate_plan import PredicatePlan
 
 
 class PredicateExecutor(AbstractExecutor):

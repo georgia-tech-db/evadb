@@ -26,7 +26,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from eva.planner.create_index_plan import CreateIndexPlan
+from eva.plan_nodes.create_index_plan import CreateIndexPlan
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 
