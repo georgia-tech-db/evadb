@@ -71,21 +71,7 @@ from eva.optimizer.rules.rules_base import Rule
 
 
 class RulesManager:
-    """Singelton class to manage all the rules in our system"""
-
-    __instance = None
-
-    def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super(RulesManager, cls).__new__(cls)
-            cls.__instance.__initialized = False
-        return cls.__instance
-
     def __init__(self):
-        if self.__initialized:
-            return
-        self.__initialized = True
-
         self._logical_rules = [LogicalInnerJoinCommutativity()]
 
         self._rewrite_rules = [
@@ -185,18 +171,3 @@ class RulesManager:
                 _add_to_list(self._logical_rules, rule)
             else:
                 raise Exception(f"Provided Invalid rule {rule}")
-
-
-@contextmanager
-def disable_rules(rules: List[Rule]):
-    """Use this function to temporarily drop rules.
-        Useful for testing and debugging purposes.
-
-    Args:
-        rules (List[Rule]): List of rules to temporirly drop
-    """
-    try:
-        RulesManager().disable_rules(rules)
-        yield
-    finally:
-        RulesManager().add_rules(rules)
