@@ -15,7 +15,7 @@
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_if_not_exists
-from eva.planner.create_plan import CreatePlan
+from eva.plan_nodes.create_plan import CreatePlan
 from eva.storage.storage_engine import StorageEngine
 
 

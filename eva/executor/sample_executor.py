@@ -16,7 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.sample_plan import SamplePlan
+from eva.plan_nodes.sample_plan import SamplePlan
 
 
 class SampleExecutor(AbstractExecutor):

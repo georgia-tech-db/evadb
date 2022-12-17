@@ -17,7 +17,7 @@ import pandas as pd
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.drop_udf_plan import DropUDFPlan
 from eva.utils.logging_manager import logger
 
 

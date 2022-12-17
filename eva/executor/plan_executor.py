@@ -43,8 +43,8 @@ from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
 
 
 class PlanExecutor:
