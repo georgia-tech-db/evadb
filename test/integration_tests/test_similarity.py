@@ -63,7 +63,8 @@ class SimilarityTests(unittest.TestCase):
                 base_table_df_metadata, Batch(pd.DataFrame([{"data": base_img}]))
             )
             storage_engine.write(
-                feature_table_df_metadata, Batch(pd.DataFrame([{"features": base_img.astype(np.float32)}]))
+                feature_table_df_metadata,
+                Batch(pd.DataFrame([{"features": base_img.astype(np.float32)}])),
             )
             base_img -= 1
 
@@ -120,7 +121,9 @@ class SimilarityTests(unittest.TestCase):
         base_img[0] -= 1
         base_img[2] += 1
 
-        actual_open = actual_batch.frames["testsimilarityfeaturetable.features"].to_numpy()[0]
+        actual_open = actual_batch.frames[
+            "testsimilarityfeaturetable.features"
+        ].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
         actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[0]
         self.assertEqual(actual_distance, 0)
@@ -135,9 +138,13 @@ class SimilarityTests(unittest.TestCase):
         base_img[0] -= 1
         base_img[2] += 1
 
-        actual_open = actual_batch.frames["testsimilarityfeaturetable.features"].to_numpy()[0]
+        actual_open = actual_batch.frames[
+            "testsimilarityfeaturetable.features"
+        ].to_numpy()[0]
         self.assertTrue(np.array_equal(actual_open, base_img))
-        actual_open = actual_batch.frames["testsimilarityfeaturetable.features"].to_numpy()[1]
+        actual_open = actual_batch.frames[
+            "testsimilarityfeaturetable.features"
+        ].to_numpy()[1]
         self.assertTrue(np.array_equal(actual_open, base_img + 1))
         actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[0]
         self.assertEqual(actual_distance, 0)
