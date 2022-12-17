@@ -438,5 +438,11 @@ class DummyFeatureExtractor(AbstractClassifierUDF):
 
     def forward(self, df: pd.DataFrame) -> pd.DataFrame:
         # Return the original input as its feature.
-        ret = pd.DataFrame({"features": [df["data"].to_numpy()[0].astype(np.float32)]})
+
+        def _extract_feature(row: pd.Series):
+            feat_input = row[0]
+            return feat_input.astype(np.float32)
+
+        ret = pd.DataFrame()
+        ret["features"] = df.apply(_extract_feature, axis=1)
         return ret

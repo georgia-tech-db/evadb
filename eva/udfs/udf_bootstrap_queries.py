@@ -41,7 +41,7 @@ DummyMultiObjectDetector_udf_query = """CREATE UDF
 DummyFeatureExtractor_udf_query = """CREATE UDF
                   IF NOT EXISTS DummyFeatureExtractor
                   INPUT (Frame_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                  OUTPUT (Feature_Array NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (features NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   TYPE Classification
                   IMPL '{}/../test/util.py';
         """.format(

@@ -38,26 +38,10 @@ class Similarity(AbstractUDF):
         """
 
         def _similarity(row: pd.Series) -> float:
-            open_input, base_input, feature_extractor_name = (
+            open_feat_np, base_feat_np = (
                 row.iloc[0],
                 row.iloc[1],
-                row.iloc[2],
             )
-
-            udf_metadata = CatalogManager().get_udf_by_name(feature_extractor_name)
-            udf_func = path_to_class(udf_metadata.impl_file_path, udf_metadata.name)
-            udf_obj = udf_func()
-
-            open_feat = udf_obj(
-                pd.DataFrame(
-                    {
-                        "data": [open_input],
-                    }
-                )
-            )
-            open_feat_np = open_feat["features"].to_numpy()[0]
-            base_feat = udf_obj(pd.DataFrame({"data": [base_input]}))
-            base_feat_np = base_feat["features"].to_numpy()[0]
 
             # Transform to 2D.
             open_feat_np = open_feat_np.reshape(1, -1)
