@@ -21,7 +21,10 @@ from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 
 class ApplyAndMergeExecutor(AbstractExecutor):
     """
-    Apply the function expression to the input data, merge the output of the function with the input data, and yield the result to the parent. The current implementation assumes an inner join while merging. Therefore, if the function does not return any output, the input rows are dropped.
+    Apply the function expression to the input data, merge the output of the function
+    with the input data, and yield the result to the parent. The current implementation
+    assumes an inner join while merging. Therefore, if the function does not return any
+    output, the input rows are dropped.
     Arguments:
         node (AbstractPlan): ApplyAndMergePlan
 

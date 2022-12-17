@@ -1161,7 +1161,11 @@ class LogicalCreateIndex(Operator):
 
 class LogicalApplyAndMerge(Operator):
     """Evaluate the function expression on the input data and return the merged output.
-    This operator simplifies the process of evaluating functions on a table source. Currently, it performs an inner join while merging the function output with the input data. This means that if the function does not return any output for a given input row, that row will be dropped from the output. We can consider expanding this to support left joins and other types of joins in the future.
+    This operator simplifies the process of evaluating functions on a table source.
+    Currently, it performs an inner join while merging the function output with the
+    input data. This means that if the function does not return any output for a given
+    input row, that row will be dropped from the output. We can consider expanding this
+    to support left joins and other types of joins in the future.
     """
 
     def __init__(

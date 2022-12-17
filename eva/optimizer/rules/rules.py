@@ -320,7 +320,12 @@ class PushDownFilterThroughJoin(Rule):
 
 
 class XformLateralJoinToLinearFlow(Rule):
-    """If the inner node of a lateral join is a function-valued expression, we eliminate the join node and make the inner node the parent of the outer node. This produces a linear #data flow path. Because this scenario is common in our system, we chose to explicitly #convert it to a linear flow, which simplifies the implementation of other optimizations such as UDF reuse and parallelized plans by removing the join."""
+    """If the inner node of a lateral join is a function-valued expression, we
+    eliminate the join node and make the inner node the parent of the outer node. This
+    produces a linear #data flow path. Because this scenario is common in our system,
+    we chose to explicitly convert it to a linear flow, which simplifies the
+    implementation of other optimizations such as UDF reuse and parallelized plans by
+    removing the join."""
 
     def __init__(self):
         pattern = Pattern(OperatorType.LOGICALJOIN)
@@ -354,7 +359,10 @@ class XformLateralJoinToLinearFlow(Rule):
 
 
 class PushDownFilterThroughApplyAndMerge(Rule):
-    """If it is feasible to partially or fully push the predicate contained within the logical filter through the ApplyAndMerge operator, we should do so. This is often beneficial, for instance, in order to prevent decoding additional frames beyond those that satisfy the predicate.
+    """If it is feasible to partially or fully push the predicate contained within the
+    logical filter through the ApplyAndMerge operator, we should do so. This is often
+    beneficial, for instance, in order to prevent decoding additional frames beyond
+    those that satisfy the predicate.
     Eg:
 
     Filter(id < 10 and func.label = 'car')           Filter(func.label = 'car')
