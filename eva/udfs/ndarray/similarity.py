@@ -15,9 +15,7 @@
 import faiss
 import pandas as pd
 
-from eva.catalog.catalog_manager import CatalogManager
 from eva.udfs.abstract.abstract_udf import AbstractUDF
-from eva.utils.generic_utils import path_to_class
 
 
 class Similarity(AbstractUDF):

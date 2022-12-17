@@ -67,7 +67,6 @@ class SimilarityTests(unittest.TestCase):
             )
             base_img -= 1
 
-
     def tearDown(self):
         drop_table_query = "DROP TABLE testSimilarityTable;"
         execute_query_fetch_all(drop_table_query)
