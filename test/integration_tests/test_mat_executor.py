@@ -96,12 +96,12 @@ class MaterializedViewTest(unittest.TestCase):
         ]
         expected_batch = Batch(frames=pd.DataFrame(expected))
         self.assertEqual(actual_batch, expected_batch)
-
+    
     @pytest.mark.torchtest
-    def test_should_mat_view_with_fastrcnn(self):
+    def test_should_mat_view_with_yolo(self):
         select_query = (
-            "SELECT id, FastRCNNObjectDetector(data).labels, "
-            "FastRCNNObjectDetector(data).bboxes "
+            "SELECT id, YoloV5(data).labels, "
+            "YoloV5(data).bboxes "
             "FROM UATRAC WHERE id < 5;"
         )
         query = (
@@ -124,7 +124,7 @@ class MaterializedViewTest(unittest.TestCase):
     def test_should_mat_view_with_fastrcnn_lateral_join(self):
         select_query = (
             "SELECT id, label, bbox FROM UATRAC JOIN LATERAL "
-            "FastRCNNObjectDetector(data) AS T(label, bbox, score) WHERE id < 5;"
+            "YoloV5(data) AS T(label, bbox, score) WHERE id < 5;"
         )
         query = (
             "CREATE MATERIALIZED VIEW IF NOT EXISTS "
