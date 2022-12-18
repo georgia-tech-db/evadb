@@ -4,11 +4,12 @@
 
 function is_server_up () {
     # check if server started
-    grep "serving" eva.txt
+    netstat -an | grep 0.0.0.0:5432
     return $?
 }
 
 eva_server &> eva.txt &
+SERVER_PID=$!
 i=0
 while [ $i -lt 5 ];
 do
@@ -32,13 +33,23 @@ then
     exit "$test_code"
 fi
 
-eva_client &> client.txt &
-if [ "$test_code" -ne 0 ];
+cmd="exit"
+echo "$cmd"  | eva_client &> client.txt &
+CLIENT_PID=$!
+sleep 5
+# shutdown processes
+kill $SERVER_PID
+kill $CLIENT_PID
+
+echo "Contents of client log"
+cat client.txt
+
+grep "failed" client.txt
+if [ "$?" -ne 1 ];
 then
     echo "Client did not start"
     echo "$test_code"
     exit "$test_code"
 fi
 
-head -n20 client.txt
 exit 0
