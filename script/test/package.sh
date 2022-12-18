@@ -8,17 +8,18 @@ function is_server_up () {
     return $?
 }
 
-eva_server &>> eva.txt &
+eva_server &> eva.txt &
 i=0
 while [ $i -lt 3 ];
 do
+    echo "Waiting for server to launch, try $i"
     sleep 20
     is_server_up
     test_code=$?
     if [ $test_code == 0 ]; then
         break
     fi
-    i+=1
+    i=$((i+1))
 done
 
 echo "Contents of server log"
