@@ -35,11 +35,12 @@ fi
 
 cmd="exit"
 echo "$cmd"  | eva_client &> client.txt &
-CLIENT_PID=$!
+
+# wait for client to launch
 sleep 5
-# shutdown processes
+
+# shutdown server
 kill $SERVER_PID
-kill $CLIENT_PID
 
 echo "Contents of client log"
 cat client.txt
