@@ -48,6 +48,14 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     @pytest.mark.torchtest
+    def test_should_run_pytorch_and_fastrcnn(self):
+        select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
+                        WHERE id < 5;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
+
+
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo(self):
         select_query = """SELECT YoloV5(data) FROM MyVideo
                         WHERE id < 5;"""
