@@ -98,7 +98,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(Mvit_udf_query)
 
         select_query = """SELECT FIRST(id),
-                                 FastRCNNObjectDetector(FIRST(data)),
+                                 YoloV5(FIRST(data)),
                                  MVITActionRecognition(SEGMENT(data))
                        FROM Actions
                        GROUP BY '16f';"""
@@ -108,7 +108,7 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue(
-                "person" in res["fastrcnnobjectdetector.labels"][idx]
+                "person" in res["yolov5.labels"][idx]
                 and "yoga" in res["mvitactionrecognition.labels"][idx]
             )
 
