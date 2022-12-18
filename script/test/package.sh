@@ -10,7 +10,7 @@ function is_server_up () {
 
 eva_server &> eva.txt &
 i=0
-while [ $i -lt 3 ];
+while [ $i -lt 5 ];
 do
     echo "Waiting for server to launch, try $i"
     sleep 20
