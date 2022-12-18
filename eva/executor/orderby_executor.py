@@ -19,6 +19,8 @@ from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.plan_nodes.orderby_plan import OrderByPlan
 from eva.executor.executor_utils import ExecutorError
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.expression.function_expression import FunctionExpression
 
 
 class OrderByExecutor(AbstractExecutor):
@@ -43,7 +45,13 @@ class OrderByExecutor(AbstractExecutor):
     def extract_column_names(self):
         """extracts the string name of the column"""
         # self._columns: List[TupleValueExpression]
-        return [tve.col_alias for tve in self._columns]
+        col_name_list = []
+        for col in self._columns:
+            if isinstance(col, TupleValueExpression):
+                col_name_list += [col.col_alias]
+            elif isinstance(col, FunctionExpression):
+                col_name_list += col.col_alias
+        return col_name_list
 
     def extract_sort_types(self):
         """extracts the sort type for the column"""
@@ -70,9 +78,15 @@ class OrderByExecutor(AbstractExecutor):
         # is not in columns, it needs to be re-evaluated.
         merge_batch_list = [aggregated_batch]
         for col in self._columns:
-            if col.col_alias not in aggregated_batch.frames:
-                batch = col.evaluate(aggregated_batch)
-                merge_batch_list.append(batch)
+            if isinstance(col, TupleValueExpression):
+                col_name_list = [col.col_alias]
+            elif isinstance(col, FunctionExpression):
+                col_name_list = col.col_alias
+
+            for col_name in col_name_list:
+                if col_name not in aggregated_batch.frames:
+                    batch = col.evaluate(aggregated_batch)
+                    merge_batch_list.append(batch)
         if len(merge_batch_list) > 1:
             aggregated_batch = Batch.merge_column_wise(merge_batch_list)
 
