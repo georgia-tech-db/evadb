@@ -137,7 +137,6 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
-    
     @unittest.skip("Not supported in current version")
     def test_select_star_in_lateral_join(self):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
