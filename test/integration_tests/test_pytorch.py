@@ -54,7 +54,6 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
 
-
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo(self):
         select_query = """SELECT YoloV5(data) FROM MyVideo
