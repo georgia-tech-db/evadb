@@ -15,12 +15,12 @@
 from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.plan_nodes.orderby_plan import OrderByPlan
-from eva.executor.executor_utils import ExecutorError
 
 
 class OrderByExecutor(AbstractExecutor):
