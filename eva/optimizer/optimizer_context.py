@@ -45,7 +45,7 @@ class OptimizerContext:
     @property
     def rules_manager(self):
         return self._rules_manager
-    
+
     @property
     def task_stack(self):
         return self._task_stack

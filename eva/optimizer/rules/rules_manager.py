@@ -14,7 +14,6 @@
 # limitations under the License.
 from __future__ import annotations
 
-from contextlib import contextmanager
 from typing import List
 
 from eva.configuration.configuration_manager import ConfigurationManager
