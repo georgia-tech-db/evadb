@@ -194,7 +194,7 @@ class PytorchTest(unittest.TestCase):
         """
         execute_query_fetch_all(create_similarity_udf_query)
 
-        create_feat_udf_query = """CREATE UDF FeatureExtractor
+        create_feat_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
                   OUTPUT (features NDARRAY FLOAT32(ANYDIM))
                   TYPE  Classification
