@@ -42,7 +42,7 @@ class Similarity(AbstractUDF):
             )
 
             # TODO: currently system takes care of feature vector shape
-            # transformation. Improve this later on. 
+            # transformation. Improve this later on.
             # Transform to 2D.
             open_feat_np = open_feat_np.reshape(1, -1)
             base_feat_np = base_feat_np.reshape(1, -1)
