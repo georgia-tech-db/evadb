@@ -43,7 +43,7 @@ class Open(AbstractUDF):
                 data = self._data_cache[path_str]
             else:
                 try:
-                    data = cv2.imread(path_str).astype(np.float32)
+                    data = cv2.imread(path_str)
                 except Exception as e:
                     raise ExecutorError(str(e))
 
