@@ -12,14 +12,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import sys
 import unittest
 from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
+import cv2
 import mock
+import numpy as np
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
@@ -98,7 +102,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all(Mvit_udf_query)
 
         select_query = """SELECT FIRST(id),
-                                 FastRCNNObjectDetector(FIRST(data)),
+                                 YoloV5(FIRST(data)),
                                  MVITActionRecognition(SEGMENT(data))
                        FROM Actions
                        GROUP BY '16f';"""
@@ -108,7 +112,7 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         for idx in res.index:
             self.assertTrue(
-                "person" in res["fastrcnnobjectdetector.labels"][idx]
+                "person" in res["yolov5.labels"][idx]
                 and "yoga" in res["mvitactionrecognition.labels"][idx]
             )
 
@@ -169,6 +173,59 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         self.assertEqual(res["featureextractor.features"][0].shape, (1, 2048))
         self.assertTrue(res["featureextractor.features"][0][0][0] > 0.3)
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_similarity(self):
+        create_open_udf_query = """CREATE UDF IF NOT EXISTS Open
+                INPUT (img_path TEXT(1000))
+                OUTPUT (data NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                TYPE NdarrayUDF
+                IMPL "eva/udfs/ndarray/open.py";
+        """
+        execute_query_fetch_all(create_open_udf_query)
+
+        create_similarity_udf_query = """CREATE UDF IF NOT EXISTS Similarity
+                    INPUT (Frame_Array_Open NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                           Frame_Array_Base NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                           Feature_Extractor_Name TEXT(100))
+                    OUTPUT (distance FLOAT(32, 7))
+                    TYPE NdarrayUDF
+                    IMPL "eva/udfs/ndarray/similarity.py";
+        """
+        execute_query_fetch_all(create_similarity_udf_query)
+
+        create_feat_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (features NDARRAY FLOAT32(ANYDIM))
+                  TYPE  Classification
+                  IMPL  "eva/udfs/feature_extractor.py";
+        """
+        execute_query_fetch_all(create_feat_udf_query)
+
+        select_query = """SELECT data FROM MyVideo WHERE id = 1;"""
+        batch_res = execute_query_fetch_all(select_query)
+        img = batch_res.frames["myvideo.data"][0]
+
+        config = ConfigurationManager()
+        upload_dir_from_config = config.get_value("storage", "upload_dir")
+
+        img_save_path = os.path.join(upload_dir_from_config, "dummy.jpg")
+        try:
+            os.remove(img_save_path)
+        except FileNotFoundError:
+            pass
+        cv2.imwrite(img_save_path, img)
+
+        similarity_query = """SELECT data FROM MyVideo WHERE id < 5
+                    ORDER BY Similarity(FeatureExtractor(Open("{}")),
+                                        FeatureExtractor(data))
+                    LIMIT 1;""".format(
+            img_save_path
+        )
+        actual_batch = execute_query_fetch_all(similarity_query)
+
+        similar_data = actual_batch.frames["myvideo.data"][0]
+        self.assertTrue(np.array_equal(img, similar_data))
 
     def test_should_raise_import_error_with_missing_torch(self):
         with self.assertRaises(ImportError):

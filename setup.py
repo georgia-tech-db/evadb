@@ -37,7 +37,7 @@ LICENSE = "Apache License 2.0"
 VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
-    "numpy>=1.19.5",
+    "numpy>=1.19.5,<=1.23.5",
     "opencv-python>=4.5.4.60,!=4.6.0.66",  # bug in easyocr
     "pandas>=1.1.5",
     "Pillow>=8.4.0",
@@ -45,7 +45,7 @@ minimal_requirement = [
     "sqlalchemy-utils>=0.36.6",
     "antlr4-python3-runtime==4.8",
     "lark>=1.0.0",
-    "pyyaml>=5.1,<5.2",
+    "pyyaml>=5.1",
     "importlib-metadata<5.0",
     "ray>=1.13.0"
 ]

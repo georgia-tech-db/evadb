@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+## [0.1.2] - 2022-12-17
+### [Added]
+
+* PR #533: feat: load img support 
+* PR #514: feat: Add support open command 
+* PR #513: feat: Load regex support
+* PR #508: feat: Yolov5 Object detector UDF 
+* PR #505: fix: support multiple evadb version. 
+* PR #477: feat: Load syntax change
+
 ## [0.1.1] - 2022-11-20
 ### [Added]
 
