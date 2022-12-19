@@ -20,9 +20,9 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.plan_nodes.orderby_plan import OrderByPlan
-from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.expression.function_expression import FunctionExpression
+from eva.executor.executor_utils import ExecutorError
 
 
 class OrderByExecutor(AbstractExecutor):
@@ -44,15 +44,22 @@ class OrderByExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    def _extract_column_name(self, col):
+        col_name = []
+        if isinstance(col, TupleValueExpression):
+            col_name += [col.col_alias]
+        elif isinstance(col, FunctionExpression):
+            col_name += col.col_alias
+        else:
+            raise ExecutorError("Expression type {} is not supported.".format(type(col)))
+        return col_name
+
     def extract_column_names(self):
         """extracts the string name of the column"""
         # self._columns: List[TupleValueExpression]
         col_name_list = []
         for col in self._columns:
-            if isinstance(col, TupleValueExpression):
-                col_name_list += [col.col_alias]
-            elif isinstance(col, FunctionExpression):
-                col_name_list += col.col_alias
+            col_name_list += self._extract_column_name(col)
         return col_name_list
 
     def extract_sort_types(self):
@@ -80,11 +87,7 @@ class OrderByExecutor(AbstractExecutor):
         # is not in columns, it needs to be re-evaluated.
         merge_batch_list = [aggregated_batch]
         for col in self._columns:
-            if isinstance(col, TupleValueExpression):
-                col_name_list = [col.col_alias]
-            elif isinstance(col, FunctionExpression):
-                col_name_list = col.col_alias
-
+            col_name_list = self._extract_column_name(col)
             for col_name in col_name_list:
                 if col_name not in aggregated_batch.frames:
                     batch = col.evaluate(aggregated_batch)
