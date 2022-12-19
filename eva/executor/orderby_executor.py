@@ -20,8 +20,6 @@ from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
 from eva.plan_nodes.orderby_plan import OrderByPlan
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.expression.function_expression import FunctionExpression
 from eva.executor.executor_utils import ExecutorError
 
 
@@ -51,7 +49,9 @@ class OrderByExecutor(AbstractExecutor):
         elif isinstance(col, FunctionExpression):
             col_name += col.col_alias
         else:
-            raise ExecutorError("Expression type {} is not supported.".format(type(col)))
+            raise ExecutorError(
+                "Expression type {} is not supported.".format(type(col))
+            )
         return col_name
 
     def extract_column_names(self):

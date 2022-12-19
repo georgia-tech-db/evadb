@@ -13,20 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import cv2
 import sys
 import unittest
-import numpy as np
 from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
+import cv2
 import mock
+import numpy as np
 import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
-from eva.configuration.configuration_manager import ConfigurationManager
 
 
 class PytorchTest(unittest.TestCase):
@@ -219,7 +219,9 @@ class PytorchTest(unittest.TestCase):
         similarity_query = """SELECT data FROM MyVideo WHERE id < 5
                     ORDER BY Similarity(FeatureExtractor(Open("{}")),
                                         FeatureExtractor(data))
-                    LIMIT 1;""".format(img_save_path)
+                    LIMIT 1;""".format(
+            img_save_path
+        )
         actual_batch = execute_query_fetch_all(similarity_query)
 
         similar_data = actual_batch.frames["myvideo.data"][0]
