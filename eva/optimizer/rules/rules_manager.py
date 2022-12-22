@@ -138,21 +138,19 @@ class RulesManager:
 
     @property
     def rewrite_rules(self):
-        return self._rewrite_rules
+        return self._rewrite_rules.copy()
 
     @property
     def implementation_rules(self):
-        return self._implementation_rules
+        return self._implementation_rules.copy()
 
     @property
     def logical_rules(self):
-        return self._logical_rules
+        return self._logical_rules.copy()
 
     @property
     def all_rules(self):
-        all_rules = (
-            self._rewrite_rules + self._logical_rules + self._implementation_rules
-        )
+        all_rules = self.rewrite_rules + self.logical_rules + self.implementation_rules
         return all_rules
 
     def disable_rules(self, rules: List[Rule]):
