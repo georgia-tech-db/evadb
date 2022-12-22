@@ -32,14 +32,13 @@ jobs:
       - image: "cimg/python:<< parameters.v >>-browsers"
     steps:
       - checkout
-      - run: tar --format=ustar -cf - eva/udfs | md5sum > udfs_checksum.txt
       - restore_cache:
           keys:
-            - v13-model_cache-{{ checksum "setup.py" }}-{{checksum "udfs_checksum.txt"}}
-
-      - restore_cache:
-          keys:
-            - v13-pip-cache-{{ checksum "setup.py" }}-{{checksum "udfs_checksum.txt"}}
+            - v13-model_cache-{{ checksum "setup.py" }}
+      # removing it - no significant advnatage
+      # - restore_cache:
+      #     keys:
+      #       - v13-pip-cache-{{ checksum "setup.py" }}
 
       - run:
           name: Install only EVA package from pip
@@ -66,12 +65,12 @@ jobs:
             coveralls
 
       - save_cache:
-          key: v13-model_cache-{{ checksum "setup.py" }}-{{checksum "udfs_checksum.txt"}}
+          key: v13-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
-      - save_cache:
-          key: v13-pip-cache-{{ checksum "setup.py" }}
-          paths:
-            - ./test_evadb/
+      # - save_cache:
+      #     key: v13-pip-cache-{{ checksum "setup.py" }}
+      #     paths:
+      #       - ./test_evadb/

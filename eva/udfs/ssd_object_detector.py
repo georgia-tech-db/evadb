@@ -172,7 +172,7 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
         ploc, plabel = [val.float() for val in prediction]
         encoded = encoder.decode_batch(ploc, plabel, criteria=0.5)
 
-        res = pd.DataFrame()
+        res = []
 
         for batch in encoded:
             bboxes, classes, confidences = [x.detach().cpu().numpy() for x in batch]
@@ -193,12 +193,9 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
 
-            res = res.append(
-                {"label": label, "pred_score": conf, "pred_boxes": bbox},
-                ignore_index=True,
-            )
+            res = res.append({"label": label, "pred_score": conf, "pred_boxes": bbox})
 
-        return res
+        return pd.DataFrame(res)
 
     def classify(self, frames: Tensor) -> pd.DataFrame:
         return self._get_predictions(frames)

@@ -173,7 +173,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
         # Stacking all frames, and changing to numpy
         # because of yolov5 error with Tensors
 
-        outcome = pd.DataFrame()
+        outcome = []
 
         frames = torch.permute(frames, (0, 2, 3, 1))
         predictions = self.model([its.cpu().detach().numpy() * 255 for its in frames])
@@ -188,6 +188,5 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
             outcome = outcome.append(
                 {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
-                ignore_index=True,
             )
-        return outcome
+        return pd.DataFrame(outcome)
