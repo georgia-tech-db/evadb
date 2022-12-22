@@ -32,7 +32,7 @@ jobs:
       - image: "cimg/python:<< parameters.v >>-browsers"
     steps:
       - checkout
-      - run: tar -cf - eva/udfs | md5sum > udfs_checksum.txt
+      - run: tar --format=ustar -cf - eva/udfs | md5sum > udfs_checksum.txt
       - restore_cache:
           keys:
             - v13-model_cache-{{ checksum "setup.py" }}-{{checksum "udfs_checksum.txt"}}
