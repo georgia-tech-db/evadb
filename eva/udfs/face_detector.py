@@ -72,8 +72,8 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
                     pred_scores = frame_scores
                 else:
                     logger.warn(f"Nan entry in box {frame_boxes}")
-            outcome = outcome.append(
+            outcome.append(
                 {"bboxes": pred_boxes, "scores": pred_scores},
             )
 
-        return pd.DataFrame(outcome)
+        return pd.DataFrame(outcome, columns=["bboxes", "scores"])

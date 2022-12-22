@@ -172,11 +172,11 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
         _, predicted = torch.max(predictions.data, 0)
 
         # save results
-        outcome = outcome.append(
+        outcome.append(
             {
                 "labels": self.labels[predicted.item()],
                 "scores": score.cpu().detach().numpy()[predicted.item()],
             }
         )
 
-        return pd.DataFrame(outcome)
+        return pd.DataFrame(outcome, columns=["labels", "scores"])

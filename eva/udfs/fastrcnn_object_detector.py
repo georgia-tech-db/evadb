@@ -190,7 +190,7 @@ class FastRCNNObjectDetector(PytorchAbstractClassifierUDF):
             pred_boxes = np.array(pred_boxes[: pred_t + 1])
             pred_class = np.array(pred_class[: pred_t + 1])
             pred_score = np.array(pred_score[: pred_t + 1])
-            outcome = outcome.append(
+            outcome.append(
                 {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes}
             )
-        return pd.DataFrame(outcome)
+        return pd.DataFrame(outcome, columns=["labels", "scores", "bboxes"])

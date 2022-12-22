@@ -193,9 +193,9 @@ class SSDObjectDetector(PytorchAbstractClassifierUDF):
                 bbox.append([x, y, w, h])
                 conf.append(confidences[idx])
 
-            res = res.append({"label": label, "pred_score": conf, "pred_boxes": bbox})
+            res.append({"label": label, "pred_score": conf, "pred_boxes": bbox})
 
-        return pd.DataFrame(res)
+        return pd.DataFrame(res, columns=["labels", "scores", "bboxes"])
 
     def classify(self, frames: Tensor) -> pd.DataFrame:
         return self._get_predictions(frames)

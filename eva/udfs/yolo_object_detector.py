@@ -186,7 +186,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
                 lambda x: list(x), axis=1
             )
 
-            outcome = outcome.append(
+            outcome.append(
                 {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
             )
-        return pd.DataFrame(outcome)
+        return pd.DataFrame(outcome, columns=["labels", "scores", "bboxes"])

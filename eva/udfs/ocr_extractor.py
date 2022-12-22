@@ -82,7 +82,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
                 bboxes.append(detection[0])
                 scores.append(detection[2])
 
-            outcome = outcome.append(
+            outcome.append(
                 {
                     "labels": list(labels),
                     "bboxes": list(bboxes),
@@ -90,4 +90,4 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
                 }
             )
 
-        return pd.DataFrame(outcome)
+        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
