@@ -32,6 +32,7 @@ from eva.optimizer.rules.rules import (
     EmbedProjectIntoDerivedGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
+    LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToFaiss,
     LogicalCreateMaterializedViewToPhysical,
     LogicalCreateToPhysical,
@@ -204,6 +205,7 @@ class TestRules(unittest.TestCase):
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
+            LogicalApplyAndMergeToPhysical()
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
