@@ -205,7 +205,7 @@ class TestRules(unittest.TestCase):
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
-            LogicalApplyAndMergeToPhysical()
+            LogicalApplyAndMergeToPhysical(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
