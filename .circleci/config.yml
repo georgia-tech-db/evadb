@@ -39,7 +39,7 @@ jobs:
 
       - restore_cache:
           keys:
-            - v13-pip-cache-{{ checksum "setup.py" }}
+            - v13-pip-cache-{{ checksum "setup.py" }}-{{checksum "udfs_checksum.txt"}}
 
       - run:
           name: Install only EVA package from pip
