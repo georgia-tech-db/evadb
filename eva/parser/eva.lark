@@ -80,8 +80,10 @@ select_statement: query_specification                          ->simple_select
     
 update_statement: UPDATE table_name (AS? uid)? SET updated_element ("," updated_element)* (WHERE expression)? order_by_clause? limit_clause?
     
-load_statement: LOAD FILE file_name INTO table_name ("(" uid_list ")")? (WITH file_options)?
+load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
+file_format: (CSV|VIDEO|IMAGE)
+
 file_options: FORMAT (CSV|VIDEO)
     
 upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" uid_list ")"))? (WITH file_options)?
@@ -377,6 +379,7 @@ WITH:                 "WITH"
 FORMAT:               "FORMAT"
 CSV:                  "CSV"
 VIDEO:                "VIDEO"
+IMAGE:                "IMAGE"
 
 // EVAQL keywords
 

@@ -45,9 +45,9 @@ class LarkParser(object):
         # add semi-colon if needed
         if not query_string.endswith(";"):
             query_string += ";"
-
+                    
         tree = self._parser.parse(query_string)
-        #pprint(tree.pretty())
+        pprint(tree.pretty())
         output = LarkInterpreter(query_string).visit(tree)
 
         # convert output to list if it is a single element

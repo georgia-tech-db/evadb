@@ -846,11 +846,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """CREATE TABLE IF NOT EXISTS Persons (
-                  Frame_ID INTEGER UNIQUE,
-                  Frame_Data TEXT(10),
-                  Frame_Value FLOAT(1000, 201),
-                  Frame_Array NDARRAY UINT8(5, 100, 2432, 4324, 100)
-            );"""
+        #query = """RENAME TABLE student TO student_info"""
+        query = """LOAD VIDEO 'data/video.mp4' INTO MyVideo;"""
         parser = Parser()
         parser.parse(query)
