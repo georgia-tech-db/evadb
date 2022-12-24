@@ -46,10 +46,12 @@ class OptimizerRulesTest(unittest.TestCase):
                   WHERE id < 2;"""
 
         time_with_rule = Timer()
+        result_with_rule = None
         with time_with_rule:
             result_with_rule = execute_query_fetch_all(query)
 
         time_without_rule = Timer()
+        result_without_pushdown_rules = None
         with time_without_rule:
             with disable_rules(
                 [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()]
@@ -63,6 +65,7 @@ class OptimizerRulesTest(unittest.TestCase):
             time_without_rule.total_elapsed_time, 3 * time_with_rule.total_elapsed_time
         )
 
+        result_without_xform_rule = None
         with disable_rules([XformLateralJoinToLinearFlow()]):
             result_without_xform_rule = execute_query_fetch_all(query)
 
