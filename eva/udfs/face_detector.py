@@ -62,7 +62,7 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
         frames = np.asarray(frames_list)
         detections = self.model.detect(frames)
         boxes, scores = detections
-        outcome = pd.DataFrame()
+        outcome = []
         for frame_boxes, frame_scores in zip(boxes, scores):
             pred_boxes = []
             pred_scores = []
@@ -72,9 +72,8 @@ class FaceDetector(AbstractClassifierUDF, GPUCompatible):
                     pred_scores = frame_scores
                 else:
                     logger.warn(f"Nan entry in box {frame_boxes}")
-            outcome = outcome.append(
+            outcome.append(
                 {"bboxes": pred_boxes, "scores": pred_scores},
-                ignore_index=True,
             )
 
-        return outcome
+        return pd.DataFrame(outcome, columns=["bboxes", "scores"])

@@ -13,12 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import sys
 import unittest
 from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
 import cv2
-import mock
 import numpy as np
 import pytest
 
@@ -64,25 +62,6 @@ class PytorchTest(unittest.TestCase):
                         WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(len(actual_batch), 5)
-
-    @pytest.mark.torchtest
-    def test_should_run_pytorch_and_ssd(self):
-        create_udf_query = """CREATE UDF SSDObjectDetector
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (label NDARRAY STR(10))
-                  TYPE  Classification
-                  IMPL  'eva/udfs/ssd_object_detector.py';
-        """
-        execute_query_fetch_all(create_udf_query)
-
-        select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 5)
-        # non-trivial test case
-        res = actual_batch.frames
-        for idx in res.index:
-            self.assertTrue("car" in res["ssdobjectdetector.label"][idx])
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_mvit(self):
@@ -226,20 +205,6 @@ class PytorchTest(unittest.TestCase):
 
         similar_data = actual_batch.frames["myvideo.data"][0]
         self.assertTrue(np.array_equal(img, similar_data))
-
-    def test_should_raise_import_error_with_missing_torch(self):
-        with self.assertRaises(ImportError):
-            with mock.patch.dict(sys.modules, {"torch": None}):
-                from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
-
-                pass
-
-    def test_should_raise_import_error_with_missing_torchvision(self):
-        with self.assertRaises(ImportError):
-            with mock.patch.dict(sys.modules, {"torchvision.transforms": None}):
-                from eva.udfs.ssd_object_detector import SSDObjectDetector  # noqa: F401
-
-                pass
 
     @pytest.mark.torchtest
     def test_should_run_ocr_on_cropped_data(self):

@@ -36,31 +36,6 @@ def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_should_run_pytorch_and_ssd(benchmark, setup_pytorch_tests):
-    create_udf_query = """CREATE UDF IF NOT EXISTS SSDObjectDetector
-                INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                OUTPUT (label NDARRAY STR(10))
-                TYPE  Classification
-                IMPL  'eva/udfs/ssd_object_detector.py';
-    """
-    execute_query_fetch_all(create_udf_query)
-
-    select_query = """SELECT SSDObjectDetector(data) FROM MyVideo
-                    WHERE id < 5;"""
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert len(actual_batch) == 5
-    # non-trivial test case
-    res = actual_batch.frames
-    for idx in res.index:
-        assert "car" in res["ssdobjectdetector.label"][idx]
-
-
-@pytest.mark.torchtest
-@pytest.mark.benchmark(
-    warmup=False,
-    warmup_iterations=1,
-    min_rounds=1,
-)
 def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FaceDetector
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))

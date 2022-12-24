@@ -71,7 +71,7 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
         # Get detections
         detections_in_frames = self.model.readtext_batched(np.vstack(frames))
 
-        outcome = pd.DataFrame()
+        outcome = []
 
         for i in range(0, frames.shape[0]):
             labels = []
@@ -82,13 +82,12 @@ class OCRExtractor(AbstractClassifierUDF, GPUCompatible):
                 bboxes.append(detection[0])
                 scores.append(detection[2])
 
-            outcome = outcome.append(
+            outcome.append(
                 {
                     "labels": list(labels),
                     "bboxes": list(bboxes),
                     "scores": list(scores),
-                },
-                ignore_index=True,
+                }
             )
 
-        return outcome
+        return pd.DataFrame(outcome, columns=["labels", "bboxes", "scores"])
