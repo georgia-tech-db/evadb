@@ -54,7 +54,7 @@ class PlanGenerator:
         return physical_plan
 
     def optimize(self, logical_plan: Operator):
-        optimizer_context = OptimizerContext(self.cost_model)
+        optimizer_context = OptimizerContext(self.cost_model, self.rules_manager)
         memo = optimizer_context.memo
         grp_expr = optimizer_context.add_opr_to_group(opr=logical_plan)
         root_grp_id = grp_expr.group_id

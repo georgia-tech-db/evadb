@@ -45,4 +45,5 @@ class PlanOprType(Enum):
     DROP_UDF = auto()
     EXPLAIN = auto()
     CREATE_INDEX = auto()
+    APPLY_AND_MERGE = auto()
     # add other types

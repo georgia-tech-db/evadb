@@ -75,7 +75,7 @@ notebook_libs = [
 integration_test_libs = [
     "torch>=1.10.0",
     "torchvision>=0.11.1",
-    "faiss-gpu>=1.7.2"
+    "faiss-cpu" # faiss-gpu does not work on mac
 ]
 
 benchmark_libs = [

@@ -25,6 +25,7 @@ import pandas as pd
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.server.command_handler import execute_query_fetch_all
 
@@ -138,7 +139,7 @@ class UDFExecutorTest(unittest.TestCase):
                   IMPL  'test/util.py';
         """
         # Try to create duplicate UDF
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ExecutorError):
             actual = execute_query_fetch_all(create_udf_query.format(udf_name))
             expected = Batch(pd.DataFrame([f"UDF {udf_name} already exists."]))
             self.assertEqual(actual, expected)
@@ -171,5 +172,5 @@ class UDFExecutorTest(unittest.TestCase):
                   TYPE  Classification
                   IMPL  'test/util.py';
         """
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ExecutorError):
             execute_query_fetch_all(create_udf_query)

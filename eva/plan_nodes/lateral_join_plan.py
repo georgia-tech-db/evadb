@@ -36,4 +36,4 @@ class LateralJoinPlan(AbstractJoin):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self.join_project)))
+        return hash((super().__hash__(), tuple(self.join_project or [])))

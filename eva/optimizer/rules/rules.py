@@ -27,6 +27,7 @@ from eva.optimizer.optimizer_utils import (
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.parser.types import JoinType
+from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
 from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.optimizer.operators import (
     Dummy,
+    LogicalApplyAndMerge,
     LogicalCreate,
     LogicalCreateIndex,
     LogicalCreateMaterializedView,
@@ -315,6 +317,100 @@ class PushDownFilterThroughJoin(Rule):
             )
 
         return new_join_node
+
+
+class XformLateralJoinToLinearFlow(Rule):
+    """If the inner node of a lateral join is a function-valued expression, we
+    eliminate the join node and make the inner node the parent of the outer node. This
+    produces a linear #data flow path. Because this scenario is common in our system,
+    we chose to explicitly convert it to a linear flow, which simplifies the
+    implementation of other optimizations such as UDF reuse and parallelized plans by
+    removing the join."""
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALJOIN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
+        super().__init__(RuleType.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW, pattern)
+
+    def promise(self):
+        return Promise.XFORM_LATERAL_JOIN_TO_LINEAR_FLOW
+
+    def check(self, before: LogicalJoin, context: OptimizerContext):
+        if before.join_type == JoinType.LATERAL_JOIN:
+            if before.join_predicate is None and not before.join_project:
+                return True
+        return False
+
+    def apply(self, before: LogicalJoin, context: OptimizerContext):
+        #     LogicalJoin(Lateral)              LogicalApplyAndMerge
+        #     /           \                 ->       |
+        #    A        LogicalFunctionScan            A
+
+        A: Dummy = before.children[0]
+        logical_func_scan: LogicalFunctionScan = before.children[1]
+        logical_apply_merge = LogicalApplyAndMerge(
+            logical_func_scan.func_expr,
+            logical_func_scan.alias,
+            logical_func_scan.do_unnest,
+        )
+        logical_apply_merge.append_child(A)
+        return logical_apply_merge
+
+
+class PushDownFilterThroughApplyAndMerge(Rule):
+    """If it is feasible to partially or fully push the predicate contained within the
+    logical filter through the ApplyAndMerge operator, we should do so. This is often
+    beneficial, for instance, in order to prevent decoding additional frames beyond
+    those that satisfy the predicate.
+    Eg:
+
+    Filter(id < 10 and func.label = 'car')           Filter(func.label = 'car')
+            |                                                   |
+        ApplyAndMerge(func)                  ->          ApplyAndMerge(func)
+            |                                                   |
+            A                                            Filter(id < 10)
+                                                                |
+                                                                A
+
+    """
+
+    def __init__(self):
+        appply_merge_pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        appply_merge_pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern = Pattern(OperatorType.LOGICALFILTER)
+        pattern.append_child(appply_merge_pattern)
+        super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE, pattern)
+
+    def promise(self):
+        return Promise.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE
+
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        A: Dummy = before.children[0].children[0]
+        apply_and_merge: LogicalApplyAndMerge = before.children[0]
+        aliases = context.memo.get_group_by_id(A.group_id).aliases
+        predicate = before.predicate
+        pushdown_pred, rem_pred = extract_pushdown_predicate_for_alias(
+            predicate, aliases
+        )
+
+        # if we find a feasible pushdown predicate, add a new filter node between
+        # ApplyAndMerge and Dummy
+        if pushdown_pred:
+            pushdown_filter = LogicalFilter(predicate=pushdown_pred)
+            pushdown_filter.append_child(A)
+            apply_and_merge.children = [pushdown_filter]
+
+        # If we have partial predicate make it the root
+        root_node = apply_and_merge
+        if rem_pred:
+            root_node = LogicalFilter(predicate=rem_pred)
+            root_node.append_child(apply_and_merge)
+
+        return root_node
 
 
 # REWRITE RULES END
@@ -869,6 +965,25 @@ class LogicalExplainToPhysical(Rule):
 
     def apply(self, before: LogicalExplain, context: OptimizerContext):
         after = ExplainPlan(before.explainable_opr)
+        for child in before.children:
+            after.append_child(child)
+        return after
+
+
+class LogicalApplyAndMergeToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        after = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
         for child in before.children:
             after.append_child(child)
         return after

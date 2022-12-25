@@ -22,6 +22,7 @@ from eva.catalog.models.df_metadata import DataFrameMetadata
 from eva.catalog.models.udf_io import UdfIO
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
@@ -58,6 +59,7 @@ class OperatorType(IntEnum):
     LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
+    LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -899,7 +901,7 @@ class LogicalFunctionScan(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr))
+        return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
 
 
 class LogicalJoin(Operator):
@@ -926,7 +928,7 @@ class LogicalJoin(Operator):
         self._join_predicate = join_predicate
         self._left_keys = left_keys
         self._right_keys = right_keys
-        self._join_project = []
+        self._join_project = None
 
     @property
     def join_type(self):
@@ -991,7 +993,7 @@ class LogicalJoin(Operator):
                 self.join_predicate,
                 self.left_keys,
                 self.right_keys,
-                tuple(self.join_project),
+                tuple(self.join_project or []),
             )
         )
 
@@ -1153,5 +1155,63 @@ class LogicalCreateIndex(Operator):
                 self.table_ref,
                 tuple(self.col_list),
                 self.index_type,
+            )
+        )
+
+
+class LogicalApplyAndMerge(Operator):
+    """Evaluate the function expression on the input data and return the merged output.
+    This operator simplifies the process of evaluating functions on a table source.
+    Currently, it performs an inner join while merging the function output with the
+    input data. This means that if the function does not return any output for a given
+    input row, that row will be dropped from the output. We can consider expanding this
+    to support left joins and other types of joins in the future.
+    """
+
+    def __init__(
+        self,
+        func_expr: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_APPLY_AND_MERGE, children)
+        self._func_expr = func_expr
+        self._do_unnest = do_unnest
+        self._alias = alias
+        self._merge_type = JoinType.INNER_JOIN
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFunctionScan):
+            return False
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+            and self._merge_type == other._merge_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.func_expr,
+                self.do_unnest,
+                self.alias,
+                self._merge_type,
             )
         )
