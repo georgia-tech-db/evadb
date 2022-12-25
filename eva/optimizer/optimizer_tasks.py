@@ -85,9 +85,6 @@ class TopDownRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                logger.info(
-                    "In TopDown, Rule {} matched for {}".format(rule, self.root_expr)
-                )
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.replace_expression(
                     after, self.root_expr.group_id

@@ -77,3 +77,30 @@ class OptimizerRulesTest(unittest.TestCase):
             )
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
+
+    def test_should_pushdown_without_pushdown_join_rule(self):
+        query = """SELECT id, obj.labels
+                  FROM MyVideo JOIN LATERAL
+                    YoloV5(data) AS obj(labels, bboxes, scores)
+                  WHERE id < 2;"""
+
+        time_with_rule = Timer()
+        result_with_rule = None
+        with time_with_rule:
+            result_with_rule = execute_query_fetch_all(query)
+            query_plan = execute_query_fetch_all(f"EXPLAIN {query}")
+        time_without_rule = Timer()
+        result_without_pushdown_join_rule = None
+        with time_without_rule:
+            with disable_rules([PushDownFilterThroughJoin()]) as rules_manager:
+                # should use PushDownFilterThroughApplyAndMerge()
+                custom_plan_generator = PlanGenerator(rules_manager)
+                result_without_pushdown_join_rule = execute_query_fetch_all(
+                    query, plan_generator=custom_plan_generator
+                )
+                query_plan_without_pushdown_join_rule = execute_query_fetch_all(
+                    f"EXPLAIN {query}", plan_generator=custom_plan_generator
+                )
+
+        self.assertEqual(result_without_pushdown_join_rule, result_with_rule)
+        self.assertEqual(query_plan, query_plan_without_pushdown_join_rule)

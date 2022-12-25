@@ -376,9 +376,10 @@ class PushDownFilterThroughApplyAndMerge(Rule):
     """
 
     def __init__(self):
+        appply_merge_pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        appply_merge_pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern = Pattern(OperatorType.LOGICALFILTER)
-        pattern.append_child(Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE))
-        pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(appply_merge_pattern)
         super().__init__(RuleType.PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE, pattern)
 
     def promise(self):
