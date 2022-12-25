@@ -16,7 +16,7 @@ from typing import Any, Dict, Iterator, List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import and_
+from sqlalchemy import Table, and_, inspect
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
@@ -66,6 +66,21 @@ class SQLStorageEngine(AbstractStorageEngine):
                 dict_row[col.name] = sql_row[idx]
         return dict_row
 
+    def _try_loading_table_via_reflection(self, table_name: str):
+        metadata_obj = BaseModel.metadata
+        if table_name in metadata_obj.tables:
+            return metadata_obj.tables[table_name]
+        # reflection
+        insp = inspect(self._sql_engine)
+        if insp.has_table(table_name):
+            table = Table(table_name, metadata_obj)
+            insp.reflect_table(table, None)
+            return table
+        else:
+            err_msg = f"No table found with name {table.name}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
+
     def create(self, table: DataFrameMetadata, **kwargs):
         """
         Create an empty table in sql.
@@ -89,7 +104,7 @@ class SQLStorageEngine(AbstractStorageEngine):
 
     def drop(self, table: DataFrameMetadata):
         try:
-            table_to_remove = BaseModel.metadata.tables[table.name]
+            table_to_remove = self._try_loading_table_via_reflection(table.name)
             table_to_remove.drop()
             # In-memory metadata does not automatically sync with the database
             # therefore manually removing the table from the in-memory metadata
@@ -97,9 +112,9 @@ class SQLStorageEngine(AbstractStorageEngine):
             BaseModel.metadata.remove(table_to_remove)
             self._sql_session.commit()
         except Exception as e:
-            logger.exception(
-                f"Failed to drop the table {table.name} with Exception {str(e)}"
-            )
+            err_msg = f"Failed to drop the table {table.name} with Exception {str(e)}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
 
     def write(self, table: DataFrameMetadata, rows: Batch):
         """
@@ -109,21 +124,28 @@ class SQLStorageEngine(AbstractStorageEngine):
             table: table metadata object to write into
             rows : batch to be persisted in the storage.
         """
-        new_table = BaseModel.metadata.tables[table.name]
-        columns = rows.frames.keys()
-        data = []
+        try:
+            table_to_update = self._try_loading_table_via_reflection(table.name)
+            columns = rows.frames.keys()
+            data = []
 
-        # During table writes, assume row_id is automatically handled by
-        # the sqlalchemy engine. Another assumption we make here is the
-        # updated data need not to take care of row_id.
-        table_columns = [col for col in table.columns if col.name != IDENTIFIER_COLUMN]
+            # During table writes, assume row_id is automatically handled by
+            # the sqlalchemy engine. Another assumption we make here is the
+            # updated data need not to take care of row_id.
+            table_columns = [
+                col for col in table.columns if col.name != IDENTIFIER_COLUMN
+            ]
 
-        # ToDo: validate the data type before inserting into the table
-        for record in rows.frames.values:
-            row_data = {col: record[idx] for idx, col in enumerate(columns)}
-            data.append(self._dict_to_sql_row(row_data, table_columns))
-        self._sql_engine.execute(new_table.insert(), data)
-        self._sql_session.commit()
+            # ToDo: validate the data type before inserting into the table
+            for record in rows.frames.values:
+                row_data = {col: record[idx] for idx, col in enumerate(columns)}
+                data.append(self._dict_to_sql_row(row_data, table_columns))
+            self._sql_engine.execute(table_to_update.insert(), data)
+            self._sql_session.commit()
+        except Exception as e:
+            err_msg = f"Failed to udpate the table {table.name} with exception {str(e)}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
 
     def read(
         self,
@@ -135,29 +157,34 @@ class SQLStorageEngine(AbstractStorageEngine):
         tuples.
 
         Argument:
-            table: table metadata object of teh table to read
+            table: table metadata object of the table to read
             batch_mem_size (int): memory size of the batch read from storage
         Return:
             Iterator of Batch read.
         """
-
-        new_table = BaseModel.metadata.tables[table.name]
-        result = self._sql_engine.execute(new_table.select())
-        data_batch = []
-        row_size = None
-        for row in result:
-            # Todo: Verfiy the order of columns in row matches the table.columns
-            # For table read, we provide row_id so that user can also retrieve
-            # row_id from the table.
-            data_batch.append(self._sql_row_to_dict(row, table.columns))
-            if row_size is None:
-                row_size = 0
-                row_size = get_size(data_batch)
-            if len(data_batch) * row_size >= batch_mem_size:
+        try:
+            table_to_read = self._try_loading_table_via_reflection(table.name)
+            result = self._sql_engine.execute(table_to_read.select())
+            data_batch = []
+            row_size = None
+            for row in result:
+                # Todo: Verfiy the order of columns in row matches the table.columns
+                # For table read, we provide row_id so that user can also retrieve
+                # row_id from the table.
+                data_batch.append(self._sql_row_to_dict(row, table.columns))
+                if row_size is None:
+                    row_size = 0
+                    row_size = get_size(data_batch)
+                if len(data_batch) * row_size >= batch_mem_size:
+                    yield Batch(pd.DataFrame(data_batch))
+                    data_batch = []
+            if data_batch:
                 yield Batch(pd.DataFrame(data_batch))
-                data_batch = []
-        if data_batch:
-            yield Batch(pd.DataFrame(data_batch))
+
+        except Exception as e:
+            err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
+            logger.exception(err_msg)
+            raise Exception(err_msg)
 
     def delete(self, table: DataFrameMetadata, where_clause: Dict[str, Any]):
         """Delete tuples from the table where rows satisfy the where_clause.
@@ -167,23 +194,32 @@ class SQLStorageEngine(AbstractStorageEngine):
             table: table metadata object of the table
             where_clause (Dict[str, Any]): where clause use to find the tuples to remove. The key should be the column name and value should be the tuple value. The function assumes an equality condition
         """
-        sqlite_table = BaseModel.metadata.tables[table.name]
-        table_columns = [
-            col.name for col in sqlite_table.columns if col.name != "_row_id"
-        ]
-        filter_clause = []
-        # verify where clause and convert to sqlalchemy supported filter
-        # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
-        for column, value in where_clause.items():
-            if column not in table_columns:
-                raise Exception(
-                    f"where_clause contains a column {column} not in the table {sqlite_table}"
-                )
-            filter_clause.append(sqlite_table.columns[column] == value)
+        try:
+            table_to_delete_from = self._try_loading_table_via_reflection(table.name)
+            table_columns = [
+                col.name
+                for col in table_to_delete_from.columns
+                if col.name != "_row_id"
+            ]
+            filter_clause = []
+            # verify where clause and convert to sqlalchemy supported filter
+            # https://stackoverflow.com/questions/34026210/where-filter-from-table-object-using-a-dictionary-or-kwargs
+            for column, value in where_clause.items():
+                if column not in table_columns:
+                    raise Exception(
+                        f"where_clause contains a column {column} not in the table {table_to_delete_from}"
+                    )
+                filter_clause.append(table_to_delete_from.columns[column] == value)
 
-        d = sqlite_table.delete().where(and_(*filter_clause))
-        self._sql_engine.execute(d)
-        self._sql_session.commit()
+            d = table_to_delete_from.delete().where(and_(*filter_clause))
+            self._sql_engine.execute(d)
+            self._sql_session.commit()
+        except Exception as e:
+            err_msg = (
+                f"Failed to delete from the table {table.name} with exception {str(e)}"
+            )
+            logger.exception(err_msg)
+            raise Exception(err_msg)
 
     def rename(self, old_table: DataFrameMetadata, new_name: TableInfo):
         raise Exception("Rename not supported for structured data table")
