@@ -161,5 +161,5 @@ class PlanExecutor:
                 yield from output
             self._clean_execution_tree(execution_tree)
         except Exception as e:
-            logger.error(e)
+            logger.error(str(e))
             raise ExecutorError(e)

@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
@@ -199,6 +200,7 @@ class CatalogManager(object):
         table_info: TableInfo,
         columns: List[ColumnDefinition],
         identifier_column: str = "id",
+        table_type: TableType = TableType.STRUCTURED_DATA,
     ) -> DataFrameMetadata:
         table_name = table_info.table_name
         column_metadata_list = self.create_columns_metadata(columns)
@@ -208,7 +210,7 @@ class CatalogManager(object):
             file_url,
             column_metadata_list,
             identifier_column=identifier_column,
-            table_type=TableType.STRUCTURED_DATA,
+            table_type=table_type,
         )
         return metadata
 
@@ -429,6 +431,9 @@ class CatalogManager(object):
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
 
+    def get_all_table_entries(self):
+        return self._dataset_service.get_all_datasets()
+
     def get_media_metainfo_table(
         self, input_table: DataFrameMetadata
     ) -> DataFrameMetadata:
@@ -441,7 +446,7 @@ class CatalogManager(object):
             DataFrameMetadata: metainfo table maintained by the system
         """
         # use file_url as the metadata table name
-        media_metadata_name = input_table.file_url
+        media_metadata_name = Path(input_table.file_url).stem
         obj = self.get_dataset_metadata(None, media_metadata_name)
         if not obj:
             err = f"Table with name {media_metadata_name} does not exist in catalog"
@@ -453,9 +458,10 @@ class CatalogManager(object):
     def create_media_metainfo_table(
         self, input_table: DataFrameMetadata
     ) -> DataFrameMetadata:
-        """Get a media metainfo table.
-        Create one if it does not exists
-        We use this table to store all the media filenames and corresponding information
+        """Create a media metainfo table.
+         This table is used to store all media filenames and related information. In
+         order to prevent direct access or modification by users, it should be
+         designated as a SYSTEM_STRUCTURED_DATA type.
         Args:
             input_table (DataFrameMetadata): input video table
 
@@ -463,7 +469,7 @@ class CatalogManager(object):
             DataFrameMetadata: metainfo table maintained by the system
         """
         # use file_url as the metadata table name
-        media_metadata_name = input_table.file_url
+        media_metadata_name = Path(input_table.file_url).stem
         obj = self.get_dataset_metadata(None, media_metadata_name)
         if obj:
             err_msg = f"Table with name {media_metadata_name} already exists"
@@ -472,7 +478,10 @@ class CatalogManager(object):
 
         columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
         obj = self.create_table_metadata(
-            TableInfo(media_metadata_name), columns, identifier_column=columns[0].name
+            TableInfo(media_metadata_name),
+            columns,
+            identifier_column=columns[0].name,
+            table_type=TableType.SYSTEM_STRUCTURED_DATA,
         )
         return obj
 

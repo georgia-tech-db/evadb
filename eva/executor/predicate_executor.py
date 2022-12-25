@@ -39,7 +39,7 @@ class PredicateExecutor(AbstractExecutor):
                 if not batch.empty():
                     yield batch
         except Exception as e:
-            logger.log(e)
+            logger.error(e)
             raise ExecutorError(e)
 
     def __call__(self, **kwargs) -> Generator[Batch, None, None]:
