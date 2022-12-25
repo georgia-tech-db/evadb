@@ -22,6 +22,7 @@ from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.executor.explain_executor import ExplainExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
 from eva.executor.groupby_executor import GroupByExecutor
@@ -46,6 +47,7 @@ from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
+from eva.utils.logging_manager import logger
 
 
 class PlanExecutor:
@@ -152,8 +154,12 @@ class PlanExecutor:
 
     def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree"""
-        execution_tree = self._build_execution_tree(self._plan)
-        output = execution_tree.exec()
-        if output is not None:
-            yield from output
-        self._clean_execution_tree(execution_tree)
+        try:
+            execution_tree = self._build_execution_tree(self._plan)
+            output = execution_tree.exec()
+            if output is not None:
+                yield from output
+            self._clean_execution_tree(execution_tree)
+        except Exception as e:
+            logger.error(e)
+            raise ExecutorError(e)

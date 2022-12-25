@@ -71,61 +71,77 @@ from eva.optimizer.rules.rules_base import Rule
 
 
 class RulesManager:
+    def __init__(self):
+        self._logical_rules = [LogicalInnerJoinCommutativity()]
 
-    logical_rules = [LogicalInnerJoinCommutativity()]
+        self._rewrite_rules = [
+            EmbedFilterIntoGet(),
+            # EmbedFilterIntoDerivedGet(),
+            EmbedProjectIntoGet(),
+            # EmbedProjectIntoDerivedGet(),
+            EmbedSampleIntoGet(),
+            PushDownFilterThroughJoin(),
+            PushDownFilterThroughApplyAndMerge(),
+            XformLateralJoinToLinearFlow(),
+        ]
 
-    rewrite_rules = [
-        EmbedFilterIntoGet(),
-        # EmbedFilterIntoDerivedGet(),
-        EmbedProjectIntoGet(),
-        # EmbedProjectIntoDerivedGet(),
-        EmbedSampleIntoGet(),
-        PushDownFilterThroughJoin(),
-        PushDownFilterThroughApplyAndMerge(),
-        XformLateralJoinToLinearFlow(),
-    ]
+        ray_enabled = ConfigurationManager().get_value("experimental", "ray")
 
-    ray_enabled = ConfigurationManager().get_value("experimental", "ray")
+        self._implementation_rules = [
+            LogicalCreateToPhysical(),
+            LogicalRenameToPhysical(),
+            LogicalDropToPhysical(),
+            LogicalCreateUDFToPhysical(),
+            LogicalDropUDFToPhysical(),
+            LogicalInsertToPhysical(),
+            LogicalLoadToPhysical(),
+            LogicalUploadToPhysical(),
+            LogicalSampleToUniformSample(),
+            DistributedLogicalGetToSeqScan()
+            if ray_enabled
+            else SequentialLogicalGetToSeqScan(),
+            LogicalDerivedGetToPhysical(),
+            LogicalUnionToPhysical(),
+            LogicalGroupByToPhysical(),
+            LogicalOrderByToPhysical(),
+            LogicalLimitToPhysical(),
+            LogicalLateralJoinToPhysical(),
+            LogicalJoinToPhysicalHashJoin(),
+            LogicalFunctionScanToPhysical(),
+            LogicalCreateMaterializedViewToPhysical(),
+            LogicalFilterToPhysical(),
+            DistributedLogicalProjectToPhysical()
+            if ray_enabled
+            else SequentialLogicalProjectToPhysical(),
+            LogicalShowToPhysical(),
+            LogicalExplainToPhysical(),
+            LogicalCreateIndexToFaiss(),
+            LogicalApplyAndMergeToPhysical(),
+        ]
 
-    implementation_rules = [
-        LogicalCreateToPhysical(),
-        LogicalRenameToPhysical(),
-        LogicalDropToPhysical(),
-        LogicalCreateUDFToPhysical(),
-        LogicalDropUDFToPhysical(),
-        LogicalInsertToPhysical(),
-        LogicalLoadToPhysical(),
-        LogicalUploadToPhysical(),
-        LogicalSampleToUniformSample(),
-        DistributedLogicalGetToSeqScan()
-        if ray_enabled
-        else SequentialLogicalGetToSeqScan(),
-        LogicalDerivedGetToPhysical(),
-        LogicalUnionToPhysical(),
-        LogicalGroupByToPhysical(),
-        LogicalOrderByToPhysical(),
-        LogicalLimitToPhysical(),
-        LogicalLateralJoinToPhysical(),
-        LogicalJoinToPhysicalHashJoin(),
-        LogicalFunctionScanToPhysical(),
-        LogicalCreateMaterializedViewToPhysical(),
-        LogicalFilterToPhysical(),
-        DistributedLogicalProjectToPhysical()
-        if ray_enabled
-        else SequentialLogicalProjectToPhysical(),
-        LogicalShowToPhysical(),
-        LogicalExplainToPhysical(),
-        LogicalCreateIndexToFaiss(),
-        LogicalApplyAndMergeToPhysical(),
-    ]
+        if ray_enabled:
+            self._implementation_rules.append(LogicalExchangeToPhysical())
+        self._all_rules = (
+            self._rewrite_rules + self._logical_rules + self._implementation_rules
+        )
 
-    if ray_enabled:
-        implementation_rules.append(LogicalExchangeToPhysical())
+    @property
+    def rewrite_rules(self):
+        return self._rewrite_rules
 
-    all_rules = rewrite_rules + logical_rules + implementation_rules
+    @property
+    def implementation_rules(self):
+        return self._implementation_rules
 
-    @classmethod
-    def disable_rules(cls, rules: List[Rule]):
+    @property
+    def logical_rules(self):
+        return self._logical_rules
+
+    @property
+    def all_rules(self):
+        return self._all_rules
+
+    def disable_rules(self, rules: List[Rule]):
         def _remove_from_list(rule_list, rule_to_remove):
             for rule in rule_list:
                 if rule.rule_type == rule_to_remove.rule_type:
@@ -133,27 +149,26 @@ class RulesManager:
 
         for rule in rules:
             if rule.is_implementation_rule():
-                _remove_from_list(cls.implementation_rules, rule)
+                _remove_from_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
-                _remove_from_list(cls.rewrite_rules, rule)
+                _remove_from_list(self.rewrite_rules, rule)
             elif rule.is_logical_rule(rule):
-                _remove_from_list(cls.logical_rules, rule)
+                _remove_from_list(self.logical_rules, rule)
             else:
                 raise Exception(f"Provided Invalid rule {rule}")
 
-    @classmethod
-    def add_rules(cls, rules: List[Rule]):
+    def add_rules(self, rules: List[Rule]):
         def _add_to_list(rule_list, rule_to_remove):
             if any([rule.rule_type != rule_to_remove.rule_type for rule in rule_list]):
                 rule_list.append(rule)
 
         for rule in rules:
             if rule.is_implementation_rule():
-                _add_to_list(cls.implementation_rules, rule)
+                _add_to_list(self.implementation_rules, rule)
             elif rule.is_rewrite_rule():
-                _add_to_list(cls.rewrite_rules, rule)
+                _add_to_list(self.rewrite_rules, rule)
             elif rule.is_logical_rule(rule):
-                _add_to_list(cls.logical_rules, rule)
+                _add_to_list(self.logical_rules, rule)
             else:
                 raise Exception(f"Provided Invalid rule {rule}")
 
@@ -166,7 +181,8 @@ def disable_rules(rules: List[Rule]):
         rules (List[Rule]): List of rules to temporirly drop
     """
     try:
-        RulesManager.disable_rules(rules)
-        yield
+        rules_manager = RulesManager()
+        rules_manager.disable_rules(rules)
+        yield rules_manager
     finally:
-        RulesManager.add_rules(rules)
+        rules_manager.add_rules(rules)

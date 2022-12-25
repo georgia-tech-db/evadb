@@ -22,7 +22,6 @@ from eva.optimizer.group import Group
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_base import Rule
-from eva.optimizer.rules.rules_manager import RulesManager
 from eva.utils.logging_manager import logger
 
 if TYPE_CHECKING:
@@ -171,10 +170,11 @@ class OptimizeExpression(OptimizerTask):
         super().__init__(optimizer_context, OptimizerTaskType.OPTIMIZE_EXPRESSION)
 
     def execute(self):
-        rules = RulesManager().logical_rules
+        rules_manager = self.optimizer_context.rules_manager
+        rules = rules_manager.logical_rules
         # if exploring, we don't need to consider implementation rules
         if not self.explore:
-            rules.extend(RulesManager().implementation_rules)
+            rules.extend(rules_manager.implementation_rules)
 
         valid_rules = []
         for rule in rules:

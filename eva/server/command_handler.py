@@ -33,11 +33,12 @@ def execute_query(query, report_time: bool = False, **kwargs) -> Iterator[Batch]
     Execute the query and return a result generator.
     """
     query_compile_time = Timer()
+    plan_generator = kwargs.pop("plan_generator", PlanGenerator())
     with query_compile_time:
         stmt = Parser().parse(query)[0]
         StatementBinder(StatementBinderContext()).bind(stmt)
         l_plan = StatementToPlanConvertor().visit(stmt)
-        p_plan = PlanGenerator().build(l_plan)
+        p_plan = plan_generator.build(l_plan)
         output = PlanExecutor(p_plan).execute_plan()
 
     query_compile_time.log_elapsed_time("Query Compile Time")

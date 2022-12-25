@@ -17,6 +17,7 @@ from test.util import load_inbuilt_udfs
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
+from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
@@ -55,8 +56,11 @@ class OptimizerRulesTest(unittest.TestCase):
         with time_without_rule:
             with disable_rules(
                 [PushDownFilterThroughApplyAndMerge(), PushDownFilterThroughJoin()]
-            ):
-                result_without_pushdown_rules = execute_query_fetch_all(query)
+            ) as rules_manager:
+                custom_plan_generator = PlanGenerator(rules_manager)
+                result_without_pushdown_rules = execute_query_fetch_all(
+                    query, plan_generator=custom_plan_generator
+                )
 
         self.assertEqual(result_without_pushdown_rules, result_with_rule)
 
@@ -66,7 +70,10 @@ class OptimizerRulesTest(unittest.TestCase):
         )
 
         result_without_xform_rule = None
-        with disable_rules([XformLateralJoinToLinearFlow()]):
-            result_without_xform_rule = execute_query_fetch_all(query)
+        with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
+            custom_plan_generator = PlanGenerator(rules_manager)
+            result_without_xform_rule = execute_query_fetch_all(
+                query, plan_generator=custom_plan_generator
+            )
 
         self.assertEqual(result_without_xform_rule, result_with_rule)

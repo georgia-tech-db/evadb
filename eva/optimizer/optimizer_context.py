@@ -20,6 +20,7 @@ from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.memo import Memo
 from eva.optimizer.operators import Dummy, Operator
 from eva.optimizer.optimizer_task_stack import OptimizerTaskStack
+from eva.optimizer.rules.rules_manager import RulesManager
 
 
 class OptimizerContext:
@@ -31,10 +32,15 @@ class OptimizerContext:
             stack to keep track outstanding tasks
     """
 
-    def __init__(self, cost_model: CostModel):
+    def __init__(self, cost_model: CostModel, rules_manager: RulesManager = None):
         self._task_stack = OptimizerTaskStack()
         self._memo = Memo()
         self._cost_model = cost_model
+        self._rules_manager = rules_manager or RulesManager()
+
+    @property
+    def rules_manager(self):
+        return self._rules_manager
 
     @property
     def cost_model(self):
