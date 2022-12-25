@@ -459,7 +459,9 @@ class CatalogManager(object):
         self, input_table: DataFrameMetadata
     ) -> DataFrameMetadata:
         """Create a media metainfo table.
-         This table is used to store all media filenames and related information. In order to prevent direct access or modification by users, it should be designated as a SYSTEM_STRUCTURED_DATA type.
+         This table is used to store all media filenames and related information. In
+         order to prevent direct access or modification by users, it should be
+         designated as a SYSTEM_STRUCTURED_DATA type.
         Args:
             input_table (DataFrameMetadata): input video table
 

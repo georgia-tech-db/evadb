@@ -192,7 +192,9 @@ class SQLStorageEngine(AbstractStorageEngine):
 
         Argument:
             table: table metadata object of the table
-            where_clause (Dict[str, Any]): where clause use to find the tuples to remove. The key should be the column name and value should be the tuple value. The function assumes an equality condition
+            where_clause (Dict[str, Any]): where clause use to find the tuples to
+            remove. The key should be the column name and value should be the tuple
+            value. The function assumes an equality condition
         """
         try:
             table_to_delete_from = self._try_loading_table_via_reflection(table.name)
