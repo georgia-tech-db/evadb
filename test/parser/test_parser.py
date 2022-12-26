@@ -844,10 +844,6 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """CREATE UDF FastRCNN
-                  INPUT  (Frame_Array NDARRAY UINT8(3, 256, 256))
-                  OUTPUT (Labels NDARRAY STR(10), Bbox NDARRAY UINT8(10, 4))
-                  TYPE  Classification
-                  IMPL  'data/fastrcnn.py';"""
+        query = """DROP TABLE foo;"""
         parser = Parser()
         parser.parse(query)

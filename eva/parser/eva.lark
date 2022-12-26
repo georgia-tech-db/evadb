@@ -62,7 +62,7 @@ drop_database: DROP DATABASE if_exists? uid
     
 drop_index: DROP INDEX uid ON table_name
     
-drop_table: DROP TABLE if_exists? tables
+drop_table: DROP TABLE if_exists? table_name
     
 drop_udf: DROP UDF if_exists? udf_name
     
@@ -226,9 +226,7 @@ length_dimension_list: "(" ( decimal_literal  ",")* decimal_literal ")"
 //    Common Lists
 
 uid_list: uid ("," uid)*
-    
-tables: table_name ("," table_name)*
-    
+        
 index_column_names: "(" index_column_name ("," index_column_name)* ")"
     
 expressions: expression ("," expression)*

@@ -14,22 +14,21 @@
 # limitations under the License.
 from eva.parser.drop_statement import DropTableStatement
 from eva.parser.table_ref import TableRef
+from lark import Tree
 
 
 class DropTable:
-    def tables(self, tree):
-        tables = []
-        for child in ctx.children:
-            tables.append(TableRef(self.visit(child)))
-        return tables
 
     def drop_table(self, tree):
-        # table_ref = None
+        table_info = None
         if_exists = False
-        for child in ctx.children[2:]:
-            if child.getRuleIndex() == evaql_parser.RULE_ifExists:
-                if_exists = True
-        tables_to_drop = self.visit(ctx.tables())
 
-        drop_stmt = DropTableStatement(tables_to_drop, if_exists=if_exists)
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'if_exists':
+                    if_exists = True
+                elif child.data == 'table_name':
+                    table_info = self.visit(child)
+
+        drop_stmt = DropTableStatement(table_info, if_exists)
         return drop_stmt
