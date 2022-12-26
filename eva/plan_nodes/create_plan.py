@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.parser.table_ref import TableInfo
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -26,14 +26,14 @@ class CreatePlan(AbstractPlan):
     operations.
     Arguments:
         video_ref {TableInfo} -- video ref for table to be created in storage
-        column_list {List[DataFrameColumn]} -- Columns to be added
+        column_list {List[ColumnCatalog]} -- Columns to be added
         if_not_exists {bool} -- Whether to override if there is existing table
     """
 
     def __init__(
         self,
         table_info: TableInfo,
-        column_list: List[DataFrameColumn],
+        column_list: List[ColumnCatalog],
         if_not_exists: bool = False,
     ):
         super().__init__(PlanOprType.CREATE)

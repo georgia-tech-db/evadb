@@ -14,16 +14,16 @@
 # limitations under the License.
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.udf import UdfCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
 class UdfService(BaseService):
     def __init__(self):
-        super().__init__(UdfMetadata)
+        super().__init__(UdfCatalog)
 
-    def create_udf(self, name: str, impl_path: str, type: str) -> UdfMetadata:
+    def create_udf(self, name: str, impl_path: str, type: str) -> UdfCatalog:
         """Creates a new udf entry
 
         Arguments:
@@ -32,7 +32,7 @@ class UdfService(BaseService):
             type (str): udf operator kind, classification or detection or etc
 
         Returns:
-            UdfMetadata: Returns the new entry created
+            UdfCatalog: Returns the new entry created
         """
         metadata = self.model(name, impl_path, type)
         metadata = metadata.save()
@@ -65,7 +65,7 @@ class UdfService(BaseService):
             return None
 
     def drop_udf_by_name(self, name: str):
-        """Drop a udf entry from the catalog udfmetadata
+        """Drop a udf entry from the catalog UdfCatalog
 
         Arguments:
             name (str): udf name to be deleted

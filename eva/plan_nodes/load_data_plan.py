@@ -27,7 +27,7 @@ class LoadDataPlan(AbstractPlan):
     operations.
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table metadata info to load into
+        table_metainfo(TableCatalog): table metadata info to load into
         file_path(Path): file path from where we will load the data
         batch_mem_size(int): memory size of the batch loaded from disk
     """

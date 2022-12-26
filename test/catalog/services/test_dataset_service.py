@@ -30,7 +30,7 @@ TABLE_TYPE = TableType.STRUCTURED_DATA
 
 
 class DatasetServiceTest(unittest.TestCase):
-    @patch("eva.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.TableCatalog")
     def test_create_dataset_should_create_model(self, mocked):
         service = DatasetService()
         service.create_dataset(
@@ -47,14 +47,14 @@ class DatasetServiceTest(unittest.TestCase):
         )
         mocked.return_value.save.assert_called_once()
 
-    @patch("eva.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.TableCatalog")
     def test_dataset_by_id_should_query_model_with_id(self, mocked):
         service = DatasetService()
         service.dataset_by_id(DATASET_ID)
         mocked.query.filter.assert_called_with(mocked._id == DATASET_ID)
         mocked.query.filter.return_value.one.assert_called_once()
 
-    @patch("eva.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.TableCatalog")
     def test_dataset_by_name_queries_model_with_name_and_return_id(self, mocked):
         service = DatasetService()
 
@@ -71,7 +71,7 @@ class DatasetServiceTest(unittest.TestCase):
 
         self.assertEqual(result, expected_output)
 
-    @patch("eva.catalog.services.df_service.DataFrameMetadata")
+    @patch("eva.catalog.services.df_service.TableCatalog")
     def test_dataset_object_by_name_queries_with_name_returns_model_object(
         self, mocked
     ):

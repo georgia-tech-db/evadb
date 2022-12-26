@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.parser.types import JoinType
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -26,11 +26,11 @@ class HashJoinBuildPlan(AbstractPlan):
     It prepares the hash table of preferably the smaller relation
     which is used by the probe side to find relevant rows.
     Arguments:
-        build_keys (List[DataFrameColumn]) : list of equi-key columns.
+        build_keys (List[ColumnCatalog]) : list of equi-key columns.
                         If empty, then Cartitian product.
     """
 
-    def __init__(self, join_type: JoinType, build_keys: List[DataFrameColumn]):
+    def __init__(self, join_type: JoinType, build_keys: List[ColumnCatalog]):
         self.join_type = join_type
         self.build_keys = build_keys
         super().__init__(PlanOprType.HASH_BUILD)

@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
@@ -25,11 +25,11 @@ from eva.utils.logging_manager import logger
 
 class DatasetService(BaseService):
     def __init__(self):
-        super().__init__(DataFrameMetadata)
+        super().__init__(TableCatalog)
 
     def create_dataset(
         self, name: str, file_url: str, identifier_id, table_type: TableType
-    ) -> DataFrameMetadata:
+    ) -> TableCatalog:
         """
         Create a new dataset entry for given name and file URL.
         Arguments:
@@ -37,7 +37,7 @@ class DatasetService(BaseService):
             file_url (str): file path of the dataset.
             table_type (TableType): type of data in the table
         Returns:
-            DataFrameMetadata object
+            TableCatalog object
         """
         try:
             metadata = self.model(
@@ -75,13 +75,13 @@ class DatasetService(BaseService):
         except NoResultFound:
             logger.error("get_id_from_name failed with name {}".format(name))
 
-    def dataset_by_id(self, dataset_id) -> DataFrameMetadata:
+    def dataset_by_id(self, dataset_id) -> TableCatalog:
         """
         Returns the dataset by ID
         Arguments:
             dataset_id (int)
         Returns:
-           DataFrameMetadata
+           TableCatalog
         """
         return self.model.query.filter(self.model._id == dataset_id).one()
 
@@ -98,14 +98,14 @@ class DatasetService(BaseService):
             need be listed. If not specified, all columns will be retrieved
             # TODO:  perform column filtering when column_name not None
         Returns:
-            DataFrameMetadata - metadata for given dataset_name
+            TableCatalog - metadata for given dataset_name
         """
         return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
-    def drop_dataset(self, dataset: DataFrameMetadata):
+    def drop_dataset(self, dataset: TableCatalog):
         """Delete dataset from the db
         Arguments:
-            dataset  (DataFrameMetadata): dataset to delete
+            dataset  (TableCatalog): dataset to delete
         Returns:
             True if successfully removed else false
         """
@@ -117,7 +117,7 @@ class DatasetService(BaseService):
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
-    def rename_dataset(self, dataset: DataFrameMetadata, new_name: str):
+    def rename_dataset(self, dataset: TableCatalog, new_name: str):
         try:
             dataset.update(_name=new_name)
         except Exception as e:

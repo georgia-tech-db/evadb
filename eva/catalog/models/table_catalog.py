@@ -20,16 +20,16 @@ from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.base_model import BaseModel
 
 
-class DataFrameMetadata(BaseModel):
-    __tablename__ = "df_metadata"
+class TableCatalog(BaseModel):
+    __tablename__ = "table_catalog"
 
     _name = Column("name", String(100), unique=True)
     _file_url = Column("file_url", String(100))
     _unique_identifier_column = Column("identifier_column", String(100))
     _table_type = Column("table_type", Enum(TableType))
     _columns = relationship(
-        "DataFrameColumn",
-        back_populates="_dataset",
+        "ColumnCatalog",
+        back_populates="_table",
         cascade="all, delete, delete-orphan",
     )
 

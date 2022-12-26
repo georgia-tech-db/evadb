@@ -26,14 +26,14 @@ UDF_ID = 123
 
 
 class UdfServiceTest(TestCase):
-    @patch("eva.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfCatalog")
     def test_create_udf_should_create_model(self, mocked):
         service = UdfService()
         service.create_udf(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.return_value.save.assert_called_once()
 
-    @patch("eva.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfCatalog")
     def test_udf_by_name_should_query_model_with_name(self, mocked):
         service = UdfService()
         expected = mocked.query.filter.return_value.one.return_value
@@ -43,7 +43,7 @@ class UdfServiceTest(TestCase):
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfCatalog")
     def test_udf_by_id_should_query_model_with_id(self, mocked):
         service = UdfService()
         expected = mocked.query.filter.return_value.one.return_value
@@ -67,7 +67,7 @@ class UdfServiceTest(TestCase):
                 str(cm.exception),
             )
 
-    @patch("eva.catalog.services.udf_service.UdfMetadata")
+    @patch("eva.catalog.services.udf_service.UdfCatalog")
     def test_get_all_udfs_should_return_empty(self, mocked):
         service = UdfService()
         mocked.query.all.side_effect = Exception(NoResultFound)

@@ -26,14 +26,14 @@ INDEX_ID = 123
 
 
 class IndexServiceTest(TestCase):
-    @patch("eva.catalog.services.index_service.IndexMetadata")
+    @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_create_index_should_create_model(self, mocked):
         service = IndexService()
         service.create_index(INDEX_NAME, INDEX_IMPL_PATH, INDEX_TYPE)
         mocked.assert_called_with(INDEX_NAME, INDEX_IMPL_PATH, INDEX_TYPE)
         mocked.return_value.save.assert_called_once()
 
-    @patch("eva.catalog.services.index_service.IndexMetadata")
+    @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_index_by_name_should_query_model_with_name(self, mocked):
         service = IndexService()
         expected = mocked.query.filter.return_value.one.return_value
@@ -43,7 +43,7 @@ class IndexServiceTest(TestCase):
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.index_service.IndexMetadata")
+    @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_index_by_id_should_query_model_with_id(self, mocked):
         service = IndexService()
         expected = mocked.query.filter.return_value.one.return_value
@@ -88,7 +88,7 @@ class IndexServiceTest(TestCase):
                     str(cm.exception),
                 )
 
-    @patch("eva.catalog.services.index_service.IndexMetadata")
+    @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_get_all_indices_should_return_empty(self, mocked):
         service = IndexService()
         mocked.query.all.side_effect = Exception(NoResultFound)

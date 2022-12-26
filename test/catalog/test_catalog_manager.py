@@ -19,8 +19,8 @@ from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.udf import UdfCatalog
 
 
 class CatalogManagerTests(unittest.TestCase):
@@ -66,9 +66,9 @@ class CatalogManagerTests(unittest.TestCase):
         x._create_video_table(name)
 
         col_metadata_list = [
-            DataFrameColumn("name", ColumnType.TEXT, False, None, []),
-            DataFrameColumn("id", ColumnType.INTEGER, False, None, []),
-            DataFrameColumn(
+            ColumnCatalog("name", ColumnType.TEXT, False, None, []),
+            ColumnCatalog("id", ColumnType.INTEGER, False, None, []),
+            ColumnCatalog(
                 "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [None, None, None]
             ),
         ]
@@ -91,13 +91,13 @@ class CatalogManagerTests(unittest.TestCase):
         file_url = "file1"
         dataset_name = "name"
 
-        columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
+        columns = [(ColumnCatalog("c1", ColumnType.INTEGER))]
         actual = catalog.create_metadata(dataset_name, file_url, columns)
         ds_mock.return_value.create_dataset.assert_called_with(
             dataset_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
         )
         for column in columns:
-            column.metadata_id = ds_mock.return_value.create_dataset.return_value.id
+            column.table_id = ds_mock.return_value.create_dataset.return_value.id
 
         dcs_mock.return_value.create_column.assert_called_with([ANY] + columns)
 
@@ -151,7 +151,7 @@ class CatalogManagerTests(unittest.TestCase):
         dcs_mock.return_value.columns_by_id_and_dataset_id.assert_not_called()
         self.assertEqual(actual, metadata_obj)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfIO")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalog")
     def test_create_udf_io_object(self, udfio_mock):
         catalog = CatalogManager()
         actual = catalog.udf_io(
@@ -193,7 +193,7 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch("eva.catalog.catalog_manager.UdfIOService")
     def test_get_udf_outputs(self, udf_mock):
         mock_func = udf_mock.return_value.get_outputs_by_udf_id
-        udf_obj = MagicMock(spec=UdfMetadata)
+        udf_obj = MagicMock(spec=UdfCatalog)
         CatalogManager().get_udf_outputs(udf_obj)
         mock_func.assert_called_once_with(udf_obj.id)
 
@@ -204,7 +204,7 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch("eva.catalog.catalog_manager.UdfIOService")
     def test_get_udf_inputs(self, udf_mock):
         mock_func = udf_mock.return_value.get_inputs_by_udf_id
-        udf_obj = MagicMock(spec=UdfMetadata)
+        udf_obj = MagicMock(spec=UdfCatalog)
         CatalogManager().get_udf_inputs(udf_obj)
         mock_func.assert_called_once_with(udf_obj.id)
 

@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
@@ -93,7 +93,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
     def _rollback_load(
         self,
         storage_engine: AbstractStorageEngine,
-        table_obj: DataFrameMetadata,
+        table_obj: TableCatalog,
         do_create: bool,
     ):
         try:

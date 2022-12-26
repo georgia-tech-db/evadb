@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Callable, List
 
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.udf_io import UdfIOCatalog
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -57,7 +57,7 @@ class FunctionExpression(AbstractExpression):
         self._function_instance = None
         self._output = output
         self.alias = alias
-        self.output_objs: List[UdfIO] = []
+        self.output_objs: List[UdfIOCatalog] = []
         self.projection_columns: List[str] = []
 
     @property

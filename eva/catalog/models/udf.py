@@ -18,15 +18,15 @@ from sqlalchemy.orm import relationship
 from eva.catalog.models.base_model import BaseModel
 
 
-class UdfMetadata(BaseModel):
-    __tablename__ = "udf"
+class UdfCatalog(BaseModel):
+    __tablename__ = "udf_catalog"
 
     _name = Column("name", String(100), unique=True)
     _impl_file_path = Column("impl_file_path", String(128))
     _type = Column("type", String(100))
 
     _cols = relationship(
-        "UdfIO", back_populates="_udf", cascade="all, delete, delete-orphan"
+        "UdfIOCatalog", back_populates="_udf", cascade="all, delete, delete-orphan"
     )
 
     def __init__(self, name: str, impl_file_path: str, type: str):

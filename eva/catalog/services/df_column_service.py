@@ -16,18 +16,18 @@ from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.catalog.services.base_service import BaseService
 
 
 class DatasetColumnService(BaseService):
     def __init__(self):
-        super().__init__(DataFrameColumn)
+        super().__init__(ColumnCatalog)
 
     def columns_by_dataset_id_and_names(self, dataset_id, column_names):
         result = self.model.query.filter(
-            self.model._metadata_id == dataset_id,
+            self.model._table_id == dataset_id,
             self.model._name.in_(column_names),
         ).all()
 
@@ -46,11 +46,11 @@ class DatasetColumnService(BaseService):
         """
         if id_list is not None:
             return self.model.query.filter(
-                self.model._metadata_id == dataset_id,
+                self.model._table_id == dataset_id,
                 self.model._id.in_(id_list),
             ).all()
 
-        return self.model.query.filter(self.model._metadata_id == dataset_id).all()
+        return self.model.query.filter(self.model._table_id == dataset_id).all()
 
     def create_column(self, column_list):
         saved_column_list = []
@@ -58,8 +58,8 @@ class DatasetColumnService(BaseService):
             saved_column_list.append(column.save())
         return saved_column_list
 
-    def get_dataset_columns(self, dataset: DataFrameMetadata) -> List[DataFrameColumn]:
+    def get_dataset_columns(self, dataset: TableCatalog) -> List[ColumnCatalog]:
         try:
-            return self.model.query.filter(self.model._metadata_id == dataset.id).all()
+            return self.model.query.filter(self.model._table_id == dataset.id).all()
         except NoResultFound:
             return None

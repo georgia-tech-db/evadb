@@ -14,14 +14,14 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.udf_io import UdfIOCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
 class UdfIOService(BaseService):
     def __init__(self):
-        super().__init__(UdfIO)
+        super().__init__(UdfIOCatalog)
 
     def get_inputs_by_udf_id(self, udf_id: int):
         try:
@@ -47,11 +47,11 @@ class UdfIOService(BaseService):
             logger.error(error)
             raise RuntimeError(error)
 
-    def add_udf_io(self, io_list: List[UdfIO]):
+    def add_udf_io(self, io_list: List[UdfIOCatalog]):
         """Commit an entry in the udf_io table
 
         Arguments:
-            io_list (List[UdfIO]): List of io info io be added
+            io_list (List[UdfIOCatalog]): List of io info io be added
         """
 
         for io in io_list:

@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.expression.abstract_expression import AbstractExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -34,7 +34,7 @@ class InsertPlan(AbstractPlan):
 
     def __init__(
         self,
-        table_metainfo: DataFrameMetadata,
+        table_metainfo: TableCatalog,
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
     ):

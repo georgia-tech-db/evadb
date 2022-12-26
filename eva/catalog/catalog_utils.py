@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 
 
-def is_video_table(table: DataFrameMetadata):
+def is_video_table(table: TableCatalog):
     return table.table_type == TableType.VIDEO_DATA

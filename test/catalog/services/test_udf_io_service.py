@@ -25,7 +25,7 @@ UDF_ID = 123
 
 
 class UdfServiceTest(TestCase):
-    @patch("eva.catalog.services.udf_io_service.UdfIO")
+    @patch("eva.catalog.services.udf_io_service.UdfIOCatalog")
     def test_get_inputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOService()
 
@@ -37,7 +37,7 @@ class UdfServiceTest(TestCase):
         expected = mocked.query.filter.return_value.all.return_value
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.udf_io_service.UdfIO")
+    @patch("eva.catalog.services.udf_io_service.UdfIOCatalog")
     def test_get_inputs_by_udf_id_should_raise(self, mock):
         service = UdfIOService()
         mock.query.filter.side_effect = Exception("error")
@@ -47,7 +47,7 @@ class UdfServiceTest(TestCase):
             f"Getting inputs for UDF id {UDF_NAME} raised error", str(cm.exception)
         )
 
-    @patch("eva.catalog.services.udf_io_service.UdfIO")
+    @patch("eva.catalog.services.udf_io_service.UdfIOCatalog")
     def test_get_outputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOService()
 
@@ -59,7 +59,7 @@ class UdfServiceTest(TestCase):
         expected = mocked.query.filter.return_value.all.return_value
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.udf_io_service.UdfIO")
+    @patch("eva.catalog.services.udf_io_service.UdfIOCatalog")
     def test_get_outputs_by_udf_id_should_raise(self, mock):
         service = UdfIOService()
         mock.query.filter.side_effect = Exception("error")

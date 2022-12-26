@@ -23,8 +23,8 @@ from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
 
 
-class UdfIO(BaseModel):
-    __tablename__ = "udf_column"
+class UdfIOCatalog(BaseModel):
+    __tablename__ = "udfio_catalog"
 
     _name = Column("name", String(100))
     _type = Column("type", Enum(ColumnType), default=Enum)
@@ -32,8 +32,8 @@ class UdfIO(BaseModel):
     _array_type = Column("array_type", Enum(NdArrayType), nullable=True)
     _array_dimensions = Column("array_dimensions", String(100))
     _is_input = Column("is_input", Boolean, default=True)
-    _udf_id = Column("udf_id", Integer, ForeignKey("udf._row_id"))
-    _udf = relationship("UdfMetadata", back_populates="_cols")
+    _udf_id = Column("udf_id", Integer, ForeignKey("udf_catalog._row_id"))
+    _udf = relationship("UdfCatalog", back_populates="_cols")
 
     __table_args__ = (UniqueConstraint("name", "udf_id"), {})
 

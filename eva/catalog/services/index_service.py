@@ -16,16 +16,16 @@ import os
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.index import IndexMetadata
+from eva.catalog.models.index import IndexCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
 class IndexService(BaseService):
     def __init__(self):
-        super().__init__(IndexMetadata)
+        super().__init__(IndexCatalog)
 
-    def create_index(self, name: str, save_file_path: str, type: str) -> IndexMetadata:
+    def create_index(self, name: str, save_file_path: str, type: str) -> IndexCatalog:
         metadata = self.model(name, save_file_path, type)
         metadata = metadata.save()
         return metadata

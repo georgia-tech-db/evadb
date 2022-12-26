@@ -23,19 +23,19 @@ from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
 
 
-class DataFrameColumn(BaseModel):
-    __tablename__ = "df_column"
+class ColumnCatalog(BaseModel):
+    __tablename__ = "column_catalog"
 
     _name = Column("name", String(100))
     _type = Column("type", Enum(ColumnType), default=Enum)
     _is_nullable = Column("is_nullable", Boolean, default=False)
     _array_type = Column("array_type", Enum(NdArrayType), nullable=True)
     _array_dimensions = Column("array_dimensions", String(100))
-    _metadata_id = Column("metadata_id", Integer, ForeignKey("df_metadata._row_id"))
+    _table_id = Column("table_id", Integer, ForeignKey("table_catalog._row_id"))
 
-    _dataset = relationship("DataFrameMetadata", back_populates="_columns")
+    _table = relationship("TableCatalog", back_populates="_columns")
 
-    __table_args__ = (UniqueConstraint("name", "metadata_id"), {})
+    __table_args__ = (UniqueConstraint("name", "table_id"), {})
 
     def __init__(
         self,
@@ -44,14 +44,14 @@ class DataFrameColumn(BaseModel):
         is_nullable: bool = False,
         array_type: NdArrayType = None,
         array_dimensions: List[int] = [],
-        metadata_id: int = None,
+        table_id: int = None,
     ):
         self._name = name
         self._type = type
         self._is_nullable = is_nullable
         self._array_type = array_type
         self.array_dimensions = array_dimensions
-        self._metadata_id = metadata_id
+        self._table_id = table_id
 
     @property
     def id(self):
@@ -93,12 +93,12 @@ class DataFrameColumn(BaseModel):
         self._array_dimensions = str(dimensions)
 
     @property
-    def metadata_id(self):
-        return self._metadata_id
+    def table_id(self):
+        return self._table_id
 
-    @metadata_id.setter
-    def metadata_id(self, value):
-        self._metadata_id = value
+    @table_id.setter
+    def table_id(self, value):
+        self._table_id = value
 
     def __str__(self):
         column_str = "Column: (%s, %s, %s, " % (
@@ -118,7 +118,7 @@ class DataFrameColumn(BaseModel):
     def __eq__(self, other):
         return (
             self.id == other.id
-            and self.metadata_id == other.metadata_id
+            and self.table_id == other.table_id
             and self.is_nullable == other.is_nullable
             and self.array_type == other.array_type
             and self.array_dimensions == other.array_dimensions
@@ -130,7 +130,7 @@ class DataFrameColumn(BaseModel):
         return hash(
             (
                 self.id,
-                self.metadata_id,
+                self.table_id,
                 self.is_nullable,
                 self.array_type,
                 tuple(self.array_dimensions),

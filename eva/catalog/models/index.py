@@ -20,8 +20,8 @@ from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.base_model import BaseModel
 
 
-class IndexMetadata(BaseModel):
-    __tablename__ = "index"
+class IndexCatalog(BaseModel):
+    __tablename__ = "index_catalog"
 
     _name = Column("name", String(100), unique=True)
     _save_file_path = Column("save_file_path", String(128))
@@ -29,15 +29,15 @@ class IndexMetadata(BaseModel):
 
     # Secondary index reference.
     _secondary_index_id = Column(
-        "secondary_index_id", Integer, ForeignKey("df_metadata._row_id")
+        "secondary_index_id", Integer, ForeignKey("table_catalog._row_id")
     )
-    _secondary_index = relationship("DataFrameMetadata")
+    _secondary_index = relationship("TableCatalog")
 
     # Input feature column reference.
     _feat_df_column_id = Column(
-        "df_column_id", Integer, ForeignKey("df_column._row_id")
+        "df_column_id", Integer, ForeignKey("column_catalog._row_id")
     )
-    _feat_df_column = relationship("DataFrameColumn")
+    _feat_df_column = relationship("ColumnCatalog")
 
     def __init__(
         self,

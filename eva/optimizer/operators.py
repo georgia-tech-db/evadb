@@ -17,9 +17,9 @@ from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import IndexType
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.udf_io import UdfIOCatalog
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
@@ -145,7 +145,7 @@ class LogicalGet(Operator):
     def __init__(
         self,
         video: TableRef,
-        dataset_metadata: DataFrameMetadata,
+        dataset_metadata: TableCatalog,
         alias: str,
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
@@ -396,7 +396,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to intert data into
+        table_metainfo(TableCatalog): table to intert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -405,7 +405,7 @@ class LogicalInsert(Operator):
 
     def __init__(
         self,
-        table_metainfo: DataFrameMetadata,
+        table_metainfo: TableCatalog,
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
         children: List = None,
@@ -582,9 +582,9 @@ class LogicalCreateUDF(Operator):
         if_not_exists: bool
             if true should throw an error if udf with same name exists
             else will replace the existing
-        inputs: List[UdfIO]
+        inputs: List[UdfIOCatalog]
             udf inputs, annotated list similar to table columns
-        outputs: List[UdfIO]
+        outputs: List[UdfIOCatalog]
             udf outputs, annotated list similar to table columns
         impl_path: Path
             file path which holds the implementation of the udf.
@@ -598,8 +598,8 @@ class LogicalCreateUDF(Operator):
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[UdfIO],
-        outputs: List[UdfIO],
+        inputs: List[UdfIOCatalog],
+        outputs: List[UdfIOCatalog],
         impl_path: Path,
         udf_type: str = None,
         children: List = None,
@@ -707,7 +707,7 @@ class LogicalLoadData(Operator):
     """Logical node for load data operation
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to load data into
+        table_metainfo(TableCatalog): table to load data into
         path(Path): file path from where we are loading data
     """
 
@@ -919,8 +919,8 @@ class LogicalJoin(Operator):
         self,
         join_type: JoinType,
         join_predicate: AbstractExpression = None,
-        left_keys: List[DataFrameColumn] = None,
-        right_keys: List[DataFrameColumn] = None,
+        left_keys: List[ColumnCatalog] = None,
+        right_keys: List[ColumnCatalog] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALJOIN, children)

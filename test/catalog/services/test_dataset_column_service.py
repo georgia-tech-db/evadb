@@ -27,7 +27,7 @@ class DatasetColumnServiceTest(unittest.TestCase):
         for mock in mocks:
             mock.save.assert_called_once()
 
-    @patch("eva.catalog.services.df_column_service.DataFrameColumn")
+    @patch("eva.catalog.services.df_column_service.ColumnCatalog")
     def test_column_by_metadata_id_and_names_should_query_correctly(self, mocked):
         mocked.query.filter.return_value.all.return_value = [1, 2, 3]
 
@@ -36,13 +36,13 @@ class DatasetColumnServiceTest(unittest.TestCase):
         column_names = ["a", "b"]
         actual = service.columns_by_dataset_id_and_names(metadata_id, column_names)
         mocked.query.filter.assert_called_with(
-            mocked._metadata_id == metadata_id, mocked._name.in_(column_names)
+            mocked._table_id == metadata_id, mocked._name.in_(column_names)
         )
         expected = [1, 2, 3]
 
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.df_column_service.DataFrameColumn")
+    @patch("eva.catalog.services.df_column_service.ColumnCatalog")
     def test_column_by_metadata_id_and_col_ids_should_query_correctly(self, mocked):
         return_val = [1, 2, 3]
         mocked.query.filter.return_value.all.return_value = return_val
@@ -52,11 +52,11 @@ class DatasetColumnServiceTest(unittest.TestCase):
         column_ids = [1, 2]
         actual = service.columns_by_id_and_dataset_id(metadata_id, column_ids)
         mocked.query.filter.assert_called_with(
-            mocked._metadata_id == metadata_id, mocked._id.in_(column_ids)
+            mocked._table_id == metadata_id, mocked._id.in_(column_ids)
         )
         self.assertEqual(actual, return_val)
 
-    @patch("eva.catalog.services.df_column_service.DataFrameColumn")
+    @patch("eva.catalog.services.df_column_service.ColumnCatalog")
     def test_by_dataset_id_and_empty_col_ids_should_query_correctly(self, mocked):
         return_val = [1, 2, 3]
         mocked.query.filter.return_value.all.return_value = return_val
