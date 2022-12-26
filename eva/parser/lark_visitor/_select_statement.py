@@ -34,10 +34,18 @@ class Select:
         return orderby_clause_data
 
     def order_by_expression(self, tree):
-        sort_token = str(tree.children[0])
-        output = self.visit_children(tree)
-        output = output[0][0][0][0]
-        return output, sort_token
+        print(tree.pretty())
+        expr = None
+        sort_order = None
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data.endswith("expression"):
+                    expr = self.visit(child)
+                elif child.data == "sort_order":
+                     sort_order = str(child)
+
+        return expr, sort_order
 
     def limit_clause(self, tree):
         output = ConstantValueExpression(self.visit(tree.children[1]))

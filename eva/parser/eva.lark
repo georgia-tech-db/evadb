@@ -102,7 +102,9 @@ updated_element: full_column_name "=" (expression | DEFAULT)
  
 order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
 
-order_by_expression: expression (ASC | DESC)?
+order_by_expression: expression sort_order?
+
+sort_order: ASC | DESC
     
 // Forcing EXPLICIT JOIN KEYWORD
 table_sources: table_source
