@@ -57,7 +57,6 @@ class Functions:
 
     # Drop UDF
     def drop_udf(self, tree):
-        print(tree.pretty())
         udf_name = None
         if_exists = False
 
@@ -75,7 +74,6 @@ class Functions:
 
     # Create UDF
     def create_udf(self, tree):
-        print(tree.pretty())
         udf_name = None
         if_not_exists = False
         input_definitions = []

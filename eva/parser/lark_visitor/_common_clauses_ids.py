@@ -27,7 +27,7 @@ class CommonClauses:
     def table_name(self, tree):
         table_name = self.visit(tree.children[0])
         if table_name is not None:
-            return TableInfo(table_name)
+            return TableInfo(table_name=table_name)
         else:
             error = "Invalid Table Name"
             logger.error(error)

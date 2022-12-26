@@ -111,8 +111,7 @@ table_source: table_source_item_with_sample join_part*
     
 table_source_item_with_sample: table_source_item alias_clause? sample_clause?
 
-table_source_item: table_name                   ->atom_table_item 
-                 | subquery_table_source_item   ->subquery_table_item
+table_source_item: table_name | subquery_table_source_item   
     
 
 table_valued_function: function_call                                

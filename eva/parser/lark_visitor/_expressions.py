@@ -67,8 +67,6 @@ class Expressions:
                            ColumnType.INTEGER)
 
     def logical_expression(self, tree):
-        print(tree.pretty())
-        print(len(tree.children))
         if len(tree.children) < 3:
             # error scenario, should have 3 children
             return None

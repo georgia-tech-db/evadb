@@ -844,10 +844,35 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT Licence_plate(bbox) FROM
-                            (SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
-                              WHERE Yolo(frame).label = 'vehicle') AS T
-                          WHERE Is_suspicious(bbox) = 1 AND
-                                Licence_plate(bbox) = '12345';"""
+        #query = """SELECT Licence_plate(bbox) FROM
+        #                    (SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
+        #                      WHERE Yolo(frame).label = 'vehicle') AS T
+        #                  WHERE Is_suspicious(bbox) = 1 AND
+        #                        Licence_plate(bbox) = '12345';"""
+        #parser = Parser()
+        #parser.parse(query)
+
         parser = Parser()
-        parser.parse(query)
+        select_query = "SELECT CLASS, REDNESS FROM TAIPAI \
+                WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
+
+        select_stmt = eva_statement_list[0]
+
+        # target List
+        self.assertIsNotNone(select_stmt.target_list)
+        self.assertEqual(len(select_stmt.target_list), 2)
+        self.assertEqual(select_stmt.target_list[0].etype, ExpressionType.TUPLE_VALUE)
+        self.assertEqual(select_stmt.target_list[1].etype, ExpressionType.TUPLE_VALUE)
+
+        # from_table
+        self.assertIsNotNone(select_stmt.from_table)
+        self.assertIsInstance(select_stmt.from_table, TableRef)
+        self.assertEqual(select_stmt.from_table.table.table_name, "TAIPAI")
+
+        # where_clause
+        self.assertIsNotNone(select_stmt.where_clause)
+        # other tests should go in expression testing

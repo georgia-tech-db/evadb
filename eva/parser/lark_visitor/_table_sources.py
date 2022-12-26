@@ -42,7 +42,7 @@ class TableSources:
     def table_sources(self, tree):
         return self.visit(tree.children[0])
 
-    def table_source_base(self, tree):
+    def table_source(self, tree):
         left_node = self.visit(tree.children[0])
         join_nodes = [left_node]
         for table_join_index in tree.children[1:]:
@@ -76,7 +76,7 @@ class TableSources:
                 elif child.data == "alias_clause":
                     alias = self.visit(child)
 
-        return TableRef(table, alias, sample_freq)
+        return TableRef(table=table, alias=alias, sample_freq=sample_freq)
 
     def table_source_item(self, tree):
         return self.visit(tree.children[0])
