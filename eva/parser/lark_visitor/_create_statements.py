@@ -24,7 +24,7 @@ from lark import Tree
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
-from eva.catalog.catalog_type import ColumnType
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 
 ##################################################################
 # CREATE STATEMENTS
@@ -89,35 +89,30 @@ class CreateTable:
         data_type = None 
         array_type = None  
         dimensions = None  
-        column_constraint_information = None 
+        column_constraint_information =  ColConstraintInfo() 
         not_null_set = False
-
-        print(tree.pretty())
 
         for child in tree.children:
             if isinstance(child, Tree):
-                print(child.data)
                 if child.data.endswith("data_type"):
                     data_type, array_type, dimensions = self.visit(child)
                 elif child.data.endswith("column_constraint"):
-                    if column_constraint_information is None:
-                        column_constraint_information = ColConstraintInfo()
-                        return_type = self.visit(child)
-
-                        if return_type == ColumnConstraintEnum.UNIQUE:
-                            column_constraint_information.unique = True
-                            column_constraint_information.nullable = False
-                            not_null_set = True
-                        elif return_type == ColumnConstraintEnum.NOTNULL:
-                            column_constraint_information.nullable = False
-                            not_null_set = True
+                    return_type = self.visit(child)
+                    if return_type == ColumnConstraintEnum.UNIQUE:
+                        column_constraint_information.unique = True
+                        column_constraint_information.nullable = False
+                        not_null_set = True
+                    elif return_type == ColumnConstraintEnum.NOTNULL:
+                        column_constraint_information.nullable = False
+                        not_null_set = True
                 else:
                     raise ValueError(f'Unidentified selector child: {child.data!r}')
                     
-        if not not_null_set and column_constraint_information is not None:
+        if not not_null_set:
             column_constraint_information.nullable = True
 
         return data_type, array_type, dimensions, column_constraint_information
+
 
     def unique_key_column_constraint(self, tree):
         return ColumnConstraintEnum.UNIQUE
@@ -160,22 +155,23 @@ class CreateTable:
             data_type = ColumnType.FLOAT
             dimensions = self.visit(tree.children[1])
         elif token == "TEXT":
-            data_type = ColumnType.INTEGER
+            data_type = ColumnType.TEXT
             dimensions = self.visit(tree.children[1])
 
         return data_type, array_type, dimensions
 
     def array_data_type(self, tree):
         data_type = ColumnType.NDARRAY
-        array_type = None
+        array_type = NdArrayType.ANYTYPE
         dimensions = None
 
-        if ctx.arrayType():
-            array_type = self.visit(ctx.arrayType())
-        else:
-            array_type = NdArrayType.ANYTYPE
-        if ctx.lengthDimensionList():
-            dimensions = self.visit(ctx.lengthDimensionList())
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "array_type":
+                    array_type = self.visit(child)
+                elif child.data == "length_dimension_list":
+                    dimensions = self.visit(child)
+
         return data_type, array_type, dimensions
 
     def any_data_type(self, tree):
@@ -184,31 +180,32 @@ class CreateTable:
     def array_type(self, tree):
         array_type = None
 
-        if ctx.INT8() is not None:
+        token = tree.children[0]
+        if token == "INT8":
             array_type = NdArrayType.INT8
-        elif ctx.UINT8() is not None:
+        elif token == "UINT8":
             array_type = NdArrayType.UINT8
-        elif ctx.INT16() is not None:
+        elif token == "INT16":
             array_type = NdArrayType.INT16
-        elif ctx.INT32() is not None:
+        elif token == "INT32":
             array_type = NdArrayType.INT32
-        elif ctx.INT64() is not None:
+        elif token == "INT64":
             array_type = NdArrayType.INT64
-        elif ctx.UNICODE() is not None:
+        elif token == "UNICODE":
             array_type = NdArrayType.UNICODE
-        elif ctx.BOOL() is not None:
+        elif token == "BOOL":
             array_type = NdArrayType.BOOL
-        elif ctx.FLOAT32() is not None:
+        elif token == "FLOAT32":
             array_type = NdArrayType.FLOAT32
-        elif ctx.FLOAT64() is not None:
+        elif token == "FLOAT64":
             array_type = NdArrayType.FLOAT64
-        elif ctx.DECIMAL() is not None:
+        elif token == "DECIMAL":
             array_type = NdArrayType.DECIMAL
-        elif ctx.STR() is not None:
+        elif token == "STR":
             array_type = NdArrayType.STR
-        elif ctx.DATETIME() is not None:
+        elif token == "DATETIME":
             array_type = NdArrayType.DATETIME
-        elif ctx.ANYTYPE() is not None:
+        elif token == "ANYTYPE":
             array_type = NdArrayType.ANYTYPE
         else:
             err_msg = "Unsupported NdArray datatype found in the query"
@@ -216,29 +213,25 @@ class CreateTable:
             raise RuntimeError(err_msg)
         return array_type
 
-    def length_one_dimension(self, trees):
+    def dimension_helper(self, tree):
         dimensions = []
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "decimal_literal":
+                    decimal = self.visit(child)
+                    dimensions.append(decimal)
+        return dimensions
 
-        if ctx.decimalLiteral() is not None:
-            dimensions = [self.visit(ctx.decimalLiteral())]
-
+    def length_one_dimension(self, tree):
+        dimensions = self.dimension_helper(tree)
         return dimensions
 
     def length_two_dimension(self, tree):
-        first_decimal = self.visit(ctx.decimalLiteral(0))
-        second_decimal = self.visit(ctx.decimalLiteral(1))
-
-        dimensions = [first_decimal, second_decimal]
+        dimensions = self.dimension_helper(tree)
         return dimensions
 
     def length_dimension_list(self, tree):
-        dimensions = []
-        dimension_list_length = len(ctx.decimalLiteral())
-        for dimension_list_index in range(dimension_list_length):
-            decimal_literal = ctx.decimalLiteral(dimension_list_index)
-            decimal = self.visit(decimal_literal)
-            dimensions.append(decimal)
-
+        dimensions = self.dimension_helper(tree)
         return dimensions
 
     def decimal_literal(self, tree):
