@@ -19,6 +19,7 @@ from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.utils.logging_manager import logger
+from lark import Tree
 
 
 ##################################################################
@@ -50,76 +51,68 @@ class Functions:
             if not isinstance(child, TerminalNode):
                 args.append(self.visit(child))
         return args
+        
 
-    # Get UDF information from context
-    def udf_info(self, tree):
+    # Drop UDF
+    def drop_udf(self, tree):
+        print(tree.pretty())
+        udf_name = None
+        if_exists = False
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'udf_name':
+                    udf_name = self.visit(child)
+                elif child.data == 'if_exists':
+                    if_exists = True
+
+        return DropUDFStatement(
+            udf_name,
+            if_exists
+        )
+
+    # Create UDF
+    def create_udf(self, tree):
+        print(tree.pretty())
         udf_name = None
         if_not_exists = False
-        if_exists = False
         input_definitions = []
         output_definitions = []
         impl_path = None
         udf_type = None
-        for child in ctx.children:
-            try:
-                if isinstance(child, TerminalNode):
-                    continue
-                rule_idx = child.getRuleIndex()
 
-                if rule_idx == evaql_parser.RULE_udfName:
-                    udf_name = self.visit(ctx.udfName())
-
-                elif rule_idx == evaql_parser.RULE_ifNotExists:
+        create_definitions_index = 0
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'udf_name':
+                    udf_name = self.visit(child)
+                elif child.data == 'if_not_exists':
                     if_not_exists = True
-
-                elif rule_idx == evaql_parser.RULE_ifExists:
-                    if_exists = True
-
-                elif rule_idx == evaql_parser.RULE_createDefinitions:
+                elif child.data == 'create_definitions':
                     # There should be 2 createDefinition
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
-                    if len(ctx.createDefinitions()) != 2:
-                        err_msg = "Mising UDF Input or Output"
-                        logger.error(err_msg)
-                        raise SyntaxError(err_msg)
-                    input_definitions = self.visit(ctx.createDefinitions(0))
-                    output_definitions = self.visit(ctx.createDefinitions(1))
+                    if create_definitions_index == 0:
+                        input_definitions = self.visit(child)
+                        create_definitions_index += 1
+                    elif create_definitions_index == 1:
+                        output_definitions = self.visit(child)
+                elif child.data == 'udf_type':
+                    udf_type = self.visit(child)                   
+                elif child.data == 'udf_impl':
+                    impl_path = self.visit(child).value
+                else:
+                    raise ValueError(f'CREATE/DROP UDF Failed: Unidentified selector child: {child.data!r}')
+                    return None
 
-                elif rule_idx == evaql_parser.RULE_udfType:
-                    udf_type = self.visit(ctx.udfType())
-
-                elif rule_idx == evaql_parser.RULE_udfImpl:
-                    impl_path = self.visit(ctx.udfImpl()).value
-
-            except BaseException:
-                logger.error("CREATE/DROP UDF Failed")
-                # stop parsing something bad happened
-                return None
-
-        if if_exists and if_not_exists:
-            logger.error("Bad CREATE/DROP UDF command syntax")
-
-        return (
+        return CreateUDFStatement(
             udf_name,
-            if_exists or if_not_exists,
+            if_not_exists,
             input_definitions,
             output_definitions,
             impl_path,
             udf_type,
         )
-
-    # Drop UDF
-    def drop_udf(self, tree):
-        udf_info = self.getUDFInfo(ctx)
-        stmt = DropUDFStatement(*udf_info[:2])
-        return stmt
-
-    # Create UDF
-    def create_udf(self, tree):
-        udf_info = self.getUDFInfo(ctx)
-        stmt = CreateUDFStatement(*udf_info)
-        return stmt
 
     def aggregate_windowed_function(self, tree):
         if ctx.aggregateFunctionName():
