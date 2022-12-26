@@ -65,11 +65,17 @@ class TableSources:
     def table_source_item_with_sample(self, tree):
         sample_freq = None
         alias = None
-        table = self.visit(tree.children[0])
-        #if ctx.sampleClause():
-        #    sample_freq = self.visit(ctx.sampleClause())
-        #if ctx.AS():
-        #    alias = Alias(self.visit(ctx.uid()))
+        table = None
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "table_source_item":
+                    table = self.visit(child)
+                elif child.data == "sample_clause":
+                    sample_freq = self.visit(child)
+                elif child.data == "alias_clause":
+                    alias = self.visit(child)
+
         return TableRef(table, alias, sample_freq)
 
     def table_source_item(self, tree):
@@ -172,10 +178,16 @@ class TableSources:
 
     # Nested sub query
     def subquery_table_item(self, tree):
-        return self.visit(ctx.subqueryTableSourceItem())
+        return self.visit(tree.children[0])
 
     def subquery_table_source_item(self, tree):
-        return self.visit(ctx.selectStatement())
+        subquery_table_source_item = None
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'simple_select':
+                    subquery_table_source_item = self.visit(child)
+        
+        return subquery_table_source_item
 
     def union_select(self, tree):
         left_selectStatement = self.visit(ctx.left)
@@ -205,10 +217,15 @@ class TableSources:
         return groupby_clause
 
     def alias_clause(self, tree):
-        alias_name = self.visit(ctx.uid())
+        alias_name = None
         column_list = []
-        if ctx.uidList():
-            column_list = self.visit(ctx.uidList())
-            column_list = [col.col_name for col in column_list]
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "uid":
+                    alias_name = self.visit(child)
+                elif child.data == "uid_list":
+                    column_list = self.visit(child)
+                    column_list = [col.col_name for col in column_list]
 
         return Alias(alias_name, column_list)

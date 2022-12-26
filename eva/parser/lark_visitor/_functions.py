@@ -30,14 +30,17 @@ class Functions:
     def udf_function(self, tree):
         udf_name = None
         udf_output = None
-        if ctx.simpleId():
-            udf_name = self.visit(ctx.simpleId())
-        else:
-            logger.error("UDF function name missing.")
-        if ctx.dottedId():
-            udf_output = self.visit(ctx.dottedId())
+        udf_args = None
 
-        udf_args = self.visit(ctx.functionArgs())
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'simple_id':
+                    udf_name = self.visit(child)
+                elif child.data == 'dotted_id':
+                    udf_output = self.visit(child)
+                elif child.data == 'function_args':           
+                    udf_args = self.visit(child) 
+
         func_expr = FunctionExpression(None, name=udf_name, output=udf_output)
         for arg in udf_args:
             func_expr.append_child(arg)
@@ -46,9 +49,8 @@ class Functions:
 
     def function_args(self, tree):
         args = []
-        for child in ctx.children:
-            # ignore COMMAs
-            if not isinstance(child, TerminalNode):
+        for child in tree.children:
+            if isinstance(child, Tree):
                 args.append(self.visit(child))
         return args
         

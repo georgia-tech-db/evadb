@@ -844,7 +844,10 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT CLASS FROM TAIPAI \
-            WHERE (CLASS = 'VAN' AND REDNESS < 300 ) OR REDNESS > 500;"""
+        query = """SELECT Licence_plate(bbox) FROM
+                            (SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
+                              WHERE Yolo(frame).label = 'vehicle') AS T
+                          WHERE Is_suspicious(bbox) = 1 AND
+                                Licence_plate(bbox) = '12345';"""
         parser = Parser()
         parser.parse(query)
