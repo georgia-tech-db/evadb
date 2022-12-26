@@ -27,7 +27,7 @@ class TableCatalogService(BaseService):
     def __init__(self):
         super().__init__(TableCatalog)
 
-    def create_dataset(
+    def insert_entry(
         self, name: str, file_url: str, identifier_id, table_type: TableType
     ) -> TableCatalog:
         """
@@ -55,7 +55,7 @@ class TableCatalogService(BaseService):
         else:
             return table_catalog_obj
 
-    def dataset_by_name(self, name: str) -> int:
+    def get_entry_by_name(self, name: str) -> int:
         """
         Returns metadata id for the name queried
 
@@ -75,7 +75,7 @@ class TableCatalogService(BaseService):
         except NoResultFound:
             logger.error("get_id_from_name failed with name {}".format(name))
 
-    def dataset_by_id(self, dataset_id) -> TableCatalog:
+    def get_entry_by_id(self, dataset_id) -> TableCatalog:
         """
         Returns the dataset by ID
         Arguments:
@@ -85,7 +85,7 @@ class TableCatalogService(BaseService):
         """
         return self.model.query.filter(self.model._id == dataset_id).one()
 
-    def dataset_object_by_name(
+    def get_entry_by_name(
         self, database_name, dataset_name, column_name: List[str] = None
     ):
         """
@@ -102,7 +102,7 @@ class TableCatalogService(BaseService):
         """
         return self.model.query.filter(self.model._name == dataset_name).one_or_none()
 
-    def drop_dataset(self, dataset: TableCatalog):
+    def delete_entry(self, dataset: TableCatalog):
         """Delete dataset from the db
         Arguments:
             dataset  (TableCatalog): dataset to delete
@@ -117,7 +117,7 @@ class TableCatalogService(BaseService):
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
-    def rename_dataset(self, dataset: TableCatalog, new_name: str):
+    def rename_entry(self, dataset: TableCatalog, new_name: str):
         try:
             dataset.update(_name=new_name)
         except Exception as e:
@@ -127,7 +127,7 @@ class TableCatalogService(BaseService):
             logger.error(err_msg)
             raise RuntimeError(err_msg)
 
-    def get_all_datasets(self):
+    def get_all_entries(self):
         try:
             return self.model.query.all()
         except NoResultFound:

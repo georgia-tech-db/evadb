@@ -25,9 +25,9 @@ class BinderUtilsTest(unittest.TestCase):
     def test_bind_table_info(self, mock):
         video = MagicMock()
         catalog = mock.return_value
-        catalog.get_dataset_metadata.return_value = obj = MagicMock()
+        catalog.get_table_catalog_entry.return_value = obj = MagicMock()
         bind_table_info(video)
-        catalog.get_dataset_metadata.assert_called_with(
+        catalog.get_table_catalog_entry.assert_called_with(
             video.database_name, video.table_name
         )
         self.assertEqual(video.table_obj, obj)
@@ -37,7 +37,7 @@ class BinderUtilsTest(unittest.TestCase):
         with self.assertRaises(BinderError):
             video = MagicMock()
             catalog = mock.return_value
-            catalog.get_dataset_metadata.return_value = None
+            catalog.get_table_catalog_entry.return_value = None
             bind_table_info(video)
 
     @patch("eva.binder.binder_utils.CatalogManager")
@@ -45,7 +45,7 @@ class BinderUtilsTest(unittest.TestCase):
         video = MagicMock()
         catalog = mock.return_value
         obj = MagicMock()
-        catalog.get_dataset_metadata.return_value = obj
+        catalog.get_table_catalog_entry.return_value = obj
         type(obj).table_type = PropertyMock(
             return_value=TableType.SYSTEM_STRUCTURED_DATA
         )

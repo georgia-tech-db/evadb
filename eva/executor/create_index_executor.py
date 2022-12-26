@@ -40,7 +40,7 @@ class CreateIndexExecutor(AbstractExecutor):
 
     def exec(self):
         catalog_manager = CatalogManager()
-        if catalog_manager.get_index_by_name(self.node.name):
+        if catalog_manager.get_index_catalog_entry_by_name(self.node.name):
             msg = f"Index {self.node.name} already exists."
             logger.error(msg)
             raise ExecutorError(msg)
@@ -94,7 +94,7 @@ class CreateIndexExecutor(AbstractExecutor):
             faiss.write_index(index, self._get_index_save_path())
 
             # Save to catalog.
-            catalog_manager.create_index(
+            catalog_manager.insert_index_catalog_entry(
                 self.node.name,
                 self._get_index_save_path(),
                 self.node.index_type,
@@ -121,12 +121,12 @@ class CreateIndexExecutor(AbstractExecutor):
                 None,
                 secondary_index_tb_name,
             ):
-                secondary_index_metadata = catalog_manager.get_dataset_metadata(
+                secondary_index_metadata = catalog_manager.get_table_catalog_entry(
                     None, secondary_index_tb_name
                 )
                 storage_engine = StorageEngine.factory(secondary_index_metadata)
                 storage_engine.drop(secondary_index_metadata)
-                catalog_manager.drop_dataset_metadata(secondary_index_metadata)
+                catalog_manager.delete_table_catalog_entry(secondary_index_metadata)
 
             # Throw exception back to user.
             raise ExecutorError(str(e))
@@ -198,7 +198,7 @@ class CreateIndexExecutor(AbstractExecutor):
             for col in col_list
         ]
         catalog_manager = CatalogManager()
-        df_metadata = catalog_manager.create_metadata(
+        df_metadata = catalog_manager.insert_table_catalog_entry(
             "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
             str(
                 EVA_DEFAULT_DIR

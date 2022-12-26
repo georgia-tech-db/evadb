@@ -59,7 +59,7 @@ class CreateIndexTest(unittest.TestCase):
             )
             for col in col_list
         ]
-        tb_metadata = CatalogManager().create_metadata(
+        tb_metadata = CatalogManager().insert_table_catalog_entry(
             "testCreateIndexFeatTable",
             str(generate_file_path("testCreateIndexFeatTable")),
             col_metadata,
@@ -90,7 +90,7 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         # Test index metadata.
-        index_metadata = CatalogManager().get_index_by_name("testCreateIndexName")
+        index_metadata = CatalogManager().get_index_catalog_entry_by_name("testCreateIndexName")
         self.assertEqual(index_metadata.type, IndexType.HNSW)
         self.assertEqual(
             index_metadata.save_file_path,
@@ -102,7 +102,7 @@ class CreateIndexTest(unittest.TestCase):
         )
 
         # Test referenced column.
-        feat_df_metadata = CatalogManager().get_dataset_metadata(
+        feat_df_metadata = CatalogManager().get_table_catalog_entry(
             None, "testCreateIndexFeatTable"
         )
         feat_column = [
@@ -121,7 +121,7 @@ class CreateIndexTest(unittest.TestCase):
         secondary_index_tb_name = "secondary_index_{}_{}".format(
             index_metadata.type, index_metadata.name
         )
-        secondary_index_metadata = CatalogManager().get_dataset_metadata(
+        secondary_index_metadata = CatalogManager().get_table_catalog_entry(
             None, secondary_index_tb_name
         )
         self.assertEqual(index_metadata.secondary_index_id, secondary_index_metadata.id)
@@ -138,8 +138,8 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(size, 3)
 
         # Cleanup.
-        CatalogManager().drop_index("testCreateIndexName")
-        CatalogManager().drop_dataset_metadata(secondary_index_metadata)
+        CatalogManager().drop_index_catalog_entry("testCreateIndexName")
+        CatalogManager().delete_table_catalog_entry(secondary_index_metadata)
 
     @patch("eva.executor.create_index_executor.faiss")
     def test_should_cleanup_when_exception(self, faiss_mock):

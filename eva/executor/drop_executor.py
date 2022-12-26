@@ -50,7 +50,7 @@ class DropExecutor(AbstractExecutor):
                 raise ExecutorError(err_msg)
 
         try:
-            table_obj = catalog_manager.get_dataset_metadata(
+            table_obj = catalog_manager.get_table_catalog_entry(
                 table_info.database_name, table_info.table_name
             )
             storage_engine = StorageEngine.factory(table_obj)
@@ -58,7 +58,7 @@ class DropExecutor(AbstractExecutor):
             raise ExecutorError(str(err))
         storage_engine.drop(table=table_obj)
 
-        success = catalog_manager.drop_dataset_metadata(table_obj)
+        success = catalog_manager.delete_table_catalog_entry(table_obj)
 
         if not success:
             err_msg = "Failed to drop {}".format(table_info)

@@ -74,7 +74,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
             metadata_table = self._get_metadata_table(table)
             self._rdb_handler.drop(metadata_table)
             # remove the metadata table from the catalog
-            CatalogManager().drop_dataset_metadata(metadata_table)
+            CatalogManager().delete_table_catalog_entry(metadata_table)
         except Exception as e:
             logger.exception(f"Failed to drop the image table {e}")
 
@@ -132,7 +132,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
 
     def rename(self, old_table: TableCatalog, new_name: TableInfo):
         try:
-            CatalogManager().rename_table(old_table, new_name)
+            CatalogManager().rename_table_catalog_entry(old_table, new_name)
         except CatalogError as err:
             raise Exception(f"Failed to rename table {new_name} with exception {err}")
         except Exception as e:

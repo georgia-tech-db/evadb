@@ -25,24 +25,26 @@ class IndexCatalogService(BaseService):
     def __init__(self):
         super().__init__(IndexCatalog)
 
-    def create_index(self, name: str, save_file_path: str, type: str) -> IndexCatalog:
+    def insert_index_entry(
+        self, name: str, save_file_path: str, type: str
+    ) -> IndexCatalog:
         metadata = self.model(name, save_file_path, type)
         metadata = metadata.save()
         return metadata
 
-    def index_by_name(self, name: str):
+    def index_entry_by_name(self, name: str):
         try:
             return self.model.query.filter(self.model._name == name).one()
         except NoResultFound:
             return None
 
-    def index_by_id(self, id: int):
+    def index_entry_by_id(self, id: int):
         try:
             return self.model.query.filter(self.model._id == id).one()
         except NoResultFound:
             return None
 
-    def drop_index_by_name(self, name: str):
+    def drop_index_entry_by_name(self, name: str):
         try:
             index_record = self.index_by_name(name)
             # clean up the on disk data
@@ -54,7 +56,7 @@ class IndexCatalogService(BaseService):
             return False
         return True
 
-    def get_all_indices(self):
+    def get_all_index_entries(self):
         try:
             return self.model.query.all()
         except NoResultFound:

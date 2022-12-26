@@ -51,10 +51,10 @@ class SimilarityTests(unittest.TestCase):
         base_img += 4
 
         # Inject data.
-        base_table_df_metadata = CatalogManager().get_dataset_metadata(
+        base_table_df_metadata = CatalogManager().get_table_catalog_entry(
             None, "testSimilarityTable"
         )
-        feature_table_df_metadata = CatalogManager().get_dataset_metadata(
+        feature_table_df_metadata = CatalogManager().get_table_catalog_entry(
             None, "testSimilarityFeatureTable"
         )
         storage_engine = StorageEngine.factory(base_table_df_metadata)

@@ -53,7 +53,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
             table_name = table_info.table_name
             # Sanity check to make sure there is no existing table with same name
             do_create = False
-            table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+            table_obj = self.catalog.get_table_catalog_entry(database_name, table_name)
             if table_obj:
                 msg = f"Adding to an existing table {table_name}."
                 logger.info(msg)

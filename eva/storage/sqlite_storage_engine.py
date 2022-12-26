@@ -227,7 +227,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         raise Exception("Rename not supported for structured data table")
         # try:
         #     old_name = old_table.name
-        #     CatalogManager().rename_table(old_table, new_name)
+        #     CatalogManager().rename_table_catalog_entry(old_table, new_name)
         #     self._sql_session.commit()
         # except CatalogError as err:
         #     raise Exception(f"Failed to rename table {old_name} with exception {err}")

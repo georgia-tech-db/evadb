@@ -34,7 +34,7 @@ class ColumnCatalogServiceTest(unittest.TestCase):
         service = ColumnCatalogService()
         metadata_id = 123
         column_names = ["a", "b"]
-        actual = service.columns_by_dataset_id_and_names(metadata_id, column_names)
+        actual = service.columns_by_table_id_and_names(metadata_id, column_names)
         mocked.query.filter.assert_called_with(
             mocked._table_id == metadata_id, mocked._name.in_(column_names)
         )
@@ -50,7 +50,7 @@ class ColumnCatalogServiceTest(unittest.TestCase):
         service = ColumnCatalogService()
         metadata_id = 123
         column_ids = [1, 2]
-        actual = service.columns_by_id_and_dataset_id(metadata_id, column_ids)
+        actual = service.columns_by_id_and_table_id(metadata_id, column_ids)
         mocked.query.filter.assert_called_with(
             mocked._table_id == metadata_id, mocked._id.in_(column_ids)
         )
@@ -64,6 +64,6 @@ class ColumnCatalogServiceTest(unittest.TestCase):
         service = ColumnCatalogService()
         metadata_id = 123
         column_ids = None
-        actual = service.columns_by_id_and_dataset_id(metadata_id, column_ids)
+        actual = service.columns_by_id_and_table_id(metadata_id, column_ids)
         mocked.query.filter.assert_called_with(mocked._metadata_id == metadata_id)
         self.assertEqual(actual, return_val)

@@ -55,7 +55,7 @@ class CatalogManagerTests(unittest.TestCase):
             mock_bootstrap.assert_called_once_with()
             mock_shutdown.assert_called_once_with()
 
-    @mock.patch("eva.catalog.catalog_manager.CatalogManager.create_metadata")
+    @mock.patch("eva.catalog.catalog_manager.CatalogManager.insert_table_catalog_entry")
     @mock.patch("eva.catalog.catalog_manager.generate_file_path")
     def test_create_video_table(self, m_gfp, m_cm):
         x = CatalogManager()
@@ -92,7 +92,7 @@ class CatalogManagerTests(unittest.TestCase):
         dataset_name = "name"
 
         columns = [(ColumnCatalog("c1", ColumnType.INTEGER))]
-        actual = catalog.create_metadata(dataset_name, file_url, columns)
+        actual = catalog.insert_table_catalog_entry(dataset_name, file_url, columns)
         ds_mock.return_value.create_dataset.assert_called_with(
             dataset_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
         )
@@ -120,13 +120,13 @@ class CatalogManagerTests(unittest.TestCase):
         id = 1
         metadata_obj = MagicMock(id=id, schema=None)
         ds_mock.return_value.dataset_object_by_name.return_value = metadata_obj
-        dcs_mock.return_value.columns_by_id_and_dataset_id.return_value = schema
+        dcs_mock.return_value.columns_by_id_and_table_id.return_value = schema
 
-        actual = catalog.get_dataset_metadata(database_name, dataset_name)
+        actual = catalog.get_table_catalog_entry(database_name, dataset_name)
         ds_mock.return_value.dataset_object_by_name.assert_called_with(
             database_name, dataset_name
         )
-        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_called_with(id, None)
+        dcs_mock.return_value.columns_by_id_and_table_id.assert_called_with(id, None)
         self.assertEqual(actual.id, id)
         self.assertEqual(actual.schema, schema)
 
@@ -144,11 +144,11 @@ class CatalogManagerTests(unittest.TestCase):
 
         ds_mock.return_value.dataset_object_by_name.return_value = metadata_obj
 
-        actual = catalog.get_dataset_metadata(database_name, dataset_name)
+        actual = catalog.get_table_catalog_entry(database_name, dataset_name)
         ds_mock.return_value.dataset_object_by_name.assert_called_with(
             database_name, dataset_name
         )
-        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_not_called()
+        dcs_mock.return_value.columns_by_id_and_table_id.assert_not_called()
         self.assertEqual(actual, metadata_obj)
 
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalog")

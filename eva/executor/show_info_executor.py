@@ -44,7 +44,7 @@ class ShowInfoExecutor(AbstractExecutor):
                 for udf in udfs:
                     show_entries.append(udf.display_format())
             elif self.node.show_type is ShowType.TABLES:
-                tables = catalog_manager.get_all_table_entries()
+                tables = catalog_manager.get_all_table_catalog_entries()
                 for table in tables:
                     if table.table_type != TableType.SYSTEM_STRUCTURED_DATA:
                         show_entries.append(table.name)

@@ -48,11 +48,11 @@ class CatalogManager(object):
         return cls._instance
 
     def __init__(self):
-        self._table_catalog_service = TableCatalogService()
-        self._column_service = ColumnCatalogService()
-        self._udf_service = UdfCatalogService()
-        self._udf_io_service = UdfIOCatalogService()
-        self._index_service = IndexCatalogService()
+        self._table_catalog_service: TableCatalogService = TableCatalogService()
+        self._column_service: ColumnCatalogService = ColumnCatalogService()
+        self._udf_service: UdfCatalogService = UdfCatalogService()
+        self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
+        self._index_service: IndexCatalogService = IndexCatalogService()
 
     def reset(self):
         """
@@ -81,7 +81,9 @@ class CatalogManager(object):
         logger.info("Shutting catalog")
         drop_db()
 
-    def create_metadata(
+    "table catalog services"
+
+    def insert_table_catalog_entry(
         self,
         name: str,
         file_url: str,
@@ -89,13 +91,11 @@ class CatalogManager(object):
         identifier_column="id",
         table_type=TableType.VIDEO_DATA,
     ) -> TableCatalog:
-        """Creates metadata object
-
-        Creates a metadata object and column objects and persists them in
-        database. Sets the schema field of the metadata object.
+        """A new entry is added to the table catalog and persisted in the database.
+        The schema field is set before the object is returned."
 
         Args:
-            name: name of the dataset/video to which this metdata corresponds
+            name: table name
             file_url: #todo
             column_list: list of columns
             identifier_column (str):  A unique identifier column for each row
@@ -104,7 +104,7 @@ class CatalogManager(object):
             The persisted TableCatalog object with the id field populated.
         """
 
-        metadata = self._table_catalog_service.create_dataset(
+        table_entry = self._table_catalog_service.insert_entry(
             name,
             file_url,
             identifier_id=identifier_column,
@@ -117,11 +117,62 @@ class CatalogManager(object):
         ] + column_list
 
         for column in column_list:
-            column.table_id = metadata.id
+            column.table_id = table_entry.id
         column_list = self._column_service.create_column(column_list)
 
-        metadata.schema = column_list
+        table_entry.schema = column_list
+        return table_entry
+
+    def get_table_catalog_entry(
+        self, database_name: str, dataset_name: str
+    ) -> TableCatalog:
+        """
+        Returns the Dataset metadata for the given dataset name
+        Arguments:
+            dataset_name (str): name of the dataset
+
+        Returns:
+            TableCatalog
+        """
+
+        metadata = self._table_catalog_service.get_entry_by_name(
+            database_name, dataset_name
+        )
+        if metadata is None:
+            return None
+        # we are forced to set schema every time metadata is fetched
+        # ToDo: maybe keep schema as a part of persistent metadata object
+        df_columns = self._column_service.columns_by_id_and_table_id(metadata.id, None)
+        metadata.schema = df_columns
         return metadata
+
+    def delete_table_catalog_entry(self, obj: TableCatalog) -> bool:
+        """
+        This method deletes the table along with its columns from df_metadata
+        and df_columns respectively
+
+        Arguments:
+           obj: dataframe metadata entry to remove
+
+        Returns:
+           True if successfully deleted else False
+        """
+        return self._table_catalog_service.delete_entry(obj)
+
+    def rename_table_catalog_entry(self, curr_table: TableCatalog, new_name: TableInfo):
+        return self._table_catalog_service.rename_entry(curr_table, new_name.table_name)
+
+    def check_table_exists(self, database_name: str, table_name: str):
+        metadata = self._table_catalog_service.get_entry_by_name(
+            database_name, table_name
+        )
+        if metadata is None:
+            return False
+        else:
+            return True
+
+    def get_all_table_catalog_entries(self):
+        return self._table_catalog_service.get_all_entries()
 
     def create_multimedia_table(self, name: str, format_type: FileFormatType):
         if format_type is FileFormatType.VIDEO:
@@ -154,7 +205,7 @@ class CatalogManager(object):
         ]
         col_metadata = self.create_columns_metadata(columns)
         uri = str(generate_file_path(name))
-        metadata = catalog.create_metadata(
+        metadata = catalog.insert_table_catalog_entry(
             name,
             uri,
             col_metadata,
@@ -186,7 +237,7 @@ class CatalogManager(object):
         ]
         col_metadata = self.create_columns_metadata(columns)
         uri = str(generate_file_path(name))
-        metadata = self.create_metadata(
+        metadata = self.insert_table_catalog_entry(
             name,
             uri,
             col_metadata,
@@ -205,7 +256,7 @@ class CatalogManager(object):
         table_name = table_info.table_name
         column_metadata_list = self.create_columns_metadata(columns)
         file_url = str(generate_file_path(table_name))
-        metadata = self.create_metadata(
+        metadata = self.insert_table_catalog_entry(
             table_name,
             file_url,
             column_metadata_list,
@@ -245,7 +296,7 @@ class CatalogManager(object):
     ) -> ColumnCatalog:
         """Create a dataframe column object this column.
         This function won't commit this object in the catalog database.
-        If you want to commit it into catalog table call create_metadata with
+        If you want to commit it into catalog table call insert_table_catalog_entry with
         corresponding table_id
 
         Arguments:
@@ -262,35 +313,10 @@ class CatalogManager(object):
             is_nullable=cci.nullable,
         )
 
-    def get_dataset_metadata(
-        self, database_name: str, dataset_name: str
-    ) -> TableCatalog:
-        """
-        Returns the Dataset metadata for the given dataset name
-        Arguments:
-            dataset_name (str): name of the dataset
-
-        Returns:
-            TableCatalog
-        """
-
-        metadata = self._table_catalog_service.dataset_object_by_name(
-            database_name, dataset_name
-        )
-        if metadata is None:
-            return None
-        # we are forced to set schema every time metadata is fetched
-        # ToDo: maybe keep schema as a part of persistent metadata object
-        df_columns = self._column_service.columns_by_id_and_dataset_id(
-            metadata.id, None
-        )
-        metadata.schema = df_columns
-        return metadata
-
     def get_column_object(
         self, table_obj: TableCatalog, col_name: str
     ) -> ColumnCatalog:
-        col_objs = self._column_service.columns_by_dataset_id_and_names(
+        col_objs = self._column_service.columns_by_table_id_and_names(
             table_obj.id, column_names=[col_name]
         )
         if col_objs:
@@ -299,7 +325,7 @@ class CatalogManager(object):
             return None
 
     def get_all_column_objects(self, table_obj: TableCatalog):
-        col_objs = self._column_service.get_dataset_columns(table_obj)
+        col_objs = self._column_service.get_all_table_columns(table_obj)
         return col_objs
 
     def udf_io(
@@ -390,19 +416,6 @@ class CatalogManager(object):
             )
         return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
 
-    def drop_dataset_metadata(self, obj: TableCatalog) -> bool:
-        """
-        This method deletes the table along with its columns from df_metadata
-        and df_columns respectively
-
-        Arguments:
-           obj: dataframe metadata entry to remove
-
-        Returns:
-           True if successfully deleted else False
-        """
-        return self._table_catalog_service.drop_dataset(obj)
-
     def drop_udf(self, udf_name: str) -> bool:
         """
         This method drops the udf entry and corresponding udf_io
@@ -416,27 +429,10 @@ class CatalogManager(object):
         """
         return self._udf_service.drop_udf_by_name(udf_name)
 
-    def rename_table(self, curr_table: TableCatalog, new_name: TableInfo):
-        return self._table_catalog_service.rename_dataset(curr_table, new_name.table_name)
-
-    def check_table_exists(self, database_name: str, table_name: str):
-        metadata = self._table_catalog_service.dataset_object_by_name(
-            database_name, table_name
-        )
-        if metadata is None:
-            return False
-        else:
-            return True
-
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
 
-    def get_all_table_entries(self):
-        return self._table_catalog_service.get_all_datasets()
-
-    def get_media_metainfo_table(
-        self, input_table: TableCatalog
-    ) -> TableCatalog:
+    def get_media_metainfo_table(self, input_table: TableCatalog) -> TableCatalog:
         """Get a media metainfo table.
         Raise if it does not exists
         Args:
@@ -447,7 +443,7 @@ class CatalogManager(object):
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
-        obj = self.get_dataset_metadata(None, media_metadata_name)
+        obj = self.get_table_catalog_entry(None, media_metadata_name)
         if not obj:
             err = f"Table with name {media_metadata_name} does not exist in catalog"
             logger.exception(err)
@@ -455,9 +451,7 @@ class CatalogManager(object):
 
         return obj
 
-    def create_media_metainfo_table(
-        self, input_table: TableCatalog
-    ) -> TableCatalog:
+    def create_media_metainfo_table(self, input_table: TableCatalog) -> TableCatalog:
         """Create a media metainfo table.
          This table is used to store all media filenames and related information. In
          order to prevent direct access or modification by users, it should be
@@ -470,7 +464,7 @@ class CatalogManager(object):
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
-        obj = self.get_dataset_metadata(None, media_metadata_name)
+        obj = self.get_table_catalog_entry(None, media_metadata_name)
         if obj:
             err_msg = f"Table with name {media_metadata_name} already exists"
             logger.exception(err_msg)
@@ -487,26 +481,26 @@ class CatalogManager(object):
 
     """ Index related services. """
 
-    def create_index(
+    def insert_index_catalog_entry(
         self,
         name: str,
         save_file_path: str,
         index_type: IndexType,
-        secondary_index_df_metadata: TableCatalog,
+        secondary_index_table: TableCatalog,
         feat_column: ColumnCatalog,
     ) -> IndexCatalog:
-        index_metadata = self._index_service.create_index(
+        index_metadata = self._index_service.insert_index_entry(
             name, save_file_path, index_type
         )
-        index_metadata.secondary_index_id = secondary_index_df_metadata.id
+        index_metadata.secondary_index_id = secondary_index_table.id
         index_metadata.feat_column_id = feat_column.id
         return index_metadata
 
-    def get_index_by_name(self, name: str) -> IndexCatalog:
-        return self._index_service.index_by_name(name)
+    def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
+        return self._index_service.index_entry_by_name(name)
 
-    def drop_index(self, index_name: str) -> bool:
-        return self._index_service.drop_index_by_name(index_name)
+    def drop_index_catalog_entry(self, index_name: str) -> bool:
+        return self._index_service.drop_index_entry_by_name(index_name)
 
-    def get_all_index_entries(self):
+    def get_all_index_catalog_entries(self):
         return self._index_service.get_all_indices()

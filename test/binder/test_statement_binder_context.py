@@ -42,7 +42,7 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch("eva.binder.statement_binder_context.CatalogManager")
     def test_add_table_alias(self, mock_catalog):
-        mock_get = mock_catalog().get_dataset_metadata = MagicMock()
+        mock_get = mock_catalog().get_table_catalog_entry = MagicMock()
         mock_get.return_value = "table_obj"
         ctx = StatementBinderContext()
 

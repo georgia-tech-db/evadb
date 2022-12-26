@@ -44,7 +44,7 @@ class LoadExecutorTest(unittest.TestCase):
         return plan
 
     @patch(
-        "eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata",
+        "eva.catalog.catalog_manager.CatalogManager.get_table_catalog_entry",
         return_value=None,
     )
     def test_should_fail_to_find_table(self, catalog_mock):
@@ -67,7 +67,7 @@ class LoadExecutorTest(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             next(load_executor.exec())
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata")
+    @patch("eva.catalog.catalog_manager.CatalogManager.get_table_catalog_entry")
     @patch("eva.executor.load_multimedia_executor.StorageEngine.factory")
     def test_should_call_csv_reader_and_storage_engine(
         self, factory_mock, catalog_mock

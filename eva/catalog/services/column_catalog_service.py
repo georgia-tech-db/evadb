@@ -25,32 +25,32 @@ class ColumnCatalogService(BaseService):
     def __init__(self):
         super().__init__(ColumnCatalog)
 
-    def columns_by_dataset_id_and_names(self, dataset_id, column_names):
+    def columns_by_table_id_and_names(self, table_id, column_names):
         result = self.model.query.filter(
-            self.model._table_id == dataset_id,
+            self.model._table_id == table_id,
             self.model._name.in_(column_names),
         ).all()
 
         return result
 
-    def columns_by_id_and_dataset_id(self, dataset_id: int, id_list: List[int] = None):
-        """return all the columns that matches id_list and  dataset_id
+    def columns_by_id_and_table_id(self, table_id: int, id_list: List[int] = None):
+        """return all the columns that matches id_list and  table_id
 
         Arguments:
-            dataset_id {int} -- [metadata id of the table]
-            id_list {List[int]} -- [metadata ids of the required columns: If
-            None return all the columns that matches the dataset_id]
+            table_id {int} -- [table id of the table]
+            id_list {List[int]} -- [table ids of the required columns: If
+            None return all the columns that matches the table_id]
 
         Returns:
             List[self.model] -- [the filtered self.models]
         """
         if id_list is not None:
             return self.model.query.filter(
-                self.model._table_id == dataset_id,
+                self.model._table_id == table_id,
                 self.model._id.in_(id_list),
             ).all()
 
-        return self.model.query.filter(self.model._table_id == dataset_id).all()
+        return self.model.query.filter(self.model._table_id == table_id).all()
 
     def create_column(self, column_list):
         saved_column_list = []
@@ -58,8 +58,8 @@ class ColumnCatalogService(BaseService):
             saved_column_list.append(column.save())
         return saved_column_list
 
-    def get_dataset_columns(self, dataset: TableCatalog) -> List[ColumnCatalog]:
+    def get_all_table_columns(self, table: TableCatalog) -> List[ColumnCatalog]:
         try:
-            return self.model.query.filter(self.model._table_id == dataset.id).all()
+            return self.model.query.filter(self.model._table_id == table.id).all()
         except NoResultFound:
             return None
