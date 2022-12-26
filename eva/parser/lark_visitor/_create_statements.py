@@ -24,7 +24,7 @@ from lark import Tree
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
-
+from eva.catalog.catalog_type import ColumnType
 
 ##################################################################
 # CREATE STATEMENTS
@@ -32,40 +32,32 @@ from eva.utils.logging_manager import logger
 class CreateTable:
 
     def create_table(self, tree):
-        table_ref = None
+        table_info = None
         if_not_exists = False
         create_definitions = []
 
-        # first two children will be CREATE TABLE terminal token
-        for child in ctx.children[2:]:
-            try:
-                rule_idx = child.getRuleIndex()
-
-                if rule_idx == evaql_parser.RULE_tableName:
-                    table_ref = TableRef(self.visit(ctx.tableName()))
-
-                elif rule_idx == evaql_parser.RULE_ifNotExists:
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'if_not_exists':
                     if_not_exists = True
+                elif child.data == 'table_name':
+                    table_info = self.visit(child)
+                elif child.data == 'create_definitions':
+                    create_definitions = self.visit(child)
 
-                elif rule_idx == evaql_parser.RULE_createDefinitions:
-                    create_definitions = self.visit(ctx.createDefinitions())
-
-            except BaseException:
-                # stop parsing something bad happened
-                return None
-
-        create_stmt = CreateTableStatement(table_ref, if_not_exists, create_definitions)
+        create_stmt = CreateTableStatement(table_info, if_not_exists, create_definitions)
         return create_stmt
 
-    def create_definition(self, tree):
+    def create_definitions(self, tree):
         column_definitions = []
-        child_index = 0
-        for child in ctx.children:
-            create_definition = ctx.createDefinition(child_index)
-            if create_definition is not None:
-                column_definition = self.visit(create_definition)
-                column_definitions.append(column_definition)
-            child_index = child_index + 1
+        for child in tree.children:
+             if isinstance(child, Tree):
+                create_definition = None
+                if child.data == 'column_declaration':
+                    create_definition = self.visit(child)
+                elif child.data == 'index_declaration':
+                    create_definition = self.visit(child)                
+                column_definitions.append(create_definition)
 
         return column_definitions
 
@@ -100,11 +92,14 @@ class CreateTable:
         column_constraint_information = None 
         not_null_set = False
 
+        print(tree.pretty())
+
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "data_type":
+                print(child.data)
+                if child.data.endswith("data_type"):
                     data_type, array_type, dimensions = self.visit(child)
-                elif child.data == "column_constraint":
+                elif child.data.endswith("column_constraint"):
                     if column_constraint_information is None:
                         column_constraint_information = ColConstraintInfo()
                         return_type = self.visit(child)
@@ -116,6 +111,8 @@ class CreateTable:
                         elif return_type == ColumnConstraintEnum.NOTNULL:
                             column_constraint_information.nullable = False
                             not_null_set = True
+                else:
+                    raise ValueError(f'Unidentified selector child: {child.data!r}')
                     
         if not not_null_set and column_constraint_information is not None:
             column_constraint_information.nullable = True
@@ -145,9 +142,10 @@ class CreateTable:
         array_type = None
         dimensions = []
 
-        if ctx.INTEGER() is not None:
+        token = tree.children[0]
+        if token == "INTEGER":
             data_type = ColumnType.INTEGER
-        elif ctx.UNSIGNED() is not None:
+        elif token == "UNSIGNED":
             data_type = ColumnType.INTEGER
 
         return data_type, array_type, dimensions
@@ -157,12 +155,13 @@ class CreateTable:
         array_type = None
         dimensions = []
 
-        if ctx.FLOAT() is not None:
+        token = tree.children[0]
+        if token == "FLOAT":
             data_type = ColumnType.FLOAT
-            dimensions = self.visit(ctx.lengthTwoDimension())
-        elif ctx.TEXT() is not None:
-            data_type = ColumnType.TEXT
-            dimensions = self.visit(ctx.lengthOneDimension())
+            dimensions = self.visit(tree.children[1])
+        elif token == "TEXT":
+            data_type = ColumnType.INTEGER
+            dimensions = self.visit(tree.children[1])
 
         return data_type, array_type, dimensions
 
@@ -170,6 +169,7 @@ class CreateTable:
         data_type = ColumnType.NDARRAY
         array_type = None
         dimensions = None
+
         if ctx.arrayType():
             array_type = self.visit(ctx.arrayType())
         else:
