@@ -17,7 +17,7 @@ from antlr4 import TerminalNode
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.table_ref import TableRef
-
+from lark.tree import Tree
 
 ##################################################################
 # INSERT STATEMENTS
@@ -52,14 +52,15 @@ class Insert:
         return insert_stmt
 
     def uid_list(self, tree):
-        uid_list = []
-        uid_list_length = len(ctx.uid())
-        for uid_index in range(uid_list_length):
-            uid = self.visit(ctx.uid(uid_index))
-            uid_expr = TupleValueExpression(uid)
-            uid_list.append(uid_expr)
+        uid_expr_list = []
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'uid':
+                    uid = self.visit(child)
+                    uid_expr = TupleValueExpression(uid)
+                    uid_expr_list.append(uid_expr)
 
-        return uid_list
+        return uid_expr_list
 
     def insert_statement_value(self, tree):
         insert_stmt_value = []

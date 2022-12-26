@@ -847,7 +847,7 @@ class ParserTests(unittest.TestCase):
 
     def test_lark(self):
         #query = """RENAME TABLE student TO student_info"""
-        query = """LOAD VIDEO 'data/video.mp4' INTO MyVideo;"""
-        #query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
+        #query = """LOAD VIDEO 'data/video.mp4' INTO MyVideo;"""
+        query = """LOAD CSV 'dummy.csv' INTO MyVideoCSV (id, frame_id, video_id, dataset_name);"""
         parser = Parser()
         parser.parse(query)

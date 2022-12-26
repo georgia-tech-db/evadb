@@ -15,6 +15,7 @@
 from eva.parser.load_statement import LoadDataStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
+from lark.tree import Tree
 
 
 class Load:
@@ -29,8 +30,10 @@ class Load:
 
         # set default for column_list as None
         column_list = None
-        #if ctx.uidList():
-        #    column_list = self.visit(ctx.uidList())
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'uid_list':
+                    column_list = self.visit(child)
 
         stmt = LoadDataStatement(table, file_path, column_list, file_options)
         return stmt
