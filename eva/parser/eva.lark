@@ -84,7 +84,7 @@ load_statement: LOAD file_format file_name INTO table_name (("(" uid_list ")"))?
     
 file_format: (CSV|VIDEO|IMAGE)
 
-file_options: FORMAT (CSV|VIDEO)
+file_options: FORMAT file_format
     
 upload_statement: UPLOAD PATH file_name BLOB video_blob INTO table_name (("(" uid_list ")"))? (WITH file_options)?
     
@@ -102,9 +102,7 @@ updated_element: full_column_name "=" (expression | DEFAULT)
  
 order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
 
-order_by_expression: expression sort_order?
-
-sort_order: ASC | DESC
+order_by_expression: expression (ASC | DESC)?
     
 // Forcing EXPLICIT JOIN KEYWORD
 table_sources: table_source

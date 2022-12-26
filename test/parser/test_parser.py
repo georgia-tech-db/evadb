@@ -845,11 +845,6 @@ class ParserTests(unittest.TestCase):
 
     def test_lark(self):
 
-        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
-                        WHERE id<5; """
-        explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
-            select_query
-        )        
-        query = explain_query
+        query = """SELECT FIRST(id) FROM foo;"""
         parser = Parser()
         parser.parse(query)

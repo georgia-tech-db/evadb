@@ -114,21 +114,7 @@ class Functions:
             udf_type,
         )
 
-    def aggregate_windowed_function(self, tree):
-        if ctx.aggregateFunctionName():
-            agg_func_name = self.visit(ctx.aggregateFunctionName())
-        else:
-            logger.error("Aggregate function name missing.")
-        agg_func_type = self.getAggregateFunctionType(agg_func_name)
-        agg_func_arg = self.visit(ctx.functionArg())
-        agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
-
-        return agg_expr
-
-    def aggregate_function_name(self, tree):
-        return ctx.getText()
-
-    def aggregate_function_type(self, tree):
+    def get_aggregate_function_type(self, agg_func_name):
         agg_func_type = None
         if agg_func_name == "FIRST":
             agg_func_type = ExpressionType.AGGREGATION_FIRST
@@ -139,3 +125,15 @@ class Functions:
         else:
             logger.error("Aggregate Function {} not supported.".format(agg_func_name))
         return agg_func_type
+
+    def aggregate_windowed_function(self, tree):
+        agg_func_name = tree.children[0]
+        agg_func_arg = None
+        assert(agg_func_name in ['MIN', 'MAX', 'AVG', 'SUM', 'COUNT'])
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'function_arg':
+                    agg_func_arg = self.visit(child)
+        agg_func_type = self.get_aggregate_function_type(agg_func_name)
+        agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
+        return agg_expr

@@ -51,8 +51,6 @@ class Load:
 
     def file_options(self, tree):
         file_options = {}
-        if ctx.fileFormat():
-            file_format = self.visit(ctx.fileFormat())
-            file_options["file_format"] = file_format
-
+        file_format = self.visit(tree.children[1])
+        file_options["file_format"] = file_format
         return file_options
