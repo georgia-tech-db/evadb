@@ -18,7 +18,7 @@ utility_statement: describe_statement | show_statement | help_statement | explai
 
 create_database: CREATE DATABASE if_not_exists? uid
 
-create_index: CREATE INDEX uid index_type? ON table_name index_column_names
+create_index: CREATE INDEX uid ON table_name index_column_names index_type?
 
 create_table: CREATE TABLE if_not_exists? table_name create_definitions 
     
@@ -39,7 +39,7 @@ udf_type: uid
 
 udf_impl: string_literal
 
-index_type: USING (BTREE | HASH)
+index_type: USING HNSW
 
 create_definitions: "(" create_definition ("," create_definition)* ")"
 
@@ -387,8 +387,7 @@ ERROR_BOUNDS:						 "ERROR_WITHIN"
 CONFIDENCE_LEVEL:					 "AT_CONFIDENCE"
 
 // Index types
-BTREE:                               "BTREE"
-HASH:                                "HASH"
+HNSW:                                "HNSW"
 
 // Computer vision tasks
 
