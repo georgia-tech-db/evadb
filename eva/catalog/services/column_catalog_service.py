@@ -26,13 +26,10 @@ class ColumnCatalogService(BaseService):
         super().__init__(ColumnCatalog)
 
     def filter_entry_by_table_id_and_name(self, table_id, column_name):
-        try:
-            return self.model.query.filter(
-                self.model._table_id == table_id,
-                self.model._name == column_name,
-            ).one()
-        except NoResultFound:
-            return None
+        return self.model.query.filter(
+            self.model._table_id == table_id,
+            self.model._name == column_name,
+        ).one_or_none()
 
     def filter_entries_by_table_id(self, table_id: int):
         """return all the columns for table table_id

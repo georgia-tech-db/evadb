@@ -17,10 +17,10 @@ import unittest
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.index_catalog import IndexCatalog
 from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.index import IndexCatalog
-from eva.catalog.models.udf import UdfCatalog
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_catalog import UdfCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 
 
 class CatalogModelsTest(unittest.TestCase):

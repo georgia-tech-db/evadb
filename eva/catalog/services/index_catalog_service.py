@@ -16,7 +16,7 @@ import os
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.index import IndexCatalog
+from eva.catalog.models.index_catalog import IndexCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
@@ -25,28 +25,26 @@ class IndexCatalogService(BaseService):
     def __init__(self):
         super().__init__(IndexCatalog)
 
-    def insert_index_entry(
-        self, name: str, save_file_path: str, type: str
-    ) -> IndexCatalog:
+    def insert_entry(self, name: str, save_file_path: str, type: str) -> IndexCatalog:
         metadata = self.model(name, save_file_path, type)
         metadata = metadata.save()
         return metadata
 
-    def index_entry_by_name(self, name: str):
+    def get_entry_by_name(self, name: str):
         try:
             return self.model.query.filter(self.model._name == name).one()
         except NoResultFound:
             return None
 
-    def index_entry_by_id(self, id: int):
+    def get_entry_by_id(self, id: int):
         try:
             return self.model.query.filter(self.model._id == id).one()
         except NoResultFound:
             return None
 
-    def drop_index_entry_by_name(self, name: str):
+    def delete_entry_by_name(self, name: str):
         try:
-            index_record = self.index_by_name(name)
+            index_record = self.get_entry_by_name(name)
             # clean up the on disk data
             if os.path.exists(index_record.save_file_path):
                 os.remove(index_record.save_file_path)
@@ -56,7 +54,7 @@ class IndexCatalogService(BaseService):
             return False
         return True
 
-    def get_all_index_entries(self):
+    def get_all_entries(self):
         try:
             return self.model.query.all()
         except NoResultFound:

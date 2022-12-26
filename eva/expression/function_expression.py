@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Callable, List
 
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType

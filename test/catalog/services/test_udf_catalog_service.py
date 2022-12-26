@@ -17,7 +17,7 @@ from unittest import TestCase
 from mock import patch
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.services.udf_service import UdfCatalogService
+from eva.catalog.services.udf_catalog_service import UdfCatalogService
 
 UDF_TYPE = "classification"
 UDF_IMPL_PATH = "file1"
@@ -26,50 +26,52 @@ UDF_ID = 123
 
 
 class UdfCatalogServiceTest(TestCase):
-    @patch("eva.catalog.services.udf_service.UdfCatalog")
+    @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_create_udf_should_create_model(self, mocked):
         service = UdfCatalogService()
-        service.insert_udf_catalog_entry(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
+        service.insert_entry(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.return_value.save.assert_called_once()
 
-    @patch("eva.catalog.services.udf_service.UdfCatalog")
+    @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_udf_by_name_should_query_model_with_name(self, mocked):
         service = UdfCatalogService()
         expected = mocked.query.filter.return_value.one.return_value
 
-        actual = service.udf_by_name(UDF_NAME)
+        actual = service.get_entry_by_name(UDF_NAME)
         mocked.query.filter.assert_called_with(mocked._name == UDF_NAME)
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.udf_service.UdfCatalog")
+    @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_udf_by_id_should_query_model_with_id(self, mocked):
         service = UdfCatalogService()
         expected = mocked.query.filter.return_value.one.return_value
-        actual = service.udf_by_id(UDF_ID)
+        actual = service.get_entry_by_id(UDF_ID)
         mocked.query.filter.assert_called_with(mocked._id == UDF_ID)
         mocked.query.filter.return_value.one.assert_called_once()
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.udf_service.UdfCatalogService.udf_by_name")
+    @patch(
+        "eva.catalog.services.udf_catalog_service.UdfCatalogService.get_entry_by_name"
+    )
     def test_udf_drop_by_name(self, mock_func):
         service = UdfCatalogService()
-        service.drop_udf_by_name("udf_name")
+        service.delete_entry_by_name("udf_name")
         mock_func.assert_called_once_with("udf_name")
         mock_func.return_value.delete.assert_called_once()
 
         mock_func.return_value.delete.side_effect = Exception()
         with self.assertRaises(Exception) as cm:
-            service.drop_udf_by_name("udf_name")
+            service.delete_entry_by_name("udf_name")
             self.assertEqual(
                 "Delete udf failed for name {}".format("udf_name"),
                 str(cm.exception),
             )
 
-    @patch("eva.catalog.services.udf_service.UdfCatalog")
+    @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_get_all_udfs_should_return_empty(self, mocked):
         service = UdfCatalogService()
         mocked.query.all.side_effect = Exception(NoResultFound)
         with self.assertRaises(Exception):
-            self.assertEqual(service.get_all_udfs(), [])
+            self.assertEqual(service.get_all_entries(), [])

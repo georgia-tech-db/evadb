@@ -46,7 +46,9 @@ def bind_table_info(table_info: TableInfo) -> TableCatalog:
         TableCatalog  -  corresponding metadata for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_table_catalog_entry(table_info.database_name, table_info.table_name)
+    obj = catalog.get_table_catalog_entry(
+        table_info.database_name, table_info.table_name
+    )
 
     # Users should not be allowed to directly access or modify the SYSTEM tables, as
     # doing so can lead to the corruption of other tables. These tables include

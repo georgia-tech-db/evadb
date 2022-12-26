@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 

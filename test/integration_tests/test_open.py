@@ -39,7 +39,9 @@ class OpenTests(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # Insert dummy data into table.
-        table_df_metadata = CatalogManager().get_table_catalog_entry(None, "testOpenTable")
+        table_df_metadata = CatalogManager().get_table_catalog_entry(
+            None, "testOpenTable"
+        )
         storage_engine = StorageEngine().factory(table_df_metadata)
         storage_engine.write(
             table_df_metadata, Batch(pd.DataFrame([{"num": 1}, {"num": 2}]))

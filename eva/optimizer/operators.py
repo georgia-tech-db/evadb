@@ -19,7 +19,7 @@ from typing import List
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression

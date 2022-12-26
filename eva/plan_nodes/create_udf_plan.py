@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import List
 
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 

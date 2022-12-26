@@ -28,9 +28,7 @@ class SQLStorageEngineTest(unittest.TestCase):
         self.table = None
 
     def create_sample_table(self):
-        table_info = TableCatalog(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
-        )
+        table_info = TableCatalog("dataset", "dataset", table_type=TableType.VIDEO_DATA)
         column_0 = ColumnCatalog("name", ColumnType.TEXT, False)
         column_1 = ColumnCatalog("id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalog(

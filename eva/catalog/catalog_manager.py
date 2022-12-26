@@ -18,15 +18,15 @@ from typing import List
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.index_catalog import IndexCatalog
 from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.index import IndexCatalog
-from eva.catalog.models.udf import UdfCatalog
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_catalog import UdfCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
+from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
-from eva.catalog.services.index_service import IndexCatalogService
-from eva.catalog.services.udf_io_service import UdfIOCatalogService
-from eva.catalog.services.udf_service import UdfCatalogService
+from eva.catalog.services.udf_catalog_service import UdfCatalogService
+from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
@@ -284,7 +284,7 @@ class CatalogManager(object):
         secondary_index_table: TableCatalog,
         feat_column: ColumnCatalog,
     ) -> IndexCatalog:
-        index_metadata = self._index_service.insert_index_entry(
+        index_metadata = self._index_service.insert_entry(
             name, save_file_path, index_type
         )
         index_metadata.secondary_index_id = secondary_index_table.id
@@ -292,13 +292,13 @@ class CatalogManager(object):
         return index_metadata
 
     def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
-        return self._index_service.index_entry_by_name(name)
+        return self._index_service.get_entry_by_name(name)
 
     def drop_index_catalog_entry(self, index_name: str) -> bool:
-        return self._index_service.drop_index_entry_by_name(index_name)
+        return self._index_service.delete_entry_by_name(index_name)
 
     def get_all_index_catalog_entries(self):
-        return self._index_service.get_all_indices()
+        return self._index_service.get_all_entries()
 
     """ utils """
 

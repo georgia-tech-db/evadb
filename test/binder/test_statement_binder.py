@@ -138,7 +138,9 @@ class StatementBinderTests(unittest.TestCase):
         mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
         mock_get_name.return_value = udf_obj
 
-        mock_get_udf_outputs = mock_catalog().get_udf_outputs = MagicMock()
+        mock_get_udf_outputs = (
+            mock_catalog().get_udf_io_catalog_output_entries
+        ) = MagicMock()
         mock_get_udf_outputs.return_value = func_ouput_objs
         mock_path_to_class.return_value.return_value = "path_to_class"
 

@@ -39,7 +39,9 @@ class DropExecutorTest(unittest.TestCase):
         metadata_obj = catalog_manager.get_table_catalog_entry(None, "MyVideo")
         video_dir = metadata_obj.file_url
         self.assertFalse(metadata_obj is None)
-        column_objects = catalog_manager.get_column_catalog_entries_by_table(metadata_obj)
+        column_objects = catalog_manager.get_column_catalog_entries_by_table(
+            metadata_obj
+        )
         self.assertEqual(len(column_objects), 4)
         self.assertTrue(Path(video_dir).exists())
         # metainfo table
@@ -50,8 +52,12 @@ class DropExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
         with self.assertRaises(Exception):
             catalog_manager.get_table_catalog_entry(metadata_obj)
-        self.assertTrue(catalog_manager.get_table_catalog_entry(None, "MyVideo") is None)
-        column_objects = catalog_manager.get_column_catalog_entries_by_table(metadata_obj)
+        self.assertTrue(
+            catalog_manager.get_table_catalog_entry(None, "MyVideo") is None
+        )
+        column_objects = catalog_manager.get_column_catalog_entries_by_table(
+            metadata_obj
+        )
         self.assertEqual(len(column_objects), 0)
         self.assertFalse(Path(video_dir).exists())
 

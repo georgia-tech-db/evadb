@@ -14,7 +14,7 @@
 # limitations under the License.
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.udf import UdfCatalog
+from eva.catalog.models.udf_catalog import UdfCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
@@ -74,7 +74,7 @@ class UdfCatalogService(BaseService):
             True if successfully deleted else True
         """
         try:
-            udf_record = self.udf_by_name(name)
+            udf_record = self.get_entry_by_name(name)
             udf_record.delete()
         except Exception:
             logger.exception("Delete udf failed for name {}".format(name))

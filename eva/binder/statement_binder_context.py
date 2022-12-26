@@ -18,7 +18,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.udf_io import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.utils.logging_manager import logger
@@ -73,7 +73,9 @@ class StatementBinderContext:
     def add_derived_table_alias(
         self,
         alias: str,
-        target_list: List[Union[TupleValueExpression, FunctionExpression, UdfIOCatalog]],
+        target_list: List[
+            Union[TupleValueExpression, FunctionExpression, UdfIOCatalog]
+        ],
     ):
         """
         Add a alias -> derived table column mapping

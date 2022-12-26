@@ -209,7 +209,7 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        output_objs = self._catalog.get_udf_outputs(udf_obj)
+        output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:
