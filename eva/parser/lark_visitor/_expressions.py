@@ -67,12 +67,14 @@ class Expressions:
                            ColumnType.INTEGER)
 
     def logical_expression(self, tree):
-        if len(ctx.children) < 3:
+        print(tree.pretty())
+        print(len(tree.children))
+        if len(tree.children) < 3:
             # error scenario, should have 3 children
             return None
-        left = self.visit(ctx.getChild(0))
-        op = self.visit(ctx.getChild(1))
-        right = self.visit(ctx.getChild(2))
+        left = self.visit(tree.children[0])
+        op = self.visit(tree.children[1])
+        right = self.visit(tree.children[2])
         return LogicalExpression(op, left, right)
 
     def binary_comparison_predicate(self, tree):
@@ -83,11 +85,12 @@ class Expressions:
 
     def nested_expression_atom(self, tree):
         # ToDo Can there be >1 expression in this case
-        expr = ctx.expression(0)
+        expr = tree.children[0]
         return self.visit(expr)
 
     def comparison_operator(self, tree):
         op = str(tree.children[0])
+        
         if op == "=":
             return ExpressionType.COMPARE_EQUAL
         elif op == "<":
@@ -108,7 +111,7 @@ class Expressions:
             return ExpressionType.INVALID
 
     def logical_operator(self, tree):
-        op = ctx.getText()
+        op = str(tree.children[0])
 
         if op == "OR":
             return ExpressionType.LOGICAL_OR
