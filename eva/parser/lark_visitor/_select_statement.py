@@ -27,7 +27,6 @@ class Select:
         return select_stmt
 
     def order_by_clause(self, tree):
-        print(tree.pretty())
         orderby_clause_data = []
         for child in tree.children:
             if isinstance(child, Tree):
@@ -35,7 +34,6 @@ class Select:
         return orderby_clause_data
 
     def order_by_expression(self, tree):
-        print(tree.pretty())        
         sort_token = str(tree.children[0])
         output = self.visit_children(tree)
         output = output[0][0][0][0]

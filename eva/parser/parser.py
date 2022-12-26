@@ -102,5 +102,7 @@ class Parser(object):
             pprint("-------- DDIFF  --------")
             d = DeepDiff(lark_output[0], antlr_output[0])
             pprint(d)
+        else:
+            pprint("Identical parse trees")
 
         return antlr_output

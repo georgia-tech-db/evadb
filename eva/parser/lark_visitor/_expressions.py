@@ -20,6 +20,7 @@ from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
+from eva.catalog.catalog_type import ColumnType
 
 from lark import Tree
 
@@ -31,11 +32,11 @@ class Expressions:
     def string_literal(self, tree):
         # Fix a bug here; 'VAN' Literal gets converted to "'VAN'";
         # Multiple quotes should be removed
-
-        if ctx.STRING_LITERAL() is not None:
-            return ConstantValueExpression(ctx.getText()[1:-1], ColumnType.TEXT)
-        # todo handle other types
-        return self.visitChildren(ctx)
+        text = tree.children[0]
+        if text is not None:
+            return ConstantValueExpression(text[1:-1], ColumnType.TEXT)
+        else:
+            return None
 
     def array_literal(self, tree):
         res = ConstantValueExpression(
@@ -50,7 +51,6 @@ class Expressions:
         return output
     
     def comparison_expression(self, tree):
-        print(tree.pretty())
         left = self.visit_children(tree.children[0])
         return left
 

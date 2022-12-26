@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from lark import visitors, Tree
-from pprint import pprint
 from typing import List, TypeVar
 
 from eva.parser.lark_visitor._rename_statement import RenameTable
@@ -76,7 +75,6 @@ class LarkInterpreter(
     def __init__(self, query):
         super().__init__()
         self.query = query
-        pprint(query)
 
     def start(self, tree):
         return self.visit_children(tree)

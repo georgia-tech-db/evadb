@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pprint import pprint
-
 from lark import Lark
 
 from eva.parser.lark_visitor import LarkInterpreter
@@ -47,7 +45,6 @@ class LarkParser(object):
             query_string += ";"
                     
         tree = self._parser.parse(query_string)
-        pprint(tree.pretty())
         output = LarkInterpreter(query_string).visit(tree)
 
         # convert output to list if it is a single element

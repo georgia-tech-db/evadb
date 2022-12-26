@@ -19,33 +19,37 @@ from eva.parser.types import FileFormatType
 
 class Load:
     def load_statement(self, tree):
-        file_path = self.visit(ctx.fileName()).value
-        table = TableRef(self.visit(ctx.tableName()))
+        file_format = self.visit(tree.children[1])
+        file_path = self.visit(tree.children[2]).value
+        table = self.visit(tree.children[4])
 
         # Set default for file_format as Video
-        file_format = FileFormatType.VIDEO
         file_options = {}
         file_options["file_format"] = file_format
 
-        if ctx.fileOptions():
-            file_options = self.visit(ctx.fileOptions())
-
         # set default for column_list as None
         column_list = None
-        if ctx.uidList():
-            column_list = self.visit(ctx.uidList())
+        #if ctx.uidList():
+        #    column_list = self.visit(ctx.uidList())
 
         stmt = LoadDataStatement(table, file_path, column_list, file_options)
         return stmt
 
-    def file_options(self, tree):
-        file_format = FileFormatType.VIDEO
-        # Check the file format
-        if ctx.CSV() is not None:
+    def file_format(self, tree):
+        file_format = None
+        file_format_string = tree.children[0]
+
+        if file_format_string == 'VIDEO':
+            file_format = FileFormatType.VIDEO
+        elif file_format_string == 'CSV':
             file_format = FileFormatType.CSV
 
-        # parse and add more file options in future
+        return file_format
+
+    def file_options(self, tree):
         file_options = {}
-        file_options["file_format"] = file_format
+        if ctx.fileFormat():
+            file_format = self.visit(ctx.fileFormat())
+            file_options["file_format"] = file_format
 
         return file_options
