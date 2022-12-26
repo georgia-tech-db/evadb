@@ -135,7 +135,7 @@ class StatementBinderTests(unittest.TestCase):
         obj2.name.lower.return_value = "out2"
         func_ouput_objs = [obj1, obj2]
         udf_obj = MagicMock()
-        mock_get_name = mock_catalog().get_udf_by_name = MagicMock()
+        mock_get_name = mock_catalog().get_udf_catalog_entry_by_name = MagicMock()
         mock_get_name.return_value = udf_obj
 
         mock_get_udf_outputs = mock_catalog().get_udf_outputs = MagicMock()

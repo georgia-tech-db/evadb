@@ -191,12 +191,10 @@ class CreateIndexExecutor(AbstractExecutor):
                 ColConstraintInfo(unique=True),
             ),
         ]
-        col_metadata = [
-            catalog_manager.create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension, col.cci
-            )
-            for col in col_list
-        ]
+        col_metadata = catalog_manager.xform_column_definitions_to_catalog_entries(
+            col_list
+        )
+
         catalog_manager = CatalogManager()
         df_metadata = catalog_manager.insert_table_catalog_entry(
             "secondary_index_{}_{}".format(self.node.index_type, self.node.name),

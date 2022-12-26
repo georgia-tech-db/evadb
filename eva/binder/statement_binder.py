@@ -190,7 +190,7 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        udf_obj = self._catalog.get_udf_by_name(node.name)
+        udf_obj = self._catalog.get_udf_catalog_entry_by_name(node.name)
         if udf_obj is None:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "

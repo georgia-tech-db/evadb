@@ -23,8 +23,8 @@ class UdfCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfCatalog)
 
-    def create_udf(self, name: str, impl_path: str, type: str) -> UdfCatalog:
-        """Creates a new udf entry
+    def insert_entry(self, name: str, impl_path: str, type: str) -> UdfCatalog:
+        """Insert a new udf entry
 
         Arguments:
             name (str): name of the udf
@@ -38,7 +38,7 @@ class UdfCatalogService(BaseService):
         udf_obj = udf_obj.save()
         return udf_obj
 
-    def udf_by_name(self, name: str):
+    def get_entry_by_name(self, name: str):
         """return the udf entry that matches the name provided.
            None if no such entry found.
 
@@ -51,7 +51,7 @@ class UdfCatalogService(BaseService):
         except NoResultFound:
             return None
 
-    def udf_by_id(self, id: int):
+    def get_entry_by_id(self, id: int):
         """return the udf entry that matches the id provided.
            None if no such entry found.
 
@@ -64,8 +64,8 @@ class UdfCatalogService(BaseService):
         except NoResultFound:
             return None
 
-    def drop_udf_by_name(self, name: str):
-        """Drop a udf entry from the catalog UdfCatalog
+    def delete_entry_by_name(self, name: str):
+        """Delete a udf entry from the catalog UdfCatalog
 
         Arguments:
             name (str): udf name to be deleted
@@ -81,7 +81,7 @@ class UdfCatalogService(BaseService):
             return False
         return True
 
-    def get_all_udfs(self):
+    def get_all_entries(self):
         try:
             return self.model.query.all()
         except NoResultFound:

@@ -40,7 +40,7 @@ class ShowInfoExecutor(AbstractExecutor):
             catalog_manager = CatalogManager()
             show_entries = []
             if self.node.show_type is ShowType.UDFS:
-                udfs = catalog_manager.get_all_udf_entries()
+                udfs = catalog_manager.get_all_udf_catalog_entries()
                 for udf in udfs:
                     show_entries.append(udf.display_format())
             elif self.node.show_type is ShowType.TABLES:

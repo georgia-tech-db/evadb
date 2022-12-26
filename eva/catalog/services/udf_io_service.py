@@ -23,7 +23,7 @@ class UdfIOCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfIOCatalog)
 
-    def get_inputs_by_udf_id(self, udf_id: int):
+    def get_input_entries_by_udf_id(self, udf_id: int):
         try:
             result = self.model.query.filter(
                 self.model._udf_id == udf_id,
@@ -35,7 +35,7 @@ class UdfIOCatalogService(BaseService):
             logger.error(error)
             raise RuntimeError(error)
 
-    def get_outputs_by_udf_id(self, udf_id: int):
+    def get_output_entries_by_udf_id(self, udf_id: int):
         try:
             result = self.model.query.filter(
                 self.model._udf_id == udf_id,
@@ -47,8 +47,8 @@ class UdfIOCatalogService(BaseService):
             logger.error(error)
             raise RuntimeError(error)
 
-    def add_udf_io(self, io_list: List[UdfIOCatalog]):
-        """Commit an entry in the udf_io table
+    def insert_entries(self, io_list: List[UdfIOCatalog]):
+        """Commit entries to the udf_io table
 
         Arguments:
             io_list (List[UdfIOCatalog]): List of io info io be added

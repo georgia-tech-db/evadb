@@ -171,23 +171,23 @@ class CatalogManagerTests(unittest.TestCase):
     def test_create_udf(self, udfio_mock, udf_mock):
         catalog = CatalogManager()
         udf_io_list = [MagicMock()]
-        actual = catalog.create_udf("udf", "sample.py", "classification", udf_io_list)
+        actual = catalog.insert_udf_catalog_entry("udf", "sample.py", "classification", udf_io_list)
         udfio_mock.return_value.add_udf_io.assert_called_with(udf_io_list)
-        udf_mock.return_value.create_udf.assert_called_with(
+        udf_mock.return_value.insert_udf_catalog_entry.assert_called_with(
             "udf", "sample.py", "classification"
         )
-        self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
+        self.assertEqual(actual, udf_mock.return_value.insert_udf_catalog_entry.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
-    def test_get_udf_by_name(self, udf_mock):
+    def test_get_udf_catalog_entry_by_name(self, udf_mock):
         catalog = CatalogManager()
-        actual = catalog.get_udf_by_name("name")
+        actual = catalog.get_udf_catalog_entry_by_name("name")
         udf_mock.return_value.udf_by_name.assert_called_with("name")
         self.assertEqual(actual, udf_mock.return_value.udf_by_name.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
     def test_drop_udf(self, udf_mock):
-        CatalogManager().drop_udf("name")
+        CatalogManager().delete_udf_catalog_entry_by_name("name")
         udf_mock.return_value.drop_udf_by_name.assert_called_with("name")
 
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")

@@ -112,7 +112,7 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch("eva.binder.statement_binder_context.CatalogManager")
     def test_check_table_alias_map(self, mock_catalog):
-        mock_get_column_object = mock_catalog().get_column_object = MagicMock()
+        mock_get_column_object = mock_catalog().get_column_catalog_entry = MagicMock()
         mock_get_column_object.return_value = "catalog_value"
         # key exists
         ctx = StatementBinderContext()

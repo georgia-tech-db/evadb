@@ -30,11 +30,10 @@ class TableCatalogService(BaseService):
     def insert_entry(
         self, name: str, file_url: str, identifier_id, table_type: TableType
     ) -> TableCatalog:
-        """
-        Create a new dataset entry for given name and file URL.
+        """Insert a new table entry into table catalog.
         Arguments:
-            name (str): name of the dataset
-            file_url (str): file path of the dataset.
+            name (str): name of the table
+            file_url (str): file path of the table.
             table_type (TableType): type of data in the table
         Returns:
             TableCatalog object
@@ -49,80 +48,55 @@ class TableCatalogService(BaseService):
             table_catalog_obj = table_catalog_obj.save()
         except Exception as e:
             logger.exception(
-                f"Failed to create catalog dataset with exception {str(e)}"
+                f"Failed to insert entry into table catalog with exception {str(e)}"
             )
             raise CatalogError(e)
         else:
             return table_catalog_obj
 
-    def get_entry_by_name(self, name: str) -> int:
+    def get_entry_by_id(self, table_id) -> TableCatalog:
         """
-        Returns metadata id for the name queried
-
+        Returns the table by ID
         Arguments:
-            name (str)- Name for which id is required
-
-        Returns:
-            int (dataset id)
-        """
-        try:
-            result = (
-                self.model.query.with_entities(self.model._id)
-                .filter(self.model._name == name)
-                .one()
-            )
-            return result[0]
-        except NoResultFound:
-            logger.error("get_id_from_name failed with name {}".format(name))
-
-    def get_entry_by_id(self, dataset_id) -> TableCatalog:
-        """
-        Returns the dataset by ID
-        Arguments:
-            dataset_id (int)
+            table_id (int)
         Returns:
            TableCatalog
         """
-        return self.model.query.filter(self.model._id == dataset_id).one()
+        return self.model.query.filter(self.model._id == table_id).one()
 
-    def get_entry_by_name(
-        self, database_name, dataset_name, column_name: List[str] = None
-    ):
+    def get_entry_by_name(self, database_name, table_name):
         """
         Get the metadata for the given table.
         Arguments:
-            database_name  (str): Database to which dataset belongs # TODO:
+            database_name  (str): Database to which table belongs # TODO:
             use this field
-            dataset_name (str): name of the dataset
-            column_name (List[str]): list of columns for the  dataset which
-            need be listed. If not specified, all columns will be retrieved
-            # TODO:  perform column filtering when column_name not None
+            table_name (str): name of the table
         Returns:
-            TableCatalog - metadata for given dataset_name
+            TableCatalog - metadata for given table_name
         """
-        return self.model.query.filter(self.model._name == dataset_name).one_or_none()
+        return self.model.query.filter(self.model._name == table_name).one_or_none()
 
-    def delete_entry(self, dataset: TableCatalog):
-        """Delete dataset from the db
+    def delete_entry(self, table: TableCatalog):
+        """Delete table from the db
         Arguments:
-            dataset  (TableCatalog): dataset to delete
+            table  (TableCatalog): table to delete
         Returns:
             True if successfully removed else false
         """
         try:
-            dataset.delete()
+            table.delete()
             return True
         except Exception as e:
-            err_msg = f"Delete dataset failed for {dataset} with error {str(e)}."
+            err_msg = f"Delete table failed for {table} with error {str(e)}."
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
-    def rename_entry(self, dataset: TableCatalog, new_name: str):
+    def rename_entry(self, table: TableCatalog, new_name: str):
         try:
-            dataset.update(_name=new_name)
+            table.update(_name=new_name)
         except Exception as e:
-            err_msg = "Update dataset name failed for {} with error {}".format(
-                dataset.name, str(e)
+            err_msg = "Update table name failed for {} with error {}".format(
+                table.name, str(e)
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)

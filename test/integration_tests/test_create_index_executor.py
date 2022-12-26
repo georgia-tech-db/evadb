@@ -53,12 +53,10 @@ class CreateIndexTest(unittest.TestCase):
             ),
             ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, [1, 3]),
         ]
-        col_metadata = [
-            CatalogManager().create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension, col.cci
-            )
-            for col in col_list
-        ]
+        col_metadata = CatalogManager().xform_column_definitions_to_catalog_entries(
+            col_list
+        )
+
         tb_metadata = CatalogManager().insert_table_catalog_entry(
             "testCreateIndexFeatTable",
             str(generate_file_path("testCreateIndexFeatTable")),
@@ -90,7 +88,9 @@ class CreateIndexTest(unittest.TestCase):
         execute_query_fetch_all(query)
 
         # Test index metadata.
-        index_metadata = CatalogManager().get_index_catalog_entry_by_name("testCreateIndexName")
+        index_metadata = CatalogManager().get_index_catalog_entry_by_name(
+            "testCreateIndexName"
+        )
         self.assertEqual(index_metadata.type, IndexType.HNSW)
         self.assertEqual(
             index_metadata.save_file_path,
@@ -105,9 +105,7 @@ class CreateIndexTest(unittest.TestCase):
         feat_df_metadata = CatalogManager().get_table_catalog_entry(
             None, "testCreateIndexFeatTable"
         )
-        feat_column = [
-            col for col in feat_df_metadata.columns if col.name == "feat"
-        ][0]
+        feat_column = [col for col in feat_df_metadata.columns if col.name == "feat"][0]
         self.assertEqual(index_metadata.feat_column_id, feat_column.id)
         self.assertEqual(index_metadata.feat_column, feat_column)
 

@@ -118,61 +118,243 @@ class CatalogManager(object):
 
         for column in column_list:
             column.table_id = table_entry.id
-        column_list = self._column_service.create_column(column_list)
+        column_list = self._column_service.insert_entries(column_list)
 
         table_entry.schema = column_list
         return table_entry
 
     def get_table_catalog_entry(
-        self, database_name: str, dataset_name: str
+        self, database_name: str, table_name: str
     ) -> TableCatalog:
         """
-        Returns the Dataset metadata for the given dataset name
+        Returns the table catalog entry for the given table name
         Arguments:
-            dataset_name (str): name of the dataset
+            table_name (str): name of the table
 
         Returns:
             TableCatalog
         """
 
-        metadata = self._table_catalog_service.get_entry_by_name(
-            database_name, dataset_name
+        table_entry = self._table_catalog_service.get_entry_by_name(
+            database_name, table_name
         )
-        if metadata is None:
+        if table_entry is None:
             return None
-        # we are forced to set schema every time metadata is fetched
-        # ToDo: maybe keep schema as a part of persistent metadata object
-        df_columns = self._column_service.columns_by_id_and_table_id(metadata.id, None)
-        metadata.schema = df_columns
-        return metadata
+        # we are forced to set schema every time table_entry is fetched
+        # ToDo: maybe keep schema as a part of persistent table_entry object
+        df_columns = self._column_service.filter_entries_by_table_id(table_entry.id)
+        table_entry.schema = df_columns
+        return table_entry
 
-    def delete_table_catalog_entry(self, obj: TableCatalog) -> bool:
+    def delete_table_catalog_entry(self, table_entry: TableCatalog) -> bool:
         """
-        This method deletes the table along with its columns from df_metadata
-        and df_columns respectively
+        This method deletes the table along with its columns from table catalog
+        and column catalog respectively
 
         Arguments:
-           obj: dataframe metadata entry to remove
+           table: table catalog entry to remove
 
         Returns:
            True if successfully deleted else False
         """
-        return self._table_catalog_service.delete_entry(obj)
+        return self._table_catalog_service.delete_entry(table_entry)
 
     def rename_table_catalog_entry(self, curr_table: TableCatalog, new_name: TableInfo):
         return self._table_catalog_service.rename_entry(curr_table, new_name.table_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
-        metadata = self._table_catalog_service.get_entry_by_name(
+        table_entry = self._table_catalog_service.get_entry_by_name(
             database_name, table_name
         )
-        if metadata is None:
+        if table_entry is None:
             return False
         else:
             return True
 
     def get_all_table_catalog_entries(self):
         return self._table_catalog_service.get_all_entries()
+
+    "column catalog services"
+
+    def get_column_catalog_entry(
+        self, table_obj: TableCatalog, col_name: str
+    ) -> ColumnCatalog:
+        col_obj = self._column_service.filter_entry_by_table_id_and_name(
+            table_obj.id, col_name
+        )
+        if col_obj:
+            return col_obj
+        else:
+            return None
+
+    def get_column_catalog_entries_by_table(self, table_obj: TableCatalog):
+        col_entries = self._column_service.filter_entries_by_table(table_obj)
+        return col_entries
+
+    "udf catalog services"
+
+    def insert_udf_catalog_entry(
+        self,
+        name: str,
+        impl_file_path: str,
+        type: str,
+        udf_io_list: List[UdfIOCatalog],
+    ) -> UdfCatalog:
+        """Inserts a UDF catalog entry along with UDF_IO entries.
+        It persists the entry to the database.
+
+        Arguments:
+            name(str): name of the udf
+            impl_file_path(str): implementation path of the udf
+            type(str): what kind of udf operator like classification,
+                                                        detection etc
+            udf_io_list(List[UdfIOCatalog]): input/output udf info list
+
+        Returns:
+            The persisted UdfCatalog object.
+        """
+
+        udf_entry = self._udf_service.insert_entry(name, impl_file_path, type)
+        for udf_io in udf_io_list:
+            udf_io.udf_id = udf_entry.id
+        self._udf_io_service.insert_entries(udf_io_list)
+        return udf_entry
+
+    def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalog:
+        """
+        Get the UDF information based on name.
+
+        Arguments:
+             name (str): name of the UDF
+
+        Returns:
+            UdfCatalog object
+        """
+        return self._udf_service.get_entry_by_name(name)
+
+    def delete_udf_catalog_entry_by_name(self, udf_name: str) -> bool:
+        """
+        This method drops the udf entry and corresponding udf_io
+        from the catalog
+
+        Arguments:
+           udf_name: udf name to be dropped.
+
+        Returns:
+           True if successfully deleted else False
+        """
+        return self._udf_service.delete_entry_by_name(udf_name)
+
+    def get_all_udf_catalog_entries(self):
+        return self._udf_service.get_all_entries()
+
+    "udf io services"
+
+    def get_udf_io_catalog_input_entries(
+        self, udf_obj: UdfCatalog
+    ) -> List[UdfIOCatalog]:
+        if not isinstance(udf_obj, UdfCatalog):
+            raise ValueError(
+                """Expected UdfCatalog object, got
+                             {}""".format(
+                    type(udf_obj)
+                )
+            )
+        return self._udf_io_service.get_input_entries_by_udf_id(udf_obj.id)
+
+    def get_udf_io_catalog_output_entries(
+        self, udf_obj: UdfCatalog
+    ) -> List[UdfIOCatalog]:
+        if not isinstance(udf_obj, UdfCatalog):
+            raise ValueError(
+                """Expected UdfCatalog object, got
+                             {}""".format(
+                    type(udf_obj)
+                )
+            )
+        return self._udf_io_service.get_output_entries_by_udf_id(udf_obj.id)
+
+    """ Index related services. """
+
+    def insert_index_catalog_entry(
+        self,
+        name: str,
+        save_file_path: str,
+        index_type: IndexType,
+        secondary_index_table: TableCatalog,
+        feat_column: ColumnCatalog,
+    ) -> IndexCatalog:
+        index_metadata = self._index_service.insert_index_entry(
+            name, save_file_path, index_type
+        )
+        index_metadata.secondary_index_id = secondary_index_table.id
+        index_metadata.feat_column_id = feat_column.id
+        return index_metadata
+
+    def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
+        return self._index_service.index_entry_by_name(name)
+
+    def drop_index_catalog_entry(self, index_name: str) -> bool:
+        return self._index_service.drop_index_entry_by_name(index_name)
+
+    def get_all_index_catalog_entries(self):
+        return self._index_service.get_all_indices()
+
+    """ utils """
+
+    def xform_column_definitions_to_catalog_entries(
+        self, col_list: List[ColumnDefinition]
+    ):
+        """Create column metadata for the input parsed column list. This function
+        will not commit the provided column into catalog table.
+        Will only return in memory list of ColumnDataframe objects
+
+        Arguments:
+            col_list {List[ColumnDefinition]} -- parsed col list to be created
+        """
+        if isinstance(col_list, ColumnDefinition):
+            col_list = [col_list]
+
+        result_list = []
+        for col in col_list:
+            column_entry = ColumnCatalog(
+                col.name,
+                col.type,
+                array_type=col.array_type,
+                array_dimensions=col.dimension,
+                is_nullable=col.cci.nullable,
+            )
+            result_list.append(column_entry)
+
+        return result_list
+
+    def udf_io(
+        self,
+        io_name: str,
+        data_type: ColumnType,
+        array_type: NdArrayType,
+        dimensions: List[int],
+        is_input: bool,
+    ):
+        """Constructs an in memory udf_io object with given info.
+        This function won't commit this object in the catalog database.
+        If you want to commit it into catalog call insert_udf_catalog_entry with
+        corresponding udf_id and io list
+
+        Arguments:
+            name(str): io name to be created
+            data_type(ColumnType): type of io created
+            array_type(NdArrayType): type of array content
+            dimensions(List[int]):dimensions of the io created
+            is_input(bool): whether a input or output, if true it is an input
+        """
+        return UdfIOCatalog(
+            io_name,
+            data_type,
+            array_type=array_type,
+            array_dimensions=dimensions,
+            is_input=is_input,
+        )
 
     def create_multimedia_table(self, name: str, format_type: FileFormatType):
         if format_type is FileFormatType.VIDEO:
@@ -203,7 +385,7 @@ class CatalogManager(object):
                 "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
             ),
         ]
-        col_metadata = self.create_columns_metadata(columns)
+        col_metadata = self.xform_column_definitions_to_catalog_entries(columns)
         uri = str(generate_file_path(name))
         metadata = catalog.insert_table_catalog_entry(
             name,
@@ -235,7 +417,7 @@ class CatalogManager(object):
                 "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
             ),
         ]
-        col_metadata = self.create_columns_metadata(columns)
+        col_metadata = self.xform_column_definitions_to_catalog_entries(columns)
         uri = str(generate_file_path(name))
         metadata = self.insert_table_catalog_entry(
             name,
@@ -254,7 +436,7 @@ class CatalogManager(object):
         table_type: TableType = TableType.STRUCTURED_DATA,
     ) -> TableCatalog:
         table_name = table_info.table_name
-        column_metadata_list = self.create_columns_metadata(columns)
+        column_metadata_list = self.xform_column_definitions_to_catalog_entries(columns)
         file_url = str(generate_file_path(table_name))
         metadata = self.insert_table_catalog_entry(
             table_name,
@@ -264,173 +446,6 @@ class CatalogManager(object):
             table_type=table_type,
         )
         return metadata
-
-    def create_columns_metadata(self, col_list: List[ColumnDefinition]):
-        """Create column metadata for the input parsed column list. This function
-        will not commit the provided column into catalog table.
-        Will only return in memory list of ColumnDataframe objects
-
-        Arguments:
-            col_list {List[ColumnDefinition]} -- parsed col list to be created
-        """
-        if isinstance(col_list, ColumnDefinition):
-            col_list = [col_list]
-
-        result_list = []
-        for col in col_list:
-            result_list.append(
-                self.create_column_metadata(
-                    col.name, col.type, col.array_type, col.dimension, col.cci
-                )
-            )
-
-        return result_list
-
-    def create_column_metadata(
-        self,
-        column_name: str,
-        data_type: ColumnType,
-        array_type: NdArrayType,
-        dimensions: List[int],
-        cci: ColConstraintInfo = ColConstraintInfo(),
-    ) -> ColumnCatalog:
-        """Create a dataframe column object this column.
-        This function won't commit this object in the catalog database.
-        If you want to commit it into catalog table call insert_table_catalog_entry with
-        corresponding table_id
-
-        Arguments:
-            column_name {str} -- column name to be created
-            data_type {ColumnType} -- type of column created
-            array_type {NdArrayType} -- type of ndarray
-            dimensions {List[int]} -- dimensions of the column created
-        """
-        return ColumnCatalog(
-            column_name,
-            data_type,
-            array_type=array_type,
-            array_dimensions=dimensions,
-            is_nullable=cci.nullable,
-        )
-
-    def get_column_object(
-        self, table_obj: TableCatalog, col_name: str
-    ) -> ColumnCatalog:
-        col_objs = self._column_service.columns_by_table_id_and_names(
-            table_obj.id, column_names=[col_name]
-        )
-        if col_objs:
-            return col_objs[0]
-        else:
-            return None
-
-    def get_all_column_objects(self, table_obj: TableCatalog):
-        col_objs = self._column_service.get_all_table_columns(table_obj)
-        return col_objs
-
-    def udf_io(
-        self,
-        io_name: str,
-        data_type: ColumnType,
-        array_type: NdArrayType,
-        dimensions: List[int],
-        is_input: bool,
-    ):
-        """Constructs an in memory udf_io object with given info.
-        This function won't commit this object in the catalog database.
-        If you want to commit it into catalog call create_udf with
-        corresponding udf_id and io list
-
-        Arguments:
-            name(str): io name to be created
-            data_type(ColumnType): type of io created
-            array_type(NdArrayType): type of array content
-            dimensions(List[int]):dimensions of the io created
-            is_input(bool): whether a input or output, if true it is an input
-        """
-        return UdfIOCatalog(
-            io_name,
-            data_type,
-            array_type=array_type,
-            array_dimensions=dimensions,
-            is_input=is_input,
-        )
-
-    def create_udf(
-        self,
-        name: str,
-        impl_file_path: str,
-        type: str,
-        udf_io_list: List[UdfIOCatalog],
-    ) -> UdfCatalog:
-        """Creates an udf metadata object and udf_io objects and persists them
-        in database.
-
-        Arguments:
-            name(str): name of the udf to which this metdata corresponds
-            impl_file_path(str): implementation path of the udf,
-                                 relative to eva/udf
-            type(str): what kind of udf operator like classification,
-                                                        detection etc
-            udf_io_list(List[UdfIOCatalog]): input/output info of this udf
-
-        Returns:
-            The persisted UdfCatalog object with the id field populated.
-        """
-
-        metadata = self._udf_service.create_udf(name, impl_file_path, type)
-        for udf_io in udf_io_list:
-            udf_io.udf_id = metadata.id
-        self._udf_io_service.add_udf_io(udf_io_list)
-        return metadata
-
-    def get_udf_by_name(self, name: str) -> UdfCatalog:
-        """
-        Get the UDF information based on name.
-
-        Arguments:
-             name (str): name of the UDF
-
-        Returns:
-            UdfCatalog object
-        """
-        return self._udf_service.udf_by_name(name)
-
-    def get_udf_inputs(self, udf_obj: UdfCatalog) -> List[UdfIOCatalog]:
-        if not isinstance(udf_obj, UdfCatalog):
-            raise ValueError(
-                """Expected UdfCatalog object, got
-                             {}""".format(
-                    type(udf_obj)
-                )
-            )
-        return self._udf_io_service.get_inputs_by_udf_id(udf_obj.id)
-
-    def get_udf_outputs(self, udf_obj: UdfCatalog) -> List[UdfIOCatalog]:
-        if not isinstance(udf_obj, UdfCatalog):
-            raise ValueError(
-                """Expected UdfCatalog object, got
-                             {}""".format(
-                    type(udf_obj)
-                )
-            )
-        return self._udf_io_service.get_outputs_by_udf_id(udf_obj.id)
-
-    def drop_udf(self, udf_name: str) -> bool:
-        """
-        This method drops the udf entry and corresponding udf_io
-        from the catalog
-
-        Arguments:
-           udf_name: udf name to be dropped.
-
-        Returns:
-           True if successfully deleted else False
-        """
-        return self._udf_service.drop_udf_by_name(udf_name)
-
-    def get_all_udf_entries(self):
-        return self._udf_service.get_all_udfs()
 
     def get_media_metainfo_table(self, input_table: TableCatalog) -> TableCatalog:
         """Get a media metainfo table.
@@ -478,29 +493,3 @@ class CatalogManager(object):
             table_type=TableType.SYSTEM_STRUCTURED_DATA,
         )
         return obj
-
-    """ Index related services. """
-
-    def insert_index_catalog_entry(
-        self,
-        name: str,
-        save_file_path: str,
-        index_type: IndexType,
-        secondary_index_table: TableCatalog,
-        feat_column: ColumnCatalog,
-    ) -> IndexCatalog:
-        index_metadata = self._index_service.insert_index_entry(
-            name, save_file_path, index_type
-        )
-        index_metadata.secondary_index_id = secondary_index_table.id
-        index_metadata.feat_column_id = feat_column.id
-        return index_metadata
-
-    def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
-        return self._index_service.index_entry_by_name(name)
-
-    def drop_index_catalog_entry(self, index_name: str) -> bool:
-        return self._index_service.drop_index_entry_by_name(index_name)
-
-    def get_all_index_catalog_entries(self):
-        return self._index_service.get_all_indices()

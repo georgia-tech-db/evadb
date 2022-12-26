@@ -136,7 +136,7 @@ class StatementBinderContext:
         """
         table_obj = self._table_alias_map.get(alias, None)
         if table_obj:
-            return self._catalog.get_column_object(table_obj, col_name)
+            return self._catalog.get_column_catalog_entry(table_obj, col_name)
 
     def _check_derived_table_alias_map(self, alias, col_name) -> CatalogColumnType:
         """

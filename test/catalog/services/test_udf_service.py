@@ -29,7 +29,7 @@ class UdfCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.udf_service.UdfCatalog")
     def test_create_udf_should_create_model(self, mocked):
         service = UdfCatalogService()
-        service.create_udf(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
+        service.insert_udf_catalog_entry(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.assert_called_with(UDF_NAME, UDF_IMPL_PATH, UDF_TYPE)
         mocked.return_value.save.assert_called_once()
 
