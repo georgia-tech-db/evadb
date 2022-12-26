@@ -17,7 +17,7 @@ from unittest import TestCase
 from mock import patch
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.services.index_service import IndexService
+from eva.catalog.services.index_service import IndexCatalogService
 
 INDEX_TYPE = "HSNW"
 INDEX_IMPL_PATH = "file1"
@@ -25,17 +25,17 @@ INDEX_NAME = "name"
 INDEX_ID = 123
 
 
-class IndexServiceTest(TestCase):
+class IndexCatalogServiceTest(TestCase):
     @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_create_index_should_create_model(self, mocked):
-        service = IndexService()
+        service = IndexCatalogService()
         service.create_index(INDEX_NAME, INDEX_IMPL_PATH, INDEX_TYPE)
         mocked.assert_called_with(INDEX_NAME, INDEX_IMPL_PATH, INDEX_TYPE)
         mocked.return_value.save.assert_called_once()
 
     @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_index_by_name_should_query_model_with_name(self, mocked):
-        service = IndexService()
+        service = IndexCatalogService()
         expected = mocked.query.filter.return_value.one.return_value
 
         actual = service.index_by_name(INDEX_NAME)
@@ -45,7 +45,7 @@ class IndexServiceTest(TestCase):
 
     @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_index_by_id_should_query_model_with_id(self, mocked):
-        service = IndexService()
+        service = IndexCatalogService()
         expected = mocked.query.filter.return_value.one.return_value
         actual = service.index_by_id(INDEX_ID)
         mocked.query.filter.assert_called_with(mocked._id == INDEX_ID)
@@ -55,11 +55,11 @@ class IndexServiceTest(TestCase):
     @patch("os.remove")
     @patch("os.path.exists")
     def test_index_drop_by_name(self, mock_os_path, mock_os_remove):
-        service = IndexService()
+        service = IndexCatalogService()
 
         # file does not exist
         with patch(
-            "eva.catalog.services.index_service.IndexService.index_by_name"
+            "eva.catalog.services.index_service.IndexCatalogService.index_by_name"
         ) as mock_func:
             mock_os_path.return_value = False
             service.drop_index_by_name("index_name")
@@ -68,7 +68,7 @@ class IndexServiceTest(TestCase):
 
         # file exists
         with patch(
-            "eva.catalog.services.index_service.IndexService.index_by_name"
+            "eva.catalog.services.index_service.IndexCatalogService.index_by_name"
         ) as mock_func:
             mock_os_path.return_value = True
             save_file_path = mock_func.return_value.save_file_path
@@ -78,7 +78,7 @@ class IndexServiceTest(TestCase):
             mock_os_remove.assert_called_once_with(save_file_path)
 
         with patch(
-            "eva.catalog.services.index_service.IndexService.index_by_name"
+            "eva.catalog.services.index_service.IndexCatalogService.index_by_name"
         ) as mock_func:
             mock_func.return_value.delete.side_effect = Exception()
             with self.assertRaises(Exception) as cm:
@@ -90,7 +90,7 @@ class IndexServiceTest(TestCase):
 
     @patch("eva.catalog.services.index_service.IndexCatalog")
     def test_get_all_indices_should_return_empty(self, mocked):
-        service = IndexService()
+        service = IndexCatalogService()
         mocked.query.all.side_effect = Exception(NoResultFound)
         with self.assertRaises(Exception):
             self.assertEqual(service.get_all_indexs(), [])

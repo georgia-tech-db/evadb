@@ -22,11 +22,11 @@ from eva.catalog.models.table_catalog import TableCatalog
 from eva.catalog.models.index import IndexCatalog
 from eva.catalog.models.udf import UdfCatalog
 from eva.catalog.models.udf_io import UdfIOCatalog
-from eva.catalog.services.df_column_service import DatasetColumnService
-from eva.catalog.services.df_service import DatasetService
-from eva.catalog.services.index_service import IndexService
-from eva.catalog.services.udf_io_service import UdfIOService
-from eva.catalog.services.udf_service import UdfService
+from eva.catalog.services.column_catalog_service import ColumnCatalogService
+from eva.catalog.services.table_catalog_service import TableCatalogService
+from eva.catalog.services.index_service import IndexCatalogService
+from eva.catalog.services.udf_io_service import UdfIOCatalogService
+from eva.catalog.services.udf_service import UdfCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
@@ -48,11 +48,11 @@ class CatalogManager(object):
         return cls._instance
 
     def __init__(self):
-        self._dataset_service = DatasetService()
-        self._column_service = DatasetColumnService()
-        self._udf_service = UdfService()
-        self._udf_io_service = UdfIOService()
-        self._index_service = IndexService()
+        self._table_catalog_service = TableCatalogService()
+        self._column_service = ColumnCatalogService()
+        self._udf_service = UdfCatalogService()
+        self._udf_io_service = UdfIOCatalogService()
+        self._index_service = IndexCatalogService()
 
     def reset(self):
         """
@@ -104,7 +104,7 @@ class CatalogManager(object):
             The persisted TableCatalog object with the id field populated.
         """
 
-        metadata = self._dataset_service.create_dataset(
+        metadata = self._table_catalog_service.create_dataset(
             name,
             file_url,
             identifier_id=identifier_column,
@@ -274,7 +274,7 @@ class CatalogManager(object):
             TableCatalog
         """
 
-        metadata = self._dataset_service.dataset_object_by_name(
+        metadata = self._table_catalog_service.dataset_object_by_name(
             database_name, dataset_name
         )
         if metadata is None:
@@ -401,7 +401,7 @@ class CatalogManager(object):
         Returns:
            True if successfully deleted else False
         """
-        return self._dataset_service.drop_dataset(obj)
+        return self._table_catalog_service.drop_dataset(obj)
 
     def drop_udf(self, udf_name: str) -> bool:
         """
@@ -417,10 +417,10 @@ class CatalogManager(object):
         return self._udf_service.drop_udf_by_name(udf_name)
 
     def rename_table(self, curr_table: TableCatalog, new_name: TableInfo):
-        return self._dataset_service.rename_dataset(curr_table, new_name.table_name)
+        return self._table_catalog_service.rename_dataset(curr_table, new_name.table_name)
 
     def check_table_exists(self, database_name: str, table_name: str):
-        metadata = self._dataset_service.dataset_object_by_name(
+        metadata = self._table_catalog_service.dataset_object_by_name(
             database_name, table_name
         )
         if metadata is None:
@@ -432,7 +432,7 @@ class CatalogManager(object):
         return self._udf_service.get_all_udfs()
 
     def get_all_table_entries(self):
-        return self._dataset_service.get_all_datasets()
+        return self._table_catalog_service.get_all_datasets()
 
     def get_media_metainfo_table(
         self, input_table: TableCatalog
@@ -493,13 +493,13 @@ class CatalogManager(object):
         save_file_path: str,
         index_type: IndexType,
         secondary_index_df_metadata: TableCatalog,
-        feat_df_column: ColumnCatalog,
+        feat_column: ColumnCatalog,
     ) -> IndexCatalog:
         index_metadata = self._index_service.create_index(
             name, save_file_path, index_type
         )
         index_metadata.secondary_index_id = secondary_index_df_metadata.id
-        index_metadata.feat_df_column_id = feat_df_column.id
+        index_metadata.feat_column_id = feat_column.id
         return index_metadata
 
     def get_index_by_name(self, name: str) -> IndexCatalog:

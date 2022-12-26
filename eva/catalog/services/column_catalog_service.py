@@ -21,7 +21,7 @@ from eva.catalog.models.table_catalog import TableCatalog
 from eva.catalog.services.base_service import BaseService
 
 
-class DatasetColumnService(BaseService):
+class ColumnCatalogService(BaseService):
     def __init__(self):
         super().__init__(ColumnCatalog)
 

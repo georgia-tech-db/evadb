@@ -16,22 +16,22 @@ import unittest
 
 from mock import MagicMock, patch
 
-from eva.catalog.services.df_column_service import DatasetColumnService
+from eva.catalog.services.column_catalog_service import ColumnCatalogService
 
 
-class DatasetColumnServiceTest(unittest.TestCase):
+class ColumnCatalogServiceTest(unittest.TestCase):
     def test_create_should_create_all_columns(self):
         mocks = [MagicMock() for i in range(5)]
-        service = DatasetColumnService()
+        service = ColumnCatalogService()
         service.create_column(mocks)
         for mock in mocks:
             mock.save.assert_called_once()
 
-    @patch("eva.catalog.services.df_column_service.ColumnCatalog")
+    @patch("eva.catalog.services.column_catalog_service.ColumnCatalog")
     def test_column_by_metadata_id_and_names_should_query_correctly(self, mocked):
         mocked.query.filter.return_value.all.return_value = [1, 2, 3]
 
-        service = DatasetColumnService()
+        service = ColumnCatalogService()
         metadata_id = 123
         column_names = ["a", "b"]
         actual = service.columns_by_dataset_id_and_names(metadata_id, column_names)
@@ -42,12 +42,12 @@ class DatasetColumnServiceTest(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-    @patch("eva.catalog.services.df_column_service.ColumnCatalog")
+    @patch("eva.catalog.services.column_catalog_service.ColumnCatalog")
     def test_column_by_metadata_id_and_col_ids_should_query_correctly(self, mocked):
         return_val = [1, 2, 3]
         mocked.query.filter.return_value.all.return_value = return_val
 
-        service = DatasetColumnService()
+        service = ColumnCatalogService()
         metadata_id = 123
         column_ids = [1, 2]
         actual = service.columns_by_id_and_dataset_id(metadata_id, column_ids)
@@ -56,12 +56,12 @@ class DatasetColumnServiceTest(unittest.TestCase):
         )
         self.assertEqual(actual, return_val)
 
-    @patch("eva.catalog.services.df_column_service.ColumnCatalog")
+    @patch("eva.catalog.services.column_catalog_service.ColumnCatalog")
     def test_by_dataset_id_and_empty_col_ids_should_query_correctly(self, mocked):
         return_val = [1, 2, 3]
         mocked.query.filter.return_value.all.return_value = return_val
 
-        service = DatasetColumnService()
+        service = ColumnCatalogService()
         metadata_id = 123
         column_ids = None
         actual = service.columns_by_id_and_dataset_id(metadata_id, column_ids)

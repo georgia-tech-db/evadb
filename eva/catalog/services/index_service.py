@@ -21,7 +21,7 @@ from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
-class IndexService(BaseService):
+class IndexCatalogService(BaseService):
     def __init__(self):
         super().__init__(IndexCatalog)
 

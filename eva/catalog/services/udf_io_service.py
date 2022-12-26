@@ -19,7 +19,7 @@ from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
-class UdfIOService(BaseService):
+class UdfIOCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfIOCatalog)
 

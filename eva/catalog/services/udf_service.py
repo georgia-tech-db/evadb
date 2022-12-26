@@ -19,7 +19,7 @@ from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
-class UdfService(BaseService):
+class UdfCatalogService(BaseService):
     def __init__(self):
         super().__init__(UdfCatalog)
 
@@ -34,9 +34,9 @@ class UdfService(BaseService):
         Returns:
             UdfCatalog: Returns the new entry created
         """
-        metadata = self.model(name, impl_path, type)
-        metadata = metadata.save()
-        return metadata
+        udf_obj = self.model(name, impl_path, type)
+        udf_obj = udf_obj.save()
+        return udf_obj
 
     def udf_by_name(self, name: str):
         """return the udf entry that matches the name provided.

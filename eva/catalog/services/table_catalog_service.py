@@ -23,7 +23,7 @@ from eva.utils.errors import CatalogError
 from eva.utils.logging_manager import logger
 
 
-class DatasetService(BaseService):
+class TableCatalogService(BaseService):
     def __init__(self):
         super().__init__(TableCatalog)
 
@@ -40,20 +40,20 @@ class DatasetService(BaseService):
             TableCatalog object
         """
         try:
-            metadata = self.model(
+            table_catalog_obj = self.model(
                 name=name,
                 file_url=file_url,
                 identifier_id=identifier_id,
                 table_type=int(table_type),
             )
-            metadata = metadata.save()
+            table_catalog_obj = table_catalog_obj.save()
         except Exception as e:
             logger.exception(
                 f"Failed to create catalog dataset with exception {str(e)}"
             )
             raise CatalogError(e)
         else:
-            return metadata
+            return table_catalog_obj
 
     def dataset_by_name(self, name: str) -> int:
         """

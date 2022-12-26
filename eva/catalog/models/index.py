@@ -34,10 +34,8 @@ class IndexCatalog(BaseModel):
     _secondary_index = relationship("TableCatalog")
 
     # Input feature column reference.
-    _feat_df_column_id = Column(
-        "df_column_id", Integer, ForeignKey("column_catalog._row_id")
-    )
-    _feat_df_column = relationship("ColumnCatalog")
+    _feat_column_id = Column("column_id", Integer, ForeignKey("column_catalog._row_id"))
+    _feat_column = relationship("ColumnCatalog")
 
     def __init__(
         self,
@@ -45,13 +43,13 @@ class IndexCatalog(BaseModel):
         save_file_path: str,
         type: IndexType,
         secondary_index_id: int = None,
-        feat_df_column_id: int = None,
+        feat_column_id: int = None,
     ):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type
         self._secondary_index_id = secondary_index_id
-        self._feat_df_column_id = feat_df_column_id
+        self._feat_column_id = feat_column_id
 
     @property
     def id(self):
@@ -74,8 +72,8 @@ class IndexCatalog(BaseModel):
         return self._secondary_index
 
     @property
-    def feat_df_column(self):
-        return self._feat_df_column
+    def feat_column(self):
+        return self._feat_column
 
     @property
     def secondary_index_id(self):
@@ -86,12 +84,12 @@ class IndexCatalog(BaseModel):
         self._secondary_index_id = value
 
     @property
-    def feat_df_column_id(self):
-        return self._feat_df_column_id
+    def feat_column_id(self):
+        return self._feat_column_id
 
-    @feat_df_column_id.setter
-    def feat_df_column_id(self, value):
-        self._feat_df_column_id = value
+    @feat_column_id.setter
+    def feat_column_id(self, value):
+        self._feat_column_id = value
 
     def __str__(self):
         index_str = "index: ({}, {}, {})\n".format(
@@ -106,6 +104,7 @@ class IndexCatalog(BaseModel):
             and self.name == other.name
             and self.type == other.type
             and self.secondary_index_id == other.secondary_index_id
+            and self.feat_column_id == other.feat_column_id
         )
 
     def __hash__(self) -> int:
@@ -116,5 +115,6 @@ class IndexCatalog(BaseModel):
                 self.save_file_path,
                 self.type,
                 self.secondary_index_id,
+                self.feat_column_id,
             )
         )

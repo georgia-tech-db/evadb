@@ -82,8 +82,8 @@ class CatalogManagerTests(unittest.TestCase):
         )
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
+    @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
     def test_create_metadata_should_create_dataset_and_columns(
         self, dcs_mock, ds_mock, initdb_mock
     ):
@@ -107,8 +107,8 @@ class CatalogManagerTests(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
+    @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
     def test_get_dataset_metadata_when_table_exists(
         self, dcs_mock, ds_mock, initdb_mock
     ):
@@ -131,8 +131,8 @@ class CatalogManagerTests(unittest.TestCase):
         self.assertEqual(actual.schema, schema)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
+    @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
     def test_get_dataset_metadata_when_table_doesnot_exists(
         self, dcs_mock, ds_mock, initdb_mock
     ):
@@ -166,8 +166,8 @@ class CatalogManagerTests(unittest.TestCase):
         )
         self.assertEqual(actual, udfio_mock.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfService")
-    @mock.patch("eva.catalog.catalog_manager.UdfIOService")
+    @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_create_udf(self, udfio_mock, udf_mock):
         catalog = CatalogManager()
         udf_io_list = [MagicMock()]
@@ -178,19 +178,19 @@ class CatalogManagerTests(unittest.TestCase):
         )
         self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfService")
+    @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
     def test_get_udf_by_name(self, udf_mock):
         catalog = CatalogManager()
         actual = catalog.get_udf_by_name("name")
         udf_mock.return_value.udf_by_name.assert_called_with("name")
         self.assertEqual(actual, udf_mock.return_value.udf_by_name.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfService")
+    @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
     def test_drop_udf(self, udf_mock):
         CatalogManager().drop_udf("name")
         udf_mock.return_value.drop_udf_by_name.assert_called_with("name")
 
-    @mock.patch("eva.catalog.catalog_manager.UdfIOService")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_get_udf_outputs(self, udf_mock):
         mock_func = udf_mock.return_value.get_outputs_by_udf_id
         udf_obj = MagicMock(spec=UdfCatalog)
@@ -201,7 +201,7 @@ class CatalogManagerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             CatalogManager().get_udf_outputs(MagicMock())
 
-    @mock.patch("eva.catalog.catalog_manager.UdfIOService")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_get_udf_inputs(self, udf_mock):
         mock_func = udf_mock.return_value.get_inputs_by_udf_id
         udf_obj = MagicMock(spec=UdfCatalog)

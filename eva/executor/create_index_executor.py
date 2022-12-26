@@ -51,7 +51,7 @@ class CreateIndexExecutor(AbstractExecutor):
 
             # Get feature column.
             feat_col_name = self.node.col_list[0].name
-            feat_df_column = [
+            feat_column = [
                 col for col in feat_df_metadata.columns if col.name == feat_col_name
             ][0]
 
@@ -99,7 +99,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 self._get_index_save_path(),
                 self.node.index_type,
                 secondary_index_df_metadata,
-                feat_df_column,
+                feat_column,
             )
 
             yield Batch(

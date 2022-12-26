@@ -17,7 +17,7 @@ import unittest
 from mock import patch
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.services.df_service import DatasetService
+from eva.catalog.services.table_catalog_service import TableCatalogService
 
 DATASET_ID = 123
 DATASET_URL = "file1"
@@ -29,10 +29,10 @@ DATASET_OBJ = "obj"
 TABLE_TYPE = TableType.STRUCTURED_DATA
 
 
-class DatasetServiceTest(unittest.TestCase):
-    @patch("eva.catalog.services.df_service.TableCatalog")
+class TableCatalogServiceTest(unittest.TestCase):
+    @patch("eva.catalog.services.table_catalog_service.TableCatalog")
     def test_create_dataset_should_create_model(self, mocked):
-        service = DatasetService()
+        service = TableCatalogService()
         service.create_dataset(
             DATASET_NAME,
             DATASET_URL,
@@ -47,16 +47,16 @@ class DatasetServiceTest(unittest.TestCase):
         )
         mocked.return_value.save.assert_called_once()
 
-    @patch("eva.catalog.services.df_service.TableCatalog")
+    @patch("eva.catalog.services.table_catalog_service.TableCatalog")
     def test_dataset_by_id_should_query_model_with_id(self, mocked):
-        service = DatasetService()
+        service = TableCatalogService()
         service.dataset_by_id(DATASET_ID)
         mocked.query.filter.assert_called_with(mocked._id == DATASET_ID)
         mocked.query.filter.return_value.one.assert_called_once()
 
-    @patch("eva.catalog.services.df_service.TableCatalog")
+    @patch("eva.catalog.services.table_catalog_service.TableCatalog")
     def test_dataset_by_name_queries_model_with_name_and_return_id(self, mocked):
-        service = DatasetService()
+        service = TableCatalogService()
 
         expected_output = 1
         mocked.query.with_entities.return_value.filter.return_value.one.return_value = [
@@ -71,11 +71,11 @@ class DatasetServiceTest(unittest.TestCase):
 
         self.assertEqual(result, expected_output)
 
-    @patch("eva.catalog.services.df_service.TableCatalog")
+    @patch("eva.catalog.services.table_catalog_service.TableCatalog")
     def test_dataset_object_by_name_queries_with_name_returns_model_object(
         self, mocked
     ):
-        service = DatasetService()
+        service = TableCatalogService()
         actual = service.dataset_object_by_name(DATABASE_NAME, DATASET_NAME)
         expected = mocked.query.filter.return_value.one_or_none.return_value
 
