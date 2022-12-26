@@ -21,7 +21,10 @@ from eva.parser.types import ShowType
 ##################################################################
 class Show:
     def show_statement(self, tree):
-        if ctx.UDFS():
+
+        token = tree.children[1]
+        
+        if token == "UDFS":
             return ShowStatement(show_type=ShowType.UDFS)
-        else:
+        elif token == "TABLES":
             return ShowStatement(show_type=ShowType.TABLES)
