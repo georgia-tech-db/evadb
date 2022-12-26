@@ -13,9 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.parser.explain_statement import ExplainStatement
-
+from lark import Tree
 
 class Explain:
     def explain_statement(self, tree):
-        explainable_stmt = self.visit(ctx.explainableStatement())
+        explainable_stmt = None
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data.endswith("explainable_statement"):
+                    explainable_stmt = self.visit(child)
+
         return ExplainStatement(explainable_stmt)

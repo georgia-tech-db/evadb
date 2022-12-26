@@ -844,8 +844,12 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT CLASS, REDNESS FROM TAIPAI \
-                    WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
-                    ORDER BY CLASS, REDNESS DESC LIMIT 3;"""
+
+        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+                        WHERE id<5; """
+        explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
+            select_query
+        )        
+        query = explain_query
         parser = Parser()
         parser.parse(query)
