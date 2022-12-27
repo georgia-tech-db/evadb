@@ -844,7 +844,12 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT name, id, data FROM MyVideo WHERE id < 2              UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 4 AND id < 6
-        UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 7;"""
+        query = """CREATE UDF FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  'eva/udfs/face_detector.py';
+                  """
         parser = Parser()
         parser.parse(query)

@@ -45,7 +45,7 @@ class Expressions:
                 array_elements.append(array_element)
 
         res = ConstantValueExpression(
-            np.array(ast.literal_eval(array_elements)), ColumnType.NDARRAY
+            np.array(array_elements), ColumnType.NDARRAY
         )
         return res
 

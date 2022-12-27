@@ -92,19 +92,20 @@ class Parser(object):
         # Call lark
         lark_output = self._lark_parser.parse(query_string)
         antlr_output = self._visitor.visit(tree)
-        verbose_diff = True
         check_output = False
+        verbose_diff = True
 
-        if check_output and lark_output != antlr_output:
-            pprint("Different parse trees: ")
-            pprint(query_string)
-            if verbose_diff is True:
-                pprint("--------  LARK  --------")
-                pprint(lark_output[0].__str__())
-                pprint("-------- ANTLR  --------")
-                pprint(antlr_output[0].__str__())
-                pprint("-------- DDIFF  --------")
-                d = DeepDiff(lark_output, antlr_output)
-                pprint(d)
+        if check_output:
+            if lark_output != antlr_output:
+                pprint("Different parse trees: ")
+                pprint(query_string)
+                if verbose_diff is True:
+                    pprint("--------  LARK  --------")
+                    pprint(lark_output[0].__str__())
+                    pprint("-------- ANTLR  --------")
+                    pprint(antlr_output[0].__str__())
+                    pprint("-------- DDIFF  --------")
+                    d = DeepDiff(lark_output, antlr_output)
+                    pprint(d)
 
         return lark_output
