@@ -148,11 +148,6 @@ class TableRef:
         alias: Alias = None,
         sample_freq: float = None,
     ):
-        # FIX Union data type
-        self.table = table
-        self.table_valued_expr = table
-        self.join_node = table
-        self.select_statement = table
 
         self._ref_handle = table
         self._sample_freq = sample_freq
@@ -173,6 +168,46 @@ class TableRef:
 
     def is_join(self) -> bool:
         return isinstance(self._ref_handle, JoinNode)
+
+    @property
+    def table(self) -> TableInfo:
+        assert isinstance(
+            self._ref_handle, TableInfo
+        ), "Expected \
+                TableInfo, got {}".format(
+            type(self._ref_handle)
+        )
+        return self._ref_handle
+
+    @property
+    def table_valued_expr(self) -> TableValuedExpression:
+        assert isinstance(
+            self._ref_handle, TableValuedExpression
+        ), "Expected \
+                TableValuedExpression, got {}".format(
+            type(self._ref_handle)
+        )
+        return self._ref_handle
+
+    @property
+    def join_node(self) -> JoinNode:
+        assert isinstance(
+            self._ref_handle, JoinNode
+        ), "Expected \
+                JoinNode, got {}".format(
+            type(self._ref_handle)
+        )
+        return self._ref_handle
+
+    @property
+    def select_statement(self) -> SelectStatement:
+        assert isinstance(
+            self._ref_handle, SelectStatement
+        ), "Expected \
+                SelectStatement, got{}".format(
+            type(self._ref_handle)
+        )
+        return self._ref_handle
 
     def generate_alias(self) -> str:
         # create alias for the table

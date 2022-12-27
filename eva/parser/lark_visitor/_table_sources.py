@@ -50,7 +50,7 @@ class TableSources:
                 if child.data == "table_source_item_with_sample":
                     left_node = self.visit(child)
                     join_nodes = [left_node]
-                elif child.data == "join_part":
+                elif child.data == "inner_join" or child.data == "lateral_join":
                     table = self.visit(child)
                     join_nodes.append(table)
 
@@ -155,7 +155,7 @@ class TableSources:
             if isinstance(child, Tree):
                 if child.data == "table_source_item_with_sample":
                     table = self.visit(child)
-                elif child.data == "expression":
+                elif child.data.endswith("expression"):
                     join_predicate = self.visit(child)
 
         return TableRef(

@@ -844,7 +844,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """INSERT INTO MyVideo (Frame_ID, Frame_Path)
-                                    VALUES    (1, '/mnt/frames/1.png');"""
+        query = """SELECT table1.a FROM table1 JOIN table2
+            ON table1.a = table2.a;"""
         parser = Parser()
         parser.parse(query)
