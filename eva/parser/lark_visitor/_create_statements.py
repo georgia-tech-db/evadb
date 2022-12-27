@@ -244,16 +244,14 @@ class CreateTable:
 
     # MATERIALIZED VIEW
     def create_materialized_view(self, tree):
-        view_name = None
-        view_ref = None
+        view_info = None
         if_not_exists = False
         query = None
 
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "table_name":
-                    view_name = self.visit(child)
-                    view_ref = TableRef(view_name)
+                    view_info = self.visit(child)
                 elif child.data == "if_not_exists":
                     if_not_exists = True
                 elif child.data == "uid_list":
@@ -266,7 +264,7 @@ class CreateTable:
         col_list = [
             ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
         ]
-        return CreateMaterializedViewStatement(view_ref, col_list, if_not_exists, query)
+        return CreateMaterializedViewStatement(view_info, col_list, if_not_exists, query)
 
     def index_type(self, tree):
         index_type = None

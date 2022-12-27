@@ -844,6 +844,9 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;"""
+        query = """UPLOAD PATH 'data/meta.csv' BLOB "b'AAAA'"
+                          INTO
+                          MyMeta (id, frame_id, video_id, label)
+                          WITH FORMAT CSV;"""
         parser = Parser()
         parser.parse(query)

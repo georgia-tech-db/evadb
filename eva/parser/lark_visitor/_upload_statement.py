@@ -14,7 +14,6 @@
 # limitations under the License.
 from lark import Tree
 
-from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
 
@@ -23,7 +22,7 @@ class Upload:
     def upload_statement(self, tree):
         srv_path = None
         video_blob = None
-        table = None
+        table_info = None
         column_list = None
 
         # default file format
@@ -38,12 +37,11 @@ class Upload:
                 elif child.data == "video_blob":
                     video_blob = self.visit(child).value
                 elif child.data == "table_name":
-                    table_name = self.visit(child)
-                    table = TableRef(table_name)
+                    table_info = self.visit(child)
                 elif child.data == "uid_list":
                     column_list = self.visit(child)
                 elif child.data == "file_options":
                     file_options = self.visit(child)
 
-        stmt = UploadStatement(srv_path, video_blob, table, column_list, file_options)
+        stmt = UploadStatement(srv_path, video_blob, table_info, column_list, file_options)
         return stmt
