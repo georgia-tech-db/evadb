@@ -844,6 +844,8 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT FIRST(id), SEGMENT(data) FROM MyVideo GROUP BY '5s'"""
+        query = """SELECT * FROM table1 JOIN
+                        table1 AS table2 ON table1.a1 = table2.a1 AND
+                        table1.a0 = table2.a0;"""
         parser = Parser()
         parser.parse(query)

@@ -29,6 +29,7 @@ from lark import Tree
 class TableSources:
 
     def select_elements(self, tree):
+        print(tree.pretty())
         kind = tree.children[0]
         if kind == "*":
             select_list = [TupleValueExpression(col_name="*")]

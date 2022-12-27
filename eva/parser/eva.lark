@@ -1,13 +1,13 @@
 // Top Level Description
 
-start: (_sql_statement? ";")+
+start: (sql_statement? ";")+
 
-_sql_statement: ddl_statement | _dml_statement | utility_statement
+sql_statement: ddl_statement | dml_statement | utility_statement
         
 ddl_statement: create_database | create_table | create_index | create_udf | create_materialized_view
     | drop_database | drop_table | drop_udf | drop_index | rename_table
     
-_dml_statement: select_statement | insert_statement | update_statement
+dml_statement: select_statement | insert_statement | update_statement
     | delete_statement | load_statement | upload_statement
     
 utility_statement: describe_statement | show_statement | help_statement | explain_statement
@@ -102,9 +102,7 @@ updated_element: full_column_name "=" (expression | DEFAULT)
  
 order_by_clause: ORDER BY order_by_expression ("," order_by_expression)*
 
-order_by_expression: expression sort_order?
-
-sort_order: ASC | DESC
+order_by_expression: expression (ASC | DESC)?
     
 // Forcing EXPLICIT JOIN KEYWORD
 table_sources: table_source
@@ -115,6 +113,7 @@ table_source_item_with_sample: table_source_item alias_clause? sample_clause?
 
 table_source_item: table_name | subquery_table_source_item   
     
+
 table_valued_function: function_call                                
     | UNNEST LR_BRACKET function_call RR_BRACKET   
     
@@ -122,7 +121,7 @@ subquery_table_source_item: (select_statement | LR_BRACKET select_statement RR_B
     
 sample_clause: SAMPLE decimal_literal
 
-join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?                                       ->inner_join
+join_part: JOIN table_source_item_with_sample (ON expression | USING LR_BRACKET uid_list RR_BRACKET)?  ->inner_join
          | JOIN LATERAL table_valued_function alias_clause? ->lateral_join
     
 alias_clause: AS? uid "(" uid_list ")" | AS? uid
@@ -133,18 +132,16 @@ query_expression: "(" query_specification ")" | "(" query_expression ")"
     
 query_specification: SELECT select_elements from_clause order_by_clause? limit_clause? error_bounds_expression? confidence_level_expression?
     
-select_elements: ("*" | select_element ) ("," select_element)*
+select_elements: (STAR | select_element ) ("," select_element)*
     
-select_element: full_id "." "*"       ->select_star_element      
+select_element: full_id "." STAR       ->select_star_element      
               | (LOCAL_ID VAR_ASSIGN)? expression (AS? uid)?  ->select_expression_element                 
     
-from_clause: FROM table_sources (WHERE where_expr)? (GROUP BY  group_by_items)? (HAVING expression)?
+from_clause: FROM table_sources (WHERE where_expr)? (GROUP BY  group_by_item ("," group_by_item)* )? (HAVING expression)?
 
 where_expr: expression
 
-group_by_items: group_by_item ("," group_by_item)*
-
-group_by_item: expression sort_order?
+group_by_item: expression (ASC | DESC)?
     
 limit_clause: LIMIT ((decimal_literal ",")? decimal_literal  | decimal_literal OFFSET decimal_literal)
     
@@ -174,7 +171,7 @@ table_name: full_id
         
 full_column_name: uid (dotted_id dotted_id? )?
     
-index_column_name: uid ("(" decimal_literal ")")? sort_order?
+index_column_name: uid ("(" decimal_literal ")")? (ASC | DESC)?
     
 user_name: STRING_USER_NAME | ID
 
