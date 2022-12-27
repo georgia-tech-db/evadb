@@ -27,26 +27,18 @@ class Insert:
         table_ref = None
         column_list = []
         value_list = []
-        # first two children with be INSERT INTO
-        # Then we will have terminal nodes for '(', ')'
-        for child in ctx.children[2:]:
-            if not isinstance(child, TerminalNode):
-                try:
-                    rule_idx = child.getRuleIndex()
 
-                    if rule_idx == evaql_parser.RULE_tableName:
-                        table_ref = TableRef(self.visit(ctx.tableName()))
-
-                    elif rule_idx == evaql_parser.RULE_uidList:
-                        column_list = self.visit(ctx.uidList())
-
-                    elif rule_idx == evaql_parser.RULE_insertStatementValue:
-                        insrt_value = self.visit(ctx.insertStatementValue())
-                        # Support only (value1, value2, .... value n)
-                        value_list = insrt_value[0]
-                except BaseException:
-                    # stop parsing something bad happened
-                    return None
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "table_name":
+                    table_name = self.visit(child)
+                    table_ref = TableRef(table_name)
+                elif child.data == "uid_list":
+                    column_list = self.visit(child)
+                elif child.data == "insert_statement_value":
+                    insrt_value = self.visit(child)
+                    # Support only (value1, value2, .... value n)
+                    value_list = insrt_value[0]
 
         insert_stmt = InsertTableStatement(table_ref, column_list, value_list)
         return insert_stmt
@@ -64,16 +56,11 @@ class Insert:
 
     def insert_statement_value(self, tree):
         insert_stmt_value = []
-        for child in ctx.children:
-            if not isinstance(child, TerminalNode):
-                try:
-                    rule_idx = child.getRuleIndex()
 
-                    if rule_idx == evaql_parser.RULE_expressionsWithDefaults:
-                        expr = self.visit(child)
-                        insert_stmt_value.append(expr)
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "expressions_with_defaults":
+                    expr = self.visit(child)
+                    insert_stmt_value.append(expr)
 
-                except BaseException:
-                    # stop parsing something bad happened
-                    return None
         return insert_stmt_value

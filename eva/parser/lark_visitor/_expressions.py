@@ -120,11 +120,11 @@ class Expressions:
 
     def expressions_with_defaults(self, tree):
         expr_list = []
-        expressions_with_defaults_count = len(ctx.expressionOrDefault())
-        for i in range(expressions_with_defaults_count):
-            expression = self.visit(ctx.expressionOrDefault(i))
-            expr_list.append(expression)
-
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "expression_or_default":
+                    expression = self.visit(child)
+                    expr_list.append(expression)            
         return expr_list
 
     def sample_clause(self, tree):

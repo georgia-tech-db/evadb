@@ -845,7 +845,7 @@ class ParserTests(unittest.TestCase):
 
     def test_lark(self):
 
-        query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
-                          INTO MyVideo WITH FORMAT VIDEO;"""
+        query = """INSERT INTO MyVideo (Frame_ID, Frame_Path)
+                                    VALUES    (1, '/mnt/frames/1.png');"""
         parser = Parser()
         parser.parse(query)
