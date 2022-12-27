@@ -158,7 +158,6 @@ setup(
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
     package_data={
-        "eva": ["eva.yml"],
-        "lark": ["parser/eva.lark"]
+        "eva": ["eva.yml", "parser/eva.lark"]
     }
 )
