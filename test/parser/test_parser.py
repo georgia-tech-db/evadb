@@ -41,7 +41,7 @@ from eva.parser.statement import AbstractStatement, StatementType
 from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
 from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
 from eva.parser.upload_statement import UploadStatement
-from pprint import pprint
+
 
 class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):

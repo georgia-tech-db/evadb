@@ -16,13 +16,13 @@ from pprint import pprint
 
 from antlr4 import CommonTokenStream, InputStream
 from antlr4.error.ErrorListener import ErrorListener
+from deepdiff import DeepDiff
 
 from eva.parser.evaql.evaql_lexer import evaql_lexer
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.lark_parser import LarkParser
 from eva.parser.parser_visitor import ParserVisitor
 
-from deepdiff import DeepDiff
 
 class AntlrErrorListener(ErrorListener):
 

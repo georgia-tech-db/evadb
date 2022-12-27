@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from lark import Tree
+
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.select_statement import SelectStatement
 from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
 from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
-
-from lark import Tree
 
 ##################################################################
 # TABLE SOURCES
@@ -27,7 +27,6 @@ from lark import Tree
 
 
 class TableSources:
-
     def select_elements(self, tree):
         kind = tree.children[0]
         if kind == "*":
@@ -48,10 +47,10 @@ class TableSources:
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'table_source_item_with_sample':
+                if child.data == "table_source_item_with_sample":
                     left_node = self.visit(child)
                     join_nodes = [left_node]
-                elif child.data == 'join_part':
+                elif child.data == "join_part":
                     table = self.visit(child)
                     join_nodes.append(table)
 
@@ -67,7 +66,7 @@ class TableSources:
             return join_nodes[-1]
         else:
             return join_nodes[0]
-    
+
     def table_source_item_with_sample(self, tree):
         sample_freq = None
         alias = None
@@ -98,16 +97,16 @@ class TableSources:
         # first child is a SELECT terminal token
         for child in tree.children[1:]:
             try:
-                if child.data == 'select_elements':
+                if child.data == "select_elements":
                     target_list = self.visit(child)
-                elif child.data == 'from_clause':
+                elif child.data == "from_clause":
                     clause = self.visit(child)
                     from_clause = clause.get("from", None)
                     where_clause = clause.get("where", None)
                     groupby_clause = clause.get("groupby", None)
-                elif child.data == 'order_by_clause':
+                elif child.data == "order_by_clause":
                     orderby_clause = self.visit(child)
-                elif child.data == 'limit_clause':
+                elif child.data == "limit_clause":
                     limit_count = self.visit(child)
 
             except BaseException as e:
@@ -171,7 +170,6 @@ class TableSources:
     def lateral_join(self, tree):
         tve = None
         alias = None
-        join_predicate = None
         has_on = False
 
         for child in tree.children:
@@ -194,7 +192,11 @@ class TableSources:
             raise SyntaxError(err_msg)
 
         join_type = JoinType.LATERAL_JOIN
-        return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
+        return TableRef(
+            JoinNode(
+                None, TableRef(tve, alias=alias), predicate=None, join_type=join_type
+            )
+        )
 
     def table_valued_function(self, tree):
         func_expr = None
@@ -216,9 +218,9 @@ class TableSources:
         subquery_table_source_item = None
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'simple_select':
+                if child.data == "simple_select":
                     subquery_table_source_item = self.visit(child)
-        
+
         return subquery_table_source_item
 
     def union_select(self, tree):
@@ -232,10 +234,10 @@ class TableSources:
                     if statement_id == 0:
                         left_select_statement = self.visit(child)
                     elif statement_id == 1:
-                        right_select_statement = self.visit(child)                    
+                        right_select_statement = self.visit(child)
                     statement_id += 1
             # Token
-            elif child == 'ALL':
+            elif child == "ALL":
                 union_all = True
 
         # FIX: Complex logic
@@ -252,7 +254,7 @@ class TableSources:
                 right_select_statement.union_all = False
             else:
                 right_select_statement.union_all = True
-                
+
         return right_select_statement
 
     def group_by_items(self, tree):
@@ -274,7 +276,7 @@ class TableSources:
                     expr = self.visit(child)
                 elif child.data == "sort_order":
                     sort_order = self.visit(child)
-                    
+
         return (expr, sort_order)
 
     def alias_clause(self, tree):

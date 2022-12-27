@@ -12,12 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from antlr4 import TerminalNode
+from lark.tree import Tree
 
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.insert_statement import InsertTableStatement
 from eva.parser.table_ref import TableRef
-from lark.tree import Tree
+
 
 ##################################################################
 # INSERT STATEMENTS
@@ -47,7 +47,7 @@ class Insert:
         uid_expr_list = []
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'uid':
+                if child.data == "uid":
                     uid = self.visit(child)
                     uid_expr = TupleValueExpression(uid)
                     uid_expr_list.append(uid_expr)

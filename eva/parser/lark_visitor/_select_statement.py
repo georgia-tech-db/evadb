@@ -13,15 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.expression.constant_value_expression import ConstantValueExpression
-from eva.parser.types import ParserOrderBySortType
 from lark.tree import Tree
+
+from eva.expression.constant_value_expression import ConstantValueExpression
+
 
 ##################################################################
 # SELECT STATEMENT
 ##################################################################
 class Select:
-
     def simple_select(self, tree):
         select_stmt = self.visit_children(tree)
         return select_stmt
@@ -42,11 +42,10 @@ class Select:
                 if child.data.endswith("expression"):
                     expr = self.visit(child)
                 elif child.data == "sort_order":
-                     sort_order = str(child)
+                    sort_order = str(child)
 
         return expr, sort_order
 
     def limit_clause(self, tree):
         output = ConstantValueExpression(self.visit(tree.children[1]))
         return output
-

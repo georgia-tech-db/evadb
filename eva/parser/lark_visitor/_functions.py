@@ -13,20 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from lark import Tree
+
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.utils.logging_manager import logger
-from lark import Tree
 
 
 ##################################################################
 # Functions - UDFs, Aggregate Windowed functions
 ##################################################################
 class Functions:
-
     def udf_function(self, tree):
         udf_name = None
         udf_output = None
@@ -34,12 +34,12 @@ class Functions:
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'simple_id':
+                if child.data == "simple_id":
                     udf_name = self.visit(child)
-                elif child.data == 'dotted_id':
+                elif child.data == "dotted_id":
                     udf_output = self.visit(child)
-                elif child.data == 'function_args':           
-                    udf_args = self.visit(child) 
+                elif child.data == "function_args":
+                    udf_args = self.visit(child)
 
         func_expr = FunctionExpression(None, name=udf_name, output=udf_output)
         for arg in udf_args:
@@ -53,7 +53,6 @@ class Functions:
             if isinstance(child, Tree):
                 args.append(self.visit(child))
         return args
-        
 
     # Drop UDF
     def drop_udf(self, tree):
@@ -62,15 +61,12 @@ class Functions:
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'udf_name':
+                if child.data == "udf_name":
                     udf_name = self.visit(child)
-                elif child.data == 'if_exists':
+                elif child.data == "if_exists":
                     if_exists = True
 
-        return DropUDFStatement(
-            udf_name,
-            if_exists
-        )
+        return DropUDFStatement(udf_name, if_exists)
 
     # Create UDF
     def create_udf(self, tree):
@@ -84,11 +80,11 @@ class Functions:
         create_definitions_index = 0
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'udf_name':
+                if child.data == "udf_name":
                     udf_name = self.visit(child)
-                elif child.data == 'if_not_exists':
+                elif child.data == "if_not_exists":
                     if_not_exists = True
-                elif child.data == 'create_definitions':
+                elif child.data == "create_definitions":
                     # There should be 2 createDefinition
                     # idx 0 describing udf INPUT
                     # idx 1 describing udf OUTPUT
@@ -97,12 +93,14 @@ class Functions:
                         create_definitions_index += 1
                     elif create_definitions_index == 1:
                         output_definitions = self.visit(child)
-                elif child.data == 'udf_type':
-                    udf_type = self.visit(child)                   
-                elif child.data == 'udf_impl':
+                elif child.data == "udf_type":
+                    udf_type = self.visit(child)
+                elif child.data == "udf_impl":
                     impl_path = self.visit(child).value
                 else:
-                    raise ValueError(f'CREATE/DROP UDF Failed: Unidentified selector child: {child.data!r}')
+                    raise ValueError(
+                        f"CREATE/DROP UDF Failed: Unidentified selector child: {child.data!r}"
+                    )
                     return None
 
         return CreateUDFStatement(
@@ -129,10 +127,10 @@ class Functions:
     def aggregate_windowed_function(self, tree):
         agg_func_name = tree.children[0]
         agg_func_arg = None
-        assert(agg_func_name in ['MIN', 'MAX', 'AVG', 'SUM', 'COUNT'])
+        assert agg_func_name in ["MIN", "MAX", "AVG", "SUM", "COUNT"]
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'function_arg':
+                if child.data == "function_arg":
                     agg_func_arg = self.visit(child)
         agg_func_type = self.get_aggregate_function_type(agg_func_name)
         agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)

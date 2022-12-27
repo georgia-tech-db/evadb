@@ -12,8 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.parser.explain_statement import ExplainStatement
 from lark import Tree
+
+from eva.parser.explain_statement import ExplainStatement
+
 
 class Explain:
     def explain_statement(self, tree):

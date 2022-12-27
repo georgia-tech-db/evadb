@@ -16,13 +16,14 @@ import ast
 
 import numpy as np
 
+from eva.catalog.catalog_type import ColumnType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from eva.catalog.catalog_type import ColumnType
+
 
 ##################################################################
 # EXPRESSIONS

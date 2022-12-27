@@ -12,15 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
+
 import pytest
-from test.util import(
-    copy_sample_videos_to_upload_dir,
-    file_remove,
-    load_inbuilt_udfs
-)
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import execute_query_fetch_all
+
 
 @pytest.fixture(autouse=False)
 def setup_pytorch_tests():

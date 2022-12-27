@@ -15,20 +15,19 @@
 import ast
 
 import numpy as np
+from lark import Tree
 
+from eva.catalog.catalog_type import ColumnType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
-from eva.catalog.catalog_type import ColumnType
 
-from lark import Tree
 
 ##################################################################
 # EXPRESSIONS
 ##################################################################
 class Expressions:
-
     def string_literal(self, tree):
         # Fix a bug here; 'VAN' Literal gets converted to "'VAN'";
         # Multiple quotes should be removed
@@ -50,7 +49,7 @@ class Expressions:
         # flatten
         output = output[0]
         return output
-    
+
     def comparison_expression(self, tree):
         left = self.visit_children(tree.children[0])
         return left
@@ -60,12 +59,10 @@ class Expressions:
             if isinstance(child, Tree):
                 if child.data == "real_literal":
                     real_literal = self.visit(child)
-                    return ConstantValueExpression(real_literal, 
-                           ColumnType.FLOAT)
+                    return ConstantValueExpression(real_literal, ColumnType.FLOAT)
                 elif child.data == "decimal_literal":
                     decimal_literal = self.visit(child)
-                    return ConstantValueExpression(decimal_literal,
-                           ColumnType.INTEGER)
+                    return ConstantValueExpression(decimal_literal, ColumnType.INTEGER)
 
     def logical_expression(self, tree):
         if len(tree.children) < 3:
@@ -89,7 +86,7 @@ class Expressions:
 
     def comparison_operator(self, tree):
         op = str(tree.children[0])
-        
+
         if op == "=":
             return ExpressionType.COMPARE_EQUAL
         elif op == "<":
@@ -125,7 +122,7 @@ class Expressions:
             if isinstance(child, Tree):
                 if child.data == "expression_or_default":
                     expression = self.visit(child)
-                    expr_list.append(expression)            
+                    expr_list.append(expression)
         return expr_list
 
     def sample_clause(self, tree):

@@ -39,11 +39,11 @@ class LarkParser(object):
 
         # remove trailing white space
         query_string = query_string.rstrip()
-        
+
         # add semi-colon if needed
         if not query_string.endswith(";"):
             query_string += ";"
-                    
+
         tree = self._parser.parse(query_string)
         output = LarkInterpreter(query_string).visit(tree)
 

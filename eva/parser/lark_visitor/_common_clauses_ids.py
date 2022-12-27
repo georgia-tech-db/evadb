@@ -13,17 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from eva.parser.rename_statement import RenameTableStatement
-from eva.parser.table_ref import TableInfo, TableRef
-from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.types import StatementType
-from eva.utils.logging_manager import logger
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.catalog.catalog_type import Dimension
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.table_ref import TableInfo
+from eva.utils.logging_manager import logger
+
 
 class CommonClauses:
-
     def table_name(self, tree):
         table_name = self.visit(tree.children[0])
         if table_name is not None:
@@ -49,7 +45,7 @@ class CommonClauses:
             return TupleValueExpression(col_name=uid)
 
     def dotted_id(self, tree):
-        dotted_id =  str(tree.children[0])
+        dotted_id = str(tree.children[0])
         dotted_id = dotted_id.lstrip(".")
         return dotted_id
 
@@ -63,7 +59,7 @@ class CommonClauses:
         if token == "ANYDIM":
             decimal = Dimension.ANYDIM
         else:
-            decimal = int(str(token))            
+            decimal = int(str(token))
         return decimal
 
     def real_literal(self, tree):

@@ -110,7 +110,7 @@ class TupleValueExpression(AbstractExpression):
             expr_str += " _col_idx: " + str(self._col_idx) + " ,"
         expr_str += ")\n"
         return expr_str
-    
+
     def __hash__(self) -> int:
         return hash(
             (

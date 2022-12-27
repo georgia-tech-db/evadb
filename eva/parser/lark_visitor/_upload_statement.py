@@ -12,18 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from lark import Tree
+
 from eva.parser.table_ref import TableRef
 from eva.parser.types import FileFormatType
 from eva.parser.upload_statement import UploadStatement
 
 
 class Upload:
-
-    def uploade_statement(self, tree):
+    def upload_statement(self, tree):
         srv_path = None
         video_blob = None
         table = None
-        uid_list = None
+        column_list = None
 
         # default file format
         file_format = FileFormatType.VIDEO
@@ -40,7 +41,7 @@ class Upload:
                     table_name = self.visit(child)
                     table = TableRef(table_name)
                 elif child.data == "uid_list":
-                    uid_list = self.visit(child)
+                    column_list = self.visit(child)
                 elif child.data == "file_options":
                     file_options = self.visit(child)
 

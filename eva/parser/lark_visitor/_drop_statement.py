@@ -12,22 +12,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.parser.drop_statement import DropTableStatement
-from eva.parser.table_ref import TableRef
 from lark import Tree
+
+from eva.parser.drop_statement import DropTableStatement
 
 
 class DropTable:
-
     def drop_table(self, tree):
         table_info = None
         if_exists = False
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'if_exists':
+                if child.data == "if_exists":
                     if_exists = True
-                elif child.data == 'table_name':
+                elif child.data == "table_name":
                     table_info = self.visit(child)
 
         drop_stmt = DropTableStatement(table_info, if_exists)

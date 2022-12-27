@@ -23,7 +23,7 @@ class Show:
     def show_statement(self, tree):
 
         token = tree.children[1]
-        
+
         if token == "UDFS":
             return ShowStatement(show_type=ShowType.UDFS)
         elif token == "TABLES":

@@ -13,24 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from lark import Tree
+
+from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
     CreateTableStatement,
 )
-
-from lark import Tree
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+
 
 ##################################################################
 # CREATE STATEMENTS
 ##################################################################
 class CreateTable:
-
     def create_table(self, tree):
         table_info = None
         if_not_exists = False
@@ -38,42 +38,49 @@ class CreateTable:
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'if_not_exists':
+                if child.data == "if_not_exists":
                     if_not_exists = True
-                elif child.data == 'table_name':
+                elif child.data == "table_name":
                     table_info = self.visit(child)
-                elif child.data == 'create_definitions':
+                elif child.data == "create_definitions":
                     create_definitions = self.visit(child)
 
-        create_stmt = CreateTableStatement(table_info, if_not_exists, create_definitions)
+        create_stmt = CreateTableStatement(
+            table_info, if_not_exists, create_definitions
+        )
         return create_stmt
 
     def create_definitions(self, tree):
         column_definitions = []
         for child in tree.children:
-             if isinstance(child, Tree):
+            if isinstance(child, Tree):
                 create_definition = None
-                if child.data == 'column_declaration':
+                if child.data == "column_declaration":
                     create_definition = self.visit(child)
-                elif child.data == 'index_declaration':
-                    create_definition = self.visit(child)                
+                elif child.data == "index_declaration":
+                    create_definition = self.visit(child)
                 column_definitions.append(create_definition)
 
         return column_definitions
 
     def column_declaration(self, tree):
         column_name = None
-        data_type = None 
-        array_type = None  
-        dimensions = None  
-        column_constraint_information = None 
-        
+        data_type = None
+        array_type = None
+        dimensions = None
+        column_constraint_information = None
+
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "uid":
                     column_name = self.visit(child)
                 elif child.data == "column_definition":
-                    data_type, array_type, dimensions, column_constraint_information = self.visit(child)
+                    (
+                        data_type,
+                        array_type,
+                        dimensions,
+                        column_constraint_information,
+                    ) = self.visit(child)
 
         if column_name is not None:
             return ColumnDefinition(
@@ -86,10 +93,10 @@ class CreateTable:
 
     def column_definition(self, tree):
 
-        data_type = None 
-        array_type = None  
-        dimensions = None  
-        column_constraint_information =  ColConstraintInfo() 
+        data_type = None
+        array_type = None
+        dimensions = None
+        column_constraint_information = ColConstraintInfo()
         not_null_set = False
 
         for child in tree.children:
@@ -106,13 +113,12 @@ class CreateTable:
                         column_constraint_information.nullable = False
                         not_null_set = True
                 else:
-                    raise ValueError(f'Unidentified selector child: {child.data!r}')
-                    
+                    raise ValueError(f"Unidentified selector child: {child.data!r}")
+
         if not not_null_set:
             column_constraint_information.nullable = True
 
         return data_type, array_type, dimensions, column_constraint_information
-
 
     def unique_key_column_constraint(self, tree):
         return ColumnConstraintEnum.UNIQUE

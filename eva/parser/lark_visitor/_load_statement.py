@@ -12,10 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.parser.load_statement import LoadDataStatement
-from eva.parser.table_ref import TableRef
-from eva.parser.types import FileFormatType
 from lark.tree import Tree
+
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.types import FileFormatType
 
 
 class Load:
@@ -32,7 +32,7 @@ class Load:
         column_list = None
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == 'uid_list':
+                if child.data == "uid_list":
                     column_list = self.visit(child)
 
         stmt = LoadDataStatement(table, file_path, column_list, file_options)
@@ -42,9 +42,9 @@ class Load:
         file_format = None
         file_format_string = tree.children[0]
 
-        if file_format_string == 'VIDEO':
+        if file_format_string == "VIDEO":
             file_format = FileFormatType.VIDEO
-        elif file_format_string == 'CSV':
+        elif file_format_string == "CSV":
             file_format = FileFormatType.CSV
 
         return file_format
