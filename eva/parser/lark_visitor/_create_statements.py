@@ -235,15 +235,6 @@ class CreateTable:
         dimensions = self.dimension_helper(tree)
         return dimensions
 
-    def decimal_literal(self, tree):
-        decimal = None
-        token = tree.children[0]
-        if token == "ANYDIM":
-            decimal = Dimension.ANYDIM
-        else:
-            decimal = int(str(token))            
-        return decimal
-
     # MATERIALIZED VIEW
     def create_materialized_view(self, tree):
         view_name = None

@@ -20,7 +20,7 @@ from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
 from eva.utils.logging_manager import logger
 from eva.expression.tuple_value_expression import TupleValueExpression
-
+from eva.catalog.catalog_type import Dimension
 
 class CommonClauses:
 
@@ -58,8 +58,13 @@ class CommonClauses:
         return simple_id
 
     def decimal_literal(self, tree):
-        decimal_literal = int(tree.children[0])
-        return decimal_literal
+        decimal = None
+        token = tree.children[0]
+        if token == "ANYDIM":
+            decimal = Dimension.ANYDIM
+        else:
+            decimal = int(str(token))            
+        return decimal
 
     def real_literal(self, tree):
         real_literal = float(tree.children[0])
