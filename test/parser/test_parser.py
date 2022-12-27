@@ -844,7 +844,6 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT CLASS FROM TAIPAI  \
-                    ORDER BY CLASS DESC LIMIT 3;"""
+        query = """SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"""
         parser = Parser()
         parser.parse(query)

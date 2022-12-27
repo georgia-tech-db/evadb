@@ -247,9 +247,11 @@ function_call: udf_function         ->udf_function_call
 udf_function: simple_id "(" function_args ")" dotted_id?
     
 
-aggregate_windowed_function: (AVG | MAX | MIN | SUM) "(" (ALL | DISTINCT)? function_arg ")"
+aggregate_windowed_function: aggregate_function_name "(" (ALL | DISTINCT)? function_arg ")"
                            | COUNT "(" ("*" | ALL? function_arg) ")"
     
+
+aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT
 
 function_args: (function_arg) ("," function_arg)*
     
@@ -417,6 +419,9 @@ MIN:                                 "MIN"
 STD:                                 "STD"
 SUM:                                 "SUM"
 FCOUNT: 						     "FCOUNT"
+FIRST:                               "FIRST"
+LAST:                                "LAST"
+SEGMENT:                             "SEGMENT"
 
 // Keywords, but can be ID
 // Common Keywords, but can be ID

@@ -20,6 +20,7 @@ from eva.parser.select_statement import SelectStatement
 from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
 from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
+from eva.parser.types import ParserOrderBySortType
 
 ##################################################################
 # TABLE SOURCES
@@ -141,8 +142,10 @@ class TableSources:
                     from_table = self.visit(child)
                 elif child.data == "where_expr":
                     where_clause = self.visit(child)
-                elif child.data == "group_by_items":
-                    groupby_clause = self.visit(child)
+                elif child.data == "group_by_item":
+                    groupby_item = self.visit(child)
+                    # TODO: Support multiple group by columns
+                    groupby_clause = groupby_item
 
         return {"from": from_table, "where": where_clause, "groupby": groupby_clause}
 
@@ -251,27 +254,15 @@ class TableSources:
 
         return right_select_statement
 
-    def group_by_items(self, tree):
-        groupby_clause = None
-        for child in tree.children:
-            if isinstance(child, Tree):
-                if child.data == "group_by_item":
-                    # TODO: Support multiple group by columns
-                    groupby_clause = self.visit(child)
-        return groupby_clause
-
     def group_by_item(self, tree):
         expr = None
-        sort_order = None
 
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "expression":
+                if child.data.endswith("expression"):
                     expr = self.visit(child)
-                elif child.data == "sort_order":
-                    sort_order = self.visit(child)
 
-        return (expr, sort_order)
+        return expr
 
     def alias_clause(self, tree):
         alias_name = None
