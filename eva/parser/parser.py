@@ -16,7 +16,6 @@ from pprint import pprint
 
 from antlr4 import CommonTokenStream, InputStream
 from antlr4.error.ErrorListener import ErrorListener
-from deepdiff import DeepDiff
 
 from eva.parser.evaql.evaql_lexer import evaql_lexer
 from eva.parser.evaql.evaql_parser import evaql_parser
@@ -104,8 +103,5 @@ class Parser(object):
                     pprint(lark_output[0].__str__())
                     pprint("-------- ANTLR  --------")
                     pprint(antlr_output[0].__str__())
-                    pprint("-------- DDIFF  --------")
-                    d = DeepDiff(lark_output, antlr_output)
-                    pprint(d)
 
         return lark_output
