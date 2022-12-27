@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pprint import pprint
-
 from antlr4 import CommonTokenStream, InputStream
 from antlr4.error.ErrorListener import ErrorListener
 
@@ -21,6 +19,7 @@ from eva.parser.evaql.evaql_lexer import evaql_lexer
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.lark_parser import LarkParser
 from eva.parser.parser_visitor import ParserVisitor
+from eva.utils.logging_manager import logger
 
 
 class AntlrErrorListener(ErrorListener):
@@ -78,7 +77,7 @@ class Parser(object):
         self._error_listener = AntlrErrorListener()
         self._lark_parser = LarkParser()
 
-    def parse(self, query_string: str) -> list:
+    def parse(self, query_string: str, check_output: bool = False) -> list:
         lexer = evaql_lexer(InputStream(query_string))
         stream = CommonTokenStream(lexer)
 
@@ -91,17 +90,14 @@ class Parser(object):
         # Call lark
         lark_output = self._lark_parser.parse(query_string)
         antlr_output = self._visitor.visit(tree)
-        check_output = False
-        verbose_diff = True
 
         if check_output:
             if lark_output != antlr_output:
-                pprint("Different parse trees: ")
-                pprint(query_string)
-                if verbose_diff is True:
-                    pprint("--------  LARK  --------")
-                    pprint(lark_output[0].__str__())
-                    pprint("-------- ANTLR  --------")
-                    pprint(antlr_output[0].__str__())
+                logger.info("Different parse trees: ")
+                logger.info(query_string)
+                logger.info("--------  LARK  --------")
+                logger.info(lark_output[0].__str__())
+                logger.info("-------- ANTLR  --------")
+                logger.info(antlr_output[0].__str__())
 
         return lark_output

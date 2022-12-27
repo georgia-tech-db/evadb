@@ -852,4 +852,4 @@ class ParserTests(unittest.TestCase):
                   IMPL  'eva/udfs/face_detector.py';
                   """
         parser = Parser()
-        parser.parse(query)
+        parser.parse(query, check_output=True)
