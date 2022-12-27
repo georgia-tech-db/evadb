@@ -107,7 +107,4 @@ class Parser(object):
                 d = DeepDiff(lark_output, antlr_output)
                 pprint(d)
 
-        elif verbose_diff is True:
-            pprint("Identical parse trees")
-
         return lark_output
