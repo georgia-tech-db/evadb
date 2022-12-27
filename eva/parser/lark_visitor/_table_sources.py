@@ -170,7 +170,6 @@ class TableSources:
     def lateral_join(self, tree):
         tve = None
         alias = None
-        has_on = False
 
         for child in tree.children:
             # Rules
@@ -179,12 +178,6 @@ class TableSources:
                     tve = self.visit(child)
                 elif child.data == "alias_clause":
                     alias = self.visit(child)
-            # Tokens
-            elif child.data == "ON":
-                has_on = True
-
-        if has_on is False:
-            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
 
         if alias is None:
             err_msg = f"TableValuedFunction {tve.func_expr.name} should have alias."
@@ -194,7 +187,7 @@ class TableSources:
         join_type = JoinType.LATERAL_JOIN
         return TableRef(
             JoinNode(
-                None, TableRef(tve, alias=alias), predicate=None, join_type=join_type
+                None, TableRef(tve, alias=alias), join_type=join_type
             )
         )
 
