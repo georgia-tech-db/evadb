@@ -844,8 +844,6 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT name, id, data FROM MyVideo WHERE id < 2
-            UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 4 AND id < 6
-            UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 7;"""
+        query = """CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;"""
         parser = Parser()
         parser.parse(query)

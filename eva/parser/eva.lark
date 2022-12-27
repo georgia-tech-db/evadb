@@ -18,7 +18,7 @@ utility_statement: describe_statement | show_statement | help_statement | explai
 
 create_database: CREATE DATABASE if_not_exists? uid
 
-create_index: CREATE INDEX uid ON table_name index_column_names index_type?
+create_index: CREATE INDEX uid ON table_name ("(" uid_list ")") index_type?
 
 create_table: CREATE TABLE if_not_exists? table_name create_definitions 
     
@@ -44,7 +44,6 @@ index_type: USING HNSW
 create_definitions: "(" create_definition ("," create_definition)* ")"
 
 create_definition: uid column_definition          -> column_declaration
-                 | index_column_definition        -> index_declaration
 
 column_definition: data_type column_constraint*
     
@@ -52,9 +51,6 @@ column_constraint: null_notnull            ->null_column_constraint
                  | DEFAULT default_value   ->default_column_constraint   
                  | PRIMARY? KEY   ->primary_key_column_constraint
                  | UNIQUE KEY?    ->unique_key_column_constraint    
-
-    
-index_column_definition: INDEX uid? index_type? index_column_names 
 
 //    Drop statements
 
@@ -225,9 +221,7 @@ length_dimension_list: "(" ( decimal_literal  ",")* decimal_literal ")"
 //    Common Lists
 
 uid_list: uid ("," uid)*
-        
-index_column_names: "(" index_column_name ("," index_column_name)* ")"
-    
+            
 expressions: expression ("," expression)*
     
 expressions_with_defaults: expression_or_default ("," expression_or_default)*

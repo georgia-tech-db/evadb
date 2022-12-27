@@ -15,13 +15,14 @@
 
 from lark import Tree
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, NdArrayType, IndexType
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
-    CreateTableStatement,
+    CreateTableStatement
 )
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
@@ -266,3 +267,37 @@ class CreateTable:
             ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
         ]
         return CreateMaterializedViewStatement(view_ref, col_list, if_not_exists, query)
+
+    def index_type(self, tree):
+        index_type = None
+        token = tree.children[1]
+
+        if token == "HNSW":
+            index_type = IndexType.HNSW
+        return index_type
+
+    # INDEX CREATION
+    def create_index(self, tree):
+        index_name = None
+        table_name = None
+        index_type = None
+        uid_list = []
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "uid":
+                    index_name = self.visit(child)
+                elif child.data == "table_name":
+                    table_name = self.visit(child)
+                    table_ref = TableRef(table_name)
+                elif child.data == "index_type":
+                    index_type = self.visit(child)
+                elif child.data == "uid_list":
+                    uid_list = self.visit(child)
+
+        col_list = [
+            ColumnDefinition(uid.col_name, None, None, None)
+            for uid in uid_list
+        ]
+
+        return CreateIndexStatement(index_name, table_ref, col_list, index_type)

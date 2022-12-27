@@ -29,5 +29,8 @@ class DropTable:
                 elif child.data == "table_name":
                     table_info = self.visit(child)
 
-        drop_stmt = DropTableStatement(table_info, if_exists)
+        # Need to wrap table in a list 
+        table_info_list = [table_info]
+
+        drop_stmt = DropTableStatement(table_info_list, if_exists)
         return drop_stmt

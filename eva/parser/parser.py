@@ -92,7 +92,7 @@ class Parser(object):
         # Call lark
         lark_output = self._lark_parser.parse(query_string)
         antlr_output = self._visitor.visit(tree)
-        verbose_diff = False
+        verbose_diff = True
 
         if lark_output != antlr_output:
             pprint("Different parse trees: ")
