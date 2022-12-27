@@ -27,7 +27,7 @@ class ParserStatementTests(unittest.TestCase):
         queries = [
             "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;",
             "RENAME TABLE student TO student_info",
-            "DROP TABLE student_info",
+            "DROP TABLE IF EXISTS student_info",
             "DROP UDF FastRCNN;",
             "SELECT CLASS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500;",
@@ -40,6 +40,7 @@ class ParserStatementTests(unittest.TestCase):
             "INSERT INTO MyVideo (Frame_ID, Frame_Path)\
                                     VALUES    (1, '/mnt/frames/1.png');",
             """LOAD VIDEO 'data/video.mp4' INTO MyVideo""",
+            """LOAD IMAGE 'data/pic.jpg' INTO MyImage""",
             """LOAD CSV 'data/meta.csv' INTO
                              MyMeta (id, frame_id, video_id, label);""",
             """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
@@ -70,6 +71,13 @@ class ParserStatementTests(unittest.TestCase):
                   TYPE  FaceDetection
                   IMPL  'eva/udfs/face_detector.py';
             """,
+            "SHOW TABLES;",
+            "SHOW UDFS",
+            "EXPLAIN SELECT a FROM foo;",
+            """SELECT data FROM MyVideo WHERE id < 5
+                    ORDER BY Similarity(FeatureExtractor(Open("abc.jpg")),
+                                        FeatureExtractor(data))
+                    LIMIT 1;"""
         ]
 
         ref_stmt = parser.parse(queries[0])[0]
