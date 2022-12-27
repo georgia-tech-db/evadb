@@ -28,7 +28,7 @@ class Insert:
         column_list = []
         value_list = []
 
-        #print(tree.pretty())
+        # print(tree.pretty())
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -64,6 +64,5 @@ class Insert:
                 if child.data == "expressions_with_defaults":
                     expr = self.visit(child)
                     insert_stmt_value.append(expr)
-        
-        
+
         return insert_stmt_value

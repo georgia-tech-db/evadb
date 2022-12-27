@@ -43,5 +43,7 @@ class Upload:
                 elif child.data == "file_options":
                     file_options = self.visit(child)
 
-        stmt = UploadStatement(srv_path, video_blob, table_info, column_list, file_options)
+        stmt = UploadStatement(
+            srv_path, video_blob, table_info, column_list, file_options
+        )
         return stmt

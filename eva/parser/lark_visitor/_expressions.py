@@ -45,8 +45,7 @@ class Expressions:
                 array_elements.append(array_element)
 
         res = ConstantValueExpression(
-            np.array(array_elements),
-            ColumnType.NDARRAY
+            np.array(ast.literal_eval(array_elements)), ColumnType.NDARRAY
         )
         return res
 
@@ -69,7 +68,7 @@ class Expressions:
                 elif child.data == "decimal_literal":
                     decimal_literal = self.visit(child)
                     return ConstantValueExpression(decimal_literal, ColumnType.INTEGER)
-                
+
         return self.visit_children(tree)
 
     def logical_expression(self, tree):
@@ -135,5 +134,5 @@ class Expressions:
 
     def sample_clause(self, tree):
         sample_list = self.visit_children(tree)
-        assert(len(sample_list) == 2)
+        assert len(sample_list) == 2
         return ConstantValueExpression(sample_list[1])

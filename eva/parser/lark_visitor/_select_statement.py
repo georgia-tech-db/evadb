@@ -18,6 +18,7 @@ from lark.tree import Tree
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.types import ParserOrderBySortType
 
+
 ##################################################################
 # SELECT STATEMENT
 ##################################################################
@@ -47,7 +48,6 @@ class Select:
 
         return expr, sort_order
 
-    
     def sort_order(self, tree):
         token = tree.children[0]
         sort_order = None
@@ -57,7 +57,6 @@ class Select:
         elif token == "DESC":
             sort_order = ParserOrderBySortType.DESC
         return sort_order
-
 
     def limit_clause(self, tree):
         output = ConstantValueExpression(self.visit(tree.children[1]))

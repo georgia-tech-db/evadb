@@ -13,14 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from lark import Tree, Token
+from lark import Token, Tree
 
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.select_statement import SelectStatement
 from eva.parser.table_ref import Alias, JoinNode, TableRef, TableValuedExpression
 from eva.parser.types import JoinType
 from eva.utils.logging_manager import logger
-from eva.parser.types import ParserOrderBySortType
 
 ##################################################################
 # TABLE SOURCES
@@ -188,11 +187,7 @@ class TableSources:
             raise SyntaxError(err_msg)
 
         join_type = JoinType.LATERAL_JOIN
-        return TableRef(
-            JoinNode(
-                None, TableRef(tve, alias=alias), join_type=join_type
-            )
-        )
+        return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
 
     def table_valued_function(self, tree):
         func_expr = None

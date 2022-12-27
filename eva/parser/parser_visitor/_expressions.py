@@ -23,7 +23,7 @@ from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.logical_expression import LogicalExpression
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.evaql.evaql_parserVisitor import evaql_parserVisitor
-from pprint import pprint
+
 
 ##################################################################
 # EXPRESSIONS

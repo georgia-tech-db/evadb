@@ -14,8 +14,8 @@
 # limitations under the License.
 from typing import Any
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from eva.catalog.catalog_type import ColumnType
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType

@@ -127,7 +127,16 @@ class Functions:
     def aggregate_windowed_function(self, tree):
         agg_func_name = self.visit(tree.children[0]).value
         agg_func_arg = None
-        assert agg_func_name in ["MIN", "MAX", "AVG", "SUM", "COUNT", "FIRST", "LAST", "SEGMENT"]
+        assert agg_func_name in [
+            "MIN",
+            "MAX",
+            "AVG",
+            "SUM",
+            "COUNT",
+            "FIRST",
+            "LAST",
+            "SEGMENT",
+        ]
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "function_arg":
