@@ -20,22 +20,29 @@ from eva.parser.upload_statement import UploadStatement
 class Upload:
 
     def uploade_statement(self, tree):
-        srv_path = self.visit(ctx.fileName()).value
-        video_blob = self.visit(ctx.videoBlob()).value
-        table = TableRef(self.visit(ctx.tableName()))
+        srv_path = None
+        video_blob = None
+        table = None
+        uid_list = None
 
-        # Set default for file_format as Video
+        # default file format
         file_format = FileFormatType.VIDEO
         file_options = {}
         file_options["file_format"] = file_format
 
-        if ctx.fileOptions():
-            file_options = self.visit(ctx.fileOptions())
-
-        # set default for column_list as None
-        column_list = None
-        if ctx.uidList():
-            column_list = self.visit(ctx.uidList())
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "file_name":
+                    srv_path = self.visit(child).value
+                elif child.data == "video_blob":
+                    video_blob = self.visit(child).value
+                elif child.data == "table_name":
+                    table_name = self.visit(child)
+                    table = TableRef(table_name)
+                elif child.data == "uid_list":
+                    uid_list = self.visit(child)
+                elif child.data == "file_options":
+                    file_options = self.visit(child)
 
         stmt = UploadStatement(srv_path, video_blob, table, column_list, file_options)
         return stmt

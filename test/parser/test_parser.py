@@ -845,6 +845,7 @@ class ParserTests(unittest.TestCase):
 
     def test_lark(self):
 
-        query = """SELECT FIRST(id) FROM foo;"""
+        query = """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
+                          INTO MyVideo WITH FORMAT VIDEO;"""
         parser = Parser()
         parser.parse(query)
