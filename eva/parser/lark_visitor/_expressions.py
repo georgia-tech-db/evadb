@@ -128,4 +128,6 @@ class Expressions:
         return expr_list
 
     def sample_clause(self, tree):
-        return ConstantValueExpression(self.visit_children(tree))
+        sample_list = self.visit_children(tree)
+        assert(len(sample_list) == 2)
+        return ConstantValueExpression(sample_list[1])
