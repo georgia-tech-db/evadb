@@ -143,7 +143,7 @@ class TableSources:
                     from_table = self.visit(child)
                 elif child.data == "where_expr":
                     where_clause = self.visit(child)
-                elif child.data == "group_by_clause":
+                elif child.data == "group_by_items":
                     groupby_clause = self.visit(child)
 
         return {"from": from_table, "where": where_clause, "groupby": groupby_clause}
@@ -198,7 +198,7 @@ class TableSources:
         return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
 
     def table_valued_function(self, tree):
-        func_expr = self.visit(ctx.functionCall())
+        func_expr = None
         has_unnest = False
 
         for child in tree.children:
@@ -223,31 +223,57 @@ class TableSources:
         return subquery_table_source_item
 
     def union_select(self, tree):
-        left_selectStatement = self.visit(ctx.left)
-        right_selectStatement = self.visit(ctx.right)
+        right_select_statement = None
+        union_all = False
+
+        statement_id = 0
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "simple_select":
+                    if statement_id == 0:
+                        left_select_statement = self.visit(child)
+                    elif statement_id == 1:
+                        right_select_statement = self.visit(child)                    
+                    statement_id += 1
+            # Token
+            elif child == 'ALL':
+                union_all = True
+
+        # FIX: Complex logic
         # This makes a difference becasue the LL parser (Left-to-right)
-        while right_selectStatement.union_link is not None:
-            right_selectStatement = right_selectStatement.union_link
+        while right_select_statement.union_link is not None:
+            right_select_statement = right_select_statement.union_link
         # We need to check the correctness for union operator.
         # Here when parsing or later operator, plan?
-        right_selectStatement.union_link = left_selectStatement
-        if ctx.unionAll is None:
-            right_selectStatement.union_all = False
-        else:
-            right_selectStatement.union_all = True
-        return right_selectStatement
+        right_select_statement.union_link = left_select_statement
 
-    def group_by_clause(self, tree):
+        if union_all is False:
+            right_select_statement.union_all = False
+        else:
+            right_select_statement.union_all = True
+        return right_select_statement
+
+    def group_by_items(self, tree):
         groupby_clause = None
-        if ctx.groupByItem():
-            # TODO ACTION: Check what happens if 0 size is possible
-            if len(ctx.groupByItem()) > 1:
-                err_msg = "Parsing error: We do not \
-                        support multiple attributes in GROUP BY"
-                logger.error(err_msg)
-                raise SyntaxError(err_msg)
-            groupby_clause = self.visit(ctx.groupByItem()[0])
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "group_by_item":
+                    # TODO: Support multiple group by columns
+                    groupby_clause = self.visit(child)
         return groupby_clause
+
+    def group_by_item(self, tree):
+        expr = None
+        sort_order = None
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "expression":
+                    expr = self.visit(child)
+                elif child.data == "sort_order":
+                    sort_order = self.visit(child)
+                    
+        return (expr, sort_order)
 
     def alias_clause(self, tree):
         alias_name = None

@@ -126,7 +126,8 @@ class CreateTable:
         array_type = None
         dimensions = []
 
-        if ctx.BOOLEAN() is not None:
+        token = tree.children[0]
+        if token == "BOOLEAN":
             data_type = ColumnType.BOOLEAN
 
         return data_type, array_type, dimensions
@@ -235,18 +236,12 @@ class CreateTable:
         return dimensions
 
     def decimal_literal(self, tree):
-
         decimal = None
-        if ctx.DECIMAL_LITERAL() is not None:
-            decimal = int(str(ctx.DECIMAL_LITERAL()))
-        elif ctx.ONE_DECIMAL() is not None:
-            decimal = int(str(ctx.ONE_DECIMAL()))
-        elif ctx.TWO_DECIMAL() is not None:
-            decimal = int(str(ctx.TWO_DECIMAL()))
-        elif ctx.ZERO_DECIMAL() is not None:
-            decimal = int(str(ctx.ZERO_DECIMAL()))
-        elif ctx.ANYDIM() is not None:
+        token = tree.children[0]
+        if token == "ANYDIM":
             decimal = Dimension.ANYDIM
+        else:
+            decimal = int(str(token))            
         return decimal
 
     # MATERIALIZED VIEW
