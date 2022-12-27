@@ -63,6 +63,8 @@ class Expressions:
                 elif child.data == "decimal_literal":
                     decimal_literal = self.visit(child)
                     return ConstantValueExpression(decimal_literal, ColumnType.INTEGER)
+                
+        return self.visit_children(tree)
 
     def logical_expression(self, tree):
         if len(tree.children) < 3:

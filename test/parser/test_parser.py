@@ -844,9 +844,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """UPLOAD PATH 'data/meta.csv' BLOB "b'AAAA'"
-                          INTO
-                          MyMeta (id, frame_id, video_id, label)
-                          WITH FORMAT CSV;"""
+        query = """INSERT INTO MyVideo (Frame_ID, Frame_Path)
+                                    VALUES    (1, '/mnt/frames/1.png');"""
         parser = Parser()
         parser.parse(query)
