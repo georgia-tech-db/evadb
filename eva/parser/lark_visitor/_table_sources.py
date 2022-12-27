@@ -50,7 +50,7 @@ class TableSources:
                 if child.data == "table_source_item_with_sample":
                     left_node = self.visit(child)
                     join_nodes = [left_node]
-                elif child.data == "inner_join" or child.data == "lateral_join":
+                elif child.data.endswith("join"):
                     table = self.visit(child)
                     join_nodes.append(table)
 
@@ -196,9 +196,10 @@ class TableSources:
         has_unnest = False
 
         for child in tree.children:
-            if child.data == "function_call":
-                func_expr = self.visit(child)
-            elif child.data == "UNNEST":
+            if isinstance(child, Tree):
+                if child.data.endswith("function_call"):
+                    func_expr = self.visit(child)
+            elif child == "UNNEST":
                 has_unnest = True
 
         return TableValuedExpression(func_expr, do_unnest=has_unnest)
