@@ -33,8 +33,8 @@ class StorageEngine:
     }
 
     @classmethod
-    def factory(cls, table_metadata: TableCatalog) -> AbstractStorageEngine:
-        if table_metadata.table_type in cls.storages:
-            return cls.storages[table_metadata.table_type]
+    def factory(cls, table: TableCatalog) -> AbstractStorageEngine:
+        if table.table_type in cls.storages:
+            return cls.storages[table.table_type]
 
-        raise RuntimeError(f"Invalid table type {table_metadata.table_type}")
+        raise RuntimeError(f"Invalid table type {table.table_type}")

@@ -59,7 +59,6 @@ from eva.utils.logging_manager import logger
 class StatementToPlanConvertor:
     def __init__(self):
         self._plan = None
-        self._dataset = None
 
     def visit_table_ref(self, table_ref: TableRef):
         """Bind table ref object and convert to LogicalGet, LogicalJoin,
@@ -70,8 +69,8 @@ class StatementToPlanConvertor:
         """
         if table_ref.is_table_atom():
             # Table
-            catalog_vid_metadata = table_ref.table.table_obj
-            self._plan = LogicalGet(table_ref, catalog_vid_metadata, table_ref.alias)
+            catalog_entry = table_ref.table.table_obj
+            self._plan = LogicalGet(table_ref, catalog_entry, table_ref.alias)
 
         elif table_ref.is_table_valued_expr():
             tve = table_ref.table_valued_expr

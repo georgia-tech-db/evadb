@@ -34,18 +34,18 @@ class TupleValueExpression(AbstractExpression):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
         self._table_alias = table_alias
-        self._table_metadata_id = None
+        self._table_id = None
         self._col_idx = col_idx
         self._col_object = col_object
         self._col_alias = col_alias
 
     @property
-    def table_metadata_id(self) -> int:
-        return self._table_metadata_id
+    def table_id(self) -> int:
+        return self._table_id
 
-    @table_metadata_id.setter
-    def table_metadata_id(self, id: int):
-        self._table_metadata_id = id
+    @table_id.setter
+    def table_id(self, id: int):
+        self._table_id = id
 
     @property
     def table_alias(self) -> str:
@@ -87,7 +87,7 @@ class TupleValueExpression(AbstractExpression):
         return (
             is_subtree_equal
             and self.table_alias == other.table_alias
-            and self.table_metadata_id == other.table_metadata_id
+            and self.table_id == other.table_id
             and self.col_name == other.col_name
             and self.col_alias == other.col_alias
             and self.col_object == other.col_object
@@ -99,7 +99,7 @@ class TupleValueExpression(AbstractExpression):
             (
                 super().__hash__(),
                 self.table_alias,
-                self.table_metadata_id,
+                self.table_id,
                 self.col_name,
                 self.col_alias,
                 self.col_object,

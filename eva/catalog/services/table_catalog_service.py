@@ -64,13 +64,13 @@ class TableCatalogService(BaseService):
 
     def get_entry_by_name(self, database_name, table_name):
         """
-        Get the metadata for the given table.
+        Get the table catalog entry with given table name.
         Arguments:
             database_name  (str): Database to which table belongs # TODO:
             use this field
             table_name (str): name of the table
         Returns:
-            TableCatalog - metadata for given table_name
+            TableCatalog - catalog entry for given table_name
         """
         return self.model.query.filter(self.model._name == table_name).one_or_none()
 

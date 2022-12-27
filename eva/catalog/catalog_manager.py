@@ -115,7 +115,7 @@ class CatalogManager(object):
             table_type=table_type,
         )
 
-        # Append row_id to table metadata.
+        # Append row_id to table column list.
         column_list = [
             ColumnCatalog(IDENTIFIER_COLUMN, ColumnType.INTEGER)
         ] + column_list
@@ -288,12 +288,12 @@ class CatalogManager(object):
         secondary_index_table: TableCatalog,
         feat_column: ColumnCatalog,
     ) -> IndexCatalog:
-        index_metadata = self._index_service.insert_entry(
+        index_catalog_entry = self._index_service.insert_entry(
             name, save_file_path, index_type
         )
-        index_metadata.secondary_index_id = secondary_index_table.id
-        index_metadata.feat_column_id = feat_column.id
-        return index_metadata
+        index_catalog_entry.secondary_index_id = secondary_index_table.id
+        index_catalog_entry.feat_column_id = feat_column.id
+        return index_catalog_entry
 
     def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
         return self._index_service.get_entry_by_name(name)
@@ -325,23 +325,25 @@ class CatalogManager(object):
             TableCatalog: entry that has been inserted into the table catalog
         """
         table_name = table_info.table_name
-        column_metadata_list = self.xform_column_definitions_to_catalog_entries(columns)
+        column_catalog_entries = self.xform_column_definitions_to_catalog_entries(
+            columns
+        )
         file_url = str(generate_file_path(table_name))
-        metadata = self.insert_table_catalog_entry(
+        table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
             file_url,
-            column_metadata_list,
+            column_catalog_entries,
             identifier_column=identifier_column,
             table_type=table_type,
         )
-        return metadata
+        return table_catalog_entry
 
     def xform_column_definitions_to_catalog_entries(
         self, col_list: List[ColumnDefinition]
-    ):
-        """Create column metadata for the input parsed column list. This function
-        will not commit the provided column into catalog table.
-        Will only return in memory list of ColumnDataframe objects
+    ) -> List[ColumnCatalog]:
+        """Create column catalog entry for the input parsed column list.
+        This function does not commit the provided column into catalog table.
+        Will only return in memory list of ColumnCatalog objects
 
         Arguments:
             col_list {List[ColumnDefinition]} -- parsed col list to be created

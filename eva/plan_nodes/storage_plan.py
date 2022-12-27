@@ -24,7 +24,7 @@ class StoragePlan(AbstractPlan):
     and returning to the higher levels.
 
     Arguments:
-        table (TableCatalog): Required meta-data for fetching data
+        table (TableCatalog): table for fetching data
         batch_mem_size (int): memory size of the batch read from disk
         skip_frames (int): skip frequency
         offset (int): storage offset for retrieving data

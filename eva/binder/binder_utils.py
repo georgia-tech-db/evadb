@@ -37,13 +37,13 @@ class BinderError(Exception):
 
 def bind_table_info(table_info: TableInfo) -> TableCatalog:
     """
-    Uses catalog to bind the dataset information for given video string.
+    Uses catalog to bind the table information .
 
     Arguments:
-         video_info (TableInfo): video information obtained in SQL query
+         table_info (TableInfo): table information obtained from SQL query
 
     Returns:
-        TableCatalog  -  corresponding metadata for the input table info
+        TableCatalog  -  corresponding table catalog entry for the input table info
     """
     catalog = CatalogManager()
     obj = catalog.get_table_catalog_entry(

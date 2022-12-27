@@ -26,9 +26,9 @@ class IndexCatalogService(BaseService):
         super().__init__(IndexCatalog)
 
     def insert_entry(self, name: str, save_file_path: str, type: str) -> IndexCatalog:
-        metadata = self.model(name, save_file_path, type)
-        metadata = metadata.save()
-        return metadata
+        index_entry = self.model(name, save_file_path, type)
+        index_entry = index_entry.save()
+        return index_entry
 
     def get_entry_by_name(self, name: str):
         try:

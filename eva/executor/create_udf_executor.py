@@ -32,7 +32,7 @@ class CreateUDFExecutor(AbstractExecutor):
     def exec(self):
         """Create udf executor
 
-        Calls the catalog to create udf metadata.
+        Calls the catalog to insert a udf catalog entry.
         """
         catalog_manager = CatalogManager()
         # check catalog if it already has this udf entry

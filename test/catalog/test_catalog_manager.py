@@ -87,17 +87,17 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch("eva.catalog.catalog_manager.init_db")
     @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
     @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
-    def test_create_metadata_should_create_dataset_and_columns(
+    def test_insert_table_catalog_entry_should_create_table_and_columns(
         self, dcs_mock, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
         file_url = "file1"
-        dataset_name = "name"
+        table_name = "name"
 
         columns = [(ColumnCatalog("c1", ColumnType.INTEGER))]
-        actual = catalog.insert_table_catalog_entry(dataset_name, file_url, columns)
+        actual = catalog.insert_table_catalog_entry(table_name, file_url, columns)
         ds_mock.return_value.insert_entry.assert_called_with(
-            dataset_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
+            table_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
         )
         for column in columns:
             column.table_id = ds_mock.return_value.insert_entry.return_value.id
@@ -116,18 +116,18 @@ class CatalogManagerTests(unittest.TestCase):
         self, dcs_mock, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
-        dataset_name = "name"
+        table_name = "name"
 
         database_name = "database"
         schema = [1, 2, 3]
         id = 1
-        metadata_obj = MagicMock(id=id, schema=None)
-        ds_mock.return_value.get_entry_by_name.return_value = metadata_obj
+        table_obj = MagicMock(id=id, schema=None)
+        ds_mock.return_value.get_entry_by_name.return_value = table_obj
         dcs_mock.return_value.filter_entries_by_table_id.return_value = schema
 
-        actual = catalog.get_table_catalog_entry(database_name, dataset_name)
+        actual = catalog.get_table_catalog_entry(database_name, table_name)
         ds_mock.return_value.get_entry_by_name.assert_called_with(
-            database_name, dataset_name
+            database_name, table_name
         )
         dcs_mock.return_value.filter_entries_by_table_id.assert_called_with(id)
         self.assertEqual(actual.id, id)
@@ -140,19 +140,19 @@ class CatalogManagerTests(unittest.TestCase):
         self, dcs_mock, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
-        dataset_name = "name"
+        table_name = "name"
 
         database_name = "database"
-        metadata_obj = None
+        table_obj = None
 
-        ds_mock.return_value.get_entry_by_name.return_value = metadata_obj
+        ds_mock.return_value.get_entry_by_name.return_value = table_obj
 
-        actual = catalog.get_table_catalog_entry(database_name, dataset_name)
+        actual = catalog.get_table_catalog_entry(database_name, table_name)
         ds_mock.return_value.get_entry_by_name.assert_called_with(
-            database_name, dataset_name
+            database_name, table_name
         )
         dcs_mock.return_value.filter_entries_by_table_id.assert_not_called()
-        self.assertEqual(actual, metadata_obj)
+        self.assertEqual(actual, table_obj)
 
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalog")
     def test_create_udf_io_object(self, udfio_mock):

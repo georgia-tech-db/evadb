@@ -40,7 +40,7 @@ class LoadCSVExecutor(AbstractExecutor):
 
     def exec(self):
         """
-        Read the input meta file using pandas and persist data
+        Read the input csv file using pandas and persist data
         using storage engine
         """
 

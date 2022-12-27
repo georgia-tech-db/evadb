@@ -47,12 +47,12 @@ class CreateIndexExecutor(AbstractExecutor):
 
         try:
             # Get feature tables.
-            feat_df_metadata = self.node.table_ref.table.table_obj
+            feat_catalog_entry = self.node.table_ref.table.table_obj
 
             # Get feature column.
             feat_col_name = self.node.col_list[0].name
             feat_column = [
-                col for col in feat_df_metadata.columns if col.name == feat_col_name
+                col for col in feat_catalog_entry.columns if col.name == feat_col_name
             ][0]
 
             # Add features to index.
@@ -60,8 +60,8 @@ class CreateIndexExecutor(AbstractExecutor):
             index = None
             input_dim, num_rows = -1, 0
             logical_to_row_id = dict()
-            storage_engine = StorageEngine.factory(feat_df_metadata)
-            for batch in storage_engine.read(feat_df_metadata, 1):
+            storage_engine = StorageEngine.factory(feat_catalog_entry)
+            for batch in storage_engine.read(feat_catalog_entry, 1):
                 # Pandas wraps numpy array as an object inside a numpy
                 # array. Use zero index to get the actual numpy array.
                 feat = batch.column_as_numpy_array(feat_col_name)[0]
@@ -77,9 +77,9 @@ class CreateIndexExecutor(AbstractExecutor):
                 num_rows += 1
 
             # Build secondary index maaping.
-            secondary_index_df_metadata = self._create_secondary_index_table()
-            storage_engine = StorageEngine.factory(secondary_index_df_metadata)
-            storage_engine.create(secondary_index_df_metadata)
+            secondary_index_catalog_entry = self._create_secondary_index_table()
+            storage_engine = StorageEngine.factory(secondary_index_catalog_entry)
+            storage_engine.create(secondary_index_catalog_entry)
 
             # Write mapping.
             logical_id, row_id = list(logical_to_row_id.keys()), list(
@@ -88,7 +88,7 @@ class CreateIndexExecutor(AbstractExecutor):
             secondary_index = Batch(
                 pd.DataFrame(data={"logical_id": logical_id, "row_id": row_id})
             )
-            storage_engine.write(secondary_index_df_metadata, secondary_index)
+            storage_engine.write(secondary_index_catalog_entry, secondary_index)
 
             # Persist index.
             faiss.write_index(index, self._get_index_save_path())
@@ -98,7 +98,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 self.node.name,
                 self._get_index_save_path(),
                 self.node.index_type,
-                secondary_index_df_metadata,
+                secondary_index_catalog_entry,
                 feat_column,
             )
 
@@ -121,12 +121,14 @@ class CreateIndexExecutor(AbstractExecutor):
                 None,
                 secondary_index_tb_name,
             ):
-                secondary_index_metadata = catalog_manager.get_table_catalog_entry(
+                secondary_index_catalog_entry = catalog_manager.get_table_catalog_entry(
                     None, secondary_index_tb_name
                 )
-                storage_engine = StorageEngine.factory(secondary_index_metadata)
-                storage_engine.drop(secondary_index_metadata)
-                catalog_manager.delete_table_catalog_entry(secondary_index_metadata)
+                storage_engine = StorageEngine.factory(secondary_index_catalog_entry)
+                storage_engine.drop(secondary_index_catalog_entry)
+                catalog_manager.delete_table_catalog_entry(
+                    secondary_index_catalog_entry
+                )
 
             # Throw exception back to user.
             raise ExecutorError(str(e))
@@ -191,23 +193,23 @@ class CreateIndexExecutor(AbstractExecutor):
                 ColConstraintInfo(unique=True),
             ),
         ]
-        col_metadata = catalog_manager.xform_column_definitions_to_catalog_entries(
-            col_list
+        col_catalog_entries = (
+            catalog_manager.xform_column_definitions_to_catalog_entries(col_list)
         )
 
         catalog_manager = CatalogManager()
-        df_metadata = catalog_manager.insert_table_catalog_entry(
+        table_catalog_entry = catalog_manager.insert_table_catalog_entry(
             "secondary_index_{}_{}".format(self.node.index_type, self.node.name),
             str(
                 EVA_DEFAULT_DIR
                 / INDEX_DIR
                 / Path("{}_{}.secindex".format(self.node.index_type, self.node.name))
             ),
-            col_metadata,
+            col_catalog_entries,
             identifier_column="logical_id",
             table_type=TableType.STRUCTURED_DATA,
         )
-        return df_metadata
+        return table_catalog_entry
 
     def _create_index(self, index_type: IndexType, input_dim: int):
         if index_type == IndexType.HNSW:

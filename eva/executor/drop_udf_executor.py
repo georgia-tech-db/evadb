@@ -29,10 +29,7 @@ class DropUDFExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Drop UDF executor
-
-        Calls the catalog to drop udf metadata.
-        """
+        """Drop UDF executor"""
         catalog_manager = CatalogManager()
 
         # check catalog if it already has this udf entry

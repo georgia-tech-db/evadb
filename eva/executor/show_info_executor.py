@@ -32,10 +32,6 @@ class ShowInfoExecutor(AbstractExecutor):
         pass
 
     def exec(self):
-        """Create udf executor
-
-        Calls the catalog to create udf metadata.
-        """
         try:
             catalog_manager = CatalogManager()
             show_entries = []

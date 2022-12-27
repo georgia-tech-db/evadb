@@ -64,46 +64,46 @@ class CatalogModelsTest(unittest.TestCase):
         )
         self.assertNotEqual(df_col, df_col1)
 
-    def test_df_metadata(self):
-        df_metadata = TableCatalog(
+    def test_table_catalog_entry(self):
+        table_catalog_entry = TableCatalog(
             "name", "eva_dataset", table_type=TableType.VIDEO_DATA
         )
         column_1 = ColumnCatalog("frame_id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalog("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
         schema = DataFrameSchema("name", col_list)
-        df_metadata.schema = col_list
+        table_catalog_entry.schema = col_list
 
-        self.assertEqual(df_metadata.name, "name")
-        self.assertEqual(df_metadata.file_url, "eva_dataset")
-        self.assertEqual(df_metadata.id, None)
-        self.assertEqual(df_metadata.identifier_column, "id")
-        self.assertEqual(df_metadata.schema, schema)
-        self.assertEqual(df_metadata.table_type, TableType.VIDEO_DATA)
+        self.assertEqual(table_catalog_entry.name, "name")
+        self.assertEqual(table_catalog_entry.file_url, "eva_dataset")
+        self.assertEqual(table_catalog_entry.id, None)
+        self.assertEqual(table_catalog_entry.identifier_column, "id")
+        self.assertEqual(table_catalog_entry.schema, schema)
+        self.assertEqual(table_catalog_entry.table_type, TableType.VIDEO_DATA)
 
-    def test_df_metadata_equality(self):
-        df_metadata = TableCatalog(
+    def test_table_catalog_entry_equality(self):
+        table_catalog_entry = TableCatalog(
             "name", "eva_dataset", table_type=TableType.VIDEO_DATA
         )
         column_1 = ColumnCatalog("frame_id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalog("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
-        df_metadata.schema = col_list
-        self.assertEqual(df_metadata, df_metadata)
+        table_catalog_entry.schema = col_list
+        self.assertEqual(table_catalog_entry, table_catalog_entry)
 
-        df_metadata1 = TableCatalog(
+        table_catalog_entry1 = TableCatalog(
             "name2", "eva_dataset", table_type=TableType.VIDEO_DATA
         )
         column_1 = ColumnCatalog("frame_id", ColumnType.INTEGER, False)
         column_2 = ColumnCatalog("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2]
-        df_metadata1.schema = col_list
-        self.assertNotEqual(df_metadata, df_metadata1)
-        df_metadata2 = TableCatalog(
+        table_catalog_entry1.schema = col_list
+        self.assertNotEqual(table_catalog_entry, table_catalog_entry1)
+        table_catalog_entry2 = TableCatalog(
             "name2", "eva_dataset", table_type=TableType.VIDEO_DATA
         )
-        df_metadata2.schema = col_list[1:]
-        self.assertNotEqual(df_metadata1, df_metadata2)
+        table_catalog_entry2.schema = col_list[1:]
+        self.assertNotEqual(table_catalog_entry1, table_catalog_entry2)
 
     def test_udf(self):
         udf = UdfCatalog("udf", "fasterRCNN", "ObjectDetection")
