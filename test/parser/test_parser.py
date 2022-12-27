@@ -351,12 +351,6 @@ class ParserTests(unittest.TestCase):
             ConstantValueExpression("8f", v_type=ColumnType.TEXT),
         )
 
-    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
-        # GROUP BY with multiple attributes should raise Syntax Error
-        parser = Parser()
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
-        self.assertRaises(SyntaxError, parser.parse, select_query)
-
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement
         Class: SelectStatement"""
@@ -816,13 +810,6 @@ class ParserTests(unittest.TestCase):
         )
         expected_stmt = SelectStatement(select_list, from_table, where_clause)
         self.assertEqual(select_stmt, expected_stmt)
-
-    def test_multiple_join_with_single_ON_should_raise(self):
-        select_query = """SELECT table1.a FROM table1 JOIN table2 JOIN table3
-                    ON table3.a = table1.a AND table1.a = table2.a;"""
-        parser = Parser()
-        with self.assertRaises(Exception):
-            parser.parse(select_query)[0]
 
     def test_lateral_join(self):
         select_query = """SELECT frame FROM MyVideo JOIN LATERAL

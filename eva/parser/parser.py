@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.parser.lark_parser import LarkParser
-from eva.parser.parser_visitor import ParserVisitor
 
 
 class Parser(object):
@@ -22,7 +21,6 @@ class Parser(object):
     """
 
     _instance = None
-    _visitor = None
     _lark_parser = None
 
     def __new__(cls):
@@ -31,7 +29,6 @@ class Parser(object):
         return cls._instance
 
     def __init__(self):
-        self._visitor = ParserVisitor()
         self._lark_parser = LarkParser()
 
     def parse(self, query_string: str) -> list:
