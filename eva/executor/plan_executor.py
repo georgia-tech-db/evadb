@@ -15,12 +15,14 @@
 from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.apply_and_merge_executor import ApplyAndMergeExecutor
 from eva.executor.create_executor import CreateExecutor
 from eva.executor.create_index_executor import CreateIndexExecutor
 from eva.executor.create_mat_view_executor import CreateMaterializedViewExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_executor import DropExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
+from eva.executor.executor_utils import ExecutorError
 from eva.executor.explain_executor import ExplainExecutor
 from eva.executor.function_scan_executor import FunctionScanExecutor
 from eva.executor.groupby_executor import GroupByExecutor
@@ -43,8 +45,9 @@ from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.types import PlanOprType
+from eva.utils.logging_manager import logger
 
 
 class PlanExecutor:
@@ -130,7 +133,8 @@ class PlanExecutor:
             executor_node = ExplainExecutor(node=plan)
         elif plan_opr_type == PlanOprType.CREATE_INDEX:
             executor_node = CreateIndexExecutor(node=plan)
-
+        elif plan_opr_type == PlanOprType.APPLY_AND_MERGE:
+            executor_node = ApplyAndMergeExecutor(node=plan)
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
             # Build Executor Tree for children
@@ -150,8 +154,12 @@ class PlanExecutor:
 
     def execute_plan(self) -> Iterator[Batch]:
         """execute the plan tree"""
-        execution_tree = self._build_execution_tree(self._plan)
-        output = execution_tree.exec()
-        if output is not None:
-            yield from output
-        self._clean_execution_tree(execution_tree)
+        try:
+            execution_tree = self._build_execution_tree(self._plan)
+            output = execution_tree.exec()
+            if output is not None:
+                yield from output
+            self._clean_execution_tree(execution_tree)
+        except Exception as e:
+            logger.error(str(e))
+            raise ExecutorError(e)

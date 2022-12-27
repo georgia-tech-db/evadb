@@ -16,13 +16,10 @@ import unittest
 from unittest import mock
 from unittest.mock import MagicMock, call
 
-import numpy as np
-import pandas as pd
 from antlr4 import TerminalNode
 
 from eva.catalog.catalog_type import NdArrayType
 from eva.expression.abstract_expression import ExpressionType
-from eva.models.storage.batch import Batch
 from eva.parser.evaql.evaql_parser import evaql_parser
 from eva.parser.parser_visitor import ParserVisitor
 from eva.parser.types import FileFormatType
@@ -208,45 +205,6 @@ class ParserVisitorTests(unittest.TestCase):
 
         visitor.visitStringLiteral(ctx)
         mock_visit.assert_has_calls([call(ctx)])
-
-    def test_visit_constant(self):
-        """Testing for value of returned constant
-        when real literal is not None
-        Function: visitConstant
-        """
-        ctx = MagicMock()
-        visitor = ParserVisitor()
-        ctx.REAL_LITERAL.return_value = "5"
-        expected = visitor.visitConstant(ctx)
-        self.assertEqual(
-            expected.evaluate(), Batch(pd.DataFrame([float(ctx.getText())]))
-        )
-
-    def test_visit_int_array_literal(self):
-        """Testing int array literal
-        Function: visitArrayLiteral
-        """
-        ctx = MagicMock()
-        visitor = ParserVisitor()
-        ctx.getText.return_value = "[1,2,3,4]"
-        expected = visitor.visitArrayLiteral(ctx)
-        self.assertEqual(
-            expected.evaluate(),
-            Batch(pd.DataFrame({0: [np.array([1, 2, 3, 4])]})),
-        )
-
-    def test_visit_str_array_literal(self):
-        """Testing str array literal
-        Function: visitArrayLiteral
-        """
-        ctx = MagicMock()
-        visitor = ParserVisitor()
-        ctx.getText.return_value = "['person', 'car']"
-        expected = visitor.visitArrayLiteral(ctx)
-        self.assertEqual(
-            expected.evaluate(),
-            Batch(pd.DataFrame({0: [np.array(["person", "car"])]})),
-        )
 
     def test_visit_array_type(self):
         attr_list = {

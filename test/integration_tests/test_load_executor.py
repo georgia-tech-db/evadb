@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import glob
+import os
 import shutil
 import tempfile
 import unittest
@@ -32,6 +33,7 @@ from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
+from eva.parser.types import FileFormatType
 from eva.server.command_handler import execute_query_fetch_all
 
 
@@ -40,6 +42,9 @@ class LoadExecutorTest(unittest.TestCase):
         # reset the catalog manager before running each test
         CatalogManager().reset()
         self.video_file_path = create_sample_video()
+        self.image_files_path = Path(
+            f"{EVA_ROOT_DIR}/test/data/uadetrac/small-data/MVI_20011/*.jpg"
+        )
         create_sample_csv()
 
     def tearDown(self):
@@ -48,7 +53,7 @@ class LoadExecutorTest(unittest.TestCase):
         # clean up
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideos;")
 
-    # integration test for video
+    # integration test for load video
     def test_should_load_video_in_table(self):
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
@@ -65,26 +70,42 @@ class LoadExecutorTest(unittest.TestCase):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
-        expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
+        expected = Batch(
+            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 2"])
+        )
         self.assertEqual(result, expected)
 
     def test_should_load_videos_with_same_name_but_different_path(self):
         path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
-        expected = Batch(pd.DataFrame(["Number of loaded videos: 3"]))
+        expected = Batch(
+            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 3"])
+        )
         self.assertEqual(result, expected)
 
     def test_should_fail_to_load_videos_with_same_path(self):
-        path = f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4"
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/2/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         result = execute_query_fetch_all(query)
-        expected = Batch(pd.DataFrame(["Number of loaded videos: 2"]))
+        expected = Batch(
+            pd.DataFrame([f"Number of loaded {FileFormatType.VIDEO.name}: 1"])
+        )
         self.assertEqual(result, expected)
-        # try adding the same file to the table
+
+        # original file should be preserved
+        expected_output = execute_query_fetch_all("SELECT id FROM MyVideos;")
+
+        # try adding duplicate files to the table
+        path = f"{EVA_ROOT_DIR}/data/sample_videos/**/*.mp4"
         query = f"""LOAD VIDEO "{path}" INTO MyVideos;"""
         with self.assertRaises(Exception):
             execute_query_fetch_all(query)
+
+        # original data should be preserved
+        after_load_fail = execute_query_fetch_all("SELECT id FROM MyVideos;")
+
+        self.assertEqual(expected_output, after_load_fail)
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
@@ -153,6 +174,113 @@ class LoadExecutorTest(unittest.TestCase):
                 file_names = np.unique(result.frames)
                 self.assertEqual(len(file_names), 1)
 
+    ###########################################
+    # integration testcases for load image
+    def test_should_load_images_in_table(self):
+        num_files = len(
+            glob.glob(os.path.expanduser(self.image_files_path), recursive=True)
+        )
+        query = f"""LOAD IMAGE "{self.image_files_path}" INTO MyImages;"""
+        result = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: {num_files}"])
+        )
+        self.assertEqual(result, expected)
+
+    def test_should_fail_to_load_images_with_same_path(self):
+        image_files = glob.glob(
+            os.path.expanduser(self.image_files_path), recursive=True
+        )
+        query = f"""LOAD IMAGE "{image_files[0]}" INTO MyImages;"""
+        result = execute_query_fetch_all(query)
+        expected = Batch(
+            pd.DataFrame([f"Number of loaded {FileFormatType.IMAGE.name}: 1"])
+        )
+        self.assertEqual(result, expected)
+
+        # original file should be preserved
+        expected_output = execute_query_fetch_all("SELECT name FROM MyImages;")
+
+        # try adding duplicate files to the table
+        query = f"""LOAD IMAGE "{image_files[0]}" INTO MyImages;"""
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(query)
+
+        # original data should be preserved
+        after_load_fail = execute_query_fetch_all("SELECT name FROM MyImages;")
+
+        self.assertEqual(expected_output, after_load_fail)
+
+    def test_should_fail_to_load_corrupt_image(self):
+        # should fail on an empty file
+        with tempfile.NamedTemporaryFile() as tmp:
+            query = f"""LOAD IMAGE "{tmp.name}" INTO MyImages;"""
+            with self.assertRaises(Exception):
+                execute_query_fetch_all(query)
+
+    def test_should_fail_to_load_invalid_files_as_image(self):
+        path = f"{EVA_ROOT_DIR}/data/**"
+        query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+        with self.assertRaises(Exception):
+            execute_query_fetch_all(query)
+        with self.assertRaises(BinderError):
+            execute_query_fetch_all("SELECT name FROM MyImages;")
+
+    def test_should_rollback_if_image_load_fails(self):
+        valid_images = glob.glob(
+            str(self.image_files_path.expanduser()), recursive=True
+        )
+
+        with tempfile.NamedTemporaryFile() as empty_file:
+            # Load one correct file and one empty file
+            # nothing should be added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_images[0]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+                with self.assertRaises(Exception):
+                    execute_query_fetch_all(query)
+                with self.assertRaises(BinderError):
+                    execute_query_fetch_all("SELECT name FROM MyImages;")
+
+            # Load two correct file and one empty file
+            # nothing should be added
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_images[0]), tmp_dir)
+                shutil.copy2(str(valid_images[1]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+                with self.assertRaises(Exception):
+                    execute_query_fetch_all(query)
+                with self.assertRaises(BinderError):
+                    execute_query_fetch_all("SELECT name FROM MyImages;")
+
+    def test_should_rollback_and_preserve_previous_state_for_load_images(self):
+        valid_images = glob.glob(
+            str(self.image_files_path.expanduser()), recursive=True
+        )
+        # Load one correct file
+        # commit
+        execute_query_fetch_all(f"""LOAD IMAGE "{valid_images[0]}" INTO MyImages;""")
+
+        # Load one correct file and one empty file
+        # original file should remain
+        with tempfile.NamedTemporaryFile() as empty_file:
+            with tempfile.TemporaryDirectory() as tmp_dir:
+                shutil.copy2(str(valid_images[1]), tmp_dir)
+                shutil.copy2(str(empty_file.name), tmp_dir)
+                path = Path(tmp_dir) / "*"
+                query = f"""LOAD IMAGE "{path}" INTO MyImages;"""
+                with self.assertRaises(Exception):
+                    execute_query_fetch_all(query)
+                result = execute_query_fetch_all("SELECT name FROM MyImages")
+                self.assertEqual(len(result), 1)
+                expected = Batch(pd.DataFrame([{"myimages.name": valid_images[0]}]))
+                self.assertEqual(expected, result)
+
+    ###################################
     # integration tests for csv
     def test_should_load_csv_in_table(self):
 
@@ -228,3 +356,7 @@ class LoadExecutorTest(unittest.TestCase):
         # clean up
         drop_query = "DROP TABLE IF EXISTS MyVideoCSV;"
         execute_query_fetch_all(drop_query)
+
+
+if __name__ == "__main__":
+    unittest.main()

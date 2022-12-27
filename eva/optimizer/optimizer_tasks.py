@@ -22,7 +22,6 @@ from eva.optimizer.group import Group
 from eva.optimizer.group_expression import GroupExpression
 from eva.optimizer.property import PropertyType
 from eva.optimizer.rules.rules_base import Rule
-from eva.optimizer.rules.rules_manager import RulesManager
 from eva.utils.logging_manager import logger
 
 if TYPE_CHECKING:
@@ -86,9 +85,6 @@ class TopDownRewrite(OptimizerTask):
             for match in iter(binder):
                 if not rule.check(match, self.optimizer_context):
                     continue
-                logger.info(
-                    "In TopDown, Rule {} matched for {}".format(rule, self.root_expr)
-                )
                 after = rule.apply(match, self.optimizer_context)
                 new_expr = self.optimizer_context.replace_expression(
                     after, self.root_expr.group_id
@@ -171,13 +167,14 @@ class OptimizeExpression(OptimizerTask):
         super().__init__(optimizer_context, OptimizerTaskType.OPTIMIZE_EXPRESSION)
 
     def execute(self):
-        all_rules = RulesManager().logical_rules
+        rules_manager = self.optimizer_context.rules_manager
+        rules = rules_manager.logical_rules
         # if exploring, we don't need to consider implementation rules
         if not self.explore:
-            all_rules.extend(RulesManager().implementation_rules)
+            rules.extend(rules_manager.implementation_rules)
 
         valid_rules = []
-        for rule in all_rules:
+        for rule in rules:
             if rule.top_match(self.root_expr.opr):
                 valid_rules.append(rule)
 

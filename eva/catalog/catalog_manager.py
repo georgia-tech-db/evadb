@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
@@ -29,6 +30,7 @@ from eva.catalog.services.udf_service import UdfService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
+from eva.parser.types import FileFormatType
 from eva.utils.errors import CatalogError
 from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
@@ -121,7 +123,47 @@ class CatalogManager(object):
         metadata.schema = column_list
         return metadata
 
-    def create_video_metadata(self, name: str) -> DataFrameMetadata:
+    def create_multimedia_table(self, name: str, format_type: FileFormatType):
+        if format_type is FileFormatType.VIDEO:
+            return self._create_video_table(name)
+        elif format_type is FileFormatType.IMAGE:
+            return self._create_image_table(name)
+        else:
+            raise CatalogError(f"Format Type {format_type} is not supported")
+
+    def _create_image_table(self, name: str) -> DataFrameMetadata:
+        """Create image table metadata object.
+            We have predefined columns for such a object
+            name:  image path
+            data: image data
+
+        Arguments:
+            name (str): name of the metadata to be added to the catalog
+
+        Returns:
+            DataFrameMetadata:  corresponding metadata for the input table info
+        """
+        catalog = CatalogManager()
+        columns = [
+            ColumnDefinition(
+                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            ),
+            ColumnDefinition(
+                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            ),
+        ]
+        col_metadata = self.create_columns_metadata(columns)
+        uri = str(generate_file_path(name))
+        metadata = catalog.create_metadata(
+            name,
+            uri,
+            col_metadata,
+            identifier_column="name",
+            table_type=TableType.IMAGE_DATA,
+        )
+        return metadata
+
+    def _create_video_table(self, name: str) -> DataFrameMetadata:
         """Create video metadata object.
             We have predefined columns for such a object
             id:  the frame id
@@ -158,6 +200,7 @@ class CatalogManager(object):
         table_info: TableInfo,
         columns: List[ColumnDefinition],
         identifier_column: str = "id",
+        table_type: TableType = TableType.STRUCTURED_DATA,
     ) -> DataFrameMetadata:
         table_name = table_info.table_name
         column_metadata_list = self.create_columns_metadata(columns)
@@ -167,7 +210,7 @@ class CatalogManager(object):
             file_url,
             column_metadata_list,
             identifier_column=identifier_column,
-            table_type=TableType.STRUCTURED_DATA,
+            table_type=table_type,
         )
         return metadata
 
@@ -388,50 +431,57 @@ class CatalogManager(object):
     def get_all_udf_entries(self):
         return self._udf_service.get_all_udfs()
 
-    def get_video_metadata_table(
+    def get_all_table_entries(self):
+        return self._dataset_service.get_all_datasets()
+
+    def get_media_metainfo_table(
         self, input_table: DataFrameMetadata
     ) -> DataFrameMetadata:
-        """Get a video metadata table.
+        """Get a media metainfo table.
         Raise if it does not exists
         Args:
-            input_table (DataFrameMetadata): input video table
+            input_table (DataFrameMetadata): input media table
 
         Returns:
-            DataFrameMetadata: metadata table maintained by the system
+            DataFrameMetadata: metainfo table maintained by the system
         """
         # use file_url as the metadata table name
-        video_metadata_name = input_table.file_url
-        obj = self.get_dataset_metadata(None, video_metadata_name)
+        media_metadata_name = Path(input_table.file_url).stem
+        obj = self.get_dataset_metadata(None, media_metadata_name)
         if not obj:
-            err = f"Table with name {video_metadata_name} does not exist in catalog"
+            err = f"Table with name {media_metadata_name} does not exist in catalog"
             logger.exception(err)
             raise CatalogError(err)
 
         return obj
 
-    def create_video_metadata_table(
+    def create_media_metainfo_table(
         self, input_table: DataFrameMetadata
     ) -> DataFrameMetadata:
-        """Get a video metadata table.
-        Create one if it does not exists
-        We use this table to store all the video filenames and corresponding information
+        """Create a media metainfo table.
+         This table is used to store all media filenames and related information. In
+         order to prevent direct access or modification by users, it should be
+         designated as a SYSTEM_STRUCTURED_DATA type.
         Args:
             input_table (DataFrameMetadata): input video table
 
         Returns:
-            DataFrameMetadata: metadata table maintained by the system
+            DataFrameMetadata: metainfo table maintained by the system
         """
         # use file_url as the metadata table name
-        video_metadata_name = input_table.file_url
-        obj = self.get_dataset_metadata(None, video_metadata_name)
+        media_metadata_name = Path(input_table.file_url).stem
+        obj = self.get_dataset_metadata(None, media_metadata_name)
         if obj:
-            err_msg = f"Table with name {video_metadata_name} already exists"
+            err_msg = f"Table with name {media_metadata_name} already exists"
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
         columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
         obj = self.create_table_metadata(
-            TableInfo(video_metadata_name), columns, identifier_column=columns[0].name
+            TableInfo(media_metadata_name),
+            columns,
+            identifier_column=columns[0].name,
+            table_type=TableType.SYSTEM_STRUCTURED_DATA,
         )
         return obj
 

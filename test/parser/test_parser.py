@@ -103,7 +103,7 @@ class ParserTests(unittest.TestCase):
     def test_explain_ddl_statement(self):
         parser = Parser()
 
-        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+        select_query = """SELECT id, YoloV5(frame).labels FROM MyVideo
                         WHERE id<5; """
         explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
             select_query
@@ -711,7 +711,7 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(select_stmt, create_udf)
 
     def test_materialized_view(self):
-        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+        select_query = """SELECT id, YoloV5(frame).labels FROM MyVideo
                         WHERE id<5; """
         query = "CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
             select_query

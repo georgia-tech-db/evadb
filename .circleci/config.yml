@@ -3,28 +3,28 @@ version: 2.1
 workflows:
   main:
     jobs:
-        - test:
-            name: "Python v3.7"
-            v: "3.7"
-        - test:
-            name: "Python v3.8"
-            v: "3.8"
-        - test:
-            name: "Python v3.9"
-            v: "3.9"
-        - test:
-            name: "Python v3.10"
-            v: "3.10"
-        #- test:
-        #    name: "Python v3.11"  # missing Torchvision
-        #    v: "3.11"
+      - test:
+          name: "Python v3.7"
+          v: "3.7"
+      - test:
+          name: "Python v3.8"
+          v: "3.8"
+      - test:
+          name: "Python v3.9"
+          v: "3.9"
+      - test:
+          name: "Python v3.10"
+          v: "3.10"
+      #- test:
+      #    name: "Python v3.11"  # missing Torchvision
+      #    v: "3.11"
 
 jobs:
-  test: 
+  test:
     parameters:
       v:
         type: string
-        default: "3.7" 
+        default: "3.7"
     resource_class: large
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
@@ -32,14 +32,13 @@ jobs:
       - image: "cimg/python:<< parameters.v >>-browsers"
     steps:
       - checkout
-
       - restore_cache:
           keys:
-            - v11-model_cache-{{ checksum "setup.py" }}
-
-      - restore_cache:
-          keys:
-            - v11-pip-cache-{{ checksum "setup.py" }}
+            - v13-model_cache-{{ checksum "setup.py" }}
+      # removing it - no significant advnatage
+      # - restore_cache:
+      #     keys:
+      #       - v13-pip-cache-{{ checksum "setup.py" }}
 
       - run:
           name: Install only EVA package from pip
@@ -66,12 +65,12 @@ jobs:
             coveralls
 
       - save_cache:
-          key: v11-model_cache-{{ checksum "setup.py" }}
+          key: v13-model_cache-{{ checksum "setup.py" }}
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
-      - save_cache:
-          key: v11-pip-cache-{{ checksum "setup.py" }}
-          paths:
-            - ./test_evadb/
+      # - save_cache:
+      #     key: v13-pip-cache-{{ checksum "setup.py" }}
+      #     paths:
+      #       - ./test_evadb/

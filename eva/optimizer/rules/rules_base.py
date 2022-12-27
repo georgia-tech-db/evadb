@@ -39,6 +39,8 @@ class RuleType(Flag):
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_GET = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
+    XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
+    PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
     REWRITE_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -71,6 +73,7 @@ class RuleType(Flag):
     LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     LOGICAL_EXPLAIN_TO_PHYSICAL = auto()
     LOGICAL_CREATE_INDEX_TO_FAISS = auto()
+    LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     NUM_RULES = auto()
@@ -109,6 +112,7 @@ class Promise(IntEnum):
     LOGICAL_DROP_UDF_TO_PHYSICAL = auto()
     LOGICAL_EXPLAIN_TO_PHYSICAL = auto()
     LOGICAL_CREATE_INDEX_TO_FAISS = auto()
+    LOGICAL_APPLY_AND_MERGE_TO_PHYSICAL = auto()
     IMPLEMENTATION_DELIMETER = auto()
 
     # TRANSFORMATION RULES (LOGICAL -> LOGICAL)
@@ -120,7 +124,9 @@ class Promise(IntEnum):
     EMBED_FILTER_INTO_DERIVED_GET = auto()
     EMBED_PROJECT_INTO_DERIVED_GET = auto()
     EMBED_SAMPLE_INTO_GET = auto()
+    XFORM_LATERAL_JOIN_TO_LINEAR_FLOW = auto()
     PUSHDOWN_FILTER_THROUGH_JOIN = auto()
+    PUSHDOWN_FILTER_THROUGH_APPLY_AND_MERGE = auto()
 
 
 class Rule(ABC):
@@ -150,6 +156,18 @@ class Rule(ABC):
 
     def top_match(self, opr: Operator) -> bool:
         return opr.opr_type == self.pattern.opr_type
+
+    def is_implementation_rule(self):
+        return self.rule_type.value > RuleType.TRANSFORMATION_DELIMETER.value
+
+    def is_logical_rule(self):
+        return (
+            self.rule_type.value > RuleType.REWRITE_DELIMETER.value
+            and self.rule_type.value < RuleType.TRANSFORMATION_DELIMETER.value
+        )
+
+    def is_rewrite_rule(self):
+        return self.rule_type.value < RuleType.REWRITE_DELIMETER.value
 
     @abstractmethod
     def promise(self) -> int:

@@ -51,11 +51,10 @@ class FeatureExtractor(PytorchAbstractClassifierUDF):
         Returns:
             features (List[float])
         """
-        outcome = pd.DataFrame()
+        outcome = []
         for f in frames:
             with torch.no_grad():
-                outcome = outcome.append(
+                outcome.append(
                     {"features": self.as_numpy(self.model(torch.unsqueeze(f, 0)))},
-                    ignore_index=True,
                 )
-        return outcome
+        return pd.DataFrame(outcome, columns=["features"])

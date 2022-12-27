@@ -22,6 +22,10 @@ class Dimension(IntEnum):
 class TableType(IntEnum):
     STRUCTURED_DATA = auto()
     VIDEO_DATA = auto()
+    IMAGE_DATA = auto()
+    # reserved for system generated tables
+    # cannot be accessed/modified directly by user
+    SYSTEM_STRUCTURED_DATA = auto()
 
 
 class ColumnType(Enum):

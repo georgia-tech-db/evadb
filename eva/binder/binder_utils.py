@@ -17,6 +17,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
@@ -46,6 +47,20 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
     """
     catalog = CatalogManager()
     obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
+
+    # Users should not be allowed to directly access or modify the SYSTEM tables, as
+    # doing so can lead to the corruption of other tables. These tables include
+    # metadata tables associated with unstructured data, such as the list of video
+    # files in the video table. Protecting these tables is crucial in order to maintain
+    # the integrity of the system.
+    if obj and obj.table_type == TableType.SYSTEM_STRUCTURED_DATA:
+        err_msg = (
+            "The query attempted to access or modify the internal table"
+            f"{table_info.table_name} of the system, but permission was denied."
+        )
+        logger.error(err_msg)
+        raise BinderError(err_msg)
+
     if obj:
         table_info.table_obj = obj
     else:

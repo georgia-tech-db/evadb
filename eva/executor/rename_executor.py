@@ -14,7 +14,7 @@
 # limitations under the License.
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
-from eva.planner.rename_plan import RenamePlan
+from eva.plan_nodes.rename_plan import RenamePlan
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 

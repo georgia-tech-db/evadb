@@ -126,3 +126,9 @@ class DatasetService(BaseService):
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)
+
+    def get_all_datasets(self):
+        try:
+            return self.model.query.all()
+        except NoResultFound:
+            return []

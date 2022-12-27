@@ -17,8 +17,8 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, handle_if_not_exists
 from eva.expression.abstract_expression import ExpressionType
 from eva.parser.create_statement import ColumnDefinition
-from eva.planner.create_mat_view_plan import CreateMaterializedViewPlan
-from eva.planner.types import PlanOprType
+from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
+from eva.plan_nodes.types import PlanOprType
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
 

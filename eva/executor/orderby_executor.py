@@ -15,9 +15,12 @@
 from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
+from eva.executor.executor_utils import ExecutorError
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.types import ParserOrderBySortType
-from eva.planner.orderby_plan import OrderByPlan
+from eva.plan_nodes.orderby_plan import OrderByPlan
 
 
 class OrderByExecutor(AbstractExecutor):
@@ -39,10 +42,25 @@ class OrderByExecutor(AbstractExecutor):
     def validate(self):
         pass
 
+    def _extract_column_name(self, col):
+        col_name = []
+        if isinstance(col, TupleValueExpression):
+            col_name += [col.col_alias]
+        elif isinstance(col, FunctionExpression):
+            col_name += col.col_alias
+        else:
+            raise ExecutorError(
+                "Expression type {} is not supported.".format(type(col))
+            )
+        return col_name
+
     def extract_column_names(self):
         """extracts the string name of the column"""
         # self._columns: List[TupleValueExpression]
-        return [tve.col_alias for tve in self._columns]
+        col_name_list = []
+        for col in self._columns:
+            col_name_list += self._extract_column_name(col)
+        return col_name_list
 
     def extract_sort_types(self):
         """extracts the sort type for the column"""
@@ -65,6 +83,18 @@ class OrderByExecutor(AbstractExecutor):
             aggregated_batch_list.append(batch)
         aggregated_batch = Batch.concat(aggregated_batch_list, copy=False)
 
+        # Column can be a functional expression, so if it
+        # is not in columns, it needs to be re-evaluated.
+        merge_batch_list = [aggregated_batch]
+        for col in self._columns:
+            col_name_list = self._extract_column_name(col)
+            for col_name in col_name_list:
+                if col_name not in aggregated_batch.frames:
+                    batch = col.evaluate(aggregated_batch)
+                    merge_batch_list.append(batch)
+        if len(merge_batch_list) > 1:
+            aggregated_batch = Batch.merge_column_wise(merge_batch_list)
+
         # sorts the batch
         try:
             aggregated_batch.sort_orderby(
@@ -72,7 +102,7 @@ class OrderByExecutor(AbstractExecutor):
                 sort_type=self.extract_sort_types(),
             )
         except KeyError:
-            # pass for now
+            # raise ExecutorError(str(e))
             pass
 
         # split the aggregated batch into smaller ones based
