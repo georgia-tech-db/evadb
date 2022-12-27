@@ -34,7 +34,6 @@ class Select:
         return orderby_clause_data
 
     def order_by_expression(self, tree):
-        print(tree.pretty())
         expr = None
         sort_order = None
 

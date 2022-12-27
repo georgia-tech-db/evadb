@@ -29,7 +29,6 @@ from lark import Tree
 class TableSources:
 
     def select_elements(self, tree):
-        print(tree.pretty())
         kind = tree.children[0]
         if kind == "*":
             select_list = [TupleValueExpression(col_name="*")]
@@ -44,7 +43,6 @@ class TableSources:
         return self.visit(tree.children[0])
 
     def table_source(self, tree):
-        print(tree.pretty())
         left_node = None
         join_nodes = []
 
@@ -242,16 +240,19 @@ class TableSources:
 
         # FIX: Complex logic
         # This makes a difference becasue the LL parser (Left-to-right)
-        while right_select_statement.union_link is not None:
-            right_select_statement = right_select_statement.union_link
-        # We need to check the correctness for union operator.
-        # Here when parsing or later operator, plan?
-        right_select_statement.union_link = left_select_statement
+        if right_select_statement is not None:
+            while right_select_statement.union_link is not None:
+                right_select_statement = right_select_statement.union_link
 
-        if union_all is False:
-            right_select_statement.union_all = False
-        else:
-            right_select_statement.union_all = True
+            # We need to check the correctness for union operator.
+            # Here when parsing or later operator, plan?
+            right_select_statement.union_link = left_select_statement
+
+            if union_all is False:
+                right_select_statement.union_all = False
+            else:
+                right_select_statement.union_all = True
+                
         return right_select_statement
 
     def group_by_items(self, tree):
