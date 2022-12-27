@@ -150,7 +150,9 @@ class TableRef:
     ):
         # FIX Union data type
         self.table = table
+        self.table_valued_expr = table
         self.join_node = table
+        self.select_statement = table
 
         self._ref_handle = table
         self._sample_freq = sample_freq
