@@ -43,11 +43,18 @@ class TableSources:
         return self.visit(tree.children[0])
 
     def table_source(self, tree):
-        left_node = self.visit(tree.children[0])
-        join_nodes = [left_node]
-        for table_join_index in tree.children[1:]:
-            table = self.visit(table_join_index)
-            join_nodes.append(table)
+        print(tree.pretty())
+        left_node = None
+        join_nodes = []
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == 'table_source_item_with_sample':
+                    left_node = self.visit(child)
+                    join_nodes = [left_node]
+                elif child.data == 'join_part':
+                    table = self.visit(child)
+                    join_nodes.append(table)
 
         num_table_joins = len(join_nodes)
 
@@ -143,37 +150,63 @@ class TableSources:
 
     # Join
     def inner_join(self, tree):
-        table = self.visit(ctx.tableSourceItemWithSample())
-        if ctx.ON() is None:
-            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
-        join_predicates = self.visit(ctx.expression())
+        table = None
+        join_predicate = None
+
+        for child in tree.children:
+            if isinstance(child, Tree):
+                if child.data == "table_source_item_with_sample":
+                    table = self.visit(child)
+                elif child.data == "expression":
+                    join_predicate = self.visit(child)
+
         return TableRef(
             JoinNode(
                 None,
                 table,
-                predicate=join_predicates,
+                predicate=join_predicate,
                 join_type=JoinType.INNER_JOIN,
             )
         )
 
     def lateral_join(self, tree):
-        tve = self.visit(ctx.tableValuedFunction())
+        tve = None
         alias = None
-        if ctx.aliasClause():
-            alias = self.visit(ctx.aliasClause())
-        else:
+        join_predicate = None
+        has_on = False
+
+        for child in tree.children:
+            # Rules
+            if isinstance(child, Tree):
+                if child.data == "table_valued_function":
+                    tve = self.visit(child)
+                elif child.data == "alias_clause":
+                    alias = self.visit(child)
+            # Tokens
+            elif child.data == "ON":
+                has_on = True
+
+        if has_on is False:
+            raise Exception("ERROR: Syntax error: Join should specify the ON columns")
+
+        if alias is None:
             err_msg = f"TableValuedFunction {tve.func_expr.name} should have alias."
             logger.error(err_msg)
             raise SyntaxError(err_msg)
-        join_type = JoinType.LATERAL_JOIN
 
+        join_type = JoinType.LATERAL_JOIN
         return TableRef(JoinNode(None, TableRef(tve, alias=alias), join_type=join_type))
 
     def table_valued_function(self, tree):
         func_expr = self.visit(ctx.functionCall())
         has_unnest = False
-        if ctx.UNNEST():
-            has_unnest = True
+
+        for child in tree.children:
+            if child.data == "function_call":
+                func_expr = self.visit(child)
+            elif child.data == "UNNEST":
+                has_unnest = True
+
         return TableValuedExpression(func_expr, do_unnest=has_unnest)
 
     # Nested sub query

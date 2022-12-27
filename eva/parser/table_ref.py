@@ -148,7 +148,10 @@ class TableRef:
         alias: Alias = None,
         sample_freq: float = None,
     ):
+        # FIX Union data type
         self.table = table
+        self.join_node = table
+
         self._ref_handle = table
         self._sample_freq = sample_freq
         self.alias = alias or self.generate_alias()
