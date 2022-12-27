@@ -20,13 +20,16 @@ from eva.parser.types import FileFormatType
 
 class Load:
     def load_statement(self, tree):
+        # Set default file_format
+        file_format = FileFormatType.VIDEO
         file_format = self.visit(tree.children[1])
-        file_path = self.visit(tree.children[2]).value
-        table = self.visit(tree.children[4])
 
         # Set default for file_format as Video
         file_options = {}
         file_options["file_format"] = file_format
+
+        file_path = self.visit(tree.children[2]).value
+        table = self.visit(tree.children[4])
 
         # set default for column_list as None
         column_list = None
@@ -46,6 +49,8 @@ class Load:
             file_format = FileFormatType.VIDEO
         elif file_format_string == "CSV":
             file_format = FileFormatType.CSV
+        elif file_format_string == "IMAGE":
+            file_format = FileFormatType.IMAGE
 
         return file_format
 

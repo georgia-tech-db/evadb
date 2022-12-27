@@ -844,8 +844,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT id,DummyObjectDetector(data) FROM MyVideo \
-            WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;
-                    """
+        query = """SELECT name, id, data FROM MyVideo WHERE id < 2              UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 4 AND id < 6
+        UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 7;"""
         parser = Parser()
         parser.parse(query)

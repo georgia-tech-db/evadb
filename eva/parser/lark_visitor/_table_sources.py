@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from lark import Tree
+from lark import Tree, Token
 
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.select_statement import SelectStatement
@@ -227,32 +227,32 @@ class TableSources:
         statement_id = 0
         for child in tree.children:
             if isinstance(child, Tree):
-                if child.data == "simple_select":
+                if child.data.endswith("select"):
                     if statement_id == 0:
                         left_select_statement = self.visit(child)
                     elif statement_id == 1:
                         right_select_statement = self.visit(child)
                     statement_id += 1
             # Token
-            elif child == "ALL":
-                union_all = True
+            elif isinstance(child, Token):
+                if child.value == "ALL":
+                    union_all = True
 
         # FIX: Complex logic
-        # This makes a difference becasue the LL parser (Left-to-right)
-        if right_select_statement is not None:
-            while right_select_statement.union_link is not None:
-                right_select_statement = right_select_statement.union_link
+        if left_select_statement is not None:
+            while left_select_statement.union_link is not None:
+                left_select_statement = left_select_statement.union_link
 
             # We need to check the correctness for union operator.
             # Here when parsing or later operator, plan?
-            right_select_statement.union_link = left_select_statement
+            left_select_statement.union_link = right_select_statement
 
             if union_all is False:
-                right_select_statement.union_all = False
+                left_select_statement.union_all = False
             else:
-                right_select_statement.union_all = True
+                left_select_statement.union_all = True
 
-        return right_select_statement
+        return left_select_statement
 
     def group_by_item(self, tree):
         expr = None
