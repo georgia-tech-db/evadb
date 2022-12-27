@@ -16,6 +16,10 @@ from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
+from eva.catalog.catalog_utils import (
+    get_image_table_column_definitions,
+    get_video_table_column_definitions,
+)
 from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.catalog.models.index_catalog import IndexCatalog
@@ -81,7 +85,7 @@ class CatalogManager(object):
         logger.info("Shutting catalog")
         drop_db()
 
-    "table catalog services"
+    "Table catalog services"
 
     def insert_table_catalog_entry(
         self,
@@ -174,7 +178,7 @@ class CatalogManager(object):
     def get_all_table_catalog_entries(self):
         return self._table_catalog_service.get_all_entries()
 
-    "column catalog services"
+    "Column catalog services"
 
     def get_column_catalog_entry(
         self, table_obj: TableCatalog, col_name: str
@@ -248,7 +252,7 @@ class CatalogManager(object):
     def get_all_udf_catalog_entries(self):
         return self._udf_service.get_all_entries()
 
-    "udf io services"
+    "UdfIO services"
 
     def get_udf_io_catalog_input_entries(
         self, udf_obj: UdfCatalog
@@ -300,7 +304,37 @@ class CatalogManager(object):
     def get_all_index_catalog_entries(self):
         return self._index_service.get_all_entries()
 
-    """ utils """
+    """ Utils """
+
+    def create_and_insert_table_catalog_entry(
+        self,
+        table_info: TableInfo,
+        columns: List[ColumnDefinition],
+        identifier_column: str = None,
+        table_type: TableType = TableType.STRUCTURED_DATA,
+    ) -> TableCatalog:
+        """Create a valid table catalog tuple and insert into the table
+
+        Args:
+            table_info (TableInfo): table info object
+            columns (List[ColumnDefinition]): columns definitions of the table
+            identifier_column (str, optional): Specify unique columns. Defaults to None.
+            table_type (TableType, optional): table type. Defaults to TableType.STRUCTURED_DATA.
+
+        Returns:
+            TableCatalog: entry that has been inserted into the table catalog
+        """
+        table_name = table_info.table_name
+        column_metadata_list = self.xform_column_definitions_to_catalog_entries(columns)
+        file_url = str(generate_file_path(table_name))
+        metadata = self.insert_table_catalog_entry(
+            table_name,
+            file_url,
+            column_metadata_list,
+            identifier_column=identifier_column,
+            table_type=table_type,
+        )
+        return metadata
 
     def xform_column_definitions_to_catalog_entries(
         self, col_list: List[ColumnDefinition]
@@ -356,105 +390,43 @@ class CatalogManager(object):
             is_input=is_input,
         )
 
-    def create_multimedia_table(self, name: str, format_type: FileFormatType):
+    def create_multimedia_table_catalog_entry(
+        self, name: str, format_type: FileFormatType
+    ) -> TableCatalog:
+        """Create a table catalog entry for the multimedia table.
+        Depending on the type of multimedia, the appropriate "create catalog entry" command is called.
+
+        Args:
+            name (str):  name of the table catalog entry
+            format_type (FileFormatType): media type
+
+        Raises:
+            CatalogError: if format_type is not supported
+
+        Returns:
+            TableCatalog: newly inserted table catalog entry
+        """
         if format_type is FileFormatType.VIDEO:
-            return self._create_video_table(name)
+            columns = get_video_table_column_definitions()
         elif format_type is FileFormatType.IMAGE:
-            return self._create_image_table(name)
+            columns = get_image_table_column_definitions()
         else:
             raise CatalogError(f"Format Type {format_type} is not supported")
 
-    def _create_image_table(self, name: str) -> TableCatalog:
-        """Create image table metadata object.
-            We have predefined columns for such a object
-            name:  image path
-            data: image data
-
-        Arguments:
-            name (str): name of the metadata to be added to the catalog
-
-        Returns:
-            TableCatalog:  corresponding metadata for the input table info
-        """
-        catalog = CatalogManager()
-        columns = [
-            ColumnDefinition(
-                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
-            ),
-            ColumnDefinition(
-                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-            ),
-        ]
-        col_metadata = self.xform_column_definitions_to_catalog_entries(columns)
-        uri = str(generate_file_path(name))
-        metadata = catalog.insert_table_catalog_entry(
-            name,
-            uri,
-            col_metadata,
-            identifier_column="name",
-            table_type=TableType.IMAGE_DATA,
+        return self.create_and_insert_table_catalog_entry(
+            TableInfo(name), columns, table_type=format_type
         )
-        return metadata
 
-    def _create_video_table(self, name: str) -> TableCatalog:
-        """Create video metadata object.
-            We have predefined columns for such a object
-            id:  the frame id
-            data: the frame data
-
-        Arguments:
-            name (str): name of the metadata to be added to the catalog
-
-        Returns:
-            TableCatalog:  corresponding metadata for the input table info
-        """
-        columns = [
-            ColumnDefinition(
-                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
-            ),
-            ColumnDefinition("id", ColumnType.INTEGER, None, []),
-            ColumnDefinition(
-                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-            ),
-        ]
-        col_metadata = self.xform_column_definitions_to_catalog_entries(columns)
-        uri = str(generate_file_path(name))
-        metadata = self.insert_table_catalog_entry(
-            name,
-            uri,
-            col_metadata,
-            identifier_column="id",
-            table_type=TableType.VIDEO_DATA,
-        )
-        return metadata
-
-    def create_table_metadata(
-        self,
-        table_info: TableInfo,
-        columns: List[ColumnDefinition],
-        identifier_column: str = "id",
-        table_type: TableType = TableType.STRUCTURED_DATA,
+    def get_media_metainfo_table_catalog_entry(
+        self, input_table: TableCatalog
     ) -> TableCatalog:
-        table_name = table_info.table_name
-        column_metadata_list = self.xform_column_definitions_to_catalog_entries(columns)
-        file_url = str(generate_file_path(table_name))
-        metadata = self.insert_table_catalog_entry(
-            table_name,
-            file_url,
-            column_metadata_list,
-            identifier_column=identifier_column,
-            table_type=table_type,
-        )
-        return metadata
-
-    def get_media_metainfo_table(self, input_table: TableCatalog) -> TableCatalog:
-        """Get a media metainfo table.
+        """Get table catalog entry for multimedia metainfo table.
         Raise if it does not exists
         Args:
             input_table (TableCatalog): input media table
 
         Returns:
-            TableCatalog: metainfo table maintained by the system
+            TableCatalog: metainfo table entry which is maintained by the system
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
@@ -466,8 +438,10 @@ class CatalogManager(object):
 
         return obj
 
-    def create_media_metainfo_table(self, input_table: TableCatalog) -> TableCatalog:
-        """Create a media metainfo table.
+    def create_media_metainfo_table_catalog_entry(
+        self, input_table: TableCatalog
+    ) -> TableCatalog:
+        """Create and insert table catalog entry for multimedia metainfo table.
          This table is used to store all media filenames and related information. In
          order to prevent direct access or modification by users, it should be
          designated as a SYSTEM_STRUCTURED_DATA type.
@@ -475,7 +449,7 @@ class CatalogManager(object):
             input_table (TableCatalog): input video table
 
         Returns:
-            TableCatalog: metainfo table maintained by the system
+            TableCatalog: metainfo table entry which is maintained by the system
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
@@ -486,7 +460,7 @@ class CatalogManager(object):
             raise CatalogError(err_msg)
 
         columns = [ColumnDefinition("file_url", ColumnType.TEXT, None, None)]
-        obj = self.create_table_metadata(
+        obj = self.create_and_insert_table_catalog_entry(
             TableInfo(media_metadata_name),
             columns,
             identifier_column=columns[0].name,
