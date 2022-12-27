@@ -84,8 +84,18 @@ class ParserStatementTests(unittest.TestCase):
         self.assertNotEqual(ref_stmt, None)
         self.assertNotEqual(ref_stmt.__str__(), None)
 
+        statement_to_query_dict = {}
+
         for other_query in queries[1:]:
             stmt = parser.parse(other_query)[0]
-            self.assertNotEqual(stmt, None)
-            self.assertNotEqual(stmt.__str__(), None)
+
+            # Check eq operator
             self.assertNotEqual(stmt, ref_stmt)
+            self.assertEqual(stmt, stmt)
+            self.assertNotEqual(stmt, None)
+
+            # Check str operator
+            self.assertNotEqual(stmt.__str__(), None)
+
+            # Check hash operator
+            statement_to_query_dict[stmt] = other_query

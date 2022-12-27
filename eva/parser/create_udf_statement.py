@@ -111,6 +111,8 @@ class CreateUDFStatement(AbstractStatement):
                 self.name,
                 self.if_not_exists,
                 tuple(self.inputs),
-                tuple(self.outputs, self.impl_path, self.udf_type),
+                tuple(self.outputs),
+                self.impl_path,
+                self.udf_type,
             )
         )

@@ -155,6 +155,6 @@ class CreateTableStatement(AbstractStatement):
                 super().__hash__(),
                 self.table_info,
                 self.if_not_exists,
-                tuple(self.column_list),
+                tuple(self.column_list) if self.column_list is not None else None,
             )
         )

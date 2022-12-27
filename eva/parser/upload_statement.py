@@ -98,7 +98,7 @@ class UploadStatement(AbstractStatement):
                 self.path,
                 self.video_blob,
                 self.table_info,
-                tuple(self.column_list),
+                tuple(self.column_list) if self.column_list is not None else None,
                 frozenset(self.file_options.items()),
             )
         )

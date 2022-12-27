@@ -108,6 +108,9 @@ class JoinNode:
             self.join_type, self.left, self.right, self.predicate
         )
 
+    def __hash__(self) -> int:
+        return hash((self.join_type, self.left, self.right, self.predicate))
+
 
 class TableValuedExpression:
     def __init__(self, func_expr: FunctionExpression, do_unnest: bool = False) -> None:

@@ -78,8 +78,8 @@ class CreateMaterializedViewStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.view_ref,
-                tuple(self.col_list),
+                self.view_info,
+                tuple(self.col_list) if self.col_list is not None else None,
                 self.if_not_exists,
                 self.query,
             )
