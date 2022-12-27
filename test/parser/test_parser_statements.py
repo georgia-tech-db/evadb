@@ -1,0 +1,113 @@
+# coding=utf-8
+# Copyright 2018-2022 EVA
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+import unittest
+from pathlib import Path
+
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
+from eva.expression.abstract_expression import ExpressionType
+from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
+from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.parser.create_statement import (
+    ColConstraintInfo,
+    ColumnDefinition,
+    CreateTableStatement,
+)
+from eva.parser.create_udf_statement import CreateUDFStatement
+from eva.parser.drop_statement import DropTableStatement
+from eva.parser.drop_udf_statement import DropUDFStatement
+from eva.parser.insert_statement import InsertTableStatement
+from eva.parser.load_statement import LoadDataStatement
+from eva.parser.parser import Parser
+from eva.parser.rename_statement import RenameTableStatement
+from eva.parser.select_statement import SelectStatement
+from eva.parser.statement import AbstractStatement, StatementType
+from eva.parser.table_ref import JoinNode, TableInfo, TableRef, TableValuedExpression
+from eva.parser.types import FileFormatType, JoinType, ParserOrderBySortType
+from eva.parser.upload_statement import UploadStatement
+from pprint import pprint
+
+class ParserStatementTests(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def test_parser_statement_types(self):
+        parser = Parser()
+
+        queries = [
+            "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;",
+            "RENAME TABLE student TO student_info",
+            "DROP TABLE student_info",
+            "DROP UDF FastRCNN;",
+            "SELECT CLASS FROM TAIPAI \
+                WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500;",
+            "SELECT CLASS, REDNESS FROM TAIPAI \
+            UNION ALL SELECT CLASS, REDNESS FROM SHANGHAI;",
+            "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';",
+            "SELECT CLASS, REDNESS FROM TAIPAI \
+                    WHERE (CLASS = 'VAN' AND REDNESS < 400 ) OR REDNESS > 700 \
+                    ORDER BY CLASS, REDNESS DESC;"
+            "INSERT INTO MyVideo (Frame_ID, Frame_Path)\
+                                    VALUES    (1, '/mnt/frames/1.png');",
+            """LOAD VIDEO 'data/video.mp4' INTO MyVideo""",
+            """LOAD CSV 'data/meta.csv' INTO
+                             MyMeta (id, frame_id, video_id, label);""",
+            """UPLOAD PATH 'data/video.mp4' BLOB "b'AAAA'"
+                          INTO MyVideo WITH FORMAT VIDEO;""",
+            """UPLOAD PATH 'data/meta.csv' BLOB "b'AAAA'"
+                          INTO
+                          MyMeta (id, frame_id, video_id, label)
+                          WITH FORMAT CSV;""",
+            """SELECT Licence_plate(bbox) FROM
+                            (SELECT Yolo(frame).bbox FROM autonomous_vehicle_1
+                              WHERE Yolo(frame).label = 'vehicle') AS T
+                          WHERE Is_suspicious(bbox) = 1 AND
+                                Licence_plate(bbox) = '12345';
+                      """,
+            """CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS 
+                SELECT id, YoloV5(frame).labels FROM MyVideo
+                        WHERE id<5; """,
+            """SELECT table1.a FROM table1 JOIN table2
+            ON table1.a = table2.a WHERE table1.a <= 5""",
+            """SELECT table1.a FROM table1 JOIN table2
+            ON table1.a = table2.a JOIN table3
+            ON table3.a = table1.a WHERE table1.a <= 5""",
+            """SELECT frame FROM MyVideo JOIN LATERAL
+                            ObjectDet(frame) AS OD;""",
+            """CREATE UDF FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  'eva/udfs/face_detector.py';
+            """
+        ]
+
+        ref_stmt = parser.parse(queries[0])[0]
+        self.assertNotEqual(ref_stmt, None)
+        self.assertNotEqual(ref_stmt.__str__(), None)
+
+        for other_query in queries[1:]:
+            stmt = parser.parse(other_query)[0]
+            pprint(stmt.__str__())
+            self.assertNotEqual(stmt, None)
+            self.assertNotEqual(stmt.__str__(), None)
+            self.assertNotEqual(stmt, ref_stmt)
+
+
