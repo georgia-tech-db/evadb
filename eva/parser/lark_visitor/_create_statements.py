@@ -15,14 +15,14 @@
 
 from lark import Tree
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType, IndexType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
-    CreateTableStatement
+    CreateTableStatement,
 )
-from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import ColumnConstraintEnum
 from eva.utils.logging_manager import logger
@@ -296,8 +296,7 @@ class CreateTable:
                     uid_list = self.visit(child)
 
         col_list = [
-            ColumnDefinition(uid.col_name, None, None, None)
-            for uid in uid_list
+            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
         ]
 
         return CreateIndexStatement(index_name, table_ref, col_list, index_type)
