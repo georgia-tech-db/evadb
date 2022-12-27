@@ -59,7 +59,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
                 logger.info(msg)
             # Create the catalog entry
             else:
-                table_obj = self.catalog.create_multimedia_table(
+                table_obj = self.catalog.create_multimedia_table_catalog_entry(
                     table_name, self.media_type
                 )
                 do_create = True

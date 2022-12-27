@@ -21,6 +21,9 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.catalog.models.udf_catalog import UdfCatalog
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.parser.table_ref import TableInfo
+from eva.parser.types import FileFormatType
 
 
 class CatalogManagerTests(unittest.TestCase):
@@ -55,29 +58,29 @@ class CatalogManagerTests(unittest.TestCase):
             mock_bootstrap.assert_called_once_with()
             mock_shutdown.assert_called_once_with()
 
-    @mock.patch("eva.catalog.catalog_manager.CatalogManager.insert_table_catalog_entry")
-    @mock.patch("eva.catalog.catalog_manager.generate_file_path")
-    def test_create_video_table(self, m_gfp, m_cm):
+    @mock.patch(
+        "eva.catalog.catalog_manager.CatalogManager.create_and_insert_table_catalog_entry"
+    )
+    def test_create_multimedia_table_catalog_entry(self, mock):
         x = CatalogManager()
-        name = "eva"
-        uri = "tmp"
-        m_gfp.return_value = uri
+        name = "myvideo"
+        x.create_multimedia_table_catalog_entry(
+            name=name, format_type=FileFormatType.VIDEO
+        )
 
-        x._create_video_table(name)
-
-        col_metadata_list = [
-            ColumnCatalog("name", ColumnType.TEXT, False, None, []),
-            ColumnCatalog("id", ColumnType.INTEGER, False, None, []),
-            ColumnCatalog(
-                "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [None, None, None]
+        columns = [
+            ColumnDefinition(
+                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            ),
+            ColumnDefinition("id", ColumnType.INTEGER, None, []),
+            ColumnDefinition(
+                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
             ),
         ]
 
-        m_cm.assert_called_once_with(
-            name,
-            uri,
-            col_metadata_list,
-            identifier_column="id",
+        mock.assert_called_once_with(
+            TableInfo(name),
+            columns,
             table_type=TableType.VIDEO_DATA,
         )
 

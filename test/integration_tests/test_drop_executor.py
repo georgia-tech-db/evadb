@@ -45,7 +45,9 @@ class DropExecutorTest(unittest.TestCase):
         self.assertEqual(len(column_objects), 4)
         self.assertTrue(Path(video_dir).exists())
         # metainfo table
-        video_metadata_table = catalog_manager.get_media_metainfo_table(metadata_obj)
+        video_metadata_table = catalog_manager.get_media_metadata_table_catalog_entry(
+            metadata_obj
+        )
         self.assertTrue(video_metadata_table is not None)
 
         drop_query = """DROP TABLE IF EXISTS MyVideo;"""

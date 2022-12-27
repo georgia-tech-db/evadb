@@ -32,7 +32,7 @@ from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
 from eva.utils.errors import CatalogError
@@ -408,19 +408,21 @@ class CatalogManager(object):
         """
         if format_type is FileFormatType.VIDEO:
             columns = get_video_table_column_definitions()
+            table_type = TableType.VIDEO_DATA
         elif format_type is FileFormatType.IMAGE:
             columns = get_image_table_column_definitions()
+            table_type = TableType.IMAGE_DATA
         else:
             raise CatalogError(f"Format Type {format_type} is not supported")
 
         return self.create_and_insert_table_catalog_entry(
-            TableInfo(name), columns, table_type=format_type
+            TableInfo(name), columns, table_type=table_type
         )
 
-    def get_media_metainfo_table_catalog_entry(
+    def get_media_metadata_table_catalog_entry(
         self, input_table: TableCatalog
     ) -> TableCatalog:
-        """Get table catalog entry for multimedia metainfo table.
+        """Get table catalog entry for multimedia metadata table.
         Raise if it does not exists
         Args:
             input_table (TableCatalog): input media table
@@ -438,10 +440,10 @@ class CatalogManager(object):
 
         return obj
 
-    def create_media_metainfo_table_catalog_entry(
+    def create_media_metadata_table_catalog_entry(
         self, input_table: TableCatalog
     ) -> TableCatalog:
-        """Create and insert table catalog entry for multimedia metainfo table.
+        """Create and insert table catalog entry for multimedia metadata table.
          This table is used to store all media filenames and related information. In
          order to prevent direct access or modification by users, it should be
          designated as a SYSTEM_STRUCTURED_DATA type.

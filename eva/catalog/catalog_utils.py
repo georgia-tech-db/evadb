@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
+
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.table_catalog import TableCatalog
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
