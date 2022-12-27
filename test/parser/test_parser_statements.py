@@ -77,7 +77,7 @@ class ParserStatementTests(unittest.TestCase):
             """SELECT data FROM MyVideo WHERE id < 5
                     ORDER BY Similarity(FeatureExtractor(Open("abc.jpg")),
                                         FeatureExtractor(data))
-                    LIMIT 1;"""
+                    LIMIT 1;""",
         ]
 
         ref_stmt = parser.parse(queries[0])[0]
