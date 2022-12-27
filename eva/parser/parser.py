@@ -95,6 +95,7 @@ class Parser(object):
 
         if lark_output != antlr_output:
             pprint("Different parse trees: ")
+            pprint(query_string)
             pprint("--------  LARK  --------")
             pprint(lark_output[0].__str__())
             pprint("-------- ANTLR  --------")
