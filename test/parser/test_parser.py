@@ -248,7 +248,7 @@ class ParserTests(unittest.TestCase):
         multiple_queries = []
         multiple_queries.append(
             "SELECT CLASS FROM TAIPAI \
-                WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
+                WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \
                 SELECT REDNESS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS = 300)"
         )
@@ -844,6 +844,8 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(select_stmt, expected_stmt)
 
     def test_lark(self):
-        query = """SELECT FIRST(id) FROM TAIPAI GROUP BY '8f';"""
+        query = """SELECT id,DummyObjectDetector(data) FROM MyVideo \
+            WHERE DummyObjectDetector(data).label = ['person'] ORDER BY id;
+                    """
         parser = Parser()
         parser.parse(query)

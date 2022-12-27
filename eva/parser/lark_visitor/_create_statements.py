@@ -256,7 +256,7 @@ class CreateTable:
                     if_not_exists = True
                 elif child.data == "uid_list":
                     uid_list = self.visit(child)
-                elif child.data == "select_statement":
+                elif child.data == "simple_select":
                     query = self.visit(child)
 
         # setting all other column definition attributes as None,

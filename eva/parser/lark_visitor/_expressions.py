@@ -38,9 +38,15 @@ class Expressions:
             return None
 
     def array_literal(self, tree):
-        text = tree.children[0]
+        array_elements = []
+        for child in tree.children:
+            if isinstance(child, Tree):
+                array_element = self.visit(child).value
+                array_elements.append(array_element)
+
         res = ConstantValueExpression(
-            np.array(ast.literal_eval(text)), ColumnType.NDARRAY
+            np.array(ast.literal_eval(array_elements)),
+            ColumnType.NDARRAY
         )
         return res
 

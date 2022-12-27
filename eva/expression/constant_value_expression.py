@@ -15,6 +15,7 @@
 from typing import Any
 
 import pandas as pd
+import numpy as np
 
 from eva.catalog.catalog_type import ColumnType
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -60,8 +61,11 @@ class ConstantValueExpression(AbstractExpression):
 
     def __str__(self) -> str:
         expr_str = "ConstantValueExpression: ( "
-        if self._value:
+        if not isinstance(self._value, np.ndarray):
             expr_str += " _value: " + str(self._value) + " ,"
+        else:
+            expr_str += " _value: " + np.array_str(self._value)
+
         if self._v_type:
             expr_str += " _v_type: " + str(self._v_type) + " ,"
         expr_str += " ) \n"

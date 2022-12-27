@@ -64,5 +64,16 @@ class LogicalExpression(AbstractExpression):
             return False
         return is_subtree_equal and self.etype == other.etype
 
+    def __str__(self) -> str:
+        expr_str = "LogicalExpression: ("
+        if self.etype:
+            expr_str += " exp_type: " + str(self.etype) + " ,"
+        if self.get_child(0):
+            expr_str += " left: " + str(self.get_child(0)) + " ,"
+        if self.get_child(1):
+            expr_str += " right: " + str(self.get_child(1)) + " ,"
+        expr_str += ")\n"
+        return expr_str
+
     def __hash__(self) -> int:
         return super().__hash__()
