@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import ast
-
 import numpy as np
 from lark import Tree
 
@@ -44,9 +42,7 @@ class Expressions:
                 array_element = self.visit(child).value
                 array_elements.append(array_element)
 
-        res = ConstantValueExpression(
-            np.array(array_elements), ColumnType.NDARRAY
-        )
+        res = ConstantValueExpression(np.array(array_elements), ColumnType.NDARRAY)
         return res
 
     def expression_atom(self, tree):
