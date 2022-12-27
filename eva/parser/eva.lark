@@ -139,7 +139,7 @@ from_clause: FROM table_sources (WHERE where_expr)? (GROUP BY  group_by_item (",
 
 where_expr: expression
 
-group_by_item: expression (ASC | DESC)?
+group_by_item: expression sort_order?
     
 limit_clause: LIMIT ((decimal_literal ",")? decimal_literal  | decimal_literal OFFSET decimal_literal)
     

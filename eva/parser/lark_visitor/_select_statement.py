@@ -43,7 +43,7 @@ class Select:
                 if child.data.endswith("expression"):
                     expr = self.visit(child)
                 elif child.data == "sort_order":
-                    sort_order = str(child)
+                    sort_order = self.visit(child)
 
         return expr, sort_order
 
