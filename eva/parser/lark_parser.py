@@ -12,6 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+
 from lark import Lark
 
 from eva.parser.lark_visitor import LarkInterpreter
@@ -31,7 +33,9 @@ class LarkParser(object):
         return cls._instance
 
     def __init__(self):
-        f = open("eva/parser/eva.lark")
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        lark_path = os.path.join(dir_path, "eva.lark")
+        f = open(lark_path)
         sql_grammar = f.read()
         self._parser = Lark(sql_grammar, parser="lalr")
 
