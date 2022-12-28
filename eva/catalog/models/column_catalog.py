@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
+from dataclasses import dataclass, field
 from typing import List
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
@@ -138,3 +139,18 @@ class ColumnCatalog(BaseModel):
                 self.type,
             )
         )
+
+
+@dataclass(unsafe_hash=True)
+class ColumnCatalogEntry:
+    """Class decouples the ColumnCatalog from the sqlalchemy.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    type: ColumnType
+    id: int = None
+    is_nullable: bool = False
+    array_type: NdArrayType = None
+    array_dimensions: List[int] = field(compare=False, default_factory=list)
+    table_id: int = None

@@ -12,12 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass, field
+from typing import List
 from sqlalchemy import Column, Enum, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 
 class TableCatalog(BaseModel):
@@ -93,3 +97,18 @@ class TableCatalog(BaseModel):
                 self.table_type,
             )
         )
+
+
+@dataclass(unsafe_hash=True)
+class TableCatalogEntry:
+    """Class decouples the ColumnCatalog from the sqlalchemy.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    file_url: str
+    table_type: TableType
+    identifier_column: str = "id"
+    id: int = None
+    columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
+    schema: DataFrameSchema = field(compare=False, default=None)

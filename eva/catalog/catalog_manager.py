@@ -21,7 +21,7 @@ from eva.catalog.catalog_utils import (
     get_video_table_column_definitions,
 )
 from eva.catalog.models.base_model import drop_db, init_db
-from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalog
 from eva.catalog.models.table_catalog import TableCatalog
 from eva.catalog.models.udf_catalog import UdfCatalog
@@ -108,22 +108,19 @@ class CatalogManager(object):
             The persisted TableCatalog object with the id field populated.
         """
 
+        # Append row_id to table column list.
+        column_list = [
+            ColumnCatalogEntry(name=IDENTIFIER_COLUMN, type=ColumnType.INTEGER)
+        ] + column_list
+
         table_entry = self._table_catalog_service.insert_entry(
             name,
             file_url,
             identifier_id=identifier_column,
             table_type=table_type,
+            column_list=column_list
         )
-
-        # Append row_id to table column list.
-        column_list = [
-            ColumnCatalog(IDENTIFIER_COLUMN, ColumnType.INTEGER)
-        ] + column_list
-
-        for column in column_list:
-            column.table_id = table_entry.id
-        column_list = self._column_service.insert_entries(column_list)
-
+    
         table_entry.schema = column_list
         return table_entry
 
@@ -360,7 +357,12 @@ class CatalogManager(object):
                 array_dimensions=col.dimension,
                 is_nullable=col.cci.nullable,
             )
-            result_list.append(column_entry)
+            # todo: change me
+            result_list.append(
+                ColumnCatalogService._column_catalog_object_to_column_catalog_entry(
+                    column_entry
+                )
+            )
 
         return result_list
 

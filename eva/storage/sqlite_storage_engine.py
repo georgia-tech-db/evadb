@@ -182,7 +182,7 @@ class SQLStorageEngine(AbstractStorageEngine):
                 yield Batch(pd.DataFrame(data_batch))
 
         except Exception as e:
-            err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
+            err_msg = f"Failed to read the table {table.name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 

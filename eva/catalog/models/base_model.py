@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from sqlalchemy import Column, Integer
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import create_database, database_exists, drop_database
 
@@ -53,6 +53,7 @@ class CustomModel:
             db_session.add(self)
             self._commit()
         except Exception as e:
+            db_session.rollback()
             logger.error("Object already exists in database")
             raise e
         return self
@@ -66,10 +67,15 @@ class CustomModel:
         Returns: updated object
 
         """
-        for attr, value in kwargs.items():
-            if hasattr(self, attr):
-                setattr(self, attr, value)
-        return self.save()
+        try:
+            for attr, value in kwargs.items():
+                if hasattr(self, attr):
+                    setattr(self, attr, value)
+            return self.save()
+        except Exception as e:
+            db_session.rollback()
+            logger.error("Failed to update the database object")
+            raise e
 
     def delete(self):
         """Delete and commit"""
@@ -77,6 +83,7 @@ class CustomModel:
             db_session.delete(self)
             self._commit()
         except Exception:
+            db_session.rollback()
             logger.error("Object couldn't be deleted")
             raise Exception
 
@@ -84,7 +91,7 @@ class CustomModel:
         """Try to commit. If an error is raised, the session is rollbacked."""
         try:
             db_session.commit()
-        except DatabaseError:
+        except SQLAlchemyError:
             db_session.rollback()
             logger.error("Exception occurred while committing to database.")
             raise Exception("Exception occurred while committing to database.")

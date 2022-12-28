@@ -34,6 +34,8 @@ class StorageEngine:
 
     @classmethod
     def factory(cls, table: TableCatalog) -> AbstractStorageEngine:
+        if table is None:
+            raise ValueError("Expected TableCatalog, got None")
         if table.table_type in cls.storages:
             return cls.storages[table.table_type]
 
