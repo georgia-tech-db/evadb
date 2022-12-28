@@ -93,11 +93,11 @@ class ComparisonExpression(AbstractExpression):
     def __str__(self) -> str:
         expr_str = "("
         if self.get_child(0):
-            expr_str += f"{self.get_child(0) }"
+            expr_str += f"{self.get_child(0)}"
         if self.etype:
-            expr_str += f"{self.get_symbol()}"
+            expr_str += f" {self.get_symbol()} "
         if self.get_child(1):
-            expr_str += f" {self.get_child(0)}"
+            expr_str += f"{self.get_child(1)}"
         expr_str += ")"
         return expr_str
 

@@ -60,15 +60,11 @@ class ConstantValueExpression(AbstractExpression):
             return is_equal and self.value == other.value
 
     def __str__(self) -> str:
-        expr_str = "ConstantValueExpression: ( "
+        expr_str = ""
         if not isinstance(self._value, np.ndarray):
-            expr_str += " _value: " + str(self._value) + " ,"
+            expr_str = f"{str(self._value)} "
         else:
-            expr_str += " _value: " + np.array_str(self._value)
-
-        if self._v_type:
-            expr_str += " _v_type: " + str(self._v_type) + " ,"
-        expr_str += " ) \n"
+            expr_str = f"{np.array_str(self._value)} "
         return expr_str
 
     def __hash__(self) -> int:

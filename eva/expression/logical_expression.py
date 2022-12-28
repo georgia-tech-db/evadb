@@ -64,15 +64,26 @@ class LogicalExpression(AbstractExpression):
             return False
         return is_subtree_equal and self.etype == other.etype
 
+    def get_symbol(self) -> str:
+
+        if self.etype == ExpressionType.LOGICAL_AND:
+            return "AND"
+        elif self.etype == ExpressionType.LOGICAL_OR:
+            return "OR"
+        elif self.etype == ExpressionType.LOGICAL_NOT:
+            return "NOT"
+        else:
+            raise NotImplementedError
+
     def __str__(self) -> str:
-        expr_str = "LogicalExpression: ("
-        if self.etype:
-            expr_str += " exp_type: " + str(self.etype) + " ,"
+        expr_str = "("
         if self.get_child(0):
-            expr_str += " left: " + str(self.get_child(0)) + " ,"
+            expr_str += f"{str(self.get_child(0))}"
+        if self.etype:
+            expr_str += f" {str(self.get_symbol())} "
         if self.get_child(1):
-            expr_str += " right: " + str(self.get_child(1)) + " ,"
-        expr_str += ")\n"
+            expr_str += f"{str(self.get_child(1))}"
+        expr_str += ")"
         return expr_str
 
     def __hash__(self) -> int:

@@ -137,8 +137,11 @@ class SelectStatement(AbstractStatement):
             for expr in self._orderby_list:
                 _orderby_list_str += str(expr)
 
-        print_str = "SELECT {} FROM {}".format(target_list_str, str(self._from_table))
-        print_str += " WHERE " + str(self._where_clause)
+        print_str = "SELECT {}FROM {}".format(target_list_str, str(self._from_table))
+
+        if self._where_clause is not None:
+            print_str += " WHERE " + str(self._where_clause)
+            
         if self._union_link is not None:
             if not self._union_all:
                 print_str += "\nUNION\n" + str(self._union_link)
