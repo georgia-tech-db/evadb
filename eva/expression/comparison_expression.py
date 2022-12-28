@@ -70,14 +70,16 @@ class ComparisonExpression(AbstractExpression):
             raise NotImplementedError
 
     def __str__(self) -> str:
+        expr_str = f""
+
         expr_str = "ComparisonExpression: ("
         if self.etype:
-            expr_str += " exp_type: " + str(self.etype) + " ,"
+            expr_str += f" exp_type: {self.etype} ,"
         if self.get_child(0):
-            expr_str += " left: " + str(self.get_child(0)) + " ,"
+            expr_str += f" left : {self.get_child(0)}" 
         if self.get_child(1):
-            expr_str += " right: " + str(self.get_child(1)) + " ,"
-        expr_str += ")\n"
+            expr_str += f" right: {self.get_child(0)}"
+        expr_str += ")"
         return expr_str
 
     def __eq__(self, other):

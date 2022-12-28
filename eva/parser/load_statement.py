@@ -85,7 +85,7 @@ class LoadDataStatement(AbstractStatement):
                 super().__hash__(),
                 self.table_info,
                 self.path,
-                tuple(self.column_list) if self.column_list is not None else None,
+                tuple(self.column_list or []),
                 frozenset(self.file_options.items()),
             )
         )

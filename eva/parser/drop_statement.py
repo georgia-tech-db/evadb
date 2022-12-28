@@ -28,11 +28,11 @@ class DropTableStatement(AbstractStatement):
         self._if_exists = if_exists
 
     def __str__(self) -> str:
+        ti_str = [str(t) for t in self._table_infos]
         if self._if_exists:
-            print_str = "DROP TABLE IF EXISTS {}".format(self._table_infos)
+            return f"DROP TABLE IF EXISTS {ti_str}"
         else:
-            print_str = "DROP TABLE {}".format(self._table_infos)
-        return print_str
+            return f"DROP TABLE {ti_str}"
 
     @property
     def table_infos(self):

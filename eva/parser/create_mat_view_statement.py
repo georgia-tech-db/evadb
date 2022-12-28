@@ -43,10 +43,7 @@ class CreateMaterializedViewStatement(AbstractStatement):
         self._query = query
 
     def __str__(self) -> str:
-        print_str = "CREATE MATERIALIZED VIEW {} ({}) AS {} ".format(
-            self._view_info, self._col_list, self._query
-        )
-        return print_str
+        return f"CREATE MATERIALIZED VIEW {self._view_info} ({self._col_list}) AS {self._query}"
 
     @property
     def view_info(self):
@@ -79,7 +76,7 @@ class CreateMaterializedViewStatement(AbstractStatement):
             (
                 super().__hash__(),
                 self.view_info,
-                tuple(self.col_list) if self.col_list is not None else None,
+                tuple(self.col_list or []),
                 self.if_not_exists,
                 self.query,
             )
