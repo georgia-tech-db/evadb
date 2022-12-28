@@ -95,20 +95,14 @@ class TupleValueExpression(AbstractExpression):
         )
 
     def __str__(self) -> str:
-        expr_str = "TupleValueExpression: ("
+        expr_str = ""
         if self.table_alias:
-            expr_str += " table_alias: " + str(self.table_alias) + " ,"
-        if self.table_metadata_id:
-            expr_str += " table_metadata_id: " + str(self.table_metadata_id) + " ,"
+            expr_str += f"{str(self.table_alias)}."
         if self.col_name:
-            expr_str += " col_name: " + self.col_name + " ,"
+            expr_str += f"{str(self.col_name)}"
         if self.col_alias:
-            expr_str += " col_alias: " + str(self.col_alias) + " ,"
-        if self.col_object:
-            expr_str += " col_object: " + str(self.col_object) + " ,"
-        if self._col_idx:
-            expr_str += " _col_idx: " + str(self._col_idx) + " ,"
-        expr_str += ")\n"
+            expr_str +=  f" as {str(self.col_alias)}" 
+        expr_str += ""
         return expr_str
 
     def __hash__(self) -> int:

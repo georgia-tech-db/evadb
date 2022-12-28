@@ -222,9 +222,9 @@ class TableRef:
             raise RuntimeError("Nested select should have alias")
 
     def __str__(self):
-        table_ref_str = "TABLE REF:: ( {} SAMPLE FREQUENCY {})".format(
-            str(self._ref_handle), str(self.sample_freq)
-        )
+        table_ref_str = f"{str(self._ref_handle)}"
+        if self.sample_freq is not None:
+            table_ref_str += f" {str(self.sample_freq)}"
         return table_ref_str
 
     def __eq__(self, other):
