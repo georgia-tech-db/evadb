@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
+from dataclasses import dataclass, field
 from typing import List
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
@@ -119,15 +120,6 @@ class UdfIOCatalog(BaseModel):
     def udf_id(self, value):
         self._udf_id = value
 
-    def display_format(self):
-        data_type = self.type.name
-        if self.type == ColumnType.NDARRAY:
-            data_type = "{} {} {}".format(
-                data_type, self.array_type.name, self.array_dimensions
-            )
-
-        return {"name": self.name, "data_type": data_type}
-
     def __str__(self):
         column_str = "\tColumn: (%s, %s, %s, %s" % (
             self._name,
@@ -143,28 +135,39 @@ class UdfIOCatalog(BaseModel):
 
         return column_str
 
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.is_input == other.is_input
-            and self.is_nullable == other.is_nullable
-            and self.array_type == other.array_type
-            and self.array_dimensions == other.array_dimensions
-            and self.name == other.name
-            and self.udf_id == other.udf_id
-            and self.type == other.type
+    def as_dataclass(self) -> "UdfIOCatalogEntry":
+        return UdfIOCatalogEntry(
+            row_id=self.row_id,
+            name=self.name,
+            type=self.type,
+            is_nullable=self.is_nullable,
+            array_type=self.array_type,
+            array_dimensions=self.array_dimensions,
+            is_input=self.is_input,
+            udf_id=self.udf_id,
         )
 
-    def __hash__(self) -> int:
-        return hash(
-            (
-                self.row_id,
-                self.is_input,
-                self.is_nullable,
-                self.array_type,
-                tuple(self.array_dimensions),
-                self.name,
-                self.udf_id,
-                self.type,
+
+@dataclass(unsafe_hash=True)
+class UdfIOCatalogEntry:
+    """Class decouples the `UdfIOCatalog` from the sqlalchemy.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    type: ColumnType
+    row_id: int = None
+    is_nullable: bool = False
+    array_type: NdArrayType = None
+    array_dimensions: List[int] = field(compare=False, default_factory=list)
+    is_input: bool = True
+    udf_id: int = None
+
+    def display_format(self):
+        data_type = self.type.name
+        if self.type == ColumnType.NDARRAY:
+            data_type = "{} {} {}".format(
+                data_type, self.array_type.name, self.array_dimensions
             )
-        )
+
+        return {"name": self.name, "data_type": data_type}

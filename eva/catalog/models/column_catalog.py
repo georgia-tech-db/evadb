@@ -128,28 +128,15 @@ class ColumnCatalog(BaseModel):
 
         return column_str
 
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.table_id == other.table_id
-            and self.is_nullable == other.is_nullable
-            and self.array_type == other.array_type
-            and self.array_dimensions == other.array_dimensions
-            and self.name == other.name
-            and self.type == other.type
-        )
-
-    def __hash__(self):
-        return hash(
-            (
-                self.row_id,
-                self.table_id,
-                self.is_nullable,
-                self.array_type,
-                tuple(self.array_dimensions),
-                self.name,
-                self.type,
-            )
+    def as_dataclass(self) -> "ColumnCatalogEntry":
+        return ColumnCatalogEntry(
+            row_id=self.row_id,
+            name=self.name,
+            type=self.type,
+            is_nullable=self.is_nullable,
+            array_type=self.array_type,
+            array_dimensions=self.array_dimensions,
+            table_id=self.table_id,
         )
 
 
@@ -161,7 +148,7 @@ class ColumnCatalogEntry:
 
     name: str
     type: ColumnType
-    id: int = None
+    row_id: int = None
     is_nullable: bool = False
     array_type: NdArrayType = None
     array_dimensions: List[int] = field(compare=False, default_factory=list)

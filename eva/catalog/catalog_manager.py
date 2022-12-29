@@ -118,9 +118,9 @@ class CatalogManager(object):
             file_url,
             identifier_id=identifier_column,
             table_type=table_type,
-            column_list=column_list
+            column_list=column_list,
         )
-    
+
         table_entry.schema = column_list
         return table_entry
 
@@ -254,25 +254,11 @@ class CatalogManager(object):
     def get_udf_io_catalog_input_entries(
         self, udf_obj: UdfCatalog
     ) -> List[UdfIOCatalog]:
-        if not isinstance(udf_obj, UdfCatalog):
-            raise ValueError(
-                """Expected UdfCatalog object, got
-                             {}""".format(
-                    type(udf_obj)
-                )
-            )
         return self._udf_io_service.get_input_entries_by_udf_id(udf_obj.row_id)
 
     def get_udf_io_catalog_output_entries(
         self, udf_obj: UdfCatalog
     ) -> List[UdfIOCatalog]:
-        if not isinstance(udf_obj, UdfCatalog):
-            raise ValueError(
-                """Expected UdfCatalog object, got
-                             {}""".format(
-                    type(udf_obj)
-                )
-            )
         return self._udf_io_service.get_output_entries_by_udf_id(udf_obj.row_id)
 
     """ Index related services. """
@@ -350,19 +336,15 @@ class CatalogManager(object):
 
         result_list = []
         for col in col_list:
-            column_entry = ColumnCatalog(
-                col.name,
-                col.type,
+            column_entry = ColumnCatalogEntry(
+                name=col.name,
+                type=col.type,
                 array_type=col.array_type,
                 array_dimensions=col.dimension,
                 is_nullable=col.cci.nullable,
             )
             # todo: change me
-            result_list.append(
-                ColumnCatalogService._column_catalog_object_to_column_catalog_entry(
-                    column_entry
-                )
-            )
+            result_list.append(column_entry)
 
         return result_list
 

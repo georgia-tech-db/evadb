@@ -25,39 +25,14 @@ class ColumnCatalogService(BaseService):
     def __init__(self):
         super().__init__(ColumnCatalog)
 
-    @classmethod
-    def _column_catalog_object_to_column_catalog_entry(cls, obj: ColumnCatalog):
-        if obj is None:
-            return None
-        return ColumnCatalogEntry(
-            id=obj.id,
-            name=obj.name,
-            type=obj.type,
-            is_nullable=obj.is_nullable,
-            array_type=obj.array_type,
-            array_dimensions=obj.array_dimensions,
-            table_id=obj.table_id,
-        )
-
-    @classmethod
-    def _column_catalog_entry_to_column_catalog_object(cls, obj: ColumnCatalogEntry):
-        if obj is None:
-            return None
-        return ColumnCatalog(
-            name=obj.name,
-            type=obj.type,
-            is_nullable=obj.is_nullable,
-            array_type=obj.array_type,
-            array_dimensions=obj.array_dimensions,
-            table_id=obj.table_id,
-        )
-
     def filter_entry_by_table_id_and_name(self, table_id, column_name):
         entry = self.model.query.filter(
             self.model._table_id == table_id,
             self.model._name == column_name,
         ).one_or_none()
-        return self._column_catalog_object_to_column_catalog_entry(entry)
+        if entry:
+            return entry.as_dataclass()
+        return entry
 
     def filter_entries_by_table_id(self, table_id: int):
         """return all the columns for table table_id
@@ -69,23 +44,24 @@ class ColumnCatalogService(BaseService):
             List[self.model] -- [the filtered self.models]
         """
         entries = self.model.query.filter(self.model._table_id == table_id).all()
-        return [
-            self._column_catalog_object_to_column_catalog_entry(entry)
-            for entry in entries
-        ]
+        return [entry.as_dataclass() for entry in entries]
 
     def insert_entries(self, column_list: List[ColumnCatalogEntry]):
         catalog_column_objs = [
-            self._column_catalog_entry_to_column_catalog_object(entry)
-            for entry in column_list
+            self.model(
+                name=col.name,
+                type=col.type,
+                is_nullable=col.is_nullable,
+                array_type=col.array_type,
+                array_dimensions=col.array_dimensions,
+                table_id=col.table_id,
+            )
+            for col in column_list
         ]
         saved_column_objs = []
         for column in catalog_column_objs:
             saved_column_objs.append(column.save())
-        return [
-            self._column_catalog_object_to_column_catalog_entry(obj)
-            for obj in saved_column_objs
-        ]
+        return [obj.as_dataclass() for obj in saved_column_objs]
 
     def filter_entries_by_table(
         self, table: TableCatalogEntry
@@ -94,10 +70,7 @@ class ColumnCatalogService(BaseService):
             entries = self.model.query.filter(
                 self.model._table_id == table.row_id
             ).all()
-            return [
-                self._column_catalog_object_to_column_catalog_entry(entry)
-                for entry in entries
-            ]
+            return [entry.as_dataclass() for entry in entries]
 
         except NoResultFound:
             return None

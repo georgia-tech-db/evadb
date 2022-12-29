@@ -29,7 +29,7 @@ class UdfIOCatalogService(BaseService):
                 self.model._udf_id == udf_id,
                 self.model._is_input == True,  # noqa
             ).all()
-            return result
+            return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting inputs for UDF id {udf_id} raised {e}"
             logger.error(error)
@@ -41,7 +41,7 @@ class UdfIOCatalogService(BaseService):
                 self.model._udf_id == udf_id,
                 self.model._is_input == False,  # noqa
             ).all()
-            return result
+            return [obj.as_dataclass() for obj in result]
         except Exception as e:
             error = f"Getting outputs for UDF id {udf_id} raised {e}"
             logger.error(error)
@@ -55,4 +55,13 @@ class UdfIOCatalogService(BaseService):
         """
 
         for io in io_list:
-            io.save()
+            io_obj = UdfIOCatalog(
+                name=io.name,
+                type=io.type,
+                is_nullable=io.is_nullable,
+                array_type=io.array_type,
+                array_dimensions=io.array_dimensions,
+                is_input=io.is_input,
+                udf_id=io.udf_id,
+            )
+            io_obj.save()

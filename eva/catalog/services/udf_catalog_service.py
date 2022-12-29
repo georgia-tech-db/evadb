@@ -36,7 +36,7 @@ class UdfCatalogService(BaseService):
         """
         udf_obj = self.model(name, impl_path, type)
         udf_obj = udf_obj.save()
-        return udf_obj
+        return udf_obj.as_dataclass()
 
     def get_entry_by_name(self, name: str):
         """return the udf entry that matches the name provided.
@@ -47,7 +47,10 @@ class UdfCatalogService(BaseService):
         """
 
         try:
-            return self.model.query.filter(self.model._name == name).one()
+            udf_obj = self.model.query.filter(self.model._name == name).one()
+            if udf_obj:
+                return udf_obj.as_dataclass()
+            return udf_obj
         except NoResultFound:
             return None
 
@@ -60,7 +63,10 @@ class UdfCatalogService(BaseService):
         """
 
         try:
-            return self.model.query.filter(self.model._row_id == id).one()
+            udf_obj = self.model.query.filter(self.model._row_id == id).one()
+            if udf_obj:
+                return udf_obj.as_dataclass()
+            return udf_obj
         except NoResultFound:
             return None
 
@@ -83,6 +89,7 @@ class UdfCatalogService(BaseService):
 
     def get_all_entries(self):
         try:
-            return self.model.query.all()
+            objs = self.model.query.all()
+            return [obj.as_dataclass() for obj in objs]
         except NoResultFound:
             return []

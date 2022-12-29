@@ -85,32 +85,25 @@ class TableCatalog(BaseModel):
     def table_type(self):
         return self._table_type
 
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.file_url == other.file_url
-            and self.schema == other.schema
-            and self.identifier_column == other.identifier_column
-            and self.name == other.name
-            and self.table_type == other.table_type
+    def as_dataclass(self) -> "TableCatalogEntry":
+        column_entries = [
+            col_obj.as_dataclass()
+            for col_obj in self.columns
+        ]
+        schema = DataFrameSchema(self.name, column_entries)
+        return TableCatalogEntry(
+            row_id=self.row_id,
+            name=self.name,
+            file_url=self.file_url,
+            schema=schema,
+            identifier_column=self.identifier_column,
+            table_type=self.table_type,
+            columns=column_entries,
         )
-
-    def __hash__(self) -> int:
-        return hash(
-            (
-                self.row_id,
-                self.file_url,
-                self.schema,
-                self.identifier_column,
-                self.name,
-                self.table_type,
-            )
-        )
-
 
 @dataclass(unsafe_hash=True)
 class TableCatalogEntry:
-    """Class decouples the ColumnCatalog from the sqlalchemy.
+    """Dataclass representing an entry in the ColumnCatalog.
     This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
     """
 
@@ -118,6 +111,6 @@ class TableCatalogEntry:
     file_url: str
     table_type: TableType
     identifier_column: str = "id"
-    id: int = None
+    row_id: int = None
     columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
     schema: DataFrameSchema = field(compare=False, default=None)

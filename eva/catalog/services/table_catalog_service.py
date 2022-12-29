@@ -47,22 +47,22 @@ class TableCatalogService(BaseService):
             columns=column_entries,
         )
 
-    @classmethod
-    def _table_catalog_entry_to_table_catalog_object(cls, entry: TableCatalogEntry):
-        if entry is None:
-            return None
-        # column_objs = [
-        #     ColumnCatalogService._column_catalog_entry_to_column_catalog_object(
-        #         col_entry
-        #     )
-        #     for col_entry in entry.columns
-        # ]
-        return TableCatalog(
-            name=entry.name,
-            file_url=entry.file_url,
-            identifier_id=entry.identifier_column,
-            table_type=entry.table_type,
-        )
+    # @classmethod
+    # def _table_catalog_entry_to_table_catalog_object(cls, entry: TableCatalogEntry):
+    #     if entry is None:
+    #         return None
+    #     # column_objs = [
+    #     #     ColumnCatalogService._column_catalog_entry_to_column_catalog_object(
+    #     #         col_entry
+    #     #     )
+    #     #     for col_entry in entry.columns
+    #     # ]
+    #     return TableCatalog(
+    #         name=entry.name,
+    #         file_url=entry.file_url,
+    #         identifier_id=entry.identifier_column,
+    #         table_type=entry.table_type,
+    #     )
 
     def insert_entry(
         self,
@@ -88,14 +88,10 @@ class TableCatalogService(BaseService):
                 table_type=int(table_type),
             )
             table_catalog_obj = table_catalog_obj.save()
-            column_list = [
-                ColumnCatalogService._column_catalog_entry_to_column_catalog_object(
-                    column
-                )
-                for column in column_list
-            ]
+
+            # populate the table_id for all the columns
             for column in column_list:
-                column.table_id = table_catalog_obj.id
+                column.table_id = table_catalog_obj.row_id
             column_list = self._column_service.insert_entries(column_list)
 
         except Exception as e:
@@ -104,7 +100,7 @@ class TableCatalogService(BaseService):
             )
             raise CatalogError(e)
         else:
-            return self._table_catalog_object_to_table_catalog_entry(table_catalog_obj)
+            return table_catalog_obj.as_dataclass()
 
     def get_entry_by_id(self, table_id) -> TableCatalog:
         """
@@ -115,7 +111,7 @@ class TableCatalogService(BaseService):
            TableCatalog
         """
         entry = self.model.query.filter(self.model._row_id == table_id).one()
-        return self._table_catalog_object_to_table_catalog_entry(entry)
+        return entry.as_dataclass()
 
     def get_entry_by_name(self, database_name, table_name):
         """
@@ -128,7 +124,9 @@ class TableCatalogService(BaseService):
             TableCatalog - catalog entry for given table_name
         """
         entry = self.model.query.filter(self.model._name == table_name).one_or_none()
-        return self._table_catalog_object_to_table_catalog_entry(entry)
+        if entry:
+            return entry.as_dataclass()
+        return entry
 
     def delete_entry(self, table: TableCatalogEntry):
         """Delete table from the db
@@ -138,7 +136,9 @@ class TableCatalogService(BaseService):
             True if successfully removed else false
         """
         try:
-            table_obj = self.model.query.filter(self.model._id == table.id).one()
+            table_obj = self.model.query.filter(
+                self.model._row_id == table.row_id
+            ).one()
             table_obj.delete()
             return True
         except Exception as e:
@@ -148,7 +148,9 @@ class TableCatalogService(BaseService):
 
     def rename_entry(self, table: TableCatalog, new_name: str):
         try:
-            table_obj = self.model.query.filter(self.model._id == table.id).one()
+            table_obj = self.model.query.filter(
+                self.model._row_id == table.row_id
+            ).one()
             table_obj.update(_name=new_name)
         except Exception as e:
             err_msg = "Update table name failed for {} with error {}".format(
@@ -160,9 +162,6 @@ class TableCatalogService(BaseService):
     def get_all_entries(self):
         try:
             entries = self.model.query.all()
-            return [
-                self._table_catalog_object_to_table_catalog_entry(entry)
-                for entry in entries
-            ]
+            return [entry.as_dataclass() for entry in entries]
         except NoResultFound:
             return []

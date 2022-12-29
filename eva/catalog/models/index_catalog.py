@@ -12,12 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass, field
+
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 
 
 class IndexCatalog(BaseModel):
@@ -103,24 +107,17 @@ class IndexCatalog(BaseModel):
         )
         return index_str
 
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.save_file_path == other.save_file_path
-            and self.name == other.name
-            and self.type == other.type
-            and self.secondary_index_id == other.secondary_index_id
-            and self.feat_column_id == other.feat_column_id
-        )
 
-    def __hash__(self) -> int:
-        return hash(
-            (
-                self.row_id,
-                self.name,
-                self.save_file_path,
-                self.type,
-                self.secondary_index_id,
-                self.feat_column_id,
-            )
-        )
+@dataclass(unsafe_hash=True)
+class IndexCatalogEntry:
+    """Dataclass representing an entry in the IndexCatalog.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    save_file_path: str
+    type: IndexType
+    secondary_index_id: int = None
+    feat_column_id: int = None
+    secondary_index: TableCatalogEntry = None
+    feat_column: ColumnCatalogEntry = None

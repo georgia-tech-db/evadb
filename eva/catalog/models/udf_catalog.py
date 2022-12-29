@@ -12,10 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass, field
+from typing import List
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 
 
 class UdfCatalog(BaseModel):
@@ -57,10 +60,39 @@ class UdfCatalog(BaseModel):
     def type(self):
         return self._type
 
+    def __str__(self):
+        udf_str = "udf: ({}, {}, {})\n".format(
+            self.name, self.impl_file_path, self.type
+        )
+        return udf_str
+
+    def as_dataclass(self) -> "UdfCatalogEntry":
+        io_list = [attribute.as_dataclass() for attribute in self._attributes]
+        return UdfCatalogEntry(
+            row_id=self.row_id,
+            name=self.name,
+            impl_file_path=self.impl_file_path,
+            type=self.type,
+            attributes=io_list,
+        )
+
+
+@dataclass(unsafe_hash=True)
+class UdfCatalogEntry:
+    """Dataclass representing an entry in the `UdfCatalog`.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    impl_file_path: str
+    type: str
+    row_id: int = None
+    attributes: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+
     def display_format(self):
         inputs = []
         outputs = []
-        for col in self._attributes:
+        for col in self.attributes:
             col_display = col.display_format()
             col_string = f"{col_display['name']} {col_display['data_type']}"
             if col.is_input:
@@ -74,20 +106,3 @@ class UdfCatalog(BaseModel):
             "type": self.type,
             "impl": self.impl_file_path,
         }
-
-    def __str__(self):
-        udf_str = "udf: ({}, {}, {})\n".format(
-            self.name, self.impl_file_path, self.type
-        )
-        return udf_str
-
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.impl_file_path == other.impl_file_path
-            and self.name == other.name
-            and self.type == other.type
-        )
-
-    def __hash__(self) -> int:
-        return hash((self.row_id, self.name, self.impl_file_path, self.type))
