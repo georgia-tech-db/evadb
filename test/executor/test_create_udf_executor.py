@@ -24,8 +24,8 @@ class CreateUdfExecutorTest(unittest.TestCase):
     @patch("eva.executor.create_udf_executor.path_to_class")
     def test_should_create_udf(self, path_to_class_mock, mock):
         catalog_instance = mock.return_value
-        catalog_instance.get_udf_by_name.return_value = None
-        catalog_instance.create_udf.return_value = "udf"
+        catalog_instance.get_udf_catalog_entry_by_name.return_value = None
+        catalog_instance.insert_udf_catalog_entry.return_value = "udf"
         impl_path = MagicMock()
         abs_path = impl_path.absolute.return_value = MagicMock()
         abs_path.as_posix.return_value = "test.py"
@@ -45,6 +45,6 @@ class CreateUdfExecutorTest(unittest.TestCase):
 
         create_udf_executor = CreateUDFExecutor(plan)
         next(create_udf_executor.exec())
-        catalog_instance.create_udf.assert_called_with(
+        catalog_instance.insert_udf_catalog_entry.assert_called_with(
             "udf", "test.py", "classification", ["inp", "out"]
         )

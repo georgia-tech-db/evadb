@@ -105,7 +105,7 @@ class EmbedFilterIntoGet(Rule):
         # System supports predicate pushdown only while reading video data
         predicate = before.predicate
         lget: LogicalGet = before.children[0]
-        if predicate and is_video_table(lget.dataset_metadata):
+        if predicate and is_video_table(lget.table_obj):
             # System only supports pushing basic range predicates on id
             video_alias = lget.video.alias
             col_alias = f"{video_alias}.id"
@@ -126,7 +126,7 @@ class EmbedFilterIntoGet(Rule):
         if pushdown_pred:
             new_get_opr = LogicalGet(
                 lget.video,
-                lget.dataset_metadata,
+                lget.table_obj,
                 alias=lget.alias,
                 predicate=pushdown_pred,
                 target_list=lget.target_list,
@@ -154,7 +154,7 @@ class EmbedSampleIntoGet(Rule):
     def check(self, before: LogicalSample, context: OptimizerContext):
         # System supports sample pushdown only while reading video data
         lget: LogicalGet = before.children[0]
-        if lget.dataset_metadata.table_type == TableType.VIDEO_DATA:
+        if lget.table_obj.table_type == TableType.VIDEO_DATA:
             return True
         return False
 
@@ -163,7 +163,7 @@ class EmbedSampleIntoGet(Rule):
         lget: LogicalGet = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
-            lget.dataset_metadata,
+            lget.table_obj,
             alias=lget.alias,
             predicate=lget.predicate,
             target_list=lget.target_list,
@@ -191,7 +191,7 @@ class EmbedProjectIntoGet(Rule):
         lget = before.children[0]
         new_get_opr = LogicalGet(
             lget.video,
-            lget.dataset_metadata,
+            lget.table_obj,
             alias=lget.alias,
             predicate=lget.predicate,
             target_list=target_list,
@@ -573,7 +573,7 @@ class LogicalInsertToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
-        after = InsertPlan(before.table_metainfo, before.column_list, before.value_list)
+        after = InsertPlan(before.table, before.column_list, before.value_list)
         return after
 
 
@@ -668,7 +668,7 @@ class LogicalGetToSeqScan(Rule):
         after = SeqScanPlan(None, before.target_list, before.alias)
         after.append_child(
             StoragePlan(
-                before.dataset_metadata,
+                before.table_obj,
                 batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,

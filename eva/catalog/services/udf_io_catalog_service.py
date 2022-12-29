@@ -14,16 +14,16 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
-class UdfIOService(BaseService):
+class UdfIOCatalogService(BaseService):
     def __init__(self):
-        super().__init__(UdfIO)
+        super().__init__(UdfIOCatalog)
 
-    def get_inputs_by_udf_id(self, udf_id: int):
+    def get_input_entries_by_udf_id(self, udf_id: int):
         try:
             result = self.model.query.filter(
                 self.model._udf_id == udf_id,
@@ -35,7 +35,7 @@ class UdfIOService(BaseService):
             logger.error(error)
             raise RuntimeError(error)
 
-    def get_outputs_by_udf_id(self, udf_id: int):
+    def get_output_entries_by_udf_id(self, udf_id: int):
         try:
             result = self.model.query.filter(
                 self.model._udf_id == udf_id,
@@ -47,11 +47,11 @@ class UdfIOService(BaseService):
             logger.error(error)
             raise RuntimeError(error)
 
-    def add_udf_io(self, io_list: List[UdfIO]):
-        """Commit an entry in the udf_io table
+    def insert_entries(self, io_list: List[UdfIOCatalog]):
+        """Commit entries to the udf_io table
 
         Arguments:
-            io_list (List[UdfIO]): List of io info io be added
+            io_list (List[UdfIOCatalog]): List of io info io be added
         """
 
         for io in io_list:

@@ -39,10 +39,10 @@ class OpenTests(unittest.TestCase):
         execute_query_fetch_all(create_table_query)
 
         # Insert dummy data into table.
-        table_df_metadata = CatalogManager().get_dataset_metadata(None, "testOpenTable")
-        storage_engine = StorageEngine().factory(table_df_metadata)
+        table_catalog_entry = CatalogManager().get_table_catalog_entry("testOpenTable")
+        storage_engine = StorageEngine().factory(table_catalog_entry)
         storage_engine.write(
-            table_df_metadata, Batch(pd.DataFrame([{"num": 1}, {"num": 2}]))
+            table_catalog_entry, Batch(pd.DataFrame([{"num": 1}, {"num": 2}]))
         )
 
     def tearDown(self):

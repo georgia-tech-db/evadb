@@ -29,7 +29,7 @@ class RenameExecutor(AbstractExecutor):
     def exec(self):
         """rename table executor
 
-        Calls the catalog to modified metadata corresponding to the table.
+        Calls the catalog to modified catalog entry corresponding to the table.
         """
         try:
             obj = self.node.old_table.table.table_obj

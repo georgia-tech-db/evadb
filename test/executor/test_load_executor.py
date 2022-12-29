@@ -44,7 +44,7 @@ class LoadExecutorTest(unittest.TestCase):
         return plan
 
     @patch(
-        "eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata",
+        "eva.catalog.catalog_manager.CatalogManager.get_table_catalog_entry",
         return_value=None,
     )
     def test_should_fail_to_find_table(self, catalog_mock):
@@ -67,7 +67,7 @@ class LoadExecutorTest(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             next(load_executor.exec())
 
-    @patch("eva.catalog.catalog_manager.CatalogManager.get_dataset_metadata")
+    @patch("eva.catalog.catalog_manager.CatalogManager.get_table_catalog_entry")
     @patch("eva.executor.load_multimedia_executor.StorageEngine.factory")
     def test_should_call_csv_reader_and_storage_engine(
         self, factory_mock, catalog_mock
@@ -83,9 +83,9 @@ class LoadExecutorTest(unittest.TestCase):
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
         column_list = [
-            type("DataFrameColumn", (), {"name": "id"}),
-            type("DataFrameColumn", (), {"name": "frame_id"}),
-            type("DataFrameColumn", (), {"name": "video_id"}),
+            type("ColumnCatalog", (), {"name": "id"}),
+            type("ColumnCatalog", (), {"name": "frame_id"}),
+            type("ColumnCatalog", (), {"name": "video_id"}),
         ]
         table_obj = MagicMock(columns=column_list)
         catalog_mock.return_value = table_obj
@@ -103,7 +103,7 @@ class LoadExecutorTest(unittest.TestCase):
 
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
-        catalog_mock.assert_called_once_with(None, "dummy")
+        catalog_mock.assert_called_once_with("dummy", None)
         factory_mock.return_value.write.has_calls(
             call(table_obj, batch_frames[0]),
             call(table_obj, batch_frames[1]),

@@ -103,7 +103,7 @@ class LogicalGetToSeqScan(Rule):
         lower = ExchangePlan(parallelism=1)
         lower.append_child(
             StoragePlan(
-                before.dataset_metadata,
+                before.table_obj,
                 batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,

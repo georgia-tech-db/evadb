@@ -32,11 +32,11 @@ class CreateUDFExecutor(AbstractExecutor):
     def exec(self):
         """Create udf executor
 
-        Calls the catalog to create udf metadata.
+        Calls the catalog to insert a udf catalog entry.
         """
         catalog_manager = CatalogManager()
         # check catalog if it already has this udf entry
-        if catalog_manager.get_udf_by_name(self.node.name):
+        if catalog_manager.get_udf_catalog_entry_by_name(self.node.name):
             if self.node.if_not_exists:
                 msg = f"UDF {self.node.name} already exists, nothing added."
                 logger.warn(msg)
@@ -60,7 +60,7 @@ class CreateUDFExecutor(AbstractExecutor):
             )
             logger.error(err_msg)
             raise RuntimeError(err_msg)
-        catalog_manager.create_udf(
+        catalog_manager.insert_udf_catalog_entry(
             self.node.name, impl_path, self.node.udf_type, io_list
         )
         yield Batch(
