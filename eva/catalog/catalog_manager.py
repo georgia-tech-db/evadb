@@ -449,6 +449,8 @@ class CatalogManager(object):
          This table is used to store all media filenames and related information. In
          order to prevent direct access or modification by users, it should be
          designated as a SYSTEM_STRUCTURED_DATA type.
+         **Note**: this table is managed by the storage engine, so it should not be
+         called elsewhere.
         Args:
             input_table (TableCatalog): input video table
 
