@@ -107,10 +107,10 @@ class CreateIndexTest(unittest.TestCase):
 
         # Test referenced column.
         feat_table_entry = CatalogManager().get_table_catalog_entry(
-            None, "testCreateIndexFeatTable"
+            "testCreateIndexFeatTable"
         )
         feat_column = [col for col in feat_table_entry.columns if col.name == "feat"][0]
-        self.assertEqual(index_catalog_entry.feat_column_id, feat_column.id)
+        self.assertEqual(index_catalog_entry.feat_column_id, feat_column.row_id)
         self.assertEqual(index_catalog_entry.feat_column, feat_column)
 
         # Test on disk index.
@@ -124,10 +124,10 @@ class CreateIndexTest(unittest.TestCase):
             index_catalog_entry.type, index_catalog_entry.name
         )
         secondary_index_entry = CatalogManager().get_table_catalog_entry(
-            None, secondary_index_tb_name
+            secondary_index_tb_name
         )
         self.assertEqual(
-            index_catalog_entry.secondary_index_id, secondary_index_entry.id
+            index_catalog_entry.secondary_index_id, secondary_index_entry.row_id
         )
         self.assertEqual(index_catalog_entry.secondary_index, secondary_index_entry)
 
@@ -157,6 +157,4 @@ class CreateIndexTest(unittest.TestCase):
         secondary_index_tb_name = "secondary_index_{}_{}".format(
             "HNSW", "testCreateIndexName"
         )
-        self.assertFalse(
-            CatalogManager().check_table_exists(None, secondary_index_tb_name)
-        )
+        self.assertFalse(CatalogManager().check_table_exists(secondary_index_tb_name))

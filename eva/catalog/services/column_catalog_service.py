@@ -50,6 +50,6 @@ class ColumnCatalogService(BaseService):
 
     def filter_entries_by_table(self, table: TableCatalog) -> List[ColumnCatalog]:
         try:
-            return self.model.query.filter(self.model._table_id == table.id).all()
+            return self.model.query.filter(self.model._table_id == table.row_id).all()
         except NoResultFound:
             return None

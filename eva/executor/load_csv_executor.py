@@ -48,7 +48,10 @@ class LoadCSVExecutor(AbstractExecutor):
         table_info = self.node.table_info
         database_name = table_info.database_name
         table_name = table_info.table_name
-        table_obj = self.catalog.get_table_catalog_entry(database_name, table_name)
+        table_obj = self.catalog.get_table_catalog_entry(
+            table_name,
+            database_name,
+        )
         if table_obj is None:
             error = f"{table_name} does not exist."
             logger.error(error)

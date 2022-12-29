@@ -34,10 +34,14 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         self._rdb_handler: SQLStorageEngine = SQLStorageEngine()
 
     def _get_metadata_table(self, table: TableCatalog):
-        return CatalogManager().get_media_metadata_table_catalog_entry(table)
+        return CatalogManager().get_multimedia_metadata_table_catalog_entry(table)
 
     def _create_metadata_table(self, table: TableCatalog):
-        return CatalogManager().create_media_metadata_table_catalog_entry(table)
+        return (
+            CatalogManager().create_and_insert_multimedia_metadata_table_catalog_entry(
+                table
+            )
+        )
 
     def _xform_file_url_to_file_name(self, file_url: Path) -> str:
         # convert media_path to file name

@@ -60,7 +60,7 @@ class TableCatalogService(BaseService):
         Returns:
            TableCatalog
         """
-        return self.model.query.filter(self.model._id == table_id).one()
+        return self.model.query.filter(self.model._row_id == table_id).one()
 
     def get_entry_by_name(self, database_name, table_name):
         """

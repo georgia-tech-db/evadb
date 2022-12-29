@@ -38,7 +38,7 @@ class IndexCatalogService(BaseService):
 
     def get_entry_by_id(self, id: int):
         try:
-            return self.model.query.filter(self.model._id == id).one()
+            return self.model.query.filter(self.model._row_id == id).one()
         except NoResultFound:
             return None
 

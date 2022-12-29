@@ -67,7 +67,7 @@ class StatementBinderContext:
             table_name (str): name of the table
         """
         self._check_duplicate_alias(alias)
-        table_obj = self._catalog.get_table_catalog_entry(None, table_name)
+        table_obj = self._catalog.get_table_catalog_entry(table_name)
         self._table_alias_map[alias] = table_obj
 
     def add_derived_table_alias(

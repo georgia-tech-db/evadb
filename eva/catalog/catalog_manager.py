@@ -121,14 +121,14 @@ class CatalogManager(object):
         ] + column_list
 
         for column in column_list:
-            column.table_id = table_entry.id
+            column.table_id = table_entry.row_id
         column_list = self._column_service.insert_entries(column_list)
 
         table_entry.schema = column_list
         return table_entry
 
     def get_table_catalog_entry(
-        self, database_name: str, table_name: str
+        self, table_name: str, database_name: str = None
     ) -> TableCatalog:
         """
         Returns the table catalog entry for the given table name
@@ -146,7 +146,7 @@ class CatalogManager(object):
             return None
         # we are forced to set schema every time table_entry is fetched
         # ToDo: maybe keep schema as a part of persistent table_entry object
-        df_columns = self._column_service.filter_entries_by_table_id(table_entry.id)
+        df_columns = self._column_service.filter_entries_by_table_id(table_entry.row_id)
         table_entry.schema = df_columns
         return table_entry
 
@@ -166,7 +166,7 @@ class CatalogManager(object):
     def rename_table_catalog_entry(self, curr_table: TableCatalog, new_name: TableInfo):
         return self._table_catalog_service.rename_entry(curr_table, new_name.table_name)
 
-    def check_table_exists(self, database_name: str, table_name: str):
+    def check_table_exists(self, table_name: str, database_name: str = None):
         table_entry = self._table_catalog_service.get_entry_by_name(
             database_name, table_name
         )
@@ -184,7 +184,7 @@ class CatalogManager(object):
         self, table_obj: TableCatalog, col_name: str
     ) -> ColumnCatalog:
         col_obj = self._column_service.filter_entry_by_table_id_and_name(
-            table_obj.id, col_name
+            table_obj.row_id, col_name
         )
         if col_obj:
             return col_obj
@@ -220,7 +220,7 @@ class CatalogManager(object):
 
         udf_entry = self._udf_service.insert_entry(name, impl_file_path, type)
         for udf_io in udf_io_list:
-            udf_io.udf_id = udf_entry.id
+            udf_io.udf_id = udf_entry.row_id
         self._udf_io_service.insert_entries(udf_io_list)
         return udf_entry
 
@@ -264,7 +264,7 @@ class CatalogManager(object):
                     type(udf_obj)
                 )
             )
-        return self._udf_io_service.get_input_entries_by_udf_id(udf_obj.id)
+        return self._udf_io_service.get_input_entries_by_udf_id(udf_obj.row_id)
 
     def get_udf_io_catalog_output_entries(
         self, udf_obj: UdfCatalog
@@ -276,7 +276,7 @@ class CatalogManager(object):
                     type(udf_obj)
                 )
             )
-        return self._udf_io_service.get_output_entries_by_udf_id(udf_obj.id)
+        return self._udf_io_service.get_output_entries_by_udf_id(udf_obj.row_id)
 
     """ Index related services. """
 
@@ -291,8 +291,8 @@ class CatalogManager(object):
         index_catalog_entry = self._index_service.insert_entry(
             name, save_file_path, index_type
         )
-        index_catalog_entry.secondary_index_id = secondary_index_table.id
-        index_catalog_entry.feat_column_id = feat_column.id
+        index_catalog_entry.secondary_index_id = secondary_index_table.row_id
+        index_catalog_entry.feat_column_id = feat_column.row_id
         return index_catalog_entry
 
     def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
@@ -392,7 +392,7 @@ class CatalogManager(object):
             is_input=is_input,
         )
 
-    def create_multimedia_table_catalog_entry(
+    def create_and_insert_multimedia_table_catalog_entry(
         self, name: str, format_type: FileFormatType
     ) -> TableCatalog:
         """Create a table catalog entry for the multimedia table.
@@ -421,7 +421,7 @@ class CatalogManager(object):
             TableInfo(name), columns, table_type=table_type
         )
 
-    def get_media_metadata_table_catalog_entry(
+    def get_multimedia_metadata_table_catalog_entry(
         self, input_table: TableCatalog
     ) -> TableCatalog:
         """Get table catalog entry for multimedia metadata table.
@@ -434,7 +434,7 @@ class CatalogManager(object):
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
-        obj = self.get_table_catalog_entry(None, media_metadata_name)
+        obj = self.get_table_catalog_entry(media_metadata_name)
         if not obj:
             err = f"Table with name {media_metadata_name} does not exist in catalog"
             logger.exception(err)
@@ -442,7 +442,7 @@ class CatalogManager(object):
 
         return obj
 
-    def create_media_metadata_table_catalog_entry(
+    def create_and_insert_multimedia_metadata_table_catalog_entry(
         self, input_table: TableCatalog
     ) -> TableCatalog:
         """Create and insert table catalog entry for multimedia metadata table.
@@ -457,7 +457,7 @@ class CatalogManager(object):
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
-        obj = self.get_table_catalog_entry(None, media_metadata_name)
+        obj = self.get_table_catalog_entry(media_metadata_name)
         if obj:
             err_msg = f"Table with name {media_metadata_name} already exists"
             logger.exception(err_msg)

@@ -39,7 +39,7 @@ class DropExecutor(AbstractExecutor):
         table_info: TableInfo = self.node.table_infos[0]
 
         if not catalog_manager.check_table_exists(
-            table_info.database_name, table_info.table_name
+            table_info.table_name, table_info.database_name
         ):
             err_msg = "Table: {} does not exist".format(table_info)
             if self.node.if_exists:
@@ -51,7 +51,7 @@ class DropExecutor(AbstractExecutor):
 
         try:
             table_obj = catalog_manager.get_table_catalog_entry(
-                table_info.database_name, table_info.table_name
+                table_info.table_name, table_info.database_name
             )
             storage_engine = StorageEngine.factory(table_obj)
         except RuntimeError as err:

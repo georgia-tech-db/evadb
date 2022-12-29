@@ -118,11 +118,10 @@ class CreateIndexExecutor(AbstractExecutor):
                 self.node.index_type, self.node.name
             )
             if catalog_manager.check_table_exists(
-                None,
                 secondary_index_tb_name,
             ):
                 secondary_index_catalog_entry = catalog_manager.get_table_catalog_entry(
-                    None, secondary_index_tb_name
+                    secondary_index_tb_name
                 )
                 storage_engine = StorageEngine.factory(secondary_index_catalog_entry)
                 storage_engine.drop(secondary_index_catalog_entry)
