@@ -137,27 +137,27 @@ class SelectStatement(AbstractStatement):
             for expr in self._orderby_list:
                 _orderby_list_str += str(expr)
 
-        print_str = "SELECT {}FROM {}".format(target_list_str, str(self._from_table))
+        select_str = "SELECT {}FROM {}".format(target_list_str, str(self._from_table))
 
         if self._where_clause is not None:
-            print_str += " WHERE " + str(self._where_clause)
-            
+            select_str += " WHERE " + str(self._where_clause)
+
         if self._union_link is not None:
             if not self._union_all:
-                print_str += "\nUNION\n" + str(self._union_link)
+                select_str += "\nUNION\n" + str(self._union_link)
             else:
-                print_str += "\nUNION ALL\n" + str(self._union_link)
+                select_str += "\nUNION ALL\n" + str(self._union_link)
 
         if self._groupby_clause is not None:
-            print_str += " GROUP BY " + str(self._groupby_clause)
+            select_str += " GROUP BY " + str(self._groupby_clause)
 
         if self._orderby_list is not None:
-            print_str += " ORDER BY " + _orderby_list_str
+            select_str += " ORDER BY " + _orderby_list_str
 
         if self._limit_count is not None:
-            print_str += " LIMIT " + str(self._limit_count)
+            select_str += " LIMIT " + str(self._limit_count)
 
-        return print_str
+        return select_str
 
     def __eq__(self, other):
         if not isinstance(other, SelectStatement):
