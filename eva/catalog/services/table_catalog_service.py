@@ -114,7 +114,7 @@ class TableCatalogService(BaseService):
         Returns:
            TableCatalog
         """
-        entry = self.model.query.filter(self.model._id == table_id).one()
+        entry = self.model.query.filter(self.model._row_id == table_id).one()
         return self._table_catalog_object_to_table_catalog_entry(entry)
 
     def get_entry_by_name(self, database_name, table_name):

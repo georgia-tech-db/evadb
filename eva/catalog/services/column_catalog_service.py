@@ -91,10 +91,13 @@ class ColumnCatalogService(BaseService):
         self, table: TableCatalogEntry
     ) -> List[ColumnCatalogEntry]:
         try:
-            entries = self.model.query.filter(self.model._table_id == table.id).all()
+            entries = self.model.query.filter(
+                self.model._table_id == table.row_id
+            ).all()
             return [
                 self._column_catalog_object_to_column_catalog_entry(entry)
                 for entry in entries
             ]
+
         except NoResultFound:
             return None

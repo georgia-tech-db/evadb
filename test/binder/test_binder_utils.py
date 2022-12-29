@@ -28,7 +28,8 @@ class BinderUtilsTest(unittest.TestCase):
         catalog.get_table_catalog_entry.return_value = obj = MagicMock()
         bind_table_info(video)
         catalog.get_table_catalog_entry.assert_called_with(
-            video.database_name, video.table_name
+            video.table_name,
+            video.database_name,
         )
         self.assertEqual(video.table_obj, obj)
 

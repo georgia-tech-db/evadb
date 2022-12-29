@@ -49,7 +49,7 @@ class StatementBinderTests(unittest.TestCase):
         mock_check = ctx._check_duplicate_alias = MagicMock()
         ctx.add_table_alias("alias", "table_name")
         mock_check.assert_called_with("alias")
-        mock_get.assert_called_with(None, "table_name")
+        mock_get.assert_called_with("table_name")
         self.assertEqual(ctx._table_alias_map["alias"], "table_obj")
 
     def test_add_derived_table_alias(self):

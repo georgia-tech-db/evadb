@@ -52,10 +52,10 @@ class SimilarityTests(unittest.TestCase):
 
         # Inject data.
         base_table_catalog_entry = CatalogManager().get_table_catalog_entry(
-            None, "testSimilarityTable"
+            "testSimilarityTable"
         )
         feature_table_catalog_entry = CatalogManager().get_table_catalog_entry(
-            None, "testSimilarityFeatureTable"
+            "testSimilarityFeatureTable"
         )
         storage_engine = StorageEngine.factory(base_table_catalog_entry)
         for _ in range(5):

@@ -34,7 +34,7 @@ class CatalogModelsTest(unittest.TestCase):
         self.assertEqual(df_col.name, "name")
         self.assertEqual(df_col.type, ColumnType.TEXT)
         self.assertEqual(df_col.table_id, 1)
-        self.assertEqual(df_col.id, None)
+        self.assertEqual(df_col.row_id, None)
         self.assertEqual(str(df_col), "Column: (name, TEXT, False, None[1, 2])")
 
     def test_df_equality(self):
@@ -76,7 +76,7 @@ class CatalogModelsTest(unittest.TestCase):
 
         self.assertEqual(table_catalog_entry.name, "name")
         self.assertEqual(table_catalog_entry.file_url, "eva_dataset")
-        self.assertEqual(table_catalog_entry.id, None)
+        self.assertEqual(table_catalog_entry.row_id, None)
         self.assertEqual(table_catalog_entry.identifier_column, "id")
         self.assertEqual(table_catalog_entry.schema, schema)
         self.assertEqual(table_catalog_entry.table_type, TableType.VIDEO_DATA)
@@ -107,7 +107,7 @@ class CatalogModelsTest(unittest.TestCase):
 
     def test_udf(self):
         udf = UdfCatalog("udf", "fasterRCNN", "ObjectDetection")
-        self.assertEqual(udf.id, None)
+        self.assertEqual(udf.row_id, None)
         self.assertEqual(udf.impl_file_path, "fasterRCNN")
         self.assertEqual(udf.name, "udf")
         self.assertEqual(udf.type, "ObjectDetection")
@@ -133,7 +133,7 @@ class CatalogModelsTest(unittest.TestCase):
         udf_io = UdfIOCatalog(
             "name", ColumnType.NDARRAY, True, NdArrayType.UINT8, [2, 3], True, 1
         )
-        self.assertEqual(udf_io.id, None)
+        self.assertEqual(udf_io.row_id, None)
         self.assertEqual(udf_io.udf_id, 1)
         self.assertEqual(udf_io.is_input, True)
         self.assertEqual(udf_io.is_nullable, True)
@@ -160,7 +160,7 @@ class CatalogModelsTest(unittest.TestCase):
 
     def test_index(self):
         index = IndexCatalog("index", "FaissSavePath", "HNSW")
-        self.assertEqual(index.id, None)
+        self.assertEqual(index.row_id, None)
         self.assertEqual(index.name, "index")
         self.assertEqual(index.save_file_path, "FaissSavePath")
         self.assertEqual(index.type, "HNSW")

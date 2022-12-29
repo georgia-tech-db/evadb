@@ -47,7 +47,8 @@ def bind_table_info(table_info: TableInfo) -> TableCatalog:
     """
     catalog = CatalogManager()
     obj = catalog.get_table_catalog_entry(
-        table_info.database_name, table_info.table_name
+        table_info.table_name,
+        table_info.database_name,
     )
 
     # Users should not be allowed to directly access or modify the SYSTEM tables, as

@@ -64,7 +64,7 @@ class CatalogManagerTests(unittest.TestCase):
     def test_create_multimedia_table_catalog_entry(self, mock):
         x = CatalogManager()
         name = "myvideo"
-        x.create_multimedia_table_catalog_entry(
+        x.create_and_insert_multimedia_table_catalog_entry(
             name=name, format_type=FileFormatType.VIDEO
         )
 
@@ -100,7 +100,7 @@ class CatalogManagerTests(unittest.TestCase):
             table_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
         )
         for column in columns:
-            column.table_id = ds_mock.return_value.insert_entry.return_value.id
+            column.table_id = ds_mock.return_value.insert_entry.return_value.row_id
 
         dcs_mock.return_value.insert_entries.assert_called_with([ANY] + columns)
 
@@ -120,17 +120,20 @@ class CatalogManagerTests(unittest.TestCase):
 
         database_name = "database"
         schema = [1, 2, 3]
-        id = 1
-        table_obj = MagicMock(id=id, schema=None)
+        row_id = 1
+        table_obj = MagicMock(row_id=row_id, schema=None)
         ds_mock.return_value.get_entry_by_name.return_value = table_obj
         dcs_mock.return_value.filter_entries_by_table_id.return_value = schema
 
-        actual = catalog.get_table_catalog_entry(database_name, table_name)
+        actual = catalog.get_table_catalog_entry(
+            table_name,
+            database_name,
+        )
         ds_mock.return_value.get_entry_by_name.assert_called_with(
             database_name, table_name
         )
-        dcs_mock.return_value.filter_entries_by_table_id.assert_called_with(id)
-        self.assertEqual(actual.id, id)
+        dcs_mock.return_value.filter_entries_by_table_id.assert_called_with(row_id)
+        self.assertEqual(actual.row_id, row_id)
         self.assertEqual(actual.schema, schema)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
@@ -147,7 +150,7 @@ class CatalogManagerTests(unittest.TestCase):
 
         ds_mock.return_value.get_entry_by_name.return_value = table_obj
 
-        actual = catalog.get_table_catalog_entry(database_name, table_name)
+        actual = catalog.get_table_catalog_entry(table_name, database_name)
         ds_mock.return_value.get_entry_by_name.assert_called_with(
             database_name, table_name
         )
@@ -200,7 +203,7 @@ class CatalogManagerTests(unittest.TestCase):
         mock_func = udf_mock.return_value.get_output_entries_by_udf_id
         udf_obj = MagicMock(spec=UdfCatalog)
         CatalogManager().get_udf_io_catalog_output_entries(udf_obj)
-        mock_func.assert_called_once_with(udf_obj.id)
+        mock_func.assert_called_once_with(udf_obj.row_id)
 
         # should raise error
         with self.assertRaises(ValueError):
@@ -211,7 +214,7 @@ class CatalogManagerTests(unittest.TestCase):
         mock_func = udf_mock.return_value.get_input_entries_by_udf_id
         udf_obj = MagicMock(spec=UdfCatalog)
         CatalogManager().get_udf_io_catalog_input_entries(udf_obj)
-        mock_func.assert_called_once_with(udf_obj.id)
+        mock_func.assert_called_once_with(udf_obj.row_id)
 
         # should raise error
         with self.assertRaises(ValueError):
