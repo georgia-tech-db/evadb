@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from dataclasses import dataclass, field
-from typing import List
+from dataclasses import dataclass
+from typing import Tuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
@@ -58,7 +58,7 @@ class UdfIOCatalog(BaseModel):
         type: ColumnType,
         is_nullable: bool = False,
         array_type: NdArrayType = None,
-        array_dimensions: List[int] = None,
+        array_dimensions: Tuple[int] = None,
         is_input: bool = True,
         udf_id: int = None,
     ):
@@ -66,38 +66,18 @@ class UdfIOCatalog(BaseModel):
         self._type = type
         self._is_nullable = is_nullable
         self._array_type = array_type
-        self.array_dimensions = array_dimensions or str([])
+        self.array_dimensions = array_dimensions or str(())
         self._is_input = is_input
         self._udf_id = udf_id
-
-    @property
-    def row_id(self):
-        return self._row_id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def is_nullable(self):
-        return self._is_nullable
-
-    @property
-    def array_type(self):
-        return self._array_type
 
     @property
     def array_dimensions(self):
         return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
-    def array_dimensions(self, value: List[int]):
+    def array_dimensions(self, value: Tuple[int]):
         # Refer df_column.py:array_dimensions
-        if not isinstance(value, list):
+        if not isinstance(value, tuple):
             self._array_dimensions = str(value)
         else:
             dimensions = []
@@ -106,45 +86,18 @@ class UdfIOCatalog(BaseModel):
                     dimensions.append(None)
                 else:
                     dimensions.append(dim)
-            self._array_dimensions = str(dimensions)
-
-    @property
-    def is_input(self):
-        return self._is_input
-
-    @property
-    def udf_id(self):
-        return self._udf_id
-
-    @udf_id.setter
-    def udf_id(self, value):
-        self._udf_id = value
-
-    def __str__(self):
-        column_str = "\tColumn: (%s, %s, %s, %s" % (
-            self._name,
-            self._type.name,
-            self._is_nullable,
-            self._is_input,
-        )
-        if self.type == ColumnType.NDARRAY:
-            column_str = "{} {} {}".format(
-                column_str, self.array_type, self.array_dimensions
-            )
-        column_str += ")\n"
-
-        return column_str
+            self._array_dimensions = str(tuple(dimensions))
 
     def as_dataclass(self) -> "UdfIOCatalogEntry":
         return UdfIOCatalogEntry(
-            row_id=self.row_id,
-            name=self.name,
-            type=self.type,
-            is_nullable=self.is_nullable,
-            array_type=self.array_type,
+            row_id=self._row_id,
+            name=self._name,
+            type=self._type,
+            is_nullable=self._is_nullable,
+            array_type=self._array_type,
             array_dimensions=self.array_dimensions,
-            is_input=self.is_input,
-            udf_id=self.udf_id,
+            is_input=self._is_input,
+            udf_id=self._udf_id,
         )
 
 
@@ -156,12 +109,12 @@ class UdfIOCatalogEntry:
 
     name: str
     type: ColumnType
-    row_id: int = None
     is_nullable: bool = False
     array_type: NdArrayType = None
-    array_dimensions: List[int] = field(compare=False, default_factory=list)
+    array_dimensions: Tuple[int] = None
     is_input: bool = True
     udf_id: int = None
+    row_id: int = None
 
     def display_format(self):
         data_type = self.type.name

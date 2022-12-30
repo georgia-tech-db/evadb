@@ -147,30 +147,28 @@ class ParserTests(unittest.TestCase):
             TableInfo("Persons"),
             True,
             [
-                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, [], unique_cci),
+                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, (), unique_cci),
                 ColumnDefinition(
-                    "Frame_Data", ColumnType.TEXT, None, [10], expected_cci
+                    "Frame_Data", ColumnType.TEXT, None, (10,), expected_cci
                 ),
                 ColumnDefinition(
-                    "Frame_Value", ColumnType.FLOAT, None, [1000, 201], expected_cci
+                    "Frame_Value", ColumnType.FLOAT, None, (1000, 201), expected_cci
                 ),
                 ColumnDefinition(
                     "Frame_Array",
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
-                    [5, 100, 2432, 4324, 100],
+                    (5, 100, 2432, 4324, 100),
                     expected_cci,
                 ),
             ],
         )
-        expected_stmt_str = "CREATE TABLE Persons (True)"
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
-            self.assertEqual(str(eva_statement_list[0]), expected_stmt_str)
             self.assertEqual(eva_statement_list[0], expected_stmt)
 
     def test_rename_statement(self):
@@ -525,16 +523,16 @@ class ParserTests(unittest.TestCase):
                     "Frame_Array",
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
-                    [3, 256, 256],
+                    (3, 256, 256),
                     expected_cci,
                 )
             ],
             [
                 ColumnDefinition(
-                    "Labels", ColumnType.NDARRAY, NdArrayType.STR, [10], expected_cci
+                    "Labels", ColumnType.NDARRAY, NdArrayType.STR, (10,), expected_cci
                 ),
                 ColumnDefinition(
-                    "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4], expected_cci
+                    "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, (10, 4), expected_cci
                 ),
             ],
             Path("data/fastrcnn.py"),
@@ -699,10 +697,10 @@ class ParserTests(unittest.TestCase):
                     "frame",
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
-                    [3, 256, 256],
+                    (3, 256, 256),
                 )
             ],
-            [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, [10])],
+            [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, (10))],
             Path("data/fastrcnn.py"),
             "Classification",
         )

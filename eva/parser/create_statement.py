@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from typing import List, Tuple
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.parser.statement import AbstractStatement
@@ -47,13 +47,13 @@ class ColumnDefinition:
         col_name: str,
         col_type: ColumnType,
         col_array_type: NdArrayType,
-        col_dim: List[int],
+        col_dim: Tuple[int],
         cci: ColConstraintInfo = ColConstraintInfo(),
     ):
         self._name = col_name
         self._type = col_type
         self._array_type = col_array_type
-        self._dimension = col_dim or []
+        self._dimension = col_dim or ()
         self._cci = cci
 
     @property
@@ -94,9 +94,7 @@ class ColumnDefinition:
         )
 
     def __hash__(self) -> int:
-        return hash(
-            (self.name, self.type, self.array_type, tuple(self.dimension), self.cci)
-        )
+        return hash((self.name, self.type, self.array_type, self.dimension, self.cci))
 
 
 class CreateTableStatement(AbstractStatement):

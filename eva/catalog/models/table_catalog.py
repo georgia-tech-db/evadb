@@ -14,14 +14,13 @@
 # limitations under the License.
 from dataclasses import dataclass, field
 from typing import List
+
 from sqlalchemy import Column, Enum, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 
 class TableCatalog(BaseModel):
@@ -36,7 +35,7 @@ class TableCatalog(BaseModel):
 
     _name = Column("name", String(100), unique=True)
     _file_url = Column("file_url", String(100))
-    _unique_identifier_column = Column("identifier_column", String(100))
+    _identifier_column = Column("identifier_column", String(100))
     _table_type = Column("table_type", Enum(TableType))
 
     # the child table containing information about the columns of the each table
@@ -46,60 +45,25 @@ class TableCatalog(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, file_url: str, table_type: int, identifier_id="id"):
+    def __init__(
+        self, name: str, file_url: str, table_type: int, identifier_column="id"
+    ):
         self._name = name
         self._file_url = file_url
-        self._schema = None
-        self._unique_identifier_column = identifier_id
+        self._identifier_column = identifier_column
         self._table_type = table_type
 
-    @property
-    def schema(self):
-        return self._schema
-
-    @schema.setter
-    def schema(self, column_list):
-        self._schema = DataFrameSchema(self._name, column_list)
-
-    @property
-    def row_id(self):
-        return self._row_id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def file_url(self):
-        return self._file_url
-
-    @property
-    def columns(self):
-        return self._columns
-
-    @property
-    def identifier_column(self):
-        return self._unique_identifier_column
-
-    @property
-    def table_type(self):
-        return self._table_type
-
     def as_dataclass(self) -> "TableCatalogEntry":
-        column_entries = [
-            col_obj.as_dataclass()
-            for col_obj in self.columns
-        ]
-        schema = DataFrameSchema(self.name, column_entries)
+        column_entries = [col_obj.as_dataclass() for col_obj in self._columns]
         return TableCatalogEntry(
-            row_id=self.row_id,
-            name=self.name,
-            file_url=self.file_url,
-            schema=schema,
-            identifier_column=self.identifier_column,
-            table_type=self.table_type,
+            row_id=self._row_id,
+            name=self._name,
+            file_url=self._file_url,
+            identifier_column=self._identifier_column,
+            table_type=self._table_type,
             columns=column_entries,
         )
+
 
 @dataclass(unsafe_hash=True)
 class TableCatalogEntry:
@@ -111,6 +75,5 @@ class TableCatalogEntry:
     file_url: str
     table_type: TableType
     identifier_column: str = "id"
-    row_id: int = None
     columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
-    schema: DataFrameSchema = field(compare=False, default=None)
+    row_id: int = None

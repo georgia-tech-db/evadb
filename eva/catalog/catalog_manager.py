@@ -15,17 +15,18 @@
 from pathlib import Path
 from typing import List
 
-from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
+from eva.catalog.catalog_type import ColumnType, IndexType, TableType
 from eva.catalog.catalog_utils import (
     get_image_table_column_definitions,
     get_video_table_column_definitions,
+    xform_column_definitions_to_catalog_entries,
 )
 from eva.catalog.models.base_model import drop_db, init_db
-from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
-from eva.catalog.models.index_catalog import IndexCatalog
-from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.udf_catalog import UdfCatalog
-from eva.catalog.models.udf_io_catalog import UdfIOCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.index_catalog import IndexCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
 from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
@@ -91,10 +92,10 @@ class CatalogManager(object):
         self,
         name: str,
         file_url: str,
-        column_list: List[ColumnCatalog],
+        column_list: List[ColumnCatalogEntry],
         identifier_column="id",
         table_type=TableType.VIDEO_DATA,
-    ) -> TableCatalog:
+    ) -> TableCatalogEntry:
         """A new entry is added to the table catalog and persisted in the database.
         The schema field is set before the object is returned."
 
@@ -105,7 +106,7 @@ class CatalogManager(object):
             identifier_column (str):  A unique identifier column for each row
             table_type (TableType): type of the table, video, images etc
         Returns:
-            The persisted TableCatalog object with the id field populated.
+            The persisted TableCatalogEntry object with the id field populated.
         """
 
         # Append row_id to table column list.
@@ -116,38 +117,32 @@ class CatalogManager(object):
         table_entry = self._table_catalog_service.insert_entry(
             name,
             file_url,
-            identifier_id=identifier_column,
+            identifier_column=identifier_column,
             table_type=table_type,
             column_list=column_list,
         )
 
-        table_entry.schema = column_list
         return table_entry
 
     def get_table_catalog_entry(
         self, table_name: str, database_name: str = None
-    ) -> TableCatalog:
+    ) -> TableCatalogEntry:
         """
         Returns the table catalog entry for the given table name
         Arguments:
             table_name (str): name of the table
 
         Returns:
-            TableCatalog
+            TableCatalogEntry
         """
 
         table_entry = self._table_catalog_service.get_entry_by_name(
             database_name, table_name
         )
-        if table_entry is None:
-            return None
-        # we are forced to set schema every time table_entry is fetched
-        # ToDo: maybe keep schema as a part of persistent table_entry object
-        df_columns = self._column_service.filter_entries_by_table_id(table_entry.row_id)
-        table_entry.schema = df_columns
+
         return table_entry
 
-    def delete_table_catalog_entry(self, table_entry: TableCatalog) -> bool:
+    def delete_table_catalog_entry(self, table_entry: TableCatalogEntry) -> bool:
         """
         This method deletes the table along with its columns from table catalog
         and column catalog respectively
@@ -160,7 +155,9 @@ class CatalogManager(object):
         """
         return self._table_catalog_service.delete_entry(table_entry)
 
-    def rename_table_catalog_entry(self, curr_table: TableCatalog, new_name: TableInfo):
+    def rename_table_catalog_entry(
+        self, curr_table: TableCatalogEntry, new_name: TableInfo
+    ):
         return self._table_catalog_service.rename_entry(curr_table, new_name.table_name)
 
     def check_table_exists(self, table_name: str, database_name: str = None):
@@ -178,8 +175,8 @@ class CatalogManager(object):
     "Column catalog services"
 
     def get_column_catalog_entry(
-        self, table_obj: TableCatalog, col_name: str
-    ) -> ColumnCatalog:
+        self, table_obj: TableCatalogEntry, col_name: str
+    ) -> ColumnCatalogEntry:
         col_obj = self._column_service.filter_entry_by_table_id_and_name(
             table_obj.row_id, col_name
         )
@@ -188,7 +185,7 @@ class CatalogManager(object):
         else:
             return None
 
-    def get_column_catalog_entries_by_table(self, table_obj: TableCatalog):
+    def get_column_catalog_entries_by_table(self, table_obj: TableCatalogEntry):
         col_entries = self._column_service.filter_entries_by_table(table_obj)
         return col_entries
 
@@ -199,8 +196,8 @@ class CatalogManager(object):
         name: str,
         impl_file_path: str,
         type: str,
-        udf_io_list: List[UdfIOCatalog],
-    ) -> UdfCatalog:
+        udf_io_list: List[UdfIOCatalogEntry],
+    ) -> UdfCatalogEntry:
         """Inserts a UDF catalog entry along with UDF_IO entries.
         It persists the entry to the database.
 
@@ -209,10 +206,10 @@ class CatalogManager(object):
             impl_file_path(str): implementation path of the udf
             type(str): what kind of udf operator like classification,
                                                         detection etc
-            udf_io_list(List[UdfIOCatalog]): input/output udf info list
+            udf_io_list(List[UdfIOCatalogEntry]): input/output udf info list
 
         Returns:
-            The persisted UdfCatalog object.
+            The persisted UdfCatalogEntry object.
         """
 
         udf_entry = self._udf_service.insert_entry(name, impl_file_path, type)
@@ -221,7 +218,7 @@ class CatalogManager(object):
         self._udf_io_service.insert_entries(udf_io_list)
         return udf_entry
 
-    def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalog:
+    def get_udf_catalog_entry_by_name(self, name: str) -> UdfCatalogEntry:
         """
         Get the UDF information based on name.
 
@@ -229,7 +226,7 @@ class CatalogManager(object):
              name (str): name of the UDF
 
         Returns:
-            UdfCatalog object
+            UdfCatalogEntry object
         """
         return self._udf_service.get_entry_by_name(name)
 
@@ -252,13 +249,13 @@ class CatalogManager(object):
     "UdfIO services"
 
     def get_udf_io_catalog_input_entries(
-        self, udf_obj: UdfCatalog
-    ) -> List[UdfIOCatalog]:
+        self, udf_obj: UdfCatalogEntry
+    ) -> List[UdfIOCatalogEntry]:
         return self._udf_io_service.get_input_entries_by_udf_id(udf_obj.row_id)
 
     def get_udf_io_catalog_output_entries(
-        self, udf_obj: UdfCatalog
-    ) -> List[UdfIOCatalog]:
+        self, udf_obj: UdfCatalogEntry
+    ) -> List[UdfIOCatalogEntry]:
         return self._udf_io_service.get_output_entries_by_udf_id(udf_obj.row_id)
 
     """ Index related services. """
@@ -268,17 +265,15 @@ class CatalogManager(object):
         name: str,
         save_file_path: str,
         index_type: IndexType,
-        secondary_index_table: TableCatalog,
-        feat_column: ColumnCatalog,
-    ) -> IndexCatalog:
+        secondary_index_table: TableCatalogEntry,
+        feat_column: ColumnCatalogEntry,
+    ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type
+            name, save_file_path, index_type, secondary_index_table, feat_column
         )
-        index_catalog_entry.secondary_index_id = secondary_index_table.row_id
-        index_catalog_entry.feat_column_id = feat_column.row_id
         return index_catalog_entry
 
-    def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalog:
+    def get_index_catalog_entry_by_name(self, name: str) -> IndexCatalogEntry:
         return self._index_service.get_entry_by_name(name)
 
     def drop_index_catalog_entry(self, index_name: str) -> bool:
@@ -295,7 +290,7 @@ class CatalogManager(object):
         columns: List[ColumnDefinition],
         identifier_column: str = None,
         table_type: TableType = TableType.STRUCTURED_DATA,
-    ) -> TableCatalog:
+    ) -> TableCatalogEntry:
         """Create a valid table catalog tuple and insert into the table
 
         Args:
@@ -305,12 +300,10 @@ class CatalogManager(object):
             table_type (TableType, optional): table type. Defaults to TableType.STRUCTURED_DATA.
 
         Returns:
-            TableCatalog: entry that has been inserted into the table catalog
+            TableCatalogEntry: entry that has been inserted into the table catalog
         """
         table_name = table_info.table_name
-        column_catalog_entries = self.xform_column_definitions_to_catalog_entries(
-            columns
-        )
+        column_catalog_entries = xform_column_definitions_to_catalog_entries(columns)
         file_url = str(generate_file_path(table_name))
         table_catalog_entry = self.insert_table_catalog_entry(
             table_name,
@@ -321,64 +314,9 @@ class CatalogManager(object):
         )
         return table_catalog_entry
 
-    def xform_column_definitions_to_catalog_entries(
-        self, col_list: List[ColumnDefinition]
-    ) -> List[ColumnCatalog]:
-        """Create column catalog entry for the input parsed column list.
-        This function does not commit the provided column into catalog table.
-        Will only return in memory list of ColumnCatalog objects
-
-        Arguments:
-            col_list {List[ColumnDefinition]} -- parsed col list to be created
-        """
-        if isinstance(col_list, ColumnDefinition):
-            col_list = [col_list]
-
-        result_list = []
-        for col in col_list:
-            column_entry = ColumnCatalogEntry(
-                name=col.name,
-                type=col.type,
-                array_type=col.array_type,
-                array_dimensions=col.dimension,
-                is_nullable=col.cci.nullable,
-            )
-            # todo: change me
-            result_list.append(column_entry)
-
-        return result_list
-
-    def udf_io(
-        self,
-        io_name: str,
-        data_type: ColumnType,
-        array_type: NdArrayType,
-        dimensions: List[int],
-        is_input: bool,
-    ):
-        """Constructs an in memory udf_io object with given info.
-        This function won't commit this object in the catalog database.
-        If you want to commit it into catalog call insert_udf_catalog_entry with
-        corresponding udf_id and io list
-
-        Arguments:
-            name(str): io name to be created
-            data_type(ColumnType): type of io created
-            array_type(NdArrayType): type of array content
-            dimensions(List[int]):dimensions of the io created
-            is_input(bool): whether a input or output, if true it is an input
-        """
-        return UdfIOCatalog(
-            io_name,
-            data_type,
-            array_type=array_type,
-            array_dimensions=dimensions,
-            is_input=is_input,
-        )
-
     def create_and_insert_multimedia_table_catalog_entry(
         self, name: str, format_type: FileFormatType
-    ) -> TableCatalog:
+    ) -> TableCatalogEntry:
         """Create a table catalog entry for the multimedia table.
         Depending on the type of multimedia, the appropriate "create catalog entry" command is called.
 
@@ -390,7 +328,7 @@ class CatalogManager(object):
             CatalogError: if format_type is not supported
 
         Returns:
-            TableCatalog: newly inserted table catalog entry
+            TableCatalogEntry: newly inserted table catalog entry
         """
         if format_type is FileFormatType.VIDEO:
             columns = get_video_table_column_definitions()
@@ -406,15 +344,15 @@ class CatalogManager(object):
         )
 
     def get_multimedia_metadata_table_catalog_entry(
-        self, input_table: TableCatalog
-    ) -> TableCatalog:
+        self, input_table: TableCatalogEntry
+    ) -> TableCatalogEntry:
         """Get table catalog entry for multimedia metadata table.
         Raise if it does not exists
         Args:
-            input_table (TableCatalog): input media table
+            input_table (TableCatalogEntryEntryEntryEntry): input media table
 
         Returns:
-            TableCatalog: metainfo table entry which is maintained by the system
+            TableCatalogEntry: metainfo table entry which is maintained by the system
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem
@@ -427,17 +365,17 @@ class CatalogManager(object):
         return obj
 
     def create_and_insert_multimedia_metadata_table_catalog_entry(
-        self, input_table: TableCatalog
-    ) -> TableCatalog:
+        self, input_table: TableCatalogEntry
+    ) -> TableCatalogEntry:
         """Create and insert table catalog entry for multimedia metadata table.
          This table is used to store all media filenames and related information. In
          order to prevent direct access or modification by users, it should be
          designated as a SYSTEM_STRUCTURED_DATA type.
         Args:
-            input_table (TableCatalog): input video table
+            input_table (TableCatalogEntry): input video table
 
         Returns:
-            TableCatalog: metainfo table entry which is maintained by the system
+            TableCatalogEntry: metainfo table entry which is maintained by the system
         """
         # use file_url as the metadata table name
         media_metadata_name = Path(input_table.file_url).stem

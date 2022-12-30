@@ -14,6 +14,7 @@
 # limitations under the License.
 from dataclasses import dataclass, field
 from typing import List
+
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
@@ -44,35 +45,13 @@ class UdfCatalog(BaseModel):
         self._impl_file_path = impl_file_path
         self._type = type
 
-    @property
-    def row_id(self):
-        return self._row_id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def impl_file_path(self):
-        return self._impl_file_path
-
-    @property
-    def type(self):
-        return self._type
-
-    def __str__(self):
-        udf_str = "udf: ({}, {}, {})\n".format(
-            self.name, self.impl_file_path, self.type
-        )
-        return udf_str
-
     def as_dataclass(self) -> "UdfCatalogEntry":
         io_list = [attribute.as_dataclass() for attribute in self._attributes]
         return UdfCatalogEntry(
-            row_id=self.row_id,
-            name=self.name,
-            impl_file_path=self.impl_file_path,
-            type=self.type,
+            row_id=self._row_id,
+            name=self._name,
+            impl_file_path=self._impl_file_path,
+            type=self._type,
             attributes=io_list,
         )
 

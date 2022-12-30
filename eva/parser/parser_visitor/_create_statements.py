@@ -215,13 +215,13 @@ class CreateTable(evaql_parserVisitor):
         if ctx.decimalLiteral() is not None:
             dimensions = [self.visit(ctx.decimalLiteral())]
 
-        return dimensions
+        return tuple(dimensions)
 
     def visitLengthTwoDimension(self, ctx: evaql_parser.LengthTwoDimensionContext):
         first_decimal = self.visit(ctx.decimalLiteral(0))
         second_decimal = self.visit(ctx.decimalLiteral(1))
 
-        dimensions = [first_decimal, second_decimal]
+        dimensions = (first_decimal, second_decimal)
         return dimensions
 
     def visitLengthDimensionList(self, ctx: evaql_parser.LengthDimensionListContext):
@@ -232,7 +232,7 @@ class CreateTable(evaql_parserVisitor):
             decimal = self.visit(decimal_literal)
             dimensions.append(decimal)
 
-        return dimensions
+        return tuple(dimensions)
 
     def visitDecimalLiteral(self, ctx: evaql_parser.DecimalLiteralContext):
 

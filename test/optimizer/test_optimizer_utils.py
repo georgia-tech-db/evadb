@@ -22,7 +22,7 @@ from eva.parser.create_statement import ColumnDefinition
 class OptimizerUtilsTest(unittest.TestCase):
     def test_column_definition_to_udf_io(self):
         col = ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
         )
         col_list = [col, col]
         actual = column_definition_to_udf_io(col_list, True)
@@ -31,7 +31,7 @@ class OptimizerUtilsTest(unittest.TestCase):
             self.assertEqual(io.type, ColumnType.NDARRAY)
             self.assertEqual(io.is_nullable, False)
             self.assertEqual(io.array_type, NdArrayType.UINT8)
-            self.assertEqual(io.array_dimensions, [None, None, None])
+            self.assertEqual(io.array_dimensions, (None, None, None))
             self.assertEqual(io.is_input, True)
             self.assertEqual(io.udf_id, None)
 
@@ -42,6 +42,6 @@ class OptimizerUtilsTest(unittest.TestCase):
             self.assertEqual(io.type, ColumnType.NDARRAY)
             self.assertEqual(io.is_nullable, False)
             self.assertEqual(io.array_type, NdArrayType.UINT8)
-            self.assertEqual(io.array_dimensions, [None, None, None])
+            self.assertEqual(io.array_dimensions, (None, None, None))
             self.assertEqual(io.is_input, True)
             self.assertEqual(io.udf_id, None)

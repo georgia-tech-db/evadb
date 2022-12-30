@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.models.storage.batch import Batch
 
 from .abstract_expression import (
@@ -28,7 +28,7 @@ class TupleValueExpression(AbstractExpression):
         col_name: str = None,
         table_alias: str = None,
         col_idx: int = -1,
-        col_object: ColumnCatalog = None,
+        col_object: ColumnCatalogEntry = None,
         col_alias=None,
     ):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
@@ -60,11 +60,11 @@ class TupleValueExpression(AbstractExpression):
         return self._col_name
 
     @property
-    def col_object(self) -> ColumnCatalog:
+    def col_object(self) -> ColumnCatalogEntry:
         return self._col_object
 
     @col_object.setter
-    def col_object(self, value: ColumnCatalog):
+    def col_object(self, value: ColumnCatalogEntry):
         self._col_object = value
 
     @property

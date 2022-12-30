@@ -12,10 +12,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
+
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
@@ -28,70 +29,34 @@ class TableCatalogService(BaseService):
         super().__init__(TableCatalog)
         self._column_service: ColumnCatalogService = ColumnCatalogService()
 
-    @classmethod
-    def _table_catalog_object_to_table_catalog_entry(cls, obj: TableCatalog):
-        if obj is None:
-            return None
-        column_entries = [
-            ColumnCatalogService._column_catalog_object_to_column_catalog_entry(col_obj)
-            for col_obj in obj.columns
-        ]
-        schema = DataFrameSchema(obj.name, column_entries)
-        return TableCatalogEntry(
-            id=obj.id,
-            name=obj.name,
-            file_url=obj.file_url,
-            schema=schema,
-            identifier_column=obj.identifier_column,
-            table_type=obj.table_type,
-            columns=column_entries,
-        )
-
-    # @classmethod
-    # def _table_catalog_entry_to_table_catalog_object(cls, entry: TableCatalogEntry):
-    #     if entry is None:
-    #         return None
-    #     # column_objs = [
-    #     #     ColumnCatalogService._column_catalog_entry_to_column_catalog_object(
-    #     #         col_entry
-    #     #     )
-    #     #     for col_entry in entry.columns
-    #     # ]
-    #     return TableCatalog(
-    #         name=entry.name,
-    #         file_url=entry.file_url,
-    #         identifier_id=entry.identifier_column,
-    #         table_type=entry.table_type,
-    #     )
-
     def insert_entry(
         self,
         name: str,
         file_url: str,
-        identifier_id,
+        identifier_column: str,
         table_type: TableType,
         column_list,
-    ) -> TableCatalog:
+    ) -> TableCatalogEntry:
         """Insert a new table entry into table catalog.
         Arguments:
             name (str): name of the table
             file_url (str): file path of the table.
             table_type (TableType): type of data in the table
         Returns:
-            TableCatalog object
+            TableCatalogEntry
         """
         try:
             table_catalog_obj = self.model(
                 name=name,
                 file_url=file_url,
-                identifier_id=identifier_id,
+                identifier_column=identifier_column,
                 table_type=int(table_type),
             )
             table_catalog_obj = table_catalog_obj.save()
 
             # populate the table_id for all the columns
             for column in column_list:
-                column.table_id = table_catalog_obj.row_id
+                column.table_id = table_catalog_obj._row_id
             column_list = self._column_service.insert_entries(column_list)
 
         except Exception as e:
@@ -102,18 +67,18 @@ class TableCatalogService(BaseService):
         else:
             return table_catalog_obj.as_dataclass()
 
-    def get_entry_by_id(self, table_id) -> TableCatalog:
+    def get_entry_by_id(self, table_id) -> TableCatalogEntry:
         """
         Returns the table by ID
         Arguments:
             table_id (int)
         Returns:
-           TableCatalog
+           TableCatalogEntry
         """
         entry = self.model.query.filter(self.model._row_id == table_id).one()
         return entry.as_dataclass()
 
-    def get_entry_by_name(self, database_name, table_name):
+    def get_entry_by_name(self, database_name, table_name) -> TableCatalogEntry:
         """
         Get the table catalog entry with given table name.
         Arguments:
@@ -121,7 +86,7 @@ class TableCatalogService(BaseService):
             use this field
             table_name (str): name of the table
         Returns:
-            TableCatalog - catalog entry for given table_name
+            TableCatalogEntry - catalog entry for given table_name
         """
         entry = self.model.query.filter(self.model._name == table_name).one_or_none()
         if entry:
@@ -146,7 +111,7 @@ class TableCatalogService(BaseService):
             logger.exception(err_msg)
             raise CatalogError(err_msg)
 
-    def rename_entry(self, table: TableCatalog, new_name: str):
+    def rename_entry(self, table: TableCatalogEntry, new_name: str):
         try:
             table_obj = self.model.query.filter(
                 self.model._row_id == table.row_id
@@ -159,7 +124,7 @@ class TableCatalogService(BaseService):
             logger.error(err_msg)
             raise RuntimeError(err_msg)
 
-    def get_all_entries(self):
+    def get_all_entries(self) -> List[TableCatalogEntry]:
         try:
             entries = self.model.query.all()
             return [entry.as_dataclass() for entry in entries]

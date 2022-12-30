@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.column_catalog import ColumnCatalog, ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalog, TableCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
 
 
@@ -25,7 +25,9 @@ class ColumnCatalogService(BaseService):
     def __init__(self):
         super().__init__(ColumnCatalog)
 
-    def filter_entry_by_table_id_and_name(self, table_id, column_name):
+    def filter_entry_by_table_id_and_name(
+        self, table_id, column_name
+    ) -> ColumnCatalogEntry:
         entry = self.model.query.filter(
             self.model._table_id == table_id,
             self.model._name == column_name,
@@ -34,15 +36,8 @@ class ColumnCatalogService(BaseService):
             return entry.as_dataclass()
         return entry
 
-    def filter_entries_by_table_id(self, table_id: int):
-        """return all the columns for table table_id
-
-        Arguments:
-            table_id {int} -- [table id of the table]
-
-        Returns:
-            List[self.model] -- [the filtered self.models]
-        """
+    def filter_entries_by_table_id(self, table_id: int) -> List[ColumnCatalogEntry]:
+        """return all the columns for table table_id"""
         entries = self.model.query.filter(self.model._table_id == table_id).all()
         return [entry.as_dataclass() for entry in entries]
 
