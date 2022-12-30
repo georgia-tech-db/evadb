@@ -33,28 +33,21 @@ We discuss each part separately.
 The parser firstly generate **syntax tree** from the input string, and
 then tansform syntax tree into **statement**.
 
-The first part of Parser is build from two ANTLR file.
+The first part of Parser is build from a LARK grammar file.
 
-parser/evaql
+parser/eva
 ~~~~~~~~~~~~
 
--  ``evaql_lexer.g4`` - add keywords(eg. CREATE, TABLE) under **Common
+-  ``eva.lark`` - add keywords(eg. CREATE, TABLE) under **Common
    Keywords**
--  ``evaql_parser.g4``
 
-   -  Add new grammar name(eg. createTable) under **ddlStatement**
+   -  Add new grammar rule (eg. create_table)
    -  Write a new grammar, for example:
 
    ::
 
-      createTable
-      : CREATE TABLE
-        ifNotExists?
-        tableName createDefinitions                                  #columnCreateTable
-      ;
+      create_table: CREATE TABLE if_not_exists? table_name create_definitions 
 
--  **Run ``sh script/antlr4/generate_parser.sh`` after modify g4 file**
-   to generate python file for the parser.
 
 --------------
 

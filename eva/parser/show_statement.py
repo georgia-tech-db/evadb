@@ -28,7 +28,13 @@ class ShowStatement(AbstractStatement):
         return self._show_type
 
     def __str__(self):
-        return f"SHOW {self._show_type}"
+        show_str = ""
+        if self.show_type == ShowType.UDFS:
+            show_str = "UDFS"
+        elif self.show_type == ShowType.TABLES:
+            show_str = "TABLES"
+
+        return f"SHOW {show_str}"
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ShowStatement):

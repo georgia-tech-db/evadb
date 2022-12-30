@@ -29,12 +29,6 @@ pipeline {
               '''
           }
         }
-        stage('Generate Parser Files') {
-          
-          steps {
-            sh 'sh script/antlr4/generate_parser.sh'
-          }
-        }
       }
     }
 

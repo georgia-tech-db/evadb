@@ -69,6 +69,38 @@ class ComparisonExpression(AbstractExpression):
         else:
             raise NotImplementedError
 
+    def get_symbol(self) -> str:
+
+        if self.etype == ExpressionType.COMPARE_EQUAL:
+            return "="
+        elif self.etype == ExpressionType.COMPARE_GREATER:
+            return ">"
+        elif self.etype == ExpressionType.COMPARE_LESSER:
+            return "<"
+        elif self.etype == ExpressionType.COMPARE_GEQ:
+            return ">="
+        elif self.etype == ExpressionType.COMPARE_LEQ:
+            return "<="
+        elif self.etype == ExpressionType.COMPARE_NEQ:
+            return "!="
+        elif self.etype == ExpressionType.COMPARE_CONTAINS:
+            return "@>"
+        elif self.etype == ExpressionType.COMPARE_IS_CONTAINED:
+            return "<@"
+        else:
+            raise NotImplementedError
+
+    def __str__(self) -> str:
+        expr_str = "("
+        if self.get_child(0):
+            expr_str += f"{self.get_child(0)}"
+        if self.etype:
+            expr_str += f" {self.get_symbol()} "
+        if self.get_child(1):
+            expr_str += f"{self.get_child(1)}"
+        expr_str += ")"
+        return expr_str
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, ComparisonExpression):

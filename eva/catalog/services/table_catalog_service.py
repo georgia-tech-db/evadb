@@ -41,7 +41,7 @@ class TableCatalogService(BaseService):
                 name=name,
                 file_url=file_url,
                 identifier_id=identifier_id,
-                table_type=int(table_type),
+                table_type=table_type,
             )
             table_catalog_obj = table_catalog_obj.save()
         except Exception as e:

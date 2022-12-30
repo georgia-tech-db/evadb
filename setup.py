@@ -38,16 +38,16 @@ VERSION = VERSION_DICT["VERSION"]
 
 minimal_requirement = [
     "numpy>=1.19.5,<=1.23.5",
-    "opencv-python>=4.5.4.60,!=4.6.0.66",  # bug in easyocr
+    "opencv-python>=4.5.4.60,<4.6.0.66",  # bug in easyocr
     "pandas>=1.1.5",
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0",
     "sqlalchemy-utils>=0.36.6",
-    "antlr4-python3-runtime==4.8",
     "lark>=1.0.0",
     "pyyaml>=5.1",
     "importlib-metadata<5.0",
-    "ray>=1.13.0"
+    "ray>=1.13.0",
+    "aenum>=2.2.0"
 ]
 
 formatter_libs = [
@@ -157,5 +157,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     extras_require=EXTRA_REQUIRES,
     include_package_data=True,
-    package_data={"eva": ["eva.yml"]}
+    package_data={
+        "eva": ["eva.yml", "parser/eva.lark"]
+    }
 )

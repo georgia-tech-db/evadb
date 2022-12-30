@@ -23,7 +23,7 @@ if typing.TYPE_CHECKING:
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
+from eva.parser.types import ParserOrderBySortType, StatementType
 
 
 class SelectStatement(AbstractStatement):
@@ -126,24 +126,47 @@ class SelectStatement(AbstractStatement):
         self._limit_count = limit_count_new
 
     def __str__(self) -> str:
-        print_str = "SELECT {} FROM {}".format(self._target_list, self._from_table)
-        print_str += " WHERE " + str(self._where_clause)
+
+        target_list_str = ""
+        if self._target_list is not None:
+            for expr in self._target_list:
+                target_list_str += str(expr) + ", "
+            target_list_str = target_list_str.rstrip(", ")
+
+        orderby_list_str = ""
+        if self._orderby_list is not None:
+            for expr in self._orderby_list:
+                sort_str = ""
+                if expr[1] == ParserOrderBySortType.ASC:
+                    sort_str = "ASC"
+                elif expr[1] == ParserOrderBySortType.DESC:
+                    sort_str = "DESC"
+                orderby_list_str += str(expr[0]) + " " + sort_str + ", "
+            orderby_list_str = orderby_list_str.rstrip(", ")
+
+        select_str = f"SELECT {target_list_str} FROM {str(self._from_table)}"
+
+        if self._where_clause is not None:
+            select_str += " WHERE " + str(self._where_clause)
+
         if self._union_link is not None:
             if not self._union_all:
-                print_str += "\nUNION\n" + str(self._union_link)
+                select_str += " UNION " + str(self._union_link)
             else:
-                print_str += "\nUNION ALL\n" + str(self._union_link)
+                select_str += " UNION ALL " + str(self._union_link)
 
         if self._groupby_clause is not None:
-            print_str += " GROUP BY " + str(self._groupby_clause)
+            select_str += " GROUP BY " + str(self._groupby_clause)
 
         if self._orderby_list is not None:
-            print_str += " ORDER BY " + str(self._orderby_list)
+            select_str += " ORDER BY " + orderby_list_str
 
         if self._limit_count is not None:
-            print_str += " LIMIT " + str(self._limit_count)
+            select_str += " LIMIT " + str(self._limit_count)
 
-        return print_str
+        select_str = select_str.rstrip(" ")
+
+        return select_str
 
     def __eq__(self, other):
         if not isinstance(other, SelectStatement):

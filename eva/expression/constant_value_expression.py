@@ -14,6 +14,7 @@
 # limitations under the License.
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_type import ColumnType
@@ -57,6 +58,14 @@ class ConstantValueExpression(AbstractExpression):
             return is_equal and all(self.value == other.value)
         else:
             return is_equal and self.value == other.value
+
+    def __str__(self) -> str:
+        expr_str = ""
+        if not isinstance(self._value, np.ndarray):
+            expr_str = f"{str(self._value)}"
+        else:
+            expr_str = f"{np.array_str(self._value)}"
+        return expr_str
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.v_type, str(self.value)))

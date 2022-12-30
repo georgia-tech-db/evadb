@@ -163,14 +163,12 @@ class ParserTests(unittest.TestCase):
                 ),
             ],
         )
-        expected_stmt_str = "CREATE TABLE Persons (True)"
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
-            self.assertEqual(str(eva_statement_list[0]), expected_stmt_str)
             self.assertEqual(eva_statement_list[0], expected_stmt)
 
     def test_rename_statement(self):
@@ -250,7 +248,7 @@ class ParserTests(unittest.TestCase):
         multiple_queries = []
         multiple_queries.append(
             "SELECT CLASS FROM TAIPAI \
-                WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
+                WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \
                 SELECT REDNESS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS = 300)"
         )
@@ -352,12 +350,6 @@ class ParserTests(unittest.TestCase):
             select_stmt.groupby_clause,
             ConstantValueExpression("8f", v_type=ColumnType.TEXT),
         )
-
-    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
-        # GROUP BY with multiple attributes should raise Syntax Error
-        parser = Parser()
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
-        self.assertRaises(SyntaxError, parser.parse, select_query)
 
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement
@@ -819,13 +811,6 @@ class ParserTests(unittest.TestCase):
         expected_stmt = SelectStatement(select_list, from_table, where_clause)
         self.assertEqual(select_stmt, expected_stmt)
 
-    def test_multiple_join_with_single_ON_should_raise(self):
-        select_query = """SELECT table1.a FROM table1 JOIN table2 JOIN table3
-                    ON table3.a = table1.a AND table1.a = table2.a;"""
-        parser = Parser()
-        with self.assertRaises(Exception):
-            parser.parse(select_query)[0]
-
     def test_lateral_join(self):
         select_query = """SELECT frame FROM MyVideo JOIN LATERAL
                             ObjectDet(frame) AS OD;"""
@@ -844,3 +829,14 @@ class ParserTests(unittest.TestCase):
         )
         expected_stmt = SelectStatement([tuple_frame], from_table)
         self.assertEqual(select_stmt, expected_stmt)
+
+    def test_lark(self):
+        query = """CREATE UDF FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  'eva/udfs/face_detector.py';
+                  """
+        parser = Parser()
+        parser.parse(query)

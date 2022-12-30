@@ -77,9 +77,20 @@ class ColumnDefinition:
         return self._cci
 
     def __str__(self):
-        return "{} {} {} {}".format(
-            self._name, self._type, self.array_type, self._dimension
-        )
+        dimension_str = ""
+        if self._dimension is not None:
+            dimension_str += "["
+            for dim in self._dimension:
+                dimension_str += str(dim) + ", "
+            dimension_str = dimension_str.rstrip(", ")
+            dimension_str += "]"
+
+        if self.array_type is None:
+            return "{} {}".format(self._name, self._type)
+        else:
+            return "{} {} {} {}".format(
+                self._name, self._type, self.array_type, dimension_str
+            )
 
     def __eq__(self, other):
         if not isinstance(other, ColumnDefinition):
@@ -119,7 +130,13 @@ class CreateTableStatement(AbstractStatement):
         self._column_list = column_list
 
     def __str__(self) -> str:
-        print_str = "CREATE TABLE {} ({})".format(self._table_info, self._if_not_exists)
+        print_str = "CREATE TABLE {} ({}) \n".format(
+            self._table_info, self._if_not_exists
+        )
+
+        for column in self.column_list:
+            print_str += str(column) + "\n"
+
         return print_str
 
     @property
@@ -149,6 +166,6 @@ class CreateTableStatement(AbstractStatement):
                 super().__hash__(),
                 self.table_info,
                 self.if_not_exists,
-                tuple(self.column_list),
+                tuple(self.column_list or []),
             )
         )
