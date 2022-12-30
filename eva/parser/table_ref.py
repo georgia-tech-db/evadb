@@ -104,9 +104,12 @@ class JoinNode:
         )
 
     def __str__(self) -> str:
-        return "JOIN {} ({}, {}) ON {}".format(
-            self.join_type, self.left, self.right, self.predicate
-        )
+        if self.predicate is not None:
+            return "{} {} {} ON {}".format(
+                self.left, self.join_type, self.right, self.predicate
+            )
+        else:
+            return "{} {} {}".format(self.left, self.join_type, self.right)
 
     def __hash__(self) -> int:
         return hash((self.join_type, self.left, self.right, self.predicate))
@@ -124,6 +127,9 @@ class TableValuedExpression:
     @property
     def do_unnest(self):
         return self._do_unnest
+
+    def __str__(self) -> str:
+        return "{}".format(self._func_expr)
 
     def __eq__(self, other):
         if not isinstance(other, TableValuedExpression):
