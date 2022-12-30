@@ -44,7 +44,7 @@ class DatasetService(BaseService):
                 name=name,
                 file_url=file_url,
                 identifier_id=identifier_id,
-                table_type=int(table_type),
+                table_type=table_type,
             )
             metadata = metadata.save()
         except Exception as e:
