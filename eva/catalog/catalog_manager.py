@@ -231,16 +231,6 @@ class CatalogManager(object):
         return self._udf_service.get_entry_by_name(name)
 
     def delete_udf_catalog_entry_by_name(self, udf_name: str) -> bool:
-        """
-        This method drops the udf entry and corresponding udf_io
-        from the catalog
-
-        Arguments:
-           udf_name: udf name to be dropped.
-
-        Returns:
-           True if successfully deleted else False
-        """
         return self._udf_service.delete_entry_by_name(udf_name)
 
     def get_all_udf_catalog_entries(self):
@@ -371,6 +361,8 @@ class CatalogManager(object):
          This table is used to store all media filenames and related information. In
          order to prevent direct access or modification by users, it should be
          designated as a SYSTEM_STRUCTURED_DATA type.
+         **Note**: this table is managed by the storage engine, so it should not be
+         called elsewhere.
         Args:
             input_table (TableCatalogEntry): input video table
 
