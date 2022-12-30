@@ -99,9 +99,9 @@ class TupleValueExpression(AbstractExpression):
         if self.table_alias:
             expr_str += f"{str(self.table_alias)}."
         if self.col_name:
-            expr_str += f"{str(self.col_name)} "
+            expr_str += f"{str(self.col_name)}"
         if self.col_alias:
-            expr_str += f" as {str(self.col_alias)} "
+            expr_str += f" AS {str(self.col_alias)}"
         expr_str += ""
         return expr_str
 

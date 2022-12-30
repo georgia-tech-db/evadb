@@ -130,7 +130,9 @@ class SelectStatement(AbstractStatement):
         target_list_str = ""
         if self._target_list is not None:
             for expr in self._target_list:
-                target_list_str += str(expr)
+                target_list_str += str(expr) + ", "
+            target_list_str = target_list_str.rstrip(", ")
+            target_list_str += " "
 
         _orderby_list_str = ""
         if self._orderby_list is not None:
@@ -144,9 +146,9 @@ class SelectStatement(AbstractStatement):
 
         if self._union_link is not None:
             if not self._union_all:
-                select_str += "\nUNION\n" + str(self._union_link)
+                select_str += " UNION " + str(self._union_link)
             else:
-                select_str += "\nUNION ALL\n" + str(self._union_link)
+                select_str += " UNION ALL " + str(self._union_link)
 
         if self._groupby_clause is not None:
             select_str += " GROUP BY " + str(self._groupby_clause)
