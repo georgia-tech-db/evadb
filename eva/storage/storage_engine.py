@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import str_to_class
@@ -33,8 +33,8 @@ class StorageEngine:
     }
 
     @classmethod
-    def factory(cls, table_metadata: DataFrameMetadata) -> AbstractStorageEngine:
-        if table_metadata.table_type in cls.storages:
-            return cls.storages[table_metadata.table_type]
+    def factory(cls, table: TableCatalog) -> AbstractStorageEngine:
+        if table.table_type in cls.storages:
+            return cls.storages[table.table_type]
 
-        raise RuntimeError(f"Invalid table type {table_metadata.table_type}")
+        raise RuntimeError(f"Invalid table type {table.table_type}")

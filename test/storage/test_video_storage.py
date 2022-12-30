@@ -18,8 +18,8 @@ from unittest.mock import MagicMock
 import mock
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.storage.storage_engine import StorageEngine
 
 
@@ -29,11 +29,9 @@ class VideoStorageEngineTest(unittest.TestCase):
         self.table = None
 
     def create_sample_table(self):
-        table_info = DataFrameMetadata(
-            "dataset", "dataset", table_type=TableType.VIDEO_DATA
-        )
-        column_1 = DataFrameColumn("id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn(
+        table_info = TableCatalog("dataset", "dataset", table_type=TableType.VIDEO_DATA)
+        column_1 = ColumnCatalog("id", ColumnType.INTEGER, False)
+        column_2 = ColumnCatalog(
             "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
         )
         table_info.schema = [column_1, column_2]

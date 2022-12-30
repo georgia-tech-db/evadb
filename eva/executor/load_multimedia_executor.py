@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
@@ -53,14 +53,16 @@ class LoadMultimediaExecutor(AbstractExecutor):
             table_name = table_info.table_name
             # Sanity check to make sure there is no existing table with same name
             do_create = False
-            table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+            table_obj = self.catalog.get_table_catalog_entry(table_name, database_name)
             if table_obj:
                 msg = f"Adding to an existing table {table_name}."
                 logger.info(msg)
             # Create the catalog entry
             else:
-                table_obj = self.catalog.create_multimedia_table(
-                    table_name, self.media_type
+                table_obj = (
+                    self.catalog.create_and_insert_multimedia_table_catalog_entry(
+                        table_name, self.media_type
+                    )
                 )
                 do_create = True
 
@@ -93,7 +95,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
     def _rollback_load(
         self,
         storage_engine: AbstractStorageEngine,
-        table_obj: DataFrameMetadata,
+        table_obj: TableCatalog,
         do_create: bool,
     ):
         try:

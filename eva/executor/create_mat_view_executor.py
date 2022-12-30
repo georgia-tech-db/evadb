@@ -81,11 +81,13 @@ class CreateMaterializedViewExecutor(AbstractExecutor):
                     )
                 )
 
-            view_metainfo = self.catalog.create_table_metadata(self.node.view, col_defs)
-            storage_engine = StorageEngine.factory(view_metainfo)
-            storage_engine.create(table=view_metainfo)
+            view_catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
+                self.node.view, col_defs
+            )
+            storage_engine = StorageEngine.factory(view_catalog_entry)
+            storage_engine.create(table=view_catalog_entry)
 
             # Populate the view
             for batch in child.exec():
                 batch.drop_column_alias()
-                storage_engine.write(view_metainfo, batch)
+                storage_engine.write(view_catalog_entry, batch)

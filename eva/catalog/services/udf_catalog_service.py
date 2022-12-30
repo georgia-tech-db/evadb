@@ -14,17 +14,17 @@
 # limitations under the License.
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.udf_catalog import UdfCatalog
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
 
-class UdfService(BaseService):
+class UdfCatalogService(BaseService):
     def __init__(self):
-        super().__init__(UdfMetadata)
+        super().__init__(UdfCatalog)
 
-    def create_udf(self, name: str, impl_path: str, type: str) -> UdfMetadata:
-        """Creates a new udf entry
+    def insert_entry(self, name: str, impl_path: str, type: str) -> UdfCatalog:
+        """Insert a new udf entry
 
         Arguments:
             name (str): name of the udf
@@ -32,13 +32,13 @@ class UdfService(BaseService):
             type (str): udf operator kind, classification or detection or etc
 
         Returns:
-            UdfMetadata: Returns the new entry created
+            UdfCatalog: Returns the new entry created
         """
-        metadata = self.model(name, impl_path, type)
-        metadata = metadata.save()
-        return metadata
+        udf_obj = self.model(name, impl_path, type)
+        udf_obj = udf_obj.save()
+        return udf_obj
 
-    def udf_by_name(self, name: str):
+    def get_entry_by_name(self, name: str):
         """return the udf entry that matches the name provided.
            None if no such entry found.
 
@@ -51,7 +51,7 @@ class UdfService(BaseService):
         except NoResultFound:
             return None
 
-    def udf_by_id(self, id: int):
+    def get_entry_by_id(self, id: int):
         """return the udf entry that matches the id provided.
            None if no such entry found.
 
@@ -60,12 +60,12 @@ class UdfService(BaseService):
         """
 
         try:
-            return self.model.query.filter(self.model._id == id).one()
+            return self.model.query.filter(self.model._row_id == id).one()
         except NoResultFound:
             return None
 
-    def drop_udf_by_name(self, name: str):
-        """Drop a udf entry from the catalog udfmetadata
+    def delete_entry_by_name(self, name: str):
+        """Delete a udf entry from the catalog UdfCatalog
 
         Arguments:
             name (str): udf name to be deleted
@@ -74,14 +74,14 @@ class UdfService(BaseService):
             True if successfully deleted else True
         """
         try:
-            udf_record = self.udf_by_name(name)
+            udf_record = self.get_entry_by_name(name)
             udf_record.delete()
         except Exception:
             logger.exception("Delete udf failed for name {}".format(name))
             return False
         return True
 
-    def get_all_udfs(self):
+    def get_all_entries(self):
         try:
             return self.model.query.all()
         except NoResultFound:

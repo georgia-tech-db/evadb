@@ -39,7 +39,7 @@ class DropExecutor(AbstractExecutor):
         table_info: TableInfo = self.node.table_infos[0]
 
         if not catalog_manager.check_table_exists(
-            table_info.database_name, table_info.table_name
+            table_info.table_name, table_info.database_name
         ):
             err_msg = "Table: {} does not exist".format(table_info)
             if self.node.if_exists:
@@ -50,15 +50,15 @@ class DropExecutor(AbstractExecutor):
                 raise ExecutorError(err_msg)
 
         try:
-            table_obj = catalog_manager.get_dataset_metadata(
-                table_info.database_name, table_info.table_name
+            table_obj = catalog_manager.get_table_catalog_entry(
+                table_info.table_name, table_info.database_name
             )
             storage_engine = StorageEngine.factory(table_obj)
         except RuntimeError as err:
             raise ExecutorError(str(err))
         storage_engine.drop(table=table_obj)
 
-        success = catalog_manager.drop_dataset_metadata(table_obj)
+        success = catalog_manager.delete_table_catalog_entry(table_obj)
 
         if not success:
             err_msg = "Failed to drop {}".format(table_info)

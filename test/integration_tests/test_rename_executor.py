@@ -36,18 +36,14 @@ class RenameExecutorTest(unittest.TestCase):
         query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        self.assertTrue(
-            catalog_manager.get_dataset_metadata(None, "MyVideo") is not None
-        )
-        self.assertTrue(catalog_manager.get_dataset_metadata(None, "MyVideo1") is None)
+        self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo") is not None)
+        self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo1") is None)
 
         rename_query = """RENAME TABLE MyVideo TO MyVideo1;"""
         execute_query_fetch_all(rename_query)
 
-        self.assertTrue(catalog_manager.get_dataset_metadata(None, "MyVideo") is None)
-        self.assertTrue(
-            catalog_manager.get_dataset_metadata(None, "MyVideo1") is not None
-        )
+        self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo") is None)
+        self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo1") is not None)
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     # integration test

@@ -51,19 +51,19 @@ class SimilarityTests(unittest.TestCase):
         base_img += 4
 
         # Inject data.
-        base_table_df_metadata = CatalogManager().get_dataset_metadata(
-            None, "testSimilarityTable"
+        base_table_catalog_entry = CatalogManager().get_table_catalog_entry(
+            "testSimilarityTable"
         )
-        feature_table_df_metadata = CatalogManager().get_dataset_metadata(
-            None, "testSimilarityFeatureTable"
+        feature_table_catalog_entry = CatalogManager().get_table_catalog_entry(
+            "testSimilarityFeatureTable"
         )
-        storage_engine = StorageEngine.factory(base_table_df_metadata)
+        storage_engine = StorageEngine.factory(base_table_catalog_entry)
         for _ in range(5):
             storage_engine.write(
-                base_table_df_metadata, Batch(pd.DataFrame([{"data": base_img}]))
+                base_table_catalog_entry, Batch(pd.DataFrame([{"data": base_img}]))
             )
             storage_engine.write(
-                feature_table_df_metadata,
+                feature_table_catalog_entry,
                 Batch(pd.DataFrame([{"features": base_img.astype(np.float32)}])),
             )
             base_img -= 1

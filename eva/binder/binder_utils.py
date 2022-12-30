@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.logging_manager import logger
@@ -35,18 +35,21 @@ class BinderError(Exception):
     pass
 
 
-def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
+def bind_table_info(table_info: TableInfo) -> TableCatalog:
     """
-    Uses catalog to bind the dataset information for given video string.
+    Uses catalog to bind the table information .
 
     Arguments:
-         video_info (TableInfo): video information obtained in SQL query
+         table_info (TableInfo): table information obtained from SQL query
 
     Returns:
-        DataFrameMetadata  -  corresponding metadata for the input table info
+        TableCatalog  -  corresponding table catalog entry for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
+    obj = catalog.get_table_catalog_entry(
+        table_info.table_name,
+        table_info.database_name,
+    )
 
     # Users should not be allowed to directly access or modify the SYSTEM tables, as
     # doing so can lead to the corruption of other tables. These tables include

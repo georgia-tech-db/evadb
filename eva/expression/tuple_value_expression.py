@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.models.storage.batch import Batch
 
 from .abstract_expression import (
@@ -27,25 +27,25 @@ class TupleValueExpression(AbstractExpression):
         self,
         col_name: str = None,
         table_alias: str = None,
-        col_idx: int = None,
-        col_object: DataFrameColumn = None,
+        col_idx: int = -1,
+        col_object: ColumnCatalog = None,
         col_alias=None,
     ):
         super().__init__(ExpressionType.TUPLE_VALUE, rtype=ExpressionReturnType.INVALID)
         self._col_name = col_name
         self._table_alias = table_alias
-        self._table_metadata_id = None
+        self._table_id = None
         self._col_idx = col_idx
         self._col_object = col_object
         self._col_alias = col_alias
 
     @property
-    def table_metadata_id(self) -> int:
-        return self._table_metadata_id
+    def table_id(self) -> int:
+        return self._table_id
 
-    @table_metadata_id.setter
-    def table_metadata_id(self, id: int):
-        self._table_metadata_id = id
+    @table_id.setter
+    def table_id(self, id: int):
+        self._table_id = id
 
     @property
     def table_alias(self) -> str:
@@ -60,11 +60,11 @@ class TupleValueExpression(AbstractExpression):
         return self._col_name
 
     @property
-    def col_object(self) -> DataFrameColumn:
+    def col_object(self) -> ColumnCatalog:
         return self._col_object
 
     @col_object.setter
-    def col_object(self, value: DataFrameColumn):
+    def col_object(self, value: ColumnCatalog):
         self._col_object = value
 
     @property
@@ -87,7 +87,7 @@ class TupleValueExpression(AbstractExpression):
         return (
             is_subtree_equal
             and self.table_alias == other.table_alias
-            and self.table_metadata_id == other.table_metadata_id
+            and self.table_id == other.table_id
             and self.col_name == other.col_name
             and self.col_alias == other.col_alias
             and self.col_object == other.col_object
@@ -110,7 +110,7 @@ class TupleValueExpression(AbstractExpression):
             (
                 super().__hash__(),
                 self.table_alias,
-                self.table_metadata_id,
+                self.table_id,
                 self.col_name,
                 self.col_alias,
                 self.col_object,

@@ -17,9 +17,9 @@ from pathlib import Path
 from typing import List
 
 from eva.catalog.catalog_type import IndexType
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
@@ -145,7 +145,7 @@ class LogicalGet(Operator):
     def __init__(
         self,
         video: TableRef,
-        dataset_metadata: DataFrameMetadata,
+        table_obj: TableCatalog,
         alias: str,
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
@@ -153,7 +153,7 @@ class LogicalGet(Operator):
         children=None,
     ):
         self._video = video
-        self._dataset_metadata = dataset_metadata
+        self._table_obj = table_obj
         self._alias = alias
         self._predicate = predicate
         self._target_list = target_list
@@ -165,8 +165,8 @@ class LogicalGet(Operator):
         return self._video
 
     @property
-    def dataset_metadata(self):
-        return self._dataset_metadata
+    def table_obj(self):
+        return self._table_obj
 
     @property
     def alias(self):
@@ -199,7 +199,7 @@ class LogicalGet(Operator):
         return (
             is_subtree_equal
             and self.video == other.video
-            and self.dataset_metadata == other.dataset_metadata
+            and self.table_obj == other.table_obj
             and self.alias == other.alias
             and self.predicate == other.predicate
             and self.target_list == other.target_list
@@ -212,7 +212,7 @@ class LogicalGet(Operator):
                 super().__hash__(),
                 self.alias,
                 self.video,
-                self.dataset_metadata,
+                self.table_obj,
                 self.predicate,
                 tuple(self.target_list or []),
                 self.sampling_rate,
@@ -396,7 +396,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to intert data into
+        table(TableCatalog): table to intert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -405,19 +405,19 @@ class LogicalInsert(Operator):
 
     def __init__(
         self,
-        table_metainfo: DataFrameMetadata,
+        table: TableCatalog,
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALINSERT, children)
-        self._table_metainfo = table_metainfo
+        self._table = table
         self._column_list = column_list
         self._value_list = value_list
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table(self):
+        return self._table
 
     @property
     def value_list(self):
@@ -433,7 +433,7 @@ class LogicalInsert(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_metainfo == other.table_metainfo
+            and self.table == other.table
             and self.value_list == other.value_list
             and self.column_list == other.column_list
         )
@@ -442,7 +442,7 @@ class LogicalInsert(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.table_metainfo,
+                self.table,
                 tuple(self.value_list),
                 tuple(self.column_list),
             )
@@ -582,9 +582,9 @@ class LogicalCreateUDF(Operator):
         if_not_exists: bool
             if true should throw an error if udf with same name exists
             else will replace the existing
-        inputs: List[UdfIO]
+        inputs: List[UdfIOCatalog]
             udf inputs, annotated list similar to table columns
-        outputs: List[UdfIO]
+        outputs: List[UdfIOCatalog]
             udf outputs, annotated list similar to table columns
         impl_path: Path
             file path which holds the implementation of the udf.
@@ -598,8 +598,8 @@ class LogicalCreateUDF(Operator):
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[UdfIO],
-        outputs: List[UdfIO],
+        inputs: List[UdfIOCatalog],
+        outputs: List[UdfIOCatalog],
         impl_path: Path,
         udf_type: str = None,
         children: List = None,
@@ -707,7 +707,7 @@ class LogicalLoadData(Operator):
     """Logical node for load data operation
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to load data into
+        table(TableCatalog): table to load data into
         path(Path): file path from where we are loading data
     """
 
@@ -919,8 +919,8 @@ class LogicalJoin(Operator):
         self,
         join_type: JoinType,
         join_predicate: AbstractExpression = None,
-        left_keys: List[DataFrameColumn] = None,
-        right_keys: List[DataFrameColumn] = None,
+        left_keys: List[ColumnCatalog] = None,
+        right_keys: List[ColumnCatalog] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALJOIN, children)

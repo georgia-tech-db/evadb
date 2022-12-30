@@ -190,7 +190,7 @@ class StatementBinder:
         for child in node.children:
             self.bind(child)
 
-        udf_obj = self._catalog.get_udf_by_name(node.name)
+        udf_obj = self._catalog.get_udf_catalog_entry_by_name(node.name)
         if udf_obj is None:
             err_msg = (
                 f"UDF with name {node.name} does not exist in the catalog. "
@@ -209,7 +209,7 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
-        output_objs = self._catalog.get_udf_outputs(udf_obj)
+        output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
         if node.output:
             for obj in output_objs:
                 if obj.name.lower() == node.output:

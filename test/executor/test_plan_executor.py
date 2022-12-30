@@ -17,7 +17,7 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.executor.create_executor import CreateExecutor
 from eva.executor.create_udf_executor import CreateUDFExecutor
 from eva.executor.drop_udf_executor import DropUDFExecutor
@@ -275,7 +275,7 @@ class PlanExecutorTest(unittest.TestCase):
         )
 
         # Build plan tree
-        video = DataFrameMetadata("dataset", "dummy.avi")
+        video = TableCatalog("dataset", "dummy.avi")
         batch_1 = Batch(pd.DataFrame({"data": [1, 2, 3]}))
         batch_2 = Batch(pd.DataFrame({"data": [4, 5, 6]}))
         class_instatnce.load.return_value = map(lambda x: x, [batch_1, batch_2])
