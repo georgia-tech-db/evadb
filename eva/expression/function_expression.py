@@ -22,6 +22,7 @@ from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
 
+
 class FunctionExpression(AbstractExpression):
     """
     Consider FunctionExpression: ObjDetector -> (labels, boxes)
@@ -46,7 +47,7 @@ class FunctionExpression(AbstractExpression):
         name: str,
         output: str = None,
         alias: Alias = None,
-        **kwargs
+        **kwargs,
     ):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
@@ -119,10 +120,9 @@ class FunctionExpression(AbstractExpression):
                     self._function_instance = self._function_instance.to_device(device)
         return self._function_instance
 
-
     def __str__(self) -> str:
-        expr_str=f"{self.name}()"
-        return expr_str 
+        expr_str = f"{self.name}()"
+        return expr_str
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

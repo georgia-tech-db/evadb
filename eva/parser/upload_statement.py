@@ -60,18 +60,15 @@ class UploadStatement(AbstractStatement):
         upload_stmt_str = ""
         if self._column_list is None:
             upload_stmt_str = "UPLOAD PATH {} BLOB {} INTO {} WITH {}".format(
-                self._path.name, 
-                "video blob",
-                self._table_info, 
-                file_option_str
+                self._path.name, "video blob", self._table_info, file_option_str
             )
         else:
             upload_stmt_str = "UPLOAD PATH {} BLOB {} INTO {} ({}) WITH {}".format(
-                self._path.name,  
+                self._path.name,
                 "video blob",
-                self._table_info, 
-                column_list_str, 
-                file_option_str
+                self._table_info,
+                column_list_str,
+                file_option_str,
             )
         return upload_stmt_str
 

@@ -30,7 +30,8 @@ class Parser(object):
         return cls._instance
 
     def __init__(self):
-        if(self._initialized): return
+        if self._initialized:
+            return
         self._lark_parser = LarkParser()
         self._initialized = True
 

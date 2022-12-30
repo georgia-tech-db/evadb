@@ -77,15 +77,15 @@ class AggregationExpression(AbstractExpression):
         elif self.etype == ExpressionType.AGGREGATION_MIN:
             return "MIN"
         elif self.etype == ExpressionType.AGGREGATION_MAX:
-             return "MAX"
+            return "MAX"
         else:
             raise NotImplementedError
 
     def __str__(self) -> str:
-        expr_str=""
+        expr_str = ""
         if self.etype:
             expr_str = f"{str(self.get_symbol())}()"
-        return expr_str        
+        return expr_str
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

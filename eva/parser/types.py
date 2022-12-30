@@ -65,12 +65,14 @@ class FileFormatType(Enum):
     """
     Manages enums for all order by sort types
     """
+
     VIDEO = auto()
     CSV = auto()
     IMAGE = auto()
 
     def __str__(self) -> str:
         return self.name
+
 
 @unique
 class ShowType(Enum):

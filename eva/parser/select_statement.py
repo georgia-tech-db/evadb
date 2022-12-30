@@ -23,8 +23,8 @@ if typing.TYPE_CHECKING:
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.statement import AbstractStatement
-from eva.parser.types import StatementType
-from eva.parser.types import ParserOrderBySortType
+from eva.parser.types import ParserOrderBySortType, StatementType
+
 
 class SelectStatement(AbstractStatement):
     """

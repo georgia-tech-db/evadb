@@ -19,6 +19,7 @@ from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
 
+
 class ColConstraintInfo:
     def __init__(self, nullable=False, default_value=None, primary=False, unique=False):
         self.nullable = nullable
@@ -77,9 +78,7 @@ class ColumnDefinition:
 
     def __str__(self):
         if self.array_type is None:
-            return "{} {}".format(
-                self._name, self._type
-            )
+            return "{} {}".format(self._name, self._type)
         else:
             return "{} {} {} {}".format(
                 self._name, self._type, self.array_type, self._dimension
