@@ -40,14 +40,14 @@ jobs:
       #     keys:
       #       - v1-pip-cache-{{ checksum "setup.py" }}
 
-      - run:
-          name: Install only EVA package from pip
-          command: |
-            sudo apt-get update          
-            sudo apt-get install lsof 
-            pip install --upgrade pip
-            pip install evadb
-            bash script/test/package.sh
+      #- run:
+      #    name: Install only EVA package from pip
+      #    command: |
+      #      sudo apt-get update          
+      #      sudo apt-get install lsof 
+      #      pip install --upgrade pip
+      #      pip install evadb
+      #      bash script/test/package.sh
 
       - run:
           name: Install EVA package from repo with all dependencies
