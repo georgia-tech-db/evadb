@@ -24,7 +24,7 @@ from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.parser.statement import AbstractStatement
 from eva.parser.types import StatementType
-
+from eva.parser.types import ParserOrderBySortType
 
 class SelectStatement(AbstractStatement):
     """
@@ -134,10 +134,17 @@ class SelectStatement(AbstractStatement):
             target_list_str = target_list_str.rstrip(", ")
             target_list_str += " "
 
-        _orderby_list_str = ""
+        orderby_list_str = ""
         if self._orderby_list is not None:
             for expr in self._orderby_list:
-                _orderby_list_str += str(expr)
+                sort_str = ""
+                if expr[1] == ParserOrderBySortType.ASC:
+                    sort_str = "ASC"
+                elif expr[1] == ParserOrderBySortType.DESC:
+                    sort_str = "DESC"
+                orderby_list_str += str(expr[0]) + " " + sort_str + ", "
+            orderby_list_str = orderby_list_str.rstrip(", ")
+            orderby_list_str += " "
 
         select_str = "SELECT {}FROM {}".format(target_list_str, str(self._from_table))
 
@@ -154,10 +161,12 @@ class SelectStatement(AbstractStatement):
             select_str += " GROUP BY " + str(self._groupby_clause)
 
         if self._orderby_list is not None:
-            select_str += " ORDER BY " + _orderby_list_str
+            select_str += " ORDER BY " + orderby_list_str
 
         if self._limit_count is not None:
             select_str += " LIMIT " + str(self._limit_count)
+
+        select_str = select_str.rstrip(" ")
 
         return select_str
 
