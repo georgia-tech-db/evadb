@@ -48,13 +48,19 @@ class LoadDataStatement(AbstractStatement):
         for key, value in self._file_options.items():
             file_option_str += f"{str(key)}: {str(value)}"
 
+        column_list_str = ""
+        if self._column_list is not None:
+            for col in self._column_list:
+                column_list_str += str(col) + ", "
+            column_list_str = column_list_str.rstrip(", ")
+
         if self._column_list is None:
             load_stmt_str = "LOAD {} INTO {} WITH {}".format(
                 self._path.name, self._table_info, file_option_str
             )
         else:
             load_stmt_str = "LOAD {} INTO {} ({}) WITH {}".format(
-                self._path.name, self._table_info, self._column_list, file_option_str
+                self._path.name, self._table_info, column_list_str, file_option_str
             )
         return load_stmt_str
 

@@ -824,7 +824,7 @@ class LogicalUpload(Operator):
                 column_list: {}, \
                 file_options: {})".format(
             self.path,
-            "string of video blob",
+            "video blob",
             self.table_info,
             self.column_list,
             self.file_options,

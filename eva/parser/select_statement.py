@@ -132,7 +132,6 @@ class SelectStatement(AbstractStatement):
             for expr in self._target_list:
                 target_list_str += str(expr) + ", "
             target_list_str = target_list_str.rstrip(", ")
-            target_list_str += " "
 
         orderby_list_str = ""
         if self._orderby_list is not None:
@@ -144,9 +143,8 @@ class SelectStatement(AbstractStatement):
                     sort_str = "DESC"
                 orderby_list_str += str(expr[0]) + " " + sort_str + ", "
             orderby_list_str = orderby_list_str.rstrip(", ")
-            orderby_list_str += " "
 
-        select_str = "SELECT {}FROM {}".format(target_list_str, str(self._from_table))
+        select_str = f"SELECT {target_list_str} FROM {str(self._from_table)}"
 
         if self._where_clause is not None:
             select_str += " WHERE " + str(self._where_clause)
