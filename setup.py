@@ -43,7 +43,6 @@ minimal_requirement = [
     "Pillow>=8.4.0",
     "sqlalchemy>=1.4.0",
     "sqlalchemy-utils>=0.36.6",
-    "antlr4-python3-runtime==4.8",
     "lark>=1.0.0",
     "pyyaml>=5.1",
     "importlib-metadata<5.0",

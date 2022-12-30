@@ -14,28 +14,16 @@ Setting up the Development Environment
 First, you will need to checkout the repository from GitHub and build EVA from
 the source. Follow the following instructions to build EVA locally. We recommend using a virtual environment and the pip package manager. 
 
-EVA requires JAVA 11 for generating the ANTLR-based EVAQL parser.
-
 .. code-block:: bash
 
    git clone https://github.com/georgia-tech-db/eva.git && cd eva
-   python3 -m venv test_eva_db                            # to create a virtual environment
-   . test_eva_db/bin/activate
-   pip install --upgrade pip
-   sudo -E apt install -y openjdk-11-jdk openjdk-11-jre   # to install JAVA
-   sh script/antlr4/generate_parser.sh                    # to generate the EVA parser
-   pip install -e ".[dev]"
-   bash script/test/test.sh                               # to run the test suite
-
-For developers using an M1 Mac, here are some pointers for installing JAVA and to resolve multi-threading issues:
-
-.. code-block:: bash      
-
-   brew install openjdk@11                         # to install openjdk 11
-   export JAVA_HOME="/opt/homebrew/opt/openjdk@11" # add this command in ~/.zshrc or ~/.bashrc
-   export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES  # to resolve multi-threading issues in macOS
+   python3 -m venv test_eva_db       # create a virtual environment
+   source test_eva_db/bin/activate   # activate the virtual environment
+   pip install --upgrade pip         # upgrade pip
+   pip install -e ".[dev]"           # build and install the EVA package
+   bash script/test/test.sh          # run the eva EVA suite
    
-After you have installed the package locally, you can make changes in the code base and examine their impact.
+After installing the package locally, you can make changes and run the test cases to check their impact.
 
 .. code-block:: bash
 
