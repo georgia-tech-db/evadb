@@ -16,7 +16,7 @@ import unittest
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType
 from eva.catalog.df_schema import DataFrameSchema
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.column_catalog import ColumnCatalog
 
 
 class SchemaTests(unittest.TestCase):
@@ -25,15 +25,15 @@ class SchemaTests(unittest.TestCase):
 
     def test_schema_equality(self):
         schema_name = "foo"
-        column_1 = DataFrameColumn("frame_id", ColumnType.INTEGER, False)
-        column_2 = DataFrameColumn(
+        column_1 = ColumnCatalog("frame_id", ColumnType.INTEGER, False)
+        column_2 = ColumnCatalog(
             "frame_data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [28, 28]
         )
-        column_3 = DataFrameColumn("frame_label", ColumnType.INTEGER, False)
+        column_3 = ColumnCatalog("frame_label", ColumnType.INTEGER, False)
         col_list = [column_1, column_2, column_3]
         schema1 = DataFrameSchema(schema_name, col_list)
         schema2 = DataFrameSchema(schema_name, col_list[1:])
-        schema3 = DataFrameColumn("foo2", col_list)
+        schema3 = ColumnCatalog("foo2", col_list)
         self.assertEqual(schema1, schema1)
         self.assertNotEqual(schema1, schema2)
         self.assertNotEqual(schema1, schema3)

@@ -12,41 +12,47 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum, IntEnum, auto
+
+from eva.utils.generic_utils import EVAEnum
 
 
-class Dimension(IntEnum):
-    ANYDIM = -1
+class Dimension(EVAEnum):
+    ANYDIM  # noqa: F821
 
 
-class TableType(IntEnum):
-    STRUCTURED_DATA = auto()
-    VIDEO_DATA = auto()
+class TableType(EVAEnum):
+    STRUCTURED_DATA  # noqa: F821
+    VIDEO_DATA  # noqa: F821
+    IMAGE_DATA  # noqa: F821
+
+    # reserved for system generated tables
+    # cannot be accessed/modified directly by user
+    SYSTEM_STRUCTURED_DATA  # noqa: F821
 
 
-class ColumnType(Enum):
-    BOOLEAN = 1
-    INTEGER = 2
-    FLOAT = 3
-    TEXT = 4
-    NDARRAY = 5
-    ANY = 6
+class ColumnType(EVAEnum):
+    BOOLEAN  # noqa: F821
+    INTEGER  # noqa: F821
+    FLOAT  # noqa: F821
+    TEXT  # noqa: F821
+    NDARRAY  # noqa: F821
+    ANY  # noqa: F821
 
 
-class NdArrayType(Enum):
-    INT8 = auto()
-    UINT8 = auto()
-    INT16 = auto()
-    INT32 = auto()
-    INT64 = auto()
-    UNICODE = auto()
-    BOOL = auto()
-    FLOAT32 = auto()
-    FLOAT64 = auto()
-    DECIMAL = auto()
-    STR = auto()
-    DATETIME = auto()
-    ANYTYPE = auto()
+class NdArrayType(EVAEnum):
+    INT8  # noqa: F821
+    UINT8  # noqa: F821
+    INT16  # noqa: F821
+    INT32  # noqa: F821
+    INT64  # noqa: F821
+    UNICODE  # noqa: F821
+    BOOL  # noqa: F821
+    FLOAT32  # noqa: F821
+    FLOAT64  # noqa: F821
+    DECIMAL  # noqa: F821
+    STR  # noqa: F821
+    DATETIME  # noqa: F821
+    ANYTYPE  # noqa: F821
 
     @classmethod
     def to_numpy_type(cls, t):
@@ -84,3 +90,7 @@ class NdArrayType(Enum):
             raise ValueError("Can not auto convert %s to numpy type" % t)
 
         return np_type
+
+
+class IndexType(EVAEnum):
+    HNSW  # noqa: F821

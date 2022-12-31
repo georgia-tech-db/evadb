@@ -15,12 +15,15 @@
 import unittest
 
 import mock
-from mock import MagicMock
+from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.udf import UdfMetadata
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.udf_catalog import UdfCatalog
+from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
+from eva.parser.table_ref import TableInfo
+from eva.parser.types import FileFormatType
 
 
 class CatalogManagerTests(unittest.TestCase):
@@ -55,77 +58,106 @@ class CatalogManagerTests(unittest.TestCase):
             mock_bootstrap.assert_called_once_with()
             mock_shutdown.assert_called_once_with()
 
+    @mock.patch(
+        "eva.catalog.catalog_manager.CatalogManager.create_and_insert_table_catalog_entry"
+    )
+    def test_create_multimedia_table_catalog_entry(self, mock):
+        x = CatalogManager()
+        name = "myvideo"
+        x.create_and_insert_multimedia_table_catalog_entry(
+            name=name, format_type=FileFormatType.VIDEO
+        )
+
+        columns = [
+            ColumnDefinition(
+                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            ),
+            ColumnDefinition("id", ColumnType.INTEGER, None, []),
+            ColumnDefinition(
+                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            ),
+        ]
+
+        mock.assert_called_once_with(
+            TableInfo(name),
+            columns,
+            table_type=TableType.VIDEO_DATA,
+        )
+
     @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_create_metadata_should_create_dataset_and_columns(
+    @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
+    def test_insert_table_catalog_entry_should_create_table_and_columns(
         self, dcs_mock, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
         file_url = "file1"
-        dataset_name = "name"
+        table_name = "name"
 
-        columns = [(DataFrameColumn("c1", ColumnType.INTEGER))]
-        actual = catalog.create_metadata(dataset_name, file_url, columns)
-        ds_mock.return_value.create_dataset.assert_called_with(
-            dataset_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
+        columns = [(ColumnCatalog("c1", ColumnType.INTEGER))]
+        actual = catalog.insert_table_catalog_entry(table_name, file_url, columns)
+        ds_mock.return_value.insert_entry.assert_called_with(
+            table_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
         )
         for column in columns:
-            column.metadata_id = ds_mock.return_value.create_dataset.return_value.id
+            column.table_id = ds_mock.return_value.insert_entry.return_value.row_id
 
-        dcs_mock.return_value.create_column.assert_called_with(columns)
+        dcs_mock.return_value.insert_entries.assert_called_with([ANY] + columns)
 
-        expected = ds_mock.return_value.create_dataset.return_value
-        expected.schema = dcs_mock.return_value.create_column.return_value
+        expected = ds_mock.return_value.insert_entry.return_value
+        expected.schema = dcs_mock.return_value.insert_entries.return_value
 
         self.assertEqual(actual, expected)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_get_dataset_metadata_when_table_exists(
+    @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
+    def test_get_table_catalog_entry_when_table_exists(
         self, dcs_mock, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
-        dataset_name = "name"
+        table_name = "name"
 
         database_name = "database"
         schema = [1, 2, 3]
-        id = 1
-        metadata_obj = MagicMock(id=id, schema=None)
-        ds_mock.return_value.dataset_object_by_name.return_value = metadata_obj
-        dcs_mock.return_value.columns_by_id_and_dataset_id.return_value = schema
+        row_id = 1
+        table_obj = MagicMock(row_id=row_id, schema=None)
+        ds_mock.return_value.get_entry_by_name.return_value = table_obj
+        dcs_mock.return_value.filter_entries_by_table_id.return_value = schema
 
-        actual = catalog.get_dataset_metadata(database_name, dataset_name)
-        ds_mock.return_value.dataset_object_by_name.assert_called_with(
-            database_name, dataset_name
+        actual = catalog.get_table_catalog_entry(
+            table_name,
+            database_name,
         )
-        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_called_with(id, None)
-        self.assertEqual(actual.id, id)
+        ds_mock.return_value.get_entry_by_name.assert_called_with(
+            database_name, table_name
+        )
+        dcs_mock.return_value.filter_entries_by_table_id.assert_called_with(row_id)
+        self.assertEqual(actual.row_id, row_id)
         self.assertEqual(actual.schema, schema)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_get_dataset_metadata_when_table_doesnot_exists(
+    @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
+    def test_get_table_catalog_entry_when_table_doesnot_exists(
         self, dcs_mock, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
-        dataset_name = "name"
+        table_name = "name"
 
         database_name = "database"
-        metadata_obj = None
+        table_obj = None
 
-        ds_mock.return_value.dataset_object_by_name.return_value = metadata_obj
+        ds_mock.return_value.get_entry_by_name.return_value = table_obj
 
-        actual = catalog.get_dataset_metadata(database_name, dataset_name)
-        ds_mock.return_value.dataset_object_by_name.assert_called_with(
-            database_name, dataset_name
+        actual = catalog.get_table_catalog_entry(table_name, database_name)
+        ds_mock.return_value.get_entry_by_name.assert_called_with(
+            database_name, table_name
         )
-        dcs_mock.return_value.columns_by_id_and_dataset_id.assert_not_called()
-        self.assertEqual(actual, metadata_obj)
+        dcs_mock.return_value.filter_entries_by_table_id.assert_not_called()
+        self.assertEqual(actual, table_obj)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfIO")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalog")
     def test_create_udf_io_object(self, udfio_mock):
         catalog = CatalogManager()
         actual = catalog.udf_io(
@@ -140,57 +172,50 @@ class CatalogManagerTests(unittest.TestCase):
         )
         self.assertEqual(actual, udfio_mock.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfService")
-    @mock.patch("eva.catalog.catalog_manager.UdfIOService")
-    def test_create_udf(self, udfio_mock, udf_mock):
+    @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
+    def test_insert_udf(self, udfio_mock, udf_mock):
         catalog = CatalogManager()
         udf_io_list = [MagicMock()]
-        actual = catalog.create_udf("udf", "sample.py", "classification", udf_io_list)
-        udfio_mock.return_value.add_udf_io.assert_called_with(udf_io_list)
-        udf_mock.return_value.create_udf.assert_called_with(
+        actual = catalog.insert_udf_catalog_entry(
+            "udf", "sample.py", "classification", udf_io_list
+        )
+        udfio_mock.return_value.insert_entries.assert_called_with(udf_io_list)
+        udf_mock.return_value.insert_entry.assert_called_with(
             "udf", "sample.py", "classification"
         )
-        self.assertEqual(actual, udf_mock.return_value.create_udf.return_value)
+        self.assertEqual(actual, udf_mock.return_value.insert_entry.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.init_db")
-    @mock.patch("eva.catalog.catalog_manager.DatasetService")
-    @mock.patch("eva.catalog.catalog_manager.DatasetColumnService")
-    def test_drop_metadata(self, dcs_mock, ds_mock, initdb_mock):
+    @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
+    def test_get_udf_catalog_entry_by_name(self, udf_mock):
         catalog = CatalogManager()
-        catalog.drop_dataset_metadata("database", "table")
-        ds_name_mock = ds_mock.return_value.drop_dataset_by_name
-        ds_name_mock.assert_called_with("database", "table")
+        actual = catalog.get_udf_catalog_entry_by_name("name")
+        udf_mock.return_value.get_entry_by_name.assert_called_with("name")
+        self.assertEqual(actual, udf_mock.return_value.get_entry_by_name.return_value)
 
-    @mock.patch("eva.catalog.catalog_manager.UdfService")
-    def test_get_udf_by_name(self, udf_mock):
-        catalog = CatalogManager()
-        actual = catalog.get_udf_by_name("name")
-        udf_mock.return_value.udf_by_name.assert_called_with("name")
-        self.assertEqual(actual, udf_mock.return_value.udf_by_name.return_value)
+    @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
+    def test_delete_udf(self, udf_mock):
+        CatalogManager().delete_udf_catalog_entry_by_name("name")
+        udf_mock.return_value.delete_entry_by_name.assert_called_with("name")
 
-    @mock.patch("eva.catalog.catalog_manager.UdfService")
-    def test_drop_udf(self, udf_mock):
-        CatalogManager().drop_udf("name")
-        udf_mock.return_value.drop_udf_by_name.assert_called_with("name")
-
-    @mock.patch("eva.catalog.catalog_manager.UdfIOService")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_get_udf_outputs(self, udf_mock):
-        mock_func = udf_mock.return_value.get_outputs_by_udf_id
-        udf_obj = MagicMock(spec=UdfMetadata)
-        CatalogManager().get_udf_outputs(udf_obj)
-        mock_func.assert_called_once_with(udf_obj.id)
+        mock_func = udf_mock.return_value.get_output_entries_by_udf_id
+        udf_obj = MagicMock(spec=UdfCatalog)
+        CatalogManager().get_udf_io_catalog_output_entries(udf_obj)
+        mock_func.assert_called_once_with(udf_obj.row_id)
 
         # should raise error
         with self.assertRaises(ValueError):
-            CatalogManager().get_udf_outputs(MagicMock())
+            CatalogManager().get_udf_io_catalog_output_entries(MagicMock())
 
-    @mock.patch("eva.catalog.catalog_manager.UdfIOService")
+    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_get_udf_inputs(self, udf_mock):
-        mock_func = udf_mock.return_value.get_inputs_by_udf_id
-        udf_obj = MagicMock(spec=UdfMetadata)
-        CatalogManager().get_udf_inputs(udf_obj)
-        mock_func.assert_called_once_with(udf_obj.id)
+        mock_func = udf_mock.return_value.get_input_entries_by_udf_id
+        udf_obj = MagicMock(spec=UdfCatalog)
+        CatalogManager().get_udf_io_catalog_input_entries(udf_obj)
+        mock_func.assert_called_once_with(udf_obj.row_id)
 
         # should raise error
         with self.assertRaises(ValueError):
-            CatalogManager().get_udf_inputs(MagicMock())
+            CatalogManager().get_udf_io_catalog_input_entries(MagicMock())

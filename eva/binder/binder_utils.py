@@ -17,19 +17,17 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
-from eva.parser.types import FileFormatType
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
-from eva.utils.generic_utils import generate_file_path
 from eva.utils.logging_manager import logger
 
 
@@ -37,99 +35,35 @@ class BinderError(Exception):
     pass
 
 
-def create_multimedia_metadata(name: str, format_type: FileFormatType):
-    if format_type is FileFormatType.VIDEO:
-        return create_video_metadata(name)
-    else:
-        raise BinderError(f"Format Type {format_type} is not supported")
-
-
-def create_video_metadata(name: str) -> DataFrameMetadata:
-    """Create video metadata object.
-        We have predefined columns for such a object
-        id:  the frame id
-        data: the frame data
+def bind_table_info(table_info: TableInfo) -> TableCatalog:
+    """
+    Uses catalog to bind the table information .
 
     Arguments:
-        name (str): name of the metadata to be added to the catalog
+         table_info (TableInfo): table information obtained from SQL query
 
     Returns:
-        DataFrameMetadata:  corresponding metadata for the input table info
+        TableCatalog  -  corresponding table catalog entry for the input table info
     """
     catalog = CatalogManager()
-    columns = [
-        ColumnDefinition(
-            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
-        ),
-        ColumnDefinition("id", ColumnType.INTEGER, None, []),
-        ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
-        ),
-    ]
-    col_metadata = create_column_metadata(columns)
-    uri = str(generate_file_path(name))
-    metadata = catalog.create_metadata(
-        name,
-        uri,
-        col_metadata,
-        identifier_column="id",
-        table_type=TableType.VIDEO_DATA,
+    obj = catalog.get_table_catalog_entry(
+        table_info.table_name,
+        table_info.database_name,
     )
-    return metadata
 
-
-def create_table_metadata(
-    table_ref: TableRef, columns: List[ColumnDefinition]
-) -> DataFrameMetadata:
-    table_name = table_ref.table.table_name
-    column_metadata_list = create_column_metadata(columns)
-    file_url = str(generate_file_path(table_name))
-    metadata = CatalogManager().create_metadata(
-        table_name,
-        file_url,
-        column_metadata_list,
-        table_type=TableType.STRUCTURED_DATA,
-    )
-    return metadata
-
-
-def create_column_metadata(col_list: List[ColumnDefinition]):
-    """Create column metadata for the input parsed column list. This function
-    will not commit the provided column into catalog table.
-    Will only return in memory list of ColumnDataframe objects
-
-    Arguments:
-        col_list {List[ColumnDefinition]} -- parsed col list to be created
-    """
-    if isinstance(col_list, ColumnDefinition):
-        col_list = [col_list]
-
-    result_list = []
-    for col in col_list:
-        if col is None:
-            logger.warn("Empty column while creating column metadata")
-            result_list.append(col)
-        result_list.append(
-            CatalogManager().create_column_metadata(
-                col.name, col.type, col.array_type, col.dimension, col.cci
-            )
+    # Users should not be allowed to directly access or modify the SYSTEM tables, as
+    # doing so can lead to the corruption of other tables. These tables include
+    # metadata tables associated with unstructured data, such as the list of video
+    # files in the video table. Protecting these tables is crucial in order to maintain
+    # the integrity of the system.
+    if obj and obj.table_type == TableType.SYSTEM_STRUCTURED_DATA:
+        err_msg = (
+            "The query attempted to access or modify the internal table"
+            f"{table_info.table_name} of the system, but permission was denied."
         )
+        logger.error(err_msg)
+        raise BinderError(err_msg)
 
-    return result_list
-
-
-def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
-    """
-    Uses catalog to bind the dataset information for given video string.
-
-    Arguments:
-         video_info (TableInfo): video information obtained in SQL query
-
-    Returns:
-        DataFrameMetadata  -  corresponding metadata for the input table info
-    """
-    catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
     if obj:
         table_info.table_obj = obj
     else:
@@ -138,21 +72,6 @@ def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
         )
         logger.error(error)
         raise BinderError(error)
-
-
-def handle_if_not_exists(table_ref: TableRef, if_not_exist=False):
-    if CatalogManager().check_table_exists(
-        table_ref.table.database_name, table_ref.table.table_name
-    ):
-        err_msg = "Table: {} already exists".format(table_ref)
-        if if_not_exist:
-            logger.warn(err_msg)
-            return True
-        else:
-            logger.error(err_msg)
-            raise BinderError(err_msg)
-    else:
-        return False
 
 
 def extend_star(
@@ -164,6 +83,7 @@ def extend_star(
         [
             TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs
+            if col_name != IDENTIFIER_COLUMN
         ]
     )
     return target_list

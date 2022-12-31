@@ -1,6 +1,10 @@
 format: jb-book
 root: index
 parts:
+  - caption: Version
+    chapters:
+      - file: source/version
+
   - caption: Overview
     chapters:
       - file: source/overview/video

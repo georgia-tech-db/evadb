@@ -16,7 +16,7 @@ from typing import Iterator
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.models.storage.batch import Batch
-from eva.planner.union_plan import UnionPlan
+from eva.plan_nodes.union_plan import UnionPlan
 from eva.utils.logging_manager import logger
 
 

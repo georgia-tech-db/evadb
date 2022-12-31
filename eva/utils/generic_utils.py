@@ -19,6 +19,8 @@ import sys
 import uuid
 from pathlib import Path
 
+from aenum import AutoEnum, unique
+
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.utils.logging_manager import logger
 
@@ -141,3 +143,9 @@ class PickleSerializer(object):
     @classmethod
     def deserialize(cls, data):
         return pickle.loads(data)
+
+
+@unique
+class EVAEnum(AutoEnum):
+    def __str__(self):
+        return self.name

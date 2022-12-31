@@ -15,10 +15,10 @@
 from functools import singledispatch
 
 from eva.optimizer.group_expression import GroupExpression
-from eva.planner.abstract_plan import AbstractPlan
-from eva.planner.hash_join_build_plan import HashJoinBuildPlan
-from eva.planner.hash_join_probe_plan import HashJoinProbePlan
-from eva.planner.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.abstract_plan import AbstractPlan
+from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
+from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 
 
 class CostModel:

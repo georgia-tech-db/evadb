@@ -14,11 +14,11 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn
+from eva.catalog.models.column_catalog import ColumnCatalog
 
 
 class DataFrameSchema(object):
-    def __init__(self, name: str, column_list: List[DataFrameColumn]):
+    def __init__(self, name: str, column_list: List[ColumnCatalog]):
 
         self._name = name
         self._column_list = column_list

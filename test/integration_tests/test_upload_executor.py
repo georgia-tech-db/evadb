@@ -16,7 +16,6 @@ import base64
 import os
 import unittest
 from test.util import (
-    create_dummy_batches,
     create_dummy_csv_batches,
     create_sample_csv_as_blob,
     create_sample_video_as_blob,
@@ -54,40 +53,6 @@ class UploadExecutorTest(unittest.TestCase):
             bytes_read = f.read()
             actual_blob = str(base64.b64encode(bytes_read))
         self.assertEqual(actual_blob, expected_blob)
-
-    def test_should_upload_file_to_location_without_format(self):
-        query = (
-            'UPLOAD PATH "dummy.avi" BLOB '
-            + '"'
-            + self.video_blob
-            + '" '
-            + "INTO MyVideo;"
-        )
-        execute_query_fetch_all(query)
-        expected_blob = self.video_blob
-        with open(os.path.join(upload_dir_from_config, "dummy.avi"), "rb") as f:
-            bytes_read = f.read()
-            actual_blob = str(base64.b64encode(bytes_read))
-        self.assertEqual(actual_blob, expected_blob)
-
-    # integration test for video
-    def test_should_upload_video_to_table(self):
-        query = (
-            'UPLOAD PATH "dummy.avi" BLOB '
-            + '"'
-            + self.video_blob
-            + '" '
-            + "INTO MyVideo;"
-        )
-        execute_query_fetch_all(query)
-
-        select_query = """SELECT name, id, data FROM MyVideo;"""
-
-        actual_batch = execute_query_fetch_all(select_query)
-        actual_batch.sort()
-        expected_batch = list(create_dummy_batches())[0]
-        expected_batch.modify_column_alias("myvideo")
-        self.assertEqual(actual_batch, expected_batch)
 
     # integration test for csv
     def test_should_upload_csv_to_table(self):

@@ -59,14 +59,19 @@ class CreateUDFStatement(AbstractStatement):
         self._udf_type = udf_type
 
     def __str__(self) -> str:
-        print_str = "CREATE UDF {} INPUT ({}) OUTPUT ({}) TYPE {} IMPL {}".format(
-            self._name,
-            self._inputs,
-            self._outputs,
-            self._udf_type,
-            self._impl_path.name,
-        )
-        return print_str
+        input_str = ""
+        if self._inputs is not None:
+            for expr in self._inputs:
+                input_str += str(expr) + ", "
+            input_str = input_str.rstrip(", ")
+
+        output_str = ""
+        if self._outputs is not None:
+            for expr in self._outputs:
+                output_str += str(expr) + ", "
+            output_str = output_str.rstrip(", ")
+
+        return f"CREATE UDF {self._name} INPUT ({input_str}) OUTPUT ({output_str}) TYPE {self._udf_type} IMPL {self._impl_path.name}"
 
     @property
     def name(self):
@@ -111,6 +116,8 @@ class CreateUDFStatement(AbstractStatement):
                 self.name,
                 self.if_not_exists,
                 tuple(self.inputs),
-                tuple(self.outputs, self.impl_path, self.udf_type),
+                tuple(self.outputs),
+                self.impl_path,
+                self.udf_type,
             )
         )

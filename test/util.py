@@ -31,7 +31,7 @@ from eva.optimizer.operators import Operator
 from eva.optimizer.plan_generator import PlanGenerator
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.parser import Parser
-from eva.planner.abstract_plan import AbstractPlan
+from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.abstract.abstract_udf import AbstractClassifierUDF
 from eva.udfs.udf_bootstrap_queries import init_builtin_udfs
@@ -225,6 +225,18 @@ def create_table(table_name, num_rows, num_columns):
     return df
 
 
+def create_sample_image():
+    try:
+        os.remove(os.path.join(upload_dir_from_config, "dummy.jpg"))
+    except FileNotFoundError:
+        pass
+
+    img = np.array(np.ones((3, 3, 3)), dtype=np.uint8)
+    img[0] -= 1
+    img[2] += 1
+    cv2.imwrite(os.path.join(upload_dir_from_config, "dummy.jpg"), img)
+
+
 def create_sample_video(num_frames=NUM_FRAMES):
     try:
         os.remove(os.path.join(upload_dir_from_config, "dummy.avi"))
@@ -242,6 +254,7 @@ def create_sample_video(num_frames=NUM_FRAMES):
         out.write(frame)
 
     out.release()
+    return os.path.join(upload_dir_from_config, "dummy.avi")
 
 
 def create_sample_video_as_blob(num_frames=NUM_FRAMES):
@@ -284,7 +297,10 @@ def copy_sample_videos_to_upload_dir():
 
 
 def file_remove(path):
-    os.remove(os.path.join(upload_dir_from_config, path))
+    try:
+        os.remove(os.path.join(upload_dir_from_config, path))
+    except FileNotFoundError:
+        pass
 
 
 def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start_id=0):
@@ -294,7 +310,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
     for i in filters:
         data.append(
             {
-                "myvideo.name": "dummy.avi",
+                "myvideo.name": os.path.join(upload_dir_from_config, "dummy.avi"),
                 "myvideo.id": i + start_id,
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
@@ -398,3 +414,35 @@ class DummyMultiObjectDetector(AbstractClassifierUDF):
         i = int(frames[0][0][0][0] * 25) - 1
         label = self.labels[i % 3 + 1]
         return np.array([label, label])
+
+
+class DummyFeatureExtractor(AbstractClassifierUDF):
+    """
+    Returns a feature for a frame.
+    """
+
+    def setup(self, *args, **kwargs):
+        pass
+
+    @property
+    def name(self) -> str:
+        return "DummyFeatureExtractor"
+
+    @property
+    def input_format(self):
+        return FrameInfo(-1, -1, 3, ColorSpace.RGB)
+
+    @property
+    def labels(self):
+        return []
+
+    def forward(self, df: pd.DataFrame) -> pd.DataFrame:
+        # Return the original input as its feature.
+
+        def _extract_feature(row: pd.Series):
+            feat_input = row[0]
+            return feat_input.astype(np.float32)
+
+        ret = pd.DataFrame()
+        ret["features"] = df.apply(_extract_feature, axis=1)
+        return ret

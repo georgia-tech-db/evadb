@@ -17,7 +17,7 @@ from typing import List
 
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.statement import AbstractStatement
-from eva.parser.table_ref import TableRef
+from eva.parser.table_ref import TableInfo
 from eva.parser.types import StatementType
 
 
@@ -35,26 +35,42 @@ class UploadStatement(AbstractStatement):
         self,
         path: str,
         video_blob: str,
-        table_ref: str,
+        table_info: str,
         column_list: List[AbstractExpression] = None,
         file_options: dict = None,
     ):
         super().__init__(StatementType.UPLOAD)
         self._path = Path(path)
         self._video_blob = video_blob
-        self._table_ref = table_ref
+        self._table_info = table_info
         self._column_list = column_list
         self._file_options = file_options
 
     def __str__(self) -> str:
-        print_str = "UPLOAD PATH {} BLOB {} INTO {}({}) WITH {}".format(
-            self._path,
-            "string of video blob",
-            self._table_ref,
-            self._column_list,
-            self._file_options,
-        )
-        return print_str
+        column_list_str = ""
+        if self._column_list is not None:
+            for col in self._column_list:
+                column_list_str += str(col) + ", "
+            column_list_str = column_list_str.rstrip(", ")
+
+        file_option_str = ""
+        for key, value in self._file_options.items():
+            file_option_str += f"{str(key)}: {str(value)}"
+
+        upload_stmt_str = ""
+        if self._column_list is None:
+            upload_stmt_str = "UPLOAD PATH {} BLOB {} INTO {} WITH {}".format(
+                self._path.name, "video blob", self._table_info, file_option_str
+            )
+        else:
+            upload_stmt_str = "UPLOAD PATH {} BLOB {} INTO {} ({}) WITH {}".format(
+                self._path.name,
+                "video blob",
+                self._table_info,
+                column_list_str,
+                file_option_str,
+            )
+        return upload_stmt_str
 
     @property
     def path(self) -> Path:
@@ -65,8 +81,8 @@ class UploadStatement(AbstractStatement):
         return self._video_blob
 
     @property
-    def table_ref(self) -> TableRef:
-        return self._table_ref
+    def table_info(self) -> TableInfo:
+        return self._table_info
 
     @property
     def column_list(self) -> List[AbstractExpression]:
@@ -86,7 +102,7 @@ class UploadStatement(AbstractStatement):
         return (
             self.path == other.path
             and self.video_blob == other.video_blob
-            and self.table_ref == other.table_ref
+            and self.table_info == other.table_info
             and self.column_list == other.column_list
             and self.file_options == other.file_options
         )
@@ -97,8 +113,8 @@ class UploadStatement(AbstractStatement):
                 super().__hash__(),
                 self.path,
                 self.video_blob,
-                self.table_ref,
-                tuple(self.column_list),
+                self.table_info,
+                tuple(self.column_list or []),
                 frozenset(self.file_options.items()),
             )
         )

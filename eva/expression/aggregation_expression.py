@@ -60,6 +60,33 @@ class AggregationExpression(AbstractExpression):
 
         return batch
 
+    def get_symbol(self) -> str:
+
+        if self.etype == ExpressionType.AGGREGATION_FIRST:
+            return "FIRST"
+        if self.etype == ExpressionType.AGGREGATION_LAST:
+            return "LAST"
+        if self.etype == ExpressionType.AGGREGATION_SEGMENT:
+            return "SEGMENT"
+        if self.etype == ExpressionType.AGGREGATION_SUM:
+            return "SUM"
+        elif self.etype == ExpressionType.AGGREGATION_COUNT:
+            return "COUNT"
+        elif self.etype == ExpressionType.AGGREGATION_AVG:
+            return "AVG"
+        elif self.etype == ExpressionType.AGGREGATION_MIN:
+            return "MIN"
+        elif self.etype == ExpressionType.AGGREGATION_MAX:
+            return "MAX"
+        else:
+            raise NotImplementedError
+
+    def __str__(self) -> str:
+        expr_str = ""
+        if self.etype:
+            expr_str = f"{str(self.get_symbol())}()"
+        return expr_str
+
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
         if not isinstance(other, AggregationExpression):
