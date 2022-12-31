@@ -99,7 +99,10 @@ def start_server(
     def raiseSystemExit(_, __):
         raise SystemExit
 
-    signals = [SIGINT, SIGTERM, SIGUSR1]
+    if os.name != "nt":
+        signals = [SIGINT, SIGTERM, SIGHUP, SIGUSR1]
+    else:
+        signals = [SIGINT, SIGTERM, CTRL_C_EVENT]
 
     for handled_signal in signals:
         signal(handled_signal, raiseSystemExit)
