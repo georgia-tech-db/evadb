@@ -50,7 +50,7 @@ class TableCatalogService(BaseService):
                 name=name,
                 file_url=file_url,
                 identifier_column=identifier_column,
-                table_type=int(table_type),
+                table_type=table_type,
             )
             table_catalog_obj = table_catalog_obj.save()
 

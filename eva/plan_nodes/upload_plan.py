@@ -82,7 +82,7 @@ class UploadPlan(AbstractPlan):
             column_list={}, \
             file_options={})".format(
             self.file_path,
-            "string of video blob",
+            "video blob",
             self.table_info,
             self.batch_mem_size,
             self.column_list,

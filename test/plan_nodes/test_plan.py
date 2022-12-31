@@ -142,7 +142,7 @@ class PlanNodeTests(unittest.TestCase):
             column_list={}, \
             file_options={})".format(
             file_path,
-            "string of video blob",
+            "video blob",
             table_info,
             batch_mem_size,
             column_list,
