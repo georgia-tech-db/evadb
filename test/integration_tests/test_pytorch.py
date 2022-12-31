@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import sys
 import unittest
 from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
 
@@ -112,6 +113,7 @@ class PytorchTest(unittest.TestCase):
         self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_run_pytorch_and_ocr(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
@@ -207,6 +209,7 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(np.array_equal(img, similar_data))
 
     @pytest.mark.torchtest
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_run_ocr_on_cropped_data(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
                   INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
