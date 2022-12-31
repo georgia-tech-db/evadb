@@ -125,7 +125,7 @@ class ParserTests(unittest.TestCase):
             inner_stmt.view_info, TableRef(TableInfo("uadetrac_fastRCNN"))
         )
 
-    def test_create_statement(self):
+    def test_create_table_statement(self):
         parser = Parser()
 
         single_queries = []
@@ -171,7 +171,15 @@ class ParserTests(unittest.TestCase):
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
             self.assertEqual(eva_statement_list[0], expected_stmt)
 
-    def test_rename_statement(self):
+    def test_create_table_exception_statement(self):
+        parser = Parser()
+
+        create_table_query = "CREATE TABLE ();"
+
+        with self.assertRaises(Exception):
+            parser.parse(create_table_query)
+
+    def test_rename_table_statement(self):
         parser = Parser()
         rename_queries = "RENAME TABLE student TO student_info"
         expected_stmt = RenameTableStatement(
@@ -285,6 +293,16 @@ class ParserTests(unittest.TestCase):
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
         # other tests should go in expression testing
+
+    def test_select_with_empty_string_literal(self):
+        parser = Parser()
+
+        select_query = """SELECT '' FROM TAIPAI;"""
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
 
     def test_select_union_statement(self):
         parser = Parser()

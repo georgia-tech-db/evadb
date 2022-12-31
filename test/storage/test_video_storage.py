@@ -16,6 +16,7 @@ import unittest
 from unittest.mock import MagicMock
 
 import mock
+import pytest
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalog
@@ -51,6 +52,7 @@ class VideoStorageEngineTest(unittest.TestCase):
         m.side_effect = FileExistsError
         with self.assertRaises(FileExistsError):
             self.video_engine.create(self.table, if_not_exists=False)
+        self.video_engine.create(self.table, if_not_exists=True)
 
     def test_write(self):
         batch = MagicMock()
@@ -59,3 +61,20 @@ class VideoStorageEngineTest(unittest.TestCase):
         table.file_url = Exception()
         with self.assertRaises(Exception):
             self.video_engine.write(table, batch)
+
+    def test_delete(self):
+        batch = MagicMock()
+        batch.frames = []
+        table = MagicMock()
+        table.file_url = Exception()
+        with self.assertRaises(Exception):
+            self.video_engine.delete(table, batch)
+
+    def test_rename(self):
+
+        table_info = TableCatalog(
+            "new_name", "new_name", table_type=TableType.VIDEO_DATA
+        )
+
+        with pytest.raises(Exception):
+            self.video_engine.rename(self.table, table_info)

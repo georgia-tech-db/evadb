@@ -100,8 +100,7 @@ udf_libs = [
     "facenet-pytorch>=2.5.2",
     "easyocr>=1.5.0",
     "ipython",
-    "tqdm>=4.64.0",
-    "seaborn>=0.11.0"
+    "yolov5"
 ]
 
 ### NEEDED FOR EXPERIMENTAL FEATURES

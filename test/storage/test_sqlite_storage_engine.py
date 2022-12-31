@@ -16,6 +16,8 @@ import shutil
 import unittest
 from test.util import create_dummy_batches
 
+import pytest
+
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalog
 from eva.catalog.models.table_catalog import TableCatalog
@@ -67,3 +69,13 @@ class SQLStorageEngineTest(unittest.TestCase):
         self.assertTrue(read_batch, dummy_batches)
         # clean up
         sqlengine.drop(self.table)
+
+    def test_rename(self):
+
+        table_info = TableCatalog(
+            "new_name", "new_name", table_type=TableType.VIDEO_DATA
+        )
+        sqlengine = SQLStorageEngine()
+
+        with pytest.raises(Exception):
+            sqlengine.rename(self.table, table_info)

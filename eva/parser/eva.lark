@@ -128,7 +128,7 @@ alias_clause: AS? uid "(" uid_list ")" | AS? uid
 
 query_expression: "(" query_specification ")" | "(" query_expression ")"
     
-query_specification: SELECT select_elements from_clause order_by_clause? limit_clause? error_bounds_expression? confidence_level_expression?
+query_specification: SELECT select_elements from_clause order_by_clause? limit_clause?
     
 select_elements: (STAR | select_element ) ("," select_element)*
     
@@ -142,11 +142,7 @@ where_expr: expression
 group_by_item: expression sort_order?
     
 limit_clause: LIMIT ((decimal_literal ",")? decimal_literal  | decimal_literal OFFSET decimal_literal)
-    
-error_bounds_expression: ERROR_BOUNDS real_literal
-	
-confidence_level_expression: CONFIDENCE_LEVEL real_literal
-	
+    	
 // Utility Statements
 
 describe_statement: DESCRIBE table_name
@@ -375,11 +371,6 @@ FORMAT:               "FORMAT"
 CSV:                  "CSV"
 VIDEO:                "VIDEO"
 IMAGE:                "IMAGE"
-
-// EVAQL keywords
-
-ERROR_BOUNDS:						 "ERROR_WITHIN"
-CONFIDENCE_LEVEL:					 "AT_CONFIDENCE"
 
 // Index types
 HNSW:                                "HNSW"

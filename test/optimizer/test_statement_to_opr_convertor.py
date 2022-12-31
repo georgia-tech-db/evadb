@@ -17,10 +17,14 @@ import unittest
 from mock import MagicMock, patch
 
 from eva.optimizer.operators import (
+    LogicalApplyAndMerge,
     LogicalCreate,
+    LogicalCreateIndex,
+    LogicalCreateMaterializedView,
     LogicalCreateUDF,
     LogicalDrop,
     LogicalDropUDF,
+    LogicalExplain,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -34,6 +38,7 @@ from eva.optimizer.operators import (
     LogicalSample,
     LogicalShow,
     LogicalUnion,
+    LogicalUpload,
 )
 from eva.optimizer.statement_to_opr_convertor import StatementToPlanConvertor
 from eva.parser.create_index_statement import CreateIndexStatement
@@ -235,11 +240,21 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans = []
         create_plan = LogicalCreate(TableRef(TableInfo("video")), [MagicMock()])
         create_udf_plan = LogicalCreateUDF("udf", False, None, None, None)
+        create_index_plan = LogicalCreateIndex(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
+        create_materialized_view_plan = LogicalCreateMaterializedView(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
         insert_plan = LogicalInsert(MagicMock(), 0, [MagicMock()], [MagicMock()])
         query_derived_plan = LogicalQueryDerivedGet(alias="T")
         load_plan = LogicalLoadData(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        upload_plan = LogicalUpload(
+            MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()
+        )
         rename_plan = LogicalRename(TableRef(TableInfo("old")), TableInfo("new"))
 
+        explain_plan = LogicalExplain([MagicMock()])
         show_plan = LogicalShow(MagicMock())
         drop_plan = LogicalDrop([MagicMock()], True)
         drop_udf_plan = LogicalDropUDF("FakeUDF", False)
@@ -251,14 +266,21 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         union_plan = LogicalUnion(MagicMock())
         function_scan_plan = LogicalFunctionScan(MagicMock(), MagicMock())
         join_plan = LogicalJoin(MagicMock(), MagicMock(), MagicMock(), MagicMock())
+        apply_and_merge_plan = LogicalApplyAndMerge(MagicMock(), MagicMock())
 
         create_plan.append_child(create_udf_plan)
 
         plans.append(create_plan)
         plans.append(create_udf_plan)
+        plans.append(create_index_plan)
+        plans.append(create_materialized_view_plan)
+
         plans.append(insert_plan)
         plans.append(query_derived_plan)
+
         plans.append(load_plan)
+        plans.append(upload_plan)
+
         plans.append(rename_plan)
         plans.append(drop_plan)
         plans.append(drop_udf_plan)
@@ -270,10 +292,14 @@ statement_to_opr_convertor.column_definition_to_udf_io"
         plans.append(union_plan)
         plans.append(function_scan_plan)
         plans.append(join_plan)
+        plans.append(apply_and_merge_plan)
+
         plans.append(show_plan)
+        plans.append(explain_plan)
 
         length = len(plans)
         for i in range(length):
             self.assertEqual(plans[i], plans[i])
+            self.assertNotEqual(str(plans[i]), None)
             if i >= 1:  # compare against next plan
                 self.assertNotEqual(plans[i - 1], plans[i])
