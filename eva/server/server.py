@@ -15,7 +15,7 @@
 import asyncio
 import os
 import string
-from signal import SIGINT, SIGTERM, SIGUSR1, signal
+from signal import CTRL_C_EVENT, SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
