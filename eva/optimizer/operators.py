@@ -1195,7 +1195,7 @@ class LogicalApplyAndMerge(Operator):
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)
-        if not isinstance(other, LogicalFunctionScan):
+        if not isinstance(other, LogicalApplyAndMerge):
             return False
         return (
             is_subtree_equal
