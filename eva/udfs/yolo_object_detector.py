@@ -30,15 +30,11 @@ except ImportError as e:
         please try `pip install torch`"
     )
 try:
-    import seaborn  # noqa: F401
-    import tqdm  # noqa: F401
+    import yolov5
 except ImportError as e:
     raise ImportError(
-        f"""please install yolov5 dependencies \n
-        pip install -r \
-        https://raw.githubusercontent.com/ultralytics/yolov5/master/requirements.txt
-        \n
-        {e}"""
+        f"Failed to import with error {e}, \
+        please try `pip install yolov5`"
     )
 
 
@@ -55,7 +51,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        self.model = torch.hub.load("ultralytics/yolov5", "yolov5m", pretrained=True)
+        self.model = yolov5.load("yolov5s.pt")
 
     @property
     def input_format(self) -> FrameInfo:
