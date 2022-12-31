@@ -345,10 +345,14 @@ def create_dummy_4d_batches(
         )
 
         if len(data) % batch_size == 0:
-            yield Batch(pd.DataFrame(data))
+            df = pd.DataFrame(data)
+            df = df.astype({"myvideo.id": np.intp})
+            yield Batch(df)
             data = []
     if data:
-        yield Batch(pd.DataFrame(data))
+        df = pd.DataFrame(data)
+        df = df.astype({"myvideo.id": np.intp})
+        yield Batch(df)
 
 
 def load_inbuilt_udfs():

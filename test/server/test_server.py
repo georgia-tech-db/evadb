@@ -16,6 +16,8 @@ import asyncio
 import threading
 import time
 import unittest
+import pytest
+import sys
 from unittest.mock import MagicMock
 
 import mock
@@ -32,30 +34,6 @@ class ServerTests(unittest.TestCase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def test_server(self):
-
-        host = "0.0.0.0"
-        port = 5489
-        socket_timeout = 60
-
-        def timeout_server():
-            # need a more robust mechanism for when to cancel the future
-            time.sleep(2)
-            self.stop_server_future.cancel()
-
-        thread = threading.Thread(target=timeout_server)
-        thread.daemon = True
-        thread.start()
-
-        with self.assertRaises((SystemExit)):
-            start_server(
-                host=host,
-                port=port,
-                loop=self.loop,
-                socket_timeout=socket_timeout,
-                stop_server_future=self.stop_server_future,
-            )
 
     def test_server_protocol_connection_lost(self):
 
@@ -104,3 +82,28 @@ class ServerTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             # error due to lack of asyncio loop
             eva_server.data_received(query_message)
+
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    def test_server(self):
+
+        host = "0.0.0.0"
+        port = 5489
+        socket_timeout = 60
+
+        def timeout_server():
+            # need a more robust mechanism for when to cancel the future
+            time.sleep(2)
+            self.stop_server_future.cancel()
+
+        thread = threading.Thread(target=timeout_server)
+        thread.daemon = True
+        thread.start()
+
+        with self.assertRaises(SystemExit):
+            start_server(
+                host=host,
+                port=port,
+                loop=self.loop,
+                socket_timeout=socket_timeout,
+                stop_server_future=self.stop_server_future,
+            )

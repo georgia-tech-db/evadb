@@ -18,7 +18,7 @@ fi
 
 # Keeping the duplicate linting for time being
 # Run linter (checks code style)
-flake8 --config=.flake8 eva/ test/ 
+python -m flake8 --config=.flake8 eva/ test/
 linter_code=$?
 
 if [ $linter_code -ne 0 ];
@@ -28,7 +28,7 @@ fi
 
 
 # Run unit tests
-PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
+PYTHONPATH=./ python -m pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
 test_code=$?
 if [ $test_code -ne 0 ];
 then
@@ -36,7 +36,7 @@ then
 fi
 
 # Run notebooks
-PYTHONPATH=./ pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
+PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
 notebook_test_code=$?
 if [ $notebook_test_code -ne 0 ];
 then
