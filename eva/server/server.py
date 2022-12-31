@@ -14,13 +14,8 @@
 # limitations under the License.
 import asyncio
 import os
+import signal
 import string
-from signal import SIGINT, SIGTERM, signal
-
-if os.name == "nt":
-    from signal import CTRL_C_EVENT
-else:
-    from signal import SIGHUP, SIGUSR1
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
@@ -105,12 +100,12 @@ def start_server(
         raise SystemExit
 
     if os.name != "nt":
-        signals = [SIGINT, SIGTERM, SIGHUP, SIGUSR1]
+        signals = [signal.SIGINT, signal.SIGTERM, signal.SIGHUP]
     else:
-        signals = [SIGINT, SIGTERM, CTRL_C_EVENT]
+        signals = [signal.SIGINT, signal.SIGTERM, signal.SIGBREAK]
 
     for handled_signal in signals:
-        signal(handled_signal, raiseSystemExit)
+        signal.signal(handled_signal, raiseSystemExit)
 
     # Get a reference to the event loop
     # loop = asyncio.get_event_loop()
