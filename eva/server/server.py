@@ -15,7 +15,7 @@
 import asyncio
 import os
 import string
-from signal import SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
+from signal import SIGINT, SIGTERM, SIGUSR1, signal
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
@@ -99,7 +99,7 @@ def start_server(
     def raiseSystemExit(_, __):
         raise SystemExit
 
-    signals = [SIGINT, SIGTERM, SIGHUP, SIGUSR1]
+    signals = [SIGINT, SIGTERM, SIGUSR1]
 
     for handled_signal in signals:
         signal(handled_signal, raiseSystemExit)
