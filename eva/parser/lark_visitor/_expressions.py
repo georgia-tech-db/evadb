@@ -27,8 +27,6 @@ from eva.expression.logical_expression import LogicalExpression
 ##################################################################
 class Expressions:
     def string_literal(self, tree):
-        # Fix a bug here; 'VAN' Literal gets converted to "'VAN'";
-        # Multiple quotes should be removed
         text = tree.children[0]
         if text is not None:
             return ConstantValueExpression(text[1:-1], ColumnType.TEXT)
@@ -68,9 +66,6 @@ class Expressions:
         return self.visit_children(tree)
 
     def logical_expression(self, tree):
-        if len(tree.children) < 3:
-            # error scenario, should have 3 children
-            return None
         left = self.visit(tree.children[0])
         op = self.visit(tree.children[1])
         right = self.visit(tree.children[2])

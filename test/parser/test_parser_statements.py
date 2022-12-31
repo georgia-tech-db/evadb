@@ -58,6 +58,8 @@ class ParserStatementTests(unittest.TestCase):
             """CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS
                SELECT id, YoloV5(frame).labels FROM MyVideo
                         WHERE id<5; """,
+            """SELECT '' FROM TAIPAI
+                         ERROR_BOUND 0.5 AT_CONFIDENCE 0.95;"""
             """SELECT table1.a FROM table1 JOIN table2
             ON table1.a = table2.a WHERE table1.a <= 5""",
             """SELECT table1.a FROM table1 JOIN table2
