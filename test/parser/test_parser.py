@@ -294,11 +294,10 @@ class ParserTests(unittest.TestCase):
         self.assertIsNotNone(select_stmt.where_clause)
         # other tests should go in expression testing
 
-    def test_select_error_bound_with_empty_string_literal(self):
+    def test_select_with_empty_string_literal(self):
         parser = Parser()
 
-        select_query = """SELECT '' FROM TAIPAI
-                         ERROR_BOUND 0.5 AT_CONFIDENCE 0.95;"""
+        select_query = """SELECT '' FROM TAIPAI;"""
 
         eva_statement_list = parser.parse(select_query)
         self.assertIsInstance(eva_statement_list, list)
