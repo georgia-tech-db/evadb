@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
+import pytest
 
 import numpy as np
 import pandas as pd
@@ -36,6 +37,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(1, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
+
 
     def test_aggregation_last(self):
         columnName = TupleValueExpression(col_name=0)
@@ -46,6 +49,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
+
 
     def test_aggregation_segment(self):
         columnName = TupleValueExpression(col_name=0)
@@ -56,6 +61,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertTrue((np.array([1, 2, 3]) == batch.frames.iloc[0][0]).all())
+        self.assertNotEqual(str(aggr_expr), None)
+
 
     def test_aggregation_sum(self):
         columnName = TupleValueExpression(col_name=0)
@@ -66,6 +73,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(6, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
+
 
     def test_aggregation_count(self):
         columnName = TupleValueExpression(col_name=0)
@@ -76,6 +85,8 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
+
 
     def test_aggregation_avg(self):
         columnName = TupleValueExpression(col_name=0)
@@ -86,6 +97,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(2, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
 
     def test_aggregation_min(self):
         columnName = TupleValueExpression(col_name=0)
@@ -96,6 +108,7 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(1, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
 
     def test_aggregation_max(self):
         columnName = TupleValueExpression(col_name=0)
@@ -106,3 +119,13 @@ class AggregationExpressionsTest(unittest.TestCase):
         tuples = Batch(pd.DataFrame({0: [1, 2, 3], 1: [2, 3, 4], 2: [3, 4, 5]}))
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
+        self.assertNotEqual(str(aggr_expr), None)
+
+    def test_aggregation_incorrect_etype(self):
+        incorrect_etype = 100
+        columnName = TupleValueExpression(col_name=0)
+        aggr_expr = AggregationExpression(incorrect_etype, columnName, columnName)
+        with pytest.raises(NotImplementedError):
+            str(aggr_expr)
+
+
