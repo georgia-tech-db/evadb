@@ -51,6 +51,7 @@ class VideoStorageEngineTest(unittest.TestCase):
         m.side_effect = FileExistsError
         with self.assertRaises(FileExistsError):
             self.video_engine.create(self.table, if_not_exists=False)
+        self.video_engine.create(self.table, if_not_exists=True)
 
     def test_write(self):
         batch = MagicMock()
@@ -59,3 +60,11 @@ class VideoStorageEngineTest(unittest.TestCase):
         table.file_url = Exception()
         with self.assertRaises(Exception):
             self.video_engine.write(table, batch)
+
+    def test_delete(self):
+        batch = MagicMock()
+        batch.frames = []
+        table = MagicMock()
+        table.file_url = Exception()
+        with self.assertRaises(Exception):
+            self.video_engine.delete(table, batch)
