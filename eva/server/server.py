@@ -15,7 +15,12 @@
 import asyncio
 import os
 import string
-from signal import CTRL_C_EVENT, SIGHUP, SIGINT, SIGTERM, SIGUSR1, signal
+from signal import SIGINT, SIGTERM, signal
+
+if os.name == "nt":
+    from signal import CTRL_C_EVENT
+else:
+    from signal import SIGHUP, SIGUSR1
 
 from eva.server.async_protocol import EvaProtocolBuffer
 from eva.server.command_handler import handle_request
