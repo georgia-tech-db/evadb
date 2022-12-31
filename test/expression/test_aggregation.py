@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unittest
-import pytest
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
@@ -39,7 +39,6 @@ class AggregationExpressionsTest(unittest.TestCase):
         self.assertEqual(1, batch.frames.iloc[0][0])
         self.assertNotEqual(str(aggr_expr), None)
 
-
     def test_aggregation_last(self):
         columnName = TupleValueExpression(col_name=0)
         columnName.col_alias = 0
@@ -50,7 +49,6 @@ class AggregationExpressionsTest(unittest.TestCase):
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
         self.assertNotEqual(str(aggr_expr), None)
-
 
     def test_aggregation_segment(self):
         columnName = TupleValueExpression(col_name=0)
@@ -63,7 +61,6 @@ class AggregationExpressionsTest(unittest.TestCase):
         self.assertTrue((np.array([1, 2, 3]) == batch.frames.iloc[0][0]).all())
         self.assertNotEqual(str(aggr_expr), None)
 
-
     def test_aggregation_sum(self):
         columnName = TupleValueExpression(col_name=0)
         columnName.col_alias = 0
@@ -75,7 +72,6 @@ class AggregationExpressionsTest(unittest.TestCase):
         self.assertEqual(6, batch.frames.iloc[0][0])
         self.assertNotEqual(str(aggr_expr), None)
 
-
     def test_aggregation_count(self):
         columnName = TupleValueExpression(col_name=0)
         columnName.col_alias = 0
@@ -86,7 +82,6 @@ class AggregationExpressionsTest(unittest.TestCase):
         batch = aggr_expr.evaluate(tuples, None)
         self.assertEqual(3, batch.frames.iloc[0][0])
         self.assertNotEqual(str(aggr_expr), None)
-
 
     def test_aggregation_avg(self):
         columnName = TupleValueExpression(col_name=0)
@@ -127,5 +122,3 @@ class AggregationExpressionsTest(unittest.TestCase):
         aggr_expr = AggregationExpression(incorrect_etype, columnName, columnName)
         with pytest.raises(NotImplementedError):
             str(aggr_expr)
-
-

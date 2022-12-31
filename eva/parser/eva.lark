@@ -378,7 +378,7 @@ IMAGE:                "IMAGE"
 
 // EVAQL keywords
 
-ERROR_BOUNDS:						 "ERROR_WITHIN"
+ERROR_BOUNDS:						 "ERROR_BOUND"
 CONFIDENCE_LEVEL:					 "AT_CONFIDENCE"
 
 // Index types
