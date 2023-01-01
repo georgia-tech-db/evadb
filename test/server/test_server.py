@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import sys
 import threading
 import time
 import unittest
-import pytest
-import sys
 from unittest.mock import MagicMock
 
 import mock
+import pytest
 
 from eva.server.networking_utils import serialize_message
 from eva.server.server import EvaServer, start_server

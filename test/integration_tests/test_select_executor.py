@@ -429,7 +429,9 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 0, 2, 2, 4, 4, 6, 6, 8, 8], dtype=np.intp),
+                    "myvideo.id": np.array(
+                        [0, 0, 2, 2, 4, 4, 6, 6, 8, 8], dtype=np.intp
+                    ),
                     "T.label": np.array(
                         [
                             "person",
