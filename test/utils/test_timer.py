@@ -43,7 +43,6 @@ class TimerTests(unittest.TestCase):
         self.assertTrue(sleep_time.total_elapsed_time < 5.2)
         self.assertTrue(sleep_time.total_elapsed_time > 4.9)
 
-    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_timer_with_query(self):
         CatalogManager().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
@@ -63,3 +62,4 @@ class TimerTests(unittest.TestCase):
         self.assertTrue(response.query_time is None)
 
         file_remove("dummy.avi")
+        self.assertEqual(1, 2)
