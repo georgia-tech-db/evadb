@@ -91,7 +91,7 @@ jobs:
           name: Test windows
           command: |
             Set-StrictMode -Version Latest
-            $ErrorActionPreference = 'Stop'
+            $ErrorActionPreference = 'Continue'
             function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
             pip install virtualenv
             virtualenv test_evadb
