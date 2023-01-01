@@ -32,6 +32,8 @@ PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/
 test_code=$?
 if [ $test_code -ne 0 ];
 then
+    echo "TEST CODE: "
+    echo $test_code
     exit $test_code
 fi
 
