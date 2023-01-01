@@ -1006,12 +1006,14 @@ class LogicalCreateMaterializedView(Operator):
         view: TableInfo,
         col_list: List[ColumnDefinition],
         if_not_exists: bool = False,
+        yield_output: bool = False,
         children=None,
     ):
         super().__init__(OperatorType.LOGICAL_CREATE_MATERIALIZED_VIEW, children)
         self._view = view
         self._col_list = col_list
         self._if_not_exists = if_not_exists
+        self._yield_output = yield_output
 
     @property
     def view(self):
@@ -1020,6 +1022,10 @@ class LogicalCreateMaterializedView(Operator):
     @property
     def if_not_exists(self):
         return self._if_not_exists
+
+    @property
+    def yield_output(self):
+        return self._yield_output
 
     @property
     def col_list(self):
@@ -1034,6 +1040,7 @@ class LogicalCreateMaterializedView(Operator):
             and self.view == other.view
             and self.col_list == other.col_list
             and self.if_not_exists == other.if_not_exists
+            and self.yield_output == other.yield_output
         )
 
     def __hash__(self) -> int:
@@ -1043,6 +1050,7 @@ class LogicalCreateMaterializedView(Operator):
                 self.view,
                 tuple(self.col_list),
                 self.if_not_exists,
+                self.yield_output,
             )
         )
 

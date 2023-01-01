@@ -76,8 +76,6 @@ class RulesManager:
     def __init__(self):
         self._logical_rules = [
             LogicalInnerJoinCommutativity(), 
-            # TODO: Add flag to enable/disable this rule
-            UdfReuseForFunctionScan()
         ]
 
         self._rewrite_rules = [
@@ -89,6 +87,10 @@ class RulesManager:
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
+            # TODO: Temporarily comment out this rule to avoid the hash bug. 
+            # PushDownFilterThroughJoin(),
+            # TODO: Add flag to enable/disable this rule
+            UdfReuseForFunctionScan()
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

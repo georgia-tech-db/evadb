@@ -35,11 +35,13 @@ class CreateMaterializedViewPlan(AbstractPlan):
         view: TableInfo,
         columns: List[ColumnDefinition],
         if_not_exists: bool = False,
+        yield_output: bool = False,
     ):
         super().__init__(PlanOprType.CREATE_MATERIALIZED_VIEW)
         self._view = view
         self._columns = columns
         self._if_not_exists = if_not_exists
+        self._yield_output = yield_output
 
     @property
     def view(self):
@@ -48,6 +50,10 @@ class CreateMaterializedViewPlan(AbstractPlan):
     @property
     def if_not_exists(self):
         return self._if_not_exists
+
+    @property
+    def yield_output(self):
+        return self._yield_output
 
     @property
     def columns(self):

@@ -23,7 +23,9 @@ from eva.catalog.models.base_model import BaseModel
 class UdfHistoryColumn(BaseModel):
     __tablename__ = "udf_history_column"
 
-    _udf_history_id = Column("udf_history_id", Integer, ForeignKey("udf_history._row_id"))
+    _udf_history_id = Column(
+        "udf_history_id", Integer, ForeignKey("udf_history._row_id")
+    )
     _arg = Column("arg", Integer, ForeignKey("df_column._row_id"))
     _arg_index = Column("arg_index", Integer)
 
