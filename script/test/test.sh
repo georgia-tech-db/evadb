@@ -23,7 +23,6 @@ then
     fi
 fi
 
-
 # Keeping the duplicate linting for time being
 # Run linter (checks code style)
 PYTHONPATH=./ python -m flake8 --config=.flake8 eva/ test/ 
@@ -49,18 +48,22 @@ else
     echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
 fi
 
-# Run notebooks
-PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
-notebook_test_code=$?
-if [ "$notebook_test_code" != "0" ];
-then
-    cat tutorials/eva.log
-    echo "NOTEBOOK CODE: --|${notebook_test_code}|-- FAILURE"
-    exit $notebook_test_code
+if [[ "$OSTYPE" != "msys" ]];
+then 
+    # Run notebooks
+    PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
+    notebook_test_code=$?
+    if [ "$notebook_test_code" != "0" ];
+    then
+        cat tutorials/eva.log
+        echo "NOTEBOOK CODE: --|${notebook_test_code}|-- FAILURE"
+        exit $notebook_test_code
+    else
+        echo "NOTEBOOK CODE: --|${notebook_test_code}|-- SUCCESS"
+        exit 0 # Success 
+    fi
 else
-    echo "NOTEBOOK CODE: --|${notebook_test_code}|-- SUCCESS"
-    # Success
-    exit 0
+    exit 0 # Success 
 fi
 
 # restore __init__.py if it exists
