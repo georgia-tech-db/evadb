@@ -35,12 +35,6 @@ jobs:
       # This comes with python and openjdk11
       - image: "cimg/python:<< parameters.v >>-browsers"
     steps:
-      - run:
-          name: Install EVA package from pip and start server
-          command: |
-            pip install --upgrade pip
-            pip install evadb
-            bash script/test/package.sh
 
       - checkout
       - restore_cache:
@@ -51,6 +45,13 @@ jobs:
       - restore_cache:
           keys:
             - v1-pip-cache-{{ checksum "setup.py" }}
+
+      - run:
+          name: Install EVA package from pip and start server
+          command: |
+            pip install --upgrade pip
+            pip install evadb
+            bash script/test/package.sh
 
       - run:
           name: Install EVA package from GitHub repo with all dependencies
