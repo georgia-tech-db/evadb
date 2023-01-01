@@ -62,4 +62,3 @@ class TimerTests(unittest.TestCase):
         self.assertTrue(response.query_time is None)
 
         file_remove("dummy.avi")
-        self.assertEqual(1, 2)

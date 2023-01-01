@@ -39,22 +39,21 @@ jobs:
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
-      # removing it - no significant advnatage
-      # - restore_cache:
-      #     keys:
-      #       - v1-pip-cache-{{ checksum "setup.py" }}
 
-      #- run:
-      #    name: Install only EVA package from pip
-      #    command: |
-      #      sudo apt-get update          
-      #      sudo apt-get install lsof 
-      #      pip install --upgrade pip
-      #      pip install evadb
-      #      bash script/test/package.sh
+      # removing it - no significant advnatage
+      - restore_cache:
+          keys:
+            - v1-pip-cache-{{ checksum "setup.py" }}
 
       - run:
-          name: Install EVA package from repo with all dependencies
+          name: Install EVA package from pip and start server
+          command: |
+            pip install --upgrade pip
+            pip install evadb
+            sh script/test/package.sh
+
+      - run:
+          name: Install EVA package from GitHub repo with all dependencies
           command: |
             "python<< parameters.v >>" -m venv test_evadb
             source test_evadb/bin/activate
