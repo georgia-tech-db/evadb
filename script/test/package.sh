@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bassh
 
 ## Test package installation
 
