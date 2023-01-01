@@ -20,7 +20,6 @@ fi
 # Run linter (checks code style)
 python -m flake8 --config=.flake8 eva/ test/
 linter_code=$?
-
 if [ $linter_code -ne 0 ];
 then
     exit $linter_code
@@ -32,6 +31,8 @@ PYTHONPATH=./ python -m pytest test/ --cov-report term --cov-config=.coveragerc 
 test_code=$?
 if [ $test_code -ne 0 ];
 then
+    echo "Test code: "
+    echo $test_code
     exit $test_code
 fi
 

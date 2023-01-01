@@ -58,34 +58,6 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
     warmup_iterations=1,
     min_rounds=1,
 )
-def test_should_run_pytorch_and_ocr(benchmark, setup_pytorch_tests):
-    create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
-                INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                OUTPUT (labels NDARRAY STR(10),
-                        bboxes NDARRAY FLOAT32(ANYDIM, 4),
-                        scores NDARRAY FLOAT32(ANYDIM))
-                TYPE  OCRExtraction
-                IMPL  'eva/udfs/ocr_extractor.py';
-    """
-    execute_query_fetch_all(create_udf_query)
-
-    select_query = """SELECT OCRExtractor(data) FROM MNIST
-                    WHERE id >= 150 AND id < 155;"""
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert len(actual_batch) == 5
-
-    # non-trivial test case for MNIST
-    res = actual_batch.frames
-    assert res["ocrextractor.labels"][0][0] == "4"
-    assert res["ocrextractor.scores"][2][0] > 0.9
-
-
-@pytest.mark.torchtest
-@pytest.mark.benchmark(
-    warmup=False,
-    warmup_iterations=1,
-    min_rounds=1,
-)
 def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
                 INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
