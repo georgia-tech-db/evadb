@@ -92,10 +92,8 @@ jobs:
           command: |
             Set-StrictMode -Version Latest
             $ErrorActionPreference = 'Continue'
-# function ThrowOnFailure($Msg) { if (-not $?) { throw $Msg } }
             pip install virtualenv
             virtualenv test_evadb
             test_evadb\Scripts\activate
             pip install ".[dev]"       
             sh script\test\test.sh
-#  ThrowOnFailure "Python test failed!"
