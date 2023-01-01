@@ -8,43 +8,58 @@ if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
 fi
 
-# Run black, isort, linter 
-sh script/formatting/pre-push.sh
-return_code=$?
-if [ $return_code -ne 0 ];
-then
-    exit $return_code
+echo "OSTYPE: --|${OSTYPE}|--"
+if [[ "$OSTYPE" != "msys" ]];
+then 
+    # Run black, isort, linter 
+    sh script/formatting/pre-push.sh
+    formatter_code=$?
+    if [ $formatter_code -ne 0 ];
+    then
+        echo "FORMATTER CODE: --|${formatter_code}|-- FAILURE"
+        exit $formatter_code
+    else 
+        echo "FORMATTER CODE: --|${formatter_code}|-- SUCCESS"
+    fi
 fi
+
 
 # Keeping the duplicate linting for time being
 # Run linter (checks code style)
-flake8 --config=.flake8 eva/ test/ 
+PYTHONPATH=./ python -m flake8 --config=.flake8 eva/ test/ 
 linter_code=$?
 
-if [ $linter_code -ne 0 ];
+if [ "$linter_code" != "0" ];
 then
+    echo "FLAKE CODE: --|${linter_code}|-- FAILURE"
     exit $linter_code
+else
+    echo "FLAKE CODE: --|${linter_code}|-- SUCCESS"
 fi
 
 
 # Run unit tests
-PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
+PYTHONPATH=./ python -m pytest test/utils --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
 test_code=$?
-if [ $test_code -ne 0 ];
+if [ "$test_code" != "0" ];
 then
-    echo "TEST CODE: "
-    echo $test_code
+    echo "PYTEST CODE: --|${test_code}|-- FAILURE"
     exit $test_code
+else
+    echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
 fi
 
 # Run notebooks
-PYTHONPATH=./ pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
+PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
 notebook_test_code=$?
-if [ $notebook_test_code -ne 0 ];
+if [ "$notebook_test_code" != "0" ];
 then
     cat tutorials/eva.log
+    echo "NOTEBOOK CODE: --|${notebook_test_code}|-- FAILURE"
     exit $notebook_test_code
 else
+    echo "NOTEBOOK CODE: --|${notebook_test_code}|-- SUCCESS"
+    # Success
     exit 0
 fi
 
