@@ -51,7 +51,7 @@ else
     echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
 fi
 
-if [[ "$OSTYPE" != "msys" ]];
+if [ "$OSTYPE" != "msys" ];
 then 
     # Run notebooks
     PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
