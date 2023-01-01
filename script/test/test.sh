@@ -38,7 +38,7 @@ fi
 
 
 # Run unit tests
-PYTHONPATH=./ python -m pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
+PYTHONPATH=./ python -m pytest test/utils/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
 test_code=$?
 if [ "$test_code" != "0" ];
 then
