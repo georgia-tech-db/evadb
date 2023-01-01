@@ -14,10 +14,13 @@
 # limitations under the License.
 
 import asyncio
+import sys
 import time
 import unittest
 from test.util import create_sample_video, file_remove
 from unittest.mock import MagicMock
+
+import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.server.command_handler import handle_request
@@ -30,6 +33,7 @@ class TimerTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_timer(self):
 
         sleep_time = Timer()
@@ -39,6 +43,7 @@ class TimerTests(unittest.TestCase):
         self.assertTrue(sleep_time.total_elapsed_time < 5.2)
         self.assertTrue(sleep_time.total_elapsed_time > 4.9)
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_timer_with_query(self):
         CatalogManager().reset()
         video_file_path = create_sample_video(NUM_FRAMES)
