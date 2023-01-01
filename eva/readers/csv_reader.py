@@ -17,8 +17,8 @@ from typing import Dict, Iterator
 import numpy as np
 import pandas as pd
 
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.readers.abstract_reader import AbstractReader
-from eva.sql_config import IDENTIFIER_COLUMN
 from eva.utils.logging_manager import logger
 
 

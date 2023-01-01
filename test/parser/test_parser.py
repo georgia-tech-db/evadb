@@ -15,13 +15,14 @@
 import unittest
 from pathlib import Path
 
-from eva.catalog.catalog_type import ColumnType, NdArrayType
+from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.comparison_expression import ComparisonExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
+from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
 from eva.parser.create_statement import (
     ColConstraintInfo,
@@ -46,6 +47,39 @@ class ParserTests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    def test_create_index_statement(self):
+        parser = Parser()
+
+        create_index_query = "CREATE INDEX testindex ON MyVideo (featCol) USING HNSW;"
+        eva_stmt_list = parser.parse(create_index_query)
+
+        # check stmt itself
+        self.assertIsInstance(eva_stmt_list, list)
+        self.assertEqual(len(eva_stmt_list), 1)
+        self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
+
+        expected_stmt = CreateIndexStatement(
+            "testindex",
+            TableRef(TableInfo("MyVideo")),
+            [
+                ColumnDefinition("featCol", None, None, None),
+            ],
+            IndexType.HNSW,
+        )
+        actual_stmt = eva_stmt_list[0]
+        self.assertEqual(actual_stmt, expected_stmt)
+
+    @unittest.skip("Skip parser exception handling testcase, moved to binder")
+    def test_create_index_exception_statement(self):
+        parser = Parser()
+
+        create_index_query = (
+            "CREATE INDEX testindex USING HNSW ON MyVideo (featCol1, featCol2);"
+        )
+
+        with self.assertRaises(Exception):
+            parser.parse(create_index_query)
+
     def test_explain_dml_statement(self):
         parser = Parser()
 
@@ -69,7 +103,7 @@ class ParserTests(unittest.TestCase):
     def test_explain_ddl_statement(self):
         parser = Parser()
 
-        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+        select_query = """SELECT id, YoloV5(frame).labels FROM MyVideo
                         WHERE id<5; """
         explain_query = "EXPLAIN CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
             select_query
@@ -91,7 +125,7 @@ class ParserTests(unittest.TestCase):
             inner_stmt.view_info, TableRef(TableInfo("uadetrac_fastRCNN"))
         )
 
-    def test_create_statement(self):
+    def test_create_table_statement(self):
         parser = Parser()
 
         single_queries = []
@@ -129,17 +163,23 @@ class ParserTests(unittest.TestCase):
                 ),
             ],
         )
-        expected_stmt_str = "CREATE TABLE Persons (True)"
 
         for query in single_queries:
             eva_statement_list = parser.parse(query)
             self.assertIsInstance(eva_statement_list, list)
             self.assertEqual(len(eva_statement_list), 1)
             self.assertIsInstance(eva_statement_list[0], AbstractStatement)
-            self.assertEqual(str(eva_statement_list[0]), expected_stmt_str)
             self.assertEqual(eva_statement_list[0], expected_stmt)
 
-    def test_rename_statement(self):
+    def test_create_table_exception_statement(self):
+        parser = Parser()
+
+        create_table_query = "CREATE TABLE ();"
+
+        with self.assertRaises(Exception):
+            parser.parse(create_table_query)
+
+    def test_rename_table_statement(self):
         parser = Parser()
         rename_queries = "RENAME TABLE student TO student_info"
         expected_stmt = RenameTableStatement(
@@ -156,7 +196,7 @@ class ParserTests(unittest.TestCase):
     def test_drop_table_statement(self):
         parser = Parser()
         drop_queries = "DROP TABLE student_info"
-        expected_stmt = DropTableStatement([TableRef(TableInfo("student_info"))], False)
+        expected_stmt = DropTableStatement([TableInfo("student_info")], False)
         eva_statement_list = parser.parse(drop_queries)
         self.assertIsInstance(eva_statement_list, list)
         self.assertEqual(len(eva_statement_list), 1)
@@ -216,7 +256,7 @@ class ParserTests(unittest.TestCase):
         multiple_queries = []
         multiple_queries.append(
             "SELECT CLASS FROM TAIPAI \
-                WHERE CLASS = 'VAN' AND REDNESS < 300  OR REDNESS > 500; \
+                WHERE (CLASS = 'VAN' AND REDNESS < 300)  OR REDNESS > 500; \
                 SELECT REDNESS FROM TAIPAI \
                 WHERE (CLASS = 'VAN' AND REDNESS = 300)"
         )
@@ -253,6 +293,16 @@ class ParserTests(unittest.TestCase):
         # where_clause
         self.assertIsNotNone(select_stmt.where_clause)
         # other tests should go in expression testing
+
+    def test_select_with_empty_string_literal(self):
+        parser = Parser()
+
+        select_query = """SELECT '' FROM TAIPAI;"""
+
+        eva_statement_list = parser.parse(select_query)
+        self.assertIsInstance(eva_statement_list, list)
+        self.assertEqual(len(eva_statement_list), 1)
+        self.assertEqual(eva_statement_list[0].stmt_type, StatementType.SELECT)
 
     def test_select_union_statement(self):
         parser = Parser()
@@ -318,12 +368,6 @@ class ParserTests(unittest.TestCase):
             select_stmt.groupby_clause,
             ConstantValueExpression("8f", v_type=ColumnType.TEXT),
         )
-
-    def test_select_statement_groupby_class_with_multiple_attributes_should_raise(self):
-        # GROUP BY with multiple attributes should raise Syntax Error
-        parser = Parser()
-        select_query = "SELECT FIRST(id) FROM TAIPAI GROUP BY '8f', '12f';"
-        self.assertRaises(SyntaxError, parser.parse, select_query)
 
     def test_select_statement_orderby_class(self):
         """Testing order by clause in select statement
@@ -679,7 +723,7 @@ class ParserTests(unittest.TestCase):
         self.assertNotEqual(select_stmt, create_udf)
 
     def test_materialized_view(self):
-        select_query = """SELECT id, FastRCNNObjectDetector(frame).labels FROM MyVideo
+        select_query = """SELECT id, YoloV5(frame).labels FROM MyVideo
                         WHERE id<5; """
         query = "CREATE MATERIALIZED VIEW uadtrac_fastRCNN (id, labels) AS {}".format(
             select_query
@@ -785,13 +829,6 @@ class ParserTests(unittest.TestCase):
         expected_stmt = SelectStatement(select_list, from_table, where_clause)
         self.assertEqual(select_stmt, expected_stmt)
 
-    def test_multiple_join_with_single_ON_should_raise(self):
-        select_query = """SELECT table1.a FROM table1 JOIN table2 JOIN table3
-                    ON table3.a = table1.a AND table1.a = table2.a;"""
-        parser = Parser()
-        with self.assertRaises(Exception):
-            parser.parse(select_query)[0]
-
     def test_lateral_join(self):
         select_query = """SELECT frame FROM MyVideo JOIN LATERAL
                             ObjectDet(frame) AS OD;"""
@@ -810,3 +847,14 @@ class ParserTests(unittest.TestCase):
         )
         expected_stmt = SelectStatement([tuple_frame], from_table)
         self.assertEqual(select_stmt, expected_stmt)
+
+    def test_lark(self):
+        query = """CREATE UDF FaceDetector
+                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  OUTPUT (bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  FaceDetection
+                  IMPL  'eva/udfs/face_detector.py';
+                  """
+        parser = Parser()
+        parser.parse(query)

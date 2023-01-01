@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.planner.insert_plan import InsertPlan
-from eva.storage.storage_engine import StorageEngine
-from eva.catalog.catalog_manager import CatalogManager
+from eva.plan_nodes.insert_plan import InsertPlan
+
 
 class InsertExecutor(AbstractExecutor):
     def __init__(self, node: InsertPlan):

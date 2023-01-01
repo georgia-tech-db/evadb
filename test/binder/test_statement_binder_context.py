@@ -42,14 +42,14 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch("eva.binder.statement_binder_context.CatalogManager")
     def test_add_table_alias(self, mock_catalog):
-        mock_get = mock_catalog().get_dataset_metadata = MagicMock()
+        mock_get = mock_catalog().get_table_catalog_entry = MagicMock()
         mock_get.return_value = "table_obj"
         ctx = StatementBinderContext()
 
         mock_check = ctx._check_duplicate_alias = MagicMock()
         ctx.add_table_alias("alias", "table_name")
         mock_check.assert_called_with("alias")
-        mock_get.assert_called_with(None, "table_name")
+        mock_get.assert_called_with("table_name")
         self.assertEqual(ctx._table_alias_map["alias"], "table_obj")
 
     def test_add_derived_table_alias(self):
@@ -112,7 +112,7 @@ class StatementBinderTests(unittest.TestCase):
 
     @patch("eva.binder.statement_binder_context.CatalogManager")
     def test_check_table_alias_map(self, mock_catalog):
-        mock_get_column_object = mock_catalog().get_column_object = MagicMock()
+        mock_get_column_object = mock_catalog().get_column_catalog_entry = MagicMock()
         mock_get_column_object.return_value = "catalog_value"
         # key exists
         ctx = StatementBinderContext()

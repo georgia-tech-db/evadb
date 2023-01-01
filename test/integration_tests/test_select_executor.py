@@ -28,6 +28,7 @@ import pytest
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
+from eva.configuration.constants import EVA_ROOT_DIR
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
 from eva.server.command_handler import execute_query_fetch_all
@@ -39,8 +40,11 @@ class SelectExecutorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         CatalogManager().reset()
-        create_sample_video(NUM_FRAMES)
-        load_query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
+        video_file_path = create_sample_video(NUM_FRAMES)
+        load_query = f"LOAD VIDEO '{video_file_path}' INTO MyVideo;"
+        execute_query_fetch_all(load_query)
+        ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
+        load_query = f"LOAD VIDEO '{ua_detrac}' INTO DETRAC;"
         execute_query_fetch_all(load_query)
         load_inbuilt_udfs()
         cls.table1 = create_table("table1", 100, 3)
@@ -56,6 +60,7 @@ class SelectExecutorTest(unittest.TestCase):
         execute_query_fetch_all(drop_query)
         drop_query = """DROP TABLE table3;"""
         execute_query_fetch_all(drop_query)
+        execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
     def test_sort_on_nonprojected_column(self):
         """This tests doing an order by on a column
@@ -135,7 +140,7 @@ class SelectExecutorTest(unittest.TestCase):
     @unittest.skip("Not supported in current version")
     def test_select_star_in_lateral_join(self):
         select_query = """SELECT * FROM MyVideo JOIN LATERAL
-                          FastRCNNObjectDetector(data);"""
+                          YoloV5(data);"""
         actual_batch = execute_query_fetch_all(select_query)
         self.assertEqual(actual_batch.frames.columns, ["myvideo.id"])
 
@@ -368,18 +373,18 @@ class SelectExecutorTest(unittest.TestCase):
 
     @pytest.mark.torchtest
     def test_lateral_join(self):
-        select_query = """SELECT id, a FROM MyVideo JOIN LATERAL
-                        FastRCNNObjectDetector(data) AS T(a,b,c) WHERE id < 5;"""
+        select_query = """SELECT id, a FROM DETRAC JOIN LATERAL
+                        YoloV5(data) AS T(a,b,c) WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(list(actual_batch.columns), ["myvideo.id", "T.a"])
+        self.assertEqual(list(actual_batch.columns), ["detrac.id", "T.a"])
         self.assertEqual(len(actual_batch), 5)
 
     @pytest.mark.torchtest
     def test_lateral_join_with_multiple_projects(self):
-        select_query = """SELECT id, T.labels FROM MyVideo JOIN LATERAL
-                        FastRCNNObjectDetector(data) AS T WHERE id < 5;"""
+        select_query = """SELECT id, T.labels FROM DETRAC JOIN LATERAL
+                        YoloV5(data) AS T WHERE id < 5;"""
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertTrue(all(actual_batch.frames.columns == ["myvideo.id", "T.labels"]))
+        self.assertTrue(all(actual_batch.frames.columns == ["detrac.id", "T.labels"]))
         self.assertEqual(len(actual_batch), 5)
 
     def test_lateral_join_with_unnest(self):

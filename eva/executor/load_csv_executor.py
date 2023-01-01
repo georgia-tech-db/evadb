@@ -22,7 +22,7 @@ from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
-from eva.planner.load_data_plan import LoadDataPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
 from eva.readers.csv_reader import CSVReader
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.logging_manager import logger
@@ -40,7 +40,7 @@ class LoadCSVExecutor(AbstractExecutor):
 
     def exec(self):
         """
-        Read the input meta file using pandas and persist data
+        Read the input csv file using pandas and persist data
         using storage engine
         """
 
@@ -48,7 +48,10 @@ class LoadCSVExecutor(AbstractExecutor):
         table_info = self.node.table_info
         database_name = table_info.database_name
         table_name = table_info.table_name
-        table_obj = self.catalog.get_dataset_metadata(database_name, table_name)
+        table_obj = self.catalog.get_table_catalog_entry(
+            table_name,
+            database_name,
+        )
         if table_obj is None:
             error = f"{table_name} does not exist."
             logger.error(error)

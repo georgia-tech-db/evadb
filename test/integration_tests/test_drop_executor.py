@@ -35,16 +35,28 @@ class DropExecutorTest(unittest.TestCase):
         query = """LOAD VIDEO 'dummy.avi' INTO MyVideo;"""
         execute_query_fetch_all(query)
 
-        metadata_obj = catalog_manager.get_dataset_metadata(None, "MyVideo")
-        video_dir = metadata_obj.file_url
-        self.assertFalse(metadata_obj is None)
-        column_objects = catalog_manager.get_all_column_objects(metadata_obj)
+        # catalog should contain vidoe table and the metedata table
+        table_catalog_entry = catalog_manager.get_table_catalog_entry("MyVideo")
+        video_dir = table_catalog_entry.file_url
+        self.assertFalse(table_catalog_entry is None)
+        column_objects = catalog_manager.get_column_catalog_entries_by_table(
+            table_catalog_entry
+        )
         self.assertEqual(len(column_objects), 4)
         self.assertTrue(Path(video_dir).exists())
-        drop_query = """DROP TABLE MyVideo;"""
+        video_metadata_table = (
+            catalog_manager.get_multimedia_metadata_table_catalog_entry(
+                table_catalog_entry
+            )
+        )
+        self.assertTrue(video_metadata_table is not None)
+
+        drop_query = """DROP TABLE IF EXISTS MyVideo;"""
         execute_query_fetch_all(drop_query)
-        self.assertTrue(catalog_manager.get_dataset_metadata(None, "MyVideo") is None)
-        column_objects = catalog_manager.get_all_column_objects(metadata_obj)
+        self.assertTrue(catalog_manager.get_table_catalog_entry("MyVideo") is None)
+        column_objects = catalog_manager.get_column_catalog_entries_by_table(
+            table_catalog_entry
+        )
         self.assertEqual(len(column_objects), 0)
         self.assertFalse(Path(video_dir).exists())
 
@@ -68,13 +80,13 @@ class DropUDFExecutorTest(unittest.TestCase):
         catalog_manager = CatalogManager()
         self.run_create_udf_query()
         udf_name = "DummyObjectDetector"
-        udf = catalog_manager.get_udf_by_name(udf_name)
+        udf = catalog_manager.get_udf_catalog_entry_by_name(udf_name)
         self.assertTrue(udf is not None)
 
         # Test that dropping the UDF reflects in the catalog
         drop_query = "DROP UDF IF EXISTS {};".format(udf_name)
         execute_query_fetch_all(drop_query)
-        udf = catalog_manager.get_udf_by_name(udf_name)
+        udf = catalog_manager.get_udf_catalog_entry_by_name(udf_name)
         self.assertTrue(udf is None)
 
     def test_drop_wrong_udf_name(self):
@@ -82,7 +94,7 @@ class DropUDFExecutorTest(unittest.TestCase):
         self.run_create_udf_query()
         right_udf_name = "DummyObjectDetector"
         wrong_udf_name = "FakeDummyObjectDetector"
-        udf = catalog_manager.get_udf_by_name(right_udf_name)
+        udf = catalog_manager.get_udf_catalog_entry_by_name(right_udf_name)
         self.assertTrue(udf is not None)
 
         # Test that dropping the wrong UDF:
@@ -96,5 +108,5 @@ class DropUDFExecutorTest(unittest.TestCase):
                 wrong_udf_name
             )
             self.assertTrue(str(e) == err_msg)
-        udf = catalog_manager.get_udf_by_name(right_udf_name)
+        udf = catalog_manager.get_udf_catalog_entry_by_name(right_udf_name)
         self.assertTrue(udf is not None)

@@ -16,11 +16,13 @@ from enum import IntEnum, auto
 from pathlib import Path
 from typing import List
 
-from eva.catalog.models.df_column import DataFrameColumn
-from eva.catalog.models.df_metadata import DataFrameMetadata
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.catalog_type import IndexType
+from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo, TableRef
@@ -56,6 +58,8 @@ class OperatorType(IntEnum):
     LOGICAL_SHOW = auto()
     LOGICALDROPUDF = auto()
     LOGICALEXPLAIN = auto()
+    LOGICALCREATEINDEX = auto()
+    LOGICAL_APPLY_AND_MERGE = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -141,7 +145,7 @@ class LogicalGet(Operator):
     def __init__(
         self,
         video: TableRef,
-        dataset_metadata: DataFrameMetadata,
+        table_obj: TableCatalog,
         alias: str,
         predicate: AbstractExpression = None,
         target_list: List[AbstractExpression] = None,
@@ -149,7 +153,7 @@ class LogicalGet(Operator):
         children=None,
     ):
         self._video = video
-        self._dataset_metadata = dataset_metadata
+        self._table_obj = table_obj
         self._alias = alias
         self._predicate = predicate
         self._target_list = target_list
@@ -161,8 +165,8 @@ class LogicalGet(Operator):
         return self._video
 
     @property
-    def dataset_metadata(self):
-        return self._dataset_metadata
+    def table_obj(self):
+        return self._table_obj
 
     @property
     def alias(self):
@@ -195,7 +199,7 @@ class LogicalGet(Operator):
         return (
             is_subtree_equal
             and self.video == other.video
-            and self.dataset_metadata == other.dataset_metadata
+            and self.table_obj == other.table_obj
             and self.alias == other.alias
             and self.predicate == other.predicate
             and self.target_list == other.target_list
@@ -208,7 +212,7 @@ class LogicalGet(Operator):
                 super().__hash__(),
                 self.alias,
                 self.video,
-                self.dataset_metadata,
+                self.table_obj,
                 self.predicate,
                 tuple(self.target_list or []),
                 self.sampling_rate,
@@ -392,7 +396,7 @@ class LogicalInsert(Operator):
     """[Logical Node for Insert operation]
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to intert data into
+        table(TableCatalog): table to intert data into
         column_list{List[AbstractExpression]}:
             [After binding annotated column_list]
         value_list{List[AbstractExpression]}:
@@ -401,19 +405,19 @@ class LogicalInsert(Operator):
 
     def __init__(
         self,
-        table_metainfo: DataFrameMetadata,
+        table: TableCatalog,
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALINSERT, children)
-        self._table_metainfo = table_metainfo
+        self._table = table
         self._column_list = column_list
         self._value_list = value_list
 
     @property
-    def table_metainfo(self):
-        return self._table_metainfo
+    def table(self):
+        return self._table
 
     @property
     def value_list(self):
@@ -429,7 +433,7 @@ class LogicalInsert(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_metainfo == other.table_metainfo
+            and self.table == other.table
             and self.value_list == other.value_list
             and self.column_list == other.column_list
         )
@@ -438,7 +442,7 @@ class LogicalInsert(Operator):
         return hash(
             (
                 super().__hash__(),
-                self.table_metainfo,
+                self.table,
                 tuple(self.value_list),
                 tuple(self.column_list),
             )
@@ -541,14 +545,14 @@ class LogicalDrop(Operator):
     Logical node for drop table operations
     """
 
-    def __init__(self, table_refs: List[TableRef], if_exists: bool, children=None):
+    def __init__(self, table_infos: List[TableInfo], if_exists: bool, children=None):
         super().__init__(OperatorType.LOGICALDROP, children)
-        self._table_refs = table_refs
+        self._table_infos = table_infos
         self._if_exists = if_exists
 
     @property
-    def table_refs(self):
-        return self._table_refs
+    def table_infos(self):
+        return self._table_infos
 
     @property
     def if_exists(self):
@@ -560,12 +564,12 @@ class LogicalDrop(Operator):
             return False
         return (
             is_subtree_equal
-            and self.table_refs == other.table_refs
+            and self.table_infos == other.table_infos
             and self.if_exists == other.if_exists
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), tuple(self._table_refs), self._if_exists))
+        return hash((super().__hash__(), tuple(self._table_infos), self._if_exists))
 
 
 class LogicalCreateUDF(Operator):
@@ -578,9 +582,9 @@ class LogicalCreateUDF(Operator):
         if_not_exists: bool
             if true should throw an error if udf with same name exists
             else will replace the existing
-        inputs: List[UdfIO]
+        inputs: List[UdfIOCatalog]
             udf inputs, annotated list similar to table columns
-        outputs: List[UdfIO]
+        outputs: List[UdfIOCatalog]
             udf outputs, annotated list similar to table columns
         impl_path: Path
             file path which holds the implementation of the udf.
@@ -594,8 +598,8 @@ class LogicalCreateUDF(Operator):
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[UdfIO],
-        outputs: List[UdfIO],
+        inputs: List[UdfIOCatalog],
+        outputs: List[UdfIOCatalog],
         impl_path: Path,
         udf_type: str = None,
         children: List = None,
@@ -703,7 +707,7 @@ class LogicalLoadData(Operator):
     """Logical node for load data operation
 
     Arguments:
-        table_metainfo(DataFrameMetadata): table to load data into
+        table(TableCatalog): table to load data into
         path(Path): file path from where we are loading data
     """
 
@@ -820,7 +824,7 @@ class LogicalUpload(Operator):
                 column_list: {}, \
                 file_options: {})".format(
             self.path,
-            "string of video blob",
+            "video blob",
             self.table_info,
             self.column_list,
             self.file_options,
@@ -897,7 +901,7 @@ class LogicalFunctionScan(Operator):
         )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.func_expr))
+        return hash((super().__hash__(), self.func_expr, self.do_unnest, self.alias))
 
 
 class LogicalJoin(Operator):
@@ -915,8 +919,8 @@ class LogicalJoin(Operator):
         self,
         join_type: JoinType,
         join_predicate: AbstractExpression = None,
-        left_keys: List[DataFrameColumn] = None,
-        right_keys: List[DataFrameColumn] = None,
+        left_keys: List[ColumnCatalog] = None,
+        right_keys: List[ColumnCatalog] = None,
         children: List = None,
     ):
         super().__init__(OperatorType.LOGICALJOIN, children)
@@ -924,7 +928,7 @@ class LogicalJoin(Operator):
         self._join_predicate = join_predicate
         self._left_keys = left_keys
         self._right_keys = right_keys
-        self._join_project = []
+        self._join_project = None
 
     @property
     def join_type(self):
@@ -934,33 +938,17 @@ class LogicalJoin(Operator):
     def join_predicate(self):
         return self._join_predicate
 
-    @join_predicate.setter
-    def join_predicate(self, predicate):
-        self._join_predicate = predicate
-
     @property
     def left_keys(self):
         return self._left_keys
-
-    @left_keys.setter
-    def left_keys(self, keys):
-        self._left_key = keys
 
     @property
     def right_keys(self):
         return self._right_keys
 
-    @right_keys.setter
-    def right_keys(self, keys):
-        self._right_keys = keys
-
     @property
     def join_project(self):
         return self._join_project
-
-    @join_project.setter
-    def join_project(self, join_project):
-        self._target_list = join_project
 
     def lhs(self):
         return self.children[0]
@@ -998,9 +986,9 @@ class LogicalJoin(Operator):
                 super().__hash__(),
                 self.join_type,
                 self.join_predicate,
-                left_keys,
-                right_keys,
-                tuple(self.join_project),
+                self.left_keys,
+                self.right_keys,
+                tuple(self.join_project or []),
             )
         )
 
@@ -1109,3 +1097,116 @@ class LogicalExplain(Operator):
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self._explainable_opr))
+
+
+class LogicalCreateIndex(Operator):
+    def __init__(
+        self,
+        name: str,
+        table_ref: TableRef,
+        col_list: List[ColumnDefinition],
+        index_type: IndexType,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICALCREATEINDEX, children)
+        self._name = name
+        self._table_ref = table_ref
+        self._col_list = col_list
+        self._index_type = index_type
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def table_ref(self):
+        return self._table_ref
+
+    @property
+    def col_list(self):
+        return self._col_list
+
+    @property
+    def index_type(self):
+        return self._index_type
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalCreateIndex):
+            return False
+        return (
+            is_subtree_equal
+            and self.name == other.name
+            and self.table_ref == other.table_ref
+            and self.col_list == other.col_list
+            and self.index_type == other.index_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.name,
+                self.table_ref,
+                tuple(self.col_list),
+                self.index_type,
+            )
+        )
+
+
+class LogicalApplyAndMerge(Operator):
+    """Evaluate the function expression on the input data and return the merged output.
+    This operator simplifies the process of evaluating functions on a table source.
+    Currently, it performs an inner join while merging the function output with the
+    input data. This means that if the function does not return any output for a given
+    input row, that row will be dropped from the output. We can consider expanding this
+    to support left joins and other types of joins in the future.
+    """
+
+    def __init__(
+        self,
+        func_expr: FunctionExpression,
+        alias: Alias,
+        do_unnest: bool = False,
+        children: List = None,
+    ):
+        super().__init__(OperatorType.LOGICAL_APPLY_AND_MERGE, children)
+        self._func_expr = func_expr
+        self._do_unnest = do_unnest
+        self._alias = alias
+        self._merge_type = JoinType.INNER_JOIN
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @property
+    def func_expr(self):
+        return self._func_expr
+
+    @property
+    def do_unnest(self):
+        return self._do_unnest
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalApplyAndMerge):
+            return False
+        return (
+            is_subtree_equal
+            and self.func_expr == other.func_expr
+            and self.do_unnest == other.do_unnest
+            and self.alias == other.alias
+            and self._merge_type == other._merge_type
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.func_expr,
+                self.do_unnest,
+                self.alias,
+                self._merge_type,
+            )
+        )

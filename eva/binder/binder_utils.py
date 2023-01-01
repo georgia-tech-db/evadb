@@ -17,13 +17,15 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, List
 
+from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
+from eva.catalog.sql_config import IDENTIFIER_COLUMN
 
 if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.df_metadata import DataFrameMetadata
+from eva.catalog.models.table_catalog import TableCatalog
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.logging_manager import logger
@@ -33,18 +35,35 @@ class BinderError(Exception):
     pass
 
 
-def bind_table_info(table_info: TableInfo) -> DataFrameMetadata:
+def bind_table_info(table_info: TableInfo) -> TableCatalog:
     """
-    Uses catalog to bind the dataset information for given video string.
+    Uses catalog to bind the table information .
 
     Arguments:
-         video_info (TableInfo): video information obtained in SQL query
+         table_info (TableInfo): table information obtained from SQL query
 
     Returns:
-        DataFrameMetadata  -  corresponding metadata for the input table info
+        TableCatalog  -  corresponding table catalog entry for the input table info
     """
     catalog = CatalogManager()
-    obj = catalog.get_dataset_metadata(table_info.database_name, table_info.table_name)
+    obj = catalog.get_table_catalog_entry(
+        table_info.table_name,
+        table_info.database_name,
+    )
+
+    # Users should not be allowed to directly access or modify the SYSTEM tables, as
+    # doing so can lead to the corruption of other tables. These tables include
+    # metadata tables associated with unstructured data, such as the list of video
+    # files in the video table. Protecting these tables is crucial in order to maintain
+    # the integrity of the system.
+    if obj and obj.table_type == TableType.SYSTEM_STRUCTURED_DATA:
+        err_msg = (
+            "The query attempted to access or modify the internal table"
+            f"{table_info.table_name} of the system, but permission was denied."
+        )
+        logger.error(err_msg)
+        raise BinderError(err_msg)
+
     if obj:
         table_info.table_obj = obj
     else:
@@ -64,6 +83,7 @@ def extend_star(
         [
             TupleValueExpression(col_name=col_name, table_alias=alias)
             for alias, col_name in col_objs
+            if col_name != IDENTIFIER_COLUMN
         ]
     )
     return target_list

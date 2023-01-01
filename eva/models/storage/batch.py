@@ -235,8 +235,8 @@ class Batch:
         self._frames.iloc[indices] = other._frames
         self._frames = pd.DataFrame(self._frames)
 
-    def video_file_paths(self) -> Iterable:
-        yield from self._frames["video_file_path"]
+    def file_paths(self) -> Iterable:
+        yield from self._frames["file_path"]
 
     def project(self, cols: None) -> Batch:
         """
@@ -278,7 +278,7 @@ class Batch:
         if not len(batches):
             return Batch()
         frames = [batch.frames for batch in batches]
-        new_frames = pd.concat(frames, axis=1, copy=False)
+        new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False)
         if new_frames.columns.duplicated().any():
             logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)

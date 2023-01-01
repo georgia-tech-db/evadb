@@ -14,9 +14,9 @@
 # limitations under the License.
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.load_csv_executor import LoadCSVExecutor
-from eva.executor.load_video_executor import LoadVideoExecutor
+from eva.executor.load_multimedia_executor import LoadMultimediaExecutor
 from eva.parser.types import FileFormatType
-from eva.planner.load_data_plan import LoadDataPlan
+from eva.plan_nodes.load_data_plan import LoadDataPlan
 
 
 class LoadDataExecutor(AbstractExecutor):
@@ -32,8 +32,11 @@ class LoadDataExecutor(AbstractExecutor):
         """
 
         # invoke the appropriate executor
-        if self.node.file_options["file_format"] == FileFormatType.VIDEO:
-            executor = LoadVideoExecutor(self.node)
+        if self.node.file_options["file_format"] in [
+            FileFormatType.VIDEO,
+            FileFormatType.IMAGE,
+        ]:
+            executor = LoadMultimediaExecutor(self.node)
         elif self.node.file_options["file_format"] == FileFormatType.CSV:
             executor = LoadCSVExecutor(self.node)
 

@@ -43,10 +43,12 @@ class CreateMaterializedViewStatement(AbstractStatement):
         self._query = query
 
     def __str__(self) -> str:
-        print_str = "CREATE MATERIALIZED VIEW {} ({}) AS {} ".format(
-            self._view_info, self._col_list, self._query
-        )
-        return print_str
+        column_list_str = ""
+        for col in self._col_list:
+            column_list_str += str(col) + ", "
+        column_list_str = column_list_str.rstrip(", ")
+
+        return f"CREATE MATERIALIZED VIEW {self._view_info} ({column_list_str}) AS {self._query}"
 
     @property
     def view_info(self):
@@ -78,8 +80,8 @@ class CreateMaterializedViewStatement(AbstractStatement):
         return hash(
             (
                 super().__hash__(),
-                self.view_ref,
-                tuple(self.col_list),
+                self.view_info,
+                tuple(self.col_list or []),
                 self.if_not_exists,
                 self.query,
             )

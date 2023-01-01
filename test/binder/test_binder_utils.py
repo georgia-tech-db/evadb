@@ -14,9 +14,10 @@
 # limitations under the License.
 import unittest
 
-from mock import MagicMock, patch
+from mock import MagicMock, PropertyMock, patch
 
 from eva.binder.binder_utils import BinderError, bind_table_info
+from eva.catalog.catalog_type import TableType
 
 
 class BinderUtilsTest(unittest.TestCase):
@@ -24,17 +25,30 @@ class BinderUtilsTest(unittest.TestCase):
     def test_bind_table_info(self, mock):
         video = MagicMock()
         catalog = mock.return_value
-        catalog.get_dataset_metadata.return_value = "obj"
+        catalog.get_table_catalog_entry.return_value = obj = MagicMock()
         bind_table_info(video)
-        catalog.get_dataset_metadata.assert_called_with(
-            video.database_name, video.table_name
+        catalog.get_table_catalog_entry.assert_called_with(
+            video.table_name,
+            video.database_name,
         )
-        self.assertEqual(video.table_obj, "obj")
+        self.assertEqual(video.table_obj, obj)
 
     @patch("eva.binder.binder_utils.CatalogManager")
     def test_bind_table_info_raise(self, mock):
         with self.assertRaises(BinderError):
             video = MagicMock()
             catalog = mock.return_value
-            catalog.get_dataset_metadata.return_value = None
+            catalog.get_table_catalog_entry.return_value = None
+            bind_table_info(video)
+
+    @patch("eva.binder.binder_utils.CatalogManager")
+    def test_bind_table_info_raise_for_system_tables(self, mock):
+        video = MagicMock()
+        catalog = mock.return_value
+        obj = MagicMock()
+        catalog.get_table_catalog_entry.return_value = obj
+        type(obj).table_type = PropertyMock(
+            return_value=TableType.SYSTEM_STRUCTURED_DATA
+        )
+        with self.assertRaises(BinderError):
             bind_table_info(video)

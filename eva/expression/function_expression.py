@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import Callable, List
 
-from eva.catalog.models.udf_io import UdfIO
+from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -47,7 +47,7 @@ class FunctionExpression(AbstractExpression):
         name: str,
         output: str = None,
         alias: Alias = None,
-        **kwargs
+        **kwargs,
     ):
 
         super().__init__(ExpressionType.FUNCTION_EXPRESSION, **kwargs)
@@ -57,7 +57,7 @@ class FunctionExpression(AbstractExpression):
         self._function_instance = None
         self._output = output
         self.alias = alias
-        self.output_objs: List[UdfIO] = []
+        self.output_objs: List[UdfIOCatalog] = []
         self.projection_columns: List[str] = []
 
     @property
@@ -67,6 +67,14 @@ class FunctionExpression(AbstractExpression):
     @property
     def output(self):
         return self._output
+
+    @property
+    def col_alias(self):
+        col_alias_list = []
+        if self.alias is not None:
+            for col in self.alias.col_names:
+                col_alias_list.append("{}.{}".format(self.alias.alias_name, col))
+        return col_alias_list
 
     @property
     def function(self):
@@ -111,6 +119,10 @@ class FunctionExpression(AbstractExpression):
                 if device != NO_GPU:
                     self._function_instance = self._function_instance.to_device(device)
         return self._function_instance
+
+    def __str__(self) -> str:
+        expr_str = f"{self.name}()"
+        return expr_str
 
     def __eq__(self, other):
         is_subtree_equal = super().__eq__(other)

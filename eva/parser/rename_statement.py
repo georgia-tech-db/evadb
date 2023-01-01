@@ -53,3 +53,12 @@ class RenameTableStatement(AbstractStatement):
             self.old_table_ref == other.old_table_ref
             and self.new_table_name == other.new_table_name
         )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.old_table_ref,
+                self.new_table_name,
+            )
+        )

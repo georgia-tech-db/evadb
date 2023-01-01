@@ -32,9 +32,9 @@ from eva.optimizer.operators import (
     OperatorType,
 )
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.planner.project_plan import ProjectPlan
-from eva.planner.seq_scan_plan import SeqScanPlan
-from eva.planner.storage_plan import StoragePlan
+from eva.plan_nodes.project_plan import ProjectPlan
+from eva.plan_nodes.seq_scan_plan import SeqScanPlan
+from eva.plan_nodes.storage_plan import StoragePlan
 
 
 class LogicalExchangeToPhysical(Rule):
@@ -103,7 +103,7 @@ class LogicalGetToSeqScan(Rule):
         lower = ExchangePlan(parallelism=1)
         lower.append_child(
             StoragePlan(
-                before.dataset_metadata,
+                before.table_obj,
                 batch_mem_size=batch_mem_size,
                 predicate=before.predicate,
                 sampling_rate=before.sampling_rate,

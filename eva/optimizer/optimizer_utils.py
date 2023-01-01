@@ -29,7 +29,7 @@ from eva.utils.logging_manager import logger
 
 
 def column_definition_to_udf_io(col_list: List[ColumnDefinition], is_input: bool):
-    """Create the UdfIO object fro each column definition provided
+    """Create the UdfIOCatalog object fro each column definition provided
 
     Arguments:
         col_list(List[ColumnDefinition]): parsed input/output definitions

@@ -15,7 +15,7 @@
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import handle_if_not_exists
-from eva.planner.create_plan import CreatePlan
+from eva.plan_nodes.create_plan import CreatePlan
 from eva.storage.storage_engine import StorageEngine
 
 
@@ -29,8 +29,8 @@ class CreateExecutor(AbstractExecutor):
 
     def exec(self):
         if not handle_if_not_exists(self.node.table_info, self.node.if_not_exists):
-            metadata = self.catalog.create_table_metadata(
+            catalog_entry = self.catalog.create_and_insert_table_catalog_entry(
                 self.node.table_info, self.node.column_list
             )
-            storage_engine = StorageEngine.factory(metadata)
-            storage_engine.create(table=metadata)
+            storage_engine = StorageEngine.factory(catalog_entry)
+            storage_engine.create(table=catalog_entry)
