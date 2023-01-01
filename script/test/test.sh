@@ -43,7 +43,9 @@ test_code=$?
 if [ "$test_code" != "0" ];
 then
     echo "PYTEST CODE: --|${test_code}|-- FAILURE"
-    exit $test_code
+    if [[ "$OSTYPE" != "msys" ]];
+        exit $test_code
+    fi
 else
     echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
 fi

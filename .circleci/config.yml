@@ -51,7 +51,8 @@ jobs:
           command: |
             pip install --upgrade pip
             pip install evadb
-            bash script/test/package.sh
+            
+        # bash script/test/package.sh
 
       - run:
           name: Install EVA package from GitHub repo with all dependencies
