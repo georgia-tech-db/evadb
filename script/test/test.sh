@@ -50,7 +50,7 @@ fi
 if [ "$OSTYPE" != "msys" ];
 # Non-Windows
 then
-    PYTHONPATH=./ python -m pytest test --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
+    PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
     test_code=$?
     if [ "$test_code" != "0" ];
     then
@@ -61,7 +61,7 @@ then
     fi
 # Windows -- no need for coverage report
 else
-    PYTHONPATH=./ pytest -p no:cov test/utils -m "not benchmark"
+    PYTHONPATH=./ pytest -p no:cov test/ -m "not benchmark"
     test_code=$?
     if [ "$test_code" != "0" ];
     then
