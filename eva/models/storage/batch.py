@@ -169,7 +169,7 @@ class Batch:
         """
         Execute function expression on frames.
         """
-        self._frames = expr(self._frames)
+        return Batch(expr(self._frames))
 
     def sort(self, by=None) -> None:
         """

@@ -16,12 +16,17 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
-from typing import TYPE_CHECKING, Optional, List
+from itertools import chain, combinations
+from typing import TYPE_CHECKING, Iterable, Optional, List
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
-from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.expression_utils import (
+    conjuction_list_to_expression_tree,
+    to_conjunction_list,
+)
 from eva.expression.comparison_expression import ComparisonExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.expression.abstract_expression import ExpressionType
 from eva.optimizer.optimizer_utils import (
@@ -266,336 +271,75 @@ class EmbedProjectIntoDerivedGet(Rule):
         )
         return new_opr
 
-class UdfReuseForFunctionScan(Rule):
+
+class CacheFunctionExpressionInFilter(Rule):
+    """This rule creates an alternative of LogicalFilter with caching enabled.
+
+    For each `FunctionExpression` in the expression tree, it considers two alternatives:
+    with and without cache enabled. If there are `n` function expressions in the tree,
+    it will generate `2^n` expression trees. This can rapidly increase the number of
+    possible plans. An alternative approach is to iteratively consider one function
+    expression at a time, which can benefit from early pruning. However, typically the
+    value of n is low, so it may not be worth the extra bookkeeping.
+
+    """
+
     def __init__(self):
-        pattern = Pattern(OperatorType.LOGICALJOIN)
-        # We do not care about the left child of the lateral join
+        pattern = Pattern(OperatorType.LOGICALFILTER)
         pattern.append_child(Pattern(OperatorType.DUMMY))
-        # As the first version, we do not support filter between function scan
-        # and lateral join.
-        pattern.append_child(Pattern(OperatorType.LOGICALFUNCTIONSCAN))
-        super().__init__(RuleType.UDF_REUSE_FUNCTION_SCAN, pattern)
+        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_FILTER, pattern)
 
     def promise(self):
-        return Promise.UDF_REUSE_FUNCTION_SCAN
+        return Promise.CACHE_FUNCTION_EXPRESISON_IN_FILTER
 
-    def check(self, before: Operator, context: OptimizerContext):
-        """
-        We can do cost analysis here. For example, skipping cheap UDFs.
-        For now, we apply the rule for all function scan.
-        """
-        # The join type needs to be lateral 
-        return (before.join_type == JoinType.LATERAL_JOIN)
-
-    def apply(self, before: Operator, context: OptimizerContext):
-        """
-              LateralJoin                                LateralJoin
-              /          \        -------------->        /          \
-            SeqScan     FuncScan                   LeftOuterJoin   FuncScan
-                                                       /     \
-                                                   SeqScan  MatView
-        """
-        
-        # Do this only for lateral join
-        if before.join_type == JoinType.LATERAL_JOIN:
-
-            lateral_join = before
-
-            # seqscan plan
-            input_relation = lateral_join.children[0]
-
-            # function scan plan
-            function_scan = lateral_join.children[1]
-
-            # first call would return None
-            view = self._check_udf_history(function_scan) 
-
-            # you have a history of this udf
-            if view is not None:
-
-                # Left join btw input_relation and the mat view
-                left_join = self._generate_left_join(lateral_join, view)
-                left_join.append_child(input_relation)
-                get = self._generate_get(view)
-                left_join.append_child(get)
-
-                # Set the guard predicate for the lateral_join
-                # TODO: Ignore for now, since we don't have predicate
-                #lateral_join = self._set_guard_predicate(lateral_join)
-                lateral_join.children[0] = left_join
-
-                # generate insert operator
-                insert = self._generate_insert_operator(view, function_scan)
-
-                # function scan is now the child of the insert operator
-                insert.append_child(function_scan)
-
-                # set insert operator as the right child of the lateral join
-                lateral_join.children[1] = insert
-
-                # TODO: This flow is buggy, need to fix. What to return?
-                # Fix: Create a LogicalToPhysical for insert the insert operator
-
-            # no udf history
-            else:
-                
-                # create udf historical record
-                self._create_udf_history(function_scan)
-
-                # create mat operator
-                mat = self._generate_mat_operator(view, function_scan)
-
-                # function scan is now the child of the mat operator
-                mat.append_child(function_scan)
-
-                # set mat operator as the right child of the lateral join
-                lateral_join.children[1] = mat
-
-
-            return lateral_join
-
-    def _read_udf_history_catalog(self, udf_id: int, cols: List[int]):
-        """
-        Given a udf_id and a list of column ids, read the historical invocation
-        of the udf_id and return the udf_history if the col list matches.
-        """
-
-        catalog = CatalogManager()
-        history_service = catalog._udf_history_service
-        history_col_service = catalog._udf_history_col_service
-
-        # get udf histories for this udf id
-        udf_histories = history_service.udf_history_by_udfid(udf_id)
-
-        # if there are histories for this UDF, check if the col list matches
-        if udf_histories:
-
-            # iterate over the histories and check if col history matches
-            for udf_history in udf_histories:
-                col_histories = list(
-                    [entry[0] for entry  in history_col_service.get_cols_by_udf_history_id(udf_history.id)]
-                )
-
-                # TODO: What about the predicate matching?
-                # if there is a match, return the udf_history
-                if col_histories == cols:
-                    return udf_history
-
-        # if no match, return None
+    def check(self, before: LogicalFilter, context: OptimizerContext):
+        # filter should have atleast one UDF
+        predicate = before.predicate
+        if predicate.find(FunctionExpression):
+            return True
         else:
-            return None
+            return False
 
-        
-    def _check_udf_history(self, fs: LogicalFunctionScan) \
-            -> Optional[DataFrameMetadata]:
+    def apply(self, before: LogicalFilter, context: OptimizerContext):
+        # def powerset(s):
+        #     "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+        #     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
-        # Hardcode all info for now
-        udf_id = fs.func_expr.output_objs[0].udf_id
-        col_ids = [1]
-        metadata_id = 1
+        # predicate = before.predicate
+        # possible_filters = []
+        # func_exprs = list(predicate.find_all(FunctionExpression))
+        # func_exprs_with_caching = func_exprs
+        # for subset in powerset(range(func_exprs)):
+        #     new_expr = predicate
+        #     for idx in subset:
+        #         # replace the expr with new expr and create a new tree
+        #         new_expr = expr.replace(expr_with_caching, copy=True)
+        #     possible_filters.append(new_expr.root())
 
-        udf_history = self._read_udf_history_catalog(udf_id, col_ids)
-
-        # if there is a match, return the mat view
-        if udf_history:
-
-            catalog = CatalogManager()
-            df_mat = catalog.get_dataset_metadata("", udf_history.materialize_view)
-
-            return df_mat
-
-        # if no match, return None
-        else:
-            return None
-
-    def _create_udf_history(self, fs: LogicalFunctionScan) \
-            -> DataFrameMetadata:
-
-        # hardcode the col info as id for now
-        col_defs = [
-            ColumnDefinition(
-                col_name="frame_id",
-                col_type=ColumnType.INTEGER,
-                col_array_type=NdArrayType.ANYTYPE,
-                col_dim=[]
-            )
-        ]
-
-        # append udf output cols
-        for op_obj in fs.func_expr.output_objs:
-            col_defs.append(
-                ColumnDefinition(
-                    col_name=op_obj.name,
-                    col_type=op_obj.type,
-                    col_array_type=op_obj.array_type,
-                    col_dim=op_obj.array_dimensions
-                )
-            )
-
-        udf_id = fs.func_expr.output_objs[0].udf_id
-        col_ids = [1]
+        # return possible_filters
+        return None
 
 
-        # TODO: What should be the name of the view? -> Later
-        # TODO: How to handle predicate info? -> Later 
-        catalog = CatalogManager()
+class CacheFunctionExpressionInApply(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICAL_APPLY_AND_MERGE)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.CACHE_FUNCTION_EXPRESISON_IN_APPLY, pattern)
 
-        # create a udf history instance
-        udf_history = catalog._udf_history_service.create_udf_history(
-            udf_id=udf_id, 
-            predicate=None, 
-            materialize_view=f"test_view",
+    def promise(self):
+        return Promise.CACHE_FUNCTION_EXPRESISON_IN_APPLY
+
+    def check(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+
+        return True
+
+    def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
+        new_func_expr = enable_cache(before.func_expr, copy=True)
+        after = LogicalApplyAndMerge(
+            func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
         )
+        return after
 
-        # create a udf history col instance
-        catalog._udf_history_col_service.create_udf_history_cols(
-            udf_history_id=udf_history.id,
-            cols=col_ids
-        )
-
-
-        # # create table metadata for the mat view
-        # table_metadata = catalog.create_table_metadata(
-        #     table_info=TableInfo(table_name="test_view"),
-        #     columns=col_defs,
-        # )
-
-        #return table_metadata
-        
-
-    def _function_scan_for_mat(self, fs: LogicalFunctionScan) \
-            -> LogicalFunctionScan:
-        
-        # TODO: Need to return a modified function scan
-        
-        raise NotImplementedError
-
-    def _generate_insert_operator(self,
-        view: DataFrameMetadata,
-        fs: LogicalFunctionScan
-    ) -> LogicalInsert:
-
-
-        # hardcode the col info as id for now
-        col_defs = [
-            ColumnDefinition(
-                col_name="frame_id",
-                col_type=ColumnType.INTEGER,
-                col_array_type=NdArrayType.ANYTYPE,
-                col_dim=[]
-            )
-        ]
-
-        # append udf output cols
-        for op_obj in fs.func_expr.output_objs:
-            col_defs.append(
-                ColumnDefinition(
-                    col_name=op_obj.name,
-                    col_type=op_obj.type,
-                    col_array_type=op_obj.array_type,
-                    col_dim=op_obj.array_dimensions
-                )
-            )
-
-        # create insert operator
-        insert = LogicalInsert(
-            table_metainfo=view,
-            column_list=col_defs,
-            value_list=fs.func_expr.output_objs,
-        )
-
-        return insert
-
-    def _generate_mat_operator(self,
-        view: DataFrameMetadata, 
-        fs: LogicalFunctionScan
-    ) -> LogicalCreateMaterializedView:
-
-        # get a ref to the mat view
-        view_ref = TableRef(
-            TableInfo(table_name="test_view"),
-        )
-
-        # hardcode the col info as id for now
-        col_defs = [
-            ColumnDefinition(
-                col_name="frame_id",
-                col_type=ColumnType.INTEGER,
-                col_array_type=NdArrayType.ANYTYPE,
-                col_dim=[]
-            )
-        ]
-
-        # append udf output cols
-        for op_obj in fs.func_expr.output_objs:
-            col_defs.append(
-                ColumnDefinition(
-                    col_name=op_obj.name,
-                    col_type=op_obj.type,
-                    col_array_type=op_obj.array_type,
-                    col_dim=op_obj.array_dimensions
-                )
-            )
-
-        mat = LogicalCreateMaterializedView(
-            view=view_ref, 
-            col_list=col_defs, 
-            if_not_exists=True, 
-            yield_output=True
-        )
-
-        return mat
-
-    def _generate_left_join(self, lj: LogicalJoin, view: DataFrameMetadata) \
-            -> LogicalJoin:
-
-        # TODO: Inner join?
-        join_type = JoinType.INNER_JOIN
-
-        # Create a logical join with left_key as id of video and right_key as id of view
-        # the join should be done on the id
-        tuple_value_exp_left = TupleValueExpression(
-            col_name="id",
-            table_alias="top_gun",
-            col_idx=2,
-        )
-        tuple_value_exp_right = TupleValueExpression(
-            col_name="frame_id",
-            table_alias="test_view",
-            col_idx=4,
-        )
-
-        left_join = LogicalJoin(
-            join_type=join_type,
-            join_predicate=ComparisonExpression(
-                ExpressionType.COMPARE_EQUAL,
-                tuple_value_exp_left,
-                tuple_value_exp_right,
-            ),
-        )
-
-        return left_join
-
-
-    def _generate_get(self, view: DataFrameMetadata) -> LogicalGet:
-
-        # need to create a new get operator to read from view
-        new_get = LogicalGet(
-            video=TableRef(
-                TableInfo(table_name=view.name),
-            ),
-            dataset_metadata=view,
-            alias="",
-        )
-
-        return new_get
-
-        
-    def _set_guard_predicate(self, ls: LogicalJoin) -> LogicalJoin:
-
-        # TODO: Need to set the guard predicate
-
-        raise NotImplementedError
 
 # Join Queries
 class PushDownFilterThroughJoin(Rule):

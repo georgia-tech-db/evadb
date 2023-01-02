@@ -19,12 +19,17 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.expression.expression_utils import (
     conjuction_list_to_expression_tree,
     contains_single_column,
-    expression_tree_to_conjunction_list,
+    to_conjunction_list,
     get_columns_in_predicate,
     is_simple_predicate,
 )
+from eva.expression.function_expression import (
+    FunctionExpression,
+    FunctionExpressionCache,
+)
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
+from eva.utils.kv_cache import DiskKVCache
 from eva.utils.logging_manager import logger
 
 
@@ -61,7 +66,7 @@ def extract_equi_join_keys(
     right_table_aliases: List[str],
 ) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
 
-    pred_list = expression_tree_to_conjunction_list(join_predicate)
+    pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
     for pred in pred_list:
@@ -110,7 +115,7 @@ def extract_pushdown_predicate(
 
     pushdown_preds = []
     rem_pred = []
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     for pred in pred_list:
         if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
             pushdown_preds.append(pred)
@@ -138,7 +143,7 @@ def extract_pushdown_predicate_for_alias(
     if predicate is None:
         return None, None
 
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     pushdown_preds = []
     rem_pred = []
     aliases = [alias.alias_name for alias in aliases]
@@ -153,3 +158,68 @@ def extract_pushdown_predicate_for_alias(
         conjuction_list_to_expression_tree(pushdown_preds),
         conjuction_list_to_expression_tree(rem_pred),
     )
+
+
+def extract_function_expressions(
+    predicate: AbstractExpression,
+) -> Tuple[List[FunctionExpression], AbstractExpression]:
+    """Decompose the predicate into a list of function expressions and remaining predicate
+    Args:
+        predicate (AbstractExpression): input predicate
+    Returns:
+        Tuple[List[FunctionExpression], AbstractExpression]: list of
+            function expressions and remaining predicate
+    """
+    pred_list = to_conjunction_list(predicate)
+    function_exprs = []
+    remaining_exprs = []
+    for pred in pred_list:
+        # either child of the predicate has a FunctionExpression
+        if isinstance(pred.children[0], FunctionExpression) or isinstance(
+            pred.children[1], FunctionExpression
+        ):
+            function_exprs.append(pred)
+        else:
+            remaining_exprs.append(pred)
+
+    return (
+        function_exprs,
+        conjuction_list_to_expression_tree(remaining_exprs),
+    )
+
+
+def enable_cache(func_expr: FunctionExpression, copy: True) -> FunctionExpression:
+    """Enable caching for the provided function expression.
+
+    It constructs teh appropriate cache object for the provided functionExpression.
+    (1) Compute the function expression signature.
+    (2) Check catalog if a cache object exists for the current signature.
+        If there exists an entry, use it else create a new entry
+    (3) set the cache key, this requires replacing `data` column with the unique IDENTIFIER column
+
+    Args:
+        func_expr (FunctionExpression): Expression to enable caching
+        copy (True): if true, a new FunctionExpression object is created, else modify inplace
+
+    Returns:
+        FunctionExpression: the expresiosn with cache enabled
+    """
+
+    # 1. compute function signature
+    signature = func_expr.signature()
+
+    # 2.
+    udf_cache = CatalogManager().get_udf_cache_catalog_entry(func_expr)
+    if udf_cache is None:
+        CatalogManager().insert_udf_cache_catalog_entry(func_expr)
+
+    cache_key_expr = _optimize_cache_expr(func_expr.children)
+
+    cache = FunctionExpressionCache(
+        DiskKVCache(udf_cache.path), cache_key_expr=cache_key_expr
+    )
+    return func_expr.copy().enable_cache(cache)
+
+
+def _optimize_cache_expr(exprs: List[AbstractExpression]):
+    return exprs

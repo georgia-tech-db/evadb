@@ -14,6 +14,9 @@
 # limitations under the License.
 from typing import Callable, List
 
+import numpy as np
+import pandas as pd
+from dataclasses import dataclass
 from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
@@ -21,6 +24,7 @@ from eva.expression.abstract_expression import AbstractExpression, ExpressionTyp
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
+from eva.utils.kv_cache import DiskKVCache
 
 
 class FunctionExpression(AbstractExpression):
@@ -59,6 +63,7 @@ class FunctionExpression(AbstractExpression):
         self.alias = alias
         self.output_objs: List[UdfIOCatalog] = []
         self.projection_columns: List[str] = []
+        self.cache: FunctionExpressionCache = None
 
     @property
     def name(self):
@@ -84,6 +89,9 @@ class FunctionExpression(AbstractExpression):
     def function(self, func: Callable):
         self._function = func
 
+    def enable_cache(self, cache: "FunctionExpressionCache"):
+        self.cache = cache
+        
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
@@ -105,8 +113,7 @@ class FunctionExpression(AbstractExpression):
             new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
-        outcomes = new_batch
-        outcomes.apply_function_expression(func)
+        outcomes = self._apply_function_expression(func, new_batch, **kwargs)
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
         return outcomes
@@ -119,6 +126,44 @@ class FunctionExpression(AbstractExpression):
                 if device != NO_GPU:
                     self._function_instance = self._function_instance.to_device(device)
         return self._function_instance
+
+    def _apply_function_expression(self, func: Callable, batch: Batch, **kwargs):
+        """
+        If cache is not enabled, call the func on the batch and return.
+        If cache is enabled:
+        (1) iterate over the input batch rows and check if we have the value in the
+        cache;
+        (2) for all cache miss rows, call the func;
+        (3) iterate over each cache miss row and store the results in the cache;
+        (4) stitch back the partial cache results with the new func calls.
+        """
+        if not self._cache:
+            return batch.apply_function_expression(func)
+
+        # 1. check cache
+        # We are required to iterate over the batch row by row and check the cache.
+        # This can hurt performance, as we have to stitch together columns to generate
+        # row tuples. Is there an alternative approach we can take?
+
+        results = np.array([np.nan] * len(batch))
+        keys = self._cache_key.evaluate(batch, **kwargs)
+        for idx, key in keys.iter_rows():
+            results[idx] = self._cache.get(key.to_numpy())
+
+        # 2. call func for cache miss rows
+        cache_miss = np.isnan(results)
+        cache_miss_results = batch[cache_miss].apply_function_expression(func)
+
+        # 3. set the cache results
+        for key, value in keys[cache_miss], cache_miss_results.iter_rows():
+            self._cache.set(key.to_numpy(), value.to_numpy())
+
+        # 4. merge the cache results
+        results[cache_miss] = cache_miss_results
+
+        # 5. return the correct batch
+        cols = [obj.name for obj in self.output_objs]
+        return Batch(pd.DataFrame(results, columns=cols))
 
     def __str__(self) -> str:
         expr_str = f"{self.name}()"
@@ -135,6 +180,7 @@ class FunctionExpression(AbstractExpression):
             and self.alias == other.alias
             and self.function == other.function
             and self.output_objs == other.output_objs
+            and self.cache == other.cache
         )
 
     def __hash__(self) -> int:
@@ -146,5 +192,23 @@ class FunctionExpression(AbstractExpression):
                 self.alias,
                 self.function,
                 tuple(self.output_objs),
+                self.cache
             )
         )
+
+
+
+@dataclass(frozen=True)
+class FunctionExpressionCache:
+    """dataclass for cache-related attributes
+    
+    Args:
+        cache (`DiskKVCache`): the cache object to get/set key-value pairs
+        cache_key (`AbstractExpression`): the expression to evaluate to get the key. 
+        If `None`, use the function arguments as the key. This is useful when the 
+        system wants to use logically equivalent columns as the key (e.g., frame number 
+        instead of frame data).
+    """
+    cache: DiskKVCache
+    cache_key: AbstractExpression = None
+    
