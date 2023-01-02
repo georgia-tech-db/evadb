@@ -242,9 +242,8 @@ function_call: udf_function         ->udf_function_call
 
 udf_function: simple_id "(" function_args ")" dotted_id?
     
-
-aggregate_windowed_function: aggregate_function_name "(" (ALL | DISTINCT)? function_arg ")"
-                           | COUNT "(" ("*" | ALL? function_arg) ")"
+aggregate_windowed_function: aggregate_function_name "(" function_arg ")"
+                           | COUNT "(" (STAR | function_arg) ")"
     
 
 aggregate_function_name: AVG | MAX | MIN | SUM | FIRST | LAST | SEGMENT
