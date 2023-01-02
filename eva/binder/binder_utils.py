@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from eva.binder.statement_binder_context import StatementBinderContext
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.utils.logging_manager import logger
@@ -35,7 +35,7 @@ class BinderError(Exception):
     pass
 
 
-def bind_table_info(table_info: TableInfo) -> TableCatalog:
+def bind_table_info(table_info: TableInfo) -> TableCatalogEntry:
     """
     Uses catalog to bind the table information .
 
@@ -43,7 +43,7 @@ def bind_table_info(table_info: TableInfo) -> TableCatalog:
          table_info (TableInfo): table information obtained from SQL query
 
     Returns:
-        TableCatalog  -  corresponding table catalog entry for the input table info
+        TableCatalogEntry  -  corresponding table catalog entry for the input table info
     """
     catalog = CatalogManager()
     obj = catalog.get_table_catalog_entry(

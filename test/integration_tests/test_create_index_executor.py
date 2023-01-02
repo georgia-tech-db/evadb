@@ -22,6 +22,7 @@ from mock import patch
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType, TableType
+from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.executor_utils import ExecutorError
@@ -49,13 +50,15 @@ class CreateIndexTest(unittest.TestCase):
         # Create table.
         col_list = [
             ColumnDefinition(
-                "feat_id", ColumnType.INTEGER, None, [], ColConstraintInfo(unique=True)
+                "feat_id",
+                ColumnType.INTEGER,
+                None,
+                None,
+                ColConstraintInfo(unique=True),
             ),
-            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, [1, 3]),
+            ColumnDefinition("feat", ColumnType.NDARRAY, NdArrayType.FLOAT32, (1, 3)),
         ]
-        col_entries = CatalogManager().xform_column_definitions_to_catalog_entries(
-            col_list
-        )
+        col_entries = xform_column_definitions_to_catalog_entries(col_list)
 
         tb_entry = CatalogManager().insert_table_catalog_entry(
             "testCreateIndexFeatTable",

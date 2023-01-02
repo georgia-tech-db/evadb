@@ -83,9 +83,9 @@ class LoadExecutorTest(unittest.TestCase):
         file_options = {}
         file_options["file_format"] = FileFormatType.CSV
         column_list = [
-            type("ColumnCatalog", (), {"name": "id"}),
-            type("ColumnCatalog", (), {"name": "frame_id"}),
-            type("ColumnCatalog", (), {"name": "video_id"}),
+            type("ColumnCatalogEntry", (), {"name": "id"}),
+            type("ColumnCatalogEntry", (), {"name": "frame_id"}),
+            type("ColumnCatalogEntry", (), {"name": "video_id"}),
         ]
         table_obj = MagicMock(columns=column_list)
         catalog_mock.return_value = table_obj

@@ -16,14 +16,14 @@ from typing import Dict, List, Tuple, Union
 
 from eva.binder.binder_utils import BinderError
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.column_catalog import ColumnCatalog
-from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.udf_io_catalog import UdfIOCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.utils.logging_manager import logger
 
-CatalogColumnType = Union[ColumnCatalog, UdfIOCatalog]
+CatalogColumnType = Union[ColumnCatalogEntry, UdfIOCatalogEntry]
 
 
 class StatementBinderContext:
@@ -41,7 +41,7 @@ class StatementBinderContext:
     """
 
     def __init__(self):
-        self._table_alias_map: Dict[str, TableCatalog] = dict()
+        self._table_alias_map: Dict[str, TableCatalogEntry] = dict()
         self._derived_table_alias_map: Dict[str, List[CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
 
@@ -74,14 +74,14 @@ class StatementBinderContext:
         self,
         alias: str,
         target_list: List[
-            Union[TupleValueExpression, FunctionExpression, UdfIOCatalog]
+            Union[TupleValueExpression, FunctionExpression, UdfIOCatalogEntry]
         ],
     ):
         """
         Add a alias -> derived table column mapping
         Arguments:
             alias (str): name of alias
-            target_list: list of Tuplevalue Expression or FunctionExpression or UdfIOCatalog
+            target_list: list of Tuplevalue Expression or FunctionExpression or UdfIOCatalogEntry
         """
         self._check_duplicate_alias(alias)
         col_list = []
@@ -126,7 +126,7 @@ class StatementBinderContext:
 
         raise_error()
 
-    def _check_table_alias_map(self, alias, col_name) -> ColumnCatalog:
+    def _check_table_alias_map(self, alias, col_name) -> ColumnCatalogEntry:
         """
         Find the column object in table alias map
         Arguments:

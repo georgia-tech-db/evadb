@@ -12,12 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import dataclass, field
+from typing import List
+
 from sqlalchemy import Column, Enum, String
 from sqlalchemy.orm import relationship
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.df_schema import DataFrameSchema
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 
 
 class TableCatalog(BaseModel):
@@ -32,7 +35,7 @@ class TableCatalog(BaseModel):
 
     _name = Column("name", String(100), unique=True)
     _file_url = Column("file_url", String(100))
-    _unique_identifier_column = Column("identifier_column", String(100))
+    _identifier_column = Column("identifier_column", String(100))
     _table_type = Column("table_type", Enum(TableType))
 
     # the child table containing information about the columns of the each table
@@ -42,63 +45,35 @@ class TableCatalog(BaseModel):
         cascade="all, delete, delete-orphan",
     )
 
-    def __init__(self, name: str, file_url: str, table_type: int, identifier_id="id"):
+    def __init__(
+        self, name: str, file_url: str, table_type: int, identifier_column="id"
+    ):
         self._name = name
         self._file_url = file_url
-        self._schema = None
-        self._unique_identifier_column = identifier_id
+        self._identifier_column = identifier_column
         self._table_type = table_type
 
-    @property
-    def schema(self):
-        return self._schema
-
-    @schema.setter
-    def schema(self, column_list):
-        self._schema = DataFrameSchema(self._name, column_list)
-
-    @property
-    def row_id(self):
-        return self._row_id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def file_url(self):
-        return self._file_url
-
-    @property
-    def columns(self):
-        return self._columns
-
-    @property
-    def identifier_column(self):
-        return self._unique_identifier_column
-
-    @property
-    def table_type(self):
-        return self._table_type
-
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.file_url == other.file_url
-            and self.schema == other.schema
-            and self.identifier_column == other.identifier_column
-            and self.name == other.name
-            and self.table_type == other.table_type
+    def as_dataclass(self) -> "TableCatalogEntry":
+        column_entries = [col_obj.as_dataclass() for col_obj in self._columns]
+        return TableCatalogEntry(
+            row_id=self._row_id,
+            name=self._name,
+            file_url=self._file_url,
+            identifier_column=self._identifier_column,
+            table_type=self._table_type,
+            columns=column_entries,
         )
 
-    def __hash__(self) -> int:
-        return hash(
-            (
-                self.row_id,
-                self.file_url,
-                self.schema,
-                self.identifier_column,
-                self.name,
-                self.table_type,
-            )
-        )
+
+@dataclass(unsafe_hash=True)
+class TableCatalogEntry:
+    """Dataclass representing an entry in the ColumnCatalog.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    file_url: str
+    table_type: TableType
+    identifier_column: str = "id"
+    columns: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
+    row_id: int = None

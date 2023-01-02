@@ -54,14 +54,14 @@ class ShowExecutorTest(unittest.TestCase):
         expected = {
             "name": ["FastRCNNObjectDetector", "Array_Count"],
             "inputs": [
-                ["Frame_Array NDARRAY UINT8 [3, None, None]"],
-                ["Input_Array NDARRAY ANYTYPE []", "Search_Key ANY"],
+                ["Frame_Array NDARRAY UINT8 (3, None, None)"],
+                ["Input_Array NDARRAY ANYTYPE ()", "Search_Key ANY"],
             ],
             "outputs": [
                 [
-                    "labels NDARRAY STR [None]",
-                    "bboxes NDARRAY FLOAT32 [None, 4]",
-                    "scores NDARRAY FLOAT32 [None]",
+                    "labels NDARRAY STR (None,)",
+                    "bboxes NDARRAY FLOAT32 (None, 4)",
+                    "scores NDARRAY FLOAT32 (None,)",
                 ],
                 ["key_count INTEGER"],
             ],

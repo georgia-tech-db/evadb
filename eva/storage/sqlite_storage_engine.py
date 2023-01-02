@@ -20,8 +20,8 @@ from sqlalchemy import Table, and_, inspect
 
 from eva.catalog.catalog_type import ColumnType
 from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.column_catalog import ColumnCatalog
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.schema_utils import SchemaUtils
 from eva.catalog.sql_config import IDENTIFIER_COLUMN, SQLConfig
 from eva.models.storage.batch import Batch
@@ -43,7 +43,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         self._sql_engine = SQLConfig().engine
         self._serializer = PickleSerializer
 
-    def _dict_to_sql_row(self, dict_row: dict, columns: List[ColumnCatalog]):
+    def _dict_to_sql_row(self, dict_row: dict, columns: List[ColumnCatalogEntry]):
         # Serialize numpy data
         for col in columns:
             if col.type == ColumnType.NDARRAY:
@@ -56,7 +56,7 @@ class SQLStorageEngine(AbstractStorageEngine):
                 dict_row[col.name] = dict_row[col.name].tolist()
         return dict_row
 
-    def _sql_row_to_dict(self, sql_row: tuple, columns: List[ColumnCatalog]):
+    def _sql_row_to_dict(self, sql_row: tuple, columns: List[ColumnCatalogEntry]):
         # Deserialize numpy data
         dict_row = {}
         for idx, col in enumerate(columns):
@@ -81,7 +81,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def create(self, table: TableCatalog, **kwargs):
+    def create(self, table: TableCatalogEntry, **kwargs):
         """
         Create an empty table in sql.
         It dynamically constructs schema in sqlaclchemy
@@ -102,7 +102,7 @@ class SQLStorageEngine(AbstractStorageEngine):
         self._sql_session.commit()
         return new_table
 
-    def drop(self, table: TableCatalog):
+    def drop(self, table: TableCatalogEntry):
         try:
             table_to_remove = self._try_loading_table_via_reflection(table.name)
             table_to_remove.drop()
@@ -116,7 +116,7 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def write(self, table: TableCatalog, rows: Batch):
+    def write(self, table: TableCatalogEntry, rows: Batch):
         """
         Write rows into the sql table.
 
@@ -149,7 +149,7 @@ class SQLStorageEngine(AbstractStorageEngine):
 
     def read(
         self,
-        table: TableCatalog,
+        table: TableCatalogEntry,
         batch_mem_size: int,
     ) -> Iterator[Batch]:
         """
@@ -182,11 +182,11 @@ class SQLStorageEngine(AbstractStorageEngine):
                 yield Batch(pd.DataFrame(data_batch))
 
         except Exception as e:
-            err_msg = f"Failed to update the table {table.name} with exception {str(e)}"
+            err_msg = f"Failed to read the table {table.name} with exception {str(e)}"
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def delete(self, table: TableCatalog, where_clause: Dict[str, Any]):
+    def delete(self, table: TableCatalogEntry, where_clause: Dict[str, Any]):
         """Delete tuples from the table where rows satisfy the where_clause.
         The current implementation only handles equality predicates.
 
@@ -223,5 +223,5 @@ class SQLStorageEngine(AbstractStorageEngine):
             logger.exception(err_msg)
             raise Exception(err_msg)
 
-    def rename(self, old_table: TableCatalog, new_name: TableInfo):
+    def rename(self, old_table: TableCatalogEntry, new_name: TableInfo):
         raise Exception("Rename not supported for structured data table")

@@ -16,7 +16,7 @@ import unittest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType
-from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.parser.table_ref import TableInfo, TableRef
 from eva.parser.types import FileFormatType
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
@@ -41,8 +41,8 @@ class PlanNodeTests(unittest.TestCase):
 
         CatalogManager().reset()
         columns = [
-            ColumnCatalog("id", ColumnType.INTEGER),
-            ColumnCatalog("name", ColumnType.TEXT, array_dimensions=[50]),
+            ColumnCatalogEntry("id", ColumnType.INTEGER),
+            ColumnCatalogEntry("name", ColumnType.TEXT, array_dimensions=[50]),
         ]
         dummy_plan_node = CreatePlan(dummy_info, columns, False)
         self.assertEqual(dummy_plan_node.opr_type, PlanOprType.CREATE)

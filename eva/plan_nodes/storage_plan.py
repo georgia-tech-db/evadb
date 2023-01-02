@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -24,7 +24,7 @@ class StoragePlan(AbstractPlan):
     and returning to the higher levels.
 
     Arguments:
-        table (TableCatalog): table for fetching data
+        table (TableCatalogEntry): table for fetching data
         batch_mem_size (int): memory size of the batch read from disk
         skip_frames (int): skip frequency
         offset (int): storage offset for retrieving data
@@ -36,7 +36,7 @@ class StoragePlan(AbstractPlan):
 
     def __init__(
         self,
-        table: TableCatalog,
+        table: TableCatalogEntry,
         batch_mem_size: int,
         skip_frames: int = 0,
         offset: int = None,

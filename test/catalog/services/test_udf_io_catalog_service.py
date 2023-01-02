@@ -14,7 +14,7 @@
 # limitations under the License.
 from unittest import TestCase
 
-from mock import MagicMock, patch
+from mock import patch
 
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
 
@@ -29,13 +29,11 @@ class UdfCatalogServiceTest(TestCase):
     def test_get_inputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOCatalogService()
 
-        actual = service.get_input_entries_by_udf_id(UDF_ID)
+        service.get_input_entries_by_udf_id(UDF_ID)
         mocked.query.filter.assert_called_with(
             mocked._id == UDF_ID, mocked._is_input == True  # noqa
         )
         mocked.query.filter.return_value.all.assert_called_once()
-        expected = mocked.query.filter.return_value.all.return_value
-        self.assertEqual(actual, expected)
 
     @patch("eva.catalog.services.udf_io_catalog_service.UdfIOCatalog")
     def test_get_inputs_by_udf_id_should_raise(self, mock):
@@ -51,13 +49,11 @@ class UdfCatalogServiceTest(TestCase):
     def test_get_outputs_by_udf_id_should_query_model_with_id(self, mocked):
         service = UdfIOCatalogService()
 
-        actual = service.get_output_entries_by_udf_id(UDF_ID)
+        service.get_output_entries_by_udf_id(UDF_ID)
         mocked.query.filter.assert_called_with(
-            mocked._id == UDF_ID, mocked._is_input == True  # noqa
+            mocked._id == UDF_ID, mocked._is_input == False  # noqa
         )
         mocked.query.filter.return_value.all.assert_called_once()
-        expected = mocked.query.filter.return_value.all.return_value
-        self.assertEqual(actual, expected)
 
     @patch("eva.catalog.services.udf_io_catalog_service.UdfIOCatalog")
     def test_get_outputs_by_udf_id_should_raise(self, mock):
@@ -68,10 +64,3 @@ class UdfCatalogServiceTest(TestCase):
         self.assertEqual(
             f"Getting outputs for UDF id {UDF_ID} raised error", str(cm.exception)
         )
-
-    def test_add_udf_io_should_save_io(self):
-        service = UdfIOCatalogService()
-        io_list = [MagicMock(), MagicMock()]
-        service.insert_entries(io_list)
-        for mock in io_list:
-            mock.save.assert_called_once()

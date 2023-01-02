@@ -20,16 +20,10 @@ from eva.catalog.services.column_catalog_service import ColumnCatalogService
 
 
 class ColumnCatalogServiceTest(unittest.TestCase):
-    def test_create_should_create_all_columns(self):
-        mocks = [MagicMock() for i in range(5)]
-        service = ColumnCatalogService()
-        service.insert_entries(mocks)
-        for mock in mocks:
-            mock.save.assert_called_once()
-
     @patch("eva.catalog.services.column_catalog_service.ColumnCatalog")
     def test_column_by_table_id_and_name_should_query_correctly(self, mocked):
-        mocked.query.filter.return_value.one_or_none.return_value = "col_obj"
+        col_obj = MagicMock()
+        mocked.query.filter.return_value.one_or_none.return_value = col_obj
 
         service = ColumnCatalogService()
         table_id = 123
@@ -38,14 +32,15 @@ class ColumnCatalogServiceTest(unittest.TestCase):
         mocked.query.filter.assert_called_with(
             mocked._table_id == table_id, mocked._name == column_name
         )
-        self.assertEqual(actual, "col_obj")
+        self.assertEqual(actual, col_obj.as_dataclass.return_value)
 
     @patch("eva.catalog.services.column_catalog_service.ColumnCatalog")
     def test_column_by_table_id(self, mocked):
-        mocked.query.filter.return_value.all.return_value = ["col_obj1", "col_obj2"]
+        mocks = [MagicMock() for i in range(5)]
+        mocked.query.filter.return_value.all.return_value = mocks
 
         service = ColumnCatalogService()
         table_id = 123
         actual = service.filter_entries_by_table_id(table_id)
         mocked.query.filter.assert_called_with(mocked._table_id == table_id)
-        self.assertEqual(actual, ["col_obj1", "col_obj2"])
+        self.assertEqual(actual, [mock.as_dataclass.return_value for mock in mocks])
