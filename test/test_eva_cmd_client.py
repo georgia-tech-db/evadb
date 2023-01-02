@@ -29,7 +29,6 @@ class CMDClientTest(unittest.TestCase):
         with mock.patch.object(sys, "argv", ["test"]):
             main()
         mock_client.called_once_with("0.0.0.0", 5432)
-        self.assertEqual(1, 2)
 
     def test_parse_args(self):
         from eva.eva_cmd_client import parse_args
