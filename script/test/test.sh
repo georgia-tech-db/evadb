@@ -9,7 +9,7 @@ if [ -f ./__init__.py ]; then
 fi
 
 echo "OSTYPE: --|${OSTYPE}|--"
-if [[ "$OSTYPE" != "msys" ]];
+if [ "$OSTYPE" != "msys" ];
 then 
     # Run black, isort, linter 
     sh script/formatting/pre-push.sh
@@ -36,20 +36,33 @@ else
     echo "FLAKE CODE: --|${linter_code}|-- SUCCESS"
 fi
 
+if [[ "$OSTYPE" != "msys" ]];
+# Non-Windows
+then
+    PYTHONPATH=./ python -m pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-}
+    test_code=$?
+    if [ "$test_code" != "0" ];
+    then
+        echo "PYTEST CODE: --|${test_code}|-- FAILURE"
+        exit $test_code
+    else
+        echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
+    fi
+# Windows -- no need for coverage report
+else
+    PYTHONPATH=./ python -m pytest test/ -s -v --log-level=WARNING ${1:-}
+    test_code=$?
+    if [ "$test_code" != "0" ];
+    then
+        echo "PYTEST CODE: --|${test_code}|-- FAILURE"
+        exit $test_code
+    else
+        echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
+    fi
+fi
 
 # Run unit tests
-PYTHONPATH=./ python -m pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark"
-test_code=$?
-if [ "$test_code" != "0" ];
-then
-    echo "PYTEST CODE: --|${test_code}|-- FAILURE"
-    if [[ "$OSTYPE" != "msys" ]];
-    then
-        exit $test_code
-    fi
-else
-    echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
-fi
+PYTHONPATH=./ python -m pytest -r test/storage test/server -s -v -m "not benchmark" 
 
 if [ "$OSTYPE" != "msys" ];
 then 
