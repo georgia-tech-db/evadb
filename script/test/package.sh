@@ -8,7 +8,7 @@ function is_server_up () {
     return $?
 }
 
-eva_server &> eva.txt &
+eva_server &> eva.log &
 SERVER_PID=$!
 i=0
 while [ $i -lt 5 ];
@@ -24,7 +24,7 @@ do
 done
 
 echo "Contents of server log"
-cat eva.txt
+cat eva.log
 
 if [ "$test_code" -ne 0 ];
 then
@@ -34,7 +34,7 @@ then
 fi
 
 cmd="exit"
-echo "$cmd"  | eva_client &> client.txt &
+echo "$cmd"  | eva_client &> client.log &
 
 # wait for client to launch
 sleep 5
@@ -43,9 +43,9 @@ sleep 5
 kill $SERVER_PID
 
 echo "Contents of client log"
-cat client.txt
+cat client.log
 
-grep "failed" client.txt
+grep "failed" client.log
 if [ "$?" -ne 1 ];
 then
     echo "Client did not start"
