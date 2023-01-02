@@ -37,14 +37,14 @@ class AggregationExpression(AbstractExpression):
         )  # can also be a float
 
     def evaluate(self, *args, **kwargs):
-        batch = self.get_child(0).evaluate(*args, **kwargs)
+        batch: Batch = self.get_child(0).evaluate(*args, **kwargs)
         if self.etype == ExpressionType.AGGREGATION_FIRST:
             batch = batch[0]
-        if self.etype == ExpressionType.AGGREGATION_LAST:
+        elif self.etype == ExpressionType.AGGREGATION_LAST:
             batch = batch[-1]
-        if self.etype == ExpressionType.AGGREGATION_SEGMENT:
+        elif self.etype == ExpressionType.AGGREGATION_SEGMENT:
             batch = Batch.stack(batch)
-        if self.etype == ExpressionType.AGGREGATION_SUM:
+        elif self.etype == ExpressionType.AGGREGATION_SUM:
             batch.aggregate("sum")
         elif self.etype == ExpressionType.AGGREGATION_COUNT:
             batch.aggregate("count")
@@ -55,9 +55,9 @@ class AggregationExpression(AbstractExpression):
         elif self.etype == ExpressionType.AGGREGATION_MAX:
             batch.aggregate("max")
         batch.reset_index()
-        # TODO ACTION:
-        # Add raise exception if data type doesn't match
+        batch.modify_column_alias(self.etype.name.replace("AGGREGATION_", ""))
 
+        # TODO: Raise exception if data type doesn't match
         return batch
 
     def get_symbol(self) -> str:

@@ -278,7 +278,9 @@ class Batch:
         if not len(batches):
             return Batch()
         frames = [batch.frames for batch in batches]
-        new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False)
+        new_frames = pd.concat(frames, axis=1, copy=False, ignore_index=False).fillna(
+            method="ffill"
+        )
         if new_frames.columns.duplicated().any():
             logger.warn("Duplicated column name detected {}".format(new_frames))
         return Batch(new_frames)
@@ -378,7 +380,14 @@ class Batch:
         Arguments:
             method: string with one of the five above options
         """
-        self._frames = self._frames.agg([method])
+        # Aggregate ndarray
+        if isinstance(self._frames.iat[0, 0], np.ndarray):
+            self._frames = self._frames.applymap(
+                lambda array: pd.DataFrame(array).agg([method]).iat[0, 0]
+            )
+        # Aggregate scalar
+        else:
+            self._frames = self._frames.agg([method])
 
     def empty(self):
         """Checks if the batch is empty

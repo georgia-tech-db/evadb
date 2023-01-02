@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from lark import Tree
+from lark import Token, Tree
 
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
 from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_udf_statement import CreateUDFStatement
 from eva.parser.drop_udf_statement import DropUDFStatement
 from eva.utils.logging_manager import logger
@@ -114,7 +115,17 @@ class Functions:
 
     def get_aggregate_function_type(self, agg_func_name):
         agg_func_type = None
-        if agg_func_name == "FIRST":
+        if agg_func_name == "COUNT":
+            agg_func_type = ExpressionType.AGGREGATION_COUNT
+        elif agg_func_name == "MIN":
+            agg_func_type = ExpressionType.AGGREGATION_MIN
+        elif agg_func_name == "MAX":
+            agg_func_type = ExpressionType.AGGREGATION_MAX
+        elif agg_func_name == "SUM":
+            agg_func_type = ExpressionType.AGGREGATION_SUM
+        elif agg_func_name == "AVG":
+            agg_func_type = ExpressionType.AGGREGATION_AVG
+        elif agg_func_name == "FIRST":
             agg_func_type = ExpressionType.AGGREGATION_FIRST
         elif agg_func_name == "LAST":
             agg_func_type = ExpressionType.AGGREGATION_LAST
@@ -125,22 +136,24 @@ class Functions:
         return agg_func_type
 
     def aggregate_windowed_function(self, tree):
-        agg_func_name = self.visit(tree.children[0]).value
+
         agg_func_arg = None
-        assert agg_func_name in [
-            "MIN",
-            "MAX",
-            "AVG",
-            "SUM",
-            "COUNT",
-            "FIRST",
-            "LAST",
-            "SEGMENT",
-        ]
+        agg_func_name = None
+
         for child in tree.children:
             if isinstance(child, Tree):
                 if child.data == "function_arg":
                     agg_func_arg = self.visit(child)
+                elif child.data == "aggregate_function_name":
+                    agg_func_name = self.visit(child).value
+            elif isinstance(child, Token):
+                token = child.value
+                # Support for COUNT(*)
+                if token != "*":
+                    agg_func_name = token
+                else:
+                    agg_func_arg = TupleValueExpression(col_name="id")
+
         agg_func_type = self.get_aggregate_function_type(agg_func_name)
         agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
         return agg_expr
