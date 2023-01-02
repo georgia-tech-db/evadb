@@ -6,19 +6,19 @@ orbs:
 workflows:
   main:
     jobs:
-        - Windows
         - test:
-            name: "Python v3.7"
+            name: "Linux - Python v3.7"
             v: "3.7"
         - test:
-            name: "Python v3.8"
+            name: "Linux - Python v3.8"
             v: "3.8"
         - test:
-            name: "Python v3.9"
+            name: "Linux - Python v3.9"
             v: "3.9"
         - test:
-            name: "Python v3.10"
+            name: "Linux - Python v3.10"
             v: "3.10"
+        - Windows
         #- test:
         #    name: "Python v3.11"  # missing Torchvision
         #    v: "3.11"
