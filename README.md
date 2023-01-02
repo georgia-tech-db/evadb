@@ -23,16 +23,16 @@
 
 EVA is a **database system tailored for video analytics** -- think PostgreSQL for videos. It supports a SQL-like language for querying videos like:
 
- * examining the "emotion palette" of different actors
- * finding gameplays that lead to a touchdown in a football game
+ * examining the movement of vehicles in a traffic video
+ * finding touchdowns in a football game
 
 EVA comes with a wide range of commonly used computer vision models. It written in Python, and it is licensed under the Apache license. 
 
-If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/latest/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
+If you are wondering why you might need a video database system, start with page on <a href="https://evadb.readthedocs.io/en/stable/source/overview/video.html#">Video Database Systems</a>. It describes how EVA lets users easily make use of deep learning models and how they can reduce money spent on inference on large image or video datasets.
 
-The <a href="https://evadb.readthedocs.io/en/latest/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
+The <a href="https://evadb.readthedocs.io/en/stable/source/overview/installation.html">Getting Started</a> page shows how you can use EVA for different computer vision tasks: image classification, object detection, action recognition, and how you can easily extend EVA to support your custom deep learning model in the form of user-defined functions.
 
-The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
+The <a href="https://evadb.readthedocs.io/en/stable/source/tutorials/index.html">User Guides</a> section contains Jupyter Notebooks that demonstrate how to use various features of EVA. Each notebook includes a link to Google Colab, where you can run the code by yourself.
 
 ## Why EVA? ##
 
@@ -52,7 +52,7 @@ The <a href="https://evadb.readthedocs.io/en/latest/source/tutorials/index.html"
 </details>
 
 ## Links
-* [Documentation](https://evadb.readthedocs.io/en/latest/)
+* [Documentation](https://evadb.readthedocs.io/)
 * [Tutorials](https://github.com/georgia-tech-db/eva/blob/master/tutorials/03-emotion-analysis.ipynb)
 * [Join Slack](https://join.slack.com/t/eva-db/shared_invite/zt-1i10zyddy-PlJ4iawLdurDv~aIAq90Dg)
 * [Demo](https://ada-00.cc.gatech.edu/eva/playground)
@@ -153,11 +153,11 @@ Join the EVA community on [Slack](https://join.slack.com/t/eva-db/shared_invite/
 [![PyPI Version](https://img.shields.io/pypi/v/evadb.svg)](https://pypi.org/project/evadb)
 [![CI Status](https://circleci.com/gh/georgia-tech-db/eva.svg?style=svg)](https://circleci.com/gh/georgia-tech-db/eva)
 [![Coverage Status](https://coveralls.io/repos/github/georgia-tech-db/eva/badge.svg?branch=master)](https://coveralls.io/github/georgia-tech-db/eva?branch=master)
-[![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=latest)](https://evadb.readthedocs.io/en/latest/index.html)
+[![Documentation Status](https://readthedocs.org/projects/evadb/badge/?version=stable)](https://evadb.readthedocs.io/en/stable/index.html)
 
 To file a bug or request a feature, please use GitHub issues. Pull requests are welcome.
 For more information on installing from source and contributing to EVA, see our
-[contributing guidelines](https://evadb.readthedocs.io/en/latest/source/contribute/index.html).
+[contributing guidelines](https://evadb.readthedocs.io/en/stable/source/contribute/index.html).
 
 ## License
 Copyright (c) 2018-2022 [Georgia Tech Database Group](http://db.cc.gatech.edu/)
