@@ -436,9 +436,9 @@ class Batch:
             ]
         else:
             for col_name in self.columns:
-                if "." in col_name:
+                if "." in str(col_name):
                     new_col_names.append(
-                        "{}.{}".format(alias.alias_name, col_name.split(".")[1])
+                        "{}.{}".format(alias.alias_name, str(col_name).split(".")[1])
                     )
                 else:
                     new_col_names.append("{}.{}".format(alias.alias_name, col_name))
