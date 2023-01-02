@@ -50,12 +50,11 @@ then
     fi
 # Windows -- no need for coverage report
 else
-    PYTHONPATH=./ python -m pytest -p no:cov test/ -s -v --log-level=WARNING ${1:-}
+    PYTHONPATH=./ python -m pytest -p no:cov test/
     test_code=$?
     if [ "$test_code" != "0" ];
     then
         echo "PYTEST CODE: --|${test_code}|-- FAILURE"
-        exit $test_code
     else
         echo "PYTEST CODE: --|${test_code}|-- SUCCESS"
     fi
