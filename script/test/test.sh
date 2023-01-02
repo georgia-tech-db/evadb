@@ -9,6 +9,11 @@ if [ -f ./__init__.py ]; then
 fi
 
 echo "OSTYPE: --|${OSTYPE}|--"
+
+##################################################
+## LINTER TESTS
+##################################################
+
 if [ "$OSTYPE" != "msys" ];
 then 
     # Run black, isort, linter 
@@ -36,10 +41,16 @@ else
     echo "FLAKE CODE: --|${linter_code}|-- SUCCESS"
 fi
 
+##################################################
+## UNIT TESTS
+## with cov pytest plugin
+##################################################
+
+
 if [ "$OSTYPE" != "msys" ];
 # Non-Windows
 then
-    PYTHONPATH=./ python -m pytest test/utils --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-}
+    PYTHONPATH=./ python -m pytest test --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "not benchmark" 
     test_code=$?
     if [ "$test_code" != "0" ];
     then
@@ -50,7 +61,7 @@ then
     fi
 # Windows -- no need for coverage report
 else
-    PYTHONPATH=./ python -m pytest -p no:cov test/
+    PYTHONPATH=./ python -m pytest -p no:cov test/ -m "not benchmark" 
     test_code=$?
     if [ "$test_code" != "0" ];
     then
@@ -60,12 +71,13 @@ else
     fi
 fi
 
-# Run unit tests
-PYTHONPATH=./ python -m pytest -r test/storage test/server -s -v -m "not benchmark" 
+##################################################
+## TEST JUPYTER NOTEBOOKS
+## with nbmake pytest plugin
+##################################################
 
 if [ "$OSTYPE" != "msys" ];
 then 
-    # Run notebooks
     PYTHONPATH=./ python -m pytest --nbmake --overwrite "./tutorials" -s -v --log-level=WARNING
     notebook_test_code=$?
     if [ "$notebook_test_code" != "0" ];

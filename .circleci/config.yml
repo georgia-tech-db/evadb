@@ -6,7 +6,7 @@ orbs:
 workflows:
   main:
     jobs:
-        - win-unittest
+        - Windows
         - test:
             name: "Python v3.7"
             v: "3.7"
@@ -33,18 +33,13 @@ jobs:
     docker:
       # https://circleci.com/docs/circleci-images#language-image-variants
       # This comes with python and openjdk11
-      - image: "cimg/python:<< parameters.v >>-browsers"
+      - image: "cimg/python:<< parameters.v >>"
     steps:
 
       - checkout
       - restore_cache:
           keys:
             - v1-model_cache-{{ checksum "setup.py" }}
-
-      # removing it - no significant advnatage
-      - restore_cache:
-          keys:
-            - v1-pip-cache-{{ checksum "setup.py" }}
 
       - run:
           name: Install EVA package from pip and start server
@@ -74,12 +69,8 @@ jobs:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
 
-      - save_cache:
-          key: v11-pip-cache-{{ checksum "setup.py" }}
-          paths:
-            - ./test_evadb/
     
-  win-unittest:
+  Windows:
     executor: win/default
     parameters:
       v:
