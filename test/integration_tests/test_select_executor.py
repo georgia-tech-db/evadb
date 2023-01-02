@@ -274,7 +274,7 @@ class SelectExecutorTest(unittest.TestCase):
         # Disabling it for time being
         self.assertEqual(actual_batch, expected_batch[0])
 
-    def test_select_and_groupby(self):
+    def test_select_and_groupby_first(self):
         # groupby and orderby together not tested because groupby
         # only applies to video data which is already sorted
         segment_size = 3
@@ -290,9 +290,13 @@ class SelectExecutorTest(unittest.TestCase):
         segments = [i for i in segments if len(i) == segment_size]
         expected_batch = list(create_dummy_4d_batches(filters=segments))[0]
         self.assertEqual(len(actual_batch), len(expected_batch))
+
+        expected_batch.rename(
+            columns={"myvideo.id": "FIRST.id", "myvideo.data": "SEGMENT.data"}
+        )
         self.assertEqual(
             actual_batch,
-            expected_batch.project(["myvideo.id", "myvideo.data"]),
+            expected_batch.project(["FIRST.id", "SEGMENT.data"]),
         )
 
     def test_select_and_groupby_with_last(self):
@@ -313,9 +317,13 @@ class SelectExecutorTest(unittest.TestCase):
             create_dummy_4d_batches(filters=segments, start_id=segment_size - 1)
         )[0]
         self.assertEqual(len(actual_batch), len(expected_batch))
+
+        expected_batch.rename(
+            columns={"myvideo.id": "LAST.id", "myvideo.data": "SEGMENT.data"}
+        )
         self.assertEqual(
             actual_batch,
-            expected_batch.project(["myvideo.id", "myvideo.data"]),
+            expected_batch.project(["LAST.id", "SEGMENT.data"]),
         )
 
     def test_select_and_groupby_should_fail_with_incorrect_pattern(self):
@@ -359,9 +367,14 @@ class SelectExecutorTest(unittest.TestCase):
         segments = [i for i in segments if len(i) == segment_size]
         expected_batch = list(create_dummy_4d_batches(filters=segments))[0]
         self.assertEqual(len(actual_batch), len(expected_batch))
+
+        expected_batch.rename(
+            columns={"myvideo.id": "FIRST.id", "myvideo.data": "SEGMENT.data"}
+        )
+
         self.assertEqual(
             actual_batch,
-            expected_batch.project(["myvideo.id", "myvideo.data"]),
+            expected_batch.project(["FIRST.id", "SEGMENT.data"]),
         )
 
     def test_select_and_sample_with_predicate(self):
@@ -376,13 +389,11 @@ class SelectExecutorTest(unittest.TestCase):
             "SELECT name, id,data FROM MyVideo SAMPLE 4 WHERE id > 2 ORDER BY id;"
         )
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         expected_batch = list(create_dummy_batches(filters=range(4, NUM_FRAMES, 4)))
         self.assertEqual(actual_batch, expected_batch[0])
 
         select_query = "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 2 AND id < 8 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         expected_batch = list(create_dummy_batches(filters=range(4, 8, 2)))
         self.assertEqual(actual_batch, expected_batch[0])
 

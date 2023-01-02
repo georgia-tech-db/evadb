@@ -455,3 +455,7 @@ class Batch:
                 new_col_names.append(col_name)
 
         self._frames.columns = new_col_names
+
+    def rename(self, columns) -> None:
+        "Rename column names"
+        self._frames.rename(columns=columns, inplace=True)
