@@ -396,7 +396,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 1]),
+                    "myvideo.id": np.array([0, 1], dtype=np.intp),
                     "T.label": np.array(["person", "bicycle"]),
                 }
             )
@@ -412,7 +412,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 1]),
+                    "myvideo.id": np.array([0, 1], dtype=np.intp),
                     "T.label": np.array(["person", "bicycle"]),
                 }
             )
@@ -429,7 +429,9 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 0, 2, 2, 4, 4, 6, 6, 8, 8]),
+                    "myvideo.id": np.array(
+                        [0, 0, 2, 2, 4, 4, 6, 6, 8, 8], dtype=np.intp
+                    ),
                     "T.label": np.array(
                         [
                             "person",
@@ -459,12 +461,11 @@ class SelectExecutorTest(unittest.TestCase):
         expected = Batch(
             pd.DataFrame(
                 {
-                    "myvideo.id": np.array([0, 0, 1, 1]),
+                    "myvideo.id": np.array([0, 0, 1, 1], np.intp),
                     "T.label": np.array(["person", "person", "bicycle", "bicycle"]),
                 }
             )
         )
-
         self.assertEqual(unnest_batch, expected)
 
     def test_should_raise_error_with_missing_alias_in_lateral_join(self):

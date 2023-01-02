@@ -109,7 +109,9 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_should_fail_to_load_corrupt_video(self):
         # should fail on an empty file
-        with tempfile.NamedTemporaryFile() as tmp:
+        tempfile_name = os.urandom(24).hex()
+        tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
+        with open(tempfile_path, "wb") as tmp:
             query = f"""LOAD VIDEO "{tmp.name}" INTO MyVideos;"""
             with self.assertRaises(Exception):
                 execute_query_fetch_all(query)
@@ -126,7 +128,9 @@ class LoadExecutorTest(unittest.TestCase):
         path_regex = Path(f"{EVA_ROOT_DIR}/data/sample_videos/1/*.mp4")
         valid_videos = glob.glob(str(path_regex.expanduser()), recursive=True)
 
-        with tempfile.NamedTemporaryFile() as empty_file:
+        tempfile_name = os.urandom(24).hex()
+        tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
+        with open(tempfile_path, "wb") as empty_file:
             # Load one correct file and one empty file
             # nothing should be added
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -162,7 +166,9 @@ class LoadExecutorTest(unittest.TestCase):
 
         # Load one correct file and one empty file
         # original file should remain
-        with tempfile.NamedTemporaryFile() as empty_file:
+        tempfile_name = os.urandom(24).hex()
+        tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
+        with open(tempfile_path, "wb") as empty_file:
             with tempfile.TemporaryDirectory() as tmp_dir:
                 shutil.copy2(str(valid_videos[1]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)
@@ -213,7 +219,9 @@ class LoadExecutorTest(unittest.TestCase):
 
     def test_should_fail_to_load_corrupt_image(self):
         # should fail on an empty file
-        with tempfile.NamedTemporaryFile() as tmp:
+        tempfile_name = os.urandom(24).hex()
+        tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
+        with open(tempfile_path, "wb") as tmp:
             query = f"""LOAD IMAGE "{tmp.name}" INTO MyImages;"""
             with self.assertRaises(Exception):
                 execute_query_fetch_all(query)
@@ -231,7 +239,9 @@ class LoadExecutorTest(unittest.TestCase):
             str(self.image_files_path.expanduser()), recursive=True
         )
 
-        with tempfile.NamedTemporaryFile() as empty_file:
+        tempfile_name = os.urandom(24).hex()
+        tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
+        with open(tempfile_path, "wb") as empty_file:
             # Load one correct file and one empty file
             # nothing should be added
             with tempfile.TemporaryDirectory() as tmp_dir:
@@ -267,7 +277,9 @@ class LoadExecutorTest(unittest.TestCase):
 
         # Load one correct file and one empty file
         # original file should remain
-        with tempfile.NamedTemporaryFile() as empty_file:
+        tempfile_name = os.urandom(24).hex()
+        tempfile_path = os.path.join(tempfile.gettempdir(), tempfile_name)
+        with open(tempfile_path, "wb") as empty_file:
             with tempfile.TemporaryDirectory() as tmp_dir:
                 shutil.copy2(str(valid_images[1]), tmp_dir)
                 shutil.copy2(str(empty_file.name), tmp_dir)

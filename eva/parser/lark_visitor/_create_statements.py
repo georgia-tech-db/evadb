@@ -228,7 +228,7 @@ class CreateTable:
                 if child.data == "decimal_literal":
                     decimal = self.visit(child)
                     dimensions.append(decimal)
-        return dimensions
+        return tuple(dimensions)
 
     def length_one_dimension(self, tree):
         dimensions = self.dimension_helper(tree)

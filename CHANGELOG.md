@@ -11,6 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Deprecated]
 ### [Removed]
 
+##  [0.1.3] - 2023-01-02
+### [Added]
+
+* PR #506: Added support for windows and macos
+* PR #492: Moved to a lark-based parser
+* PR #536: Lateral function call to linear data flow
+* PR #535: Similarity UDF
+
+### [Changed]
+
+* PR #544: fix: catalog improved file and function names
+* PR #543: fix: server relaunch does not load metadata tables
+
+### [Deprecated]
+
+### [Removed]
+
 ## [0.1.2] - 2022-12-17
 ### [Added]
 

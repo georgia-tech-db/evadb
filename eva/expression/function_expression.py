@@ -17,7 +17,7 @@ from typing import Callable, List
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass
-from eva.catalog.models.udf_io_catalog import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -61,7 +61,7 @@ class FunctionExpression(AbstractExpression):
         self._function_instance = None
         self._output = output
         self.alias = alias
-        self.output_objs: List[UdfIOCatalog] = []
+        self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
         self.cache: FunctionExpressionCache = None
 

@@ -13,10 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import sys
 from cmd import Cmd
 from contextlib import ExitStack
-from readline import read_history_file, set_history_length, write_history_file
 from typing import Dict
+
+# Skip readline on Windows
+if os.name != "nt":
+    from readline import read_history_file, set_history_length, write_history_file
 
 from eva.server.db_api import connect
 
@@ -40,13 +44,17 @@ class EvaCommandInterpreter(Cmd):
 
     def preloop(self):
         # To retain command history across multiple client sessions
-        if os.path.exists(histfile):
-            read_history_file(histfile)
+        if sys.platform != "msys":
+            if os.path.exists(histfile):
+                read_history_file(histfile)
+            else:
+                set_history_length(histfile_size)
+                write_history_file(histfile)
 
     def postloop(self):
-        # To retain command history across multiple client sessions
-        set_history_length(histfile_size)
-        write_history_file(histfile)
+        if sys.platform != "msys":
+            set_history_length(histfile_size)
+            write_history_file(histfile)
 
     def set_connection(self, connection):
         self.connection = connection

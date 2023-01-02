@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.column_catalog import ColumnCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.parser.types import JoinType
 from eva.plan_nodes.abstract_join_plan import AbstractJoin
@@ -28,7 +28,7 @@ class HashJoinProbePlan(AbstractJoin):
     and uses build side hash table to join.
     Arguments:
         join_type: JoinType
-        probe_keys (List[ColumnCatalog]) : list of equi-key columns.
+        probe_keys (List[ColumnCatalogEntry]) : list of equi-key columns.
                         Must be equal to build side keys.
         predicate (AbstractExpression)
     """
@@ -36,7 +36,7 @@ class HashJoinProbePlan(AbstractJoin):
     def __init__(
         self,
         join_type: JoinType,
-        probe_keys: List[ColumnCatalog],
+        probe_keys: List[ColumnCatalogEntry],
         join_predicate: AbstractExpression,
         join_project: List[AbstractExpression],
     ):

@@ -13,10 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+from typing import List
 
 from sqlalchemy.orm.exc import NoResultFound
 
-from eva.catalog.models.index_catalog import IndexCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
@@ -25,26 +28,37 @@ class IndexCatalogService(BaseService):
     def __init__(self):
         super().__init__(IndexCatalog)
 
-    def insert_entry(self, name: str, save_file_path: str, type: str) -> IndexCatalog:
-        index_entry = self.model(name, save_file_path, type)
+    def insert_entry(
+        self,
+        name: str,
+        save_file_path: str,
+        type: str,
+        secondary_index_table: TableCatalogEntry,
+        feat_column: ColumnCatalogEntry,
+    ) -> IndexCatalogEntry:
+        index_entry = IndexCatalog(
+            name, save_file_path, type, secondary_index_table.row_id, feat_column.row_id
+        )
         index_entry = index_entry.save()
-        return index_entry
+        return index_entry.as_dataclass()
 
-    def get_entry_by_name(self, name: str):
+    def get_entry_by_name(self, name: str) -> IndexCatalogEntry:
         try:
-            return self.model.query.filter(self.model._name == name).one()
+            entry = self.model.query.filter(self.model._name == name).one()
+            return entry.as_dataclass()
         except NoResultFound:
             return None
 
-    def get_entry_by_id(self, id: int):
+    def get_entry_by_id(self, id: int) -> IndexCatalogEntry:
         try:
-            return self.model.query.filter(self.model._row_id == id).one()
+            entry = self.model.query.filter(self.model._row_id == id).one()
+            return entry.as_dataclass()
         except NoResultFound:
             return None
 
     def delete_entry_by_name(self, name: str):
         try:
-            index_record = self.get_entry_by_name(name)
+            index_record = self.model.query.filter(self.model._name == name).one()
             # clean up the on disk data
             if os.path.exists(index_record.save_file_path):
                 os.remove(index_record.save_file_path)
@@ -54,8 +68,9 @@ class IndexCatalogService(BaseService):
             return False
         return True
 
-    def get_all_entries(self):
+    def get_all_entries(self) -> List[IndexCatalogEntry]:
         try:
-            return self.model.query.all()
+            entries = self.model.query.all()
+            return [entry.as_dataclass() for entry in entries]
         except NoResultFound:
             return []

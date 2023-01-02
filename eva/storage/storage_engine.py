@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.catalog.catalog_type import TableType
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
 from eva.utils.generic_utils import str_to_class
@@ -33,7 +33,9 @@ class StorageEngine:
     }
 
     @classmethod
-    def factory(cls, table: TableCatalog) -> AbstractStorageEngine:
+    def factory(cls, table: TableCatalogEntry) -> AbstractStorageEngine:
+        if table is None:
+            raise ValueError("Expected TableCatalogEntry, got None")
         if table.table_type in cls.storages:
             return cls.storages[table.table_type]
 
