@@ -36,7 +36,7 @@ else
     echo "FLAKE CODE: --|${linter_code}|-- SUCCESS"
 fi
 
-if [[ "$OSTYPE" != "msys" ]];
+if [ "$OSTYPE" != "msys" ];
 # Non-Windows
 then
     PYTHONPATH=./ python -m pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-}
