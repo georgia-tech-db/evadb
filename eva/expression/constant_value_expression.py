@@ -35,6 +35,9 @@ class ConstantValueExpression(AbstractExpression):
     def evaluate(self, batch: Batch, **kwargs):
         return Batch(pd.DataFrame({0: [self._value] * len(batch)}))
 
+    def signature(self) -> str:
+        return str(self)
+
     @property
     def value(self):
         return self._value

@@ -123,6 +123,7 @@ class AbstractExpression(ABC):
     def signature(self) -> str:
         NotImplementedError(f"{type(self)} does not support signature function")
     
+
     def __eq__(self, other):
         is_subtree_equal = True
         if not isinstance(other, AbstractExpression):

@@ -17,17 +17,15 @@ from typing import Callable, List
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass
-from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
 from eva.utils.kv_cache import DiskKVCache
-from eva.utils.logging_manager import logger
 
 
 class FunctionExpression(AbstractExpression):
@@ -64,6 +62,7 @@ class FunctionExpression(AbstractExpression):
         self._function_instance = None
         self._output = output
         self.alias = alias
+        self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
         self.cache: FunctionExpressionCache = None
@@ -123,18 +122,25 @@ class FunctionExpression(AbstractExpression):
 
     def signature(self) -> str:
         """It constructs the signature of the function expression.
-
         It traverses the children (function arguments) and compute signature for each child. The output is in the form `udf_name(arg1, arg2, ...)`.
-        
+
         Returns:
             str: signature string
         """
         child_sigs = []
         for child in self.children:
-            if isinstance(child, (FunctionExpression, TupleValueExpression)):
-                child_sigs.append(child.signature())
-        return f"{self.name}({','.join(child_sigs)})"
-                
+            child_sigs.append(child.signature())
+
+        func_sig = f"{self.name}({','.join(child_sigs)})"
+        if self._output and len(self.udf_obj.outputs) > 1:
+            # In this situation, the function expression has multiple output columns,
+            # but only one of them is projected. As a result, we must generate a
+            # signature that includes only the projected column in order to distinguish
+            # it from the scenario where all columns are projected.
+            func_sig = f"{func_sig}.{self.output_objs[0].name}"
+
+        return func_sig
+
     def _gpu_enabled_function(self):
         if self._function_instance is None:
             self._function_instance = self.function()

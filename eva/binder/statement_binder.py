@@ -24,7 +24,6 @@ from eva.binder.binder_utils import (
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -162,10 +161,10 @@ class StatementBinder:
             self.bind(func_expr)
             output_cols = []
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
-                col_alias = "{}.{}".format(func_expr.alias, alias)
+                col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
                 alias_obj = TupleValueExpression(
-                    col_name=obj.name,
-                    table_alias=func_expr.name,
+                    col_name=alias,
+                    table_alias=func_expr.alias.alias_name,
                     col_object=obj,
                     col_alias=col_alias,
                 )
@@ -209,6 +208,7 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
+        node.udf_obj = udf_obj
         output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
         if node.output:
             for obj in output_objs:

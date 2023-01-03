@@ -13,10 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Union
+
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.models.storage.batch import Batch
 from eva.utils.logging_manager import logger
+
 from .abstract_expression import (
     AbstractExpression,
     ExpressionReturnType,
@@ -84,21 +86,18 @@ class TupleValueExpression(AbstractExpression):
 
     def signature(self):
         """It constructs the signature of the tuple value expression.
-
         It assumes the col_object attribute is populated by the binder with the catalog
         entries. For a standard column in the table, it returns `table_name.col_name`,
         and for UDF output columns it returns `udf_name.col_name`
-
         Raises:
             ValueError: If the col_object is not a `Union[ColumnCatalogEntry, UdfIOCatalogEntry]`. This can occur if the expression has not been bound using the binder.
-
         Returns:
             str: signature string
         """
         if isinstance(self.col_object, ColumnCatalogEntry):
-            return f"{self.col_object.table.name}.{self.col_object.name}"
+            return f"{self.col_object.table_name}.{self.col_object.name}"
         elif isinstance(self.col_object, UdfIOCatalogEntry):
-            return f"{self.col_object.udf.name}.{self.col_object.name}"
+            return f"{self.col_object.udf_name}.{self.col_object.name}"
         else:
             err_msg = f"Unsupported type of self.col_object {type(self.col_object)}, expected ColumnCatalogEntry or UdfIOCatalogEntry"
             logger.error(err_msg)
