@@ -37,6 +37,7 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
         ColumnDefinition(
             "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
         ),
+        ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
     ]
     return columns
 
