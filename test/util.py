@@ -326,7 +326,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
                 ),
-                "myvideo.seconds": 0.0
+                "myvideo.seconds": 0.0,
             }
         )
 

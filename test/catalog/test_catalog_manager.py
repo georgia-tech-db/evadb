@@ -76,7 +76,7 @@ class CatalogManagerTests(unittest.TestCase):
             ColumnDefinition(
                 "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
             ),
-            ColumnDefinition("seconds", ColumnType.FLOAT, None, [])
+            ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
         ]
 
         mock.assert_called_once_with(
