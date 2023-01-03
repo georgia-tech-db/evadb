@@ -104,7 +104,7 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch = Batch(frames=pd.DataFrame(expected_rows))
         self.assertEqual(actual_batch, expected_batch)
 
-        select_query = "SELECT name, id,data FROM MyVideo;"
+        select_query = "SELECT * FROM MyVideo;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches())
@@ -162,7 +162,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_where_video_in_table(self):
-        select_query = "SELECT name, id,data FROM MyVideo WHERE id = 5;"
+        select_query = "SELECT * FROM MyVideo WHERE id = 5;"
         actual_batch = execute_query_fetch_all(select_query)
         expected_batch = list(create_dummy_batches(filters=[5]))[0]
         self.assertEqual(actual_batch, expected_batch)
@@ -188,7 +188,7 @@ class SelectExecutorTest(unittest.TestCase):
             expected_batch.project(["myvideo.id", "myvideo.data"]),
         )
 
-        select_query = "SELECT name, id, data FROM MyVideo WHERE id >= 2 AND id < 5;"
+        select_query = "SELECT * FROM MyVideo WHERE id >= 2 AND id < 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(filters=range(2, 5)))[0]
@@ -196,8 +196,8 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_nested_select_video_in_table(self):
-        nested_select_query = """SELECT name, id, data FROM
-            (SELECT name, id, data FROM MyVideo WHERE id >= 2 AND id < 5) AS T
+        nested_select_query = """SELECT * FROM
+            (SELECT * FROM MyVideo WHERE id >= 2 AND id < 5) AS T
             WHERE id >= 3;"""
         actual_batch = execute_query_fetch_all(nested_select_query)
         actual_batch.sort()
@@ -205,8 +205,8 @@ class SelectExecutorTest(unittest.TestCase):
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
 
-        nested_select_query = """SELECT T.name, T.id, T.data FROM
-            (SELECT name, id, data FROM MyVideo WHERE id >= 2 AND id < 5) AS T
+        nested_select_query = """SELECT * FROM
+            (SELECT * FROM MyVideo WHERE id >= 2 AND id < 5) AS T
             WHERE id >= 3;"""
         actual_batch = execute_query_fetch_all(nested_select_query)
         actual_batch.sort("T.id")
@@ -215,8 +215,8 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_union_video_in_table(self):
-        select_query = """SELECT name, id, data FROM MyVideo WHERE id < 3
-            UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 7;"""
+        select_query = """SELECT * FROM MyVideo WHERE id < 3
+            UNION ALL SELECT * FROM MyVideo WHERE id > 7;"""
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("myvideo.id")
         expected_batch = list(
@@ -226,9 +226,9 @@ class SelectExecutorTest(unittest.TestCase):
         )[0]
         self.assertEqual(actual_batch, expected_batch)
 
-        select_query = """SELECT name, id, data FROM MyVideo WHERE id < 2
-            UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 4 AND id < 6
-            UNION ALL SELECT name, id, data FROM MyVideo WHERE id > 7;"""
+        select_query = """SELECT * FROM MyVideo WHERE id < 2
+            UNION ALL SELECT * FROM MyVideo WHERE id > 4 AND id < 6
+            UNION ALL SELECT * FROM MyVideo WHERE id > 7;"""
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort("myvideo.id")
         expected_batch = list(
@@ -239,7 +239,7 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch, expected_batch)
 
     def test_select_and_limit(self):
-        select_query = "SELECT name,id,data FROM MyVideo ORDER BY id LIMIT 5;"
+        select_query = "SELECT * FROM MyVideo ORDER BY id LIMIT 5;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
         expected_batch = list(create_dummy_batches(num_frames=10, batch_size=5))
@@ -255,15 +255,14 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.iat[0, 1], 4.5)
 
     def test_select_and_sample(self):
-        select_query = "SELECT name, id,data FROM MyVideo SAMPLE 7 ORDER BY id;"
+        select_query = "SELECT id FROM MyVideo SAMPLE 7 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()
 
         expected_batch = list(create_dummy_batches(filters=range(0, NUM_FRAMES, 7)))
+        expected_batch[0] = expected_batch[0].project(["myvideo.id"])
 
         self.assertEqual(len(actual_batch), len(expected_batch[0]))
-        # Since frames are fetched in random order, this test might be flaky
-        # Disabling it for time being
         self.assertEqual(actual_batch, expected_batch[0])
 
     def test_select_and_groupby_first(self):
@@ -370,24 +369,22 @@ class SelectExecutorTest(unittest.TestCase):
         )
 
     def test_select_and_sample_with_predicate(self):
-        select_query = (
-            "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
-        )
+        select_query = "SELECT id FROM MyVideo SAMPLE 2 WHERE id > 5 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected_batch = list(create_dummy_batches(filters=range(6, NUM_FRAMES, 2)))
-        self.assertEqual(actual_batch, expected_batch[0])
+        self.assertEqual(actual_batch, expected_batch[0].project(["myvideo.id"]))
 
-        select_query = (
-            "SELECT name, id,data FROM MyVideo SAMPLE 4 WHERE id > 2 ORDER BY id;"
-        )
+        select_query = "SELECT id FROM MyVideo SAMPLE 4 WHERE id > 2 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)
         expected_batch = list(create_dummy_batches(filters=range(4, NUM_FRAMES, 4)))
-        self.assertEqual(actual_batch, expected_batch[0])
+        self.assertEqual(actual_batch, expected_batch[0].project(["myvideo.id"]))
 
-        select_query = "SELECT name, id,data FROM MyVideo SAMPLE 2 WHERE id > 2 AND id < 8 ORDER BY id;"
+        select_query = (
+            "SELECT id FROM MyVideo SAMPLE 2 WHERE id > 2 AND id < 8 ORDER BY id;"
+        )
         actual_batch = execute_query_fetch_all(select_query)
         expected_batch = list(create_dummy_batches(filters=range(4, 8, 2)))
-        self.assertEqual(actual_batch, expected_batch[0])
+        self.assertEqual(actual_batch, expected_batch[0].project(["myvideo.id"]))
 
     @pytest.mark.torchtest
     def test_lateral_join(self):

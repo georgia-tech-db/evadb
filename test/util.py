@@ -353,6 +353,7 @@ def create_dummy_4d_batches(
                 "myvideo.name": "dummy.avi",
                 "myvideo.id": segment[0] + start_id,
                 "myvideo.data": segment_data,
+                "myvideo.seconds": 0.0,
             }
         )
 
