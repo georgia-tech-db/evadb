@@ -28,21 +28,25 @@ CatalogColumnType = Union[ColumnCatalogEntry, UdfIOCatalogEntry]
 
 class StatementBinderContext:
     """
-    `_table_alias_map`: Maintains a mapping from table_alias to
-    corresponding catalog table object
-    `_derived_table_alias_map`:
-    Maintains a mapping from derived table alias (subquery, FunctionExpression)
-    to the corresponding projected columns.
-    For example, in the follwoing queries: Select * FROM (SELECT id1, id2
-    FROM table) AS A;
-         A: [id1, id2]
-    Select * FROM video LATERAL JOIN func;
-         func: [func.col1, func.col2]
+    This context is used to store information that is useful during the process of binding a statement (such as a SELECT statement) to the catalog. It stores the following information:
+
+    Args:
+        `_table_alias_map`: Maintains a mapping from table_alias to corresponding
+        catalog table entry
+        `_derived_table_alias_map`: Maintains a mapping from derived table aliases,
+        such as subqueries or function expressions, to column alias maps for all the
+        corresponding projected columns. For example, in the following queries, the
+        `_derived_table_alias_map` attribute would contain:
+
+        `Select * FROM (SELECT id1, id2 FROM table) AS A` :
+            `{A: {id1: table.col1, id2: table.col2}}`
+        `Select * FROM video LATERAL JOIN func AS T(a, b)` :
+            `{T: {a: func.obj1, b:func.obj2}}`
     """
 
     def __init__(self):
         self._table_alias_map: Dict[str, TableCatalogEntry] = dict()
-        self._derived_table_alias_map: Dict[str, List[CatalogColumnType]] = dict()
+        self._derived_table_alias_map: Dict[str, Dict[str, CatalogColumnType]] = dict()
         self._catalog = CatalogManager()
 
     def _check_duplicate_alias(self, alias: str):
@@ -84,16 +88,17 @@ class StatementBinderContext:
             target_list: list of Tuplevalue Expression or FunctionExpression or UdfIOCatalogEntry
         """
         self._check_duplicate_alias(alias)
-        col_list = []
+        col_alias_map = {}
         for expr in target_list:
             if isinstance(expr, FunctionExpression):
-                col_list.extend(expr.output_objs)
+                for obj in expr.output_objs:
+                    col_alias_map[obj.name] = obj
             elif isinstance(expr, TupleValueExpression):
-                col_list.append(expr.col_object)
+                col_alias_map[expr.col_name] = expr.col_object
             else:
-                col_list.append(expr)
+                continue
 
-        self._derived_table_alias_map[alias] = col_list
+        self._derived_table_alias_map[alias] = col_alias_map
 
     def get_binded_column(
         self, col_name: str, alias: str = None
@@ -150,11 +155,13 @@ class StatementBinderContext:
         Returns:
             column object
         """
-        col_objs = self._derived_table_alias_map.get(alias, None)
-        if col_objs:
-            for obj in col_objs:
-                if obj.name.lower() == col_name:
-                    return obj
+        col_objs_map = self._derived_table_alias_map.get(alias, None)
+        if col_objs_map is None:
+            return None
+
+        for name, obj in col_objs_map.items():
+            if name == col_name:
+                return obj
 
     def _get_all_alias_and_col_name(self) -> List[Tuple[str, str]]:
         """
@@ -165,8 +172,8 @@ class StatementBinderContext:
         alias_cols = []
         for alias, table_obj in self._table_alias_map.items():
             alias_cols += list([(alias, col.name) for col in table_obj.columns])
-        for alias, dtable_obj in self._derived_table_alias_map.items():
-            alias_cols += list([(alias, col.name) for col in dtable_obj])
+        for alias, col_objs_map in self._derived_table_alias_map.items():
+            alias_cols += list([(alias, col_name) for col_name in col_objs_map])
         return alias_cols
 
     def _search_all_alias_maps(self, col_name: str) -> Tuple[str, CatalogColumnType]:

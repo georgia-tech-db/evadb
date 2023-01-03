@@ -94,6 +94,7 @@ class ColumnCatalog(BaseModel):
             array_type=self._array_type,
             array_dimensions=self.array_dimensions,
             table_id=self._table_id,
+            table_name=self._table_catalog._name,
         )
 
 
@@ -109,4 +110,5 @@ class ColumnCatalogEntry:
     array_type: NdArrayType = None
     array_dimensions: Tuple[int] = field(default_factory=tuple)
     table_id: int = None
+    table_name: str = None
     row_id: int = None

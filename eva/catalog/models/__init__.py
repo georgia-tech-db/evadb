@@ -13,4 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# __all__ = ("TableCatalog", "ColumnCatalog", "UdfCatalog", "UdfIOCatalog")
+__all__ = (
+    "TableCatalog",
+    "ColumnCatalog",
+    "UdfCatalog",
+    "UdfIOCatalog",
+    "TableCatalogEntry",
+    "ColumnCatalogEntry",
+    "UdfCatalogEntry",
+    "UdfIOCatalogEntry",
+)
