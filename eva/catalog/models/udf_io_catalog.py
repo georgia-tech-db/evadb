@@ -22,6 +22,7 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
 
 
 class UdfIOCatalog(BaseModel):
@@ -98,6 +99,7 @@ class UdfIOCatalog(BaseModel):
             array_dimensions=self.array_dimensions,
             is_input=self._is_input,
             udf_id=self._udf_id,
+            udf=self._udf.as_dataclass(),
         )
 
 
@@ -114,6 +116,7 @@ class UdfIOCatalogEntry:
     array_dimensions: Tuple[int] = None
     is_input: bool = True
     udf_id: int = None
+    udf: UdfCatalogEntry = None
     row_id: int = None
 
     def display_format(self):

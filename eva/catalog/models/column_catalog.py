@@ -22,6 +22,7 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.table_catalog import TableCatalogEntry
 
 
 class ColumnCatalog(BaseModel):
@@ -94,6 +95,7 @@ class ColumnCatalog(BaseModel):
             array_type=self._array_type,
             array_dimensions=self.array_dimensions,
             table_id=self._table_id,
+            table=self._table_catalog.as_dataclass(),
         )
 
 
@@ -109,4 +111,5 @@ class ColumnCatalogEntry:
     array_type: NdArrayType = None
     array_dimensions: Tuple[int] = field(default_factory=tuple)
     table_id: int = None
+    table: TableCatalogEntry = None
     row_id: int = None

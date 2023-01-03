@@ -25,6 +25,7 @@ from eva.catalog.models.base_model import drop_db, init_db
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
+from eva.catalog.models.udf_cache_catalog import UdfCacheCatalogEntry
 from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.catalog.services.column_catalog_service import ColumnCatalogService
@@ -32,7 +33,9 @@ from eva.catalog.services.index_catalog_service import IndexCatalogService
 from eva.catalog.services.table_catalog_service import TableCatalogService
 from eva.catalog.services.udf_catalog_service import UdfCatalogService
 from eva.catalog.services.udf_io_catalog_service import UdfIOCatalogService
+from eva.catalog.services.udf_cache_catalog_service import UdfCacheCatalogService
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
@@ -58,6 +61,7 @@ class CatalogManager(object):
         self._udf_service: UdfCatalogService = UdfCatalogService()
         self._udf_io_service: UdfIOCatalogService = UdfIOCatalogService()
         self._index_service: IndexCatalogService = IndexCatalogService()
+        self._udf_cache_service: UdfCacheCatalogService = UdfCacheCatalogService()
 
     def reset(self):
         """
@@ -272,6 +276,25 @@ class CatalogManager(object):
     def get_all_index_catalog_entries(self):
         return self._index_service.get_all_entries()
 
+    """ Udf Cache related"""
+    
+    def insert_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
+        return 
+        # return self._udf_cache_service.insert_entry(
+        #     construct_udf_cache_catalog_entry(func_expr)
+        # )
+
+    def get_udf_cache_catalog_entry_by_name(self, name: str) -> UdfCacheCatalogEntry:
+        return self._udf_cache_service.get_entry_by_name(name)
+
+    def drop_udf_cache_catalog_entry(self, entry: UdfCacheCatalogEntry) -> bool:
+        return self._udf_cache_service.delete_entry(entry)
+
+    def _construct_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
+        cache_name = func_expr.signature()
+        cache_path = str(generate_file_path(cache_name))
+        udf_id = self._udf_service.get_entry_by_name(func_expr.)
+        
     """ Utils """
 
     def create_and_insert_table_catalog_entry(

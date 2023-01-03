@@ -12,14 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
-from sqlalchemy import ARRAY, BINARY, JSON, Column, ForeignKey, Integer, String
+from dataclasses import dataclass, field
+from typing import List, Union
+
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
 from eva.catalog.models.association_models import (
-    depend_udf_and_udf_cache,
     depend_column_and_udf_cache,
+    depend_udf_and_udf_cache,
 )
 from eva.catalog.models.base_model import BaseModel
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
 
 
 class UdfCacheCatalog(BaseModel):
@@ -30,18 +35,21 @@ class UdfCacheCatalog(BaseModel):
     `_name:` The name of the cache, also referred to as the unique UDF signature.
     `_udf_id:` `_row_id` of the UDF in the `UdfCatalog` for which the cache is built.
     `_num_args:` The number of arguments that the UDF takes.
-    `_arg_ids:` A serialized list of `ColumnCatalog` `_row_id`s for each argument of the UDF. If the argument is a function expression, it stores the string representation of the expression tree.
-    `_udf_depends:` A list of `row_id`s of the UDFs that the cache depends on, including both the UDF being cached and the UDFs in the arguments.
-    `_col_depends:` A list of `row_id`s of the columns that the cache depends on.
+    `_args:` A serialized list of `ColumnCatalog` `_row_id`s for each argument of the
+    UDF. If the argument is a function expression, it stores the string representation
+    of the expression tree.
+    `_udf_depends:` A list of `UdfCatalog`s of the UDFs that the cache depends on,
+    including both the UDF being cached and the UDFs in the arguments.
+    `_col_depends:` A list of `ColumnCatalog`s of the columns that the cache depends on.
     """
 
     __tablename__ = "udf_cache"
 
     _name = Column("name", String(128))
     _udf_id = Column("udf_id", Integer, ForeignKey("udf._row_id"))
-    _cache_path = Column("cache_path", BINARY)
+    _cache_path = Column("cache_path", String(256))
     _num_args = Column("num_args", Integer)
-    _arg_ids = Column("arg_ids", String(1024))
+    _args = Column("args", String(1024))
 
     _udf_depends = relationship(
         "UdfCatalog",
@@ -55,10 +63,40 @@ class UdfCacheCatalog(BaseModel):
     )
 
     def __init__(
-        self, name: str, udf_id: int, cache_path: str, num_args: int, arg_ids: List[str]
+        self, name: str, udf_id: int, cache_path: str, num_args: int, args: List[str]
     ):
         self._name = name
         self._udf_id = udf_id
         self._cache_path = cache_path
         self._num_args = num_args
-        self._arg_ids = arg_ids
+        self._args = args
+
+    def as_dataclass(self) -> "UdfCacheCatalogEntry":
+        udf_depends = [obj.as_dataclass() for obj in self._udf_depends]
+        col_depends = [obj.as_dataclass() for obj in self._col_depends]
+        return UdfCacheCatalogEntry(
+            row_id=self._row_id,
+            name=self._name,
+            udf_id=self._udf_id,
+            cache_path=self._cache_path,
+            num_args=self._num_args,
+            args=self._args,
+            udf_depends=udf_depends,
+            col_depends=col_depends,
+        )
+
+
+@dataclass(unsafe_hash=True)
+class UdfCacheCatalogEntry:
+    """Dataclass representing an entry in the `UdfCatalog`.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
+
+    name: str
+    udf_id: int
+    cache_path: str
+    num_args: int
+    args: List[Union[int, str]]
+    udf_depends: List[UdfCatalogEntry] = field(compare=False, default_factory=list)
+    col_depends: List[ColumnCatalogEntry] = field(compare=False, default_factory=list)
+    row_id: int = None

@@ -23,3 +23,4 @@ class BaseService:
 
     def __init__(self, model: BaseModel):
         self.model = model
+

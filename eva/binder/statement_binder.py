@@ -162,14 +162,13 @@ class StatementBinder:
             self.bind(func_expr)
             output_cols = []
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
-                alias_obj = UdfIOCatalogEntry(
-                    alias,
-                    type=obj.type,
-                    array_type=obj.array_type,
-                    array_dimensions=obj.array_dimensions,
-                    is_input=obj.is_input,
+                col_alias = "{}.{}".format(func_expr.alias, alias)
+                alias_obj = TupleValueExpression(
+                    col_name=obj.name,
+                    table_alias=func_expr.name,
+                    col_object=obj,
+                    col_alias=col_alias,
                 )
-
                 output_cols.append(alias_obj)
             self._binder_context.add_derived_table_alias(
                 func_expr.alias.alias_name, output_cols

@@ -17,14 +17,17 @@ from typing import Callable, List
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.constants import NO_GPU
 from eva.executor.execution_context import Context
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.models.storage.batch import Batch
 from eva.parser.alias import Alias
 from eva.udfs.gpu_compatible import GPUCompatible
 from eva.utils.kv_cache import DiskKVCache
+from eva.utils.logging_manager import logger
 
 
 class FunctionExpression(AbstractExpression):
@@ -91,7 +94,7 @@ class FunctionExpression(AbstractExpression):
 
     def enable_cache(self, cache: "FunctionExpressionCache"):
         self.cache = cache
-        
+    
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
@@ -118,6 +121,20 @@ class FunctionExpression(AbstractExpression):
         outcomes.modify_column_alias(self.alias)
         return outcomes
 
+    def signature(self) -> str:
+        """It constructs the signature of the function expression.
+
+        It traverses the children (function arguments) and compute signature for each child. The output is in the form `udf_name(arg1, arg2, ...)`.
+        
+        Returns:
+            str: signature string
+        """
+        child_sigs = []
+        for child in self.children:
+            if isinstance(child, (FunctionExpression, TupleValueExpression)):
+                child_sigs.append(child.signature())
+        return f"{self.name}({','.join(child_sigs)})"
+                
     def _gpu_enabled_function(self):
         if self._function_instance is None:
             self._function_instance = self.function()
