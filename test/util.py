@@ -16,7 +16,6 @@ import base64
 import os
 import shutil
 from pathlib import Path
-import time
 
 import cv2
 import numpy as np
