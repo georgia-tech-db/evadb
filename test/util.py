@@ -16,6 +16,7 @@ import base64
 import os
 import shutil
 from pathlib import Path
+import time
 
 import cv2
 import numpy as np
@@ -326,6 +327,7 @@ def create_dummy_batches(num_frames=NUM_FRAMES, filters=[], batch_size=10, start
                 "myvideo.data": np.array(
                     np.ones((2, 2, 3)) * float(i + 1) * 25, dtype=np.uint8
                 ),
+                "myvideo.seconds": 0.0
             }
         )
 
