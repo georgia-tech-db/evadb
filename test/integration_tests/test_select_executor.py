@@ -254,14 +254,6 @@ class SelectExecutorTest(unittest.TestCase):
         self.assertEqual(actual_batch.frames.iat[0, 0], 10)
         self.assertEqual(actual_batch.frames.iat[0, 1], 4.5)
 
-        complex_aggregate_query = """SELECT SUM(id), COUNT(label)
-                                     FROM MyVideo
-                                     JOIN LATERAL DummyMultiObjectDetector(data)
-                                     AS T(label);"""
-        actual_batch = execute_query_fetch_all(complex_aggregate_query)
-
-        self.assertEqual(len(actual_batch), 10)
-
     def test_select_and_sample(self):
         select_query = "SELECT name, id,data FROM MyVideo SAMPLE 7 ORDER BY id;"
         actual_batch = execute_query_fetch_all(select_query)

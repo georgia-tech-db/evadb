@@ -380,14 +380,7 @@ class Batch:
         Arguments:
             method: string with one of the five above options
         """
-        # Aggregate ndarray
-        if isinstance(self._frames.iat[0, 0], np.ndarray):
-            self._frames = self._frames.applymap(
-                lambda array: pd.DataFrame(array).agg([method]).iat[0, 0]
-            )
-        # Aggregate scalar
-        else:
-            self._frames = self._frames.agg([method])
+        self._frames = self._frames.agg([method])
 
     def empty(self):
         """Checks if the batch is empty
