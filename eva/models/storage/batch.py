@@ -69,6 +69,12 @@ class Batch:
 
     @classmethod
     def from_eq(cls, batch1: Batch, batch2: Batch) -> Batch:
+        print("batch1")
+        print(batch1._frames.to_numpy())
+        print("batch2")
+        print(batch2._frames.to_numpy())
+        print("comparison")
+        print(batch1._frames.to_numpy() == batch2._frames.to_numpy())
         return Batch(
             pd.DataFrame(batch1._frames.to_numpy() == batch2._frames.to_numpy())
         )
@@ -81,6 +87,12 @@ class Batch:
 
     @classmethod
     def from_lesser(cls, batch1: Batch, batch2: Batch) -> Batch:
+        print("batch1")
+        print(batch1._frames.to_numpy())
+        print("batch2")
+        print(batch2._frames.to_numpy())
+        print("comparison")
+        print(batch1._frames.to_numpy() < batch2._frames.to_numpy())
         return Batch(
             pd.DataFrame(batch1._frames.to_numpy() < batch2._frames.to_numpy())
         )

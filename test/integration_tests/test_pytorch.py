@@ -30,7 +30,7 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
+from eva.udfs.udf_bootstrap_queries import Mvit_udf_query, Timestamp_udf_query
 
 
 class PytorchTest(unittest.TestCase):
@@ -272,3 +272,15 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         self.assertTrue(res["toxicityclassifier.labels"][0] == "toxic")
         self.assertTrue(res["toxicityclassifier.labels"][1] == "not toxic")
+
+    def test_timestamp_udf(self):
+        execute_query_fetch_all(Timestamp_udf_query)
+
+        select_query = """SELECT id, seconds, Timestamp(seconds)
+                          FROM MyVideo
+                          WHERE Timestamp(seconds) <= "00:00:01"; """
+        # TODO: Check why this does not work
+        #                  AND Timestamp(seconds) < "00:00:03"; """
+        actual_batch = execute_query_fetch_all(select_query)
+
+        self.assertEqual(len(actual_batch), 60)
