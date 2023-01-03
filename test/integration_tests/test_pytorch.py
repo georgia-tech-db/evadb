@@ -15,7 +15,7 @@
 import os
 import sys
 import unittest
-from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
+from test.util import copy_sample_videos_to_upload_dir, copy_sample_images_to_upload_dir, file_remove, load_inbuilt_udfs
 
 import cv2
 import numpy as np
@@ -33,6 +33,7 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         copy_sample_videos_to_upload_dir()
+        copy_sample_images_to_upload_dir()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
