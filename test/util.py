@@ -294,6 +294,14 @@ def copy_sample_videos_to_upload_dir():
         "data/actions/actions.mp4",
         os.path.join(upload_dir_from_config, "actions.mp4"),
     )
+    shutil.copyfile(
+        "data/detoxify/meme1.jpg",
+        os.path.join(upload_dir_from_config, "meme1.jpg"),
+    )
+    shutil.copyfile(
+        "data/detoxify/meme2.jpg",
+        os.path.join(upload_dir_from_config, "meme2.jpg"),
+    )
 
 
 def file_remove(path):

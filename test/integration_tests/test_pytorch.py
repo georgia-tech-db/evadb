@@ -36,9 +36,13 @@ class PytorchTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
+        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
         execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
+        execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
+        execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
         load_inbuilt_udfs()
 
     @classmethod
@@ -49,6 +53,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -212,7 +217,7 @@ class PytorchTest(unittest.TestCase):
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_run_ocr_on_cropped_data(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
-                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  INPUT  (text NDARRAY STR(100))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
@@ -230,3 +235,34 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
+
+    @pytest.mark.torchtest
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    def test_should_run_detoxify_on_text(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+                  INPUT  (text NDARRAY STR(100))
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  OCRExtraction
+                  IMPL  'eva/udfs/ocr_extractor.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        create_udf_query = """CREATE UDF IF NOT EXISTS ToxicityClassifier
+                  INPUT  (text NDARRAY STR(100))
+                  OUTPUT (labels NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'eva/udfs/toxicity_classifier.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT OCRExtractor(data).labels,
+                                 ToxicityClassifier(OCRExtractor(data).labels)
+                        FROM MemeImages;"""
+        actual_batch = execute_query_fetch_all(select_query)
+
+        # non-trivial test case for Detoxify
+        res = actual_batch.frames
+        self.assertTrue(res["toxicityclassifier.labels"][0] == "toxic")
+        self.assertTrue(res["toxicityclassifier.labels"][1] == "not toxic")
