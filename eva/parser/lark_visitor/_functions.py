@@ -15,7 +15,6 @@
 
 from lark import Token, Tree
 
-from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.expression.abstract_expression import ExpressionType
 from eva.expression.aggregation_expression import AggregationExpression
 from eva.expression.function_expression import FunctionExpression
@@ -153,7 +152,7 @@ class Functions:
                 if token != "*":
                     agg_func_name = token
                 else:
-                    agg_func_arg = TupleValueExpression(col_name=IDENTIFIER_COLUMN)
+                    agg_func_arg = TupleValueExpression(col_name="id")
 
         agg_func_type = self.get_aggregate_function_type(agg_func_name)
         agg_expr = AggregationExpression(agg_func_type, None, agg_func_arg)
