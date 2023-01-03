@@ -15,7 +15,12 @@
 import os
 import sys
 import unittest
-from test.util import copy_sample_videos_to_upload_dir, copy_sample_images_to_upload_dir, file_remove, load_inbuilt_udfs
+from test.util import (
+    copy_sample_images_to_upload_dir,
+    copy_sample_videos_to_upload_dir,
+    file_remove,
+    load_inbuilt_udfs,
+)
 
 import cv2
 import numpy as np
