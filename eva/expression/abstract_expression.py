@@ -117,6 +117,9 @@ class AbstractExpression(ABC):
     def evaluate(self, *args, **kwargs):
         NotImplementedError("Must be implemented in subclasses.")
 
+    def signature(self) -> str:
+        NotImplementedError(f"{type(self)} does not support signature function")
+
     def __eq__(self, other):
         is_subtree_equal = True
         if not isinstance(other, AbstractExpression):

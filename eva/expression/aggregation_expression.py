@@ -81,6 +81,12 @@ class AggregationExpression(AbstractExpression):
         else:
             raise NotImplementedError
 
+    def signature(self) -> str:
+        child_sigs = []
+        for child in self.children:
+            child_sigs.append(child.signature())
+        return f"{self.get_symbol().lower()}({','.join(child_sigs)})"
+
     def __str__(self) -> str:
         expr_str = ""
         if self.etype:
