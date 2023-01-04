@@ -39,11 +39,7 @@ class CreateIndexTest(unittest.TestCase):
         return str(
             EVA_DEFAULT_DIR
             / INDEX_DIR
-            / Path(
-                "{}_{}.index".format(
-                    "HNSW", "testCreateIndexName"
-                )
-            )
+            / Path("{}_{}.index".format("HNSW", "testCreateIndexName"))
         )
 
     @classmethod
@@ -138,6 +134,4 @@ class CreateIndexTest(unittest.TestCase):
             execute_query_fetch_all(query)
 
         # Check faulty index is not persisted on the disk
-        self.assertFalse(os.path.exists(
-            self._index_save_path()
-        ))
+        self.assertFalse(os.path.exists(self._index_save_path()))

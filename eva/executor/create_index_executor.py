@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import numpy as np
 from pathlib import Path
 
 import faiss
+import numpy as np
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
@@ -142,8 +142,6 @@ class CreateIndexExecutor(AbstractExecutor):
             # HSNW is the actual index. Faiss also provides
             # a secondary mapping (IDMap) to map from ID inside index to
             # our given ID.
-            return faiss.IndexIDMap2(
-                faiss.IndexHNSWFlat(input_dim, 32)
-            )
+            return faiss.IndexIDMap2(faiss.IndexHNSWFlat(input_dim, 32))
         else:
             raise ExecutorError(f"Index Type {index_type} is not supported.")
