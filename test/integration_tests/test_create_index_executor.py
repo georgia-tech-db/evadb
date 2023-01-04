@@ -41,7 +41,11 @@ class CreateIndexTest(unittest.TestCase):
         return str(
             EVA_DEFAULT_DIR
             / INDEX_DIR
-            / Path("{}_{}.index".format("HNSW", "testCreateIndexName"))
+            / Path(
+                "{}_{}.index".format(
+                    "HNSW", "testCreateIndexName"
+                )
+            )
         )
 
     @classmethod
