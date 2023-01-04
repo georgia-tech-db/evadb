@@ -255,11 +255,10 @@ class CatalogManager(object):
         name: str,
         save_file_path: str,
         index_type: IndexType,
-        secondary_index_table: TableCatalogEntry,
         feat_column: ColumnCatalogEntry,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type, secondary_index_table, feat_column
+            name, save_file_path, index_type, feat_column
         )
         return index_catalog_entry
 

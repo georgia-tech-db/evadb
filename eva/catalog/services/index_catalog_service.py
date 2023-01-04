@@ -33,11 +33,10 @@ class IndexCatalogService(BaseService):
         name: str,
         save_file_path: str,
         type: str,
-        secondary_index_table: TableCatalogEntry,
         feat_column: ColumnCatalogEntry,
     ) -> IndexCatalogEntry:
         index_entry = IndexCatalog(
-            name, save_file_path, type, secondary_index_table.row_id, feat_column.row_id
+            name, save_file_path, type, feat_column.row_id
         )
         index_entry = index_entry.save()
         return index_entry.as_dataclass()

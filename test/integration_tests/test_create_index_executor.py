@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unittest
 from pathlib import Path
 
@@ -34,6 +35,17 @@ from eva.utils.generic_utils import generate_file_path
 
 
 class CreateIndexTest(unittest.TestCase):
+    def _index_save_path(self):
+        return str(
+            EVA_DEFAULT_DIR
+            / INDEX_DIR
+            / Path(
+                "{}_{}.index".format(
+                    "HNSW", "testCreateIndexName"
+                )
+            )
+        )
+
     @classmethod
     def setUpClass(cls):
         # Bootstrap configuration manager.
@@ -97,15 +109,7 @@ class CreateIndexTest(unittest.TestCase):
         self.assertEqual(index_catalog_entry.type, IndexType.HNSW)
         self.assertEqual(
             index_catalog_entry.save_file_path,
-            str(
-                EVA_DEFAULT_DIR
-                / INDEX_DIR
-                / Path(
-                    "{}_{}.index".format(
-                        index_catalog_entry.type, index_catalog_entry.name
-                    )
-                )
-            ),
+            self._index_save_path(),
         )
 
         # Test referenced column.
@@ -118,35 +122,12 @@ class CreateIndexTest(unittest.TestCase):
 
         # Test on disk index.
         index = faiss.read_index(index_catalog_entry.save_file_path)
-        distance, logical_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
+        distance, row_id = index.search(np.array([[0, 0, 0]]).astype(np.float32), 1)
         self.assertEqual(distance[0][0], 0)
-        self.assertEqual(logical_id[0][0], 0)
-
-        # Test secondary index.
-        secondary_index_tb_name = "secondary_index_{}_{}".format(
-            index_catalog_entry.type, index_catalog_entry.name
-        )
-        secondary_index_entry = CatalogManager().get_table_catalog_entry(
-            secondary_index_tb_name
-        )
-        self.assertEqual(
-            index_catalog_entry.secondary_index_id, secondary_index_entry.row_id
-        )
-        self.assertEqual(index_catalog_entry.secondary_index, secondary_index_entry)
-
-        size = 0
-        storage_engine = StorageEngine.factory(secondary_index_entry)
-        for i, batch in enumerate(storage_engine.read(secondary_index_entry, 1)):
-            df_data = batch.frames
-            self.assertEqual(df_data["logical_id"][0], i)
-            # Row ID is not 0 indexed.
-            self.assertEqual(df_data["row_id"][0], i + 1)
-            size += 1
-        self.assertEqual(size, 3)
+        self.assertEqual(row_id[0][0], 1)
 
         # Cleanup.
         CatalogManager().drop_index_catalog_entry("testCreateIndexName")
-        CatalogManager().delete_table_catalog_entry(secondary_index_entry)
 
     @patch("eva.executor.create_index_executor.faiss")
     def test_should_cleanup_when_exception(self, faiss_mock):
@@ -156,8 +137,7 @@ class CreateIndexTest(unittest.TestCase):
         with self.assertRaises(ExecutorError):
             execute_query_fetch_all(query)
 
-        # Check secondary index is dropped.
-        secondary_index_tb_name = "secondary_index_{}_{}".format(
-            "HNSW", "testCreateIndexName"
-        )
-        self.assertFalse(CatalogManager().check_table_exists(secondary_index_tb_name))
+        # Check faulty index is not persisted on the disk
+        self.assertFalse(os.path.exists(
+            self._index_save_path()
+        ))
