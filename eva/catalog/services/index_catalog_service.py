@@ -19,7 +19,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.index_catalog import IndexCatalog, IndexCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.catalog.services.base_service import BaseService
 from eva.utils.logging_manager import logger
 
@@ -35,9 +34,7 @@ class IndexCatalogService(BaseService):
         type: str,
         feat_column: ColumnCatalogEntry,
     ) -> IndexCatalogEntry:
-        index_entry = IndexCatalog(
-            name, save_file_path, type, feat_column.row_id
-        )
+        index_entry = IndexCatalog(name, save_file_path, type, feat_column.row_id)
         index_entry = index_entry.save()
         return index_entry.as_dataclass()
 
