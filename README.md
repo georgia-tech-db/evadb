@@ -124,21 +124,28 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 ## Illustrative EVA Applications 
 
-### :desert_island: Traffic Analysis Application using Object Detection Model
+### 🔮 Traffic Analysis (Object Detection Model)
 | Source Video  | Query Result |
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-input.webp" width="300"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/traffic-output.webp" width="300"> |
 
-### :desert_island: MNIST Digit Recognition using Image Classification Model
+### 🔮 MNIST Digit Recognition (Image Classification Model)
 | Source Video  | Query Result |
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-input.webp" width="150"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/mnist-output.webp" width="150"> |
 
-### :desert_island: Movie Analysis Application using Face Detection + Emotion Classfication Models
+### 🔮 Movie Analysis (Face Detection + Emotion Classfication Models)
 
 | Source Video  | Query Result |
 |---------------|--------------|
 |<img alt="Source Video" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-input.webp" width="400"> |<img alt="Query Result" src="https://github.com/georgia-tech-db/eva/releases/download/v0.1.0/gangubai-output.webp" width="400"> |
+
+### 🔮 [License Plate Recognition](https://github.com/georgia-tech-db/eva-application-template) (Plate Detection + OCR Extraction Models)
+
+| Source Image  | Query Result |
+|---------------|--------------|
+|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_14_6.png" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_14_2.png" width="400"> |
+
 
 ## Community
 
