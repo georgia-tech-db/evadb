@@ -34,7 +34,6 @@ from eva.parser.create_statement import ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.generic_utils import generate_file_path
-from test.util import load_inbuilt_udfs
 
 
 class CreateIndexTest(unittest.TestCase):

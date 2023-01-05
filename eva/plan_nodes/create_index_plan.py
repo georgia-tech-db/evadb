@@ -17,7 +17,6 @@ from typing import List
 from eva.catalog.catalog_type import IndexType
 from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
-from eva.expression.function_expression import FunctionExpression
 from eva.parser.table_ref import TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType

@@ -20,7 +20,6 @@ from eva.parser.create_statement import ColumnDefinition
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
-from eva.expression.function_expression import FunctionExpression
 
 
 class CreateIndexStatement(AbstractStatement):
