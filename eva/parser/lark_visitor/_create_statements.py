@@ -19,6 +19,7 @@ from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
 from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
