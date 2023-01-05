@@ -97,7 +97,9 @@ class StatementBinder:
 
         # Relax type checking for raw input table.
         if not node.udf_func:
-            assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
+            assert (
+                col.array_type == NdArrayType.FLOAT32
+            ), "Index input needs to be float32"
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):

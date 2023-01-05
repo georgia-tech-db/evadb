@@ -16,9 +16,9 @@
 from lark import Tree
 
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
-from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
@@ -307,7 +307,10 @@ class CreateTable:
             index_elem = [index_elem]
 
         col_list = [
-            ColumnDefinition(tv_expr.col_name, None, None, None) for tv_expr in index_elem
+            ColumnDefinition(tv_expr.col_name, None, None, None)
+            for tv_expr in index_elem
         ]
 
-        return CreateIndexStatement(index_name, table_ref, col_list, index_type, udf_func)
+        return CreateIndexStatement(
+            index_name, table_ref, col_list, index_type, udf_func
+        )

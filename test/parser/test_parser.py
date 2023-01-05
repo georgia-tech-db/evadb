@@ -70,7 +70,9 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(actual_stmt, expected_stmt)
 
         # create index on UDF expression
-        create_index_query = "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING HNSW;"
+        create_index_query = (
+            "CREATE INDEX testindex ON MyVideo (FeatureExtractor(featCol)) USING HNSW;"
+        )
         eva_stmt_list = parser.parse(create_index_query)
 
         # check stmt itself
@@ -79,9 +81,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(eva_stmt_list[0].stmt_type, StatementType.CREATE_INDEX)
 
         func_expr = FunctionExpression(None, "FeatureExtractor")
-        func_expr.append_child(
-            TupleValueExpression("featCol")
-        )
+        func_expr.append_child(TupleValueExpression("featCol"))
         expected_stmt = CreateIndexStatement(
             "testindex",
             TableRef(TableInfo("MyVideo")),

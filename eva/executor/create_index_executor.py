@@ -91,7 +91,7 @@ class CreateIndexExecutor(AbstractExecutor):
                 self._get_index_save_path(),
                 self.node.index_type,
                 feat_column,
-                udf_func.signature() if udf_func else None
+                udf_func.signature() if udf_func else None,
             )
 
             yield Batch(

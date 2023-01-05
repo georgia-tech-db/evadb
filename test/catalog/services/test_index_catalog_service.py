@@ -67,7 +67,9 @@ class IndexCatalogServiceTest(TestCase):
             service.delete_entry_by_name("index_name")
             mocked.query.filter.assert_called_with(mocked._name == INDEX_NAME)
             index_obj.delete.assert_called_once()
-            mock_os_remove.assert_called_once_with(index_obj.as_dataclass().save_file_path)
+            mock_os_remove.assert_called_once_with(
+                index_obj.as_dataclass().save_file_path
+            )
 
         with patch(PATCH_PATH) as mocked:
             service = IndexCatalogService()

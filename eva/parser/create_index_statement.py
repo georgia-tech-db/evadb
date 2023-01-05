@@ -15,11 +15,11 @@
 from typing import List
 
 from eva.catalog.catalog_type import IndexType
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
 from eva.parser.types import StatementType
-from eva.expression.function_expression import FunctionExpression
 
 
 class CreateIndexStatement(AbstractStatement):
@@ -40,7 +40,10 @@ class CreateIndexStatement(AbstractStatement):
 
     def __str__(self) -> str:
         print_str = "CREATE INDEX {} ON {} ({}{}) ".format(
-            self._name, self._table_ref, "" if self._udf_func else self._udf_func, tuple(self._col_list)
+            self._name,
+            self._table_ref,
+            "" if self._udf_func else self._udf_func,
+            tuple(self._col_list),
         )
         return print_str
 

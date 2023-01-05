@@ -15,6 +15,7 @@
 import os
 import unittest
 from pathlib import Path
+from test.util import load_inbuilt_udfs
 
 import faiss
 import numpy as np
@@ -33,7 +34,6 @@ from eva.parser.create_statement import ColumnDefinition
 from eva.server.command_handler import execute_query_fetch_all
 from eva.storage.storage_engine import StorageEngine
 from eva.utils.generic_utils import generate_file_path
-from test.util import load_inbuilt_udfs
 
 
 class CreateIndexTest(unittest.TestCase):
@@ -179,13 +179,18 @@ class CreateIndexTest(unittest.TestCase):
             index_catalog_entry.save_file_path,
             self._index_save_path(),
         )
-        self.assertEqual(index_catalog_entry.udf_signature, "DummyFeatureExtractor(testCreateIndexInputTable.input)")
+        self.assertEqual(
+            index_catalog_entry.udf_signature,
+            "DummyFeatureExtractor(testCreateIndexInputTable.input)",
+        )
 
         # Test referenced column.
         input_table_entry = CatalogManager().get_table_catalog_entry(
             "testCreateIndexInputTable"
         )
-        input_column = [col for col in input_table_entry.columns if col.name == "input"][0]
+        input_column = [
+            col for col in input_table_entry.columns if col.name == "input"
+        ][0]
         self.assertEqual(index_catalog_entry.feat_column_id, input_column.row_id)
         self.assertEqual(index_catalog_entry.feat_column, input_column)
 

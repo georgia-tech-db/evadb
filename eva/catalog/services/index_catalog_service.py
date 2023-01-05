@@ -35,7 +35,9 @@ class IndexCatalogService(BaseService):
         feat_column: ColumnCatalogEntry,
         udf_signature: str,
     ) -> IndexCatalogEntry:
-        index_entry = IndexCatalog(name, save_file_path, type, feat_column.row_id, udf_signature)
+        index_entry = IndexCatalog(
+            name, save_file_path, type, feat_column.row_id, udf_signature
+        )
         index_entry = index_entry.save()
         return index_entry.as_dataclass()
 
