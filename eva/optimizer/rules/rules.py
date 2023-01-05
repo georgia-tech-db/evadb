@@ -22,21 +22,18 @@ from typing import TYPE_CHECKING, Iterable, Optional, List
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import (
-    conjuction_list_to_expression_tree,
-    to_conjunction_list,
+    and_,
 )
-from eva.expression.comparison_expression import ComparisonExpression
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.expression.abstract_expression import ExpressionType
+from eva.expression.function_expression import (
+    FunctionExpression,
+    FunctionExpressionCache,
+)
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
 )
 from eva.optimizer.rules.pattern import Pattern
-from eva.parser.create_statement import ColumnDefinition
-from eva.parser.table_ref import TableInfo, TableRef
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
 from eva.parser.types import JoinType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
@@ -46,6 +43,8 @@ from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
+from eva.utils.generic_utils import get_str_hash
+from eva.utils.kv_cache import DiskKVCache
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -334,7 +333,11 @@ class CacheFunctionExpressionInApply(Rule):
         return True
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
-        new_func_expr = enable_cache(before.func_expr, copy=True)
+        signature = before.func_expr.signature()
+        path = get_str_hash(signature)
+        key = None
+        cache = FunctionExpressionCache(DiskKVCache(path), key)
+        new_func_expr = before.func_expr.copy().enable_cache(cache)
         after = LogicalApplyAndMerge(
             func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
         )
@@ -394,7 +397,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = conjuction_list_to_expression_tree(
+            new_join_node.join_predicate = and_(
                 [rem_pred, new_join_node.join_predicate]
             )
 

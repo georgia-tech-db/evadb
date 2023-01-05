@@ -13,14 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List
-from eva.catalog.catalog_manager import CatalogManager
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
 from eva.catalog.models.table_catalog import TableCatalogEntry
-from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
-from eva.utils.generic_utils import generate_file_path
 
 
 def is_video_table(table: TableCatalogEntry):
@@ -85,9 +82,3 @@ def xform_column_definitions_to_catalog_entries(
         result_list.append(column_entry)
 
     return result_list
-
-
-def get_function_expression_signature(expr: FunctionExpression):
-    udf_entry = CatalogManager().get_udf_catalog_entry_by_name(expr.name)
-    for node in expr.walk():
-            

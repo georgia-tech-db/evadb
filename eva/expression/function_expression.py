@@ -65,7 +65,7 @@ class FunctionExpression(AbstractExpression):
         self.udf_obj: UdfCatalogEntry = None
         self.output_objs: List[UdfIOCatalogEntry] = []
         self.projection_columns: List[str] = []
-        self.cache: FunctionExpressionCache = None
+        self._cache: FunctionExpressionCache = None
 
     @property
     def name(self):
@@ -92,7 +92,7 @@ class FunctionExpression(AbstractExpression):
         self._function = func
 
     def enable_cache(self, cache: "FunctionExpressionCache"):
-        self.cache = cache
+        self._cache = cache
     
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
@@ -203,7 +203,7 @@ class FunctionExpression(AbstractExpression):
             and self.alias == other.alias
             and self.function == other.function
             and self.output_objs == other.output_objs
-            and self.cache == other.cache
+            and self._cache == other._cache
         )
 
     def __hash__(self) -> int:
@@ -215,7 +215,7 @@ class FunctionExpression(AbstractExpression):
                 self.alias,
                 self.function,
                 tuple(self.output_objs),
-                self.cache
+                self._cache
             )
         )
 

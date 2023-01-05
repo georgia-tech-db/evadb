@@ -290,10 +290,10 @@ class CatalogManager(object):
     def drop_udf_cache_catalog_entry(self, entry: UdfCacheCatalogEntry) -> bool:
         return self._udf_cache_service.delete_entry(entry)
 
-    def _construct_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
-        cache_name = func_expr.signature()
-        cache_path = str(generate_file_path(cache_name))
-        udf_id = self._udf_service.get_entry_by_name(func_expr.)
+    # def _construct_udf_cache_catalog_entry(self, func_expr: FunctionExpression):
+    #     cache_name = func_expr.signature()
+    #     cache_path = str(generate_file_path(cache_name))
+    #     udf_id = self._udf_service.get_entry_by_name(func_expr.)
         
     """ Utils """
 

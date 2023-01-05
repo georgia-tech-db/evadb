@@ -22,7 +22,6 @@ from sqlalchemy.types import Enum
 
 from eva.catalog.catalog_type import ColumnType, Dimension, NdArrayType
 from eva.catalog.models.base_model import BaseModel
-from eva.catalog.models.udf_catalog import UdfCatalogEntry
 
 
 class UdfIOCatalog(BaseModel):

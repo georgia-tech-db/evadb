@@ -135,6 +135,10 @@ def get_size(obj, seen=None):
     return size
 
 
+def get_str_hash(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
+
 class PickleSerializer(object):
     @classmethod
     def serialize(cls, data):

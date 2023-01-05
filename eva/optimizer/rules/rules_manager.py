@@ -69,7 +69,7 @@ from eva.optimizer.rules.rules import (
 )
 from eva.optimizer.rules.rules_base import Rule
 
-from eva.optimizer.rules.rules import UdfReuseForFunctionScan
+from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
 
 
 class RulesManager:
@@ -90,7 +90,7 @@ class RulesManager:
             # TODO: Temporarily comment out this rule to avoid the hash bug. 
             # PushDownFilterThroughJoin(),
             # TODO: Add flag to enable/disable this rule
-            UdfReuseForFunctionScan()
+            CacheFunctionExpressionInApply()
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

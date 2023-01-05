@@ -46,7 +46,7 @@ class UdfCacheCatalog(BaseModel):
     __tablename__ = "udf_cache"
 
     _name = Column("name", String(128))
-    _udf_id = Column("udf_id", Integer, ForeignKey("udf._row_id"))
+    _udf_id = Column("udf_id", Integer, ForeignKey("udf_catalog._row_id"))
     _cache_path = Column("cache_path", String(256))
     _num_args = Column("num_args", Integer)
     _args = Column("args", String(1024))
@@ -54,12 +54,12 @@ class UdfCacheCatalog(BaseModel):
     _udf_depends = relationship(
         "UdfCatalog",
         secondary=depend_udf_and_udf_cache,
-        cascade="all, delete-orphan",
+        # cascade="all, delete-orphan",
     )
     _col_depends = relationship(
         "ColumnCatalog",
         secondary=depend_column_and_udf_cache,
-        cascade="all, delete-orphan",
+        # cascade="all, delete-orphan",
     )
 
     def __init__(

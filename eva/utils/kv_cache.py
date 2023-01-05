@@ -23,7 +23,7 @@ class DiskKVCache:
             "disk_pickle_protocol": pickle.HIGHEST_PROTOCOL,
         }
         self._path = path
-        self._cache = FanoutCache(path, shards=shards, settings=default_settings)
+        self._cache = FanoutCache(path, shards=shards, **default_settings)
 
     def get(self, key: Any):
         value = self._cache.get(key, default=None)

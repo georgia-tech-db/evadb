@@ -14,7 +14,7 @@
 # limitations under the License.
 from abc import ABC, abstractmethod
 from collections import deque
-from copy import copy, deepcopy
+from copy import deepcopy
 from enum import IntEnum, auto, unique
 from typing import Any
 
@@ -122,7 +122,6 @@ class AbstractExpression(ABC):
 
     def signature(self) -> str:
         NotImplementedError(f"{type(self)} does not support signature function")
-    
 
     def __eq__(self, other):
         is_subtree_equal = True
@@ -203,6 +202,3 @@ class AbstractExpression(ABC):
         for node in self.bfs():
             if isinstance(node, expresison_type):
                 yield node
-    
-
-        
