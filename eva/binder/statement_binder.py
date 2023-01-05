@@ -80,6 +80,8 @@ class StatementBinder:
     @bind.register(CreateIndexStatement)
     def _bind_create_index_statement(self, node: CreateIndexStatement):
         self.bind(node.table_ref)
+        if node.udf_func:
+            self.bind(node.udf_func)
 
         # TODO: create index currently only supports single numpy column.
         assert len(node.col_list) == 1, "Index cannot be created on more than 1 column"
@@ -89,9 +91,13 @@ class StatementBinder:
 
         col_def = node.col_list[0]
         table_ref_obj = node.table_ref.table.table_obj
+
         col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
         assert col.type == ColumnType.NDARRAY, "Index input needs to be numpy array"
-        assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
+
+        # Relax type checking for raw input table.
+        if not node.udf_func:
+            assert col.array_type == NdArrayType.FLOAT32, "Index input needs to be float32"
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):

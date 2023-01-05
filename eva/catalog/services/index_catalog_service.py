@@ -33,8 +33,9 @@ class IndexCatalogService(BaseService):
         save_file_path: str,
         type: str,
         feat_column: ColumnCatalogEntry,
+        udf_signature: str,
     ) -> IndexCatalogEntry:
-        index_entry = IndexCatalog(name, save_file_path, type, feat_column.row_id)
+        index_entry = IndexCatalog(name, save_file_path, type, feat_column.row_id, udf_signature)
         index_entry = index_entry.save()
         return index_entry.as_dataclass()
 
@@ -54,11 +55,12 @@ class IndexCatalogService(BaseService):
 
     def delete_entry_by_name(self, name: str):
         try:
-            index_record = self.model.query.filter(self.model._name == name).one()
+            index_obj = self.model.query.filter(self.model._name == name).one()
+            index_metadata = index_obj.as_dataclass()
             # clean up the on disk data
-            if os.path.exists(index_record.save_file_path):
-                os.remove(index_record.save_file_path)
-            index_record.delete()
+            if os.path.exists(index_metadata.save_file_path):
+                os.remove(index_metadata.save_file_path)
+            index_obj.delete()
         except Exception:
             logger.exception("Delete index failed for name {}".format(name))
             return False

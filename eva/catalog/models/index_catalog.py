@@ -30,6 +30,8 @@ class IndexCatalog(BaseModel):
     `_save_file_path:` the path to the index file on disk
     `_type:` the type of the index (refer to `IndexType`)
     `_feat_column_id:` the `_row_id` of the `ColumnCatalog` entry for the column on which the index is built.
+    `_udf_signature:` if the index is created by running udf expression on input column, this will store
+                      the udf signature of the used udf. Otherwise, this field is None.
     """
 
     __tablename__ = "index_catalog"
@@ -38,6 +40,8 @@ class IndexCatalog(BaseModel):
     _save_file_path = Column("save_file_path", String(128))
     _type = Column("type", Enum(IndexType), default=Enum)
     _feat_column_id = Column("column_id", Integer, ForeignKey("column_catalog._row_id"))
+    _udf_signature = Column("udf", String, default=None)
+
     _feat_column = relationship("ColumnCatalog")
 
     def __init__(
@@ -46,11 +50,13 @@ class IndexCatalog(BaseModel):
         save_file_path: str,
         type: IndexType,
         feat_column_id: int = None,
+        udf_signature: str = None,
     ):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type
         self._feat_column_id = feat_column_id
+        self._udf_signature = udf_signature
 
     def as_dataclass(self) -> "IndexCatalogEntry":
         feat_column = self._feat_column.as_dataclass() if self._feat_column else None
@@ -60,6 +66,7 @@ class IndexCatalog(BaseModel):
             save_file_path=self._save_file_path,
             type=self._type,
             feat_column_id=self._feat_column_id,
+            udf_signature=self._udf_signature,
             feat_column=feat_column,
         )
 
@@ -75,4 +82,5 @@ class IndexCatalogEntry:
     type: IndexType
     row_id: int = None
     feat_column_id: int = None
+    udf_signature: str = None
     feat_column: ColumnCatalogEntry = None

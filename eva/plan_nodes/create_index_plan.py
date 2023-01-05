@@ -16,6 +16,7 @@ from typing import List
 
 from eva.catalog.catalog_type import IndexType
 from eva.parser.create_statement import ColumnDefinition
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.table_ref import TableRef
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -28,12 +29,14 @@ class CreateIndexPlan(AbstractPlan):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         index_type: IndexType,
+        udf_func: FunctionExpression = None,
     ):
         super().__init__(PlanOprType.CREATE_INDEX)
         self._name = name
         self._table_ref = table_ref
         self._col_list = col_list
         self._index_type = index_type
+        self._udf_func = udf_func
 
     @property
     def name(self):
@@ -51,15 +54,21 @@ class CreateIndexPlan(AbstractPlan):
     def index_type(self):
         return self._index_type
 
+    @property
+    def udf_func(self):
+        return self._udf_func
+
     def __str__(self):
         return "CreateIndexPlan(name={}, \
             table_ref={}, \
             col_list={}, \
-            index_type={})".format(
+            index_type={}, \
+            {})".format(
             self._name,
             self._table_ref,
             tuple(self._col_list),
             self._index_type,
+            "" if not self._udf_func else "udf_func={}".format(self._udf_func),
         )
 
     def __hash__(self) -> int:
@@ -70,5 +79,6 @@ class CreateIndexPlan(AbstractPlan):
                 self.table_ref,
                 tuple(self.col_list),
                 self.index_type,
+                self.udf_func,
             )
         )

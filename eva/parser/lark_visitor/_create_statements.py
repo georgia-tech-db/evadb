@@ -18,6 +18,7 @@ from lark import Tree
 from eva.catalog.catalog_type import ColumnType, IndexType, NdArrayType
 from eva.parser.create_index_statement import CreateIndexStatement
 from eva.parser.create_mat_view_statement import CreateMaterializedViewStatement
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.create_statement import (
     ColConstraintInfo,
     ColumnDefinition,
@@ -281,7 +282,7 @@ class CreateTable:
         index_name = None
         table_name = None
         index_type = None
-        uid_list = []
+        index_elem = None
 
         for child in tree.children:
             if isinstance(child, Tree):
@@ -292,11 +293,21 @@ class CreateTable:
                     table_ref = TableRef(table_name)
                 elif child.data == "index_type":
                     index_type = self.visit(child)
-                elif child.data == "uid_list":
-                    uid_list = self.visit(child)
+                elif child.data == "index_elem":
+                    index_elem = self.visit(child)
+
+        # Parse either a single UDF function call or column list.
+        col_list, udf_func = None, None
+        if not isinstance(index_elem, list):
+            udf_func = index_elem
+
+            # Traverse to the tuple value expression.
+            while not isinstance(index_elem, TupleValueExpression):
+                index_elem = index_elem.children[0]
+            index_elem = [index_elem]
 
         col_list = [
-            ColumnDefinition(uid.col_name, None, None, None) for uid in uid_list
+            ColumnDefinition(tv_expr.col_name, None, None, None) for tv_expr in index_elem
         ]
 
-        return CreateIndexStatement(index_name, table_ref, col_list, index_type)
+        return CreateIndexStatement(index_name, table_ref, col_list, index_type, udf_func)

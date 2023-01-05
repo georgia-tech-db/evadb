@@ -256,9 +256,10 @@ class CatalogManager(object):
         save_file_path: str,
         index_type: IndexType,
         feat_column: ColumnCatalogEntry,
+        udf_signature: str,
     ) -> IndexCatalogEntry:
         index_catalog_entry = self._index_service.insert_entry(
-            name, save_file_path, index_type, feat_column
+            name, save_file_path, index_type, feat_column, udf_signature
         )
         return index_catalog_entry
 
