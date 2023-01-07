@@ -46,13 +46,21 @@ class UdfCatalog(BaseModel):
         self._type = type
 
     def as_dataclass(self) -> "UdfCatalogEntry":
-        io_list = [attribute.as_dataclass() for attribute in self._attributes]
+        args = []
+        outputs = []
+        for attribute in self._attributes:
+            if attribute._is_input:
+                args.append(attribute.as_dataclass())
+            else:
+                outputs.append(attribute.as_dataclass())
+
         return UdfCatalogEntry(
             row_id=self._row_id,
             name=self._name,
             impl_file_path=self._impl_file_path,
             type=self._type,
-            attributes=io_list,
+            args=args,
+            outputs=outputs,
         )
 
 
@@ -66,22 +74,18 @@ class UdfCatalogEntry:
     impl_file_path: str
     type: str
     row_id: int = None
-    attributes: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    args: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
+    outputs: List[UdfIOCatalogEntry] = field(compare=False, default_factory=list)
 
     def display_format(self):
-        inputs = []
-        outputs = []
-        for col in self.attributes:
+        def _to_str(col):
             col_display = col.display_format()
-            col_string = f"{col_display['name']} {col_display['data_type']}"
-            if col.is_input:
-                inputs.append(col_string)
-            else:
-                outputs.append(col_string)
+            return f"{col_display['name']} {col_display['data_type']}"
+
         return {
             "name": self.name,
-            "inputs": inputs,
-            "outputs": outputs,
+            "inputs": [_to_str(col) for col in self.args],
+            "outputs": [_to_str(col) for col in self.outputs],
             "type": self.type,
             "impl": self.impl_file_path,
         }

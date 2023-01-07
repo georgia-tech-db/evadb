@@ -98,6 +98,7 @@ class UdfIOCatalog(BaseModel):
             array_dimensions=self.array_dimensions,
             is_input=self._is_input,
             udf_id=self._udf_id,
+            udf_name=self._udf._name,
         )
 
 
@@ -114,6 +115,7 @@ class UdfIOCatalogEntry:
     array_dimensions: Tuple[int] = None
     is_input: bool = True
     udf_id: int = None
+    udf_name: str = None
     row_id: int = None
 
     def display_format(self):

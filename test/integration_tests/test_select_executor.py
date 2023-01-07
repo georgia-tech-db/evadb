@@ -19,6 +19,7 @@ from test.util import (
     create_sample_video,
     create_table,
     file_remove,
+    get_logical_query_plan,
     load_inbuilt_udfs,
 )
 
@@ -597,3 +598,10 @@ class SelectExecutorTest(unittest.TestCase):
                 expected_batch.sort_orderby(["table1.a0"]),
                 actual_batch.sort_orderby(["table1.a0"]),
             )
+
+    def test_expression_tree_signature(self):
+        plan = get_logical_query_plan(
+            "SELECT DummyMultiObjectDetector(data).labels FROM MyVideo"
+        )
+        signature = plan.target_list[0].signature()
+        self.assertEqual(signature, "DummyMultiObjectDetector(MyVideo.data)")
