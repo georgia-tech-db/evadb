@@ -108,7 +108,7 @@ class EmotionDetector(PytorchAbstractClassifierUDF):
 
         # pull model from dropbox if not present
         if not os.path.exists(model_path):
-            model_url = "https://www.dropbox.com/s/bqblykok62d28mn/emotion_detector.t7"
+            model_url = "https://www.dropbox.com/s/x0a8bz53apvmoc9/emotion_detector.t7"
             subprocess.run(["wget", model_url, "--directory-prefix", output_directory])
 
         # self.get_device() infers device from the loaded model, so not using it
