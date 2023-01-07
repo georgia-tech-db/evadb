@@ -15,11 +15,12 @@
 from typing import List
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 
 
-def is_video_table(table: TableCatalog):
+def is_video_table(table: TableCatalogEntry):
     return table.table_type == TableType.VIDEO_DATA
 
 
@@ -31,11 +32,11 @@ def get_video_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
         ),
-        ColumnDefinition("id", ColumnType.INTEGER, None, []),
+        ColumnDefinition("id", ColumnType.INTEGER, None, None),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
         ),
         ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
     ]
@@ -49,10 +50,36 @@ def get_image_table_column_definitions() -> List[ColumnDefinition]:
     """
     columns = [
         ColumnDefinition(
-            "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+            "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
         ),
         ColumnDefinition(
-            "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+            "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
         ),
     ]
     return columns
+
+
+def xform_column_definitions_to_catalog_entries(
+    col_list: List[ColumnDefinition],
+) -> List[ColumnCatalogEntry]:
+    """Create column catalog entries for the input parsed column list.
+
+    Arguments:
+        col_list {List[ColumnDefinition]} -- parsed col list to be created
+    """
+    if isinstance(col_list, ColumnDefinition):
+        col_list = [col_list]
+
+    result_list = []
+    for col in col_list:
+        column_entry = ColumnCatalogEntry(
+            name=col.name,
+            type=col.type,
+            array_type=col.array_type,
+            array_dimensions=col.dimension,
+            is_nullable=col.cci.nullable,
+        )
+        # todo: change me
+        result_list.append(column_entry)
+
+    return result_list

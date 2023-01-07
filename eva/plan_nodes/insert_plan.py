@@ -14,7 +14,7 @@
 # limitations under the License.
 from typing import List
 
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
@@ -25,7 +25,7 @@ class InsertPlan(AbstractPlan):
     operations.
 
     Args:
-        table (TableCatalog): table to insert into
+        table (TableCatalogEntry): table to insert into
         column_list (List[AbstractExpression]): list of annotated column
         value_list (List[AbstractExpression]): list of abstract expression
                                                 for the values to insert
@@ -33,7 +33,7 @@ class InsertPlan(AbstractPlan):
 
     def __init__(
         self,
-        table: TableCatalog,
+        table: TableCatalogEntry,
         column_list: List[AbstractExpression],
         value_list: List[AbstractExpression],
     ):

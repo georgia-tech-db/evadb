@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import Iterator
 
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression
 from eva.models.storage.batch import Batch
 from eva.readers.opencv_reader import OpenCVReader
@@ -28,7 +28,7 @@ class OpenCVStorageEngine(AbstractMediaStorageEngine):
 
     def read(
         self,
-        table: TableCatalog,
+        table: TableCatalogEntry,
         batch_mem_size: int,
         predicate: AbstractExpression = None,
         sampling_rate: int = None,

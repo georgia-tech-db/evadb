@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import List
 
-from eva.catalog.models.udf_io_catalog import UdfIOCatalog
+from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -30,9 +30,9 @@ class CreateUDFPlan(AbstractPlan):
         if_not_exists: bool
             if true should throw an error if udf with same name exists
             else will replace the existing
-        inputs: List[UdfIOCatalog]
+        inputs: List[UdfIOCatalogEntry]
             udf inputs, annotated list similar to table columns
-        outputs: List[UdfIOCatalog]
+        outputs: List[UdfIOCatalogEntry]
             udf outputs, annotated list similar to table columns
         impl_file_path: Path
             file path which holds the implementation of the udf.
@@ -46,8 +46,8 @@ class CreateUDFPlan(AbstractPlan):
         self,
         name: str,
         if_not_exists: bool,
-        inputs: List[UdfIOCatalog],
-        outputs: List[UdfIOCatalog],
+        inputs: List[UdfIOCatalogEntry],
+        outputs: List[UdfIOCatalogEntry],
         impl_file_path: Path,
         udf_type: str = None,
     ):
