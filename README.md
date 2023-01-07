@@ -144,7 +144,7 @@ IMPL  'eva/udfs/fastrcnn_object_detector.py';
 
 | Source Image  | Query Result |
 |---------------|--------------|
-|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_14_6.png" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_19_1.png" width="400"> |
+|<img alt="Source Image" src="https://raw.githubusercontent.com/georgia-tech-db/eva-application-template/main/README_files/README_14_6.png" width="400"> |<img alt="Query Result" src="https://raw.githubusercontent.com/georgia-tech-db/license-plate-recognition/main/README_files/README_18_1.png" width="400"> |
 
 ### 🔮 [Meme Toxicity Classification](https://github.com/georgia-tech-db/toxicity-classification) (OCR Extraction + Toxicity Classification Models)
 
