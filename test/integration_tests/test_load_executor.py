@@ -58,7 +58,7 @@ class LoadExecutorTest(unittest.TestCase):
         query = f"LOAD VIDEO '{self.video_file_path}' INTO MyVideo;"
         execute_query_fetch_all(query)
 
-        select_query = """SELECT name, id, data FROM MyVideo;"""
+        select_query = """SELECT * FROM MyVideo;"""
 
         actual_batch = execute_query_fetch_all(select_query)
         actual_batch.sort()

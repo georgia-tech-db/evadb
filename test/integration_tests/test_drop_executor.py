@@ -42,7 +42,7 @@ class DropExecutorTest(unittest.TestCase):
         column_objects = catalog_manager.get_column_catalog_entries_by_table(
             table_catalog_entry
         )
-        self.assertEqual(len(column_objects), 4)
+        self.assertEqual(len(column_objects), 5)
         self.assertTrue(Path(video_dir).exists())
         video_metadata_table = (
             catalog_manager.get_multimedia_metadata_table_catalog_entry(

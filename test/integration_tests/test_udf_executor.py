@@ -127,6 +127,9 @@ class UDFExecutorTest(unittest.TestCase):
                 filters=[i for i in range(2, NUM_FRAMES) if i % 2 == 0]
             )
         )[0]
+        expected_batch = expected_batch.project(
+            ["myvideo.name", "myvideo.id", "myvideo.data"]
+        )
         expected_batch.modify_column_alias("T")
         self.assertEqual(actual_batch, expected_batch)
 
