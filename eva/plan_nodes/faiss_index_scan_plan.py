@@ -37,7 +37,7 @@ class FaissIndexScanPlan(AbstractPlan):
         return self._query_expr
 
     def __str__(self):
-        return "FaissIndexScan(index_name={}, query_num={}, query_expr)".format(self._index_name, self._query_num, self._query_expr)
+        return "FaissIndexScan(index_name={}, query_num={}, query_expr={})".format(self._index_name, self._query_num, self._query_expr)
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.index_name, self.query_num, self.query_expr))

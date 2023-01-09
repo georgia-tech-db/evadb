@@ -1209,6 +1209,7 @@ class LogicalApplyAndMerge(Operator):
             )
         )
 
+
 class LogicalFaissIndexScan(Operator):
     def __init__(
         self,

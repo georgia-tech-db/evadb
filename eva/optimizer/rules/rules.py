@@ -37,7 +37,6 @@ from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.utils.generic_utils import path_to_class
 from eva.parser.types import ParserOrderBySortType
 
 if TYPE_CHECKING:
@@ -423,7 +422,7 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
     """
 
-    Limit(10)                                              
+    Limit(10)
         |
     OrderBy(func)        ->        IndexScan(10)
         |
@@ -488,7 +487,6 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             faiss_index_scan_node.append_child(child)
         return faiss_index_scan_node
 
-            
 
 # REWRITE RULES END
 ##############################################

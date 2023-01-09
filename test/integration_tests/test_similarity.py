@@ -161,4 +161,4 @@ class SimilarityTests(unittest.TestCase):
         select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) LIMIT 1;""".format(
             img_path
         )
-        actual_batch = execute_query_fetch_all(select_query)
+        _ = execute_query_fetch_all(select_query)

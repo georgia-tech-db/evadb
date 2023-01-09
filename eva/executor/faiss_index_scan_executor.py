@@ -12,17 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Iterator
+
 import faiss
 import pandas as pd
 
-from typing import Iterator
-
 from eva.catalog.catalog_manager import CatalogManager
 from eva.executor.abstract_executor import AbstractExecutor
-from eva.executor.executor_utils import ExecutorError
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
-from eva.utils.logging_manager import logger
 
 
 class FaissIndexScanExecutor(AbstractExecutor):
@@ -39,13 +37,17 @@ class FaissIndexScanExecutor(AbstractExecutor):
         catalog_manager = CatalogManager()
 
         # Fetch the index from disk.
-        index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(self.index_name)
+        index_catalog_entry = catalog_manager.get_index_catalog_entry_by_name(
+            self.index_name
+        )
         index = faiss.read_index(index_catalog_entry.save_file_path)
 
         # Get the query feature vector.
-        dummy_batch = Batch(frames=pd.DataFrame(
-            {"0": [0]},
-        ))
+        dummy_batch = Batch(
+            frames=pd.DataFrame(
+                {"0": [0]},
+            )
+        )
         search_batch = self.query_expr.evaluate(dummy_batch)
 
         # Scan index.
@@ -60,7 +62,11 @@ class FaissIndexScanExecutor(AbstractExecutor):
             distance_list.append(dis)
             row_id_list.append(row_id)
 
-        yield Batch(pd.DataFrame({
-            "distance": distance_list,
-            "row_id": row_id_list,
-        }))
+        yield Batch(
+            pd.DataFrame(
+                {
+                    "distance": distance_list,
+                    "row_id": row_id_list,
+                }
+            )
+        )
