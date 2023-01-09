@@ -20,6 +20,8 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -27,7 +29,7 @@ from eva.optimizer.optimizer_utils import (
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
-from eva.parser.types import JoinType
+from eva.parser.types import JoinType, ParserOrderBySortType
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
 from eva.plan_nodes.create_mat_view_plan import CreateMaterializedViewPlan
 from eva.plan_nodes.explain_plan import ExplainPlan
@@ -35,9 +37,6 @@ from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
-from eva.expression.function_expression import FunctionExpression
-from eva.expression.tuple_value_expression import TupleValueExpression
-from eva.parser.types import ParserOrderBySortType
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -53,6 +52,7 @@ from eva.optimizer.operators import (
     LogicalDrop,
     LogicalDropUDF,
     LogicalExplain,
+    LogicalFaissIndexScan,
     LogicalFilter,
     LogicalFunctionScan,
     LogicalGet,
@@ -69,7 +69,6 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
-    LogicalFaissIndexScan,
     Operator,
     OperatorType,
 )
@@ -78,6 +77,7 @@ from eva.plan_nodes.create_plan import CreatePlan
 from eva.plan_nodes.create_udf_plan import CreateUDFPlan
 from eva.plan_nodes.drop_plan import DropPlan
 from eva.plan_nodes.drop_udf_plan import DropUDFPlan
+from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
 from eva.plan_nodes.function_scan_plan import FunctionScanPlan
 from eva.plan_nodes.groupby_plan import GroupByPlan
 from eva.plan_nodes.hash_join_probe_plan import HashJoinProbePlan
@@ -92,7 +92,6 @@ from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
 from eva.plan_nodes.upload_plan import UploadPlan
-from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
 
 ##############################################
 # REWRITE RULES START
@@ -434,7 +433,9 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         orderby_pattern = Pattern(OperatorType.LOGICALORDERBY)
         orderby_pattern.append_child(Pattern(OperatorType.DUMMY))
         pattern.append_child(orderby_pattern)
-        super().__init__(RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern)
+        super().__init__(
+            RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
+        )
 
     def promise(self):
         return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
@@ -452,7 +453,10 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         # Check if orderby runs on similarity expression.
         func_orderby_expr = None
         for column, sort_type in orderby_node.orderby_list:
-            if isinstance(column, FunctionExpression) and sort_type == ParserOrderBySortType.ASC:
+            if (
+                isinstance(column, FunctionExpression)
+                and sort_type == ParserOrderBySortType.ASC
+            ):
                 func_orderby_expr = column
         if not func_orderby_expr:
             return before
@@ -473,7 +477,11 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         udf_signature = base_func_expr.signature()
 
         # Get index catalog.
-        index_catalog_entry = catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(column_catalog_entry, udf_signature)
+        index_catalog_entry = (
+            catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
+                column_catalog_entry, udf_signature
+            )
+        )
         if not index_catalog_entry:
             return before
 
@@ -1078,7 +1086,9 @@ class LogicalFaissIndexScanToPhysical(Rule):
         return True
 
     def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
-        after = FaissIndexScanPlan(before.index_name, before.query_num, before.query_expr)
+        after = FaissIndexScanPlan(
+            before.index_name, before.query_num, before.query_expr
+        )
         for child in before.children:
             after.append_child(child)
         return after

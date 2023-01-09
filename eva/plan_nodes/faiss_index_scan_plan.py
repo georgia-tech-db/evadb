@@ -12,9 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from eva.expression.function_expression import FunctionExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
-from eva.expression.function_expression import FunctionExpression
 
 
 class FaissIndexScanPlan(AbstractPlan):
@@ -37,7 +37,11 @@ class FaissIndexScanPlan(AbstractPlan):
         return self._query_expr
 
     def __str__(self):
-        return "FaissIndexScan(index_name={}, query_num={}, query_expr={})".format(self._index_name, self._query_num, self._query_expr)
+        return "FaissIndexScan(index_name={}, query_num={}, query_expr={})".format(
+            self._index_name, self._query_num, self._query_expr
+        )
 
     def __hash__(self) -> int:
-        return hash((super().__hash__(), self.index_name, self.query_num, self.query_expr))
+        return hash(
+            (super().__hash__(), self.index_name, self.query_num, self.query_expr)
+        )

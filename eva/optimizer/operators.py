@@ -1216,7 +1216,7 @@ class LogicalFaissIndexScan(Operator):
         index_name: str,
         query_num: int,
         query_expr: FunctionExpression,
-        children: List = None
+        children: List = None,
     ):
         super().__init__(OperatorType.LOGICALFAISSINDEXSCAN, children)
         self._index_name = index_name

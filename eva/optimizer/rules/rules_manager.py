@@ -26,6 +26,7 @@ from eva.experimental.ray.optimizer.rules.rules import (
     LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
 )
 from eva.optimizer.rules.rules import (
+    CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
     EmbedSampleIntoGet,
@@ -38,9 +39,9 @@ from eva.optimizer.rules.rules import (
     LogicalDropToPhysical,
     LogicalDropUDFToPhysical,
     LogicalExplainToPhysical,
+    LogicalFaissIndexScanToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
-    LogicalFaissIndexScanToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
@@ -67,7 +68,6 @@ from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     XformLateralJoinToLinearFlow,
-    CombineSimilarityOrderByAndLimitToFaissIndexScan,
 )
 from eva.optimizer.rules.rules_base import Rule
 
