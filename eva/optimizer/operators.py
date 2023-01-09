@@ -60,6 +60,7 @@ class OperatorType(IntEnum):
     LOGICALEXPLAIN = auto()
     LOGICALCREATEINDEX = auto()
     LOGICAL_APPLY_AND_MERGE = auto()
+    LOGICALFAISSINDEXSCAN = auto()
     LOGICALDELIMITER = auto()
 
 
@@ -1205,5 +1206,51 @@ class LogicalApplyAndMerge(Operator):
                 self.do_unnest,
                 self.alias,
                 self._merge_type,
+            )
+        )
+
+class LogicalFaissIndexScan(Operator):
+    def __init__(
+        self,
+        index_name: str,
+        query_num: int,
+        query_expr: FunctionExpression,
+        children: List = None
+    ):
+        super().__init__(OperatorType.LOGICALFAISSINDEXSCAN, children)
+        self._index_name = index_name
+        self._query_num = query_num
+        self._query_expr = query_expr
+
+    @property
+    def index_name(self):
+        return self._index_name
+
+    @property
+    def query_num(self):
+        return self._query_num
+
+    @property
+    def query_expr(self):
+        return self._query_expr
+
+    def __eq__(self, other):
+        is_subtree_equal = super().__eq__(other)
+        if not isinstance(other, LogicalFaissIndexScan):
+            return False
+        return (
+            is_subtree_equal
+            and self.index_name == other.index_name
+            and self.query_num == other.query_num
+            and self.query_expr == other.query_expr
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                super().__hash__(),
+                self.index_name,
+                self.query_num,
+                self.query_expr,
             )
         )

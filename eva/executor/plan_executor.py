@@ -43,6 +43,7 @@ from eva.executor.show_info_executor import ShowInfoExecutor
 from eva.executor.storage_executor import StorageExecutor
 from eva.executor.union_executor import UnionExecutor
 from eva.executor.upload_executor import UploadExecutor
+from eva.executor.faiss_index_scan_executor import FaissIndexScanExecutor
 from eva.experimental.ray.executor.exchange_executor import ExchangeExecutor
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.abstract_plan import AbstractPlan
@@ -135,6 +136,8 @@ class PlanExecutor:
             executor_node = CreateIndexExecutor(node=plan)
         elif plan_opr_type == PlanOprType.APPLY_AND_MERGE:
             executor_node = ApplyAndMergeExecutor(node=plan)
+        elif plan_opr_type == PlanOprType.FAISS_INDEX_SCAN:
+            executor_node = FaissIndexScanExecutor(node=plan)
         # EXPLAIN does not need to build execution tree for its children
         if plan_opr_type != PlanOprType.EXPLAIN:
             # Build Executor Tree for children

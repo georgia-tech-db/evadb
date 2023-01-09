@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
 from eva.expression.expression_utils import conjuction_list_to_expression_tree
@@ -34,6 +35,10 @@ from eva.plan_nodes.hash_join_build_plan import HashJoinBuildPlan
 from eva.plan_nodes.predicate_plan import PredicatePlan
 from eva.plan_nodes.project_plan import ProjectPlan
 from eva.plan_nodes.show_info_plan import ShowInfoPlan
+from eva.expression.function_expression import FunctionExpression
+from eva.expression.tuple_value_expression import TupleValueExpression
+from eva.utils.generic_utils import path_to_class
+from eva.parser.types import ParserOrderBySortType
 
 if TYPE_CHECKING:
     from eva.optimizer.optimizer_context import OptimizerContext
@@ -65,6 +70,7 @@ from eva.optimizer.operators import (
     LogicalShow,
     LogicalUnion,
     LogicalUpload,
+    LogicalFaissIndexScan,
     Operator,
     OperatorType,
 )
@@ -87,6 +93,7 @@ from eva.plan_nodes.seq_scan_plan import SeqScanPlan
 from eva.plan_nodes.storage_plan import StoragePlan
 from eva.plan_nodes.union_plan import UnionPlan
 from eva.plan_nodes.upload_plan import UploadPlan
+from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
 
 ##############################################
 # REWRITE RULES START
@@ -412,6 +419,76 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
         yield root_node
 
+
+class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
+    """
+
+    Limit(10)                                              
+        |
+    OrderBy(func)        ->        IndexScan(10)
+        |
+        A
+    """
+
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALLIMIT)
+        orderby_pattern = Pattern(OperatorType.LOGICALORDERBY)
+        orderby_pattern.append_child(Pattern(OperatorType.DUMMY))
+        pattern.append_child(orderby_pattern)
+        super().__init__(RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern)
+
+    def promise(self):
+        return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
+
+    def check(self, before: LogicalLimit, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        catalog_manager = CatalogManager()
+
+        # Get corresponding nodes.
+        limit_node = before
+        orderby_node = before.children[0]
+
+        # Check if orderby runs on similarity expression.
+        func_orderby_expr = None
+        for column, sort_type in orderby_node.orderby_list:
+            if isinstance(column, FunctionExpression) and sort_type == ParserOrderBySortType.ASC:
+                func_orderby_expr = column
+        if not func_orderby_expr:
+            return before
+        else:
+            if func_orderby_expr.name != "Similarity":
+                return before
+
+        # Check if there exists an index on table and column.
+        query_func_expr, base_func_expr = func_orderby_expr.children
+
+        # Get table and column of orderby.
+        tv_expr = base_func_expr
+        while not isinstance(tv_expr, TupleValueExpression):
+            tv_expr = tv_expr.children[0]
+
+        # Get column catalog entry and udf_signature.
+        column_catalog_entry = tv_expr.col_object
+        udf_signature = base_func_expr.signature()
+
+        # Get index catalog.
+        index_catalog_entry = catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(column_catalog_entry, udf_signature)
+        if not index_catalog_entry:
+            return before
+
+        # Construct the Faiss index scan plan.
+        faiss_index_scan_node = LogicalFaissIndexScan(
+            index_catalog_entry.name,
+            limit_node.limit_count,
+            query_func_expr,
+        )
+        for child in orderby_node.children:
+            faiss_index_scan_node.append_child(child)
+        return faiss_index_scan_node
+
+            
 
 # REWRITE RULES END
 ##############################################
@@ -988,6 +1065,25 @@ class LogicalApplyAndMergeToPhysical(Rule):
         for child in before.children:
             after.append_child(child)
         yield after
+
+
+class LogicalFaissIndexScanToPhysical(Rule):
+    def __init__(self):
+        pattern = Pattern(OperatorType.LOGICALFAISSINDEXSCAN)
+        pattern.append_child(Pattern(OperatorType.DUMMY))
+        super().__init__(RuleType.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL, pattern)
+
+    def promise(self):
+        return Promise.LOGICAL_FAISS_INDEX_SCAN_TO_PHYSICAL
+
+    def check(self, grp_id: int, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalFaissIndexScan, context: OptimizerContext):
+        after = FaissIndexScanPlan(before.index_name, before.query_num, before.query_expr)
+        for child in before.children:
+            after.append_child(child)
+        return after
 
 
 # IMPLEMENTATION RULES END

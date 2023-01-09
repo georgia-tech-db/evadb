@@ -150,3 +150,15 @@ class SimilarityTests(unittest.TestCase):
         self.assertEqual(actual_distance, 0)
         actual_distance = actual_batch.frames["similarity.distance"].to_numpy()[1]
         self.assertEqual(actual_distance, 27)
+
+    def test_should_do_faiss_index_scan(self):
+        config = ConfigurationManager()
+        upload_dir_from_config = config.get_value("storage", "upload_dir")
+        img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
+
+        create_index_query = """CREATE INDEX testFaissIndexScanRewrite ON testSimilarityTable (DummyFeatureExtractor(data)) USING HNSW;"""
+        execute_query_fetch_all(create_index_query)
+        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) LIMIT 1;""".format(
+            img_path
+        )
+        actual_batch = execute_query_fetch_all(select_query)

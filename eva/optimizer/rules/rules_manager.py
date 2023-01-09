@@ -40,6 +40,7 @@ from eva.optimizer.rules.rules import (
     LogicalExplainToPhysical,
     LogicalFilterToPhysical,
     LogicalFunctionScanToPhysical,
+    LogicalFaissIndexScanToPhysical,
 )
 from eva.optimizer.rules.rules import (
     LogicalGetToSeqScan as SequentialLogicalGetToSeqScan,
@@ -66,6 +67,7 @@ from eva.optimizer.rules.rules import (
     PushDownFilterThroughApplyAndMerge,
     PushDownFilterThroughJoin,
     XformLateralJoinToLinearFlow,
+    CombineSimilarityOrderByAndLimitToFaissIndexScan,
 )
 from eva.optimizer.rules.rules_base import Rule
 
@@ -83,6 +85,7 @@ class RulesManager:
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
+            CombineSimilarityOrderByAndLimitToFaissIndexScan(),
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")
@@ -117,6 +120,7 @@ class RulesManager:
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
             LogicalApplyAndMergeToPhysical(),
+            LogicalFaissIndexScanToPhysical(),
         ]
 
         if ray_enabled:
