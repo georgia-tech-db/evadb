@@ -75,7 +75,8 @@ from eva.optimizer.rules.rules import CacheFunctionExpressionInApply
 class RulesManager:
     def __init__(self):
         self._logical_rules = [
-            LogicalInnerJoinCommutativity(), 
+            LogicalInnerJoinCommutativity(),
+            CacheFunctionExpressionInApply(),
         ]
 
         self._rewrite_rules = [
@@ -87,10 +88,8 @@ class RulesManager:
             PushDownFilterThroughJoin(),
             PushDownFilterThroughApplyAndMerge(),
             XformLateralJoinToLinearFlow(),
-            # TODO: Temporarily comment out this rule to avoid the hash bug. 
-            # PushDownFilterThroughJoin(),
+            PushDownFilterThroughJoin(),
             # TODO: Add flag to enable/disable this rule
-            CacheFunctionExpressionInApply()
         ]
 
         ray_enabled = ConfigurationManager().get_value("experimental", "ray")

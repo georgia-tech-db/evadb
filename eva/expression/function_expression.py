@@ -93,7 +93,11 @@ class FunctionExpression(AbstractExpression):
 
     def enable_cache(self, cache: "FunctionExpressionCache"):
         self._cache = cache
-    
+        return self
+
+    def has_cache(self):
+        return self._cache is not None
+
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
@@ -163,26 +167,38 @@ class FunctionExpression(AbstractExpression):
         if not self._cache:
             return batch.apply_function_expression(func)
 
+        cols = [obj.name for obj in self.output_objs]
+        
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.
         # This can hurt performance, as we have to stitch together columns to generate
         # row tuples. Is there an alternative approach we can take?
 
-        results = np.array([np.nan] * len(batch))
-        keys = self._cache_key.evaluate(batch, **kwargs)
-        for idx, key in keys.iter_rows():
-            results[idx] = self._cache.get(key.to_numpy())
+        results = np.full([len(batch), len(cols)], None)
+        # if self._cache.cache_key:
+        #     keys = [child.evaluate(batch, **kwargs) for child in self.children]
+        #     keys =  Batch.merge_column_wise(keys)
+        # keys = self._cache_key.evaluate(batch, **kwargs)
+        keys = batch
+        cache_miss = []
+        for idx, key in keys.iterrows():
+            val = self._cache.cache.get(key.to_numpy())
+            results[idx] = val
 
+        cache_miss = np.asarray(results[:, 0] == None)
+        
         # 2. call func for cache miss rows
-        cache_miss = np.isnan(results)
-        cache_miss_results = batch[cache_miss].apply_function_expression(func)
+        if cache_miss.any():
+            batch = batch[list(cache_miss)]
+            cache_miss_results = batch.apply_function_expression(func)
 
-        # 3. set the cache results
-        for key, value in keys[cache_miss], cache_miss_results.iter_rows():
-            self._cache.set(key.to_numpy(), value.to_numpy())
+            # 3. set the cache results
+            for key, value in zip(batch.iterrows(), cache_miss_results.iterrows()):
+                assert key[0] == value[0]
+                self._cache.cache.set(key[1].to_numpy(), value[1].to_numpy())
 
-        # 4. merge the cache results
-        results[cache_miss] = cache_miss_results
+            # 4. merge the cache results
+            results[cache_miss] = cache_miss_results.to_numpy()
 
         # 5. return the correct batch
         cols = [obj.name for obj in self.output_objs]
@@ -215,23 +231,22 @@ class FunctionExpression(AbstractExpression):
                 self.alias,
                 self.function,
                 tuple(self.output_objs),
-                self._cache
+                self._cache,
             )
         )
-
 
 
 @dataclass(frozen=True)
 class FunctionExpressionCache:
     """dataclass for cache-related attributes
-    
+
     Args:
         cache (`DiskKVCache`): the cache object to get/set key-value pairs
-        cache_key (`AbstractExpression`): the expression to evaluate to get the key. 
-        If `None`, use the function arguments as the key. This is useful when the 
-        system wants to use logically equivalent columns as the key (e.g., frame number 
+        cache_key (`AbstractExpression`): the expression to evaluate to get the key.
+        If `None`, use the function arguments as the key. This is useful when the
+        system wants to use logically equivalent columns as the key (e.g., frame number
         instead of frame data).
     """
+
     cache: DiskKVCache
     cache_key: AbstractExpression = None
-    

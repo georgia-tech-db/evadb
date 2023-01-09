@@ -171,6 +171,9 @@ class Batch:
         """
         return Batch(expr(self._frames))
 
+    def iterrows(self):
+        return self._frames.iterrows()
+
     def sort(self, by=None) -> None:
         """
         in_place sort
@@ -446,3 +449,6 @@ class Batch:
                 new_col_names.append(col_name)
 
         self._frames.columns = new_col_names
+
+    def to_numpy(self):
+        return self._frames.to_numpy()
