@@ -35,11 +35,15 @@ class SimilarityTests(unittest.TestCase):
         create_sample_image()
 
         # Create base comparison table.
-        create_table_query = "CREATE TABLE IF NOT EXISTS testSimilarityTable (data NDARRAY UINT8(3, ANYDIM, ANYDIM));"
+        create_table_query = """CREATE TABLE IF NOT EXISTS testSimilarityTable
+                                  (data NDARRAY UINT8(3, ANYDIM, ANYDIM),
+                                   dummy INTEGER);"""
         execute_query_fetch_all(create_table_query)
 
         # Create feature table.
-        create_table_query = "CREATE TABLE IF NOT EXISTS testSimilarityFeatureTable (features NDARRAY FLOAT32(3, ANYDIM, ANYDIM));"
+        create_table_query = """CREATE TABLE IF NOT EXISTS testSimilarityFeatureTable
+                                  (features NDARRAY FLOAT32(3, ANYDIM, ANYDIM),
+                                   dummy INTEGER);"""
         execute_query_fetch_all(create_table_query)
 
         # Prepare injected data.
@@ -58,13 +62,19 @@ class SimilarityTests(unittest.TestCase):
             "testSimilarityFeatureTable"
         )
         storage_engine = StorageEngine.factory(base_table_catalog_entry)
-        for _ in range(5):
+        for i in range(5):
             storage_engine.write(
-                base_table_catalog_entry, Batch(pd.DataFrame([{"data": base_img}]))
+                base_table_catalog_entry, Batch(pd.DataFrame([{
+                    "data": base_img,
+                    "dummy": i,
+                }]))
             )
             storage_engine.write(
                 feature_table_catalog_entry,
-                Batch(pd.DataFrame([{"features": base_img.astype(np.float32)}])),
+                Batch(pd.DataFrame([{
+                    "features": base_img.astype(np.float32),
+                    "dummy": i,
+                }])),
             )
             base_img -= 1
 
@@ -78,7 +88,9 @@ class SimilarityTests(unittest.TestCase):
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
 
         # Top 1 - assume table contains base data.
-        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) LIMIT 1;""".format(
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 1;""".format(
             img_path
         )
         actual_batch = execute_query_fetch_all(select_query)
@@ -93,7 +105,9 @@ class SimilarityTests(unittest.TestCase):
         self.assertEqual(actual_distance, 0)
 
         # Top 2 - assume table contains base data.
-        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) LIMIT 2;""".format(
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 2;""".format(
             img_path
         )
         actual_batch = execute_query_fetch_all(select_query)
@@ -112,7 +126,9 @@ class SimilarityTests(unittest.TestCase):
         self.assertEqual(actual_distance, 27)
 
         # Top 1 - assume table contains feature data.
-        select_query = """SELECT features FROM testSimilarityFeatureTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), features) LIMIT 1;""".format(
+        select_query = """SELECT features FROM testSimilarityFeatureTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), features)
+                            LIMIT 1;""".format(
             img_path
         )
         actual_batch = execute_query_fetch_all(select_query)
@@ -129,7 +145,9 @@ class SimilarityTests(unittest.TestCase):
         self.assertEqual(actual_distance, 0)
 
         # Top 2 - assume table contains feature data.
-        select_query = """SELECT features FROM testSimilarityFeatureTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), features) LIMIT 2;""".format(
+        select_query = """SELECT features FROM testSimilarityFeatureTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), features)
+                            LIMIT 2;""".format(
             img_path
         )
         actual_batch = execute_query_fetch_all(select_query)
@@ -156,9 +174,31 @@ class SimilarityTests(unittest.TestCase):
         upload_dir_from_config = config.get_value("storage", "upload_dir")
         img_path = os.path.join(upload_dir_from_config, "dummy.jpg")
 
-        create_index_query = """CREATE INDEX testFaissIndexScanRewrite ON testSimilarityTable (DummyFeatureExtractor(data)) USING HNSW;"""
-        execute_query_fetch_all(create_index_query)
-        select_query = """SELECT data FROM testSimilarityTable ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data)) LIMIT 1;""".format(
+        # Execution without index scan.
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 3;""".format(
             img_path
         )
-        _ = execute_query_fetch_all(select_query)
+        expected_batch = execute_query_fetch_all(select_query)
+
+        # Execution with index scan.
+        create_index_query = """CREATE INDEX testFaissIndexScanRewrite
+                                    ON testSimilarityTable (DummyFeatureExtractor(data))
+                                    USING HNSW;"""
+        execute_query_fetch_all(create_index_query)
+        select_query = """SELECT data FROM testSimilarityTable
+                            ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
+                            LIMIT 3;""".format(
+            img_path
+        )
+        actual_batch = execute_query_fetch_all(select_query)
+
+        self.assertEqual(len(actual_batch), 3)
+        for i in range(3):
+            self.assertTrue(
+                np.array_equal(
+                    expected_batch.frames["testsimilaritytable.data"].to_numpy()[i],
+                    actual_batch.frames["testsimilaritytable.data"].to_numpy()[i],
+                )
+            )

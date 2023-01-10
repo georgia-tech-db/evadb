@@ -42,7 +42,13 @@ class FaissIndexScanExecutor(AbstractExecutor):
         )
         index = faiss.read_index(index_catalog_entry.save_file_path)
 
-        # Get the query feature vector.
+        # Aggregate batches from sequential scan.
+        seq_scan_batch = Batch()
+        for batch in self.children[0].exec():
+            seq_scan_batch = Batch.concat([seq_scan_batch, batch])
+
+        # Get the query feature vector. Create a dummy
+        # batch to retreat a single file path.
         dummy_batch = Batch(
             frames=pd.DataFrame(
                 {"0": [0]},
@@ -62,11 +68,23 @@ class FaissIndexScanExecutor(AbstractExecutor):
             distance_list.append(dis)
             row_id_list.append(row_id)
 
-        yield Batch(
+        column_list = batch.columns
+        row_id_alias = None
+        for column in column_list:
+            alias, col_name = column.split(".")
+            if col_name == "_row_id":
+                row_id_alias = alias
+        index_scan_batch = Batch(
             pd.DataFrame(
                 {
-                    "distance": distance_list,
-                    "row_id": row_id_list,
+                    "similarity.distance": distance_list,
+                    "{}._row_id".format(row_id_alias): row_id_list,
                 }
             )
         )
+        res_df = seq_scan_batch.frames.merge(
+            index_scan_batch.frames,
+            how="right",
+            on="{}._row_id".format(row_id_alias),
+        )
+        yield Batch(res_df)

@@ -437,21 +437,21 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             RuleType.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN, pattern
         )
 
+        # Entries populate after rule egibility validation.
+        self._index_catalog_entry = None
+        self._query_func_expr = None
+
     def promise(self):
         return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
 
     def check(self, before: LogicalLimit, context: OptimizerContext):
-        return True
-
-    def apply(self, before: LogicalLimit, context: OptimizerContext):
         catalog_manager = CatalogManager()
 
         # Get corresponding nodes.
-        limit_node = before
         orderby_node = before.children[0]
 
         # Check if orderby runs on similarity expression.
-        func_orderby_expr = None
+        # Current optimization will only accept Similarity expression.
         for column, sort_type in orderby_node.orderby_list:
             if (
                 isinstance(column, FunctionExpression)
@@ -459,10 +459,10 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             ):
                 func_orderby_expr = column
         if not func_orderby_expr:
-            return before
+            return False
         else:
             if func_orderby_expr.name != "Similarity":
-                return before
+                return False
 
         # Check if there exists an index on table and column.
         query_func_expr, base_func_expr = func_orderby_expr.children
@@ -476,20 +476,32 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         column_catalog_entry = tv_expr.col_object
         udf_signature = base_func_expr.signature()
 
-        # Get index catalog.
+        # Get index catalog. Check if an index exists for matching
+        # udf signature and table columns.
         index_catalog_entry = (
             catalog_manager.get_index_catalog_entry_by_column_and_udf_signature(
                 column_catalog_entry, udf_signature
             )
         )
         if not index_catalog_entry:
-            return before
+            return False
+
+        # Populate entries for later rewrite.
+        self._index_catalog_entry = index_catalog_entry
+        self._query_func_expr = query_func_expr
+
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
+        # Get corresponding nodes.
+        limit_node = before
+        orderby_node = before.children[0]
 
         # Construct the Faiss index scan plan.
         faiss_index_scan_node = LogicalFaissIndexScan(
-            index_catalog_entry.name,
+            self._index_catalog_entry.name,
             limit_node.limit_count,
-            query_func_expr,
+            self._query_func_expr,
         )
         for child in orderby_node.children:
             faiss_index_scan_node.append_child(child)
