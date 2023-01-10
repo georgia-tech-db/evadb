@@ -233,7 +233,9 @@ class SimilarityTests(unittest.TestCase):
                 SELECT data FROM testSimilarityTable WHERE dummy = 0
                   ORDER BY Similarity(DummyFeatureExtractor(Open("{}")), DummyFeatureExtractor(data))
                   LIMIT 3;
-        """.format("dummypath")
+        """.format(
+            "dummypath"
+        )
         batch = execute_query_fetch_all(explain_query)
 
         # Index scan should not be used.
