@@ -64,17 +64,30 @@ class SimilarityTests(unittest.TestCase):
         storage_engine = StorageEngine.factory(base_table_catalog_entry)
         for i in range(5):
             storage_engine.write(
-                base_table_catalog_entry, Batch(pd.DataFrame([{
-                    "data": base_img,
-                    "dummy": i,
-                }]))
+                base_table_catalog_entry,
+                Batch(
+                    pd.DataFrame(
+                        [
+                            {
+                                "data": base_img,
+                                "dummy": i,
+                            }
+                        ]
+                    )
+                ),
             )
             storage_engine.write(
                 feature_table_catalog_entry,
-                Batch(pd.DataFrame([{
-                    "features": base_img.astype(np.float32),
-                    "dummy": i,
-                }])),
+                Batch(
+                    pd.DataFrame(
+                        [
+                            {
+                                "features": base_img.astype(np.float32),
+                                "dummy": i,
+                            }
+                        ]
+                    )
+                ),
             )
             base_img -= 1
 
