@@ -28,6 +28,7 @@ from eva.experimental.ray.optimizer.rules.rules import (
 from eva.optimizer.rules.rules import (
     CombineSimilarityOrderByAndLimitToFaissIndexScan,
     EmbedFilterIntoGet,
+    EmbedProjectIntoGet,
     EmbedSampleIntoGet,
     LogicalApplyAndMergeToPhysical,
     LogicalCreateIndexToFaiss,
@@ -78,7 +79,7 @@ class RulesManager:
         self._rewrite_rules = [
             EmbedFilterIntoGet(),
             # EmbedFilterIntoDerivedGet(),
-            # EmbedProjectIntoGet(),
+            EmbedProjectIntoGet(),
             # EmbedProjectIntoDerivedGet(),
             EmbedSampleIntoGet(),
             PushDownFilterThroughJoin(),

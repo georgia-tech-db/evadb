@@ -452,6 +452,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
 
         # Check if orderby runs on similarity expression.
         # Current optimization will only accept Similarity expression.
+        func_orderby_expr = None
         for column, sort_type in orderby_node.orderby_list:
             if (
                 isinstance(column, FunctionExpression)
