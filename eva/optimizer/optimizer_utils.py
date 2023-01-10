@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import List, Tuple
+from eva.catalog.catalog_manager import CatalogManager
+from eva.catalog.catalog_type import TableType
+from eva.catalog.catalog_utils import get_table_primary_columns
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
 
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
@@ -27,6 +31,7 @@ from eva.expression.function_expression import (
     FunctionExpression,
     FunctionExpressionCache,
 )
+from eva.expression.tuple_value_expression import TupleValueExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.kv_cache import DiskKVCache
@@ -222,5 +227,41 @@ def enable_cache(func_expr: FunctionExpression, copy: True) -> FunctionExpressio
     return func_expr.copy().enable_cache(cache)
 
 
-def _optimize_cache_expr(exprs: List[AbstractExpression]):
-    return exprs
+def optimize_cache_key(expr: FunctionExpression):
+    """Optimize the cache key
+
+    It tries to reduce the caching overhead by replacing the caching key with logically equivalent key. For instance, frame data can be replaced with frame id.
+
+    Args:
+        expr (FunctionExpression): expression to optimize the caching key for.
+
+    Example:
+        Yolo(data) -> return id
+
+    Todo: Optimize complex expression
+        FaceDet(Crop(data, bbox)) -> return
+
+    """
+    keys = expr.children
+    # handle simple one column inputs
+    if len(keys) == 1 and isinstance(keys[0], TupleValueExpression):
+        child = keys[0]
+        col_catalog_obj = child.col_object
+        if isinstance(col_catalog_obj, ColumnCatalogEntry):
+            new_keys = []
+            table_obj = CatalogManager().get_table_catalog_entry(
+                col_catalog_obj.table_name
+            )
+            for col in get_table_primary_columns(table_obj):
+                new_obj = CatalogManager().get_column_catalog_entry(table_obj, col.name)
+                new_keys.append(
+                    TupleValueExpression(
+                        col_name=col.name,
+                        table_alias=child.table_alias,
+                        col_object=new_obj,
+                        col_alias=f"{child.table_alias}.{col.name}",
+                    )
+                )
+
+            return new_keys
+    return keys

@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Iterator
+from eva.catalog.catalog_manager import CatalogManager
 
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError
+from eva.expression.function_expression import FunctionExpressionCache
 from eva.models.storage.batch import Batch
 from eva.plan_nodes.apply_and_merge_plan import ApplyAndMergePlan
+from eva.utils.kv_cache import DiskKVCache
 from eva.utils.logging_manager import logger
 
 
@@ -43,6 +46,15 @@ class ApplyAndMergeExecutor(AbstractExecutor):
 
     def exec(self, *args, **kwargs) -> Iterator[Batch]:
         child_executor = self.children[0]
+        catalog_manager = CatalogManager()
+        if self.func_expr.has_cache():
+            name = self.func_expr.signature()
+            cache_entry = catalog_manager.get_udf_cache_catalog_entry_by_name(name)
+            if not cache_entry:
+                cache_entry = catalog_manager.insert_udf_cache_catalog_entry(self.func_expr)
+            cache_key = self.func_expr._cache.key
+            self.func_expr._cache = FunctionExpressionCache(DiskKVCache(cache_entry.cache_path), cache_key)
+                
         for batch in child_executor.exec(**kwargs):
             res = self.func_expr.evaluate(batch)
             try:

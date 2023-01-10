@@ -17,10 +17,11 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Flag, IntEnum, auto
 from itertools import chain, combinations
+from pathlib import Path
 from typing import TYPE_CHECKING, Iterable, Optional, List
 
 from eva.catalog.catalog_type import TableType
-from eva.catalog.catalog_utils import is_video_table
+from eva.catalog.catalog_utils import construct_udf_cache_catalog_entry, is_video_table
 from eva.expression.expression_utils import (
     and_,
 )
@@ -32,6 +33,7 @@ from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
     extract_pushdown_predicate_for_alias,
+    optimize_cache_key,
 )
 from eva.optimizer.rules.pattern import Pattern
 from eva.optimizer.rules.rules_base import Promise, Rule, RuleType
@@ -316,7 +318,7 @@ class CacheFunctionExpressionInFilter(Rule):
         #     possible_filters.append(new_expr.root())
 
         # return possible_filters
-        yield 
+        yield
 
 
 class CacheFunctionExpressionInApply(Rule):
@@ -335,11 +337,13 @@ class CacheFunctionExpressionInApply(Rule):
         return True
 
     def apply(self, before: LogicalApplyAndMerge, context: OptimizerContext):
-        signature = before.func_expr.signature()
-        path = get_str_hash(signature)
-        # key = before.func_expr.children
-        cache = FunctionExpressionCache(DiskKVCache(path), None)
-        new_func_expr = before.func_expr.copy().enable_cache(cache)
+        optimized_key = optimize_cache_key(before.func_expr)
+        if optimized_key == before.func_expr.children:
+            optimized_key = None
+
+        new_func_expr = before.func_expr.copy().enable_cache(
+            FunctionExpressionCache(optimized_key, None)
+        )
         after = LogicalApplyAndMerge(
             func_expr=new_func_expr, alias=before.alias, do_unnest=before.do_unnest
         )

@@ -97,6 +97,7 @@ class FunctionExpression(AbstractExpression):
 
     def has_cache(self):
         return self._cache is not None
+    
 
     def evaluate(self, batch: Batch, **kwargs) -> Batch:
         new_batch = batch
@@ -168,25 +169,24 @@ class FunctionExpression(AbstractExpression):
             return batch.apply_function_expression(func)
 
         cols = [obj.name for obj in self.output_objs]
-        
+
         # 1. check cache
         # We are required to iterate over the batch row by row and check the cache.
         # This can hurt performance, as we have to stitch together columns to generate
         # row tuples. Is there an alternative approach we can take?
 
         results = np.full([len(batch), len(cols)], None)
-        # if self._cache.cache_key:
-        #     keys = [child.evaluate(batch, **kwargs) for child in self.children]
-        #     keys =  Batch.merge_column_wise(keys)
-        # keys = self._cache_key.evaluate(batch, **kwargs)
         keys = batch
+        if self._cache.cache_key:
+            keys = [child.evaluate(batch, **kwargs) for child in self._cache.cache_key]
+            keys = Batch.merge_column_wise(keys)
         cache_miss = []
         for idx, key in keys.iterrows():
             val = self._cache.cache.get(key.to_numpy())
             results[idx] = val
 
         cache_miss = np.asarray(results[:, 0] == None)
-        
+
         # 2. call func for cache miss rows
         if cache_miss.any():
             batch = batch[list(cache_miss)]
@@ -241,12 +241,12 @@ class FunctionExpressionCache:
     """dataclass for cache-related attributes
 
     Args:
-        cache (`DiskKVCache`): the cache object to get/set key-value pairs
-        cache_key (`AbstractExpression`): the expression to evaluate to get the key.
+        key (`AbstractExpression`): the expression to evaluate to get the key.
         If `None`, use the function arguments as the key. This is useful when the
         system wants to use logically equivalent columns as the key (e.g., frame number
         instead of frame data).
+        store (`DiskKVCache`): the cache object to get/set key-value pairs
     """
 
-    cache: DiskKVCache
-    cache_key: AbstractExpression = None
+    key: AbstractExpression
+    store: DiskKVCache = None
