@@ -26,6 +26,7 @@ from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
+from eva.udfs.udf_bootstrap_queries import Asl_udf_query
 
 
 class PytorchTest(unittest.TestCase):
@@ -36,9 +37,11 @@ class PytorchTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
+        asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl2.mp4"
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
         execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
+        execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
         load_inbuilt_udfs()
 
     @classmethod
@@ -46,9 +49,12 @@ class PytorchTest(unittest.TestCase):
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
+        file_remove("computer_asl.mp4")
+        file_remove("asl_actions.avi")
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+        execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -76,6 +82,19 @@ class PytorchTest(unittest.TestCase):
         # TODO ACTION: Test case for aliases
         for idx in res.index:
             self.assertTrue("yoga" in res["mvitactionrecognition.labels"][idx])
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_mvit_asl(self):
+
+        execute_query_fetch_all(Asl_udf_query)
+        select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data)) FROM Asl_actions
+                       GROUP BY '16f';"""
+        actual_batch = execute_query_fetch_all(select_query)
+        print(actual_batch)
+        res = actual_batch.frames
+        
+       # TODO ACTION: Test case for aliases
+        
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_and_mvit(self):
@@ -230,3 +249,9 @@ class PytorchTest(unittest.TestCase):
         res = actual_batch.frames
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(PytorchTest(
+        'test_should_run_pytorch_and_mvit_asl'))
+    unittest.TextTestRunner().run(suite)

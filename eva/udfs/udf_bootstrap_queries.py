@@ -146,6 +146,15 @@ Mvit_udf_query = """CREATE UDF IF NOT EXISTS MVITActionRecognition
     EVA_INSTALLATION_DIR
 )
 
+Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
+        INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
+        OUTPUT (labels NDARRAY STR(ANYDIM))
+        TYPE  Classification
+        IMPL  '/nethome/gkakkar7/isiva/eva_codebase/eva/eva/udfs/asl_action_recognition.py';
+        """.format(
+    EVA_INSTALLATION_DIR
+)
+
 
 def init_builtin_udfs(mode="debug"):
     """
