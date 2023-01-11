@@ -15,7 +15,12 @@
 import os
 import sys
 import unittest
-from test.util import copy_sample_videos_to_upload_dir, file_remove, load_inbuilt_udfs
+from test.util import (
+    copy_sample_images_to_upload_dir,
+    copy_sample_videos_to_upload_dir,
+    file_remove,
+    load_inbuilt_udfs,
+)
 
 import cv2
 import numpy as np
@@ -27,6 +32,7 @@ from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
 from eva.udfs.udf_bootstrap_queries import Asl_udf_query
+from eva.udfs.udf_bootstrap_queries import Mvit_udf_query, Timestamp_udf_query
 
 
 class PytorchTest(unittest.TestCase):
@@ -34,14 +40,23 @@ class PytorchTest(unittest.TestCase):
     def setUpClass(cls):
         CatalogManager().reset()
         copy_sample_videos_to_upload_dir()
+        copy_sample_images_to_upload_dir()
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
         asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl2.mp4"
+        
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
         execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
+        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
+        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
+        execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
+        execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
+        execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
+        execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
         load_inbuilt_udfs()
 
     @classmethod
@@ -54,7 +69,11 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
+<<<<<<< HEAD
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
+=======
+        execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
+>>>>>>> 98f14b065053f97458883d5b9991f9d7e63ed5eb
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -231,7 +250,7 @@ class PytorchTest(unittest.TestCase):
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_run_ocr_on_cropped_data(self):
         create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
-                  INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
+                  INPUT  (text NDARRAY STR(100))
                   OUTPUT (labels NDARRAY STR(10),
                           bboxes NDARRAY FLOAT32(ANYDIM, 4),
                           scores NDARRAY FLOAT32(ANYDIM))
@@ -250,8 +269,53 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
+<<<<<<< HEAD
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(PytorchTest(
         'test_should_run_pytorch_and_mvit_asl'))
     unittest.TextTestRunner().run(suite)
+=======
+    @pytest.mark.torchtest
+    @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+    def test_should_run_detoxify_on_text(self):
+        create_udf_query = """CREATE UDF IF NOT EXISTS OCRExtractor
+                  INPUT  (text NDARRAY STR(100))
+                  OUTPUT (labels NDARRAY STR(10),
+                          bboxes NDARRAY FLOAT32(ANYDIM, 4),
+                          scores NDARRAY FLOAT32(ANYDIM))
+                  TYPE  OCRExtraction
+                  IMPL  'eva/udfs/ocr_extractor.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        create_udf_query = """CREATE UDF IF NOT EXISTS ToxicityClassifier
+                  INPUT  (text NDARRAY STR(100))
+                  OUTPUT (labels NDARRAY STR(10))
+                  TYPE  Classification
+                  IMPL  'eva/udfs/toxicity_classifier.py';
+        """
+        execute_query_fetch_all(create_udf_query)
+
+        select_query = """SELECT OCRExtractor(data).labels,
+                                 ToxicityClassifier(OCRExtractor(data).labels)
+                        FROM MemeImages;"""
+        actual_batch = execute_query_fetch_all(select_query)
+
+        # non-trivial test case for Detoxify
+        res = actual_batch.frames
+        self.assertTrue(res["toxicityclassifier.labels"][0] == "toxic")
+        self.assertTrue(res["toxicityclassifier.labels"][1] == "not toxic")
+
+    def test_timestamp_udf(self):
+        execute_query_fetch_all(Timestamp_udf_query)
+
+        select_query = """SELECT id, seconds, Timestamp(seconds)
+                          FROM MyVideo
+                          WHERE Timestamp(seconds) <= "00:00:01"; """
+        # TODO: Check why this does not work
+        #                  AND Timestamp(seconds) < "00:00:03"; """
+        actual_batch = execute_query_fetch_all(select_query)
+
+        self.assertEqual(len(actual_batch), 60)
+>>>>>>> 98f14b065053f97458883d5b9991f9d7e63ed5eb

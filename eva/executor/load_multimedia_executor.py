@@ -17,7 +17,7 @@ from pathlib import Path
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.executor.abstract_executor import AbstractExecutor
 from eva.executor.executor_utils import ExecutorError, iter_path_regex, validate_media
 from eva.models.storage.batch import Batch
@@ -37,6 +37,8 @@ class LoadMultimediaExecutor(AbstractExecutor):
         pass
 
     def exec(self):
+        storage_engine = None
+        table_obj = None
         try:
             valid_files = []
             for file_path in iter_path_regex(self.node.file_path):
@@ -79,7 +81,10 @@ class LoadMultimediaExecutor(AbstractExecutor):
             )
 
         except Exception as e:
-            self._rollback_load(storage_engine, table_obj, do_create)
+            # If we fail to obtain the storage engine or table object,
+            # there is no further action to take.
+            if storage_engine and table_obj:
+                self._rollback_load(storage_engine, table_obj, do_create)
             err_msg = f"Load {self.media_type.name} failed: encountered unexpected error {str(e)}"
             logger.error(err_msg)
             raise ExecutorError(err_msg)
@@ -95,7 +100,7 @@ class LoadMultimediaExecutor(AbstractExecutor):
     def _rollback_load(
         self,
         storage_engine: AbstractStorageEngine,
-        table_obj: TableCatalog,
+        table_obj: TableCatalogEntry,
         do_create: bool,
     ):
         try:

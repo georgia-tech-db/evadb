@@ -161,14 +161,13 @@ class StatementBinder:
             self.bind(func_expr)
             output_cols = []
             for obj, alias in zip(func_expr.output_objs, func_expr.alias.col_names):
-                alias_obj = self._catalog.udf_io(
-                    alias,
-                    data_type=obj.type,
-                    array_type=obj.array_type,
-                    dimensions=obj.array_dimensions,
-                    is_input=obj.is_input,
+                col_alias = "{}.{}".format(func_expr.alias.alias_name, alias)
+                alias_obj = TupleValueExpression(
+                    col_name=alias,
+                    table_alias=func_expr.alias.alias_name,
+                    col_object=obj,
+                    col_alias=col_alias,
                 )
-
                 output_cols.append(alias_obj)
             self._binder_context.add_derived_table_alias(
                 func_expr.alias.alias_name, output_cols
@@ -209,6 +208,7 @@ class StatementBinder:
             logger.error(err_msg)
             raise BinderError(err_msg)
 
+        node.udf_obj = udf_obj
         output_objs = self._catalog.get_udf_io_catalog_output_entries(udf_obj)
         if node.output:
             for obj in output_objs:

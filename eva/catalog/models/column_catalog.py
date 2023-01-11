@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from ast import literal_eval
-from typing import List
+from dataclasses import dataclass, field
+from typing import Tuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
@@ -55,7 +56,7 @@ class ColumnCatalog(BaseModel):
         type: ColumnType,
         is_nullable: bool = False,
         array_type: NdArrayType = None,
-        array_dimensions: List[int] = [],
+        array_dimensions: Tuple[int] = (),
         table_id: int = None,
     ):
         self._name = name
@@ -66,31 +67,11 @@ class ColumnCatalog(BaseModel):
         self._table_id = table_id
 
     @property
-    def row_id(self):
-        return self._row_id
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def type(self):
-        return self._type
-
-    @property
-    def is_nullable(self):
-        return self._is_nullable
-
-    @property
-    def array_type(self):
-        return self._array_type
-
-    @property
     def array_dimensions(self):
         return literal_eval(self._array_dimensions)
 
     @array_dimensions.setter
-    def array_dimensions(self, value: List[int]):
+    def array_dimensions(self, value: Tuple[int]):
         # This tranformation converts the ANYDIM enum to
         # None which is expected by petastorm.
         # Before adding data, petastorm verifies _is_compliant_shape
@@ -102,51 +83,32 @@ class ColumnCatalog(BaseModel):
                 dimensions.append(None)
             else:
                 dimensions.append(dim)
-        self._array_dimensions = str(dimensions)
+        self._array_dimensions = str(tuple(dimensions))
 
-    @property
-    def table_id(self):
-        return self._table_id
-
-    @table_id.setter
-    def table_id(self, value):
-        self._table_id = value
-
-    def __str__(self):
-        column_str = "Column: (%s, %s, %s, " % (
-            self._name,
-            self._type.name,
-            self._is_nullable,
+    def as_dataclass(self) -> "ColumnCatalogEntry":
+        return ColumnCatalogEntry(
+            row_id=self._row_id,
+            name=self._name,
+            type=self._type,
+            is_nullable=self._is_nullable,
+            array_type=self._array_type,
+            array_dimensions=self.array_dimensions,
+            table_id=self._table_id,
+            table_name=self._table_catalog._name,
         )
 
-        column_str += "%s[" % self.array_type
-        column_str += ", ".join(["%d"] * len(self.array_dimensions)) % tuple(
-            self.array_dimensions
-        )
-        column_str += "])"
 
-        return column_str
+@dataclass(unsafe_hash=True)
+class ColumnCatalogEntry:
+    """Class decouples the ColumnCatalog from the sqlalchemy.
+    This is done to ensure we don't expose the sqlalchemy dependencies beyond catalog service. Further, sqlalchemy does not allow sharing of objects across threads.
+    """
 
-    def __eq__(self, other):
-        return (
-            self.row_id == other.row_id
-            and self.table_id == other.table_id
-            and self.is_nullable == other.is_nullable
-            and self.array_type == other.array_type
-            and self.array_dimensions == other.array_dimensions
-            and self.name == other.name
-            and self.type == other.type
-        )
-
-    def __hash__(self):
-        return hash(
-            (
-                self.row_id,
-                self.table_id,
-                self.is_nullable,
-                self.array_type,
-                tuple(self.array_dimensions),
-                self.name,
-                self.type,
-            )
-        )
+    name: str
+    type: ColumnType
+    is_nullable: bool = False
+    array_type: NdArrayType = None
+    array_dimensions: Tuple[int] = field(default_factory=tuple)
+    table_id: int = None
+    table_name: str = None
+    row_id: int = None

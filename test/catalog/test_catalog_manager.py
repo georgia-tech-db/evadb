@@ -19,8 +19,8 @@ from mock import ANY, MagicMock
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.column_catalog import ColumnCatalog
-from eva.catalog.models.udf_catalog import UdfCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.udf_catalog import UdfCatalogEntry
 from eva.parser.create_statement import ColConstraintInfo, ColumnDefinition
 from eva.parser.table_ref import TableInfo
 from eva.parser.types import FileFormatType
@@ -70,12 +70,13 @@ class CatalogManagerTests(unittest.TestCase):
 
         columns = [
             ColumnDefinition(
-                "name", ColumnType.TEXT, None, [], ColConstraintInfo(unique=True)
+                "name", ColumnType.TEXT, None, None, ColConstraintInfo(unique=True)
             ),
-            ColumnDefinition("id", ColumnType.INTEGER, None, []),
+            ColumnDefinition("id", ColumnType.INTEGER, None, None),
             ColumnDefinition(
-                "data", ColumnType.NDARRAY, NdArrayType.UINT8, [None, None, None]
+                "data", ColumnType.NDARRAY, NdArrayType.UINT8, (None, None, None)
             ),
+            ColumnDefinition("seconds", ColumnType.FLOAT, None, []),
         ]
 
         mock.assert_called_once_with(
@@ -86,44 +87,32 @@ class CatalogManagerTests(unittest.TestCase):
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
     @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
-    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
     def test_insert_table_catalog_entry_should_create_table_and_columns(
-        self, dcs_mock, ds_mock, initdb_mock
+        self, ds_mock, initdb_mock
     ):
         catalog = CatalogManager()
         file_url = "file1"
         table_name = "name"
 
-        columns = [(ColumnCatalog("c1", ColumnType.INTEGER))]
-        actual = catalog.insert_table_catalog_entry(table_name, file_url, columns)
+        columns = [(ColumnCatalogEntry("c1", ColumnType.INTEGER))]
+        catalog.insert_table_catalog_entry(table_name, file_url, columns)
         ds_mock.return_value.insert_entry.assert_called_with(
-            table_name, file_url, identifier_id="id", table_type=TableType.VIDEO_DATA
+            table_name,
+            file_url,
+            identifier_column="id",
+            table_type=TableType.VIDEO_DATA,
+            column_list=[ANY] + columns,
         )
-        for column in columns:
-            column.table_id = ds_mock.return_value.insert_entry.return_value.row_id
-
-        dcs_mock.return_value.insert_entries.assert_called_with([ANY] + columns)
-
-        expected = ds_mock.return_value.insert_entry.return_value
-        expected.schema = dcs_mock.return_value.insert_entries.return_value
-
-        self.assertEqual(actual, expected)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
     @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
-    @mock.patch("eva.catalog.catalog_manager.ColumnCatalogService")
-    def test_get_table_catalog_entry_when_table_exists(
-        self, dcs_mock, ds_mock, initdb_mock
-    ):
+    def test_get_table_catalog_entry_when_table_exists(self, ds_mock, initdb_mock):
         catalog = CatalogManager()
         table_name = "name"
-
         database_name = "database"
-        schema = [1, 2, 3]
         row_id = 1
-        table_obj = MagicMock(row_id=row_id, schema=None)
+        table_obj = MagicMock(row_id=row_id)
         ds_mock.return_value.get_entry_by_name.return_value = table_obj
-        dcs_mock.return_value.filter_entries_by_table_id.return_value = schema
 
         actual = catalog.get_table_catalog_entry(
             table_name,
@@ -132,9 +121,7 @@ class CatalogManagerTests(unittest.TestCase):
         ds_mock.return_value.get_entry_by_name.assert_called_with(
             database_name, table_name
         )
-        dcs_mock.return_value.filter_entries_by_table_id.assert_called_with(row_id)
         self.assertEqual(actual.row_id, row_id)
-        self.assertEqual(actual.schema, schema)
 
     @mock.patch("eva.catalog.catalog_manager.init_db")
     @mock.patch("eva.catalog.catalog_manager.TableCatalogService")
@@ -156,21 +143,6 @@ class CatalogManagerTests(unittest.TestCase):
         )
         dcs_mock.return_value.filter_entries_by_table_id.assert_not_called()
         self.assertEqual(actual, table_obj)
-
-    @mock.patch("eva.catalog.catalog_manager.UdfIOCatalog")
-    def test_create_udf_io_object(self, udfio_mock):
-        catalog = CatalogManager()
-        actual = catalog.udf_io(
-            "name", ColumnType.NDARRAY, NdArrayType.UINT8, [2, 3, 4], True
-        )
-        udfio_mock.assert_called_with(
-            "name",
-            ColumnType.NDARRAY,
-            array_type=NdArrayType.UINT8,
-            array_dimensions=[2, 3, 4],
-            is_input=True,
-        )
-        self.assertEqual(actual, udfio_mock.return_value)
 
     @mock.patch("eva.catalog.catalog_manager.UdfCatalogService")
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
@@ -201,21 +173,13 @@ class CatalogManagerTests(unittest.TestCase):
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_get_udf_outputs(self, udf_mock):
         mock_func = udf_mock.return_value.get_output_entries_by_udf_id
-        udf_obj = MagicMock(spec=UdfCatalog)
+        udf_obj = MagicMock(spec=UdfCatalogEntry)
         CatalogManager().get_udf_io_catalog_output_entries(udf_obj)
         mock_func.assert_called_once_with(udf_obj.row_id)
-
-        # should raise error
-        with self.assertRaises(ValueError):
-            CatalogManager().get_udf_io_catalog_output_entries(MagicMock())
 
     @mock.patch("eva.catalog.catalog_manager.UdfIOCatalogService")
     def test_get_udf_inputs(self, udf_mock):
         mock_func = udf_mock.return_value.get_input_entries_by_udf_id
-        udf_obj = MagicMock(spec=UdfCatalog)
+        udf_obj = MagicMock(spec=UdfCatalogEntry)
         CatalogManager().get_udf_io_catalog_input_entries(udf_obj)
         mock_func.assert_called_once_with(udf_obj.row_id)
-
-        # should raise error
-        with self.assertRaises(ValueError):
-            CatalogManager().get_udf_io_catalog_input_entries(MagicMock())

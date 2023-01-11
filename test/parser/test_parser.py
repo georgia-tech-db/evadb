@@ -147,18 +147,18 @@ class ParserTests(unittest.TestCase):
             TableInfo("Persons"),
             True,
             [
-                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, [], unique_cci),
+                ColumnDefinition("Frame_ID", ColumnType.INTEGER, None, (), unique_cci),
                 ColumnDefinition(
-                    "Frame_Data", ColumnType.TEXT, None, [10], expected_cci
+                    "Frame_Data", ColumnType.TEXT, None, (10,), expected_cci
                 ),
                 ColumnDefinition(
-                    "Frame_Value", ColumnType.FLOAT, None, [1000, 201], expected_cci
+                    "Frame_Value", ColumnType.FLOAT, None, (1000, 201), expected_cci
                 ),
                 ColumnDefinition(
                     "Frame_Array",
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
-                    [5, 100, 2432, 4324, 100],
+                    (5, 100, 2432, 4324, 100),
                     expected_cci,
                 ),
             ],
@@ -535,16 +535,16 @@ class ParserTests(unittest.TestCase):
                     "Frame_Array",
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
-                    [3, 256, 256],
+                    (3, 256, 256),
                     expected_cci,
                 )
             ],
             [
                 ColumnDefinition(
-                    "Labels", ColumnType.NDARRAY, NdArrayType.STR, [10], expected_cci
+                    "Labels", ColumnType.NDARRAY, NdArrayType.STR, (10,), expected_cci
                 ),
                 ColumnDefinition(
-                    "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, [10, 4], expected_cci
+                    "Bbox", ColumnType.NDARRAY, NdArrayType.UINT8, (10, 4), expected_cci
                 ),
             ],
             Path("data/fastrcnn.py"),
@@ -709,10 +709,10 @@ class ParserTests(unittest.TestCase):
                     "frame",
                     ColumnType.NDARRAY,
                     NdArrayType.UINT8,
-                    [3, 256, 256],
+                    (3, 256, 256),
                 )
             ],
-            [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, [10])],
+            [ColumnDefinition("labels", ColumnType.NDARRAY, NdArrayType.STR, (10))],
             Path("data/fastrcnn.py"),
             "Classification",
         )

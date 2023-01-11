@@ -20,7 +20,7 @@ from typing import Iterator
 import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.models.storage.batch import Batch
 from eva.parser.table_ref import TableInfo
 from eva.storage.abstract_storage_engine import AbstractStorageEngine
@@ -33,10 +33,10 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
     def __init__(self):
         self._rdb_handler: SQLStorageEngine = SQLStorageEngine()
 
-    def _get_metadata_table(self, table: TableCatalog):
+    def _get_metadata_table(self, table: TableCatalogEntry):
         return CatalogManager().get_multimedia_metadata_table_catalog_entry(table)
 
-    def _create_metadata_table(self, table: TableCatalog):
+    def _create_metadata_table(self, table: TableCatalogEntry):
         return (
             CatalogManager().create_and_insert_multimedia_metadata_table_catalog_entry(
                 table
@@ -50,7 +50,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         xfromed_file_name = zlib.adler32(str(file_url).encode("utf-8")) & 0xFFFFFFFF
         return str(xfromed_file_name)
 
-    def create(self, table: TableCatalog, if_not_exists=True):
+    def create(self, table: TableCatalogEntry, if_not_exists=True):
         """
         Create the directory to store the images.
         Create a sqlite table to persist the file urls
@@ -71,7 +71,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         self._rdb_handler.create(self._create_metadata_table(table))
         return True
 
-    def drop(self, table: TableCatalog):
+    def drop(self, table: TableCatalogEntry):
         dir_path = Path(table.file_url)
         try:
             shutil.rmtree(str(dir_path))
@@ -82,7 +82,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         except Exception as e:
             logger.exception(f"Failed to drop the image table {e}")
 
-    def delete(self, table: TableCatalog, rows: Batch):
+    def delete(self, table: TableCatalogEntry, rows: Batch):
         try:
             media_metadata_table = self._get_metadata_table(table)
             for media_file_path in rows.file_paths():
@@ -101,7 +101,7 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
             raise RuntimeError(error)
         return True
 
-    def write(self, table: TableCatalog, rows: Batch):
+    def write(self, table: TableCatalogEntry, rows: Batch):
         try:
             dir_path = Path(table.file_url)
             copied_files = []
@@ -131,10 +131,10 @@ class AbstractMediaStorageEngine(AbstractStorageEngine):
         else:
             return True
 
-    def read(self, table: TableCatalog) -> Iterator[Batch]:
+    def read(self, table: TableCatalogEntry) -> Iterator[Batch]:
         raise NotImplementedError
 
-    def rename(self, old_table: TableCatalog, new_name: TableInfo):
+    def rename(self, old_table: TableCatalogEntry, new_name: TableInfo):
         try:
             CatalogManager().rename_table_catalog_entry(old_table, new_name)
         except CatalogError as err:

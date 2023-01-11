@@ -19,8 +19,8 @@ import mock
 import pytest
 
 from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
-from eva.catalog.models.column_catalog import ColumnCatalog
-from eva.catalog.models.table_catalog import TableCatalog
+from eva.catalog.models.column_catalog import ColumnCatalogEntry
+from eva.catalog.models.table_catalog import TableCatalogEntry
 from eva.storage.storage_engine import StorageEngine
 
 
@@ -30,9 +30,11 @@ class VideoStorageEngineTest(unittest.TestCase):
         self.table = None
 
     def create_sample_table(self):
-        table_info = TableCatalog("dataset", "dataset", table_type=TableType.VIDEO_DATA)
-        column_1 = ColumnCatalog("id", ColumnType.INTEGER, False)
-        column_2 = ColumnCatalog(
+        table_info = TableCatalogEntry(
+            "dataset", "dataset", table_type=TableType.VIDEO_DATA
+        )
+        column_1 = ColumnCatalogEntry("id", ColumnType.INTEGER, False)
+        column_2 = ColumnCatalogEntry(
             "data", ColumnType.NDARRAY, False, NdArrayType.UINT8, [2, 2, 3]
         )
         table_info.schema = [column_1, column_2]
@@ -72,7 +74,7 @@ class VideoStorageEngineTest(unittest.TestCase):
 
     def test_rename(self):
 
-        table_info = TableCatalog(
+        table_info = TableCatalogEntry(
             "new_name", "new_name", table_type=TableType.VIDEO_DATA
         )
 

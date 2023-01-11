@@ -12,9 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.catalog.models.column_catalog import ColumnCatalog
-from eva.catalog.models.table_catalog import TableCatalog
-from eva.catalog.models.udf_catalog import UdfCatalog
-from eva.catalog.models.udf_io_catalog import UdfIOCatalog
 
-__all__ = ("TableCatalog", "ColumnCatalog", "UdfCatalog", "UdfIOCatalog")
+__all__ = (
+    "TableCatalog",
+    "ColumnCatalog",
+    "UdfCatalog",
+    "UdfIOCatalog",
+    "TableCatalogEntry",
+    "ColumnCatalogEntry",
+    "UdfCatalogEntry",
+    "UdfIOCatalogEntry",
+)

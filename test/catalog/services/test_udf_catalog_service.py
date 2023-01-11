@@ -41,7 +41,7 @@ class UdfCatalogServiceTest(TestCase):
         actual = service.get_entry_by_name(UDF_NAME)
         mocked.query.filter.assert_called_with(mocked._name == UDF_NAME)
         mocked.query.filter.return_value.one.assert_called_once()
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual, expected.as_dataclass.return_value)
 
     @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
     def test_udf_by_id_should_query_model_with_id(self, mocked):
@@ -50,22 +50,20 @@ class UdfCatalogServiceTest(TestCase):
         actual = service.get_entry_by_id(UDF_ID)
         mocked.query.filter.assert_called_with(mocked._id == UDF_ID)
         mocked.query.filter.return_value.one.assert_called_once()
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual, expected.as_dataclass.return_value)
 
-    @patch(
-        "eva.catalog.services.udf_catalog_service.UdfCatalogService.get_entry_by_name"
-    )
-    def test_udf_drop_by_name(self, mock_func):
+    @patch("eva.catalog.services.udf_catalog_service.UdfCatalog")
+    def test_udf_drop_by_name(self, mocked):
         service = UdfCatalogService()
-        service.delete_entry_by_name("udf_name")
-        mock_func.assert_called_once_with("udf_name")
-        mock_func.return_value.delete.assert_called_once()
-
-        mock_func.return_value.delete.side_effect = Exception()
+        service.delete_entry_by_name(UDF_NAME)
+        udf_obj = mocked.query.filter.return_value.one.return_value
+        mocked.query.filter.assert_called_with(mocked._name == UDF_NAME)
+        udf_obj.delete.assert_called_once()
+        mocked.return_value.delete.side_effect = Exception()
         with self.assertRaises(Exception) as cm:
-            service.delete_entry_by_name("udf_name")
+            service.delete_entry_by_name(UDF_NAME)
             self.assertEqual(
-                "Delete udf failed for name {}".format("udf_name"),
+                "Delete udf failed for name {}".format(UDF_NAME),
                 str(cm.exception),
             )
 

@@ -27,7 +27,7 @@ class LoadDataPlan(AbstractPlan):
     operations.
 
     Arguments:
-        table(TableCatalog): table to load into
+        table(TableCatalogEntry): table to load into
         file_path(Path): file path from where we will load the data
         batch_mem_size(int): memory size of the batch loaded from disk
     """

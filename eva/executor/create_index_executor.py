@@ -20,6 +20,7 @@ import pandas as pd
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.catalog.catalog_type import ColumnType, IndexType, TableType
+from eva.catalog.catalog_utils import xform_column_definitions_to_catalog_entries
 from eva.catalog.sql_config import IDENTIFIER_COLUMN
 from eva.configuration.constants import EVA_DEFAULT_DIR, INDEX_DIR
 from eva.executor.abstract_executor import AbstractExecutor
@@ -181,21 +182,18 @@ class CreateIndexExecutor(AbstractExecutor):
                 "logical_id",
                 ColumnType.INTEGER,
                 None,
-                [],
+                None,
                 ColConstraintInfo(unique=True),
             ),
             ColumnDefinition(
                 "row_id",
                 ColumnType.INTEGER,
                 None,
-                [],
+                None,
                 ColConstraintInfo(unique=True),
             ),
         ]
-        col_catalog_entries = (
-            catalog_manager.xform_column_definitions_to_catalog_entries(col_list)
-        )
-
+        col_catalog_entries = xform_column_definitions_to_catalog_entries(col_list)
         catalog_manager = CatalogManager()
         table_catalog_entry = catalog_manager.insert_table_catalog_entry(
             "secondary_index_{}_{}".format(self.node.index_type, self.node.name),

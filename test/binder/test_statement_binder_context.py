@@ -53,9 +53,10 @@ class StatementBinderTests(unittest.TestCase):
         self.assertEqual(ctx._table_alias_map["alias"], "table_obj")
 
     def test_add_derived_table_alias(self):
+        objs = [MagicMock(), MagicMock()]
         exprs = [
-            MagicMock(spec=TupleValueExpression, col_object="A"),
-            MagicMock(spec=FunctionExpression, output_objs=["B", "C"]),
+            MagicMock(spec=TupleValueExpression, col_name="A", col_object="A_obj"),
+            MagicMock(spec=FunctionExpression, output_objs=objs),
         ]
         ctx = StatementBinderContext()
 
@@ -63,7 +64,8 @@ class StatementBinderTests(unittest.TestCase):
         ctx.add_derived_table_alias("alias", exprs)
 
         mock_check.assert_called_with("alias")
-        self.assertEqual(ctx._derived_table_alias_map["alias"], ["A", "B", "C"])
+        col_map = {"A": "A_obj", objs[0].name: objs[0], objs[1].name: objs[1]}
+        self.assertEqual(ctx._derived_table_alias_map["alias"], col_map)
 
     def test_get_binded_column_should_search_all(self):
         ctx = StatementBinderContext()
@@ -132,17 +134,16 @@ class StatementBinderTests(unittest.TestCase):
         # key exists
         ctx = StatementBinderContext()
         obj1 = MagicMock()
-        obj1.name.lower.return_value = "col_name1"
         obj2 = MagicMock()
-        obj2.name.lower.return_value = "col_name2"
-        objs = [obj1, obj2]
-        ctx._derived_table_alias_map["alias"] = objs
-        result = ctx._check_derived_table_alias_map("alias", "col_name1")
+        col_map = {"col1": obj1, "col2": obj2}
+        ctx._derived_table_alias_map["alias"] = col_map
+        result = ctx._check_derived_table_alias_map("alias", "col1")
         self.assertEqual(result, obj1)
-
+        result = ctx._check_derived_table_alias_map("alias", "col2")
+        self.assertEqual(result, obj2)
         # key does not exixt
         ctx = StatementBinderContext()
-        result = ctx._check_derived_table_alias_map("alias", "col_name")
+        result = ctx._check_derived_table_alias_map("alias", "col3")
         self.assertEqual(result, None)
 
     def test_search_all_alias_maps(self):

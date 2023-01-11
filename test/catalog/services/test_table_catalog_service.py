@@ -14,7 +14,7 @@
 # limitations under the License.
 import unittest
 
-from mock import patch
+from mock import MagicMock, patch
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.services.table_catalog_service import TableCatalogService
@@ -32,20 +32,26 @@ TABLE_TYPE = TableType.STRUCTURED_DATA
 class TableCatalogServiceTest(unittest.TestCase):
     @patch("eva.catalog.services.table_catalog_service.TableCatalog")
     def test_insert_table_catalog_entry(self, mocked):
-        service = TableCatalogService()
-        service.insert_entry(
-            TABLE_NAME,
-            TABLE_URL,
-            table_type=TABLE_TYPE,
-            identifier_id=IDENTIFIER,
-        )
-        mocked.assert_called_with(
-            name=TABLE_NAME,
-            file_url=TABLE_URL,
-            identifier_id=IDENTIFIER,
-            table_type=TABLE_TYPE,
-        )
-        mocked.return_value.save.assert_called_once()
+        mocks = [MagicMock(), MagicMock()]
+        with patch(
+            "eva.catalog.services.table_catalog_service.ColumnCatalogService"
+        ) as col_service:
+            service = TableCatalogService()
+            service.insert_entry(
+                TABLE_NAME,
+                TABLE_URL,
+                table_type=TABLE_TYPE,
+                identifier_column=IDENTIFIER,
+                column_list=mocks,
+            )
+            mocked.assert_called_with(
+                name=TABLE_NAME,
+                file_url=TABLE_URL,
+                identifier_column=IDENTIFIER,
+                table_type=TABLE_TYPE,
+            )
+            col_service.return_value.insert_entries.assert_called_with(mocks)
+            mocked.return_value.save.assert_called_once()
 
     @patch("eva.catalog.services.table_catalog_service.TableCatalog")
     def test_table_catalog_by_id_should_query_model_with_id(self, mocked):
@@ -60,4 +66,4 @@ class TableCatalogServiceTest(unittest.TestCase):
         actual = service.get_entry_by_name(DATABASE_NAME, TABLE_NAME)
         expected = mocked.query.filter.return_value.one_or_none.return_value
 
-        self.assertEqual(actual, expected)
+        self.assertEqual(actual, expected.as_dataclass.return_value)
