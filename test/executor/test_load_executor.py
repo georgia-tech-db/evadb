@@ -104,7 +104,7 @@ class LoadExecutorTest(unittest.TestCase):
         load_executor = LoadDataExecutor(plan)
         batch = next(load_executor.exec())
         catalog_mock.assert_called_once_with("dummy", None)
-        factory_mock.return_value.write.has_calls(
+        factory_mock.return_value.write.assert_has_calls(
             call(table_obj, batch_frames[0]),
             call(table_obj, batch_frames[1]),
         )
