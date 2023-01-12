@@ -97,6 +97,4 @@ class IndexType(EVAEnum):
 
     @classmethod
     def is_faiss_index_type(cls, t):
-        return t in [
-            cls.HNSW
-        ]
+        return t in [cls.HNSW]

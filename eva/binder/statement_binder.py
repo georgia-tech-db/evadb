@@ -23,7 +23,7 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import NdArrayType, TableType, IndexType
+from eva.catalog.catalog_type import IndexType, NdArrayType, TableType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -94,7 +94,9 @@ class StatementBinder:
                 # Feature table type needs to be float32 numpy array.
                 col_def = node.col_list[0]
                 table_ref_obj = node.table_ref.table.table_obj
-                col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+                col = [
+                    col for col in table_ref_obj.columns if col.name == col_def.name
+                ][0]
                 if not col.array_type == NdArrayType.FLOAT32:
                     raise BinderError("Index input needs to be float32.")
                 if not len(col.array_dimensions) == 2:
@@ -102,7 +104,9 @@ class StatementBinder:
             else:
                 # Output of the UDF should be 2 dimension and float32 type.
                 catalog_manager = CatalogManager()
-                udf_obj = catalog_manager.get_udf_catalog_entry_by_name(node.udf_func.name)
+                udf_obj = catalog_manager.get_udf_catalog_entry_by_name(
+                    node.udf_func.name
+                )
                 for output in udf_obj.outputs:
                     if not output.array_type == NdArrayType.FLOAT32:
                         raise BinderError("Index input needs to be float32.")
