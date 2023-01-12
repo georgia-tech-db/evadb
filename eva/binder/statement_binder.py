@@ -23,7 +23,7 @@ from eva.binder.binder_utils import (
 )
 from eva.binder.statement_binder_context import StatementBinderContext
 from eva.catalog.catalog_manager import CatalogManager
-from eva.catalog.catalog_type import ColumnType, NdArrayType, TableType
+from eva.catalog.catalog_type import NdArrayType, TableType, IndexType
 from eva.expression.abstract_expression import AbstractExpression
 from eva.expression.function_expression import FunctionExpression
 from eva.expression.tuple_value_expression import TupleValueExpression
@@ -89,17 +89,27 @@ class StatementBinder:
         # TODO: create index currently only works on TableInfo, but will extend later.
         assert node.table_ref.is_table_atom(), "Index can only be created on Tableinfo"
 
-        col_def = node.col_list[0]
-        table_ref_obj = node.table_ref.table.table_obj
-
-        col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
-        assert col.type == ColumnType.NDARRAY, "Index input needs to be numpy array"
-
-        # Relax type checking for raw input table.
-        if not node.udf_func:
-            assert (
-                col.array_type == NdArrayType.FLOAT32
-            ), "Index input needs to be float32"
+        if IndexType.is_faiss_index_type(node.index_type):
+            if not node.udf_func:
+                # Feature table type needs to be float32 numpy array.
+                col_def = node.col_list[0]
+                table_ref_obj = node.table_ref.table.table_obj
+                col = [col for col in table_ref_obj.columns if col.name == col_def.name][0]
+                if not col.array_type == NdArrayType.FLOAT32:
+                    raise BinderError("Index input needs to be float32.")
+                if not len(col.array_dimensions) == 2:
+                    raise BinderError("Index input needs to be 2 dimensional.")
+            else:
+                # Output of the UDF should be 2 dimension and float32 type.
+                catalog_manager = CatalogManager()
+                udf_obj = catalog_manager.get_udf_catalog_entry_by_name(node.udf_func.name)
+                for output in udf_obj.outputs:
+                    if not output.array_type == NdArrayType.FLOAT32:
+                        raise BinderError("Index input needs to be float32.")
+                    if not len(output.array_dimensions) == 2:
+                        raise BinderError("Index input needs to be 2 dimensional.")
+        else:
+            raise BinderError("Index type {} is not supported.".format(node.index_type))
 
     @bind.register(SelectStatement)
     def _bind_select_statement(self, node: SelectStatement):
