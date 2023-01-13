@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import unittest
 
 import pandas as pd
@@ -74,6 +75,10 @@ class ShowExecutorTest(unittest.TestCase):
         self.assertTrue(all(expected_df.type == result.frames.type))
 
     def test_show_tables(self):
+
+        os.system("nohup eva_server --stop")
+        os.system("nohup eva_server --start &")
+
         result = execute_query_fetch_all("SHOW TABLES;")
         self.assertEqual(len(result), 3)
         expected = {"name": ["MyVideo", "MNIST", "Actions"]}
