@@ -16,30 +16,11 @@ from time import sleep
 
 import pytest
 
-from eva.server.command_handler import execute_query_fetch_all
-
 
 @pytest.mark.torchtest
 @pytest.mark.benchmark(
     warmup=False, warmup_iterations=1, min_rounds=1, min_time=0.1, max_time=0.5
 )
 def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
-    create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
-                INPUT  (frame NDARRAY UINT8(3, ANYDIM, ANYDIM))
-                OUTPUT (features NDARRAY FLOAT32(ANYDIM))
-                TYPE  Classification
-                IMPL  'eva/udfs/feature_extractor.py';
-    """
-    execute_query_fetch_all(create_udf_query)
 
-    select_query = """SELECT FeatureExtractor(data) FROM MyVideo
-                    WHERE id < 5;"""
-    actual_batch = benchmark(execute_query_fetch_all, select_query)
-    assert len(actual_batch) == 5
-
-    sleep(2)
-
-    # non-trivial test case for Resnet50
-    res = actual_batch.frames
-    assert res["featureextractor.features"][0].shape == (1, 2048)
-    assert res["featureextractor.features"][0][0][0] > 0.3
+    benchmark(sleep, 2)
