@@ -16,7 +16,7 @@ then
 fi
 
 # Run only benchmark tests
-PYTHONPATH=./ pytest test/ --benchmark-save=/tmp/artifacts --benchmark-compare  -s -v --benchmark-compare-fail=min:5% --log-level=WARNING ${1:-} -m "benchmark"
+PYTHONPATH=./ pytest test/ --benchmark-save="/tmp/artifacts" --benchmark-compare  -s -v --benchmark-compare-fail=min:5% --log-level=WARNING ${1:-} -m "benchmark"
 test_code=$?
 if [ $test_code -ne 0 ];
 then
