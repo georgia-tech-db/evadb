@@ -50,7 +50,7 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    sleep(0)
+    sleep(1)
     output = execute_query(query, report_time=True, **kwargs)
     if output:
         batch_list = list(output)
