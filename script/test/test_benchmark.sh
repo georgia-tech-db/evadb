@@ -16,11 +16,22 @@ then
 fi
 
 # Run only benchmark tests
-PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -s -v --benchmark-compare-fail=min:5% --log-level=WARNING ${1:-} -m "benchmark"
-test_code=$?
-if [ $test_code -ne 0 ];
+if [ -f ./.benchmarks ];
 then
-    exit $test_code
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -s -v --benchmark-compare-fail=min:5% --log-level=WARNING ${1:-} -m "benchmark"
+    test_code=$?
+    if [ $test_code -ne 0 ];
+    then
+        exit $test_code
+    fi
+else
+    # FIRST RUN
+    PYTHONPATH=./ pytest test/  --benchmark-autosave --log-level=WARNING ${1:-} -m "benchmark"
+    test_code=$?
+    if [ $test_code -ne 0 ];
+    then
+        exit $test_code
+    fi
 fi
 
 # restore __init__.py if it exists
