@@ -18,7 +18,7 @@ utility_statement: describe_statement | show_statement | help_statement | explai
 
 create_database: CREATE DATABASE if_not_exists? uid
 
-create_index: CREATE INDEX uid ON table_name ("(" uid_list ")") index_type?
+create_index: CREATE INDEX uid ON table_name index_elem index_type?
 
 create_table: CREATE TABLE if_not_exists? table_name create_definitions 
     
@@ -40,6 +40,9 @@ udf_type: uid
 udf_impl: string_literal
 
 index_type: USING HNSW
+
+index_elem: ("(" uid_list ")"
+          | "(" function_call ")")
 
 create_definitions: "(" create_definition ("," create_definition)* ")"
 
