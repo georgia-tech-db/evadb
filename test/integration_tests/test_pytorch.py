@@ -44,17 +44,14 @@ class PytorchTest(unittest.TestCase):
         ua_detrac = f"{EVA_ROOT_DIR}/data/ua_detrac/ua_detrac.mp4"
         mnist = f"{EVA_ROOT_DIR}/data/mnist/mnist.mp4"
         actions = f"{EVA_ROOT_DIR}/data/actions/actions.mp4"
-        asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl2.mp4"
+        asl_actions = f"{EVA_ROOT_DIR}/data/actions/comp_asl_new.mp4"
+        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
+        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
         
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
         execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
         execute_query_fetch_all(f"LOAD VIDEO '{asl_actions}' INTO Asl_actions;")
-        meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
-        meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
-        execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
-        execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
-        execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme1}' INTO MemeImages;")
         execute_query_fetch_all(f"LOAD IMAGE '{meme2}' INTO MemeImages;")
         load_inbuilt_udfs()
@@ -64,16 +61,13 @@ class PytorchTest(unittest.TestCase):
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
-        file_remove("computer_asl.mp4")
-        file_remove("asl_actions.avi")
+        file_remove("comp_asl_new.mp4")
+        
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
-<<<<<<< HEAD
         execute_query_fetch_all("DROP TABLE IF EXISTS Asl_actions;")
-=======
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
->>>>>>> 98f14b065053f97458883d5b9991f9d7e63ed5eb
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn(self):
@@ -269,13 +263,7 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
-<<<<<<< HEAD
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(PytorchTest(
-        'test_should_run_pytorch_and_mvit_asl'))
-    unittest.TextTestRunner().run(suite)
-=======
+
     @pytest.mark.torchtest
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_run_detoxify_on_text(self):
@@ -313,9 +301,14 @@ if __name__ == '__main__':
         select_query = """SELECT id, seconds, Timestamp(seconds)
                           FROM MyVideo
                           WHERE Timestamp(seconds) <= "00:00:01"; """
-        # TODO: Check why this does not work
+        # TODO: Check why this does not work 
         #                  AND Timestamp(seconds) < "00:00:03"; """
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 60)
->>>>>>> 98f14b065053f97458883d5b9991f9d7e63ed5eb
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(PytorchTest(
+        'test_should_run_pytorch_and_mvit_asl'))
+    unittest.TextTestRunner().run(suite)

@@ -41,17 +41,15 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         return "ASLActionRecognition"
 
     
-
     def download_weights(self):
         if not os.path.exists(self.asl_weights_path):
-            torch.hub.set_dir("/nethome/gkakkar7/isiva/eva_codebase/eva/eva/udfs/")
+            torch.hub.set_dir(os.getcwd())
             torch.hub.download_url_to_file(self.asl_weights_url, self.asl_weights_path, hash_prefix=None, progress=True)
 
 
-
     def setup(self):
-        self.asl_weights_url = "https://gatech.box.com/shared/static/9o6nil5ttekyox6ily40130wu16poj4m.pt"
-        self.asl_weights_path = "/nethome/gkakkar7/isiva/eva_codebase/eva/eva/udfs/asl_weights.pt"
+        self.asl_weights_url = "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
+        self.asl_weights_path = os.getcwd()+"/asl_weights.pth"
         self.weights = R3D_18_Weights.DEFAULT
         self.model = torchvision.models.video.r3d_18(weights=self.weights)
         in_feats = self.model.fc.in_features
@@ -67,7 +65,7 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     @property
     def labels(self) -> np.array([str]):
-        with open("/nethome/gkakkar7/isiva/eva_codebase/eva/eva/udfs/asl_actions_map.pkl", "rb") as f:
+        with open(os.getcwd()+"/asl_20_actions_map.pkl", "rb") as f:
             action_to_index_map = pkl.load(f)
         actions_arr = [""]*len(action_to_index_map)
         for action,index in action_to_index_map.items():

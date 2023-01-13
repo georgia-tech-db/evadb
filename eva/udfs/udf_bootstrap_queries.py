@@ -102,7 +102,7 @@ Timestamp_udf_query = """CREATE UDF
             INPUT (seconds INTEGER)
             OUTPUT (timestamp NDARRAY STR(8))
             TYPE NdarrayUDF
-            IMPL "{}/udfs/{}/timestamp.py";
+            IMPL "{}/udfs/ndarray/timestamp.py";
         """.format(
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )
@@ -160,7 +160,7 @@ Asl_udf_query = """CREATE UDF IF NOT EXISTS ASLActionRecognition
         INPUT  (Frame_Array NDARRAY UINT8(3, 16, 224, 224))
         OUTPUT (labels NDARRAY STR(ANYDIM))
         TYPE  Classification
-        IMPL  '/nethome/gkakkar7/isiva/eva_codebase/eva/eva/udfs/asl_action_recognition.py';
+        IMPL  '{}/udfs/asl_action_recognition.py';
         """.format(
     EVA_INSTALLATION_DIR
 )
