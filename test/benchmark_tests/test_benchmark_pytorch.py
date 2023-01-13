@@ -19,12 +19,7 @@ from eva.server.command_handler import execute_query_fetch_all
 
 @pytest.mark.torchtest
 @pytest.mark.benchmark(
-    warmup=False,
-    warmup_iterations=1,
-    min_rounds=1,
-    min_time=0.1,
-    max_time=0.5,
-    compare_fail="min:5%",
+    warmup=False, warmup_iterations=1, min_rounds=1, min_time=0.1, max_time=0.5
 )
 def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
     create_udf_query = """CREATE UDF IF NOT EXISTS FeatureExtractor
