@@ -85,7 +85,12 @@ jobs:
               "python3.8" -m venv test_evadb
               source test_evadb/bin/activate
               pip install ".[dev]"
-              sh script/test/test_benchmark.sh
+
+        - run:
+          name: Run benchmarks
+          command: |
+            source test_evadb/bin/activate
+            sh script/test/test_benchmark.sh
 
         - store_artifacts:
             path: .benchmarks
