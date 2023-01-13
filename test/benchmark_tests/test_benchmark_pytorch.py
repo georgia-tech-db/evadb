@@ -49,6 +49,7 @@ def test_should_run_pytorch_and_facenet(benchmark, setup_pytorch_tests):
 
     select_query = """SELECT FaceDetector(data) FROM MyVideo
                     WHERE id < 5;"""
+
     actual_batch = benchmark(execute_query_fetch_all, select_query)
     assert len(actual_batch) == 5
 
