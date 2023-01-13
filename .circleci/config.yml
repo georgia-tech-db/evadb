@@ -81,7 +81,7 @@ jobs:
 
         - restore_cache:
             keys:
-              - benchmark_cache
+              - benchmark_cache-{{ checksum "./test/benchmark_tests/test_benchmark_pytorch.py" }}
 
         - run:
             name: Install EVA package from GitHub repo with all dependencies
@@ -97,7 +97,7 @@ jobs:
               sh script/test/test_benchmark.sh
 
         - save_cache:
-            key: benchmark_cache
+            key: benchmark_cache-{{ checksum "./test/benchmark_tests/test_benchmark_pytorch.py" }}
             paths:
               - /home/circleci/project/.benchmarks
 
