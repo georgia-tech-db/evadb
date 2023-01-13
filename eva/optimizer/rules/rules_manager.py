@@ -22,9 +22,10 @@ from eva.experimental.ray.optimizer.rules.rules import LogicalExchangeToPhysical
 from eva.experimental.ray.optimizer.rules.rules import (
     LogicalGetToSeqScan as DistributedLogicalGetToSeqScan,
 )
-from eva.experimental.ray.optimizer.rules.rules import (
-    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
-)
+
+# from eva.experimental.ray.optimizer.rules.rules import (
+#    LogicalProjectToPhysical as DistributedLogicalProjectToPhysical,
+# )
 from eva.optimizer.rules.rules import (
     EmbedFilterIntoGet,
     EmbedProjectIntoGet,
@@ -110,9 +111,10 @@ class RulesManager:
             LogicalFunctionScanToPhysical(),
             LogicalCreateMaterializedViewToPhysical(),
             LogicalFilterToPhysical(),
-            DistributedLogicalProjectToPhysical()
-            if ray_enabled
-            else SequentialLogicalProjectToPhysical(),
+            # DistributedLogicalProjectToPhysical()
+            # if ray_enabled
+            # else SequentialLogicalProjectToPhysical(),
+            SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
