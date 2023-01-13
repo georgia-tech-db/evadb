@@ -102,7 +102,7 @@ Timestamp_udf_query = """CREATE UDF
             INPUT (seconds INTEGER)
             OUTPUT (timestamp NDARRAY STR(8))
             TYPE NdarrayUDF
-            IMPL "{}/udfs/ndarray/timestamp.py";
+            IMPL "{}/udfs/{}/timestamp.py";
         """.format(
     EVA_INSTALLATION_DIR, NDARRAY_DIR
 )

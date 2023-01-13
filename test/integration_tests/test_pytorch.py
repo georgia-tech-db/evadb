@@ -97,7 +97,7 @@ class PytorchTest(unittest.TestCase):
             self.assertTrue("yoga" in res["mvitactionrecognition.labels"][idx])
 
     @pytest.mark.torchtest
-    def test_should_run_pytorch_and_mvit_asl(self):
+    def test_should_run_pytorch_and_asl(self):
 
         execute_query_fetch_all(Asl_udf_query)
         select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data)) FROM Asl_actions
@@ -306,3 +306,10 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 60)
+
+
+if __name__ == '__main__':
+    suite = unittest.TestSuite()
+    suite.addTest(PytorchTest(
+        'test_should_run_pytorch_and_mvit_asl'))
+    unittest.TextTestRunner().run(suite)
