@@ -2,7 +2,6 @@
 
 # generates a report for tests marked as benchmark tests
 
-
 # temporarily remove __init__.py from root if it exists
 if [ -f ./__init__.py ]; then
    mv ./__init__.py ./__init__.py.bak
