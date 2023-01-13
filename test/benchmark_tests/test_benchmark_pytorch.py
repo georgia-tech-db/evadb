@@ -25,7 +25,7 @@ from pytest_benchmark import session
 def test_should_run_pytorch_and_resnet50(benchmark, setup_pytorch_tests):
 
     try:
-        benchmark(sleep, 4)
+        benchmark(sleep, 6)
     except session.PerformanceRegression as e:
         print(e)
         exit(-1)
