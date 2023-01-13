@@ -75,20 +75,20 @@ jobs:
       # https://circleci.com/docs/circleci-images#language-image-variants
       - image: "cimg/python:3.8"
 
-    steps:
+      steps:
 
-      - checkout
+        - checkout
 
-      - run:
-          name: Install EVA package from GitHub repo with all dependencies
-          command: |
-            "python3.8" -m venv test_evadb
-            source test_evadb/bin/activate
-            pip install ".[dev]"
-            sh script/test/test_benchmark.sh
+        - run:
+            name: Install EVA package from GitHub repo with all dependencies
+            command: |
+              "python3.8" -m venv test_evadb
+              source test_evadb/bin/activate
+              pip install ".[dev]"
+              sh script/test/test_benchmark.sh
 
-      - store_artifacts:
-          path: .benchmarks
+        - store_artifacts:
+            path: .benchmarks
 
     
   Windows:
