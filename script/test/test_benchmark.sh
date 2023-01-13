@@ -16,7 +16,7 @@ then
 fi
 
 # Run only benchmark tests
-if [ -f ./.benchmarks ];
+if [ -f .benchmarks ];
 then
     echo "SUBSEQUENT RUN"
     # SUBSEQUENT RUNS
