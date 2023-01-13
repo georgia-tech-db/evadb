@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-from time import sleep
 from typing import Iterator, Optional
 
 from eva.binder.statement_binder import StatementBinder
@@ -50,7 +49,6 @@ def execute_query_fetch_all(query, **kwargs) -> Optional[Batch]:
     """
     Execute the query and fetch all results into one Batch object.
     """
-    sleep(1)
     output = execute_query(query, report_time=True, **kwargs)
     if output:
         batch_list = list(output)
