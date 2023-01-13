@@ -20,7 +20,7 @@ PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -s -v --be
 test_code=$?
 if [ $test_code -ne 0 ];
 then
-    exit 0
+    exit $test_code
 fi
 
 # restore __init__.py if it exists
