@@ -79,6 +79,9 @@ jobs:
 
         - checkout
 
+        - restore_cache:
+          keys:
+            - benchmark_cache
         - run:
             name: Install EVA package from GitHub repo with all dependencies
             command: |
@@ -92,8 +95,11 @@ jobs:
               source test_evadb/bin/activate
               sh script/test/test_benchmark.sh
 
-        - store_artifacts:
-            path: .benchmarks
+        - save_cache:
+            key: benchmark_cache
+            paths:
+              - /home/circleci/project/.benchmarks
+
 
     
   Windows:
