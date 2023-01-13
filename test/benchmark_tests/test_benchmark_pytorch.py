@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from time import sleep
 
 import pytest
 
@@ -30,7 +29,6 @@ def test_should_run_pytorch_and_yolo(benchmark, setup_pytorch_tests):
                     WHERE id < 5;"""
     actual_batch = benchmark(execute_query_fetch_all, select_query)
     assert len(actual_batch) == 5
-    sleep(5)
 
 
 @pytest.mark.torchtest
