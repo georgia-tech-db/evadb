@@ -18,6 +18,7 @@ fi
 # Run only benchmark tests
 if [ -f ./.benchmarks ];
 then
+    # SUBSEQUENT RUNS
     PYTHONPATH=./ pytest test/  --benchmark-autosave --benchmark-compare  -s -v --benchmark-compare-fail=min:5% --log-level=WARNING ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
@@ -25,8 +26,8 @@ then
         exit $test_code
     fi
 else
-    # FIRST RUN
-    PYTHONPATH=./ pytest test/  --benchmark-autosave --log-level=WARNING ${1:-} -m "benchmark"
+    # FIRST RUN FOR REFERENCE
+    PYTHONPATH=./ pytest test/  --benchmark-autosave -s -v --log-level=WARNING ${1:-} -m "benchmark"
     test_code=$?
     if [ $test_code -ne 0 ];
     then
