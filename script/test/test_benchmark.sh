@@ -18,7 +18,7 @@ fi
 echo "$PWD"
 
 # Run only benchmark tests
-if [ -f .benchmarks ];
+if [ -f ./.benchmarks ];
 then
     echo "SUBSEQUENT RUN"
     # SUBSEQUENT RUNS
