@@ -70,7 +70,7 @@ def stop_server():
         if proc.name() == "eva_server":
             proc.send_signal(SIGTERM)
 
-    exit(0)
+    return 0
 
 
 def main():
@@ -95,7 +95,7 @@ def main():
 
     # Stop server
     if args.stop:
-        stop_server()
+        return stop_server()
 
     # Start server
     if args.start:
