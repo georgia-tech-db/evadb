@@ -15,6 +15,8 @@ then
     exit $return_code
 fi
 
+echo "$PWD"
+
 # Run only benchmark tests
 if [ -f .benchmarks ];
 then
