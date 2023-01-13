@@ -12,9 +12,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import asyncio
 import sys
 from os.path import abspath, dirname, join
+from signal import SIGTERM
+
+from psutil import process_iter
 
 from eva.utils.logging_manager import logger
 
@@ -58,10 +62,46 @@ def eva():
         logger.critical(e)
 
 
+def stop_server():
+    """
+    Stop the eva server
+    """
+    for proc in process_iter():
+        if proc.name() == "eva_server":
+            proc.send_signal(SIGTERM)
+
+    exit(0)
+
+
 def main():
-    mode = ConfigurationManager().get_value("core", "mode")
-    init_builtin_udfs(mode=mode)
-    eva()
+    parser = argparse.ArgumentParser(description="EVA Server")
+
+    parser.add_argument(
+        "--start",
+        help="start server",
+        action="store_true",
+        default=True,
+    )
+
+    parser.add_argument(
+        "--stop",
+        help="stop server",
+        action="store_true",
+        default=False,
+    )
+
+    ## PARSE ARGS
+    args = parser.parse_args()
+
+    # Stop server
+    if args.stop:
+        stop_server()
+
+    # Start server
+    if args.start:
+        mode = ConfigurationManager().get_value("core", "mode")
+        init_builtin_udfs(mode=mode)
+        eva()
 
 
 if __name__ == "__main__":
