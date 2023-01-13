@@ -72,7 +72,7 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        upper = ExchangePlan(parallelism=2)
+        upper = ExchangePlan(parallelism=1)
         upper.append_child(after)
         return upper
 
