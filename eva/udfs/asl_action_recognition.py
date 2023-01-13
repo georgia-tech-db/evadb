@@ -21,7 +21,8 @@ import os
 import pickle as pkl
 
 try:
-    from torchvision.models.video import MViT_V2_S_Weights, mvit_v2_s
+    from torchvision.models.video import r3d_18, R3D_18_Weights
+
 except ImportError:
     raise ImportError(
         f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
@@ -30,8 +31,6 @@ from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
 import torchvision
-from torchvision.models.video import *
-from torchvision.models.video import R3D_18_Weights
 import torch.nn as nn
 
 class ASLActionRecognition(PytorchAbstractClassifierUDF):
@@ -51,7 +50,7 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.asl_weights_url = "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
         self.asl_weights_path = os.getcwd()+"/asl_weights.pth"
         self.weights = R3D_18_Weights.DEFAULT
-        self.model = torchvision.models.video.r3d_18(weights=self.weights)
+        self.model = r3d_18(weights=self.weights)
         in_feats = self.model.fc.in_features
         self.model.fc = nn.Linear(in_feats, 20)
         self.download_weights()

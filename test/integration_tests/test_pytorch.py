@@ -306,9 +306,3 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 60)
-
-if __name__ == '__main__':
-    suite = unittest.TestSuite()
-    suite.addTest(PytorchTest(
-        'test_should_run_pytorch_and_mvit_asl'))
-    unittest.TextTestRunner().run(suite)
