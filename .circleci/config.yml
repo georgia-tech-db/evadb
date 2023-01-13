@@ -87,10 +87,10 @@ jobs:
               pip install ".[dev]"
 
         - run:
-          name: Run benchmarks
-          command: |
-            source test_evadb/bin/activate
-            sh script/test/test_benchmark.sh
+            name: Run benchmarks
+            command: |
+              source test_evadb/bin/activate
+              sh script/test/test_benchmark.sh
 
         - store_artifacts:
             path: .benchmarks
