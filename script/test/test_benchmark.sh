@@ -15,10 +15,9 @@ then
     exit $return_code
 fi
 
-echo "$PWD"
 
 # Run only benchmark tests
-if [ -f "$PWD/.benchmarks" ];
+if [ -e ".benchmarks" ];
 then
     echo "SUBSEQUENT RUN"
     # SUBSEQUENT RUNS
