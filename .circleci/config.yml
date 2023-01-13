@@ -80,8 +80,9 @@ jobs:
         - checkout
 
         - restore_cache:
-          keys:
-            - benchmark_cache
+            keys:
+              - benchmark_cache
+
         - run:
             name: Install EVA package from GitHub repo with all dependencies
             command: |
