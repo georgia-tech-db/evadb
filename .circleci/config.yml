@@ -78,7 +78,6 @@ jobs:
       steps:
 
         - checkout
-
         - restore_cache:
             keys:
               - benchmark_cache-{{ checksum "./test/benchmark_tests/test_benchmark_pytorch.py" }}
