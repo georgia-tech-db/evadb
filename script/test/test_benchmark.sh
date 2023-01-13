@@ -16,7 +16,7 @@ then
 fi
 
 # Run only benchmark tests
-PYTHONPATH=./ pytest test/ --cov-report term --cov-config=.coveragerc --cov=eva/ -s -v --log-level=WARNING ${1:-} -m "benchmark"
+PYTHONPATH=./ pytest test/  -s -v --log-level=WARNING ${1:-} -m "benchmark"
 test_code=$?
 if [ $test_code -ne 0 ];
 then
