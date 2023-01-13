@@ -113,7 +113,6 @@ class RulesManager:
             DistributedLogicalProjectToPhysical()
             if ray_enabled
             else SequentialLogicalProjectToPhysical(),
-            SequentialLogicalProjectToPhysical(),
             LogicalShowToPhysical(),
             LogicalExplainToPhysical(),
             LogicalCreateIndexToFaiss(),
