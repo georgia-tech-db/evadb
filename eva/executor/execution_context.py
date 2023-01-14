@@ -29,10 +29,8 @@ class Context:
     if using horovod: current rank etc.
     """
 
-    _instance = None
-
     def __new__(cls):
-        if cls._instance is None:
+        if not hasattr(cls, "_instance"):
             cls._instance = super(Context, cls).__new__(cls)
         return cls._instance
 

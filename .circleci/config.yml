@@ -67,14 +67,13 @@ jobs:
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
-
     
   Windows:
     executor: win/default
     parameters:
       v:
         type: string
-        default: "3.7" 
+        default: "3.10" 
     steps:
       - checkout
 
