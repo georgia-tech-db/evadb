@@ -29,7 +29,7 @@ class ConfigurationManager(object):
     _yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
 
     def __new__(cls):
-        if cls._instance is None:
+        if not hasattr(cls, "_instance"):
             cls._instance = super(ConfigurationManager, cls).__new__(cls)
             cls._create_if_not_exists()
 

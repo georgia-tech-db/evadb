@@ -38,7 +38,7 @@ class SQLConfig:
         Returns:
             An instance of the class.
         """
-        if cls._instance is None:
+        if not hasattr(cls, "_instance"):
             cls._instance = super(SQLConfig, cls).__new__(cls)
         return cls._instance
 
