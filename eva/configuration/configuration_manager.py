@@ -25,7 +25,6 @@ from eva.configuration.constants import (
 
 
 class ConfigurationManager(object):
-    _instance = None
     _yml_path = EVA_DEFAULT_DIR / EVA_CONFIG_FILE
 
     def __new__(cls):

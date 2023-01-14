@@ -42,8 +42,6 @@ from eva.utils.logging_manager import logger
 
 
 class CatalogManager(object):
-    _instance = None
-
     def __new__(cls):
         if not hasattr(cls, "_instance"):
             cls._instance = super(CatalogManager, cls).__new__(cls)

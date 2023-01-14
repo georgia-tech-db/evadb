@@ -27,8 +27,6 @@ class SQLConfig:
         _instance: stores the singleton instance of the class.
     """
 
-    _instance = None
-
     def __new__(cls):
         """Overrides the default __new__ method.
 

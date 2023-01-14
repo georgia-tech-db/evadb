@@ -24,7 +24,6 @@ class LarkParser(object):
     Parser for EVA QL based on Lark
     """
 
-    _instance = None
     _parser = None
 
     def __new__(cls):

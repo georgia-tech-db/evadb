@@ -20,7 +20,6 @@ class Parser(object):
     Parser based on EVAQL grammar: eva.lark
     """
 
-    _instance = None
     _lark_parser = None
 
     def __new__(cls):
