@@ -107,8 +107,8 @@ def init_db():
     if not database_exists(engine.url):
         logger.info("Database does not exist, creating database.")
         create_database(engine.url)
-    logger.info("Creating tables")
-    BaseModel.metadata.create_all()
+        logger.info("Creating tables")
+        BaseModel.metadata.create_all()
 
 
 def drop_db():
