@@ -90,8 +90,6 @@ class FunctionExpression(AbstractExpression):
         new_batch = batch
         child_batches = [child.evaluate(batch, **kwargs) for child in self.children]
 
-        print("eval")
-
         if len(child_batches):
             batch_sizes = [len(child_batch) for child_batch in child_batches]
             are_all_equal_length = all(batch_sizes[0] == x for x in batch_sizes)
