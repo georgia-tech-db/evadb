@@ -19,7 +19,6 @@ workflows:
         - test:
             name: "Linux - Python v3.10"
             v: "3.10"
-        - Benchmark
         #- test:
         #    name: "Linux - Python v3.11"  # missing Torchvision
         #    v: "3.11"
@@ -68,39 +67,6 @@ jobs:
           paths:
             - /home/circleci/.cache/torch/hub/
             - /home/circleci/.EasyOCR/
-
-  Benchmark:
-      resource_class: large
-      docker:
-      # https://circleci.com/docs/circleci-images#language-image-variants
-      - image: "cimg/python:3.8"
-
-      steps:
-
-        - checkout
-        - restore_cache:
-            keys:
-              - benchmark_cache-{{ checksum "./test/benchmark_tests/test_benchmark_pytorch.py" }}
-
-        - run:
-            name: Install EVA package from GitHub repo with all dependencies
-            command: |
-              "python3.8" -m venv test_evadb
-              source test_evadb/bin/activate
-              pip install ".[dev]"
-
-        - run:
-            name: Run benchmarks
-            command: |
-              source test_evadb/bin/activate
-              sh script/test/test_benchmark.sh
-
-        - save_cache:
-            key: benchmark_cache-{{ checksum "./test/benchmark_tests/test_benchmark_pytorch.py" }}
-            paths:
-              - /home/circleci/project/.benchmarks
-
-
     
   Windows:
     executor: win/default
