@@ -73,7 +73,7 @@ jobs:
     parameters:
       v:
         type: string
-        default: "3.7" 
+        default: "3.10" 
     steps:
       - checkout
 
