@@ -49,14 +49,16 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
     def setup(self):
         self.asl_weights_url = "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
         self.asl_weights_path = os.getcwd()+"/asl_weights.pth"
+        self.download_weights()
+
         self.weights = R3D_18_Weights.DEFAULT
         self.model = r3d_18(weights=self.weights)
         in_feats = self.model.fc.in_features
         self.model.fc = nn.Linear(in_feats, 20)
-        self.download_weights()
         self.model.load_state_dict(torch.load(self.asl_weights_path))
-        self.preprocess = self.weights.transforms()
         self.model.eval()
+
+        self.preprocess = self.weights.transforms()
 
     @property
     def input_format(self) -> FrameInfo:
@@ -76,7 +78,9 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     def transform(self, segments) -> torch.Tensor:
         segments = torch.Tensor(segments)
-        segments = segments.permute(0, 3, 1, 2)
+        permute_order = [2,1,0]
+        segments = segments[:,:,:, permute_order]
+        segments = segments.permute(0, 3, 1, 2).to(torch.uint8)
         return self.preprocess(segments).unsqueeze(0)
 
     def classify(self, segments: torch.Tensor) -> pd.DataFrame:

@@ -100,12 +100,12 @@ class PytorchTest(unittest.TestCase):
     def test_should_run_pytorch_and_asl(self):
 
         execute_query_fetch_all(Asl_udf_query)
-        select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data)) FROM Asl_actions
+        select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data)) FROM Asl_actions SAMPLE 28
                        GROUP BY '16f';"""
         actual_batch = execute_query_fetch_all(select_query)
-        print(actual_batch)
         res = actual_batch.frames
-        
+        for idx in res.index:
+            self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
        # TODO ACTION: Test case for aliases
         
 
@@ -311,5 +311,5 @@ class PytorchTest(unittest.TestCase):
 if __name__ == '__main__':
     suite = unittest.TestSuite()
     suite.addTest(PytorchTest(
-        'test_should_run_pytorch_and_mvit_asl'))
+        'test_should_run_pytorch_and_asl'))
     unittest.TextTestRunner().run(suite)
