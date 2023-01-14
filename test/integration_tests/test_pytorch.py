@@ -62,6 +62,16 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     @pytest.mark.torchtest
+    def test_should_run_pytorch_and_fastrcnn_with_lateral_join(self):
+        select_query = """SELECT id, obj.labels
+                          FROM MyVideo JOIN LATERAL
+                          FastRCNNObjectDetector(data)
+                          AS obj(labels, bboxes, scores)
+                         WHERE id < 2;"""
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 2)
+
+    @pytest.mark.torchtest
     def test_should_run_pytorch_and_yolo_and_mvit(self):
         execute_query_fetch_all(Mvit_udf_query)
 
