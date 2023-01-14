@@ -15,6 +15,8 @@
 import unittest
 from test.util import load_inbuilt_udfs
 
+from mock import patch
+
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.optimizer.plan_generator import PlanGenerator
@@ -40,7 +42,8 @@ class OptimizerRulesTest(unittest.TestCase):
     def tearDownClass(cls):
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
 
-    def test_should_benefit_from_pushdown(self):
+    @patch("eva.expression.function_expression.FunctionExpression.evaluate")
+    def test_should_benefit_from_pushdown(self, evaluate_mock):
         query = """SELECT id, obj.labels
                   FROM MyVideo JOIN LATERAL
                     YoloV5(data) AS obj(labels, bboxes, scores)
@@ -50,6 +53,8 @@ class OptimizerRulesTest(unittest.TestCase):
         result_with_rule = None
         with time_with_rule:
             result_with_rule = execute_query_fetch_all(query)
+
+        evaluate_count_with_rule = evaluate_mock.call_count
 
         time_without_rule = Timer()
         result_without_pushdown_rules = None
@@ -64,10 +69,13 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_pushdown_rules, result_with_rule)
 
-        # without rule it should be slow as we end up running yolo on all the frames
-        self.assertGreater(
-            time_without_rule.total_elapsed_time, 3 * time_with_rule.total_elapsed_time
+        evaluate_count_without_rule = (
+            evaluate_mock.call_count - evaluate_count_with_rule
         )
+
+        # without rule it should be slow as we end up running the function
+        # on all the frames
+        self.assertGreater(evaluate_count_without_rule, 3 * evaluate_count_with_rule)
 
         result_without_xform_rule = None
         with disable_rules([XformLateralJoinToLinearFlow()]) as rules_manager:
@@ -78,7 +86,8 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
 
-    def test_should_pushdown_without_pushdown_join_rule(self):
+    @patch("eva.expression.function_expression.FunctionExpression.evaluate")
+    def test_should_pushdown_without_pushdown_join_rule(self, evaluate_mock):
         query = """SELECT id, obj.labels
                   FROM MyVideo JOIN LATERAL
                     YoloV5(data) AS obj(labels, bboxes, scores)
