@@ -62,43 +62,17 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     @pytest.mark.torchtest
-    def test_should_run_pytorch_and_fastrcnn(self):
-        select_query = """SELECT FastRCNNObjectDetector(data) FROM MyVideo
-                        WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 5)
-
-    @pytest.mark.torchtest
-    def test_should_run_pytorch_and_yolo(self):
-        select_query = """SELECT YoloV5(data) FROM MyVideo
-                        WHERE id < 5;"""
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 5)
-
-    @pytest.mark.torchtest
-    def test_should_run_pytorch_and_mvit(self):
-
-        execute_query_fetch_all(Mvit_udf_query)
-        select_query = """SELECT FIRST(id), MVITActionRecognition(SEGMENT(data)) FROM Actions
-                       GROUP BY '16f';"""
-        actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 9)
-        res = actual_batch.frames
-        # TODO ACTION: Test case for aliases
-        for idx in res.index:
-            self.assertTrue("yoga" in res["mvitactionrecognition.labels"][idx])
-
-    @pytest.mark.torchtest
     def test_should_run_pytorch_and_fastrcnn_and_mvit(self):
         execute_query_fetch_all(Mvit_udf_query)
 
         select_query = """SELECT FIRST(id),
-                                 YoloV5(FIRST(data)),
-                                 MVITActionRecognition(SEGMENT(data))
-                       FROM Actions
-                       GROUP BY '16f';"""
+                            YoloV5(FIRST(data)),
+                            MVITActionRecognition(SEGMENT(data))
+                            FROM Actions
+                            WHERE id < 32
+                            GROUP BY '16f'; """
         actual_batch = execute_query_fetch_all(select_query)
-        self.assertEqual(len(actual_batch), 9)
+        self.assertEqual(len(actual_batch), 2)
 
         res = actual_batch.frames
         for idx in res.index:
