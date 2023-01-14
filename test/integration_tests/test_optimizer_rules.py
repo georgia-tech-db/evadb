@@ -46,7 +46,7 @@ class OptimizerRulesTest(unittest.TestCase):
     def test_should_benefit_from_pushdown(self, evaluate_mock):
         query = """SELECT id, obj.labels
                   FROM MyVideo JOIN LATERAL
-                    YoloV5(data) AS obj(labels, bboxes, scores)
+                    FastRCNNObjectDetector(data) AS obj(labels, bboxes, scores)
                   WHERE id < 2;"""
 
         time_with_rule = Timer()
@@ -86,11 +86,10 @@ class OptimizerRulesTest(unittest.TestCase):
 
         self.assertEqual(result_without_xform_rule, result_with_rule)
 
-    @patch("eva.expression.function_expression.FunctionExpression.evaluate")
-    def test_should_pushdown_without_pushdown_join_rule(self, evaluate_mock):
+    def test_should_pushdown_without_pushdown_join_rule(self):
         query = """SELECT id, obj.labels
                   FROM MyVideo JOIN LATERAL
-                    YoloV5(data) AS obj(labels, bboxes, scores)
+                    FastRCNNObjectDetector(data) AS obj(labels, bboxes, scores)
                   WHERE id < 2;"""
 
         time_with_rule = Timer()

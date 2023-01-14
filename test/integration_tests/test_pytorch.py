@@ -62,7 +62,7 @@ class PytorchTest(unittest.TestCase):
         execute_query_fetch_all("DROP TABLE IF EXISTS MemeImages;")
 
     @pytest.mark.torchtest
-    def test_should_run_pytorch_and_fastrcnn_and_mvit(self):
+    def test_should_run_pytorch_and_yolo_and_mvit(self):
         execute_query_fetch_all(Mvit_udf_query)
 
         select_query = """SELECT FIRST(id),
