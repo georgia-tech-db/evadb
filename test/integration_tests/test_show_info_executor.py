@@ -76,6 +76,13 @@ class ShowExecutorTest(unittest.TestCase):
 
     def test_show_tables(self):
 
+        result = execute_query_fetch_all("SHOW TABLES;")
+        self.assertEqual(len(result), 3)
+        expected = {"name": ["MyVideo", "MNIST", "Actions"]}
+        expected_df = pd.DataFrame(expected)
+        self.assertEqual(result, Batch(expected_df))
+
+        # Stop and restart server
         os.system("nohup eva_server --stop")
         os.system("nohup eva_server --start &")
 
