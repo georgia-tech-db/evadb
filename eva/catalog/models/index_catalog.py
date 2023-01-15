@@ -21,7 +21,6 @@ from sqlalchemy.types import Enum
 from eva.catalog.catalog_type import IndexType
 from eva.catalog.models.base_model import BaseModel
 from eva.catalog.models.column_catalog import ColumnCatalogEntry
-from eva.catalog.models.table_catalog import TableCatalogEntry
 
 
 class IndexCatalog(BaseModel):
@@ -30,8 +29,9 @@ class IndexCatalog(BaseModel):
     `_name:` the name of the index.
     `_save_file_path:` the path to the index file on disk
     `_type:` the type of the index (refer to `IndexType`)
-    `_secondary_index_id:` the `_row_id` of the `TableCatalog` entry for the table on which the index is built
     `_feat_column_id:` the `_row_id` of the `ColumnCatalog` entry for the column on which the index is built.
+    `_udf_signature:` if the index is created by running udf expression on input column, this will store
+                      the udf signature of the used udf. Otherwise, this field is None.
     """
 
     __tablename__ = "index_catalog"
@@ -39,12 +39,9 @@ class IndexCatalog(BaseModel):
     _name = Column("name", String(100), unique=True)
     _save_file_path = Column("save_file_path", String(128))
     _type = Column("type", Enum(IndexType), default=Enum)
-    _secondary_index_id = Column(
-        "secondary_index_id", Integer, ForeignKey("table_catalog._row_id")
-    )
     _feat_column_id = Column("column_id", Integer, ForeignKey("column_catalog._row_id"))
+    _udf_signature = Column("udf", String, default=None)
 
-    _secondary_index = relationship("TableCatalog")
     _feat_column = relationship("ColumnCatalog")
 
     def __init__(
@@ -52,28 +49,24 @@ class IndexCatalog(BaseModel):
         name: str,
         save_file_path: str,
         type: IndexType,
-        secondary_index_id: int = None,
         feat_column_id: int = None,
+        udf_signature: str = None,
     ):
         self._name = name
         self._save_file_path = save_file_path
         self._type = type
-        self._secondary_index_id = secondary_index_id
         self._feat_column_id = feat_column_id
+        self._udf_signature = udf_signature
 
     def as_dataclass(self) -> "IndexCatalogEntry":
-        secondary_index = (
-            self._secondary_index.as_dataclass() if self._secondary_index else None
-        )
         feat_column = self._feat_column.as_dataclass() if self._feat_column else None
         return IndexCatalogEntry(
             row_id=self._row_id,
             name=self._name,
             save_file_path=self._save_file_path,
             type=self._type,
-            secondary_index_id=self._secondary_index_id,
             feat_column_id=self._feat_column_id,
-            secondary_index=secondary_index,
+            udf_signature=self._udf_signature,
             feat_column=feat_column,
         )
 
@@ -88,7 +81,6 @@ class IndexCatalogEntry:
     save_file_path: str
     type: IndexType
     row_id: int = None
-    secondary_index_id: int = None
     feat_column_id: int = None
-    secondary_index: TableCatalogEntry = None
+    udf_signature: str = None
     feat_column: ColumnCatalogEntry = None

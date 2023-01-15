@@ -15,6 +15,7 @@
 from typing import List
 
 from eva.catalog.catalog_type import IndexType
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.create_statement import ColumnDefinition
 from eva.parser.statement import AbstractStatement
 from eva.parser.table_ref import TableRef
@@ -28,16 +29,21 @@ class CreateIndexStatement(AbstractStatement):
         table_ref: TableRef,
         col_list: List[ColumnDefinition],
         index_type: IndexType,
+        udf_func: FunctionExpression = None,
     ):
         super().__init__(StatementType.CREATE_INDEX)
         self._name = name
         self._table_ref = table_ref
         self._col_list = col_list
         self._index_type = index_type
+        self._udf_func = udf_func
 
     def __str__(self) -> str:
-        print_str = "CREATE INDEX {} ON {} ({}) ".format(
-            self._name, self._table_ref, tuple(self._col_list)
+        print_str = "CREATE INDEX {} ON {} ({}{}) ".format(
+            self._name,
+            self._table_ref,
+            "" if self._udf_func else self._udf_func,
+            tuple(self._col_list),
         )
         return print_str
 
@@ -57,6 +63,10 @@ class CreateIndexStatement(AbstractStatement):
     def index_type(self):
         return self._index_type
 
+    @property
+    def udf_func(self):
+        return self._udf_func
+
     def __eq__(self, other):
         if not isinstance(other, CreateIndexStatement):
             return False
@@ -65,6 +75,7 @@ class CreateIndexStatement(AbstractStatement):
             and self._table_ref == other.table_ref
             and self.col_list == other.col_list
             and self._index_type == other.index_type
+            and self._udf_func == other.udf_func
         )
 
     def __hash__(self) -> int:
@@ -75,5 +86,6 @@ class CreateIndexStatement(AbstractStatement):
                 self._table_ref,
                 tuple(self.col_list),
                 self._index_type,
+                self._udf_func,
             )
         )

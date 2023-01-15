@@ -541,6 +541,7 @@ class LogicalCreateIndexToFaiss(Rule):
             before.table_ref,
             before.col_list,
             before.index_type,
+            before.udf_func,
         )
         return after
 
