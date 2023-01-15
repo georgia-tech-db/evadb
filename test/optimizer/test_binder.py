@@ -94,14 +94,14 @@ class TestBinder(unittest.TestCase):
         root_grp_expr = opt_ctxt.add_opr_to_group(root_opr)
         binder = Binder(root_grp_expr, root_ptn, opt_ctxt.memo)
         expected_match = copy.copy(root_opr)
-        expected_match.children = [child_opr, Dummy(2)]
+        expected_match.children = [child_opr, Dummy(2, None)]
         for match in iter(binder):
             self.helper_pre_order_match(expected_match, match)
 
         opt_ctxt = OptimizerContext(CostModel())
         sub_root_grp_expr = opt_ctxt.add_opr_to_group(sub_root_opr)
         expected_match = copy.copy(sub_root_opr)
-        expected_match.children = [sub_child_opr, Dummy(1)]
+        expected_match.children = [sub_child_opr, Dummy(1, None)]
         binder = Binder(sub_root_grp_expr, root_ptn, opt_ctxt.memo)
         for match in iter(binder):
             self.helper_pre_order_match(expected_match, match)
