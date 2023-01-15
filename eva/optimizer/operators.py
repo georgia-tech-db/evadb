@@ -134,9 +134,10 @@ class Dummy(Operator):
     It track the group_id of the matching operator.
     """
 
-    def __init__(self, group_id: int):
+    def __init__(self, group_id: int, opr: Operator):
         super().__init__(OperatorType.DUMMY, None)
         self.group_id = group_id
+        self.opr = opr
 
     def __hash__(self) -> int:
         return hash((super().__hash__(), self.group_id))

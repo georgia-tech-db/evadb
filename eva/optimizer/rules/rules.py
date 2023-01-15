@@ -449,6 +449,23 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
 
         # Get corresponding nodes.
         orderby_node = before.children[0]
+        sub_tree_root = orderby_node.children[0]
+
+        # Check if predicate exists on table.
+        def _exists_predicate(opr):
+            if isinstance(opr, LogicalFilter):
+                return True
+            elif isinstance(opr, LogicalGet):
+                return opr.predicate is not None
+            elif isinstance(opr, LogicalQueryDerivedGet):
+                return opr.predicate is not None
+            exists_predicate = False
+            for child in opr.children:
+                exists_predicate |= _exists_predicate(child)
+            return exists_predicate
+
+        if _exists_predicate(sub_tree_root.opr):
+            return False
 
         # Check if orderby runs on similarity expression.
         # Current optimization will only accept Similarity expression.
