@@ -13,42 +13,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import pickle as pkl
+
 import numpy as np
 import pandas as pd
 import torch
 import torchvision
-import os
-import pickle as pkl
 
 try:
-    from torchvision.models.video import r3d_18, R3D_18_Weights
+    from torchvision.models.video import R3D_18_Weights, r3d_18
 
 except ImportError:
     raise ImportError(
         f"torchvision>=0.14.0 is required to use MVITActionRecognition, found {torchvision.__version__}"
     )
+import torch.nn as nn
+import torchvision
+
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
-import torchvision
-import torch.nn as nn
+
 
 class ASLActionRecognition(PytorchAbstractClassifierUDF):
-
     @property
     def name(self) -> str:
         return "ASLActionRecognition"
 
-    
     def download_weights(self):
         if not os.path.exists(self.asl_weights_path):
             torch.hub.set_dir(os.getcwd())
-            torch.hub.download_url_to_file(self.asl_weights_url, self.asl_weights_path, hash_prefix=None, progress=True)
-
+            torch.hub.download_url_to_file(
+                self.asl_weights_url,
+                self.asl_weights_path,
+                hash_prefix=None,
+                progress=True,
+            )
 
     def setup(self):
-        self.asl_weights_url = "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
-        self.asl_weights_path = os.getcwd()+"/asl_weights.pth"
+        self.asl_weights_url = (
+            "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
+        )
+        self.asl_weights_path = os.getcwd() + "/asl_weights.pth"
         self.download_weights()
 
         self.weights = R3D_18_Weights.DEFAULT
@@ -66,10 +73,10 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     @property
     def labels(self) -> np.array([str]):
-        with open(os.getcwd()+"/asl_20_actions_map.pkl", "rb") as f:
+        with open(os.getcwd() + "/asl_20_actions_map.pkl", "rb") as f:
             action_to_index_map = pkl.load(f)
-        actions_arr = [""]*len(action_to_index_map)
-        for action,index in action_to_index_map.items():
+        actions_arr = [""] * len(action_to_index_map)
+        for action, index in action_to_index_map.items():
             actions_arr[index] = action
         return np.asarray(actions_arr)
 
@@ -78,8 +85,8 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     def transform(self, segments) -> torch.Tensor:
         segments = torch.Tensor(segments)
-        permute_order = [2,1,0]
-        segments = segments[:,:,:, permute_order]
+        permute_order = [2, 1, 0]
+        segments = segments[:, :, :, permute_order]
         segments = segments.permute(0, 3, 1, 2).to(torch.uint8)
         return self.preprocess(segments).unsqueeze(0)
 
@@ -87,7 +94,7 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         with torch.no_grad():
             preds = self.model(segments).softmax(1)
         label_indices = preds.argmax(axis=1)
-        
+
         actions = self.labels[label_indices]
         # TODO ACTION: In the current pipeline, actions will always get batches on
         # length 1, so this case would never be invoked.

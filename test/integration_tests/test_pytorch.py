@@ -30,9 +30,11 @@ from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
 from eva.configuration.constants import EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
-from eva.udfs.udf_bootstrap_queries import Mvit_udf_query
-from eva.udfs.udf_bootstrap_queries import Asl_udf_query
-from eva.udfs.udf_bootstrap_queries import Mvit_udf_query, Timestamp_udf_query
+from eva.udfs.udf_bootstrap_queries import (
+    Asl_udf_query,
+    Mvit_udf_query,
+    Timestamp_udf_query,
+)
 
 
 class PytorchTest(unittest.TestCase):
@@ -47,7 +49,7 @@ class PytorchTest(unittest.TestCase):
         asl_actions = f"{EVA_ROOT_DIR}/data/actions/computer_asl.avi"
         meme1 = f"{EVA_ROOT_DIR}/data/detoxify/meme1.jpg"
         meme2 = f"{EVA_ROOT_DIR}/data/detoxify/meme2.jpg"
-        
+
         execute_query_fetch_all(f"LOAD VIDEO '{ua_detrac}' INTO MyVideo;")
         execute_query_fetch_all(f"LOAD VIDEO '{mnist}' INTO MNIST;")
         execute_query_fetch_all(f"LOAD VIDEO '{actions}' INTO Actions;")
@@ -61,8 +63,8 @@ class PytorchTest(unittest.TestCase):
         file_remove("ua_detrac.mp4")
         file_remove("mnist.mp4")
         file_remove("actions.mp4")
-        file_remove("comp_asl_new.mp4")
-        
+        file_remove("computer_asl.avi")
+
         execute_query_fetch_all("DROP TABLE IF EXISTS Actions;")
         execute_query_fetch_all("DROP TABLE IF EXISTS Mnist;")
         execute_query_fetch_all("DROP TABLE IF EXISTS MyVideo;")
@@ -98,6 +100,18 @@ class PytorchTest(unittest.TestCase):
                 "person" in res["yolov5.labels"][idx]
                 and "yoga" in res["mvitactionrecognition.labels"][idx]
             )
+
+    @pytest.mark.torchtest
+    def test_should_run_pytorch_and_asl(self):
+        execute_query_fetch_all(Asl_udf_query)
+        select_query = """SELECT FIRST(id), ASLActionRecognition(SEGMENT(data))
+                        FROM Asl_actions SAMPLE 5 GROUP BY '16f';"""
+        actual_batch = execute_query_fetch_all(select_query)
+
+        res = actual_batch.frames
+
+        for idx in res.index:
+            self.assertTrue("computer" in res["aslactionrecognition.labels"][idx])
 
     @pytest.mark.torchtest
     def test_should_run_pytorch_and_facenet(self):
@@ -234,7 +248,6 @@ class PytorchTest(unittest.TestCase):
         self.assertTrue(res["ocrextractor.labels"][0][0] == "4")
         self.assertTrue(res["ocrextractor.scores"][2][0] > 0.9)
 
-
     @pytest.mark.torchtest
     @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
     def test_should_run_detoxify_on_text(self):
@@ -272,7 +285,7 @@ class PytorchTest(unittest.TestCase):
         select_query = """SELECT id, seconds, Timestamp(seconds)
                           FROM MyVideo
                           WHERE Timestamp(seconds) <= "00:00:01"; """
-        # TODO: Check why this does not work 
+        # TODO: Check why this does not work
         #                  AND Timestamp(seconds) < "00:00:03"; """
         actual_batch = execute_query_fetch_all(select_query)
 
