@@ -48,9 +48,7 @@ class ComparisonExpression(AbstractExpression):
             elif len(rbatch) == 1:
                 rbatch.repeat(len(lbatch))
             else:
-                raise Exception(
-                    f"Left and Right batch does not have equal elements: left: {len(lbatch)} right: {len(rbatch)}"
-                )
+                raise Exception("Left and Right batch does not have equal elements")
 
         if self.etype == ExpressionType.COMPARE_EQUAL:
             return Batch.from_eq(lbatch, rbatch)

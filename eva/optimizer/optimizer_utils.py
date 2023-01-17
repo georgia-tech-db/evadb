@@ -17,12 +17,13 @@ from typing import List, Tuple
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
-    conjuction_list_to_expression_tree,
+    and_,
     contains_single_column,
-    expression_tree_to_conjunction_list,
     get_columns_in_predicate,
     is_simple_predicate,
+    to_conjunction_list,
 )
+from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
@@ -62,7 +63,7 @@ def extract_equi_join_keys(
     right_table_aliases: List[str],
 ) -> Tuple[List[AbstractExpression], List[AbstractExpression]]:
 
-    pred_list = expression_tree_to_conjunction_list(join_predicate)
+    pred_list = to_conjunction_list(join_predicate)
     left_join_keys = []
     right_join_keys = []
     for pred in pred_list:
@@ -111,7 +112,7 @@ def extract_pushdown_predicate(
 
     pushdown_preds = []
     rem_pred = []
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     for pred in pred_list:
         if contains_single_column(pred, column_alias) and is_simple_predicate(pred):
             pushdown_preds.append(pred)
@@ -119,8 +120,8 @@ def extract_pushdown_predicate(
             rem_pred.append(pred)
 
     return (
-        conjuction_list_to_expression_tree(pushdown_preds),
-        conjuction_list_to_expression_tree(rem_pred),
+        and_(pushdown_preds),
+        and_(rem_pred),
     )
 
 
@@ -139,7 +140,7 @@ def extract_pushdown_predicate_for_alias(
     if predicate is None:
         return None, None
 
-    pred_list = expression_tree_to_conjunction_list(predicate)
+    pred_list = to_conjunction_list(predicate)
     pushdown_preds = []
     rem_pred = []
     aliases = [alias.alias_name for alias in aliases]
@@ -151,6 +152,34 @@ def extract_pushdown_predicate_for_alias(
         else:
             rem_pred.append(pred)
     return (
-        conjuction_list_to_expression_tree(pushdown_preds),
-        conjuction_list_to_expression_tree(rem_pred),
+        and_(pushdown_preds),
+        and_(rem_pred),
+    )
+
+
+def extract_function_expressions(
+    predicate: AbstractExpression,
+) -> Tuple[List[FunctionExpression], AbstractExpression]:
+    """Decompose the predicate into a list of function expressions and remaining predicate
+    Args:
+        predicate (AbstractExpression): input predicate
+    Returns:
+        Tuple[List[FunctionExpression], AbstractExpression]: list of
+            function expressions and remaining predicate
+    """
+    pred_list = to_conjunction_list(predicate)
+    function_exprs = []
+    remaining_exprs = []
+    for pred in pred_list:
+        # either child of the predicate has a FunctionExpression
+        if isinstance(pred.children[0], FunctionExpression) or isinstance(
+            pred.children[1], FunctionExpression
+        ):
+            function_exprs.append(pred)
+        else:
+            remaining_exprs.append(pred)
+
+    return (
+        function_exprs,
+        and_(remaining_exprs),
     )

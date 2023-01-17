@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
-from eva.expression.expression_utils import conjuction_list_to_expression_tree
+from eva.expression.expression_utils import and_
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -136,10 +136,10 @@ class EmbedFilterIntoGet(Rule):
             if unsupported_pred:
                 unsupported_opr = LogicalFilter(unsupported_pred)
                 unsupported_opr.append_child(new_get_opr)
-                return unsupported_opr
+                new_get_opr = unsupported_opr
             return new_get_opr
         else:
-            return before
+            yield before
 
 
 class EmbedSampleIntoGet(Rule):
@@ -170,7 +170,7 @@ class EmbedSampleIntoGet(Rule):
             sampling_rate=sample_freq,
             children=lget.children,
         )
-        return new_get_opr
+        yield new_get_opr
 
 
 class EmbedProjectIntoGet(Rule):
@@ -199,7 +199,7 @@ class EmbedProjectIntoGet(Rule):
             children=lget.children,
         )
 
-        return new_get_opr
+        yield new_get_opr
 
 
 # For nested queries
@@ -229,7 +229,7 @@ class EmbedFilterIntoDerivedGet(Rule):
             target_list=ld_get.target_list,
             children=ld_get.children,
         )
-        return new_opr
+        yield new_opr
 
 
 class EmbedProjectIntoDerivedGet(Rule):
@@ -256,7 +256,7 @@ class EmbedProjectIntoDerivedGet(Rule):
             target_list=target_list,
             children=ld_get.children,
         )
-        return new_opr
+        yield new_opr
 
 
 # Join Queries
@@ -312,11 +312,11 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = conjuction_list_to_expression_tree(
+            new_join_node.join_predicate = and_(
                 [rem_pred, new_join_node.join_predicate]
             )
 
-        return new_join_node
+        yield new_join_node
 
 
 class XformLateralJoinToLinearFlow(Rule):
@@ -355,7 +355,7 @@ class XformLateralJoinToLinearFlow(Rule):
             logical_func_scan.do_unnest,
         )
         logical_apply_merge.append_child(A)
-        return logical_apply_merge
+        yield logical_apply_merge
 
 
 class PushDownFilterThroughApplyAndMerge(Rule):
@@ -410,7 +410,7 @@ class PushDownFilterThroughApplyAndMerge(Rule):
             root_node = LogicalFilter(predicate=rem_pred)
             root_node.append_child(apply_and_merge)
 
-        return root_node
+        yield root_node
 
 
 # REWRITE RULES END
@@ -442,7 +442,7 @@ class LogicalInnerJoinCommutativity(Rule):
         new_join = LogicalJoin(before.join_type, before.join_predicate)
         new_join.append_child(before.rhs())
         new_join.append_child(before.lhs())
-        return new_join
+        yield new_join
 
 
 # LOGICAL RULES END
@@ -466,7 +466,7 @@ class LogicalCreateToPhysical(Rule):
 
     def apply(self, before: LogicalCreate, context: OptimizerContext):
         after = CreatePlan(before.video, before.column_list, before.if_not_exists)
-        return after
+        yield after
 
 
 class LogicalRenameToPhysical(Rule):
@@ -482,7 +482,7 @@ class LogicalRenameToPhysical(Rule):
 
     def apply(self, before: LogicalRename, context: OptimizerContext):
         after = RenamePlan(before.old_table_ref, before.new_name)
-        return after
+        yield after
 
 
 class LogicalDropToPhysical(Rule):
@@ -498,7 +498,7 @@ class LogicalDropToPhysical(Rule):
 
     def apply(self, before: LogicalDrop, context: OptimizerContext):
         after = DropPlan(before.table_infos, before.if_exists)
-        return after
+        yield after
 
 
 class LogicalCreateUDFToPhysical(Rule):
@@ -521,7 +521,7 @@ class LogicalCreateUDFToPhysical(Rule):
             before.impl_path,
             before.udf_type,
         )
-        return after
+        yield after
 
 
 class LogicalCreateIndexToFaiss(Rule):
@@ -541,9 +541,8 @@ class LogicalCreateIndexToFaiss(Rule):
             before.table_ref,
             before.col_list,
             before.index_type,
-            before.udf_func,
         )
-        return after
+        yield after
 
 
 class LogicalDropUDFToPhysical(Rule):
@@ -559,7 +558,7 @@ class LogicalDropUDFToPhysical(Rule):
 
     def apply(self, before: LogicalDropUDF, context: OptimizerContext):
         after = DropUDFPlan(before.name, before.if_exists)
-        return after
+        yield after
 
 
 class LogicalInsertToPhysical(Rule):
@@ -575,7 +574,7 @@ class LogicalInsertToPhysical(Rule):
 
     def apply(self, before: LogicalInsert, context: OptimizerContext):
         after = InsertPlan(before.table, before.column_list, before.value_list)
-        return after
+        yield after
 
 
 class LogicalLoadToPhysical(Rule):
@@ -607,7 +606,7 @@ class LogicalLoadToPhysical(Rule):
             before.column_list,
             before.file_options,
         )
-        return after
+        yield after
 
 
 class LogicalUploadToPhysical(Rule):
@@ -641,7 +640,7 @@ class LogicalUploadToPhysical(Rule):
             before.file_options,
         )
 
-        return after
+        yield after
 
 
 class LogicalGetToSeqScan(Rule):
@@ -675,7 +674,7 @@ class LogicalGetToSeqScan(Rule):
                 sampling_rate=before.sampling_rate,
             )
         )
-        return after
+        yield after
 
 
 class LogicalSampleToUniformSample(Rule):
@@ -694,7 +693,7 @@ class LogicalSampleToUniformSample(Rule):
         after = SamplePlan(before.sample_freq)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalDerivedGetToPhysical(Rule):
@@ -712,7 +711,7 @@ class LogicalDerivedGetToPhysical(Rule):
     def apply(self, before: LogicalQueryDerivedGet, context: OptimizerContext):
         after = SeqScanPlan(before.predicate, before.target_list, before.alias)
         after.append_child(before.children[0])
-        return after
+        yield after
 
 
 class LogicalUnionToPhysical(Rule):
@@ -733,7 +732,7 @@ class LogicalUnionToPhysical(Rule):
         after = UnionPlan(before.all)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalGroupByToPhysical(Rule):
@@ -752,7 +751,7 @@ class LogicalGroupByToPhysical(Rule):
         after = GroupByPlan(before.groupby_clause)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalOrderByToPhysical(Rule):
@@ -771,7 +770,7 @@ class LogicalOrderByToPhysical(Rule):
         after = OrderByPlan(before.orderby_list)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalLimitToPhysical(Rule):
@@ -790,7 +789,7 @@ class LogicalLimitToPhysical(Rule):
         after = LimitPlan(before.limit_count)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalFunctionScanToPhysical(Rule):
@@ -806,7 +805,7 @@ class LogicalFunctionScanToPhysical(Rule):
 
     def apply(self, before: LogicalFunctionScan, context: OptimizerContext):
         after = FunctionScanPlan(before.func_expr, before.do_unnest)
-        return after
+        yield after
 
 
 class LogicalLateralJoinToPhysical(Rule):
@@ -830,7 +829,7 @@ class LogicalLateralJoinToPhysical(Rule):
         lateral_join_plan.join_project = join_node.join_project
         lateral_join_plan.append_child(join_node.lhs())
         lateral_join_plan.append_child(join_node.rhs())
-        return lateral_join_plan
+        yield lateral_join_plan
 
 
 class LogicalJoinToPhysicalHashJoin(Rule):
@@ -872,7 +871,7 @@ class LogicalJoinToPhysicalHashJoin(Rule):
         )
         probe_side.append_child(build_plan)
         probe_side.append_child(b)
-        return probe_side
+        yield probe_side
 
 
 class LogicalCreateMaterializedViewToPhysical(Rule):
@@ -892,10 +891,11 @@ class LogicalCreateMaterializedViewToPhysical(Rule):
             before.view,
             columns=before.col_list,
             if_not_exists=before.if_not_exists,
+            yield_output=before.yield_output,
         )
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalFilterToPhysical(Rule):
@@ -914,7 +914,7 @@ class LogicalFilterToPhysical(Rule):
         after = PredicatePlan(before.predicate)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalProjectToPhysical(Rule):
@@ -933,7 +933,7 @@ class LogicalProjectToPhysical(Rule):
         after = ProjectPlan(before.target_list)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalShowToPhysical(Rule):
@@ -949,7 +949,7 @@ class LogicalShowToPhysical(Rule):
 
     def apply(self, before: LogicalShow, context: OptimizerContext):
         after = ShowInfoPlan(before.show_type)
-        return after
+        yield after
 
 
 class LogicalExplainToPhysical(Rule):
@@ -968,7 +968,7 @@ class LogicalExplainToPhysical(Rule):
         after = ExplainPlan(before.explainable_opr)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 class LogicalApplyAndMergeToPhysical(Rule):
@@ -987,7 +987,7 @@ class LogicalApplyAndMergeToPhysical(Rule):
         after = ApplyAndMergePlan(before.func_expr, before.alias, before.do_unnest)
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 # IMPLEMENTATION RULES END

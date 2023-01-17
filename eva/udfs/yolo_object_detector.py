@@ -51,7 +51,7 @@ class YoloV5(PytorchAbstractClassifierUDF):
 
     def setup(self, threshold=0.85):
         self.threshold = threshold
-        self.model = yolov5.load("yolov5s.pt", verbose=False)
+        self.model = yolov5.load("yolov5s.pt")
 
     @property
     def input_format(self) -> FrameInfo:
@@ -183,6 +183,17 @@ class YoloV5(PytorchAbstractClassifierUDF):
             )
 
             outcome.append(
-                {"labels": pred_class, "scores": pred_score, "bboxes": pred_boxes},
+                {
+                    "labels": pred_class,
+                    "bboxes": pred_boxes,
+                    "scores": pred_score,
+                },
             )
-        return pd.DataFrame(outcome, columns=["labels", "scores", "bboxes"])
+        return pd.DataFrame(
+            outcome,
+            columns=[
+                "labels",
+                "bboxes",
+                "scores",
+            ],
+        )

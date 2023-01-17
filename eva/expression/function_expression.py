@@ -107,8 +107,7 @@ class FunctionExpression(AbstractExpression):
             new_batch = Batch.merge_column_wise(child_batches)
 
         func = self._gpu_enabled_function()
-        outcomes = new_batch
-        outcomes.apply_function_expression(func)
+        outcomes = new_batch.apply_function_expression(func)
         outcomes = outcomes.project(self.projection_columns)
         outcomes.modify_column_alias(self.alias)
         return outcomes
