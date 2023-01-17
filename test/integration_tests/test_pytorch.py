@@ -28,7 +28,7 @@ import pytest
 
 from eva.catalog.catalog_manager import CatalogManager
 from eva.configuration.configuration_manager import ConfigurationManager
-from eva.configuration.constants import EVA_ROOT_DIR
+from eva.configuration.constants import EVA_INSTALLATION_DIR, EVA_ROOT_DIR
 from eva.server.command_handler import execute_query_fetch_all
 from eva.udfs.udf_bootstrap_queries import Mvit_udf_query, Timestamp_udf_query
 
@@ -284,3 +284,21 @@ class PytorchTest(unittest.TestCase):
         actual_batch = execute_query_fetch_all(select_query)
 
         self.assertEqual(len(actual_batch), 60)
+
+    # @pytest.mark.torchtest
+    def test_should_run_and_yolo(self):
+        udf = """CREATE UDF
+            IF NOT EXISTS  ByteTracker
+            INPUT (seconds INTEGER)
+            OUTPUT (timestamp NDARRAY STR(8))
+            TYPE NdarrayUDF
+            IMPL "{}/udfs/trackers/openmm_tracker.py";
+        """.format(
+            EVA_INSTALLATION_DIR
+        )
+        execute_query_fetch_all(udf)
+        select_query = """SELECT id, ByteTracker(id, data, T.bboxes, T.scores, T.labels) FROM MyVideo JOIN LATERAL YoloV5(data) AS T(labels, bboxes, scores); """
+        actual_batch = execute_query_fetch_all(select_query)
+        self.assertEqual(len(actual_batch), 5)
+
+
