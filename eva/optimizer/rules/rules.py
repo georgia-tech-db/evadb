@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 from eva.catalog.catalog_type import TableType
 from eva.catalog.catalog_utils import is_video_table
-from eva.expression.expression_utils import and_
+from eva.expression.expression_utils import conjuction_list_to_expression_tree
 from eva.optimizer.optimizer_utils import (
     extract_equi_join_keys,
     extract_pushdown_predicate,
@@ -312,7 +312,7 @@ class PushDownFilterThroughJoin(Rule):
             new_join_node.append_child(right)
 
         if rem_pred:
-            new_join_node.join_predicate = and_(
+            new_join_node.join_predicate = conjuction_list_to_expression_tree(
                 [rem_pred, new_join_node.join_predicate]
             )
 
@@ -541,6 +541,7 @@ class LogicalCreateIndexToFaiss(Rule):
             before.table_ref,
             before.col_list,
             before.index_type,
+            before.udf_func,
         )
         yield after
 

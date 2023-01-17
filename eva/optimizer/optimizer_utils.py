@@ -17,7 +17,7 @@ from typing import List, Tuple
 from eva.catalog.models.udf_io_catalog import UdfIOCatalogEntry
 from eva.expression.abstract_expression import AbstractExpression, ExpressionType
 from eva.expression.expression_utils import (
-    and_,
+    conjuction_list_to_expression_tree,
     contains_single_column,
     get_columns_in_predicate,
     is_simple_predicate,
@@ -119,8 +119,8 @@ def extract_pushdown_predicate(
             rem_pred.append(pred)
 
     return (
-        and_(pushdown_preds),
-        and_(rem_pred),
+        conjuction_list_to_expression_tree(pushdown_preds),
+        conjuction_list_to_expression_tree(rem_pred),
     )
 
 
@@ -151,6 +151,6 @@ def extract_pushdown_predicate_for_alias(
         else:
             rem_pred.append(pred)
     return (
-        and_(pushdown_preds),
-        and_(rem_pred),
+        conjuction_list_to_expression_tree(pushdown_preds),
+        conjuction_list_to_expression_tree(rem_pred),
     )

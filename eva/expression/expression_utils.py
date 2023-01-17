@@ -50,7 +50,7 @@ def to_conjunction_list(
     return expression_list
 
 
-def and_(
+def conjuction_list_to_expression_tree(
     expression_list: List[AbstractExpression],
 ) -> AbstractExpression:
     """Convert expression list to expression tree using conjuction connector
@@ -63,7 +63,7 @@ def and_(
         AbstractExpression: expression tree
 
     Example:
-        and_([a, b, c] ): AND( AND(a, b), c)
+        conjuction_list_to_expression_tree([a, b, c] ): AND( AND(a, b), c)
     """
     if len(expression_list) == 0:
         return None
