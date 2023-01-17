@@ -23,7 +23,6 @@ from eva.expression.expression_utils import (
     is_simple_predicate,
     to_conjunction_list,
 )
-from eva.expression.function_expression import FunctionExpression
 from eva.parser.alias import Alias
 from eva.parser.create_statement import ColumnDefinition
 from eva.utils.logging_manager import logger
@@ -154,32 +153,4 @@ def extract_pushdown_predicate_for_alias(
     return (
         and_(pushdown_preds),
         and_(rem_pred),
-    )
-
-
-def extract_function_expressions(
-    predicate: AbstractExpression,
-) -> Tuple[List[FunctionExpression], AbstractExpression]:
-    """Decompose the predicate into a list of function expressions and remaining predicate
-    Args:
-        predicate (AbstractExpression): input predicate
-    Returns:
-        Tuple[List[FunctionExpression], AbstractExpression]: list of
-            function expressions and remaining predicate
-    """
-    pred_list = to_conjunction_list(predicate)
-    function_exprs = []
-    remaining_exprs = []
-    for pred in pred_list:
-        # either child of the predicate has a FunctionExpression
-        if isinstance(pred.children[0], FunctionExpression) or isinstance(
-            pred.children[1], FunctionExpression
-        ):
-            function_exprs.append(pred)
-        else:
-            remaining_exprs.append(pred)
-
-    return (
-        function_exprs,
-        and_(remaining_exprs),
     )
