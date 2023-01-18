@@ -12,8 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from eva.expression.function_expression import FunctionExpression
 from eva.expression.constant_value_expression import ConstantValueExpression
+from eva.expression.function_expression import FunctionExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
@@ -29,7 +29,13 @@ class FaissIndexScanPlan(AbstractPlan):
         search_query_expr (FunctionExpression): function expression to evaluate, whose
         results will be searched in the Faiss index.
     """
-    def __init__(self, index_name: str, limit_count: ConstantValueExpression, search_query_expr: FunctionExpression):
+
+    def __init__(
+        self,
+        index_name: str,
+        limit_count: ConstantValueExpression,
+        search_query_expr: FunctionExpression,
+    ):
         super().__init__(PlanOprType.FAISS_INDEX_SCAN)
         self._index_name = index_name
         self._limit_count = limit_count
@@ -54,5 +60,10 @@ class FaissIndexScanPlan(AbstractPlan):
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.index_name, self.limit_count, self.search_query_expr)
+            (
+                super().__hash__(),
+                self.index_name,
+                self.limit_count,
+                self.search_query_expr,
+            )
         )
