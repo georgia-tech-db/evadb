@@ -420,12 +420,18 @@ class PushDownFilterThroughApplyAndMerge(Rule):
 
 class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
     """
+    This rule currently rewrites Order By + Limit to a Faiss index scan.
+    Because Faiss index only works for similarity search, the rule will
+    only be applied when the Order By is on Similarity expression. For
+    simplicity, we also only enable this rule when the Similarity expression
+    applies to the full table. Predicated query will yield incorrect results
+    if we use an index scan.
 
     Limit(10)
         |
     OrderBy(func)        ->        IndexScan(10)
-        |
-        A
+        |                               |
+        A                               A
     """
 
     def __init__(self):
@@ -445,9 +451,13 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
         return Promise.COMBINE_SIMILARITY_ORDERBY_AND_LIMIT_TO_FAISS_INDEX_SCAN
 
     def check(self, before: LogicalLimit, context: OptimizerContext):
+        return True
+
+    def apply(self, before: LogicalLimit, context: OptimizerContext):
         catalog_manager = CatalogManager()
 
         # Get corresponding nodes.
+        limit_node = before
         orderby_node = before.children[0]
         sub_tree_root = orderby_node.children[0]
 
@@ -465,7 +475,7 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             return exists_predicate
 
         if _exists_predicate(sub_tree_root.opr):
-            return False
+            return
 
         # Check if orderby runs on similarity expression.
         # Current optimization will only accept Similarity expression.
@@ -476,11 +486,8 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
                 and sort_type == ParserOrderBySortType.ASC
             ):
                 func_orderby_expr = column
-        if not func_orderby_expr:
-            return False
-        else:
-            if func_orderby_expr.name != "Similarity":
-                return False
+        if not func_orderby_expr or func_orderby_expr.name != "Similarity":
+            return
 
         # Check if there exists an index on table and column.
         query_func_expr, base_func_expr = func_orderby_expr.children
@@ -502,28 +509,17 @@ class CombineSimilarityOrderByAndLimitToFaissIndexScan(Rule):
             )
         )
         if not index_catalog_entry:
-            return False
-
-        # Populate entries for later rewrite.
-        self._index_catalog_entry = index_catalog_entry
-        self._query_func_expr = query_func_expr
-
-        return True
-
-    def apply(self, before: LogicalLimit, context: OptimizerContext):
-        # Get corresponding nodes.
-        limit_node = before
-        orderby_node = before.children[0]
+            return
 
         # Construct the Faiss index scan plan.
         faiss_index_scan_node = LogicalFaissIndexScan(
-            self._index_catalog_entry.name,
+            index_catalog_entry.name,
             limit_node.limit_count,
-            self._query_func_expr,
+            query_func_expr,
         )
         for child in orderby_node.children:
             faiss_index_scan_node.append_child(child)
-        return faiss_index_scan_node
+        yield faiss_index_scan_node
 
 
 # REWRITE RULES END
@@ -1121,7 +1117,7 @@ class LogicalFaissIndexScanToPhysical(Rule):
         )
         for child in before.children:
             after.append_child(child)
-        return after
+        yield after
 
 
 # IMPLEMENTATION RULES END

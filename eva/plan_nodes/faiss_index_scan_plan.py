@@ -13,35 +13,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from eva.expression.function_expression import FunctionExpression
+from eva.expression.constant_value_expression import ConstantValueExpression
 from eva.plan_nodes.abstract_plan import AbstractPlan
 from eva.plan_nodes.types import PlanOprType
 
 
 class FaissIndexScanPlan(AbstractPlan):
-    def __init__(self, index_name: str, query_num: int, query_expr: FunctionExpression):
+    """
+    The plan first evaluates the `search_query_expr` expression and searches the output
+    in the Faiss index. The plan finally projects `limit_count` number of results.
+
+    Arguments:
+        index_name (str): The Faiss index name.
+        limit_count (ConstantValueExpression): Number of top results to project.
+        search_query_expr (FunctionExpression): function expression to evaluate, whose
+        results will be searched in the Faiss index.
+    """
+    def __init__(self, index_name: str, limit_count: ConstantValueExpression, search_query_expr: FunctionExpression):
         super().__init__(PlanOprType.FAISS_INDEX_SCAN)
         self._index_name = index_name
-        self._query_num = query_num
-        self._query_expr = query_expr
+        self._limit_count = limit_count
+        self._search_query_expr = search_query_expr
 
     @property
     def index_name(self):
         return self._index_name
 
     @property
-    def query_num(self):
-        return self._query_num
+    def limit_count(self):
+        return self._limit_count
 
     @property
-    def query_expr(self):
-        return self._query_expr
+    def search_query_expr(self):
+        return self._search_query_expr
 
     def __str__(self):
-        return "FaissIndexScan(index_name={}, query_num={}, query_expr={})".format(
-            self._index_name, self._query_num, self._query_expr
+        return "FaissIndexScan(index_name={}, limit_count={}, search_query_expr={})".format(
+            self._index_name, self._limit_count, self._search_query_expr
         )
 
     def __hash__(self) -> int:
         return hash(
-            (super().__hash__(), self.index_name, self.query_num, self.query_expr)
+            (super().__hash__(), self.index_name, self.limit_count, self.search_query_expr)
         )

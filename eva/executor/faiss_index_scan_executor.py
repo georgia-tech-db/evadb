@@ -23,12 +23,20 @@ from eva.models.storage.batch import Batch
 from eva.plan_nodes.faiss_index_scan_plan import FaissIndexScanPlan
 
 
+# Helper function for getting row_id column alias.
+def get_row_id_column_alias(column_list):
+    for column in column_list:
+        alias, col_name = column.split(".")
+        if col_name == "_row_id":
+            return alias
+
+
 class FaissIndexScanExecutor(AbstractExecutor):
     def __init__(self, node: FaissIndexScanPlan):
         super().__init__(node)
         self.index_name = node.index_name
-        self.query_num = node.query_num
-        self.query_expr = node.query_expr
+        self.limit_count = node.limit_count
+        self.search_query_expr = node.search_query_expr
 
     def validate(self):
         pass
@@ -42,11 +50,6 @@ class FaissIndexScanExecutor(AbstractExecutor):
         )
         index = faiss.read_index(index_catalog_entry.save_file_path)
 
-        # Aggregate batches from sequential scan.
-        seq_scan_batch = Batch()
-        for batch in self.children[0].exec():
-            seq_scan_batch = Batch.concat([seq_scan_batch, batch])
-
         # Get the query feature vector. Create a dummy
         # batch to retreat a single file path.
         dummy_batch = Batch(
@@ -54,37 +57,36 @@ class FaissIndexScanExecutor(AbstractExecutor):
                 {"0": [0]},
             )
         )
-        search_batch = self.query_expr.evaluate(dummy_batch)
+        search_batch = self.search_query_expr.evaluate(dummy_batch)
 
-        # Scan index.
+        # Scan index and .
         search_batch.drop_column_alias()
         search_feat = search_batch.column_as_numpy_array("features")[0]
         search_feat = search_feat.reshape(1, -1)
-        dis_np, row_id_np = index.search(search_feat, self.query_num.value)
+        dis_np, row_id_np = index.search(search_feat, self.limit_count.value)
 
-        # Wrap results.
         distance_list, row_id_list = [], []
         for dis, row_id in zip(dis_np[0], row_id_np[0]):
             distance_list.append(dis)
             row_id_list.append(row_id)
 
-        column_list = batch.columns
-        row_id_alias = None
-        for column in column_list:
-            alias, col_name = column.split(".")
-            if col_name == "_row_id":
-                row_id_alias = alias
-        index_scan_batch = Batch(
-            pd.DataFrame(
-                {
-                    "similarity.distance": distance_list,
-                    "{}._row_id".format(row_id_alias): row_id_list,
-                }
-            )
-        )
-        res_df = seq_scan_batch.frames.merge(
-            index_scan_batch.frames,
-            how="right",
-            on="{}._row_id".format(row_id_alias),
-        )
-        yield Batch(res_df)
+        # Load projected columns from disk and join with search results.
+        row_id_col_name = None
+        res_row_list = [None for _ in range(self.limit_count.value)]
+        for batch in self.children[0].exec():
+            column_list = batch.columns
+            if not row_id_col_name:
+                row_id_alias = get_row_id_column_alias(column_list)
+                row_id_col_name = "{}._row_id".format(row_id_alias)
+
+            # Nested join.
+            for _, row in batch.frames.iterrows():
+                for idx, rid in enumerate(row_id_list):
+                    if rid == row[row_id_col_name]:
+                        res_row = dict()
+                        for col_name in column_list:
+                            res_row[col_name] = row[col_name]
+                        res_row["similarity.distance"] = distance_list[idx]
+                        res_row_list[idx] = res_row
+
+        yield Batch(pd.DataFrame(res_row_list))
