@@ -31,6 +31,7 @@ except ImportError:
 import torch.nn as nn
 import torchvision
 
+from eva.configuration.constants import EVA_DEFAULT_DIR, UDF_DIR
 from eva.models.catalog.frame_info import FrameInfo
 from eva.models.catalog.properties import ColorSpace
 from eva.udfs.abstract.pytorch_abstract_udf import PytorchAbstractClassifierUDF
@@ -55,7 +56,9 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
         self.asl_weights_url = (
             "https://gatech.box.com/shared/static/crjhyy4nc2i5nayesfljutwc1y3bpw2q.pth"
         )
-        self.asl_weights_path = os.getcwd() + "/asl_weights.pth"
+        self.asl_weights_path = (
+            str(EVA_DEFAULT_DIR) + "/" + str(UDF_DIR) + "/asl_weights.pth"
+        )
         self.download_weights()
 
         self.weights = R3D_18_Weights.DEFAULT
@@ -75,7 +78,9 @@ class ASLActionRecognition(PytorchAbstractClassifierUDF):
 
     @property
     def labels(self) -> np.array([str]):
-        with open(os.getcwd() + "/asl_20_actions_map.pkl", "rb") as f:
+        with open(
+            str(EVA_DEFAULT_DIR) + "/" + str(UDF_DIR) + "/asl_20_actions_map.pkl", "rb"
+        ) as f:
             action_to_index_map = pkl.load(f)
         actions_arr = [""] * len(action_to_index_map)
         for action, index in action_to_index_map.items():
